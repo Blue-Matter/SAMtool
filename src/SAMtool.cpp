@@ -1,4 +1,4 @@
-#define TMB_LIB_INIT R_init_MSEtool
+#define TMB_LIB_INIT R_init_SAMtool
 #include <TMB.hpp>
 #include "../inst/include/functions.hpp"
 
