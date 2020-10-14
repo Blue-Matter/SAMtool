@@ -1,0 +1,250 @@
+---
+title: "2b. Configuring selectivity for the SRA model"
+author: "Quang Huynh (<q.huynh@oceans.ubc.ca>)"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{2b. Configuring selectivity for the SRA model}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
+</script>
+
+<style type="text/css">
+
+body{ /* Normal  */
+   font-size: 12px;
+}
+td {  /* Table  */
+   font-size: 8px;
+}
+h1 { /* Header 1 */
+ font-size: 18px;
+ color: DarkBlue;
+}
+h2 { /* Header 2 */
+ font-size: 15px;
+ color: DarkBlue;
+}
+h3 { /* Header 3 */
+ font-size: 14px;
+ color: DarkBlue;
+}
+code.r{ /* Code block */
+  font-size: 10px;
+}
+pre { /* Code block */
+  font-size: 10px
+}
+</style>
+
+
+```{r set options, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(dpi=85)
+options(width = 650)
+```
+
+```{r echo = FALSE}
+OM <- DLMtool::testOM
+data <- list()
+
+vul_par_easy <- matrix(c(55, 30, 1, 55, 30, 0.5, 20, 19, 0.9), 3, 3)
+vul_par_free <- matrix(c(55, 30, 1, rep(NA, 3), 45, 30, 0.5, rep(NA, 3), 0.1, 0.3, 0.7, 1, 1, 1), 6, 3)
+
+```
+<br>
+
+# Introduction
+
+There are a multitude of options available in how selectivity for fleets and surveys is parameterized in the model. This vignette is designed to be a step-by-step guide for setup of selectivity. It is best to first think about fleet selectivity followed by survey selectivity. Familiarity with the more general <a href="SRA_scope.html">SRA vignette</a> and the function help page (found by typing `?SRA_scope` into the R console) will be helpful.
+
+This vignette is designed to provide step-by-step information on possible model configurations, but of course it is up to the user to decide whether those configurations are appropriate for the operating model conditioning.
+
+The general function call for `SRA_scope` is:
+
+```{r eval = FALSE}
+SRA <- SRA_scope(OM, data, ...)
+```
+
+where the `SRA` is of class SRA, `OM` is a class OM object, `data` is a list, and `...` are additional function arguments explained below. 
+
+# Fleet selectivity
+
+## Time blocks for selectivity
+
+Fleet selectivity can be vary in time blocks. Let's say we have 2 fleets, a 10-year time series, and the first fleet selectivity changes in year 6. Thus, we have 3 selectivity blocks, a.k.a. dummy fleets each with their own selectivity. For each 'true' fleet and year in the model, we will assign the selectivity to one of the three dummy fleets. To do so, we create a 10 by 2 integer matrix:
+
+```{r echo = FALSE}
+data$nsel_block <- 3 # There are three dummy fleets
+data$sel_block <- matrix(c(rep(1, 5), rep(2, 5), rep(3, 10)), 10, 2)
+```
+
+```{r}
+data$sel_block
+```
+Thus, for the first fleet (first column), we assign the selectivity of dummy fleet #1 to years 1-5 and that of dummy fleet #2 to years 6-10. The second fleet is assigned to dummy fleet #3 for all years.
+
+By default, a unique block is assigned to each fleet, indicating no time-varying selectivity, and the above code chunk is not needed. In other words, there's no distinction between dummy fleets and the true fleets.
+
+## Selectivity of each dummy fleet
+
+We specify the selectivity as a character vector with each entry corresponding to dummy fleet:
+
+```{r}
+selectivity <- c("logistic", "dome", "free")
+```
+
+Thus, the selectivity of the first dummy fleet is logistic, the second is dome, and the third is free, i.e., independent parameters for selectivity-at-age.
+
+These functions are described in <a href="SRA_scope_eq.html">Vignette #2a</a>.
+
+## Starting values of selectivity parameters
+
+For logistic and dome selectivity, the default behavior is to generate starting values from `OM@LFS`, `OM@L5`, and `OM@Vmaxlen`. Custom start values are needed when selectivity uses free parameters.
+
+Custom starting values are passed to the model with the `vul_par` matrix (the terms selectivity and vulnerability are used interchangeably). If only logistic or dome options are used, then `vul_par` is a matrix of 3 rows (corresponding to LFS, L5, and Vmaxlen) and `data$nsel_block` columns:
+
+```{r echo = FALSE}
+vul_par <- vul_par_easy
+```
+```{r}
+selectivity <- c("logistic", "dome", "dome")
+vul_par
+```
+
+Note that `Vmaxlen` is ultimately not used when the selectivity is logistic and the value in the third row, first column is merely an unused placeholder. If `vul_par` is provided, another step is needed to turn off this parameter (see next subsection).
+
+If we have selectivity as free parameters (independent parameters for each age), `vul_par` has `OM@maxage` rows with each row giving the selectivity value to the corresponding age (first row = age-1, etc.):
+
+```{r echo = FALSE}
+vul_par <- vul_par_free
+```
+```{r}
+OM@maxage <- 6
+selectivity <- c("logistic", "dome", "free")
+vul_par
+```
+
+Rows 4 to maxage for logistic and dome selectivity are unused placeholders.
+
+## Fixing and sharing parameters
+
+Selectivity parameters may be fixed or shared. For TMB, this is accomplished by the `map` argument, which can be provided in `SRA_scope` via the `map_vul_par` matrix which is of identical dimension to `vul_par`. `map_vul_par` tells TMB what to do to the parameter of the corresponding row and column in `vul_par`. Shared parameters are assigned a unique integer amongst themselves while fixed/unused parameters are assigned `NA`. Let's look at the first `vul_par` example again:
+
+```{r echo = FALSE}
+vul_par <- vul_par_easy
+```
+```{r}
+selectivity <- c("logistic", "dome", "dome")
+vul_par
+```
+
+We want:
+
+- LFS and L5 for the first two dummy fleets to be identical
+- Vmaxlen in the third dummy fleet to be fixed
+- The parameter reserved for Vmaxlen for the first dummy fleet to be turned off since it's merely a placeholder
+- All other parameters are estimated unique parameters 
+
+The matrix `map_vul_par` that accomplishes these tasks will look like this:
+
+```{r echo = FALSE}
+map_vul_par <- matrix(c(1, 2, NA, 1, 2, 3, 4, 5, NA), 3, 3)
+ 
+```
+```{r}
+map_vul_par
+```
+
+For the second `vul_par` example, we want:
+
+- Selectivity of dummy fleet #3 to be estimated only for ages 1 and 2
+- The parameter reserved for Vmaxlen for the first block to be turned off since it's a placeholder
+- Rows 4-6 for the first two blocks to be turned off (they're placeholders and undefined in the model)
+
+The matrix `map_vul_par` that accomplishes these tasks will look like this:
+
+```{r echo = FALSE}
+map_vul_par <- matrix(c(1, 2, rep(NA, 4), 3, 4, 5, rep(NA, 3), 6, 7, rep(NA, 4)), 6, 3)
+ 
+```
+```{r}
+selectivity <- c("logistic", "dome", "free")
+map_vul_par
+```
+
+Finally the function call looks like this:
+
+```{r eval = FALSE}
+SRA <- SRA_scope(OM, data, selectivity = selectivity, vul_par = vul_par, map_vul_par = map_vul_par, ...)
+```
+
+# Survey selectivity 
+
+Next we can move on to survey selectivity. Unlike fleet selectivity, selectivity is unique to each survey and no dummy fleets are used.
+
+## Is survey selectivity already defined elsewhere?
+
+The vector `s_selectivity` defines where the survey selectivity is defined (the terms index and survey are used interchangeably). Survey selectivity may be identical to fleet selectivity, i.e., vulnerable biomass, total biomass, or spawning biomass. If we have 4 surveys with:
+
+```{r}
+s_selectivity <- c("SSB", "B", 1, 2)
+```
+
+The first survey is a survey of spawning biomass as denoted by "SSB" (maturity is configured in the `OM`), the second survey indexes total biomass as denoted by "B" (selectivity = 1 for all ages), and the third and fourth surveys have the selectivity of the first and second fleets, respectively. Note that the integers for fleets refer to the true fleet and not to selectivity blocks/dummy fleets. 
+
+No further consideration of survey selectivity is needed when selectivity is defined elsewhere, the function call can look like this:
+
+```{r eval = FALSE}
+SRA <- SRA_scope(OM, data, selectivity = selectivity, s_selectivity = s_selectivity, ...)
+```
+
+## Survey selectivity is independent of anything else in the model
+
+On the other hand, if survey selectivity needs to be explicitly defined, then the `s_selectivity` vector can indicate the functional form, using one of `logistic`, `dome`, `dome`. Let's look at another situation with 5 surveys:
+
+```{r}
+s_selectivity <- c(2, "SSB", "B", "dome", "free")
+```
+
+For the fourth and fifth surveys, the selectivity functions are dome-shaped and free parameters, respectively. Next we need to consider what the parameters defining this functions are, either as starting values to be estimated or fixed values in the model.
+
+## Selectivity parameters
+
+Just as in the fleet parameters, the survey selectivity parameters by default use `OM@LFS`, `OM@L5`, and `OM@Vmaxlen` for start values when `s_selectivity = "logistic"` or `"dome"`, and custom start values needed when selectivity uses free parameters. 
+
+Custom start values are passed to the SRA in the `s_vul_par` matrix with the same layout as that for the fleet blocks:
+
+```{r echo = FALSE}
+s_vul_par <- matrix(c(rep(0, 18), 55, 40, 0.5, rep(0, 3), 1, rep(0, 5)), 6, 5)
+```
+```{r}
+OM@maxage <- 6
+s_selectivity <- c(2, "SSB", "B", "dome", "free")
+s_vul_par
+```
+
+Parameter slots for surveys 1 - 3 are ignored. Again they're placeholders for internal organization. The first three rows in column four are the start values for the three parameters of the dome function (to be estimated), and the fifth survey only selects age-1 animals, i.e., a survey of recruits.
+
+Finally, to remove parameters from estimation either because they're just placeholders (surveys 1-4) or they should be fixed in the model (survey 5), we provide the map argument for `s_vul_par` with `map_s_vul_par`:
+
+```{r echo = FALSE}
+map_s_vul_par <- matrix(NA, 6, 5)
+map_s_vul_par[1:3, 4] <- 1:3
+```
+```{r}
+map_s_vul_par
+```
+
+A function call utilizing this custom set-up for survey selectivity would be:
+
+```{r eval = FALSE}
+SRA <- SRA_scope(OM, data, selectivity = selectivity, s_selectivity = s_selectivity, s_vul_par = s_vul_par, map_s_vul_par = map_s_vul_par, ...)
+```
+

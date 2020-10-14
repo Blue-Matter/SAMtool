@@ -1,0 +1,56 @@
+#' Management Strategy Evaluation
+#'
+#' Simulation tools for management strategy evaluation are provided for the DLMtool operating model to inform data-rich fisheries.
+#' MSEtool provides complementary assessment models of varying complexity with standardized reporting, diagnostic tools for evaluating
+#' assessment models within closed-loop simulation, and helper functions for building more complex operating models and management procedures.
+#'
+#' @name MSEtool-package
+#' @aliases MSEtool
+#' @docType package
+#' @author Quang Huynh \email{q.huynh@@oceans.ubc.ca}
+#' @author Tom Carruthers \email{t.carruthers@@oceans.ubc.ca}
+#' @author Adrian Hordyk \email{a.hordyk@@oceans.ubc.ca}
+#' @section How to use MSEtool:
+#' The main features of MSEtool are the assessment models and the ability to make model-based management procedures by combining
+#' assessment models with harvest control rules. Such MPs can be used and tested in management strategy evaluation
+#' with DLMtool operating models. An overview of these features is available in the \href{../doc/MSEtool.html}{MSEtool vignette}.
+#'
+#' The following assessment models are available:
+#' \itemize{
+#' \item \href{../doc/Surplus_production.html}{Surplus production} (\link{SP}, \link{SP_SS}, \link{SP_Fox}, and \code{spict})
+#' \item \href{../doc/Delay_difference.html}{Delay difference} (\link{DD}, \link{cDD}, \link{DD_SS}, and \link{cDD_SS})
+#' \item \href{../doc/SCA.html}{Statistical catch-at-age} (\link{SCA}, \link{SCA2}, and \link{SCA_Pope})
+#' \item Simple Stock Synthesis (\link{SSS} which implements \link{SCA_Pope} with fixed depletion assumption)
+#' \item \href{../doc/VPA.html}{Virtual population analysis} (\link{VPA})
+#' }
+#'
+#'
+#' The \code{\link{SRA_scope}} model can be used to condition DLMtool operating models from real data. Information can be found
+#' \href{../doc/SRA_scope.html}{here}.
+#'
+#' MSEtool also contains \link{multiMSE}, a platform for multi-stock and multi-fleet operating models based on components
+#' from DLMtool. An overview of multiMSE is available in the \href{../doc/multiMSE.html}{multiMSE vignette}.
+#'
+#' All MSEtool vignettes can also be viewed by typing \code{browseVignettes("MSEtool")} into the R console or through the
+#' MSEtool webpage on \href{https://cran.r-project.org/package=MSEtool}{CRAN}.
+#'
+#' @section Additional links:
+#'
+#' See the \href{https://dlmtool.github.io/DLMtool/userguide/introduction.html}{DLMtool User Guide} for
+#' a detailed description of how to use the DLMtool package.
+#'
+#' See the \href{https://www.datalimitedtoolkit.org/}{Data-Limited Toolkit Website} for more information on DLMtool,
+#' including an interactive demo of the main features of the toolkit, information on case studies where the toolkit has
+#' been applied, and more about the history and development of the DLMtool.
+#'
+#' @references
+#' Carruthers, T.R., Punt, A.E., Walters, C.J., MacCall, A.,
+#' McAllister, M.K., Dick, E.J., Cope, J. 2014. Evaluating methods for setting
+#' catch limits in data-limited fisheries. Fisheries Research. 153: 48-68.
+#'
+#' Carruthers, T.R., Kell, L.T., Butterworth, D.S., Maunder, M.N., Geromont,
+#' H.F., Walters, C., McAllister, M.K., Hillary, R., Levontin, P., Kitakado,
+#' T., Davies, C.R. Performance review of simple management procedures. ICES
+#' Journal of Marine Science. 73: 464-482.
+#' @keywords  management strategy evaluation fisheries
+NULL

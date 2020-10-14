@@ -1,0 +1,55 @@
+Meta
+doc
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+# Folder config file
+Desktop.ini
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+# Windows shortcuts
+*.lnk
+# =========================
+# Operating System Files
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+# Thumbnails
+._*
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+.Rproj.user
+*.Rhistory
+.Rbuildignore
+.Rproj.user/1427710/pcs/files-pane.pper
+.Rproj.user/1427710/pcs/windowlayoutstate.pper
+.Rproj.user/1427710/pcs/workbench-pane.pper
+*.pper
+.Rproj.user/1427710/persistent-state
+
+#Rcpp files
+src/*.o
+src/*.so
+src/*.dll 
+src-i386/
+src-x64/
+*.Rproj
+Workfiles
+tests/tests_results
