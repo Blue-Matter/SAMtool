@@ -154,7 +154,7 @@
 #' @author Q. Huynh
 #' @return An object of class \linkS4class{Assessment}.
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @export
 SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
                 CAA_multiplier = 50, I_type = c("B", "VB", "SSB"), rescale = "mean1", max_age = Data@MaxAge,
@@ -384,7 +384,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev")
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
-                   map = map, random = random, DLL = "MSEtool", inner.control = inner.control, silent = silent)
+                   map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
 
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]

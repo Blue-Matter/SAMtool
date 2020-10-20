@@ -244,7 +244,7 @@ VPA <- function(x = 1, Data, expanded = FALSE, SR = c("BH", "Ricker"), vulnerabi
   }
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
-                   map = map, DLL = "MSEtool", silent = silent)
+                   map = map, DLL = "SAMtool", silent = silent)
 
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]

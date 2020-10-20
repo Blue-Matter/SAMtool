@@ -35,7 +35,7 @@
 #' res <- SSS(1, Data = Red_snapper)
 #'
 #' SSS_MP <- make_MP(SSS, HCR40_10, dep = 0.3) # Always assume depletion = 0.3
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @export
 SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1",
                 start = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
@@ -133,7 +133,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   map$log_rec_dev <- factor(rep(NA, n_y))
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
-                   map = map, DLL = "MSEtool", silent = silent)
+                   map = map, DLL = "SAMtool", silent = silent)
 
   # Add starting values for rec-devs and increase R0 start value if U is too high (> 0.975)
   high_U <- try(obj$report(obj$par)$penalty > 0, silent = TRUE)

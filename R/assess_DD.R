@@ -90,7 +90,7 @@
 #' res <- DD_SS(Data = Red_snapper, start = list(tau = 0.3))
 #' }
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @export
 DD_TMB <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
                    start = NULL, fix_h = TRUE, dep = 1, LWT = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
@@ -105,7 +105,7 @@ class(DD_TMB) <- "Assess"
 
 
 #' @rdname DD_TMB
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @export
 DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
                   start = NULL, fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL,
@@ -240,7 +240,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   if(integrate) random <- "log_rec_dev"
 
   obj <- MakeADFun(data = info$data, parameters = info$params, random = random,
-                   map = map, hessian = TRUE, DLL = "MSEtool", inner.control = inner.control, silent = silent)
+                   map = map, hessian = TRUE, DLL = "SAMtool", inner.control = inner.control, silent = silent)
 
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]

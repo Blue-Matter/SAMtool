@@ -130,7 +130,7 @@ profile_likelihood_SCA <- function(Assessment, ...) {
       if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
     }
     obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
-                      inner.control = Assessment@info$inner.control, DLL = "MSEtool", silent = TRUE)
+                      inner.control = Assessment@info$inner.control, DLL = "SAMtool", silent = TRUE)
     opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
     if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
     return(nll)
@@ -195,7 +195,7 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
     if(any(names(map) == "logF")) map$logF <- map$logF[1:n_y_ret]
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
-                      inner.control = info$inner.control, DLL = "MSEtool", silent = TRUE)
+                      inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
     mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
@@ -265,7 +265,7 @@ profile_likelihood_SCA2 <- function(Assessment, ...) {
     } else {
 
       obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
-                        inner.control = Assessment@info$inner.control, DLL = "MSEtool", silent = TRUE)
+                        inner.control = Assessment@info$inner.control, DLL = "SAMtool", silent = TRUE)
       opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
       if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
 

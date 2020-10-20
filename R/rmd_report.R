@@ -472,7 +472,7 @@ rmd_retrospective <- function() {
 rmd_footer <- function() {
   c("## About\n",
     "This report was generated on: `r Sys.time()`<br />",
-    "MSEtool R package version `r packageVersion(\"MSEtool\")`<br />",
+    "SAMtool R package version `r packageVersion(\"SAMtool\")`<br />",
     "`r R.version.string`<br />\n")
 }
 

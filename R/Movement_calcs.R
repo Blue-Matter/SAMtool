@@ -21,7 +21,7 @@
 #' @author T. Carruthers and Q. Huynh
 #' @export
 #' @import TMB
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @examples
 #' \donttest{
 #' movOM_5areas <- simmov(testOM, dist = c(0.01,0.1,0.2,0.3,0.39), prob = c(0.1,0.6,0.6,0.7,0.9))
@@ -86,7 +86,7 @@ simmov<-function(OM,dist=c(0.1,0.2,0.3,0.4),prob=0.5,distE=0.1,probE=0.1,prob2=N
 #' @export makemov
 #' @import TMB
 #' @importFrom stats nlminb
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @seealso \link{simmov}
 makemov<-function(fracs=c(0.1,0.2,0.3,0.4),prob=c(0.5,0.8,0.9,0.95)){
 
@@ -100,14 +100,14 @@ makemov<-function(fracs=c(0.1,0.2,0.3,0.4),prob=c(0.5,0.8,0.9,0.95)){
 
   info <- list(data = data, params = params)
 
-  obj <- MakeADFun(data = info$data, parameters = info$params, DLL = "MSEtool", silent = TRUE)
+  obj <- MakeADFun(data = info$data, parameters = info$params, DLL = "SAMtool", silent = TRUE)
   opt <- nlminb(start = obj$par, objective = obj$fn, gradient = obj$gr)
 
   if(length(prob)==1)params.new<-list(log_visc=opt$par[1],log_grav=opt$par[2:nareas])
   if(length(prob)==nareas)params.new<-list(log_visc=opt$par[1:nareas],log_grav=opt$par[nareas+(1:(nareas-1))])
 
   info <- list(data = data, params = params.new)
-  obj.new<-MakeADFun(data = info$data, parameters = info$params, DLL = "MSEtool", silent = TRUE)
+  obj.new<-MakeADFun(data = info$data, parameters = info$params, DLL = "SAMtool", silent = TRUE)
 
   obj.new$report(obj.new$env$last.par.best)$mov
   #validateTMB(obj.new)

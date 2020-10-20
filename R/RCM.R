@@ -647,7 +647,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev") else random <- NULL
 
   obj <- MakeADFun(data = c(TMB_data, TMB_data_all), parameters = TMB_params, map = map, random = random,
-                   inner.control = inner.control, DLL = "MSEtool", silent = TRUE)
+                   inner.control = inner.control, DLL = "SAMtool", silent = TRUE)
 
   if(data$condition == "catch2") {
     if(any(is.na(obj$report(obj$par)$F)) || any(is.infinite(obj$report(obj$par)$F))) {
@@ -774,7 +774,7 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
     new_args$data$C_hist <- matrix(1e-8, new_args$data$n_y, new_args$data$nfleet)
 
     obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, map = new_args$map, random = obj$env$random,
-                      DLL = "MSEtool", silent = TRUE)
+                      DLL = "SAMtool", silent = TRUE)
     out <- obj2$report(par)$E
 
   } else {
@@ -878,7 +878,7 @@ RCM_retro <- function(x, nyr = 5) {
   new_args <- lapply(n_y - 0:nyr, RCM_retro_subset, data = data, params = params, map = map)
   lapply_fn <- function(i, new_args, x) {
     obj2 <- MakeADFun(data = new_args[[i+1]]$data, parameters = new_args[[i+1]]$params, map = new_args[[i+1]]$map,
-                      random = x@mean_fit$obj$env$random, DLL = "MSEtool", silent = TRUE)
+                      random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
     if(new_args[[i+1]]$data$condition == "catch2") {
       if(any(is.na(obj2$report(obj2$par)$F)) || any(is.infinite(obj2$report(obj2$par)$F))) {
         for(ii in 1:10) {

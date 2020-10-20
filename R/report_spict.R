@@ -76,7 +76,7 @@ rmd_spict_yield_header <- function(header = NULL) {
 
 
 profile_likelihood_spict <- function(Assessment, ...) {
-  stop("Profiling currently not supported for spict in MSEtool.", call. = FALSE)
+  stop("Profiling currently not supported for spict in SAMtool.", call. = FALSE)
 }
 
 

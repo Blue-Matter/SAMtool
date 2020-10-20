@@ -151,7 +151,7 @@ profile_likelihood_DD_TMB <- function(Assessment, ...) {
       if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
     }
     obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
-                      DLL = "MSEtool", silent = TRUE)
+                      DLL = "SAMtool", silent = TRUE)
     opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
     if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
     return(nll)
@@ -202,7 +202,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
     if(state_space) info$params$log_rec_dev <- rep(0, ny_ret - k)
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, random = obj$env$random, map = obj$env$map,
-                      inner.control = info$inner.control, DLL = "MSEtool", silent = TRUE)
+                      inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
     mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]

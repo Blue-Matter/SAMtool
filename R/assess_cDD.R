@@ -79,7 +79,7 @@
 #' res <- cDD_SS(Data = Red_snapper, start = list(tau = 0.6))
 #'
 #' @seealso \link{DD_TMB} \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @export
 cDD <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL, fix_h = TRUE,
                 dep = 1, LWT = NULL, n_itF = 5L, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
@@ -96,7 +96,7 @@ class(cDD) <- "Assess"
 #' @export
 #' @importFrom TMB MakeADFun
 #' @importFrom stats nlminb
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 cDD_SS <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL,
                    fix_h = TRUE, fix_sigma = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL, n_itF = 5L,
                    integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
@@ -217,7 +217,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   if(integrate) random <- "log_rec_dev"
 
   obj <- MakeADFun(data = info$data, parameters = info$params, random = random, map = map, hessian = TRUE,
-                   DLL = "MSEtool", inner.control = inner.control, silent = silent)
+                   DLL = "SAMtool", inner.control = inner.control, silent = silent)
 
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]

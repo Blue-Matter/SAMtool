@@ -81,7 +81,7 @@ retrospective_SSS <- function(Assessment, nyr) {
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map,
-                      DLL = "MSEtool", silent = TRUE)
+                      DLL = "SAMtool", silent = TRUE)
     mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]

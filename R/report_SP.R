@@ -111,7 +111,7 @@ profile_likelihood_SP <- function(Assessment, ...) {
         if(profile_par == "MSY") map$MSYx <- factor(NA) else map$log_FMSY <- factor(NA)
       }
       obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map,
-                        random = Assessment@obj$env$random, DLL = "MSEtool", silent = TRUE)
+                        random = Assessment@obj$env$random, DLL = "SAMtool", silent = TRUE)
       opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
       if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
     }
@@ -166,7 +166,7 @@ retrospective_SP <- function(Assessment, nyr, state_space = FALSE) {
     }
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
-                      DLL = "MSEtool", silent = TRUE)
+                      DLL = "SAMtool", silent = TRUE)
     mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]

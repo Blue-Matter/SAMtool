@@ -127,7 +127,7 @@ profile_likelihood_cDD <- function(Assessment, ...) {
       } else {
 
         obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
-                          DLL = "MSEtool", silent = TRUE)
+                          DLL = "SAMtool", silent = TRUE)
 
         if(joint_profile) {
           nll <- obj2$fn(params$R0x)
@@ -144,14 +144,14 @@ profile_likelihood_cDD <- function(Assessment, ...) {
         } else {
           if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
           obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
-                            DLL = "MSEtool", silent = TRUE)
+                            DLL = "SAMtool", silent = TRUE)
           opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
           if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
         }
       } else { # R0, F
         if(joint_profile || profile_par == "R0") map$R0x <- factor(NA)
         obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
-                          DLL = "MSEtool", silent = TRUE)
+                          DLL = "SAMtool", silent = TRUE)
         opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
         if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
       }
@@ -165,7 +165,7 @@ profile_likelihood_cDD <- function(Assessment, ...) {
         if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
       }
 
-      obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random, DLL = "MSEtool", silent = TRUE)
+      obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random, DLL = "SAMtool", silent = TRUE)
       opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
       if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
     }
@@ -217,7 +217,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
     if(state_space) info$params$log_rec_dev <- rep(0, ny_ret - k)
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map, random = obj$env$random,
-                      inner.control = info$inner.control, DLL = "MSEtool", silent = TRUE)
+                      inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
     mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]

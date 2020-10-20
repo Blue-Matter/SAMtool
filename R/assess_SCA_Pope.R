@@ -1,6 +1,6 @@
 
 #' @rdname SCA
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 #' @export
 SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
                      CAA_multiplier = 50, I_type = c("B", "VB", "SSB"), rescale = "mean1", max_age = Data@MaxAge,
@@ -200,7 +200,7 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev")
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
-                   map = map, random = random, DLL = "MSEtool", inner.control = inner.control, silent = silent)
+                   map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
 
   # Add starting values for rec-devs and increase R0 start value if U is too high (> 0.975)
   high_U <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0, silent = TRUE)
@@ -212,7 +212,7 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
       info$params$log_rec_dev <- log_rec_dev
 
       obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
-                       map = map, random = random, DLL = "MSEtool", inner.control = inner.control, silent = silent)
+                       map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
     }
     while(obj$par["R0x"] < 30 && obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0) {
       obj$par["R0x"] <- obj$par["R0x"] + 1

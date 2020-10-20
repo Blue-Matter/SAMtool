@@ -1,6 +1,6 @@
 # Create "sdreport" class for output from TMB function sdreport()
 
-#' @import DLMtool
+#' @import OMtool
 #' @import graphics
 #' @import stats
 #' @import utils

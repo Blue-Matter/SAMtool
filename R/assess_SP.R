@@ -178,7 +178,7 @@ class(SP_Fox) <- "Assess"
 
 #' @importFrom TMB MakeADFun
 #' @importFrom stats nlminb
-#' @useDynLib MSEtool
+#' @useDynLib SAMtool
 SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1", start = NULL, fix_dep = TRUE, fix_n = TRUE, fix_sigma = TRUE,
                 fix_tau = TRUE, early_dev = c("all", "index"), LWT = NULL, n_seas = 4L, n_itF = 3L,
                 use_r_prior = FALSE, r_reps = 1e2, SR_type = c("BH", "Ricker"), integrate = FALSE,
@@ -268,7 +268,7 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   info <- list(Year = Year, data = data, params = params, rp = rp, control = control, inner.control = inner.control)
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
-                   map = map, random = random, DLL = "MSEtool", silent = silent)
+                   map = map, random = random, DLL = "SAMtool", silent = silent)
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]
   SD <- mod[[2]]
