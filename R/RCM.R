@@ -1,10 +1,10 @@
 
 
-SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                          comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
-                          max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
-                          drop_highF = FALSE,
-                          control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
+RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
+                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
+                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
+                    drop_highF = FALSE,
+                    control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
 
   dots <- list(...) # can be vul_par, s_vul_par, map_vul_par, map_s_vul_par, map_log_rec_dev, map_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
   if(!is.null(dots$maxF)) max_F <- dots$maxF
@@ -13,7 +13,7 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
   comp_like <- match.arg(comp_like)
   condition <- match.arg(condition)
 
-  dat_update <- update_SRA_data(data, OM, condition, dots)
+  dat_update <- update_RCM_data(data, OM, condition, dots)
   OM <- dat_update$OM
   data <- dat_update$data
   StockPars <- dat_update$StockPars
@@ -78,7 +78,7 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
   if(!is.null(dots$resample) && dots$resample) { # Re-sample covariance matrix
 
     message("\nResample = TRUE. Running mean fit model first...")
-    mean_fit_output <- SRA_scope_est(data = data, selectivity = sel, s_selectivity = s_sel,
+    mean_fit_output <- RCM_est(data = data, selectivity = sel, s_selectivity = s_sel,
                                      SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
                                      max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                      FleetPars = FleetPars, mean_fit = TRUE, dots = dots)
@@ -102,7 +102,7 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
     }
 
     report_internal_fn <- function(x, samps, obj, conv) {
-      report <- obj$report(samps[x, ]) %>% SRA_posthoc_adjust(obj, par = samps[x, ])
+      report <- obj$report(samps[x, ]) %>% RCM_posthoc_adjust(obj, par = samps[x, ])
       report$conv <- conv
       return(report)
     }
@@ -115,10 +115,10 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
     if(all(par_identical_sims)) { # All identical sims detected
       message("\nAll ", nsim, " replicates are identical. Fitting once and replicating single fit...")
 
-      mean_fit_output <- SRA_scope_est(data = data, selectivity = sel, s_selectivity = s_sel,
-                                       SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
-                                       max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                                       FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
+      mean_fit_output <- RCM_est(data = data, selectivity = sel, s_selectivity = s_sel,
+                                 SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
+                                 max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                                 FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
 
       mod <- lapply(1:nsim, function(x) return(mean_fit_output))
     } else {
@@ -126,12 +126,12 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
       message("\nFitting model (", nsim, " simulations) ...")
       if(cores > 1 && !snowfall::sfIsRunning()) DLMtool::setup(as.integer(cores))
       if(snowfall::sfIsRunning()) {
-        mod <- snowfall::sfClusterApplyLB(1:nsim, SRA_scope_est, data = data, selectivity = sel, s_selectivity = s_sel,
+        mod <- snowfall::sfClusterApplyLB(1:nsim, RCM_est, data = data, selectivity = sel, s_selectivity = s_sel,
                                           SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
                                           max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                           FleetPars = FleetPars, control = control, dots = dots)
       } else {
-        mod <- lapply(1:nsim, SRA_scope_est, data = data, selectivity = sel, s_selectivity = s_sel,
+        mod <- lapply(1:nsim, RCM_est, data = data, selectivity = sel, s_selectivity = s_sel,
                       SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
                       max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                       FleetPars = FleetPars, control = control, dots = dots)
@@ -139,7 +139,7 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
 
       if(mean_fit) { ### Fit to life history means if mean_fit = TRUE
         message("Generating additional model fit from mean values of parameters in the operating model...\n")
-        mean_fit_output <- SRA_scope_est(data = data, selectivity = sel, s_selectivity = s_sel,
+        mean_fit_output <- RCM_est(data = data, selectivity = sel, s_selectivity = s_sel,
                                          SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
                                          max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                          FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
@@ -306,7 +306,7 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
     message("Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).\n")
   }
 
-  ### Assign OM variables that were used in the SRA to the output
+  ### Assign OM variables that were used in the RCM to the output
   OM@cpars$Len_age <- StockPars$Len_age
   OM@cpars$Linf <- StockPars$Linf
   OM@cpars$K <- StockPars$K
@@ -330,12 +330,12 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
     OM@cpars$binWidth <- bw
     OM@cpars$CAL_binsmid <- data$length_bin
     OM@cpars$CAL_bins <- c(data$length_bin - 0.5 * bw, max(data$length_bin) + 0.5 * bw)
-    message("SRA length bins will be added to OM.")
+    message("RCM length bins will be added to OM.")
   }
 
   if(is.null(dots$plusgroup) || dots$plusgroup) OM@cpars$plusgroup <- rep(1L, nsim)
   if(is.null(data$I_sd) || !any(data$I_sd > 0, na.rm = TRUE)) OM@cpars$Iobs <- ObsPars$Iobs
-  message("Growth, maturity, natural mortality, and steepness values from SRA are set in OM@cpars.\n")
+  message("Growth, maturity, natural mortality, and steepness values from RCM are set in OM@cpars.\n")
 
   ### Output list
   E <- do.call(rbind, lapply(res[keep], getElement, "E"))
@@ -343,7 +343,7 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
   CAA_pred <- array(sapply(res[keep], getElement, "CAApred"), c(nyears, maxage, nfleet, sum(keep)))
   CAL_pred <- array(sapply(res[keep], getElement, "CALpred"), c(nyears, length(data$length_bin), nfleet, sum(keep)))
 
-  output <- new("SRA", OM = Sub_cpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
+  output <- new("RCM", OM = Sub_cpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
                 CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = data, Misc = res[keep])
 
   # Data in cpars
@@ -408,11 +408,11 @@ SRA_scope_int <- function(OM, data = list(), condition = c("catch", "catch2", "e
 }
 
 
-SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "Ricker"), LWT = list(),
-                          comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
-                          max_F = 3, integrate = FALSE, StockPars, ObsPars, FleetPars, mean_fit = FALSE,
-                          control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), dots = list()) {
-
+RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "Ricker"), LWT = list(),
+                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
+                    max_F = 3, integrate = FALSE, StockPars, ObsPars, FleetPars, mean_fit = FALSE,
+                    control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), dots = list()) {
+  
   SR_type <- match.arg(SR_type)
   comp_like <- match.arg(comp_like)
 
@@ -421,13 +421,13 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
   max_age <- dim(data$CAA)[2]
   nsurvey <- ncol(data$Index)
 
-  data$CAA <- apply(data$CAA, c(1, 3), SRA_tiny_comp) %>% aperm(c(2, 1, 3))
-  data$CAL <- apply(data$CAL, c(1, 3), SRA_tiny_comp) %>% aperm(c(2, 1, 3))
+  data$CAA <- apply(data$CAA, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
+  data$CAL <- apply(data$CAL, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
   CAA_n <- apply(data$CAA, c(1, 3), sum, na.rm = TRUE)
   CAL_n <- apply(data$CAL, c(1, 3), sum, na.rm = TRUE)
 
-  data$s_CAA <- apply(data$s_CAA, c(1, 3), SRA_tiny_comp) %>% aperm(c(2, 1, 3))
-  data$s_CAL <- apply(data$s_CAL, c(1, 3), SRA_tiny_comp) %>% aperm(c(2, 1, 3))
+  data$s_CAA <- apply(data$s_CAA, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
+  data$s_CAL <- apply(data$s_CAL, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
   s_CAA_n <- apply(data$s_CAA, c(1, 3), sum, na.rm = TRUE)
   s_CAL_n <- apply(data$s_CAL, c(1, 3), sum, na.rm = TRUE)
 
@@ -531,9 +531,9 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
                        yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup)
 
   if(data$condition == "catch" || data$condition == "catch2") {
-    TMB_data <- list(model = "SRA_scope", C_hist = C_hist, C_eq = data$C_eq, E_hist = E_hist, E_eq = rep(0, nfleet))
+    TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = data$C_eq, E_hist = E_hist, E_eq = rep(0, nfleet))
   } else {
-    TMB_data <- list(model = "SRA_scope", C_hist = C_hist, C_eq = rep(0, nfleet), E_hist = E_hist, E_eq = data$E_eq * rescale_effort)
+    TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = rep(0, nfleet), E_hist = E_hist, E_eq = data$E_eq * rescale_effort)
   }
 
   if(SR_type == "BH") {
@@ -545,7 +545,7 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
   Vmaxlen <- FleetPars$Vmaxlen[nyears, x]
 
   if(is.null(dots$vul_par)) {
-    if(any(selectivity == -2)) stop("Some (fleet) selectivity specified to be free parameters. Provide vul_par matrix to SRA_scope.")
+    if(any(selectivity == -2)) stop("Some (fleet) selectivity specified to be free parameters. Provide vul_par matrix to RCM.")
     vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, data$nsel_block)
   } else {
     vul_par <- dots$vul_par
@@ -558,7 +558,7 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
   if(any(selectivity == -2)) vul_par[, selectivity == -2] <- logit(vul_par[, selectivity == -2], soft_bounds = TRUE)
 
   if(is.null(dots$map_vul_par)) {
-    if(any(selectivity == -2)) stop("Some (fleet) selectivity specified to be free parameters. Provide map_vul_par matrix to SRA_scope.")
+    if(any(selectivity == -2)) stop("Some (fleet) selectivity specified to be free parameters. Provide map_vul_par matrix to RCM.")
     map_vul_par <- matrix(0, 3, data$nsel_block)
     map_vul_par[3, selectivity == -1] <- NA # Fix third parameter for logistic sel
     if(!is.null(dots$fix_dome) && dots$fix_dome) map_vul_par[3, selectivity == 0] <- NA # Fix dome
@@ -575,7 +575,7 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
 
   # s_vul_par, and map
   if(is.null(dots$s_vul_par)) {
-    if(any(s_selectivity == -2)) stop("Some s_selectivity specified to be free parameters. Provide s_vul_par matrix to SRA_scope.")
+    if(any(s_selectivity == -2)) stop("Some s_selectivity specified to be free parameters. Provide s_vul_par matrix to RCM.")
     s_vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, nsurvey)
   } else {
     s_vul_par <- dots$s_vul_par
@@ -588,7 +588,7 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
   if(any(s_selectivity == -2)) s_vul_par[, s_selectivity == -2] <- logit(s_vul_par[, s_selectivity == -2], soft_bounds = TRUE)
 
   if(is.null(dots$map_s_vul_par)) {
-    if(any(s_selectivity == -2)) stop("Some s_selectivity specified to be free parameters. Provide map_s_vul_par matrix to SRA_scope.")
+    if(any(s_selectivity == -2)) stop("Some s_selectivity specified to be free parameters. Provide map_s_vul_par matrix to RCM.")
     map_s_vul_par <- matrix(0, 3, nsurvey)
     map_s_vul_par[3, s_selectivity < 0] <- NA # if logistic
     for(sur in 1:nsurvey) {
@@ -661,7 +661,7 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
   mod <- optimize_TMB_model(obj, control, restart = 0)
   opt <- mod[[1]]
   SD <- mod[[2]]
-  report <- obj$report(obj$env$last.par.best) %>% SRA_posthoc_adjust(obj)
+  report <- obj$report(obj$env$last.par.best) %>% RCM_posthoc_adjust(obj)
 
   if(data$condition == "effort" && any(data$Chist > 0, na.rm = TRUE)) {
     vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
@@ -679,7 +679,7 @@ SRA_scope_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("
 
 
 
-#' @rdname SRA_scope
+#' @rdname RCM
 #' @export
 Sub_cpars <- function(OM, sims = 1:OM@nsim) {
 
@@ -761,7 +761,7 @@ par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, data, dots) {
 }
 
 
-SRA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
+RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
 
   if(obj$env$data$condition == "catch") {
 
@@ -770,7 +770,7 @@ SRA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
 
   } else if(obj$env$data$condition == "catch2") {
 
-    new_args <- SRA_retro_subset(obj$env$data$n_y, data = obj$env$data, params = obj$env$parameters, map = obj$env$map)
+    new_args <- RCM_retro_subset(obj$env$data$n_y, data = obj$env$data, params = obj$env$parameters, map = obj$env$map)
     new_args$data$C_hist <- matrix(1e-8, new_args$data$n_y, new_args$data$nfleet)
 
     obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, map = new_args$map, random = obj$env$random,
@@ -787,7 +787,7 @@ SRA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
   return(out)
 }
 
-SRA_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best) {
+RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best) {
   data <- obj$env$data
   report$F_at_age <- report$Z - data$M
   report$NPR_unfished <- do.call(rbind, report$NPR_unfished)
@@ -806,7 +806,7 @@ SRA_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best) {
     report$vul_len <- get_vul_len(report, data$vul_type, length_bin, data$Linf)
     report$s_vul_len <- get_s_vul_len(report, data$s_vul_type, length_bin, data$Linf)
   }
-  report$dynamic_SSB0 <- SRA_dynamic_SSB0(obj, par)
+  report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
   return(report)
 }
 
@@ -863,8 +863,8 @@ process_AddIndV <- function(sur, Misc, s_sel, maxage, nfleet, nyears) { # Return
   return(out)
 }
 
-SRA_retro <- function(x, nyr = 5) {
-  if(length(x@mean_fit) == 0) stop("Re-run SRA_scope() with argument `mean_fit = TRUE`", .call = FALSE)
+RCM_retro <- function(x, nyr = 5) {
+  if(length(x@mean_fit) == 0) stop("Re-run RCM() with argument `mean_fit = TRUE`", .call = FALSE)
 
   data <- x@mean_fit$obj$env$data
   params <- x@mean_fit$obj$env$parameters
@@ -875,7 +875,7 @@ SRA_retro <- function(x, nyr = 5) {
   TS_var <- c(paste("F", 1:data$nfleet), "SSB", "SSB_SSB0", "R")
   dimnames(retro_ts) <- list(Peel = 0:nyr, Year = (x@OM@CurrentYr - n_y):x@OM@CurrentYr + 1, Var = TS_var)
 
-  new_args <- lapply(n_y - 0:nyr, SRA_retro_subset, data = data, params = params, map = map)
+  new_args <- lapply(n_y - 0:nyr, RCM_retro_subset, data = data, params = params, map = map)
   lapply_fn <- function(i, new_args, x) {
     obj2 <- MakeADFun(data = new_args[[i+1]]$data, parameters = new_args[[i+1]]$params, map = new_args[[i+1]]$map,
                       random = x@mean_fit$obj$env$random, DLL = "MSEtool", silent = TRUE)
@@ -920,7 +920,7 @@ SRA_retro <- function(x, nyr = 5) {
   conv <- vapply(0:nyr, lapply_fn, logical(1), new_args = new_args, x = x)
   if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
 
-  retro <- new("retro", Model = "SRA_scope", Name = x@OM@Name, TS_var = TS_var, TS = retro_ts)
+  retro <- new("retro", Model = "RCM", Name = x@OM@Name, TS_var = TS_var, TS = retro_ts)
   attr(retro, "TS_lab") <- c(paste("Fishing mortality of Fleet", 1:data$nfleet),
                              "Spawning biomass", "Spawning depletion", "Recruitment")
 
@@ -928,7 +928,7 @@ SRA_retro <- function(x, nyr = 5) {
 }
 
 
-SRA_retro_subset <- function(yr, data, params, map) {
+RCM_retro_subset <- function(yr, data, params, map) {
   ##### Data object
   data_out <- structure(data, check.passed = NULL)
 

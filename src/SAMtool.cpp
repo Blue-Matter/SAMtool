@@ -25,8 +25,8 @@ Type objective_function<Type>::operator() ()
     return VPA(this);
   } else if(model == "cDD") {
     return cDD(this);
-  } else if(model == "SRA_scope") {
-    return SRA_scope(this);
+  } else if(model == "RCM") {
+    return RCM(this);
   } else {
     error("No model found.");
   }

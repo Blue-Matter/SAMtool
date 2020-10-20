@@ -1,5 +1,5 @@
 
-namespace ns_SRA_scope {
+namespace ns_RCM {
 
 using namespace ns_SCA;
 

@@ -1,9 +1,9 @@
 
-#' Class-\code{SRA}
+#' Class-\code{RCM}
 #'
-#' An S4 class for the output from \link{SRA_scope}.
+#' An S4 class for the output from \link{RCM_scope}.
 #'
-#' @name SRA-class
+#' @name RCM-class
 #' @docType class
 #'
 #' @slot OM An updated operating model, class \linkS4class{OM}.
@@ -11,8 +11,8 @@
 #' @slot NAA An array for the predicted numbers at age with dimension \code{OM@@nsim}, \code{OM@@nyears+1}, and \code{OM@@maxage}.
 #' @slot CAA An array for the predicted catch at age with dimension \code{OM@@nsim}, \code{OM@@nyears}, \code{OM@@maxage}, and nfleet.
 #' @slot CAL An array for the predicted catch at length with dimension \code{OM@@nsim}, \code{OM@@nyears}, length bins, and nfleet.
-#' @slot conv A logical vector of length \code{OM@@nsim} indicating convergence of the SRA scoping model in the i-th simulation.
-#' @slot Misc A list of length \code{OM@@nsim} with more output from the fitted SRA scoping model. Within each simulation, items of interest include:
+#' @slot conv A logical vector of length \code{OM@@nsim} indicating convergence of the RCM in the i-th simulation.
+#' @slot Misc A list of length \code{OM@@nsim} with more output from the fitted RCM. Within each simulation, items of interest include:
 #'
 #' \itemize{
 #' \item B - total biomass - vector of length nyears+1
@@ -55,29 +55,29 @@
 #' \code{\link[TMB]{sdreport}}.
 #' \item report - a list of model output reported from the TMB executable, i.e. \code{obj$report()}. See Misc.
 #' }
-#' @slot data A list of the data inputs for the SRA scoping model.
-#' @slot config A data frame describing configuration of the SRA scoping model (not currently used).
+#' @slot data A list of the data inputs for the RCM.
+#' @slot config A data frame describing configuration of the RCM (not currently used).
 #'
-#' @seealso \link{plot.SRA} \link{SRA_scope}
+#' @seealso \link{plot.RCM} \link{RCM}
 #' @author Q. Huynh
-#' @export SRA
-#' @exportClass SRA
-SRA <- setClass("SRA", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
+#' @export RCM
+#' @exportClass RCM
+RCM <- setClass("RCM", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
                                  CAA = "array", CAL = "array", conv = "logical", Misc = "list", mean_fit = "list",
                                  data = "list", config = "data.frame"))
 
 
-#' @name plot.SRA
-#' @aliases plot,SRA,missing-method
-#' @title Plot SRA scope output
+#' @name plot.RCM
+#' @aliases plot,RCM,missing-method
+#' @title Plot RCM scope output
 #' @description Produces HTML file (via markdown) figures of parameter estimates and output from an \linkS4class{Assessment} object.
-#' Plots histograms of operating model parameters that are updated by the SRA scoping function, as well as diagnostic plots
-#' for the fits to the SRA for each simulation. \code{compare_SRA} plots a short report that compares output from multiple SRA objects,
+#' Plots histograms of operating model parameters that are updated by the RCM scoping function, as well as diagnostic plots
+#' for the fits to the RCM for each simulation. \code{compare_RCM} plots a short report that compares output from multiple RCM objects,
 #' assuming the same model structure, i.e., identical matrix and array dimensions among models, but different data weightings, data omissions, etc.
 #'
-#' @param x An object of class \linkS4class{SRA} (output from \link{SRA_scope}).
+#' @param x An object of class \linkS4class{RCM} (output from \link{RCM}).
 #' @param compare Logical, if TRUE, the function will run \code{runMSE} to compare the historical period of the operating model
-#' and the SRA model output.
+#' and the RCM output.
 #' @param filename Character string for the name of the markdown and HTML files.
 #' @param dir The directory in which the markdown and HTML files will be saved.
 #' @param sims A logical vector of length \code{x@@OM@@nsim} or a numeric vector indicating which simulations to keep.
@@ -86,19 +86,19 @@ SRA <- setClass("SRA", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
 #' @param s_name Character vector for survey names.
 #' @param MSY_ref A numeric vector for reference horizontal lines for B/BMSY plots.
 #' @param bubble_adj A number to adjust the size of bubble plots (for residuals of age and length comps).
-#' @param scenario Optional, a named list to label each simulation in the SRA for plotting, e.g.:
+#' @param scenario Optional, a named list to label each simulation in the RCM for plotting, e.g.:
 #' \code{list(names = c("low M", "high M"), col = c("blue", "red"))}.
 #' @param title Optional character string for an alternative title for the markdown report.
 #' @param open_file Logical, whether the HTML document is opened after it is rendered.
 #' @param quiet Logical, whether to silence the markdown rendering function.
 #' @param render_args A list of other arguments to pass to \link[rmarkdown]{render}.
-#' @param ... For \code{compare_SRA}, multiple SRA objects for comparison.
+#' @param ... For \code{compare_RCM}, multiple RCM objects for comparison.
 #' @return Returns invisibly the output from \link[rmarkdown]{render}.
 #' @importFrom rmarkdown render
-#' @seealso \linkS4class{SRA} \link{SRA_scope}
+#' @seealso \linkS4class{RCM} \link{RCM}
 #' @exportMethod plot
-setMethod("plot", signature(x = "SRA", y = "missing"),
-          function(x, compare = TRUE, filename = "SRA_scope", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL,
+setMethod("plot", signature(x = "RCM", y = "missing"),
+          function(x, compare = TRUE, filename = "RCM", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL,
                    f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
                    open_file = TRUE, quiet = TRUE, render_args, ...) {
 
@@ -181,7 +181,7 @@ setMethod("plot", signature(x = "SRA", y = "missing"),
             if(is.null(title)) title <- "Operating model (OM) conditioning for `r ifelse(nchar(OM@Name) > 0, OM@Name, substitute(OM))`"
             header <- c("---",
                         paste0("title: \"", title, "\""),
-                        "subtitle: Output from Stock Reduction Analysis scoping function (SRA_scope)",
+                        "subtitle: Output from Rapid Conditioning Model (RCM)",
                         "date: \"`r Sys.Date()`\"",
                         "---",
                         "<style type=\"text/css\">",
@@ -201,18 +201,18 @@ setMethod("plot", signature(x = "SRA", y = "missing"),
             Yearplusone_matrix <- matrix(Yearplusone, ncol = nsim, nrow = nyears+1)
 
             OM_update <- c("# Summary {.tabset}\n",
-                           "## Updated historical OM parameters\n", rmd_SRA_R0(),
-                           rmd_SRA_D(), rmd_SRA_Perr(), rmd_SRA_Find(), rmd_SRA_sel())
+                           "## Updated historical OM parameters\n", rmd_RCM_R0(),
+                           rmd_RCM_D(), rmd_RCM_Perr(), rmd_RCM_Find(), rmd_RCM_sel())
 
             ####### Output from all simulations {.tabset}
-            fleet_output <- lapply(1:nfleet, rmd_SRA_fleet_output, f_name = f_name)
+            fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
             if(any(data$Index > 0, na.rm = TRUE)) {
-              survey_output <- lapply(1:nsurvey, rmd_SRA_survey_output, s_name = s_name)
+              survey_output <- lapply(1:nsurvey, rmd_RCM_survey_output, s_name = s_name)
             } else survey_output <- NULL
 
             all_sims_output <- c(fleet_output, survey_output, "### Model predictions\n",
-                                 rmd_SRA_initD(), rmd_SRA_R_output(), rmd_SRA_SSB_output(), rmd_log_rec_dev())
+                                 rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), rmd_log_rec_dev())
 
             ####### Fit to mean inputs from operating model
             # Generate summary table (parameter estimates)
@@ -234,11 +234,11 @@ setMethod("plot", signature(x = "SRA", y = "missing"),
               SD2 <- sdreport_int(SD) %>% signif(4) %>% format() %>% as.data.frame()
               if(render_args$output_format == "html_document") {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
-                           "### SRA Model Estimates\n",
+                           "### RCM Estimates\n",
                            "`r SD2`\n\n")
               } else {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
-                           "### SRA Model Estimates\n",
+                           "### RCM Model Estimates\n",
                            "`r SD2 %>% knitr::kable(format = \"markdown\")`\n\n")
               }
 
@@ -389,14 +389,14 @@ setMethod("plot", signature(x = "SRA", y = "missing"),
                                          fig.cap = "Predicted catch-at-length (summed over all fleets).", bubble_adj = as.character(bubble_adj))
               } else CAL_bubble <- ""
 
-              ts_output <- c(sel_matplot, F_matplot, rmd_SSB(), SSB_plot, rmd_SSB_SSB0(FALSE), rmd_dynamic_SSB0(), rmd_R(), rmd_SRA_SR(),
+              ts_output <- c(sel_matplot, F_matplot, rmd_SSB(), SSB_plot, rmd_SSB_SSB0(FALSE), rmd_dynamic_SSB0(), rmd_R(), rmd_RCM_SR(),
                              rmd_residual("log_rec_dev", fig.cap = "Time series of recruitment deviations.", label = "log-Recruitment deviations"),
                              rmd_residual("log_rec_dev", "log_rec_dev_SE", fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
                                           label = "log-Recruitment deviations", conv_check = TRUE),
                              rmd_N(), N_bubble, CAA_bubble, CAL_bubble)
 
               if(!is.null(data$LWT)) { # Backwards compatibility
-                nll <- SRA_get_likelihoods(report, data$LWT, f_name, s_name)
+                nll <- RCM_get_likelihoods(report, data$LWT, f_name, s_name)
                 if(render_args$output_format == "html_document") {
                   nll_table <- c("### Likelihood components\n",
                                  "#### Summary\n",
@@ -425,12 +425,12 @@ setMethod("plot", signature(x = "SRA", y = "missing"),
               } else nll_table <- NULL
 
               if(exists("retro", inherits = FALSE)) {
-                ret <- rmd_SRA_retrospective(render_args)
+                ret <- rmd_RCM_retrospective(render_args)
               } else ret <- NULL
 
               mean_fit_rmd <- c(sumry, LH_section, data_section, ts_output, nll_table, ret)
             } else mean_fit_rmd <- c("## Fit to mean parameters of OM {.tabset}\n",
-                                     "No model found. Re-run `SRA_scope()` with `mean_fit = TRUE`.\n\n")
+                                     "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")
 
             if(compare) {
               Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = OM@nsim >= 48 & snowfall::sfIsRunning())
@@ -483,55 +483,55 @@ setMethod("plot", signature(x = "SRA", y = "missing"),
                                "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
                                "```\n",
                                "",
-                               "### OM/SRA Comparison\n\n",
-                               "```{r, fig.cap = \"Apical F comparison between the OM and SRA.\"}",
+                               "### OM/RCM Comparison\n\n",
+                               "```{r, fig.cap = \"Apical F comparison between the OM and RCM.\"}",
                                "matplot(Year, t(Hist_F), typ = \"o\", pch = 16, col = \"red\", xlab = \"Year\", ylab = \"Apical F\", ylim = c(0, 1.1 * max(c(Hist_F, OM@cpars$Find))))",
                                "matlines(Year, t(OM@cpars$Find), col = \"black\")",
                                "abline(h = 0, col = \"grey\")",
-                               "legend(\"topleft\", c(\"SRA\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
+                               "legend(\"topleft\", c(\"RCM\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
                                "```\n",
                                "",
-                               "```{r, fig.cap = \"Difference in apical F between the OM and SRA. Positive values indicate higher F in the OM.\"}",
+                               "```{r, fig.cap = \"Difference in apical F between the OM and RCM. Positive values indicate higher F in the OM.\"}",
                                "matplot(Year, t(Hist_F - OM@cpars$Find), typ = \"n\", xlab = \"Year\", ylab = \"Difference in apical F\")",
                                "abline(h = 0, col = \"grey\")",
                                "matlines(Year, t(Hist_F - OM@cpars$Find), col = \"black\")",
                                "```\n",
                                "",
-                               "```{r, fig.cap = \"SSB comparison between the OM and SRA.\"}",
+                               "```{r, fig.cap = \"SSB comparison between the OM and RCM.\"}",
                                "matplot(Year, t(Hist@TSdata$SSB), typ = \"o\", col = \"red\", pch = 16, xlab = \"Year\", ylab = \"SSB\",",
                                "        ylim = c(0, 1.1 * max(c(Hist@TSdata$SSB, x@SSB[sims, 1:OM@nyears]))))",
                                "matlines(Year, t(x@SSB[sims, 1:OM@nyears, drop = FALSE]), col = \"black\")",
                                "abline(h = 0, col = \"grey\")",
-                               "legend(\"topleft\", c(\"SRA\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
+                               "legend(\"topleft\", c(\"RCM\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
                                "```\n",
                                "",
-                               "```{r, fig.cap = \"Difference in spawning biomass (SSB), relative to SSB0, between the OM and SRA, calculated as $(SSB^{OM}_y - SSB^{SRA}_y)/SSB^{OM}_0$. Positive values indicate higher SSB in the OM.\"}",
+                               "```{r, fig.cap = \"Difference in spawning biomass (SSB), relative to SSB0, between the OM and RCM, calculated as $(SSB^{OM}_y - SSB^{RCM}_y)/SSB^{OM}_0$. Positive values indicate higher SSB in the OM.\"}",
                                "matplot(Year, t((Hist@TSdata$SSB - x@SSB[sims, 1:OM@nyears, drop = FALSE])/Hist@Ref$SSB0), typ = \"n\", xlab = \"Year\", ylab = \"Difference in relative SSB\")",
                                "abline(h = 0, col = \"grey\")",
                                "matlines(Year, t((Hist@TSdata$SSB - x@SSB[sims, 1:OM@nyears, drop = FALSE])/Hist@Ref$SSB0), col = \"black\")",
                                "```\n",
                                "",
-                               "```{r, fig.cap = \"Recruitment comparison between the OM and SRA.\"}",
+                               "```{r, fig.cap = \"Recruitment comparison between the OM and RCM.\"}",
                                "matplot(Year, t(Hist@TSdata$Rec), typ = \"o\", col = \"red\", pch = 16, xlab = \"Year\", ylab = \"Recruitment\",",
                                "        ylim = c(0, 1.1 * max(c(Hist@TSdata$Rec, x@NAA[sims, 1:OM@nyears, 1]))))",
                                "matlines(Year, t(x@NAA[, 1:OM@nyears, 1][sims, , drop = FALSE]), col = \"black\")",
                                "abline(h = 0, col = \"grey\")",
-                               "legend(\"topleft\", c(\"SRA\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
+                               "legend(\"topleft\", c(\"RCM\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
                                "```\n",
                                "",
-                               "```{r, fig.cap = \"Difference in recruitment (relative to R0) between the OM and SRA, calculated as $(R^{OM}_y - R^{SRA}_y)/R^{OM}_0$. Positive values indicate higher recruitment in the OM.\"}",
+                               "```{r, fig.cap = \"Difference in recruitment (relative to R0) between the OM and RCM, calculated as $(R^{OM}_y - R^{RCM}_y)/R^{OM}_0$. Positive values indicate higher recruitment in the OM.\"}",
                                "matplot(Year, t(Hist@TSdata$Rec/OM@cpars$R0 - x@NAA[, 1:OM@nyears, 1][sims, , drop = FALSE]/OM@cpars$R0), typ = \"n\", xlab = \"Year\", ylab = \"Difference in relative recruitment\")",
                                "abline(h = 0, col = \"grey\")",
                                "matlines(Year, t(Hist@TSdata$Rec/OM@cpars$R0 - x@NAA[, 1:OM@nyears, 1][sims, , drop = FALSE]/OM@cpars$R0),",
                                "         col = \"black\")",
                                "```\n",
                                "",
-                               "```{r, fig.cap = \"Comparison of total removals between the OM and SRA.\"}",
+                               "```{r, fig.cap = \"Comparison of total removals between the OM and RCM.\"}",
                                "matplot(Year, t(Hist@TSdata$Removals), typ = \"o\", col = \"red\", pch = 16, xlab = \"Year\", ylab = \"Total removals\",",
                                "        ylim = c(0, 1.1 * max(c(Hist@TSdata$Removals, data$Chist, na.rm = TRUE))))",
                                "lines(Year, rowSums(data$Chist, na.rm = TRUE), col = \"black\")",
                                "abline(h = 0, col = \"grey\")",
-                               "legend(\"topleft\", c(\"SRA\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
+                               "legend(\"topleft\", c(\"RCM\", \"OM\"), col = c(\"black\", \"red\"), pch = c(NA_integer_, 16), lwd = c(1, 1), bty = \"n\")",
                                "```\n",
                                "",
                                "```{r, fig.cap = \"Difference in annual catch (relative to observed), calculated as $C^{OM}_y/C^{obs}_y - 1$. Positive values indicate higher catch in the OM. Catch in the OM is the total removals (both landings and discards).\"}",
@@ -590,7 +590,7 @@ rmd_matplot <- function(x, y, col, xlab, ylab, legend.lab, type = "l", lty = 1, 
   return(ans)
 }
 
-# For SRA scope function
+# For RCM function
 rmd_assess_fit2 <- function(year, obs, fit, fig.cap, label = fig.cap, match = FALSE) {
   fig.cap2 <- paste0("Observed (black) and predicted (red) ", fig.cap, ".")
   if(match) fig.cap2 <- paste(fig.cap2, "Predicted", fig.cap, "should match observed in this model.")
@@ -616,19 +616,19 @@ rmd_fit_comps <- function(year, obs, fit, type = c("bubble", "annual", "bubble_r
     "```\n")
 }
 
-rmd_SRA_R0 <- function(fig.cap = "Histogram of R0 (unfished recruitment).") {
+rmd_RCM_R0 <- function(fig.cap = "Histogram of R0 (unfished recruitment).") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "if(!is.null(OM@cpars$R0)) hist(OM@cpars$R0, main = \"\", xlab = expression(R[0]))",
     "```\n")
 }
 
-rmd_SRA_D <- function(fig.cap = "Histogram of historical depletion.") {
+rmd_RCM_D <- function(fig.cap = "Histogram of historical depletion.") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "if(!is.null(OM@cpars$D)) hist(OM@cpars$D, main = \"\", xlab = \"Depletion\")",
     "```\n")
 }
 
-rmd_SRA_Perr <- function(fig.cap = "Historical recruitment deviations among simulations.") {
+rmd_RCM_Perr <- function(fig.cap = "Historical recruitment deviations among simulations.") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "Perr <- OM@cpars$Perr_y[, max_age:(max_age+nyears-1), drop = FALSE]",
     "matplot(Year, t(Perr), type = \"l\", col = \"black\", xlab = \"Year\", ylab = \"Recruitment deviations\",",
@@ -658,14 +658,14 @@ rmd_SRA_Perr <- function(fig.cap = "Historical recruitment deviations among simu
     "```\n")
 }
 
-rmd_SRA_Find <- function(fig.cap = "Apical F from SRA model. These values may be subsequently re-scaled in the operating model in order to match the specified depletion") {
+rmd_RCM_Find <- function(fig.cap = "Apical F from RCM model. These values may be subsequently re-scaled in the operating model in order to match the specified depletion") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "matplot(Year, t(OM@cpars$Find), type = \"l\", col = \"black\", xlab = \"Year\", ylab = \"Apical F\")",
     "abline(h = 0, col = \"grey\")",
     "```\n")
 }
 
-rmd_SRA_sel <- function(fig.cap = "Operating model selectivity among simulations.") {
+rmd_RCM_sel <- function(fig.cap = "Operating model selectivity among simulations.") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "if(nsel_block == 1) {",
     "  vul <- do.call(cbind, lapply(report_list, getElement, \"vul_len\"))",
@@ -680,8 +680,8 @@ rmd_SRA_sel <- function(fig.cap = "Operating model selectivity among simulations
     "```\n")
 }
 
-rmd_SRA_fleet_output <- function(ff, f_name) {
-  if(ff == 1) header <- "## SRA output {.tabset}\n" else header <- NULL
+rmd_RCM_fleet_output <- function(ff, f_name) {
+  if(ff == 1) header <- "## RCM output {.tabset}\n" else header <- NULL
   ans <- c(paste("### ", f_name[ff], "\n"),
            paste0("```{r, fig.cap = \"Selectivity of ", f_name[ff], ".\"}"),
            paste0("bl <- unique(data$sel_block[, ", ff, "])"),
@@ -778,32 +778,32 @@ rmd_SRA_fleet_output <- function(ff, f_name) {
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", f_name[ff], ".\"}"),
            paste0("if(any(data$CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
            paste0("if(nsim == 1) CAA_plot <- array(x@CAA[, , , ", ff, "], c(1, nyears, max_age)) else CAA_plot <- x@CAA[, , , ", ff, "]"),
-           paste0("plot_composition_SRA(Year, CAA_plot, data$CAA[, , ", ff, "], dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, CAA_plot, data$CAA[, , ", ff, "], dat_col = scenario$col)"),
            "}",
            "```\n",
            paste0("```{r, fig.cap = \"Predicted age composition from fleet ", ff, ".\"}"),
            paste0("if(any(data$CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
-           paste0("plot_composition_SRA(Year, CAA_plot, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, CAA_plot, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) length composition from ", f_name[ff], ".\"}"),
            paste0("if(any(data$CAL[, , ", ff, "] > 0, na.rm = TRUE)) {"),
            paste0("if(nsim == 1) CAL_plot <- array(x@CAL[, , , ", ff, "], c(1, nyears, length(data$length_bin))) else CAL_plot <- x@CAL[, , , ", ff, "]"),
-           paste0("plot_composition_SRA(Year, CAL_plot, data$CAL[, , ", ff, "], CAL_bins = data$length_bin, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, CAL_plot, data$CAL[, , ", ff, "], CAL_bins = data$length_bin, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Predicted length composition from ", f_name[ff], ".\"}"),
            paste0("if(any(data$CAL[, , ", ff, "] > 0, na.rm = TRUE)) {"),
-           paste0("plot_composition_SRA(Year, CAL_plot, CAL_bins = data$length_bin, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, CAL_plot, CAL_bins = data$length_bin, dat_col = scenario$col)"),
            "}",
            "```\n")
 
   c(header, ans)
 }
 
-rmd_SRA_survey_output <- function(sur, s_name) {
+rmd_RCM_survey_output <- function(sur, s_name) {
   ans <- c(paste0("### ", s_name[sur], " \n"),
            "",
            paste0("```{r, fig.cap = \"Selectivity of ", s_name[sur], " in last historical year.\"}"),
@@ -839,27 +839,27 @@ rmd_SRA_survey_output <- function(sur, s_name) {
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", s_name[sur], ".\"}"),
            paste0("if(!is.null(data$s_CAA) && any(data$s_CAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
            paste0("pred_sCAA <- lapply(report_list, function(x) x$s_CAA[,, ", sur, "]) %>% unlist() %>% array(dim = c(nyears, max_age, nsim)) %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_SRA(Year, pred_sCAA, data$s_CAA[, , ", sur, "], dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, pred_sCAA, data$s_CAA[, , ", sur, "], dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) length composition from ", s_name[sur], ".\"}"),
            paste0("if(!is.null(data$s_CAL) && any(data$s_CAL[, , ", sur, "] > 0, na.rm = TRUE)) {"),
            paste0("pred_sCAL <- lapply(report_list, function(x) x$s_CAL[,, ", sur, "]) %>% unlist() %>% array(dim = c(nyears, length(data$length_bin), nsim)) %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_SRA(Year, pred_sCAL, data$s_CAL[, , ", sur, "], CAL_bins = data$length_bin, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, pred_sCAL, data$s_CAL[, , ", sur, "], CAL_bins = data$length_bin, dat_col = scenario$col)"),
            "}",
            "```\n")
   ans
 }
 
-rmd_SRA_initD <- function(fig.cap = "Histogram of initial depletion among all simulations.") {
+rmd_RCM_initD <- function(fig.cap = "Histogram of initial depletion among all simulations.") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "initD <- vapply(report_list, function(x) x$E[1]/x$E0[1], numeric(1))",
     "hist(initD, main = \"\", xlab = \"Initial depletion\")",
     "```\n")
 }
 
-rmd_SRA_R_output <- function() {
+rmd_RCM_R_output <- function() {
   c("```{r, fig.cap = \"Estimated recruitment among all simulations.\"}",
     "R_out <- do.call(cbind, lapply(report_list, getElement, \"R\"))",
     "matplot(Yearplusone, R_out, ylim = c(0, 1.1 * max(R_out, na.rm = TRUE)), type = \"l\", col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd, xlab = \"Year\", ylab = \"Recruitment\")",
@@ -868,7 +868,7 @@ rmd_SRA_R_output <- function() {
     "```\n")
 }
 
-rmd_SRA_SSB_output <- function() {
+rmd_RCM_SSB_output <- function() {
   c("```{r, fig.cap = \"Estimated spawning biomass among all simulations.\"}",
     "E <- do.call(cbind, lapply(report_list, getElement, \"E\"))",
     "matplot(Yearplusone, E, ylim = c(0, 1.1 * max(E, na.rm = TRUE)), type = \"l\", col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd, xlab = \"Year\", ylab = \"Spawning biomass\")",
@@ -901,7 +901,7 @@ rmd_log_rec_dev <- function() {
     "```\n")
 }
 
-rmd_SRA_SR <- function() {
+rmd_RCM_SR <- function() {
   c("```{r, fig.cap = \"Stock-recruit relationship and estimated recruitment.\"}",
     "if(OM@SRrel == 1) {",
     "  expectedR <- report$Arec * report$E[1:nyears] / (1 + report$Brec * report$E[1:nyears])",
@@ -912,7 +912,7 @@ rmd_SRA_SR <- function() {
     "```\n")
 }
 
-rmd_SRA_retrospective <- function(render_args) {
+rmd_RCM_retrospective <- function(render_args) {
   if(render_args$output_format == "html_document") {
     x <- "summary(retro) %>% as.data.frame()"
   } else {
@@ -926,7 +926,7 @@ rmd_SRA_retrospective <- function(render_args) {
     "```\n")
 }
 
-plot_composition_SRA <- function(Year, SRA, dat = NULL, CAL_bins = NULL, ages = NULL, annual_ylab = "Frequency",
+plot_composition_RCM <- function(Year, RCM, dat = NULL, CAL_bins = NULL, ages = NULL, annual_ylab = "Frequency",
                                  annual_yscale = c("proportions", "raw"), N = if(is.null(dat)) NULL else round(rowSums(dat)), dat_linewidth = 2, dat_color = "black") {
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
@@ -940,23 +940,23 @@ plot_composition_SRA <- function(Year, SRA, dat = NULL, CAL_bins = NULL, ages = 
     data_lab <- "Length"
   }
   if(data_type == 'age') {
-    data_val <- if(is.null(ages)) 1:dim(SRA)[3] else ages
+    data_val <- if(is.null(ages)) 1:dim(RCM)[3] else ages
     data_lab <- "Age"
   }
 
-  # Annual comps (SRA vs. dat if available)
+  # Annual comps (RCM vs. dat if available)
   # Dim of
-  SRA_plot <- SRA
+  RCM_plot <- RCM
   dat_plot <- dat
   if(annual_yscale == "proportions") {
     for(i in 1:length(Year)) {
-      SRA_plot[, i, ] <- SRA[, i, ]/rowSums(SRA[, i, ])
+      RCM_plot[, i, ] <- RCM[, i, ]/rowSums(RCM[, i, ])
       if(!is.null(dat)) dat_plot[i, ] <- dat[i, ]/sum(dat[i, ])
     }
   }
-  ylim <- c(0, 1.1 * max(SRA_plot, dat_plot, na.rm = TRUE))
+  ylim <- c(0, 1.1 * max(RCM_plot, dat_plot, na.rm = TRUE))
   yaxp <- c(0, max(pretty(ylim, n = 4)), 4)
-  if(max(c(SRA_plot, dat_plot), na.rm = TRUE) == 1) yaxp <- c(0, 1, 4)
+  if(max(c(RCM_plot, dat_plot), na.rm = TRUE) == 1) yaxp <- c(0, 1, 4)
 
   las <- 1
 
@@ -964,14 +964,14 @@ plot_composition_SRA <- function(Year, SRA, dat = NULL, CAL_bins = NULL, ages = 
     yaxt <- ifelse(i %% 16 %in% c(1:4), "s", "n") # TRUE = first column
     xaxt <- ifelse(i < length(Year) & i %% 4 %in% c(1:3), "n", "s") # TRUE = first three rows
 
-    if(dim(SRA_plot)[1] == 1) {
-      plot(data_val, SRA_plot[, i, ], type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
+    if(dim(RCM_plot)[1] == 1) {
+      plot(data_val, RCM_plot[, i, ], type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
       abline(h = 0, col = 'grey')
-      lines(data_val, SRA_plot[, i, ], col = dat_color)
+      lines(data_val, RCM_plot[, i, ], col = dat_color)
     } else {
-      matplot(data_val, t(SRA_plot[, i, ]), type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
+      matplot(data_val, t(RCM_plot[, i, ]), type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
       abline(h = 0, col = 'grey')
-      matlines(data_val, t(SRA_plot[, i, ]), col = dat_color)
+      matlines(data_val, t(RCM_plot[, i, ]), col = dat_color)
     }
     abline(h = 0, col = 'grey')
     if(!is.null(dat)) lines(data_val, dat_plot[i, ], lwd = 1.5)
@@ -986,7 +986,7 @@ plot_composition_SRA <- function(Year, SRA, dat = NULL, CAL_bins = NULL, ages = 
   invisible()
 }
 
-SRA_get_likelihoods <- function(x, LWT, f_name, s_name) {
+RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
   f_nll <- rbind(x$nll_Catch + x$nll_Ceq, x$nll_CAA, x$nll_CAL, x$nll_MS)
   f_nll[is.na(f_nll)] <- 0
   f_nll <- cbind(f_nll, rowSums(f_nll))
@@ -1013,9 +1013,9 @@ SRA_get_likelihoods <- function(x, LWT, f_name, s_name) {
   return(res)
 }
 
-#' @rdname plot.SRA
+#' @rdname plot.RCM
 #' @export
-compare_SRA <- function(..., compare = TRUE, filename = "compare_SRA", dir = tempdir(), Year = NULL,
+compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tempdir(), Year = NULL,
                         f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
                         open_file = TRUE, quiet = TRUE, render_args) {
 
@@ -1049,7 +1049,7 @@ compare_SRA <- function(..., compare = TRUE, filename = "compare_SRA", dir = tem
 
   ####### Assign variables
   x <- dots[[1]] # Dummy variable
-  report_list <- lapply(dots, function(xx) if(length(xx@mean_fit) > 0) return(xx@mean_fit$report) else stop("Error in SRA objects."))
+  report_list <- lapply(dots, function(xx) if(length(xx@mean_fit) > 0) return(xx@mean_fit$report) else stop("Error in RCM objects."))
 
   nsim <- length(report_list)
   data <- dots[[1]]@data
@@ -1077,7 +1077,7 @@ compare_SRA <- function(..., compare = TRUE, filename = "compare_SRA", dir = tem
   if(is.null(title)) title <- "Comparisons of OM conditioning"
   header <- c("---",
               paste0("title: \"", title, "\""),
-              "subtitle: Output from Stock Reduction Analysis scoping function (SRA_scope)",
+              "subtitle: Output from Rapid Conditioning Model (RCM)",
               "date: \"`r Sys.Date()`\"",
               "---",
               "<style type=\"text/css\">",
@@ -1094,10 +1094,10 @@ compare_SRA <- function(..., compare = TRUE, filename = "compare_SRA", dir = tem
 
 
   ####### Output from all simulations {.tabset}
-  fleet_output <- lapply(1:nfleet, rmd_SRA_fleet_output, f_name = f_name)
+  fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
   if(any(data$Index > 0, na.rm = TRUE)) {
-    survey_output <- lapply(1:nsurvey, rmd_SRA_survey_output, s_name = s_name)
+    survey_output <- lapply(1:nsurvey, rmd_RCM_survey_output, s_name = s_name)
   } else survey_output <- NULL
 
   #### MSY comparisons
@@ -1136,10 +1136,10 @@ compare_SRA <- function(..., compare = TRUE, filename = "compare_SRA", dir = tem
   }
 
   all_sims_output <- c("# Summary {.tabset}\n\n", fleet_output, survey_output, "### Model predictions\n",
-                       rmd_SRA_initD(), rmd_SRA_R_output(), rmd_SRA_SSB_output(), SSB_MSY, rmd_log_rec_dev())
+                       rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), SSB_MSY, rmd_log_rec_dev())
 
   #### Likelihoods
-  nll <- Map(SRA_get_likelihoods, x = report_list, LWT = lapply(dots, function(xx) xx@data$LWT),
+  nll <- Map(RCM_get_likelihoods, x = report_list, LWT = lapply(dots, function(xx) xx@data$LWT),
              MoreArgs = list(f_name = f_name, s_name = s_name))
 
   summary_nll <- vapply(nll, function(xx) xx[[1]] %>% as.matrix(), numeric(4)) %>%

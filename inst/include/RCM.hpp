@@ -1,14 +1,14 @@
 
-#ifndef SRA_scope_hpp
-#define SRA_scope_hpp
+#ifndef RCM_hpp
+#define RCM_hpp
 
 #undef TMB_OBJECTIVE_PTR
 #define TMB_OBJECTIVE_PTR obj
 
 template<class Type>
-Type SRA_scope(objective_function<Type> *obj) {
+Type RCM(objective_function<Type> *obj) {
 
-  using namespace ns_SRA_scope;
+  using namespace ns_RCM;
 
   DATA_MATRIX(C_hist);    // Total catch by year and fleet
   DATA_VECTOR(C_eq);      // Equilibrium catch by fleet
@@ -255,7 +255,7 @@ Type SRA_scope(objective_function<Type> *obj) {
         }
       }
     } else if(condition == "catch2") {
-      F.row(y) = Newton_SRA_F(C_hist, N, M, wt, VB, vul, max_F, y, max_age, nfleet, nit_F, penalty);
+      F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, max_age, nfleet, nit_F, penalty);
     } else {
       for(int ff=0;ff<nfleet;ff++) {
         Type tmp = max_F - q_effort(ff) * E_hist(y,ff);

@@ -1,11 +1,11 @@
 
 
-#' @name SRA_scope
-#' @aliases SRA_scope SRA_scope,OM,list-method SRA_scope,OM,Data-method
-#' @title Stock-reduction analysis (SRA) for conditioning operating models
+#' @name RCM
+#' @aliases RCM RCM,OM,list-method RCM,OM,Data-method
+#' @title Rapid Conditioning Model (RCM)
 #'
 #' @description Intended for conditioning operating models for DLMtool. For data-limited stocks, this function can generate a range of potential depletion scenarios inferred from sparse data.
-#' From a historical time series of total catch or effort, and potentially age/length compositions and multiple indices of abundance, the SRA returns a range of values for depletion, selectivity,
+#' From a historical time series of total catch or effort, and potentially age/length compositions and multiple indices of abundance, the RCM returns a range of values for depletion, selectivity,
 #' unfished recruitment (R0), historical fishing effort, and recruitment deviations for the operating model. This is done by sampling life history parameters
 #' provided by the user and fitting a statistical catch-at-age model (with the predicted catch equal to the observed catch).
 #' Alternatively one can do a single model fit and sample the covariance matrix to generate an operating model with uncertainty based on the model fit.
@@ -14,7 +14,7 @@
 #' @param OM An object of class \linkS4class{OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 #' steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).
 #' @param data Data inputs formatted in a list object (preferred). Alternatively, \code{data} can be a \linkS4class{Data} S4 object. See Data section below.
-#' @param condition String to indicate whether the SRA model is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
+#' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 #' or "effort".
 #' @param selectivity A character vector of length nfleet to indicate \code{"logistic"}, \code{"dome"}, or \code{"free"} selectivity for each fleet in \code{Chist}.
 #' If there is time-varying selectivity, this is a character vector of length nsel_block (see Data section below). "free" indicates independent selectivity parameters for each age,
@@ -23,7 +23,7 @@
 #' total biomass, or \code{"SSB"} for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
 #' If the survey selectivity is otherwise independent of anything else in the model, use \code{"logistic"}, \code{"dome"}, or \code{"free"} to specify the functional form of selectivity, and
 #' see Additional arguments section for setup of survey selectivity parameters. See \href{../doc/SRA_scope_sel.html}{selectivity vignette} for more information.
-#' @param LWT A named list of likelihood weights for the SRA model. See below.
+#' @param LWT A named list of likelihood weights for the RCM. See below.
 #' @param comp_like A string indicating either \code{"multinomial"} (default) or \code{"lognormal"} distributions for the composition data.
 #' @param ESS If \code{comp_like = "multinomial"}, a numeric vector of length two to cap the maximum effective samples size of the age and length compositions,
 #' respectively, for the multinomial likelihood function. The effective sample size of an age or length composition sample is the minimum of ESS or the number of observations
@@ -33,8 +33,8 @@
 #' @param integrate Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).
 #' @param mean_fit Logical, whether to run an additional with mean values of life history parameters from the OM.
 #' @param sims A logical vector of length \code{OM@@nsim} or a numeric vector indicating which simulations to keep.
-#' @param drop_nonconv Logical, whether to drop non-converged fits of the SRA model, including fits where F = NA.
-#' @param drop_highF Logical, whether to drop fits of the SRA model where F = \code{max_F}.
+#' @param drop_nonconv Logical, whether to drop non-converged fits of the RCM, including fits where F = NA.
+#' @param drop_highF Logical, whether to drop fits of the RCM where F = \code{max_F}.
 #' @param control A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.
 #' @param ... Other arguments to pass in for starting values of parameters and fixing parameters. See details.
 #'
@@ -44,9 +44,9 @@
 #' Survey selectivity is estimable only if \code{s_CAA} or \code{s_CAL} is provided. Otherwise, the selectivity should
 #' be mirrored to a fleet (vulnerable biomass selectivity) or indexed to total or spawning biomass (see \code{s_selectivity}).
 #'
-#' Parameters that were used in the fitting model are placed in the \code{SRA@@OM@@cpars} list.
+#' Parameters that were used in the fitting model are placed in the \code{RCM@@OM@@cpars} list.
 
-#' If the operating model \code{OM} uses time-varying growth or M, then those trends will be used in the SRA as well.
+#' If the operating model \code{OM} uses time-varying growth or M, then those trends will be used in the RCM as well.
 #' Time-varying life history parameters can create ambiguity in the calculation and interpretation of depletion and reference points in \link[DLMtool]{runMSE}.
 #' See section D.5 of \code{DLMtool::userguide()}.
 #'
@@ -58,10 +58,10 @@
 #' To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 #' index but the data won't enter the likelihood. See section on likelihood weights.
 #'
-#' @return An object of class \linkS4class{SRA} (see link for description of output).
+#' @return An object of class \linkS4class{RCM} (see link for description of output).
 #'
 #' @section Vignette:
-#' Three vignettes are available for the SRA model:
+#' Three vignettes are available for the RCM:
 #'
 #' \itemize{
 #' \item \href{../doc/SRA_scope.html}{General overview of approach}
@@ -121,11 +121,11 @@
 #' \item Data@@AddIndV, Data@@AddIndType, Data@@AddIunits - Additional information for indices in Data@@AddInd: selectivity and units (i.e., biomass or abundance).
 #' }
 #'
-#' There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed in the function call, i.e., \code{SRA_scope(OM, Data, C_eq = C_eq, ...)}.
+#' There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed in the function call, i.e., \code{RCM(OM, Data, C_eq = C_eq, ...)}.
 #'
 #'
 #' @section Additional arguments:
-#' For \code{SRA_scope}, additional arguments can be passed to the model via \code{...}:
+#' For \code{RCM}, additional arguments can be passed to the model via \code{...}:
 #'
 #' \itemize{
 #' \item vul_par: A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
@@ -163,29 +163,29 @@
 #' to cap the multinomial sample size for age and length comps.
 #'
 #' @author Q. Huynh
-#' @seealso \link{plot.SRA} \linkS4class{SRA}
+#' @seealso \link{plot.RCM} \linkS4class{RCM}
 #' @importFrom dplyr %>%
 #' @export
-setGeneric("SRA_scope", function(OM, data, ...) standardGeneric("SRA_scope"))
+setGeneric("RCM", function(OM, data, ...) standardGeneric("RCM"))
 
-#' @rdname SRA_scope
+#' @rdname RCM
 #' @export
-setMethod("SRA_scope", signature(OM = "OM", data = "list"),
+setMethod("RCM", signature(OM = "OM", data = "list"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
-
-            SRA_scope_int(OM = OM, data = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
-                          comp_like = comp_like, ESS = ESS, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
-                          drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, ...)
-
+            
+            RCM_int(OM = OM, data = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
+                    comp_like = comp_like, ESS = ESS, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
+                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, ...)
+            
           })
 
 
-#' @rdname SRA_scope
+#' @rdname RCM
 #' @export
-setMethod("SRA_scope", signature(OM = "OM", data = "Data"),
+setMethod("RCM", signature(OM = "OM", data = "Data"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
@@ -202,7 +202,7 @@ setMethod("SRA_scope", signature(OM = "OM", data = "Data"),
             matrix_slot <- c("CAA", "CAL")
             data_matrix <- lapply(matrix_slot, matrix_slot_fn, Data = data) %>% structure(names = matrix_slot)
 
-            ####### Generate data list for SRA_scope
+            ####### Generate data list for RCM
             data_list <- list()
 
             # Catch or effort
@@ -253,13 +253,12 @@ setMethod("SRA_scope", signature(OM = "OM", data = "Data"),
             data_list$C_eq <- extra_args$C_eq
             data_list$E_eq <- extra_args$E_eq
 
-            ####### Run SRA_scope
-            output <-
-              SRA_scope_int(OM = OM, data = data_list, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
-                            comp_like = comp_like, ESS = ESS, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
-                            drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control,
-                            OMeff = extra_args$OMeff, s_vul_par = extra_args$s_vul_par, map_s_vul_par = extra_args$map_s_vul_par, ...)
-
+            ####### Run RCM
+            output <- RCM_int(OM = OM, data = data_list, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
+                              comp_like = comp_like, ESS = ESS, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
+                              drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control,
+                              OMeff = extra_args$OMeff, s_vul_par = extra_args$s_vul_par, map_s_vul_par = extra_args$map_s_vul_par, ...)
+            
             ####### Re-assign index slots from AddInd to their original places
             if(any(Ind$slotname != "AddInd")) {
               Data_out <- output@OM@cpars$Data

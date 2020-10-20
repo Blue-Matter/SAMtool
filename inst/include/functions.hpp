@@ -159,7 +159,7 @@ Type Ricker_SR(Type SSB, Type h, Type R0, Type SSB0) {
 #include "ns/ns_cDD.hpp"
 #include "ns/ns_SCA.hpp"
 #include "ns/ns_VPA.hpp"
-#include "ns/ns_SRA_scope.hpp"
+#include "ns/ns_RCM.hpp"
 #include "ns/ns_SP.hpp"
 
 
@@ -169,7 +169,7 @@ Type Ricker_SR(Type SSB, Type h, Type R0, Type SSB0) {
 // g'(x) = sum_a v * N * w * deriv where deriv is defined in the code below
 // We iteratively solve for x where x_next = x_previous - g(x)/g'(x)
 template<class Type>
-vector<Type> Newton_SRA_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matrix<Type> wt, matrix<Type> VB_out, array<Type> vul,
+vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matrix<Type> wt, matrix<Type> VB_out, array<Type> vul,
                           Type max_F, int y, int max_age, int nfleet, int nit_F, Type &penalty) {
 
   vector<Type> F_out(nfleet);
@@ -235,6 +235,6 @@ vector<Type> Newton_SRA_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, m
 #include "SCA_Pope.hpp"
 #include "SCA2.hpp"
 #include "SP.hpp"
-#include "SRA_scope.hpp"
+#include "RCM.hpp"
 #include "VPA.hpp"
 

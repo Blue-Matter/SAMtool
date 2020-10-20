@@ -113,7 +113,7 @@ pull_Index <- function(Data, maxage) {
 }
 
 
-SRA_tiny_comp <- function(x) {
+RCM_tiny_comp <- function(x) {
   all_zero <- all(is.na(x)) | sum(x, na.rm = TRUE) == 0
   if(!all_zero) {
     ind <- is.na(x) | x == 0
@@ -217,7 +217,7 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
 }
 
 
-update_SRA_data <- function(data, OM, condition, dots) {
+update_RCM_data <- function(data, OM, condition, dots) {
 
   message("\nChecking OM and data...\n")
 
@@ -284,7 +284,7 @@ update_SRA_data <- function(data, OM, condition, dots) {
     }
   }
 
-  message("SRA model is conditioned on: ", data$condition)
+  message("RCM model is conditioned on: ", data$condition)
   message(data$nfleet, " fleet(s) detected.")
   message(data$nyears, " years of data detected.")
 
@@ -618,7 +618,7 @@ check_OM_for_sampling <- function(OM, data) {
       OM@R0 <- 1
     } else {
       OM@R0 <- 1e3
-      message("OM@R0 is used as the starting value for R0 in SRA_scope, but was not found. By default, using 1000.")
+      message("OM@R0 is used as the starting value for R0 in RCM, but was not found. By default, using 1000.")
     }
   }
 

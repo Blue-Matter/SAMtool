@@ -25,7 +25,7 @@
 #' }
 #'
 #'
-#' The \code{\link{SRA_scope}} model can be used to condition operating models from real data. Information can be found
+#' The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. Information can be found
 #' \href{../doc/SRA_scope.html}{here}.
 #'
 #' All SAMtool vignettes can also be viewed by typing \code{browseVignettes("SAMtool")} into the R console or through the

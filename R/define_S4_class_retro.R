@@ -5,7 +5,7 @@
 #' @description Perform a retrospective analysis, successive removals of most recent years of data to evaluate resulting
 #' parameter estimates.
 #'
-#' @param x An S4 object of class \linkS4class{Assessment} of \linkS4class{SRA}.
+#' @param x An S4 object of class \linkS4class{Assessment} of \linkS4class{RCM}.
 #' @param nyr The maximum number of years to remove for the retrospective analysis.
 #' @param figure Indicates whether plots will be drawn.
 #' @param ... More arguments.
@@ -48,9 +48,9 @@ setMethod("retrospective", signature(x = "Assessment"),
 
 
 #' @rdname retrospective
-#' @aliases retrospective,SRA-method
+#' @aliases retrospective,RCM-method
 #' @exportMethod retrospective
-setMethod("retrospective", signature(x = "SRA"),
+setMethod("retrospective", signature(x = "RCM"),
           function(x, nyr = 5, figure = TRUE) {
             if(figure) {
               old.warning <- options()$warn
@@ -60,7 +60,7 @@ setMethod("retrospective", signature(x = "SRA"),
               old_par <- par(no.readonly = TRUE)
               on.exit(par(old_par), add = TRUE)
             }
-            res <- SRA_retro(x, nyr)
+            res <- RCM_retro(x, nyr)
             if(figure) plot(res)
             return(res)
           })
