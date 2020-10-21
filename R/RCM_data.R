@@ -151,7 +151,6 @@ int_sel <- function(selectivity) {
   if(any(is.na(sel))) {
     stop("Character entries for s_selectivity (for fleets) must be either: \"logistic\", \"dome\", or \"free\"", call. = FALSE)
   }
-
   return(sel)
 }
 
@@ -233,7 +232,7 @@ update_RCM_data <- function(data, OM, condition, dots) {
     invisible()
   }
 
-  dat_names <- c("Chist", "Ehist", "Index", "I_sd", "I_type", "CAA", "CAL", "ML", "ML_sd", "C_eq", "E_eq", "s_CAA", "s_CAL", "length_bin")
+  dat_names <- c("Chist", "Ehist", "Index", "I_sd", "I_type", "CAA", "CAL", "ML", "ML_sd", "C_eq", "E_eq", "s_CAA", "s_CAL", "length_bin", "C_sd", "C_eq_sd")
 
   lapply(dat_names, assign_for_compatibility)
 
@@ -301,6 +300,20 @@ update_RCM_data <- function(data, OM, condition, dots) {
     }
   }
   if(length(OM@CurrentYr) == 0) OM@CurrentYr <- data$nyears
+  
+  # C_sd  
+  if(!is.null(data$C_sd)) {
+    if(is.vector(data$C_sd)) {
+      if(length(data$C_sd) != data$nyears) stop("Length of C_sd vector does not equal nyears (", data$nyears, ").", call. = FALSE)
+      data$C_sd <- matrix(data$C_sd, ncol = 1)
+    } else if(is.matrix(data$C_sd)) {
+      if(nrow(data$C_sd) != data$nyears) stop("Number of rows of C_sd matrix does not equal nyears (", data$nyears, "). NAs are acceptable.", call. = FALSE)
+      if(ncol(data$C_sd) != data$nsurvey) stop("Number of columns of C_sd matrix does not equal nfleet (", data$nfleet, ").", call. = FALSE)
+    }
+    if(any(is.na(data$C_sd))) stop("There are NA's in data$C_sd.", call. = FALSE)
+  } else {
+    data$C_sd <- matrix(0.01, data$nyears, data$nfleet)
+  }
 
   # Indices
   if(!is.null(data$Index)) {
@@ -342,24 +355,24 @@ update_RCM_data <- function(data, OM, condition, dots) {
     if(dim(data$CAA)[1] != data$nyears) {
       stop("Number of CAA rows (", dim(data$CAA)[1], ") does not equal nyears (", data$nyears, "). NAs are acceptable.", call. = FALSE)
     }
-    if(dim(data$CAA)[2] < OM@maxage) {
-      message("Number of CAA columns (", dim(data$CAA)[2], ") does not equal OM@maxage (", OM@maxage, ").")
-      message("Assuming no observations for ages greater than ", dim(data$CAA)[2], " and filling with zeros.")
-      add_ages <- OM@maxage - dim(data$CAA)[2]
-      CAA_new <- array(0, c(data$nyears, OM@maxage, data$nfleet))
+    if(dim(data$CAA)[2] < OM@maxage + 1) {
+      message("Number of CAA columns (", dim(data$CAA)[2], ") does not equal OM@maxage + 1 (", OM@maxage + 1, ").")
+      message("Assuming no observations for ages greater than 0 - ", dim(data$CAA)[2] - 1, " and filling with zeros.")
+      add_ages <- OM@maxage + 1 - dim(data$CAA)[2]
+      CAA_new <- array(0, c(data$nyears, OM@maxage + 1, data$nfleet))
       CAA_new[, 1:dim(data$CAA)[2], ] <- data$CAA
       data$CAA <- CAA_new
     }
-    if(dim(data$CAA)[2] > OM@maxage) {
-      OM@maxage <- dim(data$CAA)[2]
+    if(dim(data$CAA)[2] > OM@maxage + 1) {
+      OM@maxage <- dim(data$CAA)[2] - 1
       message("Increasing OM@maxage to ", OM@maxage, ".")
     }
     if(dim(data$CAA)[3] != data$nfleet) {
       stop("Number of CAA slices (", dim(data$CAA)[3], ") does not equal nfleet (", data$nfleet, "). NAs are acceptable.", call. = FALSE)
     }
-
+    message("Age comps processed, assuming ages 0 - ", OM@maxage, " in array.")
   } else {
-    data$CAA <- array(0, c(data$nyears, OM@maxage, data$nfleet))
+    data$CAA <- array(0, c(data$nyears, OM@maxage + 1, data$nfleet))
   }
 
   # Sample life history, selectivity, and obs parameters
@@ -433,13 +446,18 @@ update_RCM_data <- function(data, OM, condition, dots) {
     data$MS_type <- "length"
   }
 
-  # Process equilibrium catch/effort - Ceq
+  # Process equilibrium catch/effort - C_eq
   if(is.null(data$C_eq)) data$C_eq <- rep(0, data$nfleet)
   if(data$condition == "catch" || data$condition == "catch2") {
     if(length(data$C_eq) == 1) data$C_eq <- rep(data$C_eq, data$nfleet)
     if(length(data$C_eq) < data$nfleet) stop("C_eq needs to be of length nfleet (", data$nfleet, ").", call. = FALSE)
   }
-
+  
+  if(is.null(data$C_eq_sd)) {
+    data$C_eq_sd <- rep(0.01, data$nfleet)
+  } else if(length(data$C_eq_sd) == 1) data$C_eq_sd <- rep(data$C_eq_sd, data$nfleet)
+  if(length(data$C_eq_sd) != data$nfleet) stop("C_eq_sd needs to be of length nfleet (", data$nfleet, ").", call. = FALSE)
+  
   if(data$condition == "catch2" && any(data$C_eq > 0)) {
     message("Equilibrium catch was detected. The corresponding equilibrium F will be estimated.")
   }
@@ -452,29 +470,27 @@ update_RCM_data <- function(data, OM, condition, dots) {
 
   # Process survey age comps
   if(!is.null(data$s_CAA)) {
-
     if(is.matrix(data$s_CAA)) data$s_CAA <- array(data$s_CAA, c(dim(data$s_CAA), 1))
-
     if(dim(data$s_CAA)[1] != data$nyears) {
       stop("Number of s_CAA rows (", dim(data$s_CAA)[1], ") does not equal nyears (", data$nyears, "). NAs are acceptable.", call. = FALSE)
     }
-    if(dim(data$s_CAA)[2] < OM@maxage) {
-      message("Number of s_CAA columns (", dim(data$s_CAA)[2], ") does not equal OM@maxage (", OM@maxage, ").")
-      message("Assuming no observations for ages greater than ", dim(data$s_CAA)[2], " and filling with zeros.")
-      add_ages <- OM@maxage - dim(data$s_CAA)[2]
+    if(dim(data$s_CAA)[2] < OM@maxage + 1) {
+      message("Number of s_CAA columns (", dim(data$s_CAA)[2], ") does not equal OM@maxage + 1 (", OM@maxage + 1, ").")
+      message("Assuming no observations for ages greater than 0 - ", dim(data$s_CAA)[2] - 1, " and filling with zeros.")
+      add_ages <- OM@maxage + 1 - dim(data$s_CAA)[2]
       CAA_new <- array(0, c(data$nyears, OM@maxage, data$survey))
       CAA_new[, 1:dim(data$s_CAA)[2], ] <- data$s_CAA
       data$s_CAA <- CAA_new
     }
-    if(dim(data$s_CAA)[2] > OM@maxage) {
+    if(dim(data$s_CAA)[2] > OM@maxage + 1) {
       stop("Error in age dimension of s_CAA.", call. = FALSE)
     }
     if(dim(data$s_CAA)[3] != data$nsurvey) {
       stop("Number of CAA slices (", dim(data$s_CAA)[3], ") does not equal nsurvey (", data$nsurvey, "). NAs are acceptable.", call. = FALSE)
     }
-
+    message("Survey age comps processed, assuming ages 0 - ", OM@maxage, " in array.")
   } else {
-    data$s_CAA <- array(0, c(data$nyears, OM@maxage, ncol(data$Index)))
+    data$s_CAA <- array(0, c(data$nyears, OM@maxage + 1, ncol(data$Index)))
   }
 
   # Process survey length comps
@@ -515,8 +531,8 @@ update_RCM_data <- function(data, OM, condition, dots) {
   }
 
   # Ageing error
-  if(is.null(data$age_error)) data$age_error <- diag(OM@maxage)
-  if(any(dim(data$age_error) != OM@maxage)) stop("data$age_error should be a square matrix of OM@maxage rows and columns", call. = FALSE)
+  if(is.null(data$age_error)) data$age_error <- diag(OM@maxage + 1)
+  if(any(dim(data$age_error) != OM@maxage + 1)) stop("data$age_error should be a square matrix of OM@maxage + 1 rows and columns", call. = FALSE)
 
   # Sel_block dummy fleets
   if(is.null(data$sel_block)) {
@@ -653,11 +669,11 @@ check_OM_for_sampling <- function(OM, data) {
     }
   }
   Iobs <- OM@Iobs
-  OM <- Replace(OM, DLMtool::Generic_Obs, silent = TRUE)
+  OM <- Replace(OM, OMtool::Generic_Obs, silent = TRUE)
   OM@Iobs <- Iobs
 
   ###### Imp
-  OM <- Replace(OM, DLMtool::Perfect_Imp, silent = TRUE)
+  OM <- Replace(OM, OMtool::Perfect_Imp, silent = TRUE)
 
   return(OM)
 }

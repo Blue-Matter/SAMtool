@@ -6,7 +6,6 @@ template<class Type>
 Type objective_function<Type>::operator() ()
 {
   DATA_STRING(model);
-
   if(model == "DD") {
     return DD(this);
   } else if(model =="SP") {
@@ -30,6 +29,7 @@ Type objective_function<Type>::operator() ()
   } else {
     error("No model found.");
   }
-
   return 0;
 }
+
+

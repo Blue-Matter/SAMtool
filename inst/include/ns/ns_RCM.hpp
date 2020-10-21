@@ -9,15 +9,16 @@ Type log2(Type x) {
 }
 
 template<class Type>
-matrix<Type> generate_ALK(vector<Type> length_bin, matrix<Type> len_age, Type CV_LAA, int max_age, int nlbin, Type bin_width, int y) {
-  matrix<Type> ALK(max_age, length_bin.size());
-  for(int a=0;a<max_age;a++) {
+matrix<Type> generate_ALK(vector<Type> length_bin, matrix<Type> len_age, matrix<Type> SD_LAA, 
+                          int n_age, int nlbin, Type bin_width, int y) {
+  matrix<Type> ALK(n_age, length_bin.size());
+  for(int a=0;a<n_age;a++) {
     for(int j=0;j<nlbin;j++) {
       if(j==nlbin-1) {
-        ALK(a,j) = 1 - pnorm(length_bin(j) - 0.5 * bin_width, len_age(y,a), CV_LAA * len_age(y,a));
+        ALK(a,j) = 1 - pnorm(length_bin(j) - 0.5 * bin_width, len_age(y,a), SD_LAA(y,a));
       } else {
-        ALK(a,j) = pnorm(length_bin(j) + 0.5 * bin_width, len_age(y,a), CV_LAA * len_age(y,a));
-        if(j>0) ALK(a,j) -= pnorm(length_bin(j) - 0.5 * bin_width, len_age(y,a), CV_LAA * len_age(y,a));
+        ALK(a,j) = pnorm(length_bin(j) + 0.5 * bin_width, len_age(y,a), SD_LAA(y,a));
+        if(j>0) ALK(a,j) -= pnorm(length_bin(j) - 0.5 * bin_width, len_age(y,a), SD_LAA(y,a));
       }
     }
   }
@@ -25,39 +26,39 @@ matrix<Type> generate_ALK(vector<Type> length_bin, matrix<Type> len_age, Type CV
 }
 
 template<class Type>
-vector<Type> calc_NPR0(matrix<Type> M, int max_age, int y, int plusgroup) {
-  vector<Type> NPR(max_age);
+vector<Type> calc_NPR0(matrix<Type> M, int n_age, int y, int plusgroup) {
+  vector<Type> NPR(n_age);
   NPR(0) = 1;
-  for(int a=1;a<max_age;a++) NPR(a) = NPR(a-1) * exp(-M(y,a-1));
-  if(plusgroup) NPR(max_age-1) /= 1 - exp(-M(y,max_age-1));
+  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M(y,a-1));
+  if(plusgroup) NPR(n_age-1) /= 1 - exp(-M(y,n_age-1));
   return NPR;
 }
 
 
 template<class Type>
-vector<Type> calc_NPR(vector<Type> F, array<Type> vul, int nfleet, matrix<Type> M, int max_age, int y, int plusgroup) {
-  vector<Type> NPR(max_age);
+vector<Type> calc_NPR(vector<Type> F, array<Type> vul, int nfleet, matrix<Type> M, int n_age, int y, int plusgroup) {
+  vector<Type> NPR(n_age);
   vector<Type> Z = M.row(y);
   NPR(0) = 1;
-  for(int a=0;a<max_age;a++) {
+  for(int a=0;a<n_age;a++) {
     for(int ff=0;ff<nfleet;ff++) Z(a) += vul(y,a,ff) * F(ff);
     if(a > 0) NPR(a) = NPR(a-1) * exp(-Z(a-1));
   }
-  if(plusgroup) NPR(max_age-1) /= 1 - exp(-Z(max_age-1));
+  if(plusgroup) NPR(n_age-1) /= 1 - exp(-Z(n_age-1));
   return NPR;
 }
 
 template<class Type>
-Type sum_EPR(vector<Type> NPR, matrix<Type> wt, matrix<Type> mat, int max_age, int y) {
+Type sum_EPR(vector<Type> NPR, matrix<Type> wt, matrix<Type> mat, int n_age, int y) {
   Type EPR = 0.;
-  for(int a=0;a<max_age;a++) EPR += NPR(a) * wt(y,a) * mat(y,a);
+  for(int a=0;a<n_age;a++) EPR += NPR(a) * wt(y,a) * mat(y,a);
   return EPR;
 }
 
 template<class Type>
-Type sum_BPR(vector<Type> NPR, matrix<Type> wt, int max_age, int y) {
+Type sum_BPR(vector<Type> NPR, matrix<Type> wt, int n_age, int y) {
   Type BPR = 0;
-  for(int a=0;a<max_age;a++) BPR += NPR(a) * wt(y,a);
+  for(int a=0;a<n_age;a++) BPR += NPR(a) * wt(y,a);
   return BPR;
 }
 

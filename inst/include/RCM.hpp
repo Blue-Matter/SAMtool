@@ -12,6 +12,8 @@ Type RCM(objective_function<Type> *obj) {
 
   DATA_MATRIX(C_hist);    // Total catch by year and fleet
   DATA_VECTOR(C_eq);      // Equilibrium catch by fleet
+  DATA_MATRIX(sigma_C);   // Standard deviation of catch
+  DATA_VECTOR(sigma_Ceq); // Standard deviation of equilibrium catch
 
   DATA_MATRIX(E_hist);    // Effort by year and fleet
   DATA_VECTOR(E_eq);      // Equilibrium effort by fleet
@@ -42,14 +44,14 @@ Type RCM(objective_function<Type> *obj) {
   DATA_INTEGER(nsel_block); // The number of selectivity "blocks"
 
   DATA_INTEGER(n_y);      // Number of years in model
-  DATA_INTEGER(max_age);  // Maximum age (plus-group)
+  DATA_INTEGER(n_age);    // Number of age classes from 0 - maxage (plus-group)
   DATA_INTEGER(nfleet);   // Number of fleets
   DATA_INTEGER(nsurvey);  // Number of surveys
 
   DATA_MATRIX(M);         // Natural mortality at age
   DATA_MATRIX(len_age);   // Length-at-age
   DATA_SCALAR(Linf);      // Linf
-  DATA_SCALAR(CV_LAA);    // CV of length-at-age
+  DATA_MATRIX(SD_LAA);    // Length-at-age SD (year x age)
   DATA_MATRIX(wt);        // Weight-at-age
   DATA_MATRIX(mat);       // Maturity-at-age at the beginning of the year
 
@@ -135,14 +137,15 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> E0(n_y);
   vector<Type> B0(n_y);
   vector<Type> N0(n_y);
+  vector<Type> CR(n_y);
 
   Type E0_SR = 0;
   for(int y=0;y<n_y;y++) {
-    NPR_unfished(y) = calc_NPR0(M, max_age, y, plusgroup);
+    NPR_unfished(y) = calc_NPR0(M, n_age, y, plusgroup);
 
-    EPR0(y) = sum_EPR(NPR_unfished(y), wt, mat, max_age, y);
+    EPR0(y) = sum_EPR(NPR_unfished(y), wt, mat, n_age, y);
     E0(y) = R0 * EPR0(y);
-    B0(y) = R0 * sum_BPR(NPR_unfished(y), wt, max_age, y);
+    B0(y) = R0 * sum_BPR(NPR_unfished(y), wt, n_age, y);
     N0(y) = R0 * NPR_unfished(y).sum();
 
     if(y < ageM) E0_SR += E0(y);
@@ -150,27 +153,29 @@ Type RCM(objective_function<Type> *obj) {
   E0_SR /= Type(ageM);
   Type EPR0_SR = E0_SR/R0;
 
-  Type Arec, Brec;
+  Type CR_SR, Brec;
   if(SR_type == "BH") {
-    Arec = 4 *h;
-    Arec /= 1-h;
+    CR_SR = 4 *h;
+    CR_SR /= 1-h;
     Brec = 5*h - 1;
     Brec /= (1-h);
   } else {
-    Arec = pow(5*h, 1.25);
+    CR_SR = pow(5*h, 1.25);
     Brec = 1.25;
     Brec *= log(5*h);
   }
-  Arec /= EPR0_SR;
+  Type Arec = CR_SR/EPR0_SR;
   Brec /= E0_SR;
+  
+  for(int y=0;y<n_y;y++) CR(y) = Arec/EPR0(y);
 
   ////// During time series year = 1, 2, ..., n_y
   vector<matrix<Type> > ALK(n_y);
-  matrix<Type> N(n_y+1, max_age);
+  matrix<Type> N(n_y+1, n_age);
 
   vector<Type> C_eq_pred(nfleet);
-  array<Type> CAAtrue(n_y, max_age, nfleet);   // Catch (in numbers) at year and age at the mid-point of the season
-  array<Type> CAApred(n_y, max_age, nfleet);   // Catch (in numbers) at year and age at the mid-point of the season
+  array<Type> CAAtrue(n_y, n_age, nfleet);   // Catch (in numbers) at year and age at the mid-point of the season
+  array<Type> CAApred(n_y, n_age, nfleet);   // Catch (in numbers) at year and age at the mid-point of the season
   array<Type> CALpred(n_y, nlbin, nfleet);
   matrix<Type> MLpred(n_y, nfleet);
   matrix<Type> MWpred(n_y, nfleet);
@@ -180,7 +185,7 @@ Type RCM(objective_function<Type> *obj) {
   matrix<Type> Ipred(n_y, nsurvey);          // Predicted index at year
 
   vector<Type> R(n_y+1);            // Recruitment at year
-  vector<Type> R_early(max_age-1);
+  vector<Type> R_early(n_age-1);
   matrix<Type> VB(n_y+1, nfleet);   // Vulnerable biomass at year
   vector<Type> B(n_y+1);            // Total biomass at year
   vector<Type> E(n_y+1);            // Spawning biomass at year
@@ -199,8 +204,8 @@ Type RCM(objective_function<Type> *obj) {
   E.setZero();
 
   // Equilibrium quantities (leading into first year of model)
-  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, nfleet, M, max_age, 0, plusgroup);
-  Type EPR_eq = sum_EPR(NPR_equilibrium, wt, mat, max_age, 0);
+  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup);
+  Type EPR_eq = sum_EPR(NPR_equilibrium, wt, mat, n_age, 0);
   Type R_eq;
 
   if(SR_type == "BH") {
@@ -209,11 +214,11 @@ Type RCM(objective_function<Type> *obj) {
     R_eq = log(Arec * EPR_eq);
   }
   R_eq /= Brec * EPR_eq;
-
+  
   R(0) = R_eq;
   if(est_rec_dev(0)) R(0) *= exp(log_rec_dev(0) - 0.5 * tau * tau);
-
-  for(int a=0;a<max_age;a++) {
+  
+  for(int a=0;a<n_age;a++) {
     if(a == 0) {
       N(0,a) = R(0) * NPR_equilibrium(a);
     } else {
@@ -221,7 +226,7 @@ Type RCM(objective_function<Type> *obj) {
       if(est_early_rec_dev(a-1)) R_early(a-1) *= exp(log_early_rec_dev(a-1) - 0.5 * tau * tau);
       N(0,a) = R_early(a-1) * NPR_equilibrium(a);
     }
-
+    
     B(0) += N(0,a) * wt(0,a);
     E(0) += N(0,a) * wt(0,a) * mat(0,a);
 
@@ -236,17 +241,8 @@ Type RCM(objective_function<Type> *obj) {
 
   // Loop over all other years
   for(int y=0;y<n_y;y++) {
-    if(SR_type == "BH") {
-      R(y+1) = BH_SR(E(y), h, R0, E0_SR);
-    } else {
-      R(y+1) = Ricker_SR(E(y), h, R0, E0_SR);
-    }
-
-    if(y<n_y-1 && est_rec_dev(y+1)) R(y+1) *= exp(log_rec_dev(y+1) - 0.5 * tau * tau);
-
-    N(y+1,0) = R(y+1);
-    if(Type(max_age) != Linf) ALK(y) = generate_ALK(length_bin, len_age, CV_LAA, max_age, nlbin, bin_width, y);
-
+    // Calculate this year's age-length key (ALK) and F
+    if(Type(n_age) != Linf) ALK(y) = generate_ALK(length_bin, len_age, SD_LAA, n_age, nlbin, bin_width, y);
     if(condition == "catch") {
       for(int ff=0;ff<nfleet;ff++) {
         if(y != yind_F(ff)) {
@@ -255,41 +251,54 @@ Type RCM(objective_function<Type> *obj) {
         }
       }
     } else if(condition == "catch2") {
-      F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, max_age, nfleet, nit_F, penalty);
+      F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, nit_F, penalty);
     } else {
       for(int ff=0;ff<nfleet;ff++) {
         Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
         F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
       }
     }
-
-    for(int a=0;a<max_age;a++) {
+    
+    // Calculate this year's catch, CAA, CAL, mean size; and next year's abundance and SSB (ex. age-0)
+    for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) Z(y,a) += vul(y,a,ff) * F(y,ff);
       Type mean_N = N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
 
-      if(a<max_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
-      if(plusgroup && a==max_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
+      if(a<n_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
+      if(plusgroup && a==n_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
 
       for(int ff=0;ff<nfleet;ff++) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * mean_N;
         CN(y,ff) += CAAtrue(y,a,ff);
         Cpred(y,ff) += CAAtrue(y,a,ff) * wt(y,a);
 
-        if(Type(max_age) != Linf) {
+        if(Type(n_age) != Linf) {
           for(int len=0;len<nlbin;len++) {
             CALpred(y,len,ff) += CAAtrue(y,a,ff) * ALK(y)(a,len);
             MLpred(y,ff) += CAAtrue(y,a,ff) * ALK(y)(a,len) * length_bin(len);
           }
         }
-        for(int aa=0;aa<max_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
-        VB(y+1,ff) += vul(y+1,a,ff) * N(y+1,a) * wt(y+1,a);
+        for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
       }
-
-      B(y+1) += N(y+1,a) * wt(y+1,a);
-      E(y+1) += N(y+1,a) * wt(y+1,a) * mat(y+1,a);
+      if(a>0) E(y+1) += N(y+1,a) * wt(y+1,a) * mat(y+1,a);
     }
-    if(Type(max_age) != Linf) for(int ff=0;ff<nfleet;ff++) MLpred(y,ff) /= CN(y,ff);
+    if(Type(n_age) != Linf) for(int ff=0;ff<nfleet;ff++) MLpred(y,ff) /= CN(y,ff);
     if(msize_type == "weight") for(int ff=0;ff<nfleet;ff++) MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
+    
+    // Calc next year's recruitment, total biomass, and vulnerable biomass
+    if(SR_type == "BH") {
+      R(y+1) = BH_SR(E(y+1), h, R0, E0_SR);
+    } else {
+      R(y+1) = Ricker_SR(E(y+1), h, R0, E0_SR);
+    }
+    
+    if(y<n_y-1 && est_rec_dev(y+1)) R(y+1) *= exp(log_rec_dev(y+1) - 0.5 * tau * tau);
+    N(y+1,0) = R(y+1);
+    
+    for(int a=0;a<n_age;a++) {
+      B(y+1) += N(y+1,a) * wt(y+1,a);
+      for(int ff=0;ff<nfleet;ff++) VB(y+1,ff) += vul(y+1,a,ff) * N(y+1,a) * wt(y+1,a);
+    }
   }
 
   // Calculate nuisance parameters and likelihood
@@ -298,8 +307,8 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> s_L5(nsurvey);
   vector<Type> s_Vmaxlen(nsurvey);
 
-  array<Type> s_CAAtrue(n_y, max_age, nsurvey); // True abundance at age vulnerable to survey
-  array<Type> s_CAApred(n_y, max_age, nsurvey); // Predicted abundance (after ageing error) at age vulnerable to survey
+  array<Type> s_CAAtrue(n_y, n_age, nsurvey); // True abundance at age vulnerable to survey
+  array<Type> s_CAApred(n_y, n_age, nsurvey); // Predicted abundance (after ageing error) at age vulnerable to survey
   array<Type> s_CALpred(n_y, nlbin, nsurvey); // Abundance at length vulnerable to survey
   matrix<Type> s_CN(n_y, nsurvey); // Total abundance vulnerable to the survey
   matrix<Type> s_BN(n_y, nsurvey); // Biomass or abundance vulnerable to the survey
@@ -313,14 +322,14 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
-      for(int a=0;a<max_age;a++) {
+      for(int a=0;a<n_age;a++) {
         s_CAAtrue(y,a,sur) = s_vul(y,a,sur) * N(y,a);
         s_CN(y,sur) += s_CAAtrue(y,a,sur);
 
-        for(int aa=0;aa<max_age;aa++) s_CAApred(y,aa,sur) += s_CAAtrue(y,a,sur) * age_error(a,aa);
+        for(int aa=0;aa<n_age;aa++) s_CAApred(y,aa,sur) += s_CAAtrue(y,a,sur) * age_error(a,aa);
 
         if(I_units(sur)) s_BN(y,sur) += s_CAAtrue(y,a,sur) * wt(y,a); // Biomass vulnerable to survey
-        if(Type(max_age) != Linf && s_CAL_n.col(sur).sum() > 0) {
+        if(Type(n_age) != Linf && s_CAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
           for(int len=0;len<nlbin;len++) s_CALpred(y,len,sur) += s_CAAtrue(y,a,sur) * ALK(y)(a,len);
         }
       }
@@ -356,9 +365,9 @@ Type RCM(objective_function<Type> *obj) {
 
       if(LWT_Index(sur,1) > 0 && !R_IsNA(asDouble(s_CAA_n(y,sur))) && s_CAA_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_s_CAA(sur) -= comp_multinom(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, max_age, sur);
+          nll_s_CAA(sur) -= comp_multinom(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
         } else {
-          nll_s_CAA(sur) -= comp_lognorm(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, max_age, sur);
+          nll_s_CAA(sur) -= comp_lognorm(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
         }
       }
 
@@ -380,9 +389,9 @@ Type RCM(objective_function<Type> *obj) {
       if(C_hist(y,ff)>0 || E_hist(y,ff)>0) {
         if(LWT_C(ff,1) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
-            nll_CAA(ff) -= comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, max_age, ff);
+            nll_CAA(ff) -= comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           } else {
-            nll_CAA(ff) -= comp_lognorm(CAA_hist, CAApred, CN, CAA_n, y, max_age, ff);
+            nll_CAA(ff) -= comp_lognorm(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           }
         }
 
@@ -394,7 +403,7 @@ Type RCM(objective_function<Type> *obj) {
           }
         }
 
-        if(nll_C && LWT_C(ff,0) > 0) nll_Catch(ff) -= dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), Type(0.01), true);
+        if(nll_C && LWT_C(ff,0) > 0) nll_Catch(ff) -= dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
         if(LWT_C(ff,3) > 0 && !R_IsNA(asDouble(msize(y,ff))) && msize(y,ff) > 0) {
           if(msize_type == "length") {
             nll_MS(ff) -= dnorm_(msize(y,ff), MLpred(y,ff), CV_msize(ff) * msize(y,ff), true);
@@ -411,14 +420,14 @@ Type RCM(objective_function<Type> *obj) {
     nll_MS(ff) *= LWT_C(ff,3);
 
     if(LWT_C(ff,4) > 0 && C_eq(ff) > 0 && condition != "effort") {
-      nll_Ceq(ff) = -1 * LWT_C(ff,4) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), Type(0.01), true);
+      nll_Ceq(ff) = -1 * LWT_C(ff,4) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), sigma_Ceq(ff), true);
     }
   }
 
   for(int y=0;y<n_y;y++) {
     if(est_rec_dev(y)) nll_log_rec_dev -= dnorm_(log_rec_dev(y), Type(0), tau, true);
   }
-  for(int a=0;a<max_age-1;a++) {
+  for(int a=0;a<n_age-1;a++) {
     if(est_early_rec_dev(a)) nll_log_rec_dev -= dnorm_(log_early_rec_dev(a), Type(0), tau, true);
   }
 
@@ -468,6 +477,8 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(Brec);
   REPORT(E0_SR);
   REPORT(EPR0_SR);
+  REPORT(CR_SR);
+  REPORT(CR);
 
   if(nll_CAL.sum() != 0 || nll_s_CAL.sum() != 0 || ((nll_MS.sum() != 0) & (msize_type == "length"))) REPORT(ALK);
   REPORT(N);
@@ -505,7 +516,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(penalty);
   REPORT(prior);
 
-  if(age_error.trace() != Type(max_age)) {
+  if(age_error.trace() != Type(n_age)) {
     REPORT(CAAtrue);
     REPORT(s_CAAtrue);
   }

@@ -1,12 +1,11 @@
 Package: SAMtool
 Type: Package
 Title: Stock Assessment Methods Toolkit
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(person("Quang", "Huynh", email = "quang@bluematterscience.com", role = "aut"), 
   person("Tom", "Carruthers", email = "tom@bluematterscience.com", role = c("aut", "cre")),
-  person("Adrian", "Hordyk", email = "adrian@bluematterscience.com", role = "aut"),
-  person("Chris", "Grandin", rol = "ctb", comment = "iSCAM functions"))
-Date: 2020-10-14
+  person("Adrian", "Hordyk", email = "adrian@bluematterscience.com", role = "aut"))
+Date: 2020-10-21
 Maintainer: Tom Carruthers <tom@bluematterscience.com>
 Description: Simulation tools for closed-loop simulation are provided for the 'OMtool' operating model to inform data-rich fisheries. 
   'SAMtool' provides an OM conditioning model, assessment models of varying complexity with standardized reporting, diagnostic tools for evaluating 

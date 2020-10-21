@@ -9,7 +9,7 @@
 RCM(OM, data, ...)
 }
 \description{
-An S4 class for the output from \link{RCM_scope}.
+An S4 class for the output from \link{RCM}.
 }
 \section{Slots}{
 
@@ -18,7 +18,7 @@ An S4 class for the output from \link{RCM_scope}.
 
 \item{\code{SSB}}{A matrix of estimated spawning biomass with \code{OM@nsim} rows and \code{OM@nyears+1} columns.}
 
-\item{\code{NAA}}{An array for the predicted numbers at age with dimension \code{OM@nsim}, \code{OM@nyears+1}, and \code{OM@maxage}.}
+\item{\code{NAA}}{An array for the predicted numbers at age with dimension \code{OM@nsim}, \code{OM@nyears+1}, and \code{OM@maxage+1}.}
 
 \item{\code{CAA}}{An array for the predicted catch at age with dimension \code{OM@nsim}, \code{OM@nyears}, \code{OM@maxage}, and nfleet.}
 
@@ -32,6 +32,7 @@ An S4 class for the output from \link{RCM_scope}.
 \item B - total biomass - vector of length nyears+1
 \item E0 - annual unfished spawning biomass - vector of length nyears
 \item E0_SR - unfished spawning biomass for the stock-recruit relationship - numeric
+\item CR - annual compensation ratio - vector of length nyears
 \item Arec - alpha parameter of the stock-recruit relationship - numeric
 \item Brec - beta parameter of the stock-recruit relationship - numeric
 \item R - recruitment - vector of length nyears+1
