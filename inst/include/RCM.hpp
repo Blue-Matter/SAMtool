@@ -137,7 +137,6 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> E0(n_y);
   vector<Type> B0(n_y);
   vector<Type> N0(n_y);
-  vector<Type> CR(n_y);
 
   Type E0_SR = 0;
   for(int y=0;y<n_y;y++) {
@@ -167,8 +166,6 @@ Type RCM(objective_function<Type> *obj) {
   Type Arec = CR_SR/EPR0_SR;
   Brec /= E0_SR;
   
-  for(int y=0;y<n_y;y++) CR(y) = Arec/EPR0(y);
-
   ////// During time series year = 1, 2, ..., n_y
   vector<matrix<Type> > ALK(n_y);
   matrix<Type> N(n_y+1, n_age);
@@ -478,7 +475,6 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(E0_SR);
   REPORT(EPR0_SR);
   REPORT(CR_SR);
-  REPORT(CR);
 
   if(nll_CAL.sum() != 0 || nll_s_CAL.sum() != 0 || ((nll_MS.sum() != 0) & (msize_type == "length"))) REPORT(ALK);
   REPORT(N);

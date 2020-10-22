@@ -790,11 +790,13 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
   return(out)
 }
 
-RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best) {
+RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic_SSB0 = TRUE) {
   data <- obj$env$data
   report$F_at_age <- report$Z - data$M
   report$NPR_unfished <- do.call(rbind, report$NPR_unfished)
   length_bin <- obj$env$data$length_bin
+  
+  report$CR <- report$Arec * report$EPR0
 
   age_only_model <- data$len_age %>%
     apply(1, function(x) length(x) == data$n_age && max(x) == data$n_age) %>% all()
@@ -809,7 +811,7 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best) {
     report$vul_len <- get_vul_len(report, data$vul_type, length_bin, data$Linf)
     report$s_vul_len <- get_s_vul_len(report, data$s_vul_type, length_bin, data$Linf)
   }
-  report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
+  if(dynamic_SSB0) report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
   return(report)
 }
 
@@ -873,9 +875,14 @@ RCM_retro <- function(x, nyr = 5) {
   params <- x@mean_fit$obj$env$parameters
   n_y <- data$n_y
   map <- x@mean_fit$obj$env$map
-
-  retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, data$nfleet + 3))
-  TS_var <- c(paste("F", 1:data$nfleet), "SSB", "SSB_SSB0", "R")
+  
+  if(data$nfleet > 1) {
+    retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, data$nfleet + 4))
+    TS_var <- c(paste("Fleet", 1:data$nfleet, "F"), "Apical F", "SSB", "SSB_SSB0", "R")
+  } else {
+    retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, 4))
+    TS_var <- c("Apical F", "SSB", "SSB_SSB0", "R")
+  }
   dimnames(retro_ts) <- list(Peel = 0:nyr, Year = (x@OM@CurrentYr - n_y):x@OM@CurrentYr + 1, Var = TS_var)
 
   new_args <- lapply(n_y - 0:nyr, RCM_retro_subset, data = data, params = params, map = map)
@@ -895,7 +902,7 @@ RCM_retro <- function(x, nyr = 5) {
     SD <- mod[[2]]
 
     if(!is.character(opt2) && !is.character(SD)) {
-      report <- obj2$report(obj2$env$last.par.best)
+      report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2, dynamic_SSB0 = FALSE)
 
       if(new_args[[i+1]]$data$condition == "effort" && any(new_args[[i+1]]$data$Chist > 0, na.rm = TRUE)) {
         vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
@@ -909,6 +916,8 @@ RCM_retro <- function(x, nyr = 5) {
       }
 
       FMort <- rbind(report$F, matrix(NA, i + 1, ncol(report$F)))
+      if(data$nfleet > 1) FMort <- cbind(FMort, apply(report$F_at_age, 1, max, na.rm = TRUE) %>% c(rep(NA, i+1)))
+
       SSB <- c(report$E, rep(NA, i))
       SSB_SSB0 <- SSB/report$E0_SR
       R <- c(report$R, rep(NA, i))
@@ -924,9 +933,13 @@ RCM_retro <- function(x, nyr = 5) {
   if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
 
   retro <- new("retro", Model = "RCM", Name = x@OM@Name, TS_var = TS_var, TS = retro_ts)
-  attr(retro, "TS_lab") <- c(paste("Fishing mortality of Fleet", 1:data$nfleet),
-                             "Spawning biomass", "Spawning depletion", "Recruitment")
-
+  if(data$nfleet > 1) {  
+    attr(retro, "TS_lab") <- c(paste("Fishing mortality of Fleet", 1:data$nfleet), "Apical F",
+                               "Spawning biomass", "Spawning depletion", "Recruitment")
+  } else {  
+    attr(retro, "TS_lab") <- c(paste("Fishing mortality of Fleet", 1:data$nfleet),
+                               "Spawning biomass", "Spawning depletion", "Recruitment")
+  }
   return(retro)
 }
 

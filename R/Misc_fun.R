@@ -8,7 +8,7 @@
 #'
 #' @param classy A class of object (character string, e.g. 'Fleet')
 #' @param all_avail Logical. If TRUE, function will return all objects of class \code{classy} available to user.
-#' If FALSE, returns only those objects included in MSEtool.
+#' If FALSE, returns only those objects included in OMtool.
 #' @author Q. Huynh
 #' @examples
 #' avail("Assess")
@@ -22,14 +22,14 @@ avail <- function(classy, all_avail = TRUE) {
   if(class(temp) == "try-error") classy <- deparse(substitute(classy))
   if(temp == "function") classy <- deparse(substitute(classy))
 
-  temp <- ls("package:MSEtool")[vapply(ls("package:MSEtool"), getclass, logical(1), classy = classy)]
+  temp <- ls("package:SAMtool")[vapply(ls("package:SAMtool"), getclass, logical(1), classy = classy)]
 
   if(all_avail) {
     temp_globalenv <- ls(envir = .GlobalEnv)[vapply(ls(envir = .GlobalEnv), getclass, logical(1), classy = classy)]
     temp <- c(temp, temp_globalenv)
 
-    temp_DLMtool <- try(DLMtool::avail(classy), silent = TRUE)
-    if(!inherits(temp_DLMtool, "try-error")) temp <- unique(c(temp, temp_DLMtool))
+    temp_OMtool <- try(OMtool::avail(classy), silent = TRUE)
+    if(!inherits(temp_OMtool, "try-error")) temp <- unique(c(temp, temp_OMtool)) %>% sort()
   }
 
   if(length(temp) < 1) stop("No objects of class '", classy, "' found", call. = FALSE)
@@ -130,8 +130,11 @@ sdreport_int <- function(object, select = c("all", "fixed", "random", "report"),
   select <- match.arg(select, several.ok = TRUE)
   if("report" %in% select) {
     gradient.AD <- object$env$gradient.AD %>% as.vector()
-    if(is.null(gradient.AD)) gradient.AD <- rep(NA_real_, length(object$value))
-
+    if(is.null(gradient.AD)) {
+      gradient.AD <- rep(NA_real_, length(object$value))
+    } else {
+      gradient.AD <- ifelse(object$sd, gradient.AD, 0)
+    }
     AD <- TMB::summary.sdreport(object, "report", p.value = p.value) %>% cbind("Gradient" = gradient.AD)
   } else AD <- NULL
 

@@ -182,7 +182,7 @@ setMethod("plot", signature(x = "RCM", y = "missing"),
             if(is.null(title)) title <- "Operating model (OM) conditioning report for `r ifelse(nchar(OM@Name) > 0, OM@Name, substitute(OM))`"
             header <- c("---",
                         paste0("title: \"", title, "\""),
-                        "subtitle: Output from Rapid Conditioning Model (RCM)",
+                        "subtitle: Output from SAMtool Rapid Conditioning Model (RCM)",
                         "date: \"`r Sys.Date()`\"",
                         "---",
                         "<style type=\"text/css\">",
@@ -270,24 +270,35 @@ setMethod("plot", signature(x = "RCM", y = "missing"),
               LH_section <- c(LAA, LAA_persp, mat, mat_persp, NatM, NatM_persp)
 
               # Data and fit section
-              individual_matrix_fn <- function(i, obs, pred, fig.cap, label) {
-                rmd_assess_fit2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
-                                fig.cap = paste(fig.cap, i), label = label[i])
+              individual_matrix_fn <- function(i, obs, pred, fig.cap, label, resids = FALSE, match = FALSE) {
+                if(resids) {
+                  rmd_assess_resid2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
+                                    fig.cap = paste(fig.cap, i), label = label[i])
+                } else {
+                  rmd_assess_fit2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
+                                  fig.cap = paste(fig.cap, i), label = label[i], match = match)
+                }
               }
-              individual_array_fn <- function(i, obs, pred, comps = c("age", "length"), label) {
+              individual_array_fn <- function(i, obs, pred, comps = c("age", "length"), label, plot_mean = TRUE) {
                 comps <- match.arg(comps)
                 obs2 <- paste0(obs, "[, , ", i, "]")
                 pred2 <- paste0(pred, "[, , ", i, "]")
-                fig.cap2 <- paste0("Observed (black) and predicted (red) ", comps, " composition from ", label[i], ".")
-                fig.cap3 <- paste0("Residuals for ", comps, " composition from ", label[i], ".")
+                fig.cap <- paste0("Observed (black) and predicted (red) ", comps, " composition from ", label[i], ".")
+                fig.cap2 <- paste0("Residuals for ", comps, " composition from ", label[i], ".")
+                fig.cap3 <- paste0("Observed (black) and predicted (red) mean ", comps, " from the composition data for ", 
+                                   label[i], ".")
                 if(comps == "age") {
-                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", ages = "age", fig.cap = fig.cap2)
-                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", ages = "age", fig.cap = fig.cap3)
+                  #rr <- rmd_fit_comps("Year", obs2, pred2, type = c("annual", "bubble_residuals", "mean"), 
+                  #                    ages = "age", fig.cap = fig.cap)
+                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", ages = "age", fig.cap = fig.cap)
+                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", ages = "age", fig.cap = fig.cap2)
+                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", ages = "age", fig.cap = fig.cap3)
                 } else {
-                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", CAL_bins = "data$length_bin", fig.cap = fig.cap2)
-                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", CAL_bins = "data$length_bin", fig.cap = fig.cap3)
+                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", CAL_bins = "data$length_bin", fig.cap = fig.cap)
+                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", CAL_bins = "data$length_bin", fig.cap = fig.cap2)
+                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", CAL_bins = "data$length_bin", fig.cap = fig.cap3)
                 }
-                c(rr, rr2)
+                c(rr, rr2, rr3)
               }
 
               if(any(data$Chist > 0, na.rm = TRUE)) {
@@ -297,7 +308,7 @@ setMethod("plot", signature(x = "RCM", y = "missing"),
 
                 if(data_mean_fit$condition == "effort" || ncol(data$Chist) > 1) {
                   C_plots <- lapply(1:nfleet, individual_matrix_fn, obs = "data$Chist", pred = "report$Cpred",
-                                    fig.cap = "catch from fleet", label = f_name)
+                                    fig.cap = "catch from fleet", label = f_name, match = data_mean_fit$condition == "catch2")
                 } else C_plots <- NULL
               } else C_matplot <- C_plots <- NULL
 
@@ -314,7 +325,9 @@ setMethod("plot", signature(x = "RCM", y = "missing"),
               if(any(data$Index > 0, na.rm = TRUE)) {
                 I_plots <- c("#### Surveys \n",
                              lapply(1:nsurvey, individual_matrix_fn, obs = "data$Index", pred = "report$Ipred",
-                                    fig.cap = "index from survey", label = s_name))
+                                    fig.cap = "index from survey", label = s_name),
+                             lapply(1:nsurvey, individual_matrix_fn, obs = "data$Index", pred = "report$Ipred",
+                                    fig.cap = "index from survey", label = paste(s_name, "Residuals"), resids = TRUE))
               } else I_plots <- NULL
 
               if(any(data$CAA > 0, na.rm = TRUE)) {
@@ -418,6 +431,7 @@ setMethod("plot", signature(x = "RCM", y = "missing"),
                                      "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")
 
             if(compare) {
+              message("Getting Hist object from runMSE...")
               Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = OM@nsim >= 48 & snowfall::sfIsRunning())
 
               compare_rmd <- c("## Updated OM {.tabset}\n",
@@ -588,16 +602,23 @@ rmd_assess_fit2 <- function(year, obs, fit, fig.cap, label = fig.cap, match = FA
     "```\n")
 }
 
-rmd_fit_comps <- function(year, obs, fit, type = c("bubble", "annual", "bubble_residuals"), ages = "NULL", CAL_bins = "NULL", fig.cap,
+# For RCM function
+rmd_assess_resid2 <- function(year, obs, fit, fig.cap, label = fig.cap) {
+  fig.cap2 <- paste0("Index residuals (in log space) for ", fig.cap, ".")
+  
+  c(paste0("```{r, fig.cap = \"", fig.cap2, "\"}"),
+    paste0("istart <- which(!is.na(", obs, "))[1]"),
+    paste0("istop <- which(!is.na(", obs, ")) %>% max()"),
+    paste0("plot_residuals(", year, "[istart:istop], log(", obs, "[istart:istop]/", fit, "[istart:istop]), label = \"", label, "\")"),
+    "```\n")
+}
+
+
+
+rmd_fit_comps <- function(year, obs, fit, type = c("bubble_data", "annual", "bubble_residuals", "mean"), ages = "NULL", CAL_bins = "NULL", fig.cap,
                           bubble_adj = "10") {
   type <- match.arg(type)
-  if(type == "bubble") {
-    arg <- paste0("\"bubble_data\", CAL_bins = ", CAL_bins, ", ages = ", ages)
-  } else if(type == "bubble_residuals") {
-    arg <- paste0("\"bubble_residuals\", CAL_bins = ", CAL_bins, ", ages = ", ages)
-  } else {
-    arg <- paste0("\"annual\", CAL_bins = ", CAL_bins, ", ages = ", ages)
-  }
+  arg <- paste0("\"", type, "\", CAL_bins = ", CAL_bins, ", ages = ", ages)
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     paste0("ind_valid <- rowSums(", obs, ", na.rm = TRUE) > 0"),
     paste0("if(any(ind_valid)) plot_composition(", year, "[ind_valid], ", obs, "[ind_valid, , drop = FALSE], ", fit, "[ind_valid, , drop = FALSE], plot_type = ", arg, ", bubble_adj = ", bubble_adj, ")"),
@@ -630,12 +651,14 @@ rmd_RCM_Perr <- function(fig.cap = "Historical recruitment deviations among simu
     "        xlim = c(min(Year), max(Year) + proyears), ylim = c(0, 1.1 * max(c(Perr, Perr_future))))",
     "matlines(max(Year) + 1:proyears, t(Perr_future[1:min(5, nrow(OM@cpars$Perr_y)), ]), type = \"l\")",
     "abline(h = 0, col = \"grey\")",
+    "abline(v = max(Year), lty = 3)",
     "```\n",
     "",
     "```{r, fig.cap = \"Annual mean and median of future recruitment deviations.\"}",
     "matplot(Year, t(Perr), type = \"n\", xlab = \"Year\", ylab = \"Recruitment deviations\",",
     "        xlim = c(min(Year), max(Year) + proyears), ylim = c(0, 1.1 * max(c(Perr, Perr_future))))",
     "abline(h = c(0, 1), col = \"grey\")",
+    "abline(v = max(Year), lty = 3)",
     "matlines(Year, t(Perr), type = \"l\", col = \"black\")",
     "lines(max(Year) + 1:proyears, apply(Perr_future, 2, mean), col = \"red\")",
     "lines(max(Year) + 1:proyears, apply(Perr_future, 2, median), lty = 2)",
@@ -824,6 +847,32 @@ rmd_RCM_survey_output <- function(sur, s_name) {
            "}",
            "```\n",
            "",
+           paste0("```{r, fig.cap = \"Observed (black) and predicted (red) mean ages from ", s_name[sur], ".\"}"),
+           paste0("if(!is.null(data$s_CAA) && any(data$s_CAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
+           paste0("MApred <- do.call(cbind, lapply(report_list, function(x) x$s_CAApred[, , ", sur, "] %*% age/rowSums(x$N[1:nyears, ] * x$s_vul[1:nyears, , ", sur, "])))"),
+           paste0("MAobs <- (data$s_CAA[, , ", sur, "] %*% age)/rowSums(data$s_CAA[, , ", sur, "], na.rm = TRUE)"),
+           "ylim <- c(0.9, 1.1) * range(c(MApred, MAobs), na.rm = TRUE)",
+           "matplot(Year, MApred, type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, xlab = \"Year\", ylab = \"Mean age\", ylim = ylim)",
+           paste0("if(any(data$s_CAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
+           paste0("  lines(Year, MAobs, col = \"black\", typ = \"o\")"),
+           "}",
+           "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col, lty = scenario$lty, lwd = scenario$lwd)",
+           "}",
+           "```\n",
+           "",
+           paste0("```{r, fig.cap = \"Observed (black) and predicted (red) mean lengths from ", s_name[sur], ".\"}"),
+           paste0("if(!is.null(data$s_CAL) && any(data$s_CAL[, , ", sur, "] > 0, na.rm = TRUE)) {"),
+           paste0("MLpred <- do.call(cbind, lapply(report_list, function(x) x$s_CALpred[, , ", sur, "] %*% length_bin/rowSums(x$N[1:nyears, ] * x$s_vul[1:nyears, , ", sur, "])))"),
+           paste0("MLobs <- (data$s_CAL[, , ", sur, "] %*% length_bin)/rowSums(data$s_CAL[, , ", sur, "], na.rm = TRUE)"),
+           "ylim <- c(0.9, 1.1) * range(c(MLpred, MLobs), na.rm = TRUE)",
+           "matplot(Year, MLpred, type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, xlab = \"Year\", ylab = \"Mean length\", ylim = ylim)",
+           paste0("if(any(data$s_CAL[, , ", sur, "] > 0, na.rm = TRUE)) {"),
+           paste0("  lines(Year, MLobs, col = \"black\", typ = \"o\")"),
+           "}",
+           "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col, lty = scenario$lty, lwd = scenario$lwd)",
+           "}",
+           "```\n",
+           "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", s_name[sur], ".\"}"),
            paste0("if(!is.null(data$s_CAA) && any(data$s_CAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
            paste0("pred_sCAA <- lapply(report_list, function(x) x$s_CAA[,, ", sur, "]) %>% unlist() %>% array(dim = c(nyears, max_age + 1, nsim)) %>% aperm(perm = c(3, 1, 2))"),
@@ -836,7 +885,8 @@ rmd_RCM_survey_output <- function(sur, s_name) {
            paste0("pred_sCAL <- lapply(report_list, function(x) x$s_CAL[,, ", sur, "]) %>% unlist() %>% array(dim = c(nyears, length(data$length_bin), nsim)) %>% aperm(perm = c(3, 1, 2))"),
            paste0("plot_composition_RCM(Year, pred_sCAL, data$s_CAL[, , ", sur, "], CAL_bins = data$length_bin, dat_col = scenario$col)"),
            "}",
-           "```\n")
+           "```\n"
+           )
   ans
 }
 
@@ -914,7 +964,7 @@ rmd_RCM_retrospective <- function(render_args) {
     "```\n")
 }
 
-plot_composition_RCM <- function(Year, RCM, dat = NULL, CAL_bins = NULL, ages = NULL, annual_ylab = "Frequency",
+plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = NULL, annual_ylab = "Frequency",
                                  annual_yscale = c("proportions", "raw"), N = if(is.null(dat)) NULL else round(rowSums(dat)), dat_linewidth = 2, dat_color = "black") {
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
@@ -928,23 +978,23 @@ plot_composition_RCM <- function(Year, RCM, dat = NULL, CAL_bins = NULL, ages = 
     data_lab <- "Length"
   }
   if(data_type == 'age') {
-    data_val <- if(is.null(ages)) 1:dim(RCM)[3] else ages
+    data_val <- if(is.null(ages)) 1:dim(fit)[3] else ages
     data_lab <- "Age"
   }
 
-  # Annual comps (RCM vs. dat if available)
+  # Annual comps (fit vs. dat if available)
   # Dim of
-  RCM_plot <- RCM
+  fit_plot <- fit
   dat_plot <- dat
   if(annual_yscale == "proportions") {
     for(i in 1:length(Year)) {
-      RCM_plot[, i, ] <- RCM[, i, ]/rowSums(RCM[, i, ])
+      fit_plot[, i, ] <- fit[, i, ]/rowSums(fit[, i, ])
       if(!is.null(dat)) dat_plot[i, ] <- dat[i, ]/sum(dat[i, ])
     }
   }
-  ylim <- c(0, 1.1 * max(RCM_plot, dat_plot, na.rm = TRUE))
+  ylim <- c(0, 1.1 * max(fit_plot, dat_plot, na.rm = TRUE))
   yaxp <- c(0, max(pretty(ylim, n = 4)), 4)
-  if(max(c(RCM_plot, dat_plot), na.rm = TRUE) == 1) yaxp <- c(0, 1, 4)
+  if(max(c(fit_plot, dat_plot), na.rm = TRUE) == 1) yaxp <- c(0, 1, 4)
 
   las <- 1
 
@@ -952,18 +1002,18 @@ plot_composition_RCM <- function(Year, RCM, dat = NULL, CAL_bins = NULL, ages = 
     yaxt <- ifelse(i %% 16 %in% c(1:4), "s", "n") # TRUE = first column
     xaxt <- ifelse(i < length(Year) & i %% 4 %in% c(1:3), "n", "s") # TRUE = first three rows
 
-    if(dim(RCM_plot)[1] == 1) {
-      plot(data_val, RCM_plot[, i, ], type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
+    if(dim(fit_plot)[1] == 1) {
+      plot(data_val, fit_plot[, i, ], type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
       abline(h = 0, col = 'grey')
-      lines(data_val, RCM_plot[, i, ], col = dat_color)
+      lines(data_val, fit_plot[, i, ], col = dat_color)
     } else {
-      matplot(data_val, t(RCM_plot[, i, ]), type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
+      matplot(data_val, t(fit_plot[, i, ]), type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
       abline(h = 0, col = 'grey')
-      matlines(data_val, t(RCM_plot[, i, ]), col = dat_color)
+      matlines(data_val, t(fit_plot[, i, ]), col = dat_color)
     }
     abline(h = 0, col = 'grey')
     if(!is.null(dat)) lines(data_val, dat_plot[i, ], lwd = 1.5)
-    legend("topright", legend = c(Year[i], ifelse(is.null(N) || is.na(N[i]), "", paste0("N = ", N[i]))), bty = "n", xjust = 1)
+    legend("topright", legend = c(Year[i], ifelse(is.null(N) | is.na(N[i]), "", paste("N =", N[i]))), bty = "n", xjust = 1)
 
     if(i %% 16 == 1) {
       mtext(data_lab, side = 1, line = 3, outer = TRUE)

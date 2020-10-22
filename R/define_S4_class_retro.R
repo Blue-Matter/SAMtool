@@ -122,7 +122,7 @@ setMethod("plot", signature(x = "retro", y = "missing"),
 
             retro <- x
             if(is.null(color) || length(color) != dim(retro@TS)[1]) color <- rich.colors(dim(retro@TS)[1])
-            Year_matrix <- matrix(as.numeric(dimnames(retro@TS)$Year), ncol = length(color), nrow = dim(retro@TS)[2], byrow = FALSE)
+            Year <- as.numeric(dimnames(retro@TS)$Year)
             xlim <- range(as.numeric(dimnames(retro@TS)$Year))
             nyr_label <- dimnames(retro@TS)$Peel
 
@@ -135,7 +135,7 @@ setMethod("plot", signature(x = "retro", y = "missing"),
               abline(h = 0, col = "grey")
               if(grepl("MSY", as.character(ylab))) abline(h = 1, lty = 3)
 
-              matlines(Year_matrix, matrix_to_plot, col = color, lty = 1)
+              matlines(Year, matrix_to_plot, col = color, lty = 1)
 
               legend("topleft", legend = nyr_label, lwd = 1, col = color, bty = "n", title = "Years removed:")
             }
