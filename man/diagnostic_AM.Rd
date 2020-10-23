@@ -34,7 +34,7 @@ DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
 show(DD_MSY)
 
 ##### Ensure that PPD = TRUE in runMSE function
-myMSE <- runMSE(DLMtool::testOM, MPs = "DD_MSY", PPD = TRUE)
+myMSE <- runMSE(OMtool::testOM, MPs = "DD_MSY")
 diagnostic_AM(myMSE)
 }
 }

@@ -90,7 +90,7 @@ type = "l", col = "blue")
 abline(v = c(0.4, 0.8), col = "red", lty = 2)
 
 \dontrun{
-myOM <- DLMtool::runMSE(DLMtool::testOM, MPs = c("FMSYref", "DD_40_10"))
+myOM <- OMtool::runMSE(OMtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 }
 }
 \references{

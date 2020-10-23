@@ -1,8 +1,8 @@
-library(MSEtool)
+library(SAMtool)
 load('boccaccio_OM.RData')
 
 sfInit(parallel = TRUE, cpus = 8)
-sfLibrary(MSEtool)
+sfLibrary(SAMtool)
 
 start_time <- proc.time()
 res <- sfLapply(1:48, SCA, Data = Data, start = list(R0 = 10 * OM@R0), vulnerability = "dome", early_dev = "comp")

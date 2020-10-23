@@ -18,10 +18,11 @@ Imports:
   MASS, TMB, coda, corpcor, dplyr, gplots, grDevices, graphics, methods, mvtnorm,
   reshape2, snowfall, stats, utils, abind, rmarkdown
 LinkingTo: TMB, RcppEigen
+Suggests: knitr, testthat, r4ss, shiny
 LazyData: yes
 LazyLoad: yes
 RoxygenNote: 7.1.1
-Suggests: knitr, testthat, r4ss, shiny
+Encoding: UTF-8
 VignetteBuilder: knitr
 URL: https://github.com/Blue-Matter/SAMtool
 BugReports: https://github.com/Blue-Matter/SAMtool/issues

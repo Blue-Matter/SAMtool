@@ -1,6 +1,6 @@
 
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 
 context("Delay-Difference in assessment mode")
 Red_snapper@sigmaR <- 0.3

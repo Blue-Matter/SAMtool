@@ -149,17 +149,17 @@ violated tends to be the biggest driver of performance for this method.
 \examples{
 \donttest{
 #### Observation-error delay difference model
-res <- DD_TMB(Data = DLMtool::Red_snapper)
+res <- DD_TMB(Data = OMtool::SimulatedData)
 
 # Provide starting values
-start <- list(R0 = 1, h = 0.95)
-res <- DD_TMB(Data = DLMtool::Red_snapper, start = start)
+start <- list(R0 = 1000, h = 0.95)
+res <- DD_TMB(Data = OMtool::SimulatedData, start = start)
 
 summary(res@SD) # Parameter estimates
 
 ### State-space version
 ### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)
-res <- DD_SS(Data = Red_snapper, start = list(tau = 0.3))
+res <- DD_SS(Data = SimulatedData, start = list(tau = 0.3))
 }
 }
 \references{

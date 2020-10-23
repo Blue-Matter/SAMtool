@@ -47,8 +47,7 @@
 #' Parameters that were used in the fitting model are placed in the \code{RCM@@OM@@cpars} list.
 #' 
 #' If the operating model \code{OM} uses time-varying growth or M, then those trends will be used in the RCM as well.
-#' Time-varying life history parameters can create ambiguity in the calculation and interpretation of depletion and reference points in \link[DLMtool]{runMSE}.
-#' See section D.5 of \code{DLMtool::userguide()}.
+#' Non-stationary productivity creates ambiguity in the calculation and interpretation of depletion and MSY reference points.
 #'
 #' The easiest way to turn off time-varying growth/M is by setting: \code{OM@@Msd <- OM@@Linfsd <- OM@@Ksd <- c(0, 0)}.
 #'

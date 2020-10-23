@@ -1,7 +1,6 @@
 
 
 
-library(MSEtool)
 
 swo <- read.csv("data-raw/swordfish.csv")
 

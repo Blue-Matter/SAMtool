@@ -14,28 +14,26 @@
 #' @author Q. Huynh
 #' @examples
 #' \dontrun{
-#' prelim_AM(DLMtool::testOM, DD_TMB)
+#' prelim_AM(OMtool::testOM, DD_TMB)
 #' }
 #' @export
 prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 
   # is Hist?
-  if(is.list(x) && any(names(x) == "Data")) {
-    Data <- x$Data
-  } else
-    if(inherits(x, "OM")) {
-      message("Generating Hist object from OM object via runMSE:")
-      runHist <- runMSE(x, Hist = TRUE)
-      if(packageVersion("DLMtool") >= 5.3) Data <- runHist@Data else Data <- runHist$Data
-    } else
-      if(inherits(x, "Data")) {
-        Data <- x
-      } else {
-        stop("x does not appear to be either a Hist, Data, or OM object.")
-      }
+  if(inherits(x, "Hist")) {
+    Data <- x@Data
+  } else if(inherits(x, "OM")) {
+    message("Generating Hist object from OM object via runMSE:")
+    runHist <- runMSE(x, Hist = TRUE, silent = TRUE)
+    Data <- runHist@Data
+  } else if(inherits(x, "Data")) {
+    Data <- x
+  } else {
+    stop("x does not appear to be either a Hist, Data, or OM object.")
+  }
 
   if(is.numeric(ncpus) && !snowfall::sfIsRunning()) {
-    DLMtool::setup(cpus = ncpus)
+    OMtool::setup(cpus = ncpus)
     on.exit(snowfall::sfStop())
   }
   nsim <- nrow(Data@Cat)
@@ -92,7 +90,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' show(DD_MSY)
 #'
 #' ##### Ensure that PPD = TRUE in runMSE function
-#' myMSE <- runMSE(DLMtool::testOM, MPs = "DD_MSY", PPD = TRUE)
+#' myMSE <- runMSE(OMtool::testOM, MPs = "DD_MSY")
 #' diagnostic_AM(myMSE)
 #' }
 #' @importFrom graphics layout
@@ -120,15 +118,9 @@ diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRU
     all(vapply(Misc, function(y) any(names(y) == "diagnostic"), logical(1)))
   }
 
-  if(packageVersion("DLMtool") >= 5.3) {
-    has_diagnostic <- vapply(MSE@Misc$Data, has_diagnostic_fn, logical(1))
-    if(all(!has_diagnostic)) stop("No diagnostic information found in MSE@Misc$Data for any MP. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
-
-  } else {
-    has_diagnostic <- vapply(MSE@Misc, has_diagnostic_fn, logical(1))
-    if(all(!has_diagnostic)) stop("No diagnostic information found in MSE@Misc for any MP. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
-  }
-
+  has_diagnostic <- vapply(MSE@Misc, has_diagnostic_fn, logical(1))
+  if(all(!has_diagnostic)) stop("No diagnostic information found in MSE@Misc for any MP. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
+  
   MPs <- MPs[has_diagnostic]
 
   if(!is.null(MP)) {
@@ -142,9 +134,7 @@ diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRU
   get_code <- function(x, y) vapply(x, getElement, numeric(1), y)
   get_code_char <- function(x, y) vapply(x, getElement, character(1), y)
   for(i in 1:length(MPs)) {
-    if(packageVersion("DLMtool") >= 5.3) {
-      objects <- MSE@Misc$Data[[which(MPs[i] == MSE@MPs)]]
-    } else objects <- MSE@Misc[[which(MPs[i] == MSE@MPs)]]
+    objects <- MSE@Misc[[which(MPs[i] == MSE@MPs)]]
     diagnostic <- lapply(objects@Misc, getElement, "diagnostic")
 
     if(!is.null(diagnostic)) {

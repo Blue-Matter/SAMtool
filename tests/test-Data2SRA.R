@@ -1,7 +1,7 @@
 
 #### For data-limited situations - see notes below
 
-library(MSEtool)
+library(SAMtool)
 library(testthat)
 
 Data <- new("Data", "tests/Data_files/Data_ORH7A.csv")

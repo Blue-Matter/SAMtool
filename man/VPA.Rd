@@ -39,7 +39,7 @@ should be provided in \code{Data@Cat} so that the function can calculate annual 
 independent F's are calculated in the terminal year (subject to the assumed ratio of F of the plus-group to the previous age class).
 See details for parameterization.}
 
-\item{I_type}{Whether the index surveys population biomass (B; this is the default in the DLMtool operating model),
+\item{I_type}{Whether the index surveys population biomass (B),
 vulnerable biomass (VB), or spawning stock biomass (SSB).}
 
 \item{start}{Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.}

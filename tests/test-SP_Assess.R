@@ -1,6 +1,6 @@
 
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 
 
 context("Surplus production in assessment mode")

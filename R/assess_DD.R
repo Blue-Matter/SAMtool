@@ -77,17 +77,17 @@
 #' @examples
 #' \donttest{
 #' #### Observation-error delay difference model
-#' res <- DD_TMB(Data = DLMtool::Red_snapper)
+#' res <- DD_TMB(Data = OMtool::SimulatedData)
 #'
 #' # Provide starting values
-#' start <- list(R0 = 1, h = 0.95)
-#' res <- DD_TMB(Data = DLMtool::Red_snapper, start = start)
+#' start <- list(R0 = 1000, h = 0.95)
+#' res <- DD_TMB(Data = OMtool::SimulatedData, start = start)
 #'
 #' summary(res@@SD) # Parameter estimates
 #'
 #' ### State-space version
 #' ### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)
-#' res <- DD_SS(Data = Red_snapper, start = list(tau = 0.3))
+#' res <- DD_SS(Data = SimulatedData, start = list(tau = 0.3))
 #' }
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @useDynLib SAMtool
@@ -147,7 +147,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- do.call(cbind, lapply(Ind, getElement, "I_hist"))
   I_sd <- do.call(cbind, lapply(Ind, getElement, "I_sd"))
-  I_units <- do.call(cbind, lapply(Ind, getElement, "I_units"))
+  I_units <- do.call(c, lapply(Ind, getElement, "I_units"))
 
   if(is.null(I_hist)) stop("No indices found.", call. = FALSE)
   nsurvey <- ncol(I_hist)

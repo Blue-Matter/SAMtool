@@ -24,21 +24,11 @@
 #' \item \href{../doc/VPA.html}{Virtual population analysis} (\link{VPA})
 #' }
 #'
-#'
 #' The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. Information can be found
-#' \href{../doc/SRA_scope.html}{here}.
+#' \href{../doc/RCM.html}{here}.
 #'
 #' All SAMtool vignettes can also be viewed by typing \code{browseVignettes("SAMtool")} into the R console or through the
 #' SAMtool webpage on \href{https://cran.r-project.org/package=SAMtool}{CRAN}.
-#'
-#' @section Additional links:
-#'
-#' See the \href{https://dlmtool.github.io/DLMtool/userguide/introduction.html}{DLMtool User Guide} for
-#' a detailed description of how to use the DLMtool package.
-#'
-#' See the \href{https://www.datalimitedtoolkit.org/}{Data-Limited Toolkit Website} for more information on DLMtool,
-#' including an interactive demo of the main features of the toolkit, information on case studies where the toolkit has
-#' been applied, and more about the history and development of the DLMtool.
 #'
 #' @references
 #' Carruthers, T.R., Punt, A.E., Walters, C.J., MacCall, A.,

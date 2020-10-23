@@ -21,10 +21,10 @@
 #'
 #' # The same MP which fishes at 75% of UMSY
 #' DD_75MSY <- make_MP(DD_TMB, HCR_MSY, MSY_frac = 0.75)
-#' class(DD_MSY)
+#' class(DD_75MSY)
 #'
 #' \dontrun{
-#' myOM <- DLMtool::runMSE(DLMtool::testOM, MPs = c("FMSYref", "DD_MSY"))
+#' myOM <- OMtool::runMSE(OMtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_75MSY"))
 #' }
 #' @export
 HCR_MSY <- function(Assessment, reps = 1, MSY_frac = 1, ...) {
@@ -106,7 +106,7 @@ class(HCR_MSY) <- "HCR"
 #' abline(v = c(0.4, 0.8), col = "red", lty = 2)
 #'
 #' \dontrun{
-#' myOM <- DLMtool::runMSE(DLMtool::testOM, MPs = c("FMSYref", "DD_40_10"))
+#' myOM <- OMtool::runMSE(OMtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 #' }
 #' @export
 HCR_ramp <- function(Assessment, reps = 1, LRP, TRP, rel_min = 0, rel_max = 1,

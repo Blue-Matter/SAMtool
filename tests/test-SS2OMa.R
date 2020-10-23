@@ -1,6 +1,6 @@
 
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 
 
 context("SS2OM Case studies")
@@ -46,7 +46,7 @@ for(i in 1:length(dir_vec)) {
 
     expect_true(length(res@M) == length(res@M2))
 
-    expect_equal(DLMtool::cparscheck(res@cpars), res@nsim)
+    #expect_equal(DLMtool::cparscheck(res@cpars), res@nsim)
 
 
   })

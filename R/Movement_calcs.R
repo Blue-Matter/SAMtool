@@ -2,7 +2,7 @@
 # Movement matrix calculation functions
 #' Calculates movement matrices from user inputs
 #'
-#' A wrapper function for \link{makemov} used to generate movement matrices for a DLMtool operating model.
+#' A wrapper function for \link{makemov} used to generate movement matrices for the operating model.
 #' Calculates a movement matrix from user-specified unfished stock biomass fraction in each area and probability of staying in the area in each time step.
 #' @param OM Operating model, an object of class \linkS4class{OM}.
 #' @param dist A vector of fractions of unfished stock in each area. The length of this vector will determine the number of areas (\code{nareas}) in the OM.
@@ -13,7 +13,7 @@
 #' @param figure Logical to indicate if the movement matrix will be plotted (mean values and range across \code{OM@@nsim} simulations.)
 #' @param mov A four-dimensional array of dimension \code{c(nsim, maxage, nareas, nareas)}
 #' specifying movement in the operating model.
-#' @param age An age from 1 to maxage for the movement-at-age matrix figure when \code{type = "matrix"}.
+#' @param age An age from 0 to maxage for the movement-at-age matrix figure when \code{type = "matrix"}.
 #' @param type Whether to plot a movement matrix for a single age (\code{"matrix"}) or the full movement versus age figure (\code{"all"})
 #' @return The operating model \code{OM} with movement parameters in slot \code{cpars}.
 #' The \code{mov} array is of dimension \code{nsim}, \code{maxage}, \code{nareas}, \code{nareas}.
@@ -30,48 +30,38 @@
 #' plot_mov(movOM_5areas@@cpars$mov, type = "all")
 #' }
 #' @describeIn simmov Estimation function for creating movement matrix.
-simmov<-function(OM,dist=c(0.1,0.2,0.3,0.4),prob=0.5,distE=0.1,probE=0.1,prob2=NA,figure=TRUE){
+simmov<-function(OM, dist = c(0.1, 0.2, 0.3, 0.4), prob = 0.5, distE = 0.1, probE = 0.1, prob2 = NA, figure = TRUE){
 
-  nareas<-length(dist)
+  nareas <- length(dist)
   if(nareas < 2) stop("Error: nareas, i.e., length(dist), is less than 2.")
-  nsim<-OM@nsim
-  maxage<-OM@maxage
+  nsim <- OM@nsim
+  maxage <- OM@maxage
 
-  mov<-array(NA,c(nsim,maxage,nareas,nareas))
+  mov <- array(NA, c(nsim, maxage + 1, nareas, nareas))
 
-  dist_s<-ilogitm(t(matrix(rnorm(nareas*nsim,log(dist),distE),nrow=nareas)))
+  dist_s <- rnorm(nareas*nsim, log(dist), distE) %>% matrix(nrow=nareas) %>% t() %>% ilogitm()
 
-  if(length(prob)==1){
-
-    prob_s<-ilogit(matrix(rnorm(nsim,logit(prob),probE),nrow=nsim))
-
-  }else if(length(prob)==length(dist)&is.na(prob2)){
-
-    prob_s<-ilogit(t(matrix(rnorm(nareas*nsim,logit(prob),probE),nrow=nareas)))
-
-  }else if(length(prob)==length(dist)&length(prob)==length(prob2)){
-
-    prob_s<-t(matrix(runif(nareas*nsim,prob,prob2),nrow=nareas))
-
-  }else{
-
+  if(length(prob) == 1) {
+    prob_s <- rnorm(nsim, logit(prob), probE) %>% matrix(nrow = nsim) %>% ilogit()
+  } else if(length(prob) == length(dist) && is.na(prob2)) {
+    prob_s <- rnorm(nareas*nsim, logit(prob), probE) %>% matrix(nrow = nareas) %>% t() %>% logit()
+  } else if(length(prob) == length(dist) && length(prob) == length(prob2)) {
+    prob_s <- runif(nareas*nsim, prob, prob2) %>% matrix(nrow=nareas) %>% t()
+  } else{
     stop("Error: either prob wasn't of length 1, or prob wasn't of length dist or prob 2 wasn't the same length as prob and dist.
             You have three options:
             (1) provide one value for prob which represents mean probability of staying across all areas sampled for each simulation with probE logit error
             (2) provide nareas values of prob which represent probability of staying across all areas sampled for each simulation with probE logit error
             (3) provide nareas values of prob and prob2 which are the upper and lower bounds for sampling uniform probability of staying for each area")
   }
-
-  for(i in 1:nsim){
-
-    movt<-makemov(fracs=dist_s[i,],prob=prob_s[i,])
-    mov[i,,,]<-rep(movt,each=maxage)
-  } # nsim
-
-  OM@cpars$mov<-mov
-  if(figure)plot_mov(mov)
-  OM
-
+  
+  movt <- lapply(1:nsim, function(i) makemov(fracs = dist_s[i, ], prob = prob_s[i, ]) %>% rep(each = maxage + 1))
+  for(i in 1:nsim) mov[i, , , ] <- movt[[i]]
+  
+  OM@cpars$mov <- mov
+  if(figure) plot_mov(mov)
+  
+  return(OM)
 }
 # myOM<-simmov(testOM, dist=c(0.1,0.8,0.05,0.05),prob=c(0.6,0.5,0.7,0.85))
 
@@ -79,7 +69,7 @@ simmov<-function(OM,dist=c(0.1,0.2,0.3,0.4),prob=0.5,distE=0.1,probE=0.1,prob2=N
 #' Calculates movement matrices from user inputs for fraction in each area (fracs) and probability of staying in areas (prob)
 #'
 #' @description A function for calculating a movement matrix from user specified unfished stock biomass fraction in each area.
-#' Used by \link{simmov} to generate movement matrices for a DLMtool operating model.
+#' Used by \link{simmov} to generate movement matrices for an operating model.
 #' @param fracs A vector nareas long of fractions of unfished stock biomass in each area
 #' @param prob A vector of the probability of individuals staying in each area or a single value for the mean probability of staying among all areas
 #' @author T. Carruthers
@@ -88,30 +78,29 @@ simmov<-function(OM,dist=c(0.1,0.2,0.3,0.4),prob=0.5,distE=0.1,probE=0.1,prob2=N
 #' @importFrom stats nlminb
 #' @useDynLib SAMtool
 #' @seealso \link{simmov}
-makemov<-function(fracs=c(0.1,0.2,0.3,0.4),prob=c(0.5,0.8,0.9,0.95)){
+makemov<-function(fracs = c(0.1, 0.2, 0.3, 0.4), prob = c(0.5, 0.8, 0.9, 0.95)){
 
-  nareas<-length(fracs)
+  nareas <- length(fracs)
 
-  if(length(prob)==1) data <- list(model = "grav",fracs = fracs, prob = prob, nareas = nareas)
-  if(length(prob)==nareas) data <- list(model = "grav_Pbyarea",fracs = fracs, prob = prob, nareas = nareas)
+  if(length(prob) == 1) data <- list(model = "grav", fracs = fracs, prob = prob, nareas = nareas)
+  if(length(prob) == nareas) data <- list(model = "grav_Pbyarea", fracs = fracs, prob = prob, nareas = nareas)
 
-  if(length(prob)==1)params <- list(log_visc = 0,log_grav = rep(0,nareas-1))
-  if(length(prob)==nareas)params <- list(log_visc = rep(0,nareas),log_grav = rep(0,nareas-1))
+  if(length(prob) == 1) params <- list(log_visc = 0, log_grav = rep(0, nareas - 1))
+  if(length(prob) == nareas) params <- list(log_visc = rep(0, nareas), log_grav = rep(0, nareas - 1))
 
   info <- list(data = data, params = params)
 
   obj <- MakeADFun(data = info$data, parameters = info$params, DLL = "SAMtool", silent = TRUE)
   opt <- nlminb(start = obj$par, objective = obj$fn, gradient = obj$gr)
 
-  if(length(prob)==1)params.new<-list(log_visc=opt$par[1],log_grav=opt$par[2:nareas])
-  if(length(prob)==nareas)params.new<-list(log_visc=opt$par[1:nareas],log_grav=opt$par[nareas+(1:(nareas-1))])
+  if(length(prob) == 1) params.new <- list(log_visc = opt$par[1], log_grav = opt$par[2:nareas])
+  if(length(prob) == nareas)params.new <- list(log_visc = opt$par[1:nareas], log_grav = opt$par[nareas+(1:(nareas-1))])
 
   info <- list(data = data, params = params.new)
-  obj.new<-MakeADFun(data = info$data, parameters = info$params, DLL = "SAMtool", silent = TRUE)
-
-  obj.new$report(obj.new$env$last.par.best)$mov
+  obj.new <- MakeADFun(data = info$data, parameters = info$params, DLL = "SAMtool", silent = TRUE)
+  
   #validateTMB(obj.new)
-
+  return(obj.new$report(obj.new$env$last.par.best)$mov)
 }
 
 # #' Checks the TMB equations again estimated movement matrices and also checks fit
@@ -148,13 +137,13 @@ validateTMB<-function(obj){
 #' @describeIn simmov Plotting function.
 #' @export
 plot_mov <- function(mov, age = 1, type = c("matrix", "all")) {
-  type <- match.arg(type)
+  type <- match.arg(type, several.ok = TRUE)
   nsim <- dim(mov)[1]
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
 
   if(type == "matrix") {
-    mov_at_age <- mov[ , age, , ] # dimension nsim, narea, narea
+    mov_at_age <- mov[ , age + 1, , ] # dimension nsim, narea, narea
     mean_mov <- apply(mov_at_age, c(2, 3), mean)
     nareas <- nrow(mean_mov)
 

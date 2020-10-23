@@ -23,8 +23,8 @@ plot and summary functions for retro object.
 }
 \examples{
 \donttest{
-res <- SCA(Data = DLMtool::Red_snapper)
-ret <- retrospective(res)
+res <- SP(Data = swordfish)
+ret <- retrospective(res, figure = FALSE)
 
 summary(ret)
 }

@@ -17,7 +17,7 @@
 #' estimates (R0, steepness, etc.), also returns a matrix of Mohn's rho (Mohn 1999).
 #' @examples
 #' \donttest{
-#' output <- DD_TMB(Data = DLMtool::Red_snapper)
+#' output <- SP(Data = swordfish)
 #' get_retro <- retrospective(output, nyr = 5, figure = FALSE)
 #' }
 #' @references
@@ -106,8 +106,8 @@ setMethod("plot", signature(x = "Assessment", y = "retro"),
 #' @aliases plot.retro plot,retro,missing-method
 #' @examples
 #' \donttest{
-#' res <- SCA(Data = DLMtool::Red_snapper)
-#' ret <- retrospective(res)
+#' res <- SP(Data = swordfish)
+#' ret <- retrospective(res, figure = FALSE)
 #'
 #' summary(ret)
 #' }

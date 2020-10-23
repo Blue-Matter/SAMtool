@@ -10,14 +10,14 @@ avail(classy, all_avail = TRUE)
 \item{classy}{A class of object (character string, e.g. 'Fleet')}
 
 \item{all_avail}{Logical. If TRUE, function will return all objects of class \code{classy} available to user.
-If FALSE, returns only those objects included in MSEtool.}
+If FALSE, returns only those objects included in OMtool.}
 }
 \description{
 Generic class finder
 }
 \details{
 Finds objects of the specified class in the global environment or in the
-MSEtool and DLMtool packages. This function is an addendum to the \code{\link[DLMtool]{avail}}
+SAMtool and OMtool packages. This function is an addendum to the \code{\link[OMtool]{avail}}
 function in DLMtool.
 }
 \examples{

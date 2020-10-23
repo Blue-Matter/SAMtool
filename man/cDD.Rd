@@ -135,17 +135,17 @@ deviation of the index and recruitment variability, respectively.
 
 \examples{
 #### Observation-error delay difference model
-res <- cDD(Data = DLMtool::Red_snapper)
+res <- cDD(Data = OMtool::SimulatedData)
 
 # Provide starting values
-start <- list(R0 = 1, h = 0.95)
-res <- cDD(Data = DLMtool::Red_snapper, start = start)
+start <- list(R0 = 1000, h = 0.95)
+res <- cDD(Data = OMtool::SimulatedData, start = start)
 
 summary(res@SD) # Parameter estimates
 
 ### State-space version
 ### Set recruitment variability SD = 0.6 (since fix_tau = TRUE)
-res <- cDD_SS(Data = Red_snapper, start = list(tau = 0.6))
+res <- cDD_SS(Data = SimulatedData, start = list(tau = 0.6))
 
 }
 \references{

@@ -35,7 +35,7 @@ parameter estimates.
 }
 \examples{
 \donttest{
-output <- DD_TMB(Data = DLMtool::Red_snapper)
+output <- SP(Data = swordfish)
 get_retro <- retrospective(output, nyr = 5, figure = FALSE)
 }
 }

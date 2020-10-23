@@ -21,10 +21,9 @@ Plot biomass, recruitment, and fishing mortality time series from several . This
 different assessment models from the same Data object.
 }
 \examples{
-res <- cDD_SS(Data = DLMtool::SimulatedData)
-res2 <- SCA(Data = DLMtool::SimulatedData)
-res3 <- SCA2(Data = DLMtool::SimulatedData)
-res4 <- VPA(Data = DLMtool::SimulatedData)
+res <- cDD_SS(Data = OMtool::SimulatedData)
+res2 <- SCA(Data = OMtool::SimulatedData)
+res3 <- SCA2(Data = OMtool::SimulatedData)
 
 compare_models(res, res2, res3)
 }

@@ -1,6 +1,6 @@
 
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 
 
 context("SS2Data Case studies")

@@ -2,7 +2,7 @@
 
 # Test that default configurations are very, very robust when running MSEs.
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 
 
 DD_MP <- make_MP(DD_TMB, HCR_MSY, diagnostic = 'min')

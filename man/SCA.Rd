@@ -252,12 +252,10 @@ for example, when vulnerability >> 0.5 for the youngest age class.
 }
 
 \examples{
-res <- SCA(Data = DLMtool::SimulatedData)
-res2 <- SCA2(Data = DLMtool::SimulatedData)
+res <- SCA(Data = OMtool::SimulatedData)
+res2 <- SCA2(Data = OMtool::SimulatedData)
 
 compare_models(res, res2)
-
-SCA_assess <- SCA2(Data = DLMtool::Simulation_1)
 
 \dontrun{
 plot(res)

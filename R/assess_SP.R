@@ -6,9 +6,9 @@
 #' the behavior of ASPIC (Prager 1994). The Fox model, \code{SP_Fox}, fixes BMSY/K = 0.37 (1/e).
 #' The state-space version, \code{SP_SS} estimates annual deviates in biomass. An option allows for setting a
 #' prior for the intrinsic rate of increase.
-#' The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[DLMtool]{DLMextra}.
+#' The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[OMtool]{DLMextra}.
 #'
-#' @param x An index for the objects in \code{Data} when running in \link[DLMtool]{runMSE}.
+#' @param x An index for the objects in \code{Data} when running in \link[OMtool]{runMSE}.
 #' Otherwise, equals to 1 When running an assessment interactively.
 #' @param Data An object of class Data.
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to

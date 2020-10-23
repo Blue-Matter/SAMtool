@@ -56,7 +56,7 @@ SP_SS(
 SP_Fox(x = 1, Data, ...)
 }
 \arguments{
-\item{x}{An index for the objects in \code{Data} when running in \link[DLMtool]{runMSE}.
+\item{x}{An index for the objects in \code{Data} when running in \link[OMtool]{runMSE}.
 Otherwise, equals to 1 When running an assessment interactively.}
 
 \item{Data}{An object of class Data.}
@@ -136,7 +136,7 @@ Continuous surplus production and fishing is modeled with sub-annual time steps 
 the behavior of ASPIC (Prager 1994). The Fox model, \code{SP_Fox}, fixes BMSY/K = 0.37 (1/e).
 The state-space version, \code{SP_SS} estimates annual deviates in biomass. An option allows for setting a
 prior for the intrinsic rate of increase.
-The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[DLMtool]{DLMextra}.
+The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[OMtool]{DLMextra}.
 }
 \details{
 To provide starting values for the \code{SP}, a named list can be provided for \code{FMSY},

@@ -3,7 +3,7 @@
 #' Generic class finder
 #'
 #' Finds objects of the specified class in the global environment or in the
-#' MSEtool and DLMtool packages. This function is an addendum to the \code{\link[DLMtool]{avail}}
+#' SAMtool and OMtool packages. This function is an addendum to the \code{\link[OMtool]{avail}}
 #' function in DLMtool.
 #'
 #' @param classy A class of object (character string, e.g. 'Fleet')
@@ -38,25 +38,21 @@ avail <- function(classy, all_avail = TRUE) {
 
 getclass <- function(x, classy) any(inherits(get(x), classy))
 
-#' Get the MSEtool vignettes
+#' Get the SAMtool vignettes
 #'
-#' A convenient function to open a web browser with the MSEtool package vignettes
+#' A convenient function to open a web browser with the SAMtool package vignettes
 #' @examples
 #' \dontrun{
-#' MSEtool::userguide()
-#' DLMtool::userguide()
+#' SAMtool::userguide()
 #' }
-#' @seealso \link[DLMtool]{userguide}
+#' @seealso \link[OMtool]{userguide}
 #' @export
 userguide <- function() {
-  message("For the DLMtool user guide, type in \"DLMtool::userguide()\" to the console.")
-  browseVignettes("MSEtool")
+  #message("For the DLMtool user guide, type in \"DLMtool::userguide()\" to the console.")
+  browseVignettes("OMtool")
 }
 
 
-# Internal DLMtool functions that are also needed for MSEtool
-iVB <- function(t0, K, Linf, L) max(1, ((-log(1 - L/Linf))/K + t0))
-mconv <- function (m, sd) log(m) - 0.5 * log(1 + ((sd^2)/(m^2)))
 squeeze <- function(x) (1 - .Machine$double.eps) * (x - 0.5) + 0.5
 
 logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) {

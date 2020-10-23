@@ -2,19 +2,18 @@
 % Please edit documentation in R/Misc_fun.R
 \name{userguide}
 \alias{userguide}
-\title{Get the MSEtool vignettes}
+\title{Get the SAMtool vignettes}
 \usage{
 userguide()
 }
 \description{
-A convenient function to open a web browser with the MSEtool package vignettes
+A convenient function to open a web browser with the SAMtool package vignettes
 }
 \examples{
 \dontrun{
-MSEtool::userguide()
-DLMtool::userguide()
+SAMtool::userguide()
 }
 }
 \seealso{
-\link[DLMtool]{userguide}
+\link[OMtool]{userguide}
 }

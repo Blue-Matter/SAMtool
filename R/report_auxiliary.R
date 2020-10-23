@@ -11,10 +11,9 @@
 #' @author Q. Huynh
 #' @return A set of figures of biomass, recruitment, and fishing mortality estimates among the models.
 #' @examples
-#' res <- cDD_SS(Data = DLMtool::SimulatedData)
-#' res2 <- SCA(Data = DLMtool::SimulatedData)
-#' res3 <- SCA2(Data = DLMtool::SimulatedData)
-#' res4 <- VPA(Data = DLMtool::SimulatedData)
+#' res <- cDD_SS(Data = OMtool::SimulatedData)
+#' res2 <- SCA(Data = OMtool::SimulatedData)
+#' res3 <- SCA2(Data = OMtool::SimulatedData)
 #'
 #' compare_models(res, res2, res3)
 #' @importFrom gplots rich.colors
@@ -385,8 +384,8 @@ plot_betavar <- function(m, sd, label = NULL, is_logit = FALSE, color = "black")
 #' @export
 #' @seealso \code{\link{plot_lognormalvar}} \code{\link{plot_betavar}}
 #' @examples
-#' mu <- DLMtool::Simulation_1@@steep
-#' stddev <- DLMtool::Simulation_1@@steep * DLMtool::Simulation_1@@CV_steep
+#' mu <- 0.8
+#' stddev <- 0.1
 #' plot_steepness(mu, stddev)
 plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), color = "black") {
   SR <- match.arg(SR)

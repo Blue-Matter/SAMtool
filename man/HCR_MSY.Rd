@@ -30,10 +30,10 @@ class(DD_MSY)
 
 # The same MP which fishes at 75\% of UMSY
 DD_75MSY <- make_MP(DD_TMB, HCR_MSY, MSY_frac = 0.75)
-class(DD_MSY)
+class(DD_75MSY)
 
 \dontrun{
-myOM <- DLMtool::runMSE(DLMtool::testOM, MPs = c("FMSYref", "DD_MSY"))
+myOM <- OMtool::runMSE(OMtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_75MSY"))
 }
 }
 \references{

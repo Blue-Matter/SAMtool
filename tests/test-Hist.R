@@ -2,7 +2,7 @@
 
 # Test that default configurations are very, very robust when running Assessments.
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 library(DLMextra)
 
 OMs <- avail("OM")

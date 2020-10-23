@@ -1,5 +1,5 @@
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 
 
 test_file("test-DD_Assess.R")

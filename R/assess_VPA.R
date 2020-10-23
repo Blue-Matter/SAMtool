@@ -12,7 +12,7 @@
 #' @param vulnerability Whether the terminal year vulnerability is \code{"logistic"} or \code{"dome"} (double-normal). If \code{"free"},
 #' independent F's are calculated in the terminal year (subject to the assumed ratio of F of the plus-group to the previous age class).
 #' See details for parameterization.
-#' @param I_type Whether the index surveys population biomass (B; this is the default in the DLMtool operating model),
+#' @param I_type Whether the index surveys population biomass (B),
 #' vulnerable biomass (VB), or spawning stock biomass (SSB).
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
 #' @param fix_Fratio Logical, whether the ratio of F of the plus-group to the previous age class is fixed in the model.

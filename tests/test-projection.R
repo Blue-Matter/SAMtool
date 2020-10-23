@@ -13,23 +13,23 @@ for(i in 1:length(mods)) {
 
   par(mfrow = c(3,3))
 
-  pro <- MSEtool:::projection(res, FMort = ifelse(length(res@FMSY) > 0, res@FMSY, res@UMSY))
+  pro <- projection(res, FMort = ifelse(length(res@FMSY) > 0, res@FMSY, res@UMSY))
   gen_plots()
 
-  pro <- MSEtool:::projection(res, FMort = 0.25 * ifelse(length(res@FMSY) > 0, res@FMSY, res@UMSY))
+  pro <- projection(res, FMort = 0.25 * ifelse(length(res@FMSY) > 0, res@FMSY, res@UMSY))
   gen_plots()
 
-  pro <- MSEtool:::projection(res, FMort = 2.5 * ifelse(length(res@FMSY) > 0, res@FMSY, res@UMSY))
+  pro <- projection(res, FMort = 2.5 * ifelse(length(res@FMSY) > 0, res@FMSY, res@UMSY))
   gen_plots()
 
 
-  pro <- MSEtool:::projection(res, Catch = 10, constrain = "Catch")
+  pro <- projection(res, Catch = 10, constrain = "Catch")
   gen_plots()
 
-  pro <- MSEtool:::projection(res, Catch = 100, constrain = "Catch")
+  pro <- projection(res, Catch = 100, constrain = "Catch")
   gen_plots()
 
-  pro <- MSEtool:::projection(res, Catch = 100000, constrain = "Catch")
+  pro <- projection(res, Catch = 100000, constrain = "Catch")
   gen_plots()
 }
 

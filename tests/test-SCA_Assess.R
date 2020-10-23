@@ -1,6 +1,6 @@
 
 library(testthat)
-library(MSEtool)
+library(SAMtool)
 
 context("SCA in assessment mode")
 

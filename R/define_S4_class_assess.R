@@ -84,7 +84,7 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' @slot dependencies A character string of data types required for the assessment.
 #' @examples
 #' \donttest{
-#' output <- DD_TMB(Data = DLMtool::Red_snapper)
+#' output <- DD_TMB(Data = OMtool::SimulatedData)
 #' class(output)
 #' }
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
@@ -118,7 +118,7 @@ Assessment <- setClass("Assessment",
 #' @param object An object of class \linkS4class{Assessment}
 #' @return A list of parameters.
 #' @examples
-#' output <- DD_TMB(Data = DLMtool::Simulation_1)
+#' output <- DD_TMB(Data = OMtool::SimulatedData)
 #' summary(output)
 #' @exportMethod summary
 setMethod("summary", signature(object = "Assessment"), function(object) {

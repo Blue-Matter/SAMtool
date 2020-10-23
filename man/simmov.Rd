@@ -35,7 +35,7 @@ plot_mov(mov, age = 1, type = c("matrix", "all"))
 \item{mov}{A four-dimensional array of dimension \code{c(nsim, maxage, nareas, nareas)}
 specifying movement in the operating model.}
 
-\item{age}{An age from 1 to maxage for the movement-at-age matrix figure when \code{type = "matrix"}.}
+\item{age}{An age from 0 to maxage for the movement-at-age matrix figure when \code{type = "matrix"}.}
 
 \item{type}{Whether to plot a movement matrix for a single age (\code{"matrix"}) or the full movement versus age figure (\code{"all"})}
 }
@@ -44,7 +44,7 @@ The operating model \code{OM} with movement parameters in slot \code{cpars}.
 The \code{mov} array is of dimension \code{nsim}, \code{maxage}, \code{nareas}, \code{nareas}.
 }
 \description{
-A wrapper function for \link{makemov} used to generate movement matrices for a DLMtool operating model.
+A wrapper function for \link{makemov} used to generate movement matrices for the operating model.
 Calculates a movement matrix from user-specified unfished stock biomass fraction in each area and probability of staying in the area in each time step.
 }
 \section{Functions}{

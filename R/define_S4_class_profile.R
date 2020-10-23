@@ -92,9 +92,13 @@ setGeneric("profile", function(fitted, ...) standardGeneric("profile"))
 #' a figure of the likelihood surface.
 #' @examples
 #' \donttest{
-#' output <- DD_TMB(Data = DLMtool::Red_snapper)
-#' pro <- profile(output, R0 = seq(0.75, 1.25, 0.025), h = seq(0.9, 0.99, 0.01))
-#' pro <- profile(output, R0 = seq(0.75, 1.25, 0.025)) # Profile R0 only
+#' output <- DD_TMB(Data = OMtool::SimulatedData)
+#' 
+#' # Profile R0 only
+#' pro <- profile(output, R0 = seq(100, 300, 10))
+#' 
+#' # Profile both R0 and steepness
+#' pro <- profile(output, R0 = seq(100, 300, 10), h = seq(0.7, 0.9, 0.01))
 #'
 #' # Ensure your grid is of proper resolution. A grid that is too coarse
 #' # will likely distort the shape of the likelihood surface.

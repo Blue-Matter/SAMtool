@@ -1,70 +1,159 @@
-cores <- parallel::detectCores() / 2
+
+#### For data-limited situations - see notes below
+
 library(SAMtool)
+library(testthat)
 
-############ Condition operating models with SRA_scope and data
-SRA_data <- readRDS("tests/Data_files/IYE_data.rds")
-data_names <- c("Chist", "Index", "I_sd", "I_type", "length_bin", "s_CAA", "CAA", "CAL", "I_units")
-data_ind <- match(data_names, names(SRA_data))
+OM <- testOM
+OM@nsim = 2
+OM@Msd <- OM@Ksd <- OM@Linfsd <- c(0, 0)
 
-OM_condition <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
+Hist = runMSE(OM, Hist = TRUE)
+
+bool <- c(TRUE, FALSE)
+
+#### Function to run RCM in parallel (with list)
+data_master <- expand.grid(cond = c("catch", "effort"), Catch_with_effort = bool,
+                           Index = bool, ML = bool, MW = bool, CAL = bool, CAA = bool)
+
+data_master$MW[data_master$ML] <- NA
+data_master$CAA[data_master$ML | data_master$MW] <- data_master$CAL[data_master$ML | data_master$MW] <- NA
+
+lapply_fn <- function(i, data_master, OM, Hist) {
+  args <- list(OM = OM)
+  args$data <- list()
+
+  if(data_master$cond[i] == "catch") { # Condition on catch
+    args$condition <- "catch2"
+    args$data$Chist <- Hist@Data@Cat[1, ]
+  } else {
+    if(data_master$Catch_with_effort[i]) { # Conditioned on effort, but may include some catches
+      args$data$Chist <- Hist@Data@Cat[1, ]
+      args$data$Chist[c(1:40)] <- NA
+    }
+    args$condition <- "effort"
+    args$data$Ehist <- Hist@TSdata$Find[1, ]
+  }
+
+  if(data_master$Index[i]) { # Only recent ten years index
+    args$data$Index <- Hist@Data@Ind[1, ]
+    args$data$Index[c(1:20)] <- NA
+    args$data$I_sd <- c(rep(NA, 20), rep(0.3, 30))
+    args$s_selectivity <- "B"
+  }
+
+  if(data_master$ML[i]) { # Only recent mean length
+    args$data$MS <- Hist@Data@ML[1, ]
+    args$data$MS[c(1:40)] <- NA
+    args$data$MS_type <- "length"
+  } else if(data_master$MW[i]) {
+    Data <- Hist@Data
+    a <- Data@wla[1]
+    b <- Data@wlb[1]
+    WAL <- a * Data@CAL_mids^b
+
+    MW <- colSums(t(Data@CAL[1, , ]) * WAL) / rowSums(Data@CAL[1, , ])
+    args$data$MS <- MW
+    args$data$MS_cv <- 0.2
+    args$data$MS_type <- "weight"
+  } else if(data_master$CAA[i]) {
+    args$data$CAA <- Hist@Data@CAA[1, , ]
+    args$data$CAA[1:35, ] <- NA
+  } else if(data_master$CAL[i]) {
+
+    args$data$CAL <- Hist@Data@CAL[1, , ]
+    args$data$CAL[1:35, ] <- NA
+
+    args$data$length_bin <- Hist@Data@CAL_mids
+  }
+  args$mean_fit <- TRUE
+  SRA <- do.call(RCM, args)
+
+  return(SRA)
+}
 
 
-# Base
-SRA <- RCM(OM_condition, data = SRA_data[data_ind], condition = "catch2", selectivity = rep("free", 2),
-                 s_selectivity = rep("logistic", 5), cores = 1,
-                 vul_par = SRA_data$vul_par, map_vul_par = matrix(NA, 81, 2),
-                 map_s_vul_par = SRA_data$map_s_vul_par, map_log_rec_dev = SRA_data$map_log_rec_dev,
-                 LWT = list(CAL = 0, CAA = 0))
-saveRDS(SRA, "tests/Data_files/IYE_SRA.rds")
+#### Function to run RCM in parallel (with Data object)
+data_master <- expand.grid(cond = c("catch", "effort"), Catch_with_effort = bool,
+                           Index = bool, ML = bool, CAL = bool, CAA = bool)
 
-SRA <- readRDS("tests/Data_files/IYE_SRA.rds")
-ret <- retrospective(SRA, 2, figure = FALSE)
+data_master$CAA[data_master$ML] <- data_master$CAL[data_master$ML] <- NA
 
-saveRDS(ret, "tests/Data_files/IYE_ret.rds")
-ret <- readRDS("tests/Data_files/IYE_ret.rds")
+lapply_fn <- function(i, data_master, OM, Hist) {
+  args <- list(OM = OM)
+  args$data <- new("Data")
 
-plot(SRA)
-plot(SRA, retro = ret)
+  if(data_master$cond[i] == "catch") { # Condition on catch
+    args$condition <- "catch2"
+    args$data@Cat <- Hist@Data@Cat[1, , drop = FALSE]
+  } else {
+    if(data_master$Catch_with_effort[i]) { # Conditioned on effort, but may include some catches
+      args$data@Cat <- Hist@Data@Cat[1, , drop = FALSE]
+      args$data@Cat[1, 1:40] <- NA
+    }
+    args$condition <- "effort"
+    args$data@Effort <- Hist@TSdata$Find[1, , drop = FALSE]
+  }
+
+  if(data_master$Index[i]) { # Only recent ten years index
+    args$data@Ind <- Hist@Data@Ind[1, , drop = FALSE]
+    args$data@Ind[1, 1:20] <- NA
+    args$data@CV_Ind <- c(rep(NA, 20), rep(0.3, 30)) %>% matrix(nrow = 1)
+    args$s_selectivity <- "B"
+  }
+
+  if(data_master$ML[i]) { # Only recent mean length
+    args$data@ML <- Hist@Data@ML[1, , drop = FALSE]
+    args$data@ML[1, 1:40] <- NA
+  } else if(data_master$CAA[i]) {
+    args$data@CAA <- Hist@Data@CAA[1, , , drop = FALSE]
+    args$data@CAA[, 1:35, ] <- NA
+  } else if(data_master$CAL[i]) {
+
+    args$data@CAL <- Hist@Data@CAL[1, , , drop = FALSE]
+    args$data@CAL[, 1:35, ] <- NA
+
+    args$data@CAL_mids <- Hist@Data@CAL_mids
+  }
+  args$mean_fit <- TRUE
+  SRA <- do.call(RCM, args)
+
+  return(SRA)
+}
+
+setup(4)
+sfExportAll()
+sfLibrary(dplyr)
 
 
 
+#### Run SRA
+res <- sfClusterApplyLB(1:nrow(data_master), lapply_fn, data_master = data_master, Hist = Hist, OM = OM)
+res <- lapply(5, lapply_fn, data_master = data_master, Hist = Hist, OM = OM)
+
+# Test MW
+res <- lapply_fn(9, data_master = data_master, Hist = Hist, OM = OM)
+
+
+#### Test whether plot function works
+lapply_fn_plot <- function(x, res) {
+  try(R.utils::withTimeout(plot(res[[x]], compare = FALSE, open_file = FALSE, filename = as.character(x)),
+                           timeout = 5),
+      silent = TRUE)
+}
+
+#sfLibrary(R.utils)
+#sfExport(list = c("lapply_fn_plot", "res"))
+test_plot <- lapply(1:nrow(data_master), lapply_fn_plot, res = res)
+saveRDS(test_plot, file = "tests/test_plot.rds")
+
+error_fn <- function(x) {
+  length(grep("elapsed time limit", x[1])) > 0 | length(grep("C:/", x[1])) > 0
+}
 
 
 
+data_master$conv <- lapply(res, function(x) sum(x@conv)/length(x@conv))
+data_master$figure <- vapply(test_plot, error_fn, numeric(1))
+View(data_master)
 
-
-
-########
-# Cod
-#args <- readRDS("C:/~/NE_retro/GoM_cod/args_cod_M02.rds")
-#newOM <- readRDS("tests/Data_files/cod_OM.rds")
-#for(i in 1:length(slotNames(newOM))) if(slotNames(newOM)[i] != "MPA") slot(newOM, slotNames(newOM)[i]) <- slot(args$OM, slotNames(newOM)[i])
-#
-#args$OM <- newOM
-args$OM@DR <- rep(0, 2)
-args$OM@MPA <- FALSE
-#
-#args$data$CAA <- array(0, c(37, 1, 1)) %>% abind::abind(args$data$CAA, along = 2)
-#args$data$s_CAA <- array(0, c(37, 1, 3)) %>% abind::abind(args$data$s_CAA, along = 2)
-#
-#args$OM@cpars$M_ageArray <- array(0.2, c(100, 1, 87)) %>% abind::abind(args$OM@cpars$M_ageArray, along = 2)
-#args$OM@cpars$Mat_age <- array(0, c(100, 1, 87)) %>% abind::abind(args$OM@cpars$Mat_age, along = 2)
-#
-#args$OM@cpars$Len_age <- abind::abind(args$OM@cpars$Len_age, array(10, c(100, 1, 87)), along = 2)
-#args$OM@cpars$Wt_age <- array(0.1, c(100, 1, 87)) %>% abind::abind(args$OM@cpars$Wt_age, along = 2)
-#args$map_log_early_rec_dev <- 1:9
-#args$s_vul_par <- matrix(0, 1, 3) %>% rbind(args$s_vul_par)
-#args$map_s_vul_par <- matrix(NA, 1, 3) %>% rbind(args$map_s_vul_par)
-
-#saveRDS(args, file = "tests/Data_files/cod_args.rds")
-
-args <- readRDS(file = "tests/Data_files/cod_args.rds")
-#args$resample <- TRUE
-out <- do.call(RCM, args)
-
-ret <- retrospective(out, 7, figure = FALSE)
-plot(ret)
-
-plot(out)
-
-# Pollock
