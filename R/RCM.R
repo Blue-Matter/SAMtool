@@ -604,16 +604,17 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   } else {
     map_s_vul_par <- dots$map_s_vul_par
   }
-
-  log_F_start <- matrix(0, nyears, nfleet)
-  if(data$condition == "catch") log_F_start[TMB_data_all$yind_F + 1, 1:nfleet] <- log(0.5 * mean(TMB_data_all$M[nyears, ]))
-
+  
   TMB_params <- list(R0x = ifelse(TMB_data_all$nll_C | data$condition == "catch2", log(StockPars$R0[x] * rescale), 0),
                      transformed_h = transformed_h, vul_par = vul_par, s_vul_par = s_vul_par,
-                     log_q_effort = rep(log(0.1), nfleet), log_F = log_F_start,
+                     log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
                      log_F_equilibrium = rep(log(0.05), nfleet),
                      log_CV_msize = log(data$MS_cv), log_tau = log(StockPars$procsd[x]),
                      log_early_rec_dev = rep(0, n_age - 1), log_rec_dev = rep(0, nyears))
+  if(data$condition == "catch") {
+    TMB_params$log_F_dev[TMB_data_all$yind_F + 1, 1:nfleet] <- log(0.5 * mean(TMB_data_all$M[nyears, ]))
+  }
+  
 
   map <- list()
   if(data$condition == "effort" && !TMB_data_all$nll_C) map$R0x <- factor(NA)
@@ -630,7 +631,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   } else {
     map$log_F_equilibrium <- factor(rep(NA, nfleet))
   }
-  if(data$condition != "catch") map$log_F <- factor(matrix(NA, nyears, nfleet))
+  if(data$condition != "catch") map$log_F_dev <- factor(matrix(NA, nyears, nfleet))
   map$log_CV_msize <- factor(rep(NA, nfleet))
 
   if(is.null(dots$map_log_early_rec_dev)) {
@@ -768,7 +769,7 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
 
   if(obj$env$data$condition == "catch") {
 
-    par[names(par) == "log_F" | names(par) == "log_F_equilibrium"] <- log(1e-8)
+    par[names(par) == "log_F_dev" | names(par) == "log_F_equilibrium"] <- log(1e-8)
     out <- obj$report(par)$E
 
   } else if(obj$env$data$condition == "catch2") {
@@ -980,11 +981,11 @@ RCM_retro_subset <- function(yr, data, params, map) {
 
   # Update F
   if(data_out$condition == "catch") {
-    params_out$log_F <- params_out$log_F[1:yr, , drop = FALSE]
+    params_out$log_F_dev <- params_out$log_F_dev[1:yr, , drop = FALSE]
 
     if(any(data_out$yind_F + 1 > yr)) {
       data_out$yind_F <- as.integer(0.5 * yr)
-      params_out$log_F[data_out$yind_F + 1, ] <- params$log_F[data$yind_F + 1, ]
+      params_out$log_F_dev[data_out$yind_F + 1, ] <- params$log_F_dev[data$yind_F + 1, ]
     }
   }
 

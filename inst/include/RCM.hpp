@@ -82,7 +82,7 @@ Type RCM(objective_function<Type> *obj) {
   PARAMETER_MATRIX(vul_par);            // Matrix of vul_par 3 rows and nsel_block columns
   PARAMETER_MATRIX(s_vul_par);          // Matrix of selectivity parameters, 3 rows and nsurvey columns
   PARAMETER_VECTOR(log_q_effort);       // log_q for F when condition = "effort"
-  PARAMETER_MATRIX(log_F);              // log_F_deviations when condition = "catch"
+  PARAMETER_MATRIX(log_F_dev);          // log_F_deviations when condition = "catch"
   PARAMETER_VECTOR(log_F_equilibrium);  // Equilibrium F by fleet when condition != "effort"
 
   PARAMETER_VECTOR(log_CV_msize);       // CV of mean size
@@ -126,8 +126,8 @@ Type RCM(objective_function<Type> *obj) {
     if(condition != "effort" && C_eq(ff)>0) F_equilibrium(ff) = exp(log_F_equilibrium(ff));
     if(condition == "effort" && E_eq(ff)>0) F_equilibrium(ff) = q_effort(ff) * E_eq(ff);
     if(condition == "catch") {
-      Type tmp = max_F - exp(log_F(yind_F(ff),ff));
-      F(yind_F(ff),ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), exp(log_F(yind_F(ff),ff)));
+      Type tmp = max_F - exp(log_F_dev(yind_F(ff),ff));
+      F(yind_F(ff),ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), exp(log_F_dev(yind_F(ff),ff)));
     }
   }
 
@@ -243,8 +243,8 @@ Type RCM(objective_function<Type> *obj) {
     if(condition == "catch") {
       for(int ff=0;ff<nfleet;ff++) {
         if(y != yind_F(ff)) {
-          Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F(y,ff));
-          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F(y,ff)));
+          Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff));
+          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
         }
       }
     } else if(condition == "catch2") {
@@ -458,7 +458,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(h);
   REPORT(tau);
   if(nll_MS.sum() != 0) REPORT(CV_msize);
-  if(condition == "catch") REPORT(log_F);
+  if(condition == "catch") REPORT(log_F_dev);
   REPORT(F_equilibrium);
   REPORT(vul);
   REPORT(F);
