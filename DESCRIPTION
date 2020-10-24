@@ -11,14 +11,10 @@ Description: Simulation tools for closed-loop simulation are provided for the 'O
   'SAMtool' provides an OM conditioning model, assessment models of varying complexity with standardized reporting, diagnostic tools for evaluating 
   assessments within closed-loop simulation, and helper functions for building more complex operating models and model-based management procedures.
 License: GPL-3
-Depends:
-  R (>= 3.5.0),
-  OMtool
-Imports:
-  MASS, TMB, coda, corpcor, dplyr, gplots, grDevices, graphics, methods, mvtnorm,
-  reshape2, snowfall, stats, utils, abind, rmarkdown
+Depends: R (>= 3.5.0), OMtool
+Imports: TMB, corpcor, dplyr, gplots, grDevices, graphics, methods, mvtnorm, reshape2, snowfall, stats, utils, rmarkdown
 LinkingTo: TMB, RcppEigen
-Suggests: knitr, testthat, r4ss, shiny
+Suggests: knitr, testthat, shiny
 LazyData: yes
 LazyLoad: yes
 RoxygenNote: 7.1.1

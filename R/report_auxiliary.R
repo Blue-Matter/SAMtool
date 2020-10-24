@@ -85,7 +85,7 @@ compare_models <- function(..., label = NULL, color = NULL) {
   invisible()
 }
 
-#' @importFrom graphics matlines
+
 ts_matplot <- function(m, ylab, color, dotted_one = FALSE) {
   m <- t(m)
   x <- matrix(as.numeric(rownames(m)), ncol = ncol(m), nrow = nrow(m))
@@ -791,12 +791,6 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c(
 }
 
 
-
-
-
-
-
-#' @importFrom graphics arrows
 plot_surplus_production <- function(B, B0 = NULL, C, yield_fn = NULL, arrow_size = 0.07, xlab = NULL) {
   old.warning <- options()$warn
   options(warn = -1)

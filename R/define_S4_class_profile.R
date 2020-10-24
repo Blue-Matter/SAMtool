@@ -27,7 +27,6 @@ prof <- setClass("prof", slots = c(Model = "character", Name = "character", Par 
 #' @param ... Miscellaneous. Not used.
 #' @author Q. Huynh
 #' @importFrom reshape2 acast
-#' @importFrom graphics contour
 #' @exportMethod plot
 setMethod("plot", signature(x = "prof", y = "missing"),
           function(x, contour_levels = 20, ...) {

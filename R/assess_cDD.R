@@ -62,8 +62,6 @@
 #' \item \code{cDD}: steep
 #' \item \code{cDD_SS}: steep, CV_Ind, sigmaR
 #' }
-#' @import TMB
-#' @importFrom stats nlminb
 #' @examples
 #' #### Observation-error delay difference model
 #' res <- cDD(Data = OMtool::SimulatedData)
@@ -79,7 +77,6 @@
 #' res <- cDD_SS(Data = SimulatedData, start = list(tau = 0.6))
 #'
 #' @seealso \link{DD_TMB} \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
-#' @useDynLib SAMtool
 #' @export
 cDD <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL, fix_h = TRUE,
                 dep = 1, LWT = NULL, n_itF = 5L, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
@@ -94,9 +91,6 @@ class(cDD) <- "Assess"
 
 #' @rdname cDD
 #' @export
-#' @importFrom TMB MakeADFun
-#' @importFrom stats nlminb
-#' @useDynLib SAMtool
 cDD_SS <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL,
                    fix_h = TRUE, fix_sigma = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL, n_itF = 5L,
                    integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
@@ -108,7 +102,7 @@ cDD_SS <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), rescale = 
 }
 class(cDD_SS) <- "Assess"
 
-
+#' @useDynLib SAMtool
 cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "Ricker"), rescale = "mean1", start = NULL,
                  fix_h = TRUE, fix_sigma = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL, n_itF = 5L,
                  integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),

@@ -176,8 +176,6 @@ SP_Fox <- function(x = 1, Data, ...) {
 class(SP_Fox) <- "Assess"
 
 
-#' @importFrom TMB MakeADFun
-#' @importFrom stats nlminb
 #' @useDynLib SAMtool
 SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1", start = NULL, fix_dep = TRUE, fix_n = TRUE, fix_sigma = TRUE,
                 fix_tau = TRUE, early_dev = c("all", "index"), LWT = NULL, n_seas = 4L, n_itF = 3L,

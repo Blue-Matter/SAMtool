@@ -43,7 +43,7 @@ getclass <- function(x, classy) any(inherits(get(x), classy))
 #' A convenient function to open a web browser with the SAMtool package vignettes
 #' @examples
 #' \dontrun{
-#' SAMtool::userguide()
+#' userguide()
 #' }
 #' @seealso \link[OMtool]{userguide}
 #' @export
@@ -66,7 +66,7 @@ logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) {
 ilogit <- function(x) 1/(1 + exp(-x))
 ilogitm <- function(x) exp(x)/apply(exp(x), 1, sum)
 
-#' @importFrom stats nlminb
+
 optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 1) {
   restart <- as.integer(restart)
   if(is.null(obj$env$random) && use_hessian) h <- obj$he else h <- NULL
@@ -89,7 +89,7 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
   }
 }
 
-#' @importFrom stats optimHess
+
 get_sdreport <- function(obj, opt) {
   if(is.character(opt)) par.fixed <- NULL else par.fixed <- opt$par
   if(is.null(obj$env$random) && !is.character(opt)) h <- obj$he(opt$par) else h <- NULL

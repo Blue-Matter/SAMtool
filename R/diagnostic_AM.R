@@ -93,7 +93,6 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' myMSE <- runMSE(OMtool::testOM, MPs = "DD_MSY")
 #' diagnostic_AM(myMSE)
 #' }
-#' @importFrom graphics layout
 #' @seealso \link{retrospective_AM}
 #' @export
 diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRUE) {

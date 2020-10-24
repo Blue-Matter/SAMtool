@@ -11,7 +11,7 @@ A convenient function to open a web browser with the SAMtool package vignettes
 }
 \examples{
 \dontrun{
-SAMtool::userguide()
+userguide()
 }
 }
 \seealso{

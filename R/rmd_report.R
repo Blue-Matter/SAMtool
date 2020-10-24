@@ -224,7 +224,6 @@ rmd_sel <- function(age, sel, fig.cap) {
     "```\n")
 }
 
-#' @importFrom graphics persp
 rmd_sel_persp <- function(age, sel = "Selectivity", fig.cap = "Perspective plot of selectivity.") {
   age <- vector2char(age)
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
@@ -258,7 +257,6 @@ rmd_assess_resid <- function(par, fig.cap = paste(par, "residuals in log-space."
     "```\n")
 }
 
-#' @importFrom stats qqline qqnorm
 rmd_assess_qq <- function(par, fig.cap) {
   fig.cap2 <- paste("QQ-plot of", fig.cap, "residuals in log-space.")
   c(paste0("```{r, fig.cap=\"", fig.cap2, "\"}"),

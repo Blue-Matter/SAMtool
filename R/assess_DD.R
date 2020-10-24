@@ -72,8 +72,6 @@
 #' \item \code{DD_TMB}: steep
 #' \item \code{DD_SS}: steep, CV_Cat
 #' }
-#' @import TMB
-#' @importFrom stats nlminb
 #' @examples
 #' \donttest{
 #' #### Observation-error delay difference model
@@ -90,7 +88,6 @@
 #' res <- DD_SS(Data = SimulatedData, start = list(tau = 0.3))
 #' }
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
-#' @useDynLib SAMtool
 #' @export
 DD_TMB <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
                    start = NULL, fix_h = TRUE, dep = 1, LWT = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
@@ -105,7 +102,6 @@ class(DD_TMB) <- "Assess"
 
 
 #' @rdname DD_TMB
-#' @useDynLib SAMtool
 #' @export
 DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
                   start = NULL, fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL,
@@ -119,6 +115,7 @@ DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", S
 }
 class(DD_SS) <- "Assess"
 
+#' @useDynLib SAMtool
 DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL,
                 fix_h = TRUE, fix_sd = TRUE, fix_tau = TRUE, dep = 1, LWT = NULL,
                 integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),

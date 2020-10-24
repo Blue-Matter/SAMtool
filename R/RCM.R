@@ -1,5 +1,5 @@
 
-
+#' @importFrom mvtnorm rmvnorm
 RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                     comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,

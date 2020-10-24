@@ -217,7 +217,6 @@ Probs<-function(indPPD,indData,alpha=0.05,removedat=FALSE,removethresh=0.05){
 #' @param plotCC Logical, should the PPD cross correlations be plotted?
 #' @param removedat Logical, should data not contributing to the mahalanobis distance be removed?
 #' @param removethresh Positive fraction: the cumulative percentage of removed data (removedat=TRUE) that contribute to the mahalanobis distance
-#' @importFrom MASS cov.mcd
 #' @importFrom corpcor pseudoinverse
 #' @return A list object with two hierarchies of indexing, first by MP, second has two positions as described in \link{Probs}: (1) mahalanobis distance, (2) a matrix of type 1 error
 #' (first row) and statistical power (second row), by time block.

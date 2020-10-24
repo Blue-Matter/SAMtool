@@ -273,7 +273,6 @@ plot_yield_SP <- function(data = NULL, report, fmsy, msy, xaxis = c("F", "Biomas
 #' @note May be useful for parameterizing \code{n} in \link{SP} and \link{SP_SS}.
 #' @examples SP_production(0.5)
 #' @return The production function exponent n (numeric).
-#' @importFrom stats uniroot
 #' @examples
 #' SP_production(0.5)
 #' @seealso \link{SP} \link{SP_SS}
