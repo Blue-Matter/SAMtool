@@ -3,7 +3,7 @@
 #'
 #' Function operator that combines a function of class \code{Assess} and a function of
 #' class \code{HCR} to create a management procedure (MP). The resulting function
-#' can then be tested in closed-loop simulation via \code{\link[OMtool]{runMSE}}.
+#' can then be tested in closed-loop simulation via \code{\link[MSEtool]{runMSE}}.
 #'
 #' @param .Assess Assessment model, a function of class \code{Assess}.
 #' @param .HCR Harvest control rule, a function of class \code{HCR}.
@@ -27,7 +27,7 @@
 #' DD_Ricker <- make_MP(DD_TMB, HCR_MSY, SR = "Ricker")
 #'
 #' \dontrun{
-#' myMSE <- OMtool::runMSE(OMtool::testOM, MPs = c("FMSYref", "DD_40_10"))
+#' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 #' 
 #' diagnostic_AM(myMSE)
 #' }
@@ -105,7 +105,7 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("none", "min", "full"), ...) {
 #' avail("MP", all_avail = FALSE)
 #'
 #' \dontrun{
-#' myMSE <- DLMtool::runMSE(DLMtool::testOM, MPs = c("FMSYref", "SCA_MSY", "SCA_4010"))
+#' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_MSY", "SCA_4010"))
 #' }
 #' @return An object of class \linkS4class{Rec} which contains the management recommendation.
 NULL

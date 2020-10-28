@@ -669,11 +669,11 @@ check_OM_for_sampling <- function(OM, data) {
     }
   }
   Iobs <- OM@Iobs
-  OM <- Replace(OM, OMtool::Generic_Obs, silent = TRUE)
+  OM <- Replace(OM, MSEtool::Generic_Obs, silent = TRUE)
   OM@Iobs <- Iobs
 
   ###### Imp
-  OM <- Replace(OM, OMtool::Perfect_Imp, silent = TRUE)
+  OM <- Replace(OM, MSEtool::Perfect_Imp, silent = TRUE)
 
   return(OM)
 }

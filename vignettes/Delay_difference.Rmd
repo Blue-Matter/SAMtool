@@ -54,17 +54,17 @@ options(width = 650)
 
 # Introduction
 
-In MSEtool, assessment models are of class `Assess`. This appendix provides a brief description and references for the `Assess` objects. Further details regarding parameterization, e.g., fixing parameters, and tuning, e.g., adjusting start parameters, are provided in the function documentation.
+In SAMtool, assessment models are of class `Assess`. This appendix provides a brief description and references for the `Assess` objects. Further details regarding parameterization, e.g., fixing parameters, and tuning, e.g., adjusting start parameters, are provided in the function documentation.
 
 For LaTeX equation rendering, it is recommended that this vignette be viewed in a HTML browser. This can be done with the `browseVignettes` function in R:
 
 ```{r, eval = FALSE}
-browseVignettes("MSEtool")
+browseVignettes("SAMtool")
 ```
 
 # Delay Difference (DD_TMB) Model
 
-There has been a rich history of development for the delay difference model for catch and index data. For the formulation used in MSEtool, the most relevant citations are Chapter 9 of Hilborn and Walters (1992) and Carruthers et al. (2012).
+There has been a rich history of development for the delay difference model for catch and index data. For the formulation used in SAMtool, the most relevant citations are Chapter 9 of Hilborn and Walters (1992) and Carruthers et al. (2012).
 
 ## Growth
 Growth in weight-at-age $w_a$ follows the recursive Ford-Brody equation:
@@ -75,7 +75,7 @@ Parameter $\tilde\alpha$ is solved in the limiting case where $w_a = w_{a-1} = W
 $$\tilde\alpha = W_{\infty}(1 - \rho). $$
 Substitution of equation 3 into equation 1 solves for $\rho$, 
 $$\rho = \dfrac{w_a - W_{\infty}}{w_{a-1} - W_{\infty}}.$$
-In MSEtool, $a = k+2$ is arbitrarily chosen to calculate $\rho$, where $k$ is the age of knife-edge selectivity. From catch and effort data alone, the age corresponding to the length of 50% maturity is chosen for $k$.
+In SAMtool, $a = k+2$ is arbitrarily chosen to calculate $\rho$, where $k$ is the age of knife-edge selectivity. From catch and effort data alone, the age corresponding to the length of 50% maturity is chosen for $k$.
 
 ## Dynamics equations
 The population biomass $B_t$ and abundance $N_t$ in year $t$ is given by

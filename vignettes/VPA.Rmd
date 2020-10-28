@@ -54,12 +54,12 @@ options(width = 650)
 
 # Introduction
 
-In MSEtool, assessment models are of class `Assess`. This appendix provides a brief description and references for the `Assess` objects. Further details regarding parameterization, e.g., fixing parameters, and tuning, e.g., adjusting start parameters, are provided in the function documentation.
+In SAMtool, assessment models are of class `Assess`. This appendix provides a brief description and references for the `Assess` objects. Further details regarding parameterization, e.g., fixing parameters, and tuning, e.g., adjusting start parameters, are provided in the function documentation.
 
 For LaTeX equation rendering, it is recommended that this vignette be viewed in a HTML browser. This can be done with the `browseVignettes` function in R:
 
 ```{r, eval = FALSE}
-browseVignettes("MSEtool")
+browseVignettes("SAMtool")
 ```
 
 # Virtual Population Analysis (VPA)

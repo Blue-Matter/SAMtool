@@ -15,5 +15,5 @@ userguide()
 }
 }
 \seealso{
-\link[OMtool]{userguide}
+\link[MSEtool]{userguide}
 }

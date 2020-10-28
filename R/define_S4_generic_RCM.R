@@ -4,7 +4,7 @@
 #' @aliases RCM RCM,OM,list-method RCM,OM,Data-method
 #' @title Rapid Conditioning Model (RCM)
 #'
-#' @description Intended for conditioning operating models for DLMtool. For data-limited stocks, this function can generate a range of potential depletion scenarios inferred from sparse data.
+#' @description Intended for conditioning operating models for MSEtool. For data-limited stocks, this function can generate a range of potential depletion scenarios inferred from sparse data.
 #' From a historical time series of total catch or effort, and potentially age/length compositions and multiple indices of abundance, the RCM returns a range of values for depletion, selectivity,
 #' unfished recruitment (R0), historical fishing effort, and recruitment deviations for the operating model. This is done by sampling life history parameters
 #' provided by the user and fitting a statistical catch-at-age model (with the predicted catch equal to the observed catch).

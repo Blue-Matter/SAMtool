@@ -7,7 +7,7 @@
 diagnostic_AM(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRUE)
 }
 \arguments{
-\item{MSE}{An object of class MSE created by \code{\link[DLMtool]{runMSE}}. If no MSE object
+\item{MSE}{An object of class MSE created by \code{\link[MSEtool]{runMSE}}. If no MSE object
 is available, use argument \code{MP} instead.}
 
 \item{MP}{A character vector of MPs with assessment models.}
@@ -34,7 +34,7 @@ DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
 show(DD_MSY)
 
 ##### Ensure that PPD = TRUE in runMSE function
-myMSE <- runMSE(OMtool::testOM, MPs = "DD_MSY")
+myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
 diagnostic_AM(myMSE)
 }
 }

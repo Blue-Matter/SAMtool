@@ -136,7 +136,7 @@ for the assessment.}
 
 \examples{
 \donttest{
-output <- DD_TMB(Data = OMtool::SimulatedData)
+output <- DD_TMB(Data = MSEtool::SimulatedData)
 class(output)
 }
 }

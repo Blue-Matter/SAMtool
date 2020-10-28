@@ -6,7 +6,7 @@
 #' @param MSE An object of class \linkS4class{MSE}.
 #' @param sim Integer between 1 and MSE@@nsim. The simulation number for which the retrospectives will be plotted.
 #' @param MP Character. The name of the management procedure created by \code{\link{make_MP}} containing the asssessment model.
-#' @param Hist Optional. The list containing historical data for the MSE, created by \code{\link[OMtool]{runMSE}} with argument \code{Hist = TRUE}.
+#' @param Hist Optional. The list containing historical data for the MSE, created by \code{\link[MSEtool]{runMSE}} with argument \code{Hist = TRUE}.
 #' Currently only used to plot operating model vulnerable biomass in historical period.
 #' @param plot_legend Logical. Whether to plot legend to reference year of assessment in the MSE.
 #' @author Q. Huynh
@@ -21,8 +21,8 @@
 #' @examples
 #' \dontrun{
 #' DD_MSY <- makeMP(DD_TMB, HCR_MSY, diagnostic = "full")
-#' Hist <- OMtool::runMSE(Hist = TRUE)
-#' myMSE <- OMtool::runMSE(MPs = "DD_MSY")
+#' Hist <- MSEtool::runMSE(Hist = TRUE)
+#' myMSE <- MSEtool::runMSE(MPs = "DD_MSY")
 #' retrospective_AM(myMSE, sim = 1, MP = "DD_MSY")
 #' retrospective_AM(myMSE, sim = 1, MP = "DD_MSY", Hist = Hist)
 #' }

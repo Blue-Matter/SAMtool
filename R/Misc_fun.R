@@ -1,42 +1,45 @@
-#' What objects of this class are available
-#'
-#' Generic class finder
-#'
-#' Finds objects of the specified class in the global environment or in the
-#' SAMtool and OMtool packages. This function is an addendum to the \code{\link[OMtool]{avail}}
-#' function in DLMtool.
-#'
-#' @param classy A class of object (character string, e.g. 'Fleet')
-#' @param all_avail Logical. If TRUE, function will return all objects of class \code{classy} available to user.
-#' If FALSE, returns only those objects included in OMtool.
-#' @author Q. Huynh
-#' @examples
-#' avail("Assess")
-#' avail("HCR")
-#' avail("Stock")
-#' avail("MP")
-#' avail("MP", all_avail = FALSE)
-#' @export
-avail <- function(classy, all_avail = TRUE) {
-  temp <- try(class(classy), silent = TRUE)
-  if(class(temp) == "try-error") classy <- deparse(substitute(classy))
-  if(temp == "function") classy <- deparse(substitute(classy))
 
-  temp <- ls("package:SAMtool")[vapply(ls("package:SAMtool"), getclass, logical(1), classy = classy)]
-
-  if(all_avail) {
-    temp_globalenv <- ls(envir = .GlobalEnv)[vapply(ls(envir = .GlobalEnv), getclass, logical(1), classy = classy)]
-    temp <- c(temp, temp_globalenv)
-
-    temp_OMtool <- try(OMtool::avail(classy), silent = TRUE)
-    if(!inherits(temp_OMtool, "try-error")) temp <- unique(c(temp, temp_OMtool)) %>% sort()
-  }
-
-  if(length(temp) < 1) stop("No objects of class '", classy, "' found", call. = FALSE)
-  return(temp)
-}
-
-getclass <- function(x, classy) any(inherits(get(x), classy))
+# Now in MSEtool 
+# 
+# #' What objects of this class are available
+# #'
+# #' Generic class finder
+# #'
+# #' Finds objects of the specified class in the global environment or in the
+# #' SAMtool and MSEtool packages. This function is an addendum to the \code{\link[MSEtool]{avail}}
+# #' function in MSEtool.
+# #'
+# #' @param classy A class of object (character string, e.g. 'Fleet')
+# #' @param all_avail Logical. If TRUE, function will return all objects of class \code{classy} available to user.
+# #' If FALSE, returns only those objects included in MSEtool.
+# #' @author Q. Huynh
+# #' @examples
+# #' avail("Assess")
+# #' avail("HCR")
+# #' avail("Stock")
+# #' avail("MP")
+# #' avail("MP", all_avail = FALSE)
+# #' @export
+# avail <- function(classy, all_avail = TRUE) {
+#   temp <- try(class(classy), silent = TRUE)
+#   if(class(temp) == "try-error") classy <- deparse(substitute(classy))
+#   if(temp == "function") classy <- deparse(substitute(classy))
+# 
+#   temp <- ls("package:SAMtool")[vapply(ls("package:SAMtool"), getclass, logical(1), classy = classy)]
+# 
+#   if(all_avail) {
+#     temp_globalenv <- ls(envir = .GlobalEnv)[vapply(ls(envir = .GlobalEnv), getclass, logical(1), classy = classy)]
+#     temp <- c(temp, temp_globalenv)
+# 
+#     temp_MSEtool <- try(MSEtool::avail(classy), silent = TRUE)
+#     if(!inherits(temp_MSEtool, "try-error")) temp <- unique(c(temp, temp_MSEtool)) %>% sort()
+#   }
+# 
+#   if(length(temp) < 1) stop("No objects of class '", classy, "' found", call. = FALSE)
+#   return(temp)
+# }
+# 
+# getclass <- function(x, classy) any(inherits(get(x), classy))
 
 #' Get the SAMtool vignettes
 #'
@@ -45,11 +48,11 @@ getclass <- function(x, classy) any(inherits(get(x), classy))
 #' \dontrun{
 #' userguide()
 #' }
-#' @seealso \link[OMtool]{userguide}
+#' @seealso \link[MSEtool]{userguide}
 #' @export
 userguide <- function() {
-  #message("For the DLMtool user guide, type in \"DLMtool::userguide()\" to the console.")
-  browseVignettes("OMtool")
+  #message("For the MSEtool user guide, type in \"MSEtool::userguide()\" to the console.")
+  browseVignettes("MSEtool")
 }
 
 

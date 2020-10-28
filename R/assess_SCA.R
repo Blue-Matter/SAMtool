@@ -17,7 +17,7 @@
 #' See details for parameterization.
 #' @param CAA_dist Whether a multinomial or lognormal distribution is used for likelihood of the catch-at-age matrix. See details.
 #' @param CAA_multiplier Numeric for data weighting of catch-at-age matrix if \code{CAA_hist = "multinomial"}. Otherwise ignored. See details.
-#' @param I_type Whether the index surveys population biomass (B; this is the default in the DLMtool operating model),
+#' @param I_type Whether the index surveys population biomass (B; this is the default in the MSEtool operating model),
 #' vulnerable biomass (VB), or spawning stock biomass (SSB).
 #' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
 #' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
@@ -130,8 +130,8 @@
 #' Research 48:967-980.
 #'
 #' @examples
-#' res <- SCA(Data = OMtool::SimulatedData)
-#' res2 <- SCA2(Data = OMtool::SimulatedData)
+#' res <- SCA(Data = MSEtool::SimulatedData)
+#' res2 <- SCA2(Data = MSEtool::SimulatedData)
 #'
 #' compare_models(res, res2)
 #'

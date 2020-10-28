@@ -149,11 +149,11 @@ violated tends to be the biggest driver of performance for this method.
 \examples{
 \donttest{
 #### Observation-error delay difference model
-res <- DD_TMB(Data = OMtool::SimulatedData)
+res <- DD_TMB(Data = MSEtool::SimulatedData)
 
 # Provide starting values
 start <- list(R0 = 1000, h = 0.95)
-res <- DD_TMB(Data = OMtool::SimulatedData, start = start)
+res <- DD_TMB(Data = MSEtool::SimulatedData, start = start)
 
 summary(res@SD) # Parameter estimates
 

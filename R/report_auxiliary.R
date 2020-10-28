@@ -11,9 +11,9 @@
 #' @author Q. Huynh
 #' @return A set of figures of biomass, recruitment, and fishing mortality estimates among the models.
 #' @examples
-#' res <- cDD_SS(Data = OMtool::SimulatedData)
-#' res2 <- SCA(Data = OMtool::SimulatedData)
-#' res3 <- SCA2(Data = OMtool::SimulatedData)
+#' res <- cDD_SS(Data = MSEtool::SimulatedData)
+#' res2 <- SCA(Data = MSEtool::SimulatedData)
+#' res3 <- SCA2(Data = MSEtool::SimulatedData)
 #'
 #' compare_models(res, res2, res3)
 #' @importFrom gplots rich.colors

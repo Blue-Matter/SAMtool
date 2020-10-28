@@ -64,11 +64,11 @@
 #' }
 #' @examples
 #' #### Observation-error delay difference model
-#' res <- cDD(Data = OMtool::SimulatedData)
+#' res <- cDD(Data = MSEtool::SimulatedData)
 #'
 #' # Provide starting values
 #' start <- list(R0 = 1000, h = 0.95)
-#' res <- cDD(Data = OMtool::SimulatedData, start = start)
+#' res <- cDD(Data = MSEtool::SimulatedData, start = start)
 #'
 #' summary(res@@SD) # Parameter estimates
 #'
