@@ -1,5 +1,5 @@
 ---
-title: "1. User guide to MSEtool and model-based MPs"
+title: "1. User guide to SAMtool and model-based MPs"
 subtitle: "Development, testing, and implementation of model-based management procedures"
 author: "Quang Huynh (<q.huynh@oceans.ubc.ca>), Tom Carruthers (<t.carruthers@oceans.ubc.ca>), 
          Adrian Hordyk (<a.hordyk@oceans.ubc.ca>)"
@@ -9,7 +9,7 @@ output:
     toc: true
     number_sections: true 
 vignette: >
-  %\VignetteIndexEntry{1. User guide to MSEtool and model-based MPs}
+  %\VignetteIndexEntry{1. User guide to SAMtool and model-based MPs}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -44,7 +44,7 @@ pre { /* Code block */
 
 
 ```{r, echo = FALSE, include = FALSE}
-library(MSEtool)
+library(SAMtool)
 ```
 
 ```{r set options, echo = FALSE}
@@ -57,39 +57,39 @@ options(width = 650)
 
 
 # Introduction 
-MSEtool is an extension of the DLMtool package for implementing closed-loop simulation testing of management procedures, a process often referred to as management strategy evaluation (MSE). The components of the operating model for conducting MSEs for data-rich stocks is wholly contained within DLMtool, but MSEtool provides the tools for implementing additional features to facilitate model-based management procedures (MPs). Whereas DLMtool is primarily designed for testing data-limited management procedures, MSEtool provides an object-oriented framework for creating data-rich MPs which typically combine an assessment model with a harvest control rule to provide a catch recommendation. Management procedures created by MSEtool are designed to be used with the operating model of DLMtool through the `runMSE` function. 
+SAMtool is an extension of the MSEtool package for implementing closed-loop simulation testing of management procedures, a process often referred to as management strategy evaluation (MSE). The components of the operating model for conducting MSEs for data-rich stocks is wholly contained within MSEtool, but SAMtool provides the tools for implementing additional features to facilitate model-based management procedures (MPs). Whereas MSEtool is primarily designed for testing data-limited management procedures, SAMtool provides an object-oriented framework for creating data-rich MPs which typically combine an assessment model with a harvest control rule to provide a catch recommendation. Management procedures created by SAMtool are designed to be used with the operating model of MSEtool through the `runMSE` function. 
 
-The user guide to the DLMtool package is accessible via:
+The user guide to the MSEtool package is accessible via:
 
 ```{r, eval = FALSE}
-DLMtool::userguide()
+MSEtool::userguide()
 ```
 
-The overall structure of a closed-loop simulation for a MSE in DLMtool can be described through the classes deployed in the package. An operating model (class __OM__ object) parameterizes the stock (biology), fleet, observation, and implementation dynamics of the MSE. To begin the MSE, the __OM__ object generates the data to be used for a management procedure and stores them in an object of class __Data__. A function of class __MP__ uses the __Data__ object and returns an object of class __Rec__ containing the management recommendations, e.g., some combination of spatial closures and size, effort and catch limits. From the management recommendations, the __OM__ object is updated and the process is successively repeated as the operating model progresses over time. The output for the closed-loop simulation is returned in an object of class __MSE__, from which summary statistics can be calculated.
+The overall structure of a closed-loop simulation for a MSE in MSEtool can be described through the classes deployed in the package. An operating model (class __OM__ object) parameterizes the stock (biology), fleet, observation, and implementation dynamics of the MSE. To begin the MSE, the __OM__ object generates the data to be used for a management procedure and stores them in an object of class __Data__. A function of class __MP__ uses the __Data__ object and returns an object of class __Rec__ containing the management recommendations, e.g., some combination of spatial closures and size, effort and catch limits. From the management recommendations, the __OM__ object is updated and the process is successively repeated as the operating model progresses over time. The output for the closed-loop simulation is returned in an object of class __MSE__, from which summary statistics can be calculated.
 
-<img src="fig_assess/DLMtool_design.png" width=400>
+<img src="fig_assess/MSEtool_design.png" width=400>
 
-_Figure 1: Design of DLMtool package for management strategy evaluations_
+_Figure 1: Design of MSEtool package for management strategy evaluations_
 
-## Overview of MSEtool
+## Overview of SAMtool
 
-To facilitate a standardized design for data-rich MPs, MSEtool creates new classes to build out the __MP__ class. MSEtool uses functions of class __Assess__ and __HCR__ for an assessment model and harvest control rule, respectively. An __MP__ class function can be made from these functions to be tested in a MSE within the DLMtool framework. 
+To facilitate a standardized design for data-rich MPs, SAMtool creates new classes to build out the __MP__ class. SAMtool uses functions of class __Assess__ and __HCR__ for an assessment model and harvest control rule, respectively. An __MP__ class function can be made from these functions to be tested in a MSE within the MSEtool framework. 
 
 Additionally, __Assess__ functions can be used in an assessment-only context (external to management strategy evaluations). Output of an __Assess__ function can be used to provide standardized stock assessment reporting and diagnostics, such as Kobe plots, likelihood profiles for parameter estimates, and retrospective analyses of time series estimates of biomass, fishing mortality, recruitment, etc.
 
-<img src="fig_assess/MSEtool_design.png" width=690>
+<img src="fig_assess/SAMtool_design.png" width=690>
 
-_Figure 2: Design of MSEtool package for building management procedures from assessment models and harvest control rules for management strategy evaluations with the DLMtool package. Assess and HCR functions and the Assessment object are unique to MSEtool, but work within the framework of DLMtool objects. Separate functions are also available for standardized reporting of output from assessment models in a stock assessment setting._
+_Figure 2: Design of SAMtool package for building management procedures from assessment models and harvest control rules for management strategy evaluations with the MSEtool package. Assess and HCR functions and the Assessment object are unique to SAMtool, but work within the framework of MSEtool objects. Separate functions are also available for standardized reporting of output from assessment models in a stock assessment setting._
 
 
 ### Additional features
-MSEtool provides functions for converting the results of assessment models into DLMtool __OM__ and __Data__ objects. The `SS2OM` and `SS2Data` functions convert SS (Stock Synthesis) assessments, while `iSCAM2OM` and `iSCAM2Data` functions are provided for iSCAM assessments. 
+SAMtool provides functions for converting the results of assessment models into MSEtool __OM__ and __Data__ objects. The `SS2OM` and `SS2Data` functions convert SS (Stock Synthesis) assessments, while `iSCAM2OM` and `iSCAM2Data` functions are provided for iSCAM assessments. 
 
 To support multiple-area operating models, the `simmov` function estimates the movement matrix based on the prescribed number of areas, biomass distribution among areas in unfished conditions, and the probability of staying in each area in the next time step.
 
 # Assessment models
 
-Assessment models in MSEtool are functions of class __Assess__. Currently, the following assessment functions are available: 
+Assessment models in SAMtool are functions of class __Assess__. Currently, the following assessment functions are available: 
 
 - `DD_TMB` (Delay-Difference model and its state-space counterpart, `DD_SS`)
 - `cDD` (Continuous Delay-Differential model and its state-space counterpart, `cDD_SS`)
@@ -114,7 +114,7 @@ class?Assessment
 Descriptions of the __Assess__ functions are provided in a separate vignettes:
 
 ```{r, eval = FALSE}
-browseVignettes("MSEtool")
+browseVignettes("SAMtool")
 ```
 
 ## Reporting and diagnostic functions
@@ -138,12 +138,12 @@ _Figure 3: Joint profile of R0 and steepness from Delay-Difference assessment mo
 
 # Harvest control rules (HCRs)
 
-Harvest control rules in MSEtool are functions of class __HCR__, and are designed to provide different for a given assessment model. __HCR__ functions take an object of class __Assessment__ and return an object of class __Rec__. Currently, three __HCR__ functions are available as output controls (catch limits): HCR_MSY, HCR40_10, and HCR60_20. HCR_MSY prescribes the TAC to be the catch predicted with fishing at the estimated $F_{MSY}$, i.e., the product of $F_{MSY}$ and estimated vulnerable biomass, while HCR40_10 and HCR60_20 are ramped control rules which reduce the $F_{MSY}$ catch limit based on spawning depletion $SSB/SSB_0$.
+Harvest control rules in SAMtool are functions of class __HCR__, and are designed to provide different for a given assessment model. __HCR__ functions take an object of class __Assessment__ and return an object of class __Rec__. Currently, three __HCR__ functions are available as output controls (catch limits): HCR_MSY, HCR40_10, and HCR60_20. HCR_MSY prescribes the TAC to be the catch predicted with fishing at the estimated $F_{MSY}$, i.e., the product of $F_{MSY}$ and estimated vulnerable biomass, while HCR40_10 and HCR60_20 are ramped control rules which reduce the $F_{MSY}$ catch limit based on spawning depletion $SSB/SSB_0$.
 
 ```{r, echo = FALSE, fig.width = 5, fig.height = 4}
 par(mar = c(5,5,3,1))
 Brel <- seq(0, 1, length.out = 200)
-plot(Brel, MSEtool::HCRlin(Brel, 0.1, 0.4), xlab = expression(Estimated~~SSB/SSB[0]), ylab = "TAC adjustment factor \n(proportion of FMSY catch)", main = "40-10 harvest control rule", type = "l", col = "blue")
+plot(Brel, SAMtool::HCRlin(Brel, 0.1, 0.4), xlab = expression(Estimated~~SSB/SSB[0]), ylab = "TAC adjustment factor \n(proportion of FMSY catch)", main = "40-10 harvest control rule", type = "l", col = "blue")
 abline(v = c(0.1, 0.4), col = "red", lty = 2)
 ```
 
@@ -153,18 +153,18 @@ _Figure 4: The 40-10 harvest control rule prescribes an additional reduction in 
 
 ## Creating MPs from assessment models and HCRs
 
-MSEtool comes with a set of pre-built data-rich MPs:
+SAMtool comes with a set of pre-built data-rich MPs:
 ```{r}
 avail("MP", all_avail = FALSE)
 ```
 These MPs use an assessment model and a harvest control rule to come up with a management recommendation (TAC).
 
-Additionally, the `make_MP` function is a convenient way to stitch together additional MPs from an assessment model and HCR. This is handy if an assessment model with a different configuration than the default is needed (for example, specify dome vulnerability instead of logistic vulnerability in `SCA`) or a different harvest control rule is desired. The resulting function can then be passed to `DLMtool::runMSE()` as a management procedure.
+Additionally, the `make_MP` function is a convenient way to stitch together additional MPs from an assessment model and HCR. This is handy if an assessment model with a different configuration than the default is needed (for example, specify dome vulnerability instead of logistic vulnerability in `SCA`) or a different harvest control rule is desired. The resulting function can then be passed to `MSEtool::runMSE()` as a management procedure.
 
 ```{r, eval = FALSE}
 DD_MSY <- make_MP(DD_TMB, HCR_MSY, ...)
 DD_4010 <- make_MP(DD_TMB, HCR40_10)
-myMSE <- DLMtool::runMSE(OM = DLMtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_4010"))
+myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_4010"))
 Tplot2(myMSE)
 ```
 
@@ -187,7 +187,7 @@ Three functions are designed to evaluate the performance of __Assess__ models in
 `prelim_AM` is designed to evaluate the configuration of the assessment model before running the closed-loop simulation. Given an operating model, this function generates data from the historical period of the MSE, applies the assessment model to those data, then returns the convergence rate of the model. A list of __Assessment__ objects are returned and can be used for troubleshooting. Additional arguments are passed to the __Assess__ function via `...`:
 
 ```{r, eval = FALSE}
-prelim_AM(DLMtool::testOM, DD_TMB, ...)
+prelim_AM(MSEtool::testOM, DD_TMB, ...)
 #> Generating Hist object from OM object via runMSE:
 #> Loading operating model
 #> Optimizing for user-specified movement
@@ -197,7 +197,7 @@ prelim_AM(DLMtool::testOM, DD_TMB, ...)
 #> Calculating B-low reference points
 #> Calculating reference yield - best fixed F strategy
 #> Returning historical simulations
-#> Running DD_TMB with 48 simulations for DLMtool::testOM.
+#> Running DD_TMB with 48 simulations for MSEtool::testOM.
 #> Assessments complete.
 #> Total time to run 48 assessments: 1.2 seconds
 #> 2 of 48 simulations (4.2%) did not converge.
@@ -223,17 +223,17 @@ retrospective_AM(myMSE, sim = 1, MP = "DD_MSY")
 ```
 <img src="fig_assess/DD_diagnostic_AM.png">
 
-_Figure 6. Convergence diagnostics (return by TMB objects and nlminb function) for the DD_MSY MP during the MSE. Here, the assessment model was applied beginning in year 50 of the MSE and repeated every 4th year. In MSEtool, convergence is defined by a positive-definite Hessian matrix (top left figure). In the case of non-convergence, the previous management recommendation is used._
+_Figure 6. Convergence diagnostics (return by TMB objects and nlminb function) for the DD_MSY MP during the MSE. Here, the assessment model was applied beginning in year 50 of the MSE and repeated every 4th year. In SAMtool, convergence is defined by a positive-definite Hessian matrix (top left figure). In the case of non-convergence, the previous management recommendation is used._
 
 <img src="fig_assess/DD_retrospective_AM.png">
 
 _Figure 7. Retrospective analysis of the Delay-Difference model in the DD_MSY MP during the MSE for simulation #1. Operating model (true) values of spawning biomass (SSB), relative spawning biomass (SSB_SSBMSY), spawning biomass depletion (SSB_SSB0), fishing mortality (F), relative F (F_FMSY), and vulnerable bimoass (VB) are in dark black. Colored lines indicate model estimates sequentially over the projection years. Note that this assessment model assumes the vulnerable biomass to be the spawning biomass._
 
-Once it is determined that the MSEtool assessment models are performing adequately (no major convergence issues), then the performance of the MPs that use these models can be evaluated within the DLMtool package.
+Once it is determined that the SAMtool assessment models are performing adequately (no major convergence issues), then the performance of the MPs that use these models can be evaluated within the MSEtool package.
 
 ## Obtaining management recommendations
 
-Like all other output MPs, `DLMtool::TAC()` can be used to obtain a catch limit:
+Like all other output MPs, `MSEtool::TAC()` can be used to obtain a catch limit:
 ```{r, eval = FALSE}
 DD_MSY <- make_MP(DD_TMB, HCR_MSY)
 DD_4010 <- make_MP(DD_TMB, HCR40_10)
@@ -247,8 +247,8 @@ _Figure 8. Stochastic TAC recommendations from the Delay-Difference model with t
 
 # Acknowledgements
 
-MSEtool development is funded by the Canadian Department of Fisheries and Oceans and benefits from ongoing collaborations with the Natural Resources Defense Council and number of Canadian government scientists including Robyn Forrest, Sean Anderson and Daniel Duplisea. 
+SAMtool development is funded by the Canadian Department of Fisheries and Oceans and benefits from ongoing collaborations with the Natural Resources Defense Council and number of Canadian government scientists including Robyn Forrest, Sean Anderson and Daniel Duplisea. 
 
-The [DLMtool](https://www.datalimitedtoolkit.org/) package was developed at the University of British Columbia in collaboration with the Natural Resources Defense Council. DLMtool development has been funded by the Gordon and Betty Moore Foundation, the Packard Foundation, U.S. National Oceanic and Atmospheric Administration, Fisheries and Oceans Canada, the Walton Foundation, Resources Legacy Fund, the Natural Resources Defense Council, the United Nations Food and Agricultural Organization and the California Department of Fish and Wildlife. 
+The [MSEtool](https://www.datalimitedtoolkit.org/) package was developed at the University of British Columbia in collaboration with the Natural Resources Defense Council. MSEtool development has been funded by the Gordon and Betty Moore Foundation, the Packard Foundation, U.S. National Oceanic and Atmospheric Administration, Fisheries and Oceans Canada, the Walton Foundation, Resources Legacy Fund, the Natural Resources Defense Council, the United Nations Food and Agricultural Organization and the California Department of Fish and Wildlife. 
 
-<a href="https://www.datalimitedtoolkit.org/"><img src="DLMtool_logo.png" width=250></a>
+<a href="https://www.datalimitedtoolkit.org/"><img src="MSEtool_logo.png" width=250></a>

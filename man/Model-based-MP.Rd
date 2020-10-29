@@ -91,6 +91,6 @@ and default arguments for configuring \link{SP}.
 avail("MP", all_avail = FALSE)
 
 \dontrun{
-myMSE <- DLMtool::runMSE(DLMtool::testOM, MPs = c("FMSYref", "SCA_MSY", "SCA_4010"))
+myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_MSY", "SCA_4010"))
 }
 }

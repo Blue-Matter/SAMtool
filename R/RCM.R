@@ -123,7 +123,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
     } else {
 
       message("\nFitting model (", nsim, " simulations) ...")
-      if(cores > 1 && !snowfall::sfIsRunning()) OMtool::setup(as.integer(cores))
+      if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
       if(snowfall::sfIsRunning()) {
         mod <- snowfall::sfClusterApplyLB(1:nsim, RCM_est, data = data, selectivity = sel, s_selectivity = s_sel,
                                           SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,

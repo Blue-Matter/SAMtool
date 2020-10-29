@@ -51,7 +51,7 @@ options(width = 650)
 ```
 
 ```{r echo = FALSE}
-OM <- DLMtool::testOM
+OM <- MSEtool::testOM
 data <- list()
 
 vul_par_easy <- matrix(c(55, 30, 1, 55, 30, 0.5, 20, 19, 0.9), 3, 3)

@@ -1,6 +1,6 @@
 #' Stock Assessment Methods Toolkit 
 #'
-#' Simulation tools for closed-loop simulation are provided for the 'OMtool' operating model to inform data-rich fisheries. 
+#' Simulation tools for closed-loop simulation are provided for the 'MSEtool' operating model to inform data-rich fisheries. 
 #' SAMtool provides an OM conditioning model, assessment models of varying complexity with standardized reporting, diagnostic tools for evaluating 
 #' assessments within closed-loop simulation, and helper functions for building more complex operating models and model-based management procedures.
 #'
@@ -13,7 +13,7 @@
 #' @section How to use SAMtool:
 #' The main features of SAMtool are the assessment models and the ability to make model-based management procedures by combining
 #' assessment models with harvest control rules. Such MPs can be used and tested in management strategy evaluation
-#' with OMtool operating models. An overview of these features is available in the \href{../doc/SAMtool.html}{SAMtool vignette}.
+#' with MSEtool operating models. An overview of these features is available in the \href{../doc/SAMtool.html}{SAMtool vignette}.
 #'
 #' The following assessment models are available:
 #' \itemize{

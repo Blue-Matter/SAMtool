@@ -14,7 +14,7 @@
 #' @author Q. Huynh
 #' @examples
 #' \dontrun{
-#' prelim_AM(OMtool::testOM, DD_TMB)
+#' prelim_AM(MSEtool::testOM, DD_TMB)
 #' }
 #' @export
 prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
@@ -33,7 +33,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
   }
 
   if(is.numeric(ncpus) && !snowfall::sfIsRunning()) {
-    OMtool::setup(cpus = ncpus)
+    MSEtool::setup(cpus = ncpus)
     on.exit(snowfall::sfStop())
   }
   nsim <- nrow(Data@Cat)
@@ -73,7 +73,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' Assess models write output to the DLMenv environment if the MP was created with \link{make_MP}
 #' with argument \code{diagnostic = TRUE}. This function summarizes and plots the diagnostic information.
 #'
-#' @param MSE An object of class MSE created by \code{\link[DLMtool]{runMSE}}. If no MSE object
+#' @param MSE An object of class MSE created by \code{\link[MSEtool]{runMSE}}. If no MSE object
 #' is available, use argument \code{MP} instead.
 #' @param MP A character vector of MPs with assessment models.
 #' @param gradient_threshold The maximum magnitude (absolute value) desired for the gradient of the likelihood.
@@ -90,18 +90,20 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' show(DD_MSY)
 #'
 #' ##### Ensure that PPD = TRUE in runMSE function
-#' myMSE <- runMSE(OMtool::testOM, MPs = "DD_MSY")
+#' myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
 #' diagnostic_AM(myMSE)
 #' }
 #' @seealso \link{retrospective_AM}
 #' @export
 diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRUE) {
   if(!inherits(MSE, "MSE")) stop("No object of class MSE was provided.")
+
   #if(packageVersion("DLMtool") >= 5.3) {
   #  if(length(MSE@Misc$Data) == 0) stop("Nothing found in MSE@Misc$Data. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
   #} else {
   #  if(length(MSE@Misc) == 0) stop("Nothing found in MSE@Misc. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
   #}
+
 
   if(figure) {
     old_par <- par(no.readonly = TRUE)

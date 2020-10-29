@@ -17,6 +17,6 @@ A list of parameters.
 Returns a summary of parameter estimates and output from an \linkS4class{Assessment} object.
 }
 \examples{
-output <- DD_TMB(Data = OMtool::SimulatedData)
+output <- DD_TMB(Data = MSEtool::SimulatedData)
 summary(output)
 }

@@ -25,7 +25,7 @@ the convergence rate for the model and total time elapsed in running the assessm
 }
 \examples{
 \dontrun{
-prelim_AM(OMtool::testOM, DD_TMB)
+prelim_AM(MSEtool::testOM, DD_TMB)
 }
 }
 \author{

@@ -1,6 +1,6 @@
 
 
-#' @import OMtool
+#' @import MSEtool
 #' @import TMB
 #' @import graphics
 #' @import stats
@@ -85,7 +85,7 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' @slot dependencies A character string of data types required for the assessment.
 #' @examples
 #' \donttest{
-#' output <- DD_TMB(Data = OMtool::SimulatedData)
+#' output <- DD_TMB(Data = MSEtool::SimulatedData)
 #' class(output)
 #' }
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
@@ -119,7 +119,7 @@ Assessment <- setClass("Assessment",
 #' @param object An object of class \linkS4class{Assessment}
 #' @return A list of parameters.
 #' @examples
-#' output <- DD_TMB(Data = OMtool::SimulatedData)
+#' output <- DD_TMB(Data = MSEtool::SimulatedData)
 #' summary(output)
 #' @exportMethod summary
 setMethod("summary", signature(object = "Assessment"), function(object) {

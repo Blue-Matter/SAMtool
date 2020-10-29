@@ -164,8 +164,8 @@ OM: Yellowfin_Tuna_IO_IOTC
 
 snowfall 1.84-6.1 initialized (using snow 0.4-2): parallel execution on 12 CPUs.
 
-Library MSEtool loaded.
-Library MSEtool loaded in cluster.
+Library SAMtool loaded.
+Library SAMtool loaded in cluster.
 
 Running SCA with 100 simulations for Data.
 Error in checkForRemoteErrors(val) :

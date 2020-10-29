@@ -38,7 +38,7 @@ For the following assessment models, possible sequence of values for profiling a
 }
 \examples{
 \donttest{
-output <- DD_TMB(Data = OMtool::SimulatedData)
+output <- DD_TMB(Data = MSEtool::SimulatedData)
 
 # Profile R0 only
 pro <- profile(output, R0 = seq(100, 300, 10))

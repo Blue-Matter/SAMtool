@@ -1,5 +1,5 @@
 ---
-title: "2. Description of the SRA model for conditioning DLMtool operating models"
+title: "2. Description of the SRA model for conditioning MSEtool operating models"
 author: "Quang Huynh (<q.huynh@oceans.ubc.ca>)"
 date: "`r Sys.Date()`"
 output:
@@ -7,7 +7,7 @@ output:
     toc: true
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{2. Description of the SRA model for conditioning DLMtool operating models}
+  %\VignetteIndexEntry{2. Description of the SRA model for conditioning MSEtool operating models}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---
@@ -65,11 +65,11 @@ In this context, we don't look at point estimates, but rather try to reduce the 
 Consider two extreme scenarios. If the productivity or unfished stock size is too low, then the modeled population would crash while trying to explain the observed catches over time. On the other hand, if the productivity or unfished stock size is too high, then the observed catches are tiny in relation to the population, and implies still unfished conditions despite the observed fishing history. Finding a suitable range of parameters is akin to "threading the needle" in order to avoid these two extreme scenarios.
 
 
-# Stock Reduction Analysis (SRA) for conditioning DLMtool operating models
+# Stock Reduction Analysis (SRA) for conditioning MSEtool operating models
 
-The stock reduction paradigm can be quite useful for informing the historical scenarios in a DLMtool operating model. Suppose that we are unsure about how to specify certain life history parameters, e.g. steepness. For other life history parameters such as growth, we may be more certain or we prefer to incorporate uncertainty in other parameters. With some data, we can try to fit an age-structured model that estimates historical depletion (spawning biomass in the last year of the historical period relative to that when fishing started), recruitment, and fishing mortality that are consistent with the specified parameter values. 
+The stock reduction paradigm can be quite useful for informing the historical scenarios in a MSEtool operating model. Suppose that we are unsure about how to specify certain life history parameters, e.g. steepness. For other life history parameters such as growth, we may be more certain or we prefer to incorporate uncertainty in other parameters. With some data, we can try to fit an age-structured model that estimates historical depletion (spawning biomass in the last year of the historical period relative to that when fishing started), recruitment, and fishing mortality that are consistent with the specified parameter values. 
 
-In MSEtool, `SRA_scope()` will be the main function for scoping historical scenarios for an operating model `OM`. `SRA_scope` takes an operating model, data, in order to run the SRA and then returns a list with an updated OM and predicted outputs from the SRA. All model configurations for the SRA will also be specified through arguments passed through `SRA_scope`.
+In SAMtool, `SRA_scope()` will be the main function for scoping historical scenarios for an operating model `OM`. `SRA_scope` takes an operating model, data, in order to run the SRA and then returns a list with an updated OM and predicted outputs from the SRA. All model configurations for the SRA will also be specified through arguments passed through `SRA_scope`.
 
 The approach can be stochastic (with Monte Carlo sampling) if the operating model is specified as such. For example, steepness is highly uncertain, then one could specify a range of values, for example, between 0.6 and 0.9 with a uniform distribution, in an operating model:
 ```{r, eval = FALSE}
@@ -135,7 +135,7 @@ The easiest way to turn off time-varying growth and M is to set:
 OM@Linfsd <- OM@Ksd <- OM@Msd <- c(0, 0)
 ```
 
-Information about the slots in the OM object can be viewed through `class?OM`. If passing custom objects to the operating model that override default inputs (e.g., for time-varying parameters), then `DLMtool::validcpars()` will be helpful for setting up and indexing the dimensions of the custom objects.
+Information about the slots in the OM object can be viewed through `class?OM`. If passing custom objects to the operating model that override default inputs (e.g., for time-varying parameters), then `MSEtool::validcpars()` will be helpful for setting up and indexing the dimensions of the custom objects.
 
 ## Data-limited cases 
 
@@ -160,9 +160,9 @@ The SRA model will estimate and return R0 when conditioned on catch. When condit
 
 Additionally, if multiple fleets are used for conditioning, then the annual selectivity can change based on the relative F among fleets. In this case, the annual selectivity is passed from the OM output in the `OM@cpars$V` slot. The default assumption in the projection period of the closed-loop simulation is that the selectivity and relative F among fleets are identical to those in the last historical year. Fleet allocation in management procedures can be explored in `multiMSE`, see `vignette("multiMSE")`.
 
-Life history parameters used in the SRA reconstruction will be also passed to `OM@cpars` to ensure reproducibility. Time-varying parameters affect calculation of reference points, mostly importantly unfished depletion. In `SRA_scope` (and DLMtool), depletion is the ratio of the spawning biomass in the terminal year and the unfished spawning biomass in the first year of the model. In this sense, depletion used to describe changes in the stock since fishing began. If life-history parameter are time-varying, then this definition may not necessarily reflect a management target.
+Life history parameters used in the SRA reconstruction will be also passed to `OM@cpars` to ensure reproducibility. Time-varying parameters affect calculation of reference points, mostly importantly unfished depletion. In `SRA_scope` (and MSEtool), depletion is the ratio of the spawning biomass in the terminal year and the unfished spawning biomass in the first year of the model. In this sense, depletion used to describe changes in the stock since fishing began. If life-history parameter are time-varying, then this definition may not necessarily reflect a management target.
 
-The relative effort provided in the output is the apical F from the SRA. When running the management strategy evaluation with `DLMtool::runMSE()`, the apical F may be re-scaled to ensure that specified depletion has been reached at the beginning and end of the historical period. For simple operating models, i.e. those with conditions identical to the SRA, the apical F's in the MSE should be nearly identical to those from the SRA. To confirm that this is the case, one can run the `plot` function on output returned by `SRA_scope`:
+The relative effort provided in the output is the apical F from the SRA. When running the management strategy evaluation with `MSEtool::runMSE()`, the apical F may be re-scaled to ensure that specified depletion has been reached at the beginning and end of the historical period. For simple operating models, i.e. those with conditions identical to the SRA, the apical F's in the MSE should be nearly identical to those from the SRA. To confirm that this is the case, one can run the `plot` function on output returned by `SRA_scope`:
 
 ```{r, eval = FALSE}
 output <- SRA_scope(...)
@@ -177,7 +177,7 @@ This function returns a markdown report with:
 - Fits to an additional run of the SRA model to mean life history values among simulations (only when `SRA_scope(..., mean_fit = TRUE)` is run)
 - Comparisons of the historical period of the updated OM to the estimated SRA output
 
-Currently, it is possible to create a more complex operating model than the SRA model itself. For example, discard mortality, movement, and spatial targetting are currently not modeled in the SRA. It is assumed that the catch in the SRA are all known sources of removal, i.e. landings plus discards. The SRA is a single area model, whereas DLMtool uses a multiple-area model. A simple operating model that best matches the SRA model may have the following configurations:
+Currently, it is possible to create a more complex operating model than the SRA model itself. For example, discard mortality, movement, and spatial targetting are currently not modeled in the SRA. It is assumed that the catch in the SRA are all known sources of removal, i.e. landings plus discards. The SRA is a single area model, whereas MSEtool uses a multiple-area model. A simple operating model that best matches the SRA model may have the following configurations:
 
 ```{r, eval = FALSE}
 OM@DR <- c(0, 0) # All discards are accounted for

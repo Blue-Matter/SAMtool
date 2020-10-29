@@ -100,7 +100,7 @@ See details for parameterization.}
 
 \item{CAA_multiplier}{Numeric for data weighting of catch-at-age matrix if \code{CAA_hist = "multinomial"}. Otherwise ignored. See details.}
 
-\item{I_type}{Whether the index surveys population biomass (B; this is the default in the DLMtool operating model),
+\item{I_type}{Whether the index surveys population biomass (B; this is the default in the MSEtool operating model),
 vulnerable biomass (VB), or spawning stock biomass (SSB).}
 
 \item{rescale}{A multiplicative factor that rescales the catch in the assessment model, which
@@ -252,8 +252,8 @@ for example, when vulnerability >> 0.5 for the youngest age class.
 }
 
 \examples{
-res <- SCA(Data = OMtool::SimulatedData)
-res2 <- SCA2(Data = OMtool::SimulatedData)
+res <- SCA(Data = MSEtool::SimulatedData)
+res2 <- SCA2(Data = MSEtool::SimulatedData)
 
 compare_models(res, res2)
 
