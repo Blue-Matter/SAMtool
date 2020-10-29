@@ -16,7 +16,7 @@ Type SCA2(objective_function<Type> *obj) {
   DATA_MATRIX(CAA_hist);  // Catch-at-age proportions
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
   DATA_INTEGER(n_y);      // Number of years in model
-  DATA_INTEGER(max_age);  // Maximum age (plus-group)
+  DATA_INTEGER(n_age);    // Maximum age (plus-group)
   DATA_VECTOR(M);         // Natural mortality at age
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
@@ -31,7 +31,7 @@ Type SCA2(objective_function<Type> *obj) {
   PARAMETER(F_equilibrium);
   PARAMETER_VECTOR(vul_par);
 
-  PARAMETER_VECTOR(logF);
+  PARAMETER_VECTOR(log_F_dev);
 
   PARAMETER(log_omega);
   PARAMETER(log_sigma);
@@ -49,22 +49,22 @@ Type SCA2(objective_function<Type> *obj) {
   Type prior = 0.;
 
   // Vulnerability
-  vector<Type> vul(max_age);
+  vector<Type> vul(n_age);
   if(vul_type == "logistic") {
-    vul = calc_logistic_vul(vul_par, max_age, prior);
+    vul = calc_logistic_vul(vul_par, n_age, prior);
   } else {
-    vul = calc_dome_vul(vul_par, max_age, prior);
+    vul = calc_dome_vul(vul_par, n_age, prior);
   }
 
   ////// During time series year = 1, 2, ..., n_y
-  matrix<Type> N(n_y+1, max_age);   // Numbers at year and age
-  matrix<Type> CAApred(n_y, max_age);   // Catch (in numbers) at year and age at the mid-point of the season
+  matrix<Type> N(n_y+1, n_age);   // Numbers at year and age
+  matrix<Type> CAApred(n_y, n_age);   // Catch (in numbers) at year and age at the mid-point of the season
   vector<Type> CN(n_y);             // Catch in numbers
   vector<Type> Cpred(n_y);
   vector<Type> F(n_y);              // Harvest rate at year
   vector<Type> Ipred(n_y);          // Predicted index at year
   vector<Type> R(n_y+1);            // Recruitment at year
-  vector<Type> R_early(max_age-1);  // Early recruitment (boundary conditions)
+  vector<Type> R_early(n_age-1);  // Early recruitment (boundary conditions)
   vector<Type> VB(n_y+1);           // Vulnerable biomass at year
   vector<Type> B(n_y+1);            // Total biomass at year
   vector<Type> E(n_y+1);            // Spawning biomass at year
@@ -76,11 +76,11 @@ Type SCA2(objective_function<Type> *obj) {
   E.setZero();
 
   // Equilibrium quantities (leading into first year of model)
-  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, M, max_age);
+  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, M, n_age);
 
   R(0) = meanR;
   if(est_rec_dev(0)) R(0) *= exp(log_rec_dev(0) - 0.5 * tau * tau);
-  for(int a=0;a<max_age;a++) {
+  for(int a=0;a<n_age;a++) {
     if(a==0) {
       N(0,a) = R(0) * NPR_equilibrium(a);
     } else {
@@ -94,8 +94,29 @@ Type SCA2(objective_function<Type> *obj) {
   }
 
   // Loop over all other years
-  F(yindF) = exp(logF(yindF));
+  F(yindF) = exp(log_F_dev(yindF));
   for(int y=0;y<n_y;y++) {
+    // Calculate this year's F
+    if(y != yindF) {
+      Type Ftmp = F(yindF) * exp(log_F_dev(y));
+      F(y) = CppAD::CondExpLt(3 - Ftmp, Type(0), 3 - posfun(3 - Ftmp, Type(0), penalty), Ftmp);
+    }
+    
+    // Calculate this year's catch, CAA, and next year's abundance and SSB (ex. age-0)
+    for(int a=0;a<n_age;a++) {
+      Type meanN = N(y,a) * (1 - exp(-vul(a) * F(y) - M(a))) / (vul(a) * F(y) + M(a));
+      CAApred(y,a) = vul(a) * F(y) * meanN;
+      if(a<n_age-1) {
+        N(y+1,a+1) = N(y,a) * exp(-vul(a) * F(y) - M(a));
+      } else {
+        N(y+1,a) += N(y,a) * exp(-vul(a) * F(y) - M(a));
+      }
+      CN(y) += CAApred(y,a);
+      Cpred(y) += CAApred(y,a) * weight(a);
+      E(y+1) += N(y+1,a) * weight(a) * mat(a);
+    }
+    
+    // Calculate next year's recruitment, total biomass, and vulnerable biomass
     if(y<n_y-1) {
       R(y+1) = meanR;
       if(est_rec_dev(y+1)) R(y+1) *= exp(log_rec_dev(y+1) - 0.5 * tau * tau);
@@ -103,37 +124,22 @@ Type SCA2(objective_function<Type> *obj) {
       R(y+1) = R(y);
     }
     N(y+1,0) = R(y+1);
-
-    if(y != yindF) {
-      Type Ftmp = F(yindF) * exp(logF(y));
-      Type tmp2 = 3 - Ftmp;
-      F(y) = CppAD::CondExpLt(tmp2, Type(0), 3 - posfun(tmp2, Type(0), penalty), Ftmp);
-    }
-
-    for(int a=0;a<max_age;a++) {
-      Type meanN = N(y,a) * (1 - exp(-vul(a) * F(y) - M(a))) / (vul(a) * F(y) + M(a));
-      CAApred(y,a) = vul(a) * F(y) * meanN;
-      if(a<max_age-1) N(y+1,a+1) = N(y,a) * exp(-vul(a) * F(y) - M(a));
-      if(a==max_age-1) N(y+1,a) += N(y,a) * exp(-vul(a) * F(y) - M(a));
-      CN(y) += CAApred(y,a);
-      Cpred(y) += CAApred(y,a) * weight(a);
+    
+    for(int a=0;a<n_age;a++) {
       B(y+1) += N(y+1,a) * weight(a);
       VB(y+1) += N(y+1,a) * weight(a) * vul(a);
-      E(y+1) += N(y+1,a) * weight(a) * mat(a);
     }
   }
 
   // Calculate nuisance parameters and likelihood
+  // Ipred updated in calc_q function
   Type q;
   if(I_type == "B") {
-    q = calc_q(I_hist, B);
-    for(int y=0;y<n_y;y++) Ipred(y) = q * B(y);
+    q = calc_q(I_hist, B, Ipred);
   } else if(I_type == "VB") {
-    q = calc_q(I_hist, VB);
-    for(int y=0;y<n_y;y++) Ipred(y) = q * VB(y);
+    q = calc_q(I_hist, VB, Ipred);
   } else {
-    q = calc_q(I_hist, E);
-    for(int y=0;y<n_y;y++) Ipred(y) = q * E(y);
+    q = calc_q(I_hist, E, Ipred);
   }
 
   vector<Type> nll_comp(4);
@@ -142,8 +148,8 @@ Type SCA2(objective_function<Type> *obj) {
     if(!R_IsNA(asDouble(I_hist(y)))) nll_comp(0) -= dnorm(log(I_hist(y)), log(Ipred(y)), sigma, true);
     if(C_hist(y) > 0) {
       if(!R_IsNA(asDouble(CAA_n(y)))) {
-        vector<Type> loglike_CAAobs(max_age);
-        vector<Type> loglike_CAApred(max_age);
+        vector<Type> loglike_CAAobs(n_age);
+        vector<Type> loglike_CAApred(n_age);
         loglike_CAApred = CAApred.row(y)/CN(y);
         loglike_CAAobs = CAA_hist.row(y);
         if(CAA_dist == "multinomial") {
@@ -157,7 +163,7 @@ Type SCA2(objective_function<Type> *obj) {
     }
     if(est_rec_dev(y)) nll_comp(3) -= dnorm(log_rec_dev(y), Type(0), tau, true);
   }
-  for(int a=0;a<max_age-1;a++) {
+  for(int a=0;a<n_age-1;a++) {
     if(est_early_rec_dev(a)) nll_comp(3) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
   }
 

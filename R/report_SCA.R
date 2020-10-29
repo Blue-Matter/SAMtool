@@ -7,7 +7,7 @@ summary_SCA <- function(Assessment, SCA2 = FALSE) {
   current_status <- data.frame(Value = current_status)
   rownames(current_status) <- c("F/FMSY", "SSB/SSBMSY", "SSB/SSB0")
 
-  Value <- c(h, info$data$M[1], info$data$max_age, info$LH$Linf, info$LH$K, info$LH$t0,
+  Value <- c(h, info$data$M[1], info$data$n_age - 1, info$LH$Linf, info$LH$K, info$LH$t0,
              info$LH$a * info$LH$Linf ^ info$LH$b, info$LH$A50, info$LH$A95)
   Description = c("Stock-recruit steepness", "Natural mortality", "Maximum age (plus-group)", "Asymptotic length", "Growth coefficient",
                   "Age at length-zero", "Asymptotic weight", "Age of 50% maturity", "Age of 95% maturity")
@@ -32,7 +32,7 @@ summary_SCA <- function(Assessment, SCA2 = FALSE) {
 
   model_estimates <- sdreport_int(SD)
   if(!is.character(model_estimates)) {
-    rownames(model_estimates)[rownames(model_estimates) == "logF"] <- paste0("logF_", names(FMort))
+    rownames(model_estimates)[rownames(model_estimates) == "log_F_"] <- paste0("log_F_dev_", names(FMort))
     rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(FMort)[as.logical(obj$env$data$est_rec_dev)])
   }
 
@@ -47,7 +47,7 @@ rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
   ss <- rmd_summary(paste("Statistical Catch-at-Age", ifelse(SCA2, "(SCA2)", "(SCA)")))
 
   # Life History
-  age <- 1:Assessment@info$data$max_age
+  age <- 0:(Assessment@info$data$n_age - 1)
   LH_section <- c(rmd_LAA(age, Assessment@info$LH$LAA, header = "## Life History\n"), rmd_WAA(age, Assessment@info$LH$WAA),
                   rmd_LW(Assessment@info$LH$LAA, Assessment@info$LH$WAA),
                   rmd_mat(age, Assessment@info$data$mat,
@@ -82,13 +82,15 @@ rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
   # Productivity
   Arec <- Assessment@TMB_report$Arec
   Brec <- Assessment@TMB_report$Brec
-  SSB <- Assessment@SSB[1:(length(Assessment@SSB)-1)]
+  SSB <- Assessment@SSB
 
   SR <- ifelse(SCA2, Assessment@info$SR, Assessment@info$data$SR_type)
-  if(SR == "BH") expectedR <- Arec * SSB / (1 + Brec * SSB) else {
+  if(SR == "BH") {
+    expectedR <- Arec * SSB / (1 + Brec * SSB)
+  } else {
     expectedR <- Arec * SSB * exp(-Brec * SSB)
   }
-  estR <- Assessment@R[as.numeric(names(Assessment@R)) > Assessment@info$Year[1]]
+  estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
 
   productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
                     rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
@@ -164,7 +166,7 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
   dimnames(retro_ts) <- list(Peel = 0:nyr, Year = Year, Var = TS_var)
 
   SD_nondev <- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev"
-                           & rownames(summary(SD)) != "logF", ]
+                           & rownames(summary(SD)) != "log_F_dev", ]
   retro_est <- array(NA, dim = c(nyr+1, dim(SD_nondev)))
   dimnames(retro_est) <- list(Peel = 0:nyr, Var = rownames(SD_nondev), Value = c("Estimate", "Std. Error"))
 
@@ -175,7 +177,7 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
     if(info$data$yindF + 1 > n_y_ret) {
       info_old <- info
       info$data$yindF <- as.integer(0.5 * n_y_ret)
-      info$params$logF[info$data$yindF + 1] <- info_old$params$logF[info_old$data$yindF + 1]
+      info$params$log_F_dev[info$data$yindF + 1] <- info_old$params$log_F_dev[info_old$data$yindF + 1]
     }
 
     info$data$C_hist <- info$data$C_hist[1:n_y_ret]
@@ -185,14 +187,14 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]
 
     info$params$log_rec_dev <- rep(0, n_y_ret)
-    info$params$logF <- info$params$logF[1:n_y_ret]
+    info$params$log_F_dev <- info$params$log_F_dev[1:n_y_ret]
 
     map <- obj$env$map
     if(any(names(map) == "log_rec_dev")) {
       new_map <- as.numeric(map$log_rec_dev) - i
       map$log_rec_dev <- factor(new_map[new_map > 0])
     }
-    if(any(names(map) == "logF")) map$logF <- map$logF[1:n_y_ret]
+    if(any(names(map) == "log_F_dev")) map$log_F_dev <- map$log_F_dev[1:n_y_ret]
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
@@ -203,7 +205,7 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best)
       if(SCA2) {
-        ref_pt <- SCA_refpt_calc(E = report$E[1:(length(report$E) - 1)], R = report$R[2:length(report$R)], M = info$data$M,
+        ref_pt <- SCA_refpt_calc(E = report$E, R = report$R, M = info$data$M,
                                  weight = info$data$weight, mat = info$data$mat, vul = report$vul, SR = info$SR,
                                  fix_h = info$fix_h, h = h)
       } else {
@@ -224,7 +226,7 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
 
       retro_ts[i+1, , ] <<- cbind(FMort, F_FMSY, SSB, SSB_SSBMSY, SSB_SSB0, R, VB)
       retro_est[i+1, , ] <<- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev" &
-                                          rownames(summary(SD)) != "logF", ]
+                                          rownames(summary(SD)) != "log_F_dev", ]
 
       return(SD$pdHess)
     }
@@ -293,7 +295,7 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   M <- data$M
   mat <- data$mat
   weight <- data$weight
-  maxage <- data$max_age
+  n_age <- data$n_age
   SR <- data$SR_type
 
   vul <- report$vul
@@ -308,8 +310,8 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   solveMSY <- function(logF) {
     Fmort <- exp(logF)
     surv <- exp(-vul * Fmort - M)
-    NPR <- c(1, cumprod(surv[1:(maxage-1)]))
-    NPR[maxage] <- NPR[maxage]/(1 - surv[maxage])
+    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
+    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
     EPR <<- sum(NPR * mat * weight)
     if(SR == "BH") Req <<- (Arec * EPR - 1)/(Brec * EPR)
     if(SR == "Ricker") Req <<- log(Arec * EPR)/(Brec * EPR)

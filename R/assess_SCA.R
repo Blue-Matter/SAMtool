@@ -165,11 +165,13 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   start <- lapply(start, eval, envir = environment())
 
   max_age <- as.integer(min(max_age, Data@MaxAge))
+  n_age <- max_age + 1
   vulnerability <- match.arg(vulnerability)
   CAA_dist <- match.arg(CAA_dist)
   SR <- match.arg(SR)
   I_type <- match.arg(I_type)
-  early_dev <- match.arg(early_dev)
+  if(is.character(early_dev)) early_dev <- match.arg(early_dev)
+  if(is.numeric(early_dev)) stopifnot(early_dev < length(Data@Year))
 
   if(any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
@@ -180,10 +182,16 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   Year <- Data@Year[yind]
   C_hist <- Data@Cat[x, yind]
   if(any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
-  I_hist <- Data@Ind[x, yind]
+  if(I_type == "B") {
+    I_hist <- Data@Ind[x, yind]
+  } else if(I_type == "VB") {
+    I_hist <- Data@VInd[x, yind]
+  } else {
+    I_hist <- Data@Sp_Ind[x, yind]
+  }
   Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
-  CAA_hist <- Data@CAA[x, yind, 1:max_age]
-  if(max_age < Data@MaxAge) CAA_hist[, max_age] <- rowSums(Data@CAA[x, yind, max_age:Data@MaxAge], na.rm = TRUE)
+  CAA_hist <- Data@CAA[x, yind, 1:n_age]
+  if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
 
   CAA_n_nominal <- rowSums(CAA_hist)
   if(CAA_multiplier <= 1) {
@@ -191,50 +199,51 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   } else CAA_n_rescale <- pmin(CAA_multiplier, CAA_n_nominal)
 
   n_y <- length(C_hist)
-  M <- rep(Data@Mort[x], max_age)
+  M <- rep(Data@Mort[x], n_age)
   a <- Data@wla[x]
   b <- Data@wlb[x]
   Linf <- Data@vbLinf[x]
   K <- Data@vbK[x]
   t0 <- Data@vbt0[x]
-  La <- Linf * (1 - exp(-K * (c(1:max_age) - t0)))
+  La <- Linf * (1 - exp(-K * (c(0:max_age) - t0)))
   Wa <- a * La ^ b
   A50 <- min(0.5 * max_age, iVB(t0, K, Linf, Data@L50[x]))
   A95 <- max(A50+0.5, iVB(t0, K, Linf, Data@L95[x]))
-  mat_age <- 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50)))
+  mat_age <- c(0, 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50)))) # Age-0 is immature
   mat_age <- mat_age/max(mat_age)
   LH <- list(LAA = La, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
+  
 
   if(early_dev == "all") {
-    est_early_rec_dev <- rep(1, max_age-1)
+    est_early_rec_dev <- rep(1, n_age - 1)
     est_rec_dev <- rep(1, n_y)
-  }
-  if(early_dev == "comp") {
-    est_early_rec_dev <- rep(0, max_age-1)
+  } else if(early_dev == "comp") {
+    est_early_rec_dev <- rep(0, n_age-1)
     ind1 <- which(!is.na(CAA_n_nominal))[1]
     est_rec_dev <- ifelse(1:n_y < ind1, 0, 1)
-  }
-  if(early_dev == "comp_onegen") {
-    ind1 <- which(!is.na(CAA_n_nominal))[1] - max_age
+  } else if(early_dev == "comp_onegen") {
+    ind1 <- which(!is.na(CAA_n_nominal))[1] - n_age
     if(ind1 < 0) {
-      early_start <- max_age + ind1
-      est_early_rec_dev <- rev(ifelse(c(1:(max_age-1)) < early_start, 0, 1))
+      early_start <- n_age + ind1
+      est_early_rec_dev <- rev(ifelse(c(1:(n_age-1)) < early_start, 0, 1))
       est_rec_dev <- rep(1, n_y)
     } else {
-      est_early_rec_dev <- rep(0, max_age-1)
+      est_early_rec_dev <- rep(0, n_age - 1)
       est_rec_dev <- ifelse(1:n_y < ind1, 0, 1)
     }
-  }
-  if(is.numeric(early_dev)) {
+  } else if(is.numeric(early_dev)) {
     if(early_dev > 1) {
-      est_early_rec_dev <- rep(0, max_age-1)
+      est_early_rec_dev <- rep(0, n_age-1)
       est_rec_dev <- ifelse(1:n_y >= early_dev, 1, 0)
     } else {
       ind1 <- early_dev - 1
-      est_early_rec_dev <- c(rep(1, ind1), rep(NA, max_age-ind1-1))
+      est_early_rec_dev <- c(rep(1, ind1), rep(NA, n_age-ind1-1))
       est_rec_dev <- rep(1, n_y)
     }
+  } else {
+    stop("Invalid early_dev argument.")
   }
+  
   if(is.character(late_dev) && late_dev == "comp50") {
     CAA_all <- colSums(CAA_hist, na.rm = TRUE)/max(colSums(CAA_hist, na.rm = TRUE))
     CAA_mode <- which.max(CAA_all)[1]
@@ -251,7 +260,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
                CAA_hist = t(apply(CAA_hist, 1, function(x) x/sum(x))),
-               CAA_n = CAA_n_rescale, n_y = n_y, max_age = max_age, M = M,
+               CAA_n = CAA_n_rescale, n_y = n_y, n_age = n_age, M = M,
                weight = Wa, mat = mat_age, vul_type = vulnerability, I_type = I_type,
                SR_type = SR, CAA_dist = CAA_dist, est_early_rec_dev = est_early_rec_dev,
                est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y))
@@ -295,7 +304,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
       Fstart_ind <- data$yindF + 1
       Fstart[Fstart_ind] <- log(start$F[Fstart_ind])
       Fstart[-Fstart_ind] <- log(start$F[-Fstart_ind]/Fstart[Fstart_ind])
-      params$logF <- Fstart
+      params$log_F_dev <- Fstart
     }
 
     if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega)
@@ -336,10 +345,10 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
     }
   }
   if(is.na(params$vul_par[1])) params$vul_par[1] <- 1
-  if(is.null(params$logF)) {
+  if(is.null(params$log_F_dev)) {
     Fstart <- numeric(n_y)
     Fstart[data$yindF + 1] <- log(0.75 * mean(data$M))
-    params$logF <- Fstart
+    params$log_F_dev <- Fstart
   }
 
   if(is.null(params$log_omega)) {
@@ -354,7 +363,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
     tau_start <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x])
     params$log_tau <- log(tau_start)
   }
-  params$log_early_rec_dev <- rep(0, max_age - 1)
+  params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control,
@@ -363,11 +372,11 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   map <- list()
   if(any(info$data$C_hist <= 0)) {
     ind <- info$data$C_hist <= 0
-    info$params$logF[ind] <- -20
-    map_logF <- length(params$logF)
+    info$params$log_F_dev[ind] <- -20
+    map_logF <- length(params$log_F_dev)
     map_logF[ind] <- NA
     map_logF[!ind] <- 1:sum(!ind)
-    map$logF <- factor(map_logF)
+    map$log_F_dev <- factor(map_logF)
   }
   if(fix_h) map$transformed_h <- factor(NA)
   if(fix_F_equilibrium) map$F_equilibrium <- factor(NA)
@@ -390,7 +399,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   report <- obj$report(obj$env$last.par.best)
 
   Yearplusone <- c(Year, max(Year) + 1)
-  YearEarly <- (Year[1] - max_age + 1):(Year[1] - 1)
+  YearEarly <- (Year[1] - n_age + 1):(Year[1] - 1)
   YearDev <- c(YearEarly, Year)
   YearR <- c(YearDev, max(YearDev) + 1)
   R <- c(rev(report$R_early), report$R)
@@ -412,7 +421,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
                     N = structure(rowSums(report$N), names = Yearplusone),
                     N_at_age = report$N,
                     Selectivity = matrix(report$vul, nrow = length(Year),
-                                         ncol = max_age, byrow = TRUE),
+                                         ncol = n_age, byrow = TRUE),
                     Obs_Catch = structure(C_hist, names = Year),
                     Obs_Index = structure(I_hist, names = Year),
                     Obs_C_at_age = CAA_hist,
@@ -467,13 +476,13 @@ class(SCA) <- "Assess"
 
 SCA_MSY_calc <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
   SR <- match.arg(SR)
-  maxage <- length(M)
+  n_age <- length(M)
 
   solveMSY <- function(logF) {
     Fmort <- exp(logF)
     surv <- exp(-vul * Fmort - M)
-    NPR <- c(1, cumprod(surv[1:(maxage-1)]))
-    NPR[maxage] <- NPR[maxage]/(1 - surv[maxage])
+    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
+    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
     EPR <- sum(NPR * mat * weight)
     if(SR == "BH") Req <- (Arec * EPR - 1)/(Brec * EPR)
     if(SR == "Ricker") Req <- log(Arec * EPR)/(Brec * EPR)
@@ -487,8 +496,8 @@ SCA_MSY_calc <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")
   MSY <- -1 * opt2$objective
 
   surv_MSY <- exp(-vul * FMSY - M)
-  NPR_MSY <- c(1, cumprod(surv_MSY[1:(maxage-1)]))
-  NPR_MSY[maxage] <- NPR_MSY[maxage]/(1 - surv_MSY[maxage])
+  NPR_MSY <- c(1, cumprod(surv_MSY[1:(n_age-1)]))
+  NPR_MSY[n_age] <- NPR_MSY[n_age]/(1 - surv_MSY[n_age])
 
   EPR_MSY <- sum(NPR_MSY * weight * mat)
   if(SR == "BH") RMSY <- (Arec * EPR_MSY - 1)/(Brec * EPR_MSY)
@@ -504,10 +513,10 @@ SCA_MSY_calc <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")
 
 SCA_refpt_calc <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
   # Per-recruit quantities
-  maxage <- length(M)
+  n_age <- length(M)
   surv0 <- exp(-M)
-  NPR0 <- c(1, cumprod(surv0[1:(maxage-1)]))
-  NPR0[maxage] <- NPR0[maxage]/(1 - exp(-M[maxage]))
+  NPR0 <- c(1, cumprod(surv0[1:(n_age-1)]))
+  NPR0[n_age] <- NPR0[n_age]/(1 - exp(-M[n_age]))
   EPR0 <- sum(NPR0 * weight * mat)
 
   # Fit stock-recruit curve

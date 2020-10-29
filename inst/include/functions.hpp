@@ -96,6 +96,22 @@ Type calc_q(vector<Type> I_y, vector<Type> B_y) {
   return q;
 }
 
+template<class Type>
+Type calc_q(vector<Type> I_y, vector<Type> B_y, vector<Type> &Ipred_y) {
+  Type num = 0.;
+  Type n_y = 0.;
+  
+  for(int y=0;y<I_y.size();y++) {
+    if(!R_IsNA(asDouble(I_y(y))) && I_y(y)>0) {
+      num += log(I_y(y)/B_y(y));
+      n_y += 1.;
+    }
+  }
+  Type q = exp(num/n_y);
+  for(int y=0;y<Ipred_y.size();y++) Ipred_y(y) = q * B_y(y);
+  return q;
+}
+
 
 
 template<class Type>

@@ -189,7 +189,6 @@ projection_SCA_internal <- function(FMort = NULL, Catch = NULL, constrain, TMB_r
   vul <- TMB_report$vul
 
   if(constrain == "F") {
-
     if(Pope) {
       Fout <- pmin(FMort, max_F)
       UU <- vul %o% FMort
@@ -213,9 +212,8 @@ projection_SCA_internal <- function(FMort = NULL, Catch = NULL, constrain, TMB_r
   N[1, 1] <- N[1, 1] * p_log_rec_dev[1]
 
   E <- VB <- Cpred <- numeric(length(p_log_rec_dev))
+  E[1] <- sum(N[1, ] * mat * weight)
   for(y in 1:length(p_log_rec_dev)) {
-    E[y] <- sum(N[y, ] * mat * weight)
-
     if(constrain == "Catch") {
       if(Pope) {
         VB[y] <- sum(N[y, ] * exp(-0.5 * TMB_data$M) * vul * weight)
@@ -230,9 +228,11 @@ projection_SCA_internal <- function(FMort = NULL, Catch = NULL, constrain, TMB_r
     }
 
     if(y < length(p_log_rec_dev)) {
-      N[y+1, 1] <- R_pred(E[y], TMB_report$h, TMB_report$R0, TMB_report$E0, TMB_data$SR_type) * p_log_rec_dev[y+1]
       N[y+1, 2:ncol(N)] <- N[y, 1:(ncol(N)-1)] * surv[1:(ncol(N)-1), y]
       N[y+1, ncol(N)] <- N[y+1, ncol(N)] + N[y, ncol(N)] * surv[ncol(N), y]
+      
+      E[y+1] <- sum(N[y+1, ] * mat * weight, na.rm = TRUE)
+      N[y+1, 1] <- R_pred(E[y+1], TMB_report$h, TMB_report$R0, TMB_report$E0, TMB_data$SR_type) * p_log_rec_dev[y+1]
     }
   }
   if(Pope) {

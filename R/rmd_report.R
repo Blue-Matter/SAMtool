@@ -101,7 +101,7 @@ rmd_data_timeseries <- function(type, header = NULL, is_matrix = FALSE, nsets = 
 }
 
 
-rmd_data_age_comps <- function(type = c("bubble", "annual"), ages = "NULL", annual_yscale = "\"proportions\"",
+rmd_data_age_comps <- function(type = c("bubble", "annual"), ages = "0:(info$data$n_age-1)", annual_yscale = "\"proportions\"",
                                annual_ylab = "\"Frequency\"")  {
   type <- match.arg(type)
   if(type == "bubble") {
@@ -314,10 +314,10 @@ rmd_residual <- function(par, se = "NULL", fig.cap, label, conv_check = FALSE, b
     "```\n")
 }
 
-rmd_fit_age_comps <- function(type = c("bubble", "annual"), ages = "NULL", match = FALSE)  {
+rmd_fit_age_comps <- function(type = c("bubble", "annual"), ages = "0:(info$data$n_age-1)", match = FALSE)  {
   type <- match.arg(type)
   if(type == "bubble") {
-    arg <- "\"bubble_residuals\", bubble_adj = 20"
+    arg <- paste("\"bubble_residuals\", bubble_adj = 20, ages =", ages)
     fig.cap = "Pearson residual bubble plot of age compositions (grey bubbles are negative, white are positive)."
   } else {
     arg <- paste("\"annual\", ages =", ages)
@@ -384,13 +384,13 @@ rmd_R <- function() rmd_assess_timeseries("R", "recruitment", "\"Recruitment (R)
 
 rmd_N <- function() rmd_assess_timeseries("N", "abundance", "\"Abundance (N)\"")
 
-rmd_N_at_age <- function() rmd_bubble("c(info$Year, max(info$Year)+1)", "N_at_age", fig.cap = "Abundance-at-age bubble plot.")
+rmd_N_at_age <- function() rmd_bubble("c(info$Year, max(info$Year)+1)", "N_at_age", age = "0:(info$data$n_age-1)", fig.cap = "Abundance-at-age bubble plot.")
 
-rmd_C_at_age <- function() rmd_bubble("info$Year", "C_at_age", fig.cap = "Predicted catch-at-age bubble plot.")
+rmd_C_at_age <- function() rmd_bubble("info$Year", "C_at_age", age = "0:(info$data$n_age-1)", fig.cap = "Predicted catch-at-age bubble plot.")
 
 rmd_C_mean_age <- function() {
   c(paste0("```{r, fig.cap=\"Observed (black) and predicted (red) mean age of the composition data.\"}"),
-    "plot_composition(info$Year, Obs_C_at_age, C_at_age, plot_type = \"mean\")",
+    "plot_composition(info$Year, Obs_C_at_age, C_at_age, ages = 0:(info$data$n_age-1), plot_type = \"mean\")",
     "```\n")
 }
 

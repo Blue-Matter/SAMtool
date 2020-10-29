@@ -7,7 +7,7 @@ summary_SCA_Pope <- function(Assessment) {
   current_status <- data.frame(Value = current_status)
   rownames(current_status) <- c("U/UMSY", "SSB/SSBMSY", "SSB/SSB0")
 
-  Value <- c(h, info$data$M[1], info$data$max_age, info$LH$Linf, info$LH$K, info$LH$t0,
+  Value <- c(h, info$data$M[1], info$data$n_age - 1, info$LH$Linf, info$LH$K, info$LH$t0,
              info$LH$a * info$LH$Linf ^ info$LH$b, info$LH$A50, info$LH$A95)
   Description = c("Stock-recruit steepness", "Natural mortality", "Maximum age (plus-group)", "Asymptotic length", "Growth coefficient",
                   "Age at length-zero", "Asymptotic weight", "Age of 50% maturity", "Age of 95% maturity")
@@ -24,9 +24,10 @@ summary_SCA_Pope <- function(Assessment) {
                   "Vulnerable biomass at MSY", "SSB at MSY", "Spawning depletion at MSY")
   derived <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
   rownames(derived) <- c("VB0", "SSB0", "MSY", "UMSY", "VBMSY", "SSBMSY", "SSBMSY/SSB0")
-
+  
+  model_estimates <- sdreport_int(SD)
   if(!is.character(model_estimates)) {
-    rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(FMort)[as.logical(obj$env$data$est_rec_dev)])
+    rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(U)[as.logical(obj$env$data$est_rec_dev)])
   }
 
   output <- list(model = "Statistical Catch-at-Age (SCA_Pope)",
@@ -40,7 +41,7 @@ rmd_SCA_Pope <- function(Assessment, ...) {
   ss <- rmd_summary("Statistical Catch-at-Age (SCA_Pope)")
 
   # Life History
-  age <- 1:Assessment@info$data$max_age
+  age <- 0:(Assessment@info$data$n_age - 1)
   LH_section <- c(rmd_LAA(age, Assessment@info$LH$LAA, header = "## Life History\n"), rmd_WAA(age, Assessment@info$LH$WAA),
                   rmd_LW(Assessment@info$LH$LAA, Assessment@info$LH$WAA),
                   rmd_mat(age, Assessment@info$data$mat,
@@ -68,13 +69,15 @@ rmd_SCA_Pope <- function(Assessment, ...) {
   # Productivity
   Arec <- Assessment@TMB_report$Arec
   Brec <- Assessment@TMB_report$Brec
-  SSB <- Assessment@SSB[1:(length(Assessment@SSB)-1)]
+  SSB <- Assessment@SSB
 
   SR <- Assessment@info$data$SR_type
-  if(SR == "BH") expectedR <- Arec * SSB / (1 + Brec * SSB) else {
+  if(SR == "BH") {
+    expectedR <- Arec * SSB / (1 + Brec * SSB)
+  } else {
     expectedR <- Arec * SSB * exp(-Brec * SSB)
   }
-  estR <- Assessment@R[as.numeric(names(Assessment@R)) > Assessment@info$Year[1]]
+  estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
 
   productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
                     rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
@@ -171,7 +174,7 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   M <- data$M
   mat <- data$mat
   weight <- data$weight
-  maxage <- data$max_age
+  n_age <- data$n_age
   vul <- report$vul
 
   BMSY <- report$EMSY
@@ -186,8 +189,8 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   solveMSY <- function(logit_U) {
     U <- ilogit(logit_U)
     surv <- exp(-M) * (1 - vul * U)
-    NPR <- c(1, cumprod(surv[1:(maxage-1)]))
-    NPR[maxage] <- NPR[maxage]/(1 - surv[maxage])
+    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
+    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
     EPR <<- sum(NPR * mat * weight)
     if(SR == "BH") Req <<- (Arec * EPR - 1)/(Brec * EPR)
     if(SR == "Ricker") Req <<- log(Arec * EPR)/(Brec * EPR)
