@@ -41,13 +41,13 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
   if(is.na(match_ind)) stop(paste(MP, "MP was not found in the MSE object. Available options are:", paste(MPs, collapse = " ")))
 
   has_Assess_fn <- function(Data) {
-    Misc <- Data@Misc
+    Misc <- Data@Misc[1:MSE@nsim]
     all(vapply(Misc, function(y) any(names(y) == "Assessment_report"), logical(1)))
   }
 
-  has_Assess <- has_Assess_fn(MSE@Misc[[match_ind]])
+  has_Assess <- has_Assess_fn(MSE@Misc$Data[[match_ind]])
   if(!has_Assess) stop("No Assessment objects were found in MSE@Misc for any MP. Use an MP created by 'make_MP(diagnostic = 'full')' and set 'runMSE(PPD = TRUE)'.")
-  Assessment_report <- lapply(MSE@Misc[[match_ind]]@Misc, getElement, "Assessment_report")[[sim]]
+  Assessment_report <- lapply(MSE@Misc$Data[[match_ind]]@Misc[1:MSE@nsim], getElement, "Assessment_report")[[sim]]
   
   color.vec <- rich.colors(length(Assessment_report))
   Yr_MSE <- 1:(MSE@nyears + MSE@proyears)
@@ -61,13 +61,13 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     if(plot_type[i] == "SSB_SSBMSY") {
       ylab <- expression(SSB/SSB[MSY])
 
-      Hist <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]/MSE@OM$SSBMSY[sim]
+      Hist_ts <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]/MSE@OM$SSBMSY[sim]
       Proj <- MSE@B_BMSY[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "SSB_SSBMSY")
     }
     if(plot_type[i] == "F_FMSY") {
       ylab <- expression(F/F[MSY])
-      Hist <- apply(MSE@FM_hist, c(1, 3), max)[sim, ]/MSE@OM$FMSY[sim]
+      Hist_ts <- apply(MSE@FM_hist, c(1, 3), max)[sim, ]/MSE@OM$FMSY[sim]
       Proj <- MSE@F_FMSY[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "F_FMSY")
       if(length(do.call(c, Assess)) == 0) {
@@ -78,13 +78,13 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     }
     if(plot_type[i] == "SSB") {
       ylab <- "SSB"
-      Hist <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]
+      Hist_ts <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]
       Proj <- MSE@SSB[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "SSB")
     }
     if(plot_type[i] == "F") {
       ylab <- "F"
-      Hist <- apply(MSE@FM_hist, c(1, 3), max)[sim, ]
+      Hist_ts <- apply(MSE@FM_hist, c(1, 3), max)[sim, ]
       Proj <- MSE@FM[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "FMort")
       if(length(do.call(c, Assess)) == 0) {
@@ -94,16 +94,16 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     }
     if(plot_type[i] == "SSB_SSB0") {
       ylab <- expression(SSB/SSB[0])
-      Hist <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]/MSE@OM$SSB0[sim]
+      Hist_ts <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]/MSE@OM$SSB0[sim]
       Proj <- MSE@SSB[sim, match_ind, ]/MSE@OM$SSB0[sim]
       Assess <- lapply(Assessment_report, slot, "SSB_SSB0")
     }
     if(plot_type[i] == "VB") {
       ylab <- "Vulnerable biomass"
       if(!is.null(Hist)) {
-        Hist <- Hist@TSdata$VBiomass[sim, , ] %>% rowSums()
+        Hist_ts <- Hist@TSdata$VBiomass[sim, , ] %>% rowSums()
       } else {
-        Hist <- rep(NA, MSE@nyears)
+        Hist_ts <- rep(NA, MSE@nyears)
         message("Provide Hist object in order to plot the historical vulnerable biomass in the operating model.")
       }
       Proj <- MSE@VB[sim, match_ind, ]
@@ -112,15 +112,34 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     if(plot_type[i] == "Recruit") {
       ylab <- "Recruitment"
       if(!is.null(Hist)) {
-        Hist <- Hist@AtAge$Number[sim, 1, , ] %>% rowSums()
+        Hist_ts <- Hist@AtAge$Number[sim, 1, , ] %>% rowSums()
       } else {
-        Hist <- rep(NA, MSE@nyears)
+        Hist_ts <- rep(NA, MSE@nyears)
         message("Provide Hist object in order to plot simulated recruitment in the operating model.")
       }
       Proj <- rep(NA, MSE@proyears)
       Assess <- lapply(Assessment_report, slot, "R")
     }
+    
+    Assess_Yr <- lapply(Assess, function(x) as.numeric(names(x)))
+    xlimits <- c(1, MSE@nyears + MSE@proyears)
+    
+    converged_assessments <- vapply(Assessment_report, slot, logical(1), "conv")
+    ylimits <- c(0, 1.1 * max(c(Hist_ts, Proj, do.call(c, Assess[converged_assessments])), na.rm = TRUE))
+    
+    if(all(!is.na(ylimits))) {
+      plot(Yr_MSE, c(Hist_ts, Proj), xlab = "MSE year", ylab = ylab, xlim = xlimits, ylim = ylimits, lwd = 2, typ = 'l')
+      for(j in length(Assess):1) {
+        if(Assessment_report[[j]]@conv && length(Assess[[j]]) > 0) lines(Assess_Yr[[j]], Assess[[j]], col = color.vec[j])
+      }
+      if(plot_type[i] == "SSB_SSBMSY" || plot_type[i] == "F_FMSY") abline(h = 1)
+      abline(h = 0, col = "grey")
+      abline(v = MSE@nyears, lty = 2)
+      if(plot_legend && i == 1) legend("topleft", c("OM", End_Assess_Yr), col = c("black", color.vec), lwd = c(2, rep(1, length(Assessment_report))))
+    } else {
+      message(paste0("Skipped plot for ", plot_type[i], "."))
+    }
   }
-  title(paste0(MP, " management procedure \n Simulation #", sim), outer = TRUE)
+  title(paste0("Simulation #", sim, " of ", MP, "\n(OM in black, MP in colors)"), outer = TRUE)
   invisible()
 }

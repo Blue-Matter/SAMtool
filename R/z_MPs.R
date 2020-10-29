@@ -34,7 +34,7 @@
 #'
 #' @seealso \link{HCR_ramp} \link{HCR_MSY} \link{diagnostic_AM} \link{retrospective_AM}
 #' @export
-make_MP <- function(.Assess, .HCR, diagnostic = c("none", "min", "full"), ...) {
+make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
   diagnostic <- match.arg(diagnostic)
   if(is.character(.Assess)) {
     Assess_char <- .Assess
