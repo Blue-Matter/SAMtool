@@ -2,6 +2,13 @@ library(SAMtool)
 
 ############ Condition operating models with SRA_scope and data
 SRA_data <- readRDS("tests/Data_files/IYE_data.rds")
+
+SRA_data$s_CAA[!is.na(SRA_data$s_CAA[, 80, 1]), 81, 1] <- 0
+
+saveRDS(SRA_data, file = "tests/Data_files/IYE_data.rds")
+
+
+
 data_names <- c("Chist", "Index", "I_sd", "I_type", "length_bin", "s_CAA", "CAA", "CAL", "I_units")
 data_ind <- match(data_names, names(SRA_data))
 
@@ -37,8 +44,8 @@ NOM <- Hist@AtAge$Number[1, , , ] %>% apply(c(1, 2), sum) %>% t()
 #for(i in 1:length(slotNames(newOM))) if(slotNames(newOM)[i] != "MPA") slot(newOM, slotNames(newOM)[i]) <- slot(args$OM, slotNames(newOM)[i])
 #
 #args$OM <- newOM
-args$OM@DR <- rep(0, 2)
-args$OM@MPA <- FALSE
+#args$OM@DR <- rep(0, 2)
+#args$OM@MPA <- FALSE
 #
 #args$data$CAA <- array(0, c(37, 1, 1)) %>% abind::abind(args$data$CAA, along = 2)
 #args$data$s_CAA <- array(0, c(37, 1, 3)) %>% abind::abind(args$data$s_CAA, along = 2)
@@ -55,15 +62,18 @@ args$OM@MPA <- FALSE
 #saveRDS(args, file = "tests/Data_files/cod_args.rds")
 
 args <- readRDS(file = "tests/Data_files/cod_args.rds")
+args <- readRDS(file = "tests/Data_files/cod_args_MRAMP.rds")
 #args$resample <- TRUE
+
 SRA <- do.call(RCM, args)
 saveRDS(SRA, "tests/Data_files/cod_SRA.rds")
 SRA <- readRDS("tests/Data_files/cod_SRA.rds")
 
-ret <- retrospective(out, 7, figure = FALSE)
+
+ret <- retrospective(SRA, 7, figure = FALSE)
 plot(ret)
 
-plot(out)
+plot(SRA)
 
 Hist <- runMSE(SRA@OM, Hist = TRUE)
 
@@ -75,3 +85,11 @@ View(N - NOM)
 
 plot(N[, 1], typ = 'o')
 lines(NOM[, 1], col = 'red')
+
+plot(N[, 1]/NOM[, 1] - 1)
+
+Hist@Data@Misc$StockPars$R0a
+
+Hist@Data@Misc$StockPars$SSBpR
+
+
