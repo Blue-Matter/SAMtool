@@ -1,6 +1,6 @@
 ---
 title: "1c. Surplus production model"
-author: "Quang Huynh (<q.huynh@oceans.ubc.ca>)"
+author: "Quang Huynh (<quang@bluematterscience.com>)"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
@@ -79,7 +79,7 @@ $$\hat{F}_t = \dfrac{C_t}{\hat{B}_t}.$$
 The dynamics equations above use an annual time step. Optionally, smaller time steps are used in the model to approximate continuous production and fishing. Given the biomass in the start of the year and assuming a constant fishing mortality over the time steps within a year, the fishing mortality that produces the observed annual catch is solved iteratively.
 
 The likelihood of the observed index $I_t$, assuming a lognormal distribution, is
-$$\log(I_t) \sim N(\log[\hat{I}_t], \sigma^2).$$
+$$L = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right).$$
 
 # Derived parameters
 
@@ -107,8 +107,8 @@ In the state-state version, annual biomass deviates are estimated as random effe
 $$B_t = (B_{t-1} + P_{t-1} - C_{t-1})\exp(\delta_t - 0.5 \tau^2),$$
 where $\delta_t \sim N(0, \tau^2)$ are biomass deviations in lognormal space and $\tau$ is the standard deviation of the biomass deviations.
 
-The log-likelihood of the estimated deviations $\hat{\delta}_t$ is
-$$\hat{\delta}_t \sim N(0, \tau^2).$$
+Log-recruitment deviations $\hat{\delta}_t$ are typically estimated as penalized parameters towards the likelihood, with the penalty:
+$$L^{\delta} = \sum_t \left(-\log(\tau) - 0.5\left[\dfrac{\delta_t}{\tau}\right]^2\right).$$
 
 # Prior for r
 To generate the prior for the intrinsic rate of increase, natural mortality $M_a$ and steepness $h$ are sampled from a distribution. Natural mortality is modelled to be age-invariant and is sampled from a lognormal distribution.
@@ -144,7 +144,9 @@ for a Beverton-Holt and Ricker stock-recruit relationship, respectively, where u
 is
 $$\phi_0 = \Sigma_{a=1}^A l_a w_a m_a.$$
 
-A normal distribution is assumed for the prior with the mean and standard deviation calculated from the values of $r$ calculated using the above procedure.
+A normal distribution is assumed for the prior (a penalty to the likelihood) with the mean ($\mu_r$) and standard deviation ($\sigma_r$) calculated from the values of $r$ calculated using the above procedure:
+
+$$L^r = - 0.5\left(\dfrac{\hat{r} - \mu_r}{\sigma_r}\right)^2,$$
 
 # References
 Fletcher, R.I. 1978. On the restructuring of the Pella-Tomlinson system. Fishery Bulletin 76:515-521.

@@ -23,7 +23,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
   if(inherits(x, "Hist")) {
     Data <- x@Data
   } else if(inherits(x, "OM")) {
-    message("Generating Hist object from OM object via runMSE:")
+    message("Generating Hist object from OM via runMSE...")
     runHist <- runMSE(x, Hist = TRUE, silent = TRUE)
     Data <- runHist@Data
   } else if(inherits(x, "Data")) {
@@ -31,7 +31,9 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
   } else {
     stop("x does not appear to be either a Hist, Data, or OM object.")
   }
-
+  
+  Assess_char <- as.character(substitute(Assess))
+  
   if(is.numeric(ncpus) && !snowfall::sfIsRunning()) {
     MSEtool::setup(cpus = ncpus)
     on.exit(snowfall::sfStop())
@@ -45,10 +47,10 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
   if(snowfall::sfIsRunning()) snowfall::sfExport(list = c("Assess", "Data"))
   timing <- proc.time()
   if(snowfall::sfIsRunning()) {
-    message("Running ", deparse(substitute(Assess)), " with ", nsim, " simulations for ", deparse(substitute(x)), " on ", snowfall::sfCpus(), " CPUs.")
+    message("Running ", Assess_char, " with ", nsim, " simulations for ", deparse(substitute(x)), " on ", snowfall::sfCpus(), " CPUs.")
     res <- snowfall::sfClusterApplyLB(1:nsim, Assess, Data = Data, ...)
   } else {
-    message(paste0("Running ", deparse(substitute(Assess)), " with ", nsim, " simulations for ", deparse(substitute(x)), "."))
+    message(paste0("Running ", Assess_char, " with ", nsim, " simulations for ", deparse(substitute(x)), "."))
     res <- lapply(1:nsim, Assess, Data = Data, ...)
   }
   timing2 <- (proc.time() - timing)[3]

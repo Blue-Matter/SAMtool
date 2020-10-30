@@ -1,6 +1,6 @@
 ---
 title: "1b. Statistical catch-at-age (SCA) model"
-author: "Quang Huynh (<q.huynh@oceans.ubc.ca>)"
+author: "Quang Huynh (<quang@bluematterscience.com>)"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
@@ -76,6 +76,7 @@ $$ N_{a,t} =
 $$
 where $R_t$ is the recruitment (age-1), $v_a$ is the vulnerability at age $a$, $F_t$ is the apical fishing mortality rate, $M_a$ is the instantaneous natural mortality rate at age $a$, and $A$ is the maximum age in the model as a plus-group accumulator age.
 
+## Selectivity
 Assuming logistic vulnerability, the vulnerability is:
 $$v_a = \left[1 + \exp\left(-\log(19) \dfrac{a - a_{50}}{a_{95} - a_{50}}\right)\right]^{-1}, $$
 where $a_{50}$ and $a_{95}$ are the estimated ages of 50% and 95% vulnerability, respectively.
@@ -88,8 +89,9 @@ $$ v_a =
       f(a; a_{des}, \sigma_{des}) & a \gt a_{des}
 \end{cases},
 $$
-where $f(a; \mu, \sigma) = \exp(-0.5 (a - \mu)^2/\sigma^2)$ is the normal probability density function scaled to one at $\mu$. Four parameters are estimated: $a_{50}$ the age of 50% vulnerability (ascending limb), $a_{asc}$ the first age of full vulnerability, $a_{des}$ the last age of full vulnerability, and $v_A$ the vulnerability at the maximum age in the model. The $\mu$ and $\sigma$ for both the ascending and descending limbs of the double-normal equation are estimated parameters. From these four parameters, $\sigma_{asc} = \sqrt{(a_{50} - \mu_{asc})^2/\log(4)}$ and $\sigma_{des} = \sqrt{-0.5(A - \mu_{des})^2/\log(v_A)}$ can be derived.
+where $f(a; \mu, \sigma) = \exp(-0.5 (a - \mu)^2/\sigma^2)$ is the normal probability density function scaled to one at $\mu$. Four parameters are estimated: $a_{50}$ the age of 50% vulnerability (ascending limb), $a_{asc}$ the first age of full vulnerability, $a_{des}$ the last age of full vulnerability, and $v_A$ the vulnerability at the maximum age in the model. The $\mu$ and $\sigma$ for both the ascending and descending limbs of the double-normal equation are estimated parameters. From these four parameters, $\sigma_{asc} = \sqrt{(a_{50} - \mu_{asc})^2/\log(4)}$ and $\sigma_{des} = \sqrt{-0.5(A - \mu_{des})^2/\log(v_A)}$ can be derived. The default option sets $a_{asc} = a_{des}$.
 
+## Biomass
 The vulnerable biomass $VB_t$ at the beginning of year $t$ is
 $$VB_t = \sum_{a=1}^A v_a w_a N_{a,t},$$
 where weight-at-age $w_a$ is given by
@@ -101,7 +103,8 @@ where maturity at age $m_a$ is
 $$m_a = \left[1 + \exp\left(-\log(19) \dfrac{a - \tilde{a}_{50}}{\tilde{a}_{95} - \tilde{a}_{50}}\right)\right]^{-1}, $$
 where $\tilde{a}_{50}$ and $\tilde{a}_{95}$ are the ages of 50% and 95% maturity, respectively.
 
-The estimated catch-at-age $\hat{C}_{a,t}$ is obtained from the Baranov equation:
+## Catch-at-age
+The estimated catch-at-age $\hat{C}_{a,t}$ (CAA) is obtained from the Baranov equation:
 $$\hat{C}_{a,t} = \dfrac{\hat{v}_a \hat{F}_t}{\hat{v}_a \hat{F}_t + M_a} [1 - \exp(- \hat{v}_a \hat{F}_t - M_a)] \hat{N}_{a,t}.$$
 The predicted total catch in weight $\hat{Y}_t$ is
 $\hat{Y}_t = \sum_a w_a \hat{C}_{a,t}.$
@@ -110,22 +113,24 @@ The estimated index $\hat{I}_t$, assuming that it is an index for total biomass,
 $$ \hat{I}_t = \hat{q} \hat{B}_t,$$
 where $B_t = \sum_{a=1}^A w_a N_{a,t}$. A function argument allows for the user to specify that the observed index is for vulnerable or spawning biomass.
 
+## Likelihoods
 The likelihood of the observed catch at age $C_{a,t}$, assuming a multinomial distribution, is
-$$ C_{a,t} \sim \textrm{Multinomial}(O_t, \hat{p}_{a,t}), $$
+$$L^{CAA} = \sum_t O_t \sum_a p_{a,t} \log(\hat{p}_{a,t}),$$ 
+
 where $O_t$ is the assumed sample size of catch-at-age observations in year $t$ and $\hat{p}_{a,t} = \hat{C}_{a,t}/\sum_a\hat{C}_{a,t}$ is annual predicted
 proportions of catch-at-age.
 
 If a lognormal distribution for the observed proportions at age is assumed, then the likelihood is
-$$\log(p_{a,t}) \sim N(\log[\hat{p}_{a,t}], 0.01/\hat{p}_{a,t}).$$
+$$L^{CAA} = \sum_t \left(-\log(0.01/\hat{p}_{a,t}) - 0.5\left[\dfrac{\log(p_{a,t}) - \log(\hat{p}_{a,t})}{0.01/\hat{p}_{a,t}}\right]^2\right)$$.
 
 The likelihood of the observed catch $Y_t$, assuming a lognormal distribution, is
-$$\log(Y_t) \sim N(\log[\hat{Y}_t], \omega^2).$$
+$$L^Y = \sum_t \left(-\log(\omega) - 0.5\left[\dfrac{\log(Y_t) - \log(\hat{Y}_t)}{\omega}\right]^2\right).$$
 
 The likelihood of the observed index $I_t$, assuming a lognormal distribution, is
-$$\log(I_t) \sim N(\log[\hat{I}_t], \sigma^2)$$
+$$L^I = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right).$$
 
 ### SCA with Pope's approximation (SCA_Pope)
-A variant of the SCA is the SCA_Pope function, which fixes the predicted catches to the observed catches and uses Pope's approximation to calculate the annual harvest rate in the midpoint of the year.
+A variant of the SCA is the `SCA_Pope` function, which fixes the predicted catches to the observed catches and uses Pope's approximation to calculate the annual harvest rate in the midpoint of the year.
 
 The abundance at age is
 
@@ -192,8 +197,9 @@ $$R_t = \bar{R} \exp(\delta_t - 0.5 \tau^2), $$
 where $\delta_t \sim N(0, \tau^2)$ are recruitment deviations in lognormal space from the estimated mean recruitment $\bar{R}$ and $\tau$ is the standard deviation of the recruitment deviations. Typically, $\tau$ is set to 1 so that recruitment is estimated almost as free parameters (Cadigan, 2016).
 
 ### Likelihood of recruitment deviations
-The likelihood of the estimated log-recruitment deviations $\hat{\delta}_t$ is
-$$\hat{\delta}_t \sim N(0, \tau^2).$$
+
+The likelihood of the estimated log-recruitment deviations $\hat{\delta}_t$ (penalized parameters) is
+$$L^{\delta} = \sum_t \left(-\log(\tau) - 0.5\left[\dfrac{\hat{\delta}_t}{\tau}\right]^2\right).$$
 
 # References
 

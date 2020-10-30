@@ -1,5 +1,5 @@
 ---
-title: "2b. Configuring selectivity for the SRA model"
+title: "2b. Configuring selectivity for the RCM"
 author: "Quang Huynh (<q.huynh@oceans.ubc.ca>)"
 date: "`r Sys.Date()`"
 output:
@@ -7,7 +7,7 @@ output:
     toc: true
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{2b. Configuring selectivity for the SRA model}
+  %\VignetteIndexEntry{2b. Configuring selectivity for the RCM}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---
@@ -62,17 +62,17 @@ vul_par_free <- matrix(c(55, 30, 1, rep(NA, 3), 45, 30, 0.5, rep(NA, 3), 0.1, 0.
 
 # Introduction
 
-There are a multitude of options available in how selectivity for fleets and surveys is parameterized in the model. This vignette is designed to be a step-by-step guide for setup of selectivity. It is best to first think about fleet selectivity followed by survey selectivity. Familiarity with the more general <a href="SRA_scope.html">SRA vignette</a> and the function help page (found by typing `?SRA_scope` into the R console) will be helpful.
+There are a multitude of options available in how selectivity for fleets and surveys is parameterized in the model. This vignette is designed to be a step-by-step guide for setup of selectivity. It is best to first think about fleet selectivity followed by survey selectivity. Familiarity with the more general <a href="RCM.html">RCM vignette</a> and the function help page (found by typing `?RCM` into the R console) will be helpful.
 
 This vignette is designed to provide step-by-step information on possible model configurations, but of course it is up to the user to decide whether those configurations are appropriate for the operating model conditioning.
 
-The general function call for `SRA_scope` is:
+The general function call for `RCM` is:
 
 ```{r eval = FALSE}
-SRA <- SRA_scope(OM, data, ...)
+output <- RCM(OM, data, ...)
 ```
 
-where the `SRA` is of class SRA, `OM` is a class OM object, `data` is a list, and `...` are additional function arguments explained below. 
+where the `output` is of class RCModel, `OM` is a class OM object, `data` is a list, and `...` are additional function arguments explained below. 
 
 # Fleet selectivity
 
@@ -102,7 +102,7 @@ selectivity <- c("logistic", "dome", "free")
 
 Thus, the selectivity of the first dummy fleet is logistic, the second is dome, and the third is free, i.e., independent parameters for selectivity-at-age.
 
-These functions are described in <a href="SRA_scope_eq.html">Vignette #2a</a>.
+These functions are described in <a href="RCM_eq.html">Vignette #2a</a>.
 
 ## Starting values of selectivity parameters
 
@@ -135,7 +135,7 @@ Rows 4 to maxage for logistic and dome selectivity are unused placeholders.
 
 ## Fixing and sharing parameters
 
-Selectivity parameters may be fixed or shared. For TMB, this is accomplished by the `map` argument, which can be provided in `SRA_scope` via the `map_vul_par` matrix which is of identical dimension to `vul_par`. `map_vul_par` tells TMB what to do to the parameter of the corresponding row and column in `vul_par`. Shared parameters are assigned a unique integer amongst themselves while fixed/unused parameters are assigned `NA`. Let's look at the first `vul_par` example again:
+Selectivity parameters may be fixed or shared. For TMB, this is accomplished by the `map` argument, which can be provided in `RCM` via the `map_vul_par` matrix which is of identical dimension to `vul_par`. `map_vul_par` tells TMB what to do to the parameter of the corresponding row and column in `vul_par`. Shared parameters are assigned a unique integer amongst themselves while fixed/unused parameters are assigned `NA`. Let's look at the first `vul_par` example again:
 
 ```{r echo = FALSE}
 vul_par <- vul_par_easy
@@ -182,7 +182,7 @@ map_vul_par
 Finally the function call looks like this:
 
 ```{r eval = FALSE}
-SRA <- SRA_scope(OM, data, selectivity = selectivity, vul_par = vul_par, map_vul_par = map_vul_par, ...)
+output <- RCM(OM, data, selectivity = selectivity, vul_par = vul_par, map_vul_par = map_vul_par, ...)
 ```
 
 # Survey selectivity 
@@ -202,7 +202,7 @@ The first survey is a survey of spawning biomass as denoted by "SSB" (maturity i
 No further consideration of survey selectivity is needed when selectivity is defined elsewhere, the function call can look like this:
 
 ```{r eval = FALSE}
-SRA <- SRA_scope(OM, data, selectivity = selectivity, s_selectivity = s_selectivity, ...)
+output <- RCM(OM, data, selectivity = selectivity, s_selectivity = s_selectivity, ...)
 ```
 
 ## Survey selectivity is independent of anything else in the model
@@ -219,7 +219,7 @@ For the fourth and fifth surveys, the selectivity functions are dome-shaped and 
 
 Just as in the fleet parameters, the survey selectivity parameters by default use `OM@LFS`, `OM@L5`, and `OM@Vmaxlen` for start values when `s_selectivity = "logistic"` or `"dome"`, and custom start values needed when selectivity uses free parameters. 
 
-Custom start values are passed to the SRA in the `s_vul_par` matrix with the same layout as that for the fleet blocks:
+Custom start values are passed to the RCM in the `s_vul_par` matrix with the same layout as that for the fleet blocks:
 
 ```{r echo = FALSE}
 s_vul_par <- matrix(c(rep(0, 18), 55, 40, 0.5, rep(0, 3), 1, rep(0, 5)), 6, 5)
@@ -245,6 +245,6 @@ map_s_vul_par
 A function call utilizing this custom set-up for survey selectivity would be:
 
 ```{r eval = FALSE}
-SRA <- SRA_scope(OM, data, selectivity = selectivity, s_selectivity = s_selectivity, s_vul_par = s_vul_par, map_s_vul_par = map_s_vul_par, ...)
+output <- RCM(OM, data, selectivity = selectivity, s_selectivity = s_selectivity, s_vul_par = s_vul_par, map_s_vul_par = map_s_vul_par, ...)
 ```
 

@@ -1,6 +1,6 @@
 ---
 title: "1d. Virtual population analysis (VPA)"
-author: "Quang Huynh (<q.huynh@oceans.ubc.ca>)"
+author: "Quang Huynh (<quang@bluematterscience.com>)"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
@@ -92,6 +92,9 @@ From $N_{A,t+1}$, $C_{A,t}$, $C_{A-1,t}$, $M_A$, and $M_{A-1}$, we can solve $F_
 The VPA is tuned to an index via maximum likelihood. The predicted biomass index is
 $$ \hat{I}_t = \hat{q}\sum_a N_{a,t} w_a.$$
 The likelihood of the observed index is
+
+$$L^I = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right),$$
+
 $$\log(I_t) \sim N(\log(\hat{I}_t), \sigma^2).$$
 
 From the VPA output, reference points can be calculated. Estimates of recruitment (the youngest age class $\tilde{a}$) and spawning biomass are used to estimate a stock-recruitment relationship to obtain MSY and unfished reference points.

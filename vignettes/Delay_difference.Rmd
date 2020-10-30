@@ -1,6 +1,6 @@
 ---
 title: "1a. Delay-difference and delay-differential models"
-author: "Quang Huynh (<q.huynh@oceans.ubc.ca>)"
+author: "Quang Huynh (<quang@bluematterscience.com>)"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -85,16 +85,34 @@ N_t &= s_{t-1} N_{t-1} + R_t,
 \end{align}$$
 where $R_t$ is the recruitment (defined in the next section) at age $k$ and $w_k$ is the weight of recruits. Survival $s_t$ is defined as
 $$ s_t = (1 - u_t)\exp(-M), $$
-where $u_t$ is the annual harvest rate and $M$ is the instantaneous natural mortality rate. By conditioning the model on effort (as the ratio of the catch and index), the harvest rate is
-$$ u_t = 1 - \exp(-qf_t), $$
-where $q$ is the estimated catchability coefficient and $f_t$ is the effort in year $t$. 
+where $u_t$ is the annual harvest rate and $M$ is the instantaneous natural mortality rate. 
+
+### Conditioning on catch
+
+If the model is conditioned on catch ($C_t$), the harvest rate $u_t$ is
+$$ u_t = C_t/B_t. $$
+
+The predicted index is 
+$$\hat{I}_t = \hat{q}^I \hat{B}_t ,$$
+where the circumflex $^$ denotes the model estimate.
+
+The likelihood $L$ of the observed catch $I_t$, assuming a lognormal distribution, is
+$$L^C = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right),$$
+where $\sigma$ is the standard deviation of the index.
+
+
+### Conditioning on effort
+
+Otherwise, if the model is conditioned on effort (as the ratio of the catch and index), the harvest rate is
+$$ u_t = 1 - \exp(-q^f f_t), $$
+where $q$ is the estimated coefficient that scales effort and $f_t$ is the effort in year $t$. 
 
 The predicted catch is 
-$$\hat{C}_t = \hat{u}_t \hat{B}_t ,$$
+$$\hat{C}_t = \hat{u}_t \hat{B}_t,$$
 where the circumflex $^$ denotes the model estimate.
 
 The likelihood $L$ of the observed catch $C_t$, assuming a lognormal distribution, is
-$$\log(C_t) \sim N(\log[\hat{C}_t], \omega^2).$$
+$$L^I = \sum_t \left(-\log(\omega) - 0.5\left[\dfrac{\log(C_t) - log(\hat{C}_t)}{\omega}\right]^2\right).$$
 where $\omega$ is the standard deviation of the catch.
 
 ## Stock-recruit parameters
@@ -174,7 +192,7 @@ The predicted index is
 $$\hat{I}_t=\hat{q}\hat{B}_t.$$
 
 The likelihood of the observed index $I_t$, assuming a lognormal distribution, is
-$$\log(I_t) \sim N(\log[\hat{I}_t],\sigma^2),$$
+$$L^I = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right),$$
 where $\sigma$ is the standard deviation of the index.
 
 ## Stock-recruit parameters
@@ -191,9 +209,8 @@ or
 $$ R_t = \alpha B_{t-k}\exp(-\beta B_{t-k})\exp(\delta_t - 0.5 \tau^2),$$
 where $\delta_t$ are recruitment deviations in lognormal space and $\tau$ is the standard deviation of the recruitment deviations.
 
-The likelihood of the estimated log-recruitment deviations $\hat{\delta}_t$
-$$\hat{\delta}_t \sim N(0, \tau^2).$$
-
+Log-recruitment deviations $\hat{\delta}_t$ are typically estimated as penalized parameters towards the likelihood, with the penalty:
+$$L^{\delta} = \sum_t \left(-\log(\tau) - 0.5\left[\dfrac{\hat{\delta}_t}{\tau}\right]^2\right).$$
 
 
 # References
