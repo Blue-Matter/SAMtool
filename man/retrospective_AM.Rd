@@ -4,17 +4,14 @@
 \alias{retrospective_AM}
 \title{retrospective_AM (retrospective of Assessment model in MSE)}
 \usage{
-retrospective_AM(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
+retrospective_AM(MSE, MP, sim = 1, plot_legend = FALSE)
 }
 \arguments{
 \item{MSE}{An object of class \linkS4class{MSE}.}
 
-\item{sim}{Integer between 1 and MSE@nsim. The simulation number for which the retrospectives will be plotted.}
-
 \item{MP}{Character. The name of the management procedure created by \code{\link{make_MP}} containing the asssessment model.}
 
-\item{Hist}{Optional. The list containing historical data for the MSE, created by \code{\link[MSEtool]{runMSE}} with argument \code{Hist = TRUE}.
-Currently only used to plot operating model vulnerable biomass in historical period.}
+\item{sim}{Integer between 1 and MSE@nsim. The simulation number for which the retrospectives will be plotted.}
 
 \item{plot_legend}{Logical. Whether to plot legend to reference year of assessment in the MSE.}
 }

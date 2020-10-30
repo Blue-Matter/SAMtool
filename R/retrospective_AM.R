@@ -4,10 +4,8 @@
 #' are plotted over the course of the MSE are plotted against the operating model (true) values (in black).
 #'
 #' @param MSE An object of class \linkS4class{MSE}.
+#' @param MP Character. The name of the management procedure created by \code{\link{make_MP}} containing the asssessment model. 
 #' @param sim Integer between 1 and MSE@@nsim. The simulation number for which the retrospectives will be plotted.
-#' @param MP Character. The name of the management procedure created by \code{\link{make_MP}} containing the asssessment model.
-#' @param Hist Optional. The list containing historical data for the MSE, created by \code{\link[MSEtool]{runMSE}} with argument \code{Hist = TRUE}.
-#' Currently only used to plot operating model vulnerable biomass in historical period.
 #' @param plot_legend Logical. Whether to plot legend to reference year of assessment in the MSE.
 #' @author Q. Huynh
 #' @details For assessment models that utilize annual harvest rates (u), the instantaneous fishing mortality rates
@@ -29,7 +27,7 @@
 #' @seealso \link{diagnostic_AM}
 #' @importFrom gplots rich.colors
 #' @export
-retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE) {
+retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
 
@@ -61,13 +59,13 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     if(plot_type[i] == "SSB_SSBMSY") {
       ylab <- expression(SSB/SSB[MSY])
 
-      Hist_ts <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]/MSE@OM$SSBMSY[sim]
+      Hist <- apply(MSE@Hist@TSdata$SBiomass[sim, , ], 1, sum)/MSE@OM$SSBMSY[sim]
       Proj <- MSE@SB_SBMSY[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "SSB_SSBMSY")
     }
     if(plot_type[i] == "F_FMSY") {
       ylab <- expression(F/F[MSY])
-      Hist_ts <- apply(MSE@FM_hist, c(1, 3), max)[sim, ]/MSE@OM$FMSY[sim]
+      Hist <- apply(MSE@Hist@AtAge$F.Mortality[sim, , , ], 2, max)/MSE@OM$FMSY[sim]
       Proj <- MSE@F_FMSY[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "F_FMSY")
       if(length(do.call(c, Assess)) == 0) {
@@ -78,13 +76,13 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     }
     if(plot_type[i] == "SSB") {
       ylab <- "SSB"
-      Hist_ts <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]
+      Hist <- apply(MSE@Hist@TSdata$SBiomass[sim, , ], 1, sum)
       Proj <- MSE@SSB[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "SSB")
     }
     if(plot_type[i] == "F") {
       ylab <- "F"
-      Hist_ts <- apply(MSE@FM_hist, c(1, 3), max)[sim, ]
+      Hist <- apply(MSE@Hist@AtAge$F.Mortality[sim, , , ], 2, max)
       Proj <- MSE@FM[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "FMort")
       if(length(do.call(c, Assess)) == 0) {
@@ -94,45 +92,44 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     }
     if(plot_type[i] == "SSB_SSB0") {
       ylab <- expression(SSB/SSB[0])
-      Hist_ts <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]/MSE@OM$SSB0[sim]
+      Hist <- apply(MSE@Hist@TSdata$SBiomass[sim, , ], 1, sum)/MSE@OM$SSB0[sim]
       Proj <- MSE@SSB[sim, match_ind, ]/MSE@OM$SSB0[sim]
       Assess <- lapply(Assessment_report, slot, "SSB_SSB0")
     }
     if(plot_type[i] == "VB") {
       ylab <- "Vulnerable biomass"
-      if(!is.null(Hist)) {
-        Hist_ts <- Hist@TSdata$VBiomass[sim, , ] %>% rowSums()
-      } else {
-        Hist_ts <- rep(NA, MSE@nyears)
-        message("Provide Hist object in order to plot the historical vulnerable biomass in the operating model.")
-      }
+      Hist <- apply(MSE@Hist@TSdata$VBiomass[sim, , ], 1, sum)
       Proj <- MSE@VB[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "VB")
     }
-    if(plot_type[i] == "Recruit") {
-      ylab <- "Recruitment"
-      if(!is.null(Hist)) {
-        Hist_ts <- Hist@AtAge$Number[sim, 1, , ] %>% rowSums()
-      } else {
-        Hist_ts <- rep(NA, MSE@nyears)
-        message("Provide Hist object in order to plot simulated recruitment in the operating model.")
-      }
-      Proj <- rep(NA, MSE@proyears)
-      Assess <- lapply(Assessment_report, slot, "R")
-    }
+    #if(plot_type[i] == "Recruit") {
+    #  ylab <- "Recruitment"
+    #  if(!is.null(Hist)) {
+    #    Hist_ts <- Hist@AtAge$Number[sim, 1, , ] %>% rowSums()
+    #  } else {
+    #    Hist_ts <- rep(NA, MSE@nyears)
+    #    message("Provide Hist object in order to plot simulated recruitment in the operating model.")
+    #  }
+    #  Proj <- rep(NA, MSE@proyears)
+    #  Assess <- lapply(Assessment_report, slot, "R")
+    #}
     
     Assess_Yr <- lapply(Assess, function(x) as.numeric(names(x)))
     xlimits <- c(1, MSE@nyears + MSE@proyears)
     
     converged_assessments <- vapply(Assessment_report, slot, logical(1), "conv")
-    ylimits <- c(0, 1.1 * max(c(Hist_ts, Proj, do.call(c, Assess[converged_assessments])), na.rm = TRUE))
+    ylimits <- c(0, 1.1 * max(c(Hist, Proj, do.call(c, Assess[converged_assessments])), na.rm = TRUE))
     
     if(all(!is.na(ylimits))) {
-      plot(Yr_MSE, c(Hist_ts, Proj), xlab = "MSE year", ylab = ylab, xlim = xlimits, ylim = ylimits, lwd = 2, typ = 'l')
+      plot(NULL, NULL, xlab = "MSE year", ylab = ylab, xlim = xlimits, ylim = ylimits)
       for(j in length(Assess):1) {
-        if(Assessment_report[[j]]@conv && length(Assess[[j]]) > 0) lines(Assess_Yr[[j]], Assess[[j]], col = color.vec[j])
+        if(Assessment_report[[j]]@conv && length(Assess[[j]]) > 0) {
+          lines(Assess_Yr[[j]], Assess[[j]], col = color.vec[j])
+          points(max(Assess_Yr[[j]]), Assess[[j]][length(Assess[[j]])], col = color.vec[j], pch = 16, cex = 1.5)
+        }
       }
       if(plot_type[i] == "SSB_SSBMSY" || plot_type[i] == "F_FMSY") abline(h = 1)
+      lines(Yr_MSE, c(Hist, Proj), xlab = "MSE year", ylab = ylab, xlim = xlimits, ylim = ylimits, lwd = 2)
       abline(h = 0, col = "grey")
       abline(v = MSE@nyears, lty = 2)
       if(plot_legend && i == 1) legend("topleft", c("OM", End_Assess_Yr), col = c("black", color.vec), lwd = c(2, rep(1, length(Assessment_report))))
