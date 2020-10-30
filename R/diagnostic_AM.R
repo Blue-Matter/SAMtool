@@ -98,13 +98,6 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRUE) {
   if(!inherits(MSE, "MSE")) stop("No object of class MSE was provided.")
 
-  #if(packageVersion("DLMtool") >= 5.3) {
-  #  if(length(MSE@Misc$Data) == 0) stop("Nothing found in MSE@Misc$Data. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
-  #} else {
-  #  if(length(MSE@Misc) == 0) stop("Nothing found in MSE@Misc. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
-  #}
-
-
   if(figure) {
     old_par <- par(no.readonly = TRUE)
     on.exit(layout(matrix(1)))
@@ -119,8 +112,8 @@ diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRU
     all(vapply(Misc, function(y) any(names(y) == "diagnostic"), logical(1)))
   }
 
-  has_diagnostic <- vapply(MSE@Misc$Data, has_diagnostic_fn, logical(1))
-  if(all(!has_diagnostic)) stop("No diagnostic information found in MSE@Misc for any MP. Use an MP created by 'make_MP(diagnostic = 'min')' and set 'runMSE(PPD = TRUE)'.")
+  has_diagnostic <- vapply(MSE@PPD, has_diagnostic_fn, logical(1))
+  if(all(!has_diagnostic)) stop("No diagnostic information found in MSE@PPD for any MP. Use an MP created by: make_MP(diagnostic = \"min\").")
   
   MPs <- MPs[has_diagnostic]
 
@@ -135,7 +128,7 @@ diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRU
   get_code <- function(x, y) vapply(x, getElement, numeric(1), y)
   get_code_char <- function(x, y) vapply(x, getElement, character(1), y)
   for(i in 1:length(MPs)) {
-    objects <- MSE@Misc$Data[[which(MPs[i] == MSE@MPs)]]
+    objects <- MSE@PPD[[which(MPs[i] == MSE@MPs)]]
     diagnostic <- lapply(objects@Misc[1:MSE@nsim], getElement, "diagnostic")
 
     if(!is.null(diagnostic)) {

@@ -352,7 +352,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
     real_Data@MaxAge <- maxage
     if(sum(output@data$Chist > 0, na.rm = TRUE) && all(!is.na(output@data$Chist))) {
       real_Data@Cat <- matrix(rowSums(output@data$Chist, na.rm = TRUE), 1, nyears)
-      real_Data@CV_Cat <- exp((rowSums(data$C_sd * data$Chist)/rowSums(data$Chist))^2 - 1) %>% sqrt() %>% 
+      real_Data@CV_Cat <- sqrt(exp((rowSums(data$C_sd * data$Chist)/rowSums(data$Chist))^2 - 1)) %>% 
         matrix(1, nyears)
       message("Historical catch data added to OM@cpars$Data@Cat.")
       if(nfleet > 1) message("Annual catch CV is a weighted average by fleet-specific catch.")

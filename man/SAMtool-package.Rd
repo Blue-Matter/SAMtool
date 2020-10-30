@@ -19,7 +19,7 @@ with MSEtool operating models. An overview of these features is available in the
 The following assessment models are available:
 \itemize{
 \item \href{../doc/Surplus_production.html}{Surplus production} (\link{SP}, \link{SP_SS}, \link{SP_Fox}, and \code{spict})
-\item \href{../doc/Delay_difference.html}{Delay difference} (\link{DD}, \link{cDD}, \link{DD_SS}, and \link{cDD_SS})
+\item \href{../doc/Delay_difference.html}{Delay difference} (\link{DD_TMB}, \link{cDD}, \link{DD_SS}, and \link{cDD_SS})
 \item \href{../doc/SCA.html}{Statistical catch-at-age} (\link{SCA}, \link{SCA2}, and \link{SCA_Pope})
 \item Simple Stock Synthesis (\link{SSS} which implements \link{SCA_Pope} with fixed depletion assumption)
 \item \href{../doc/VPA.html}{Virtual population analysis} (\link{VPA})

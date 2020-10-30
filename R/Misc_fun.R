@@ -41,6 +41,12 @@
 # 
 # getclass <- function(x, classy) any(inherits(get(x), classy))
 
+TACfilter <- function(TAC) {
+  TAC[TAC < 0] <- NA_real_  # Have to robustify due to R optmization problems.. work in progress.
+  TAC[TAC > (mean(TAC, na.rm = TRUE) + 5 * sd(TAC, na.rm = TRUE))] <- NA_real_  # remove very large TAC samples
+  return(TAC)
+}
+
 #' Get the SAMtool vignettes
 #'
 #' A convenient function to open a web browser with the SAMtool package vignettes
@@ -52,11 +58,12 @@
 #' @export
 userguide <- function() {
   #message("For the MSEtool user guide, type in \"MSEtool::userguide()\" to the console.")
-  browseVignettes("MSEtool")
+  browseVignettes("SAMtool")
 }
 
 
 squeeze <- function(x) (1 - .Machine$double.eps) * (x - 0.5) + 0.5
+iVB <- function(t0, K, Linf, L) max(1, ((-log(1 - L/Linf))/K + t0))  # Inverse Von-B
 
 logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) {
   p <- squeeze(p)
@@ -67,7 +74,13 @@ logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) {
   log(p/(1 - p))
 }
 ilogit <- function(x) 1/(1 + exp(-x))
-ilogitm <- function(x) exp(x)/apply(exp(x), 1, sum)
+ilogitm <- function(x) {
+  if(inherits(x, "matrix")) {
+    return(exp(x)/apply(exp(x), 1, sum))
+  } else {
+    return(exp(x)/sum(exp(x)))
+  }
+}
 
 
 optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 1) {

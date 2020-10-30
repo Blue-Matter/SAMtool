@@ -45,9 +45,9 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
     all(vapply(Misc, function(y) any(names(y) == "Assessment_report"), logical(1)))
   }
 
-  has_Assess <- has_Assess_fn(MSE@Misc$Data[[match_ind]])
-  if(!has_Assess) stop("No Assessment objects were found in MSE@Misc for any MP. Use an MP created by 'make_MP(diagnostic = 'full')' and set 'runMSE(PPD = TRUE)'.")
-  Assessment_report <- lapply(MSE@Misc$Data[[match_ind]]@Misc[1:MSE@nsim], getElement, "Assessment_report")[[sim]]
+  has_Assess <- has_Assess_fn(MSE@PPD[[match_ind]])
+  if(!has_Assess) stop("No Assessment objects were found in MSE@PPD for ", MP, ". Use an MP created by: make_MP(diagnostic = \"full\").")
+  Assessment_report <- lapply(MSE@PPD[[match_ind]]@Misc[1:MSE@nsim], getElement, "Assessment_report")[[sim]]
   
   color.vec <- rich.colors(length(Assessment_report))
   Yr_MSE <- 1:(MSE@nyears + MSE@proyears)
@@ -62,7 +62,7 @@ retrospective_AM <- function(MSE, sim = 1, MP, Hist = NULL, plot_legend = FALSE)
       ylab <- expression(SSB/SSB[MSY])
 
       Hist_ts <- apply(MSE@SSB_hist, c(1, 3), sum)[sim, ]/MSE@OM$SSBMSY[sim]
-      Proj <- MSE@B_BMSY[sim, match_ind, ]
+      Proj <- MSE@SB_SBMSY[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "SSB_SSBMSY")
     }
     if(plot_type[i] == "F_FMSY") {
