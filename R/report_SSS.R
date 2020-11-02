@@ -9,7 +9,7 @@ rmd_SSS <- function(Assessment, ...) {
   ss <- rmd_summary("Simple Stock Synthesis (SSS)")
 
   # Life History
-  age <- 1:Assessment@info$data$max_age
+  age <- 0:(Assessment@info$data$n_age - 1)
   LH_section <- c(rmd_LAA(age, Assessment@info$LH$LAA, header = "## Life History\n"), rmd_WAA(age, Assessment@info$LH$WAA),
                   rmd_LW(Assessment@info$LH$LAA, Assessment@info$LH$WAA),
                   rmd_mat(age, Assessment@info$data$mat,
@@ -30,8 +30,8 @@ rmd_SSS <- function(Assessment, ...) {
                  rmd_N(), rmd_N_at_age())
 
   # Productivity
-  SSB <- Assessment@SSB[1:(length(Assessment@SSB)-1)]
-  expectedR <- estR <- Assessment@R[as.numeric(names(Assessment@R)) > Assessment@info$Year[1]]
+  SSB <- Assessment@SSB
+  expectedR <- estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
 
   productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
                     rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),

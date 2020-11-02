@@ -63,23 +63,24 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   I_hist[n_y] <- dep
 
   max_age <- as.integer(-log(0.01)/Data@Mort[x])
-  M <- rep(Data@Mort[x], max_age)
+  n_age <- max_age + 1
+  M <- rep(Data@Mort[x], n_age)
   a <- Data@wla[x]
   b <- Data@wlb[x]
   Linf <- Data@vbLinf[x]
   K <- Data@vbK[x]
   t0 <- Data@vbt0[x]
-  La <- Linf * (1 - exp(-K * (c(1:max_age) - t0)))
+  La <- Linf * (1 - exp(-K * (c(0:max_age) - t0)))
   Wa <- a * La ^ b
   A50 <- min(0.5 * max_age, iVB(t0, K, Linf, Data@L50[x]))
   A95 <- max(A50+0.5, iVB(t0, K, Linf, Data@L95[x]))
-  mat_age <- 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50)))
+  mat_age <- c(0, 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50))))
   mat_age <- mat_age/max(mat_age)
   LH <- list(LAA = La, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
 
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
   data <- list(model = "SCA_Pope", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
-               CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(0, n_y), n_y = n_y, max_age = max_age, M = M,
+               CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(0, n_y), n_y = n_y, n_age = n_age, M = M,
                weight = Wa, mat = mat_age, vul_type = "logistic", I_type = "B",
                SR_type = SR, CAA_dist = "multinomial", est_early_rec_dev = rep(0, max_age - 1),
                est_rec_dev = rep(0, n_y))
@@ -121,7 +122,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
 
   params$U_equilibrium <- 0
   params$log_sigma <- params$log_tau <- log(0.01)
-  params$log_early_rec_dev <- rep(0, max_age - 1)
+  params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control)
@@ -129,7 +130,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   map <- list()
   map$transformed_h <- map$U_equilibrium <- map$log_sigma <- map$log_tau <- factor(NA)
   map$vul_par <- factor(c(NA, NA))
-  map$log_early_rec_dev <- factor(rep(NA, max_age - 1))
+  map$log_early_rec_dev <- factor(rep(NA, n_age - 1))
   map$log_rec_dev <- factor(rep(NA, n_y))
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
@@ -165,7 +166,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
                     N = structure(rowSums(report$N), names = Yearplusone),
                     N_at_age = report$N,
                     Selectivity = matrix(report$vul, nrow = length(Year),
-                                         ncol = max_age, byrow = TRUE),
+                                         ncol = n_age, byrow = TRUE),
                     Obs_Catch = structure(C_hist, names = Year),
                     Obs_Index = structure(I_hist, names = Year),
                     Catch = structure(colSums(t(report$CAApred) * Wa), names = Year),
