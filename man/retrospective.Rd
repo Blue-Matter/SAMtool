@@ -3,17 +3,17 @@
 \name{retrospective}
 \alias{retrospective}
 \alias{retrospective,Assessment-method}
-\alias{retrospective,RCM-method}
+\alias{retrospective,RCModel-method}
 \title{Retrospective analysis of assessment models}
 \usage{
 retrospective(x, ...)
 
 \S4method{retrospective}{Assessment}(x, nyr = 5, figure = TRUE)
 
-\S4method{retrospective}{RCM}(x, nyr = 5, figure = TRUE)
+\S4method{retrospective}{RCModel}(x, nyr = 5, figure = TRUE)
 }
 \arguments{
-\item{x}{An S4 object of class \linkS4class{Assessment} of \linkS4class{RCM}.}
+\item{x}{An S4 object of class \linkS4class{Assessment} of \linkS4class{RCModel}.}
 
 \item{...}{More arguments.}
 

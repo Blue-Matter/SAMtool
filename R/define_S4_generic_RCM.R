@@ -22,7 +22,7 @@
 #' @param s_selectivity A vector of length nsurvey to indicate the selectivity of the corresponding columns in \code{data$Index}. Use \code{"B"} for
 #' total biomass, or \code{"SSB"} for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
 #' If the survey selectivity is otherwise independent of anything else in the model, use \code{"logistic"}, \code{"dome"}, or \code{"free"} to specify the functional form of selectivity, and
-#' see Additional arguments section for setup of survey selectivity parameters. See \href{../doc/SRA_scope_sel.html}{selectivity vignette} for more information.
+#' see Additional arguments section for setup of survey selectivity parameters. See \href{../doc/RCM_sel.html}{selectivity vignette} for more information.
 #' @param LWT A named list of likelihood weights for the RCM. See below.
 #' @param comp_like A string indicating either \code{"multinomial"} (default) or \code{"lognormal"} distributions for the composition data.
 #' @param ESS If \code{comp_like = "multinomial"}, a numeric vector of length two to cap the maximum effective samples size of the age and length compositions,
@@ -57,15 +57,15 @@
 #' To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 #' index but the data won't enter the likelihood. See section on likelihood weights.
 #'
-#' @return An object of class \linkS4class{RCM} (see link for description of output).
+#' @return An object of class \linkS4class{RCModel} (see link for description of output).
 #'
 #' @section Vignette:
 #' Three vignettes are available for the RCM:
 #'
 #' \itemize{
-#' \item \href{../doc/SRA_scope.html}{General overview of approach}
-#' \item \href{../doc/SRA_scope_eq.html}{Mathematical description}
-#' \item \href{../doc/SRA_scope_sel.html}{Setup of selectivity settings} (useful for more data-rich cases)
+#' \item \href{../doc/RCM.html}{General overview of approach}
+#' \item \href{../doc/RCM_eq.html}{Mathematical description}
+#' \item \href{../doc/RCM_sel.html}{Setup of selectivity settings} (useful for more data-rich cases)
 #' }
 #'
 #' @section Data:
@@ -108,7 +108,7 @@
 #' \item age_error - Optional, a square matrix of maxage + 1 rows and columns to specify ageing error. The aa-th column assigns a proportion of the true age in the
 #' a-th row to observed age. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).
 #' \item sel_block - Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function to a fleet for certain years.
-#' See the \href{../doc/SRA_scope_sel.html}{selectivity} vignette for more details.
+#' See the \href{../doc/RCM_sel.html}{selectivity} vignette for more details.
 #' }
 #'
 #' Alternatively, the \code{data} input can be a \linkS4class{Data} S4 object which will retrieve data from the following slots:
@@ -134,7 +134,7 @@
 #' \item vul_par: A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
 #' to LFS (length of full selectivity), L5 (length of 5 percent selectivity), and Vmaxlen (selectivity at length Linf). By default,
 #' the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage rows where
-#' the row specifies the selectivity at age. See the \href{../doc/SRA_scope_sel.html}{selectivity} vignette for more information.
+#' the row specifies the selectivity at age. See the \href{../doc/RCM_sel.html}{selectivity} vignette for more information.
 #' \item s_vul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. These values are only
 #' used if \code{s_selectivity = "est"} for the corresponding fleet. Otherwise, placeholders should be used to complete the matrix.
 #' \item map_vul_par: An integer matrix of the same dimension as vul_par. This is the 'map' argument for vul_par in TMB, see \link[TMB]{MakeADFun}, which indicates whether selectivity parameters are fixed
@@ -166,7 +166,7 @@
 #' to cap the multinomial sample size for age and length comps.
 #'
 #' @author Q. Huynh
-#' @seealso \link{plot.RCM} \linkS4class{RCM}
+#' @seealso \link{plot.RCModel} \linkS4class{RCModel}
 #' @importFrom dplyr %>%
 #' @export
 setGeneric("RCM", function(OM, data, ...) standardGeneric("RCM"))

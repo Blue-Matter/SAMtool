@@ -16,6 +16,9 @@ OM_condition <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
 
 
 # Base
+SRA_data <- readRDS("tests/Data_files/IYE_data.rds")
+OM_conditon <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
+
 SRA <- RCM(OM_condition, data = SRA_data[data_ind], condition = "catch2", selectivity = rep("free", 2),
            s_selectivity = rep("logistic", 5), cores = 1,
            vul_par = SRA_data$vul_par, map_vul_par = matrix(NA, 81, 2),

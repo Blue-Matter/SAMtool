@@ -1,9 +1,9 @@
 
-#' Class-\code{RCM}
+#' Class-\code{RCModel}
 #'
 #' An S4 class for the output from \link{RCM}.
 #'
-#' @name RCM-class
+#' @name RCModel-class
 #' @docType class
 #'
 #' @slot OM An updated operating model, class \linkS4class{OM}.
@@ -59,24 +59,24 @@
 #' @slot data A list of the data inputs for the RCM.
 #' @slot config A data frame describing configuration of the RCM (not currently used).
 #'
-#' @seealso \link{plot.RCM} \link{RCM}
+#' @seealso \link{plot.RCModel} \link{RCM}
 #' @author Q. Huynh
-#' @export RCM
-#' @exportClass RCM
-RCM <- setClass("RCM", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
-                                 CAA = "array", CAL = "array", conv = "logical", Misc = "list", mean_fit = "list",
-                                 data = "list", config = "data.frame"))
+#' @export RCModel
+#' @exportClass RCModel
+RCModel <- setClass("RCModel", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
+                                         CAA = "array", CAL = "array", conv = "logical", Misc = "list", mean_fit = "list",
+                                         data = "list", config = "data.frame"))
 
 
-#' @name plot.RCM
-#' @aliases plot,RCM,missing-method
+#' @name plot.RCModel
+#' @aliases plot,RCModel,missing-method
 #' @title Plot RCM scope output
 #' @description Produces HTML file (via markdown) figures of parameter estimates and output from an \linkS4class{Assessment} object.
 #' Plots histograms of operating model parameters that are updated by the RCM scoping function, as well as diagnostic plots
 #' for the fits to the RCM for each simulation. \code{compare_RCM} plots a short report that compares output from multiple RCM objects,
 #' assuming the same model structure, i.e., identical matrix and array dimensions among models, but different data weightings, data omissions, etc.
 #'
-#' @param x An object of class \linkS4class{RCM} (output from \link{RCM}).
+#' @param x An object of class \linkS4class{RCModel} (output from \link{RCM}).
 #' @param compare Logical, if TRUE, the function will run \code{runMSE} to compare the historical period of the operating model
 #' and the RCM output.
 #' @param filename Character string for the name of the markdown and HTML files.
@@ -96,9 +96,9 @@ RCM <- setClass("RCM", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
 #' @param ... For \code{compare_RCM}, multiple RCM objects for comparison.
 #' @return Returns invisibly the output from \link[rmarkdown]{render}.
 #' @importFrom rmarkdown render
-#' @seealso \linkS4class{RCM} \link{RCM}
+#' @seealso \linkS4class{RCModel} \link{RCM}
 #' @exportMethod plot
-setMethod("plot", signature(x = "RCM", y = "missing"),
+setMethod("plot", signature(x = "RCModel", y = "missing"),
           function(x, compare = TRUE, filename = "RCM", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL,
                    f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
                    open_file = TRUE, quiet = TRUE, render_args, ...) {
@@ -239,7 +239,7 @@ setMethod("plot", signature(x = "RCM", y = "missing"),
                            "`r SD2`\n\n")
               } else {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
-                           "### RCM Model Estimates\n",
+                           "### RCM Estimates\n",
                            "`r SD2 %>% knitr::kable(format = \"markdown\")`\n\n")
               }
 
@@ -1051,13 +1051,16 @@ RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
   return(res)
 }
 
-#' @rdname plot.RCM
+#' @rdname plot.RCModel
 #' @export
 compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tempdir(), Year = NULL,
                         f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
                         open_file = TRUE, quiet = TRUE, render_args) {
 
   dots <- list(...)
+  test <- vapply(dots, inherits, character(1), what = "RCModel") %>% all()
+  if(!test) stop("Objects provided are not of class RCModel.", call. = FALSE)
+  
   # Update scenario
   if(is.null(scenario$names)) scenario$names <- paste("Scenario", 1:length(dots))
   if(is.null(scenario$col)) {

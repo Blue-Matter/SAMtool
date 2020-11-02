@@ -341,7 +341,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   CAA_pred <- array(sapply(res[keep], getElement, "CAApred"), c(nyears, maxage+1, nfleet, sum(keep)))
   CAL_pred <- array(sapply(res[keep], getElement, "CALpred"), c(nyears, length(data$length_bin), nfleet, sum(keep)))
 
-  output <- new("RCM", OM = Sub_cpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
+  output <- new("RCModel", OM = Sub_cpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
                 CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = data, Misc = res[keep])
 
   # Data in cpars

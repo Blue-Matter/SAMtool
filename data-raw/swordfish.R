@@ -1,6 +1,6 @@
 
 
-
+library(SAMtool)
 
 swo <- read.csv("data-raw/swordfish.csv")
 
