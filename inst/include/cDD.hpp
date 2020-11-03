@@ -51,22 +51,20 @@ Type cDD(objective_function<Type> *obj) {
   Type B0 = BPR0 * R0;
   Type N0 = R0/M;
 
-  Type Arec;
-  Type Brec;
+  Type CR, Brec;
 
   if(SR_type == "BH") {
-    Arec = 4 *h;
-    Arec /= 1-h;
-    Arec /= BPR0;
+    CR = 4 *h;
+    CR /= 1-h;
     Brec = 5*h - 1;
     Brec /= (1-h) * B0;
   } else {
-    Arec = pow(5*h, 1.25);
-    Arec /= BPR0;
+    CR = pow(5*h, 1.25);
     Brec = 1.25;
     Brec *= log(5*h);
     Brec /= B0;
   }
+  Type Arec = CR/BPR0;
 
   //--DECLARING STORAGE VECTORS
   vector<Type> B(ny+1);
@@ -156,6 +154,7 @@ Type cDD(objective_function<Type> *obj) {
   REPORT(nll);
   REPORT(Arec);
   REPORT(Brec);
+  REPORT(CR);
   REPORT(BPR0);
   REPORT(Cpred);
   REPORT(Ceqpred);

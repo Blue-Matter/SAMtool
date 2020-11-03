@@ -54,22 +54,20 @@ Type DD(objective_function<Type> *obj) {
   Type B0 = R0 * Spr0;
   Type N0 = R0/(1 - S0);
 
-  Type Arec;
-  Type Brec;
+  Type CR, Brec;
 
   if(SR_type == "BH") {
-    Arec = 4 *h;
-    Arec /= 1-h;
-    Arec /= Spr0;
+    CR = 4 *h;
+    CR /= 1-h;
     Brec = 5*h - 1;
     Brec /= (1-h) * B0;
   } else {
-    Arec = pow(5*h, 1.25);
-    Arec /= Spr0;
+    CR = pow(5*h, 1.25);
     Brec = 1.25;
     Brec *= log(5*h);
     Brec /= B0;
   }
+  Type Arec = CR/Spr0;
 
   //--DECLARING STORAGE VECTORS
   int ny_p = ny + 1;
@@ -156,7 +154,6 @@ Type DD(objective_function<Type> *obj) {
         }
         nll_comp(sur) *= I_lambda(sur);
       }
-
     }
     if(state_space && tt + k < ny) nll_comp(nsurvey) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
   }
@@ -179,6 +176,7 @@ Type DD(objective_function<Type> *obj) {
   REPORT(nll);
   REPORT(Arec);
   REPORT(Brec);
+  REPORT(CR);
   REPORT(Spr0);
   REPORT(Cpred);
   REPORT(Ceqpred);
