@@ -137,7 +137,7 @@ plot_mov <- function(mov, age = 1, type = c("matrix", "all")) {
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
 
-  if(type == "matrix") {
+  if(any(type == "matrix")) {
     mov_at_age <- mov[ , age + 1, , ] # dimension nsim, narea, narea
     mean_mov <- apply(mov_at_age, c(2, 3), mean)
     nareas <- nrow(mean_mov)
@@ -153,7 +153,7 @@ plot_mov <- function(mov, age = 1, type = c("matrix", "all")) {
     title(paste("Movement matrix at age", age, "\n(mean and range across", nsim, "simulations)"))
   }
 
-  if(type == "all") {
+  if(any(type == "all")) {
     mean_mov <- apply(mov, 2:4, mean)
     maxage <- dim(mean_mov)[1]
     nareas <- dim(mean_mov)[2]

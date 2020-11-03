@@ -36,10 +36,8 @@ may not be indicative of general assessment behavior and performance overall.
 \examples{
 \dontrun{
 DD_MSY <- makeMP(DD_TMB, HCR_MSY, diagnostic = "full")
-Hist <- MSEtool::runMSE(Hist = TRUE)
-myMSE <- MSEtool::runMSE(MPs = "DD_MSY")
-retrospective_AM(myMSE, sim = 1, MP = "DD_MSY")
-retrospective_AM(myMSE, sim = 1, MP = "DD_MSY", Hist = Hist)
+myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "DD_MSY")
+retrospective_AM(myMSE, MP = "DD_MSY", sim = 1)
 }
 }
 \seealso{

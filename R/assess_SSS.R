@@ -32,7 +32,7 @@
 #' deriving overfishing limits in data-limited situations. Fisheries Research 142:3-14.
 #' @author Q. Huynh
 #' @examples
-#' res <- SSS(1, Data = Red_snapper)
+#' res <- SSS(Data = Red_snapper)
 #'
 #' SSS_MP <- make_MP(SSS, HCR40_10, dep = 0.3) # Always assume depletion = 0.3
 #' @useDynLib SAMtool

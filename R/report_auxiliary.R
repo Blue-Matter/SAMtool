@@ -11,9 +11,9 @@
 #' @author Q. Huynh
 #' @return A set of figures of biomass, recruitment, and fishing mortality estimates among the models.
 #' @examples
-#' res <- cDD_SS(Data = MSEtool::SimulatedData)
-#' res2 <- SCA(Data = MSEtool::SimulatedData)
-#' res3 <- SCA2(Data = MSEtool::SimulatedData)
+#' res <- cDD_SS(x = 3, Data = MSEtool::SimulatedData)
+#' res2 <- SCA(x = 3, Data = MSEtool::SimulatedData)
+#' res3 <- SP(x = 3, Data = MSEtool::SimulatedData)
 #'
 #' compare_models(res, res2, res3)
 #' @importFrom gplots rich.colors
@@ -647,13 +647,9 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' @export plot_composition
 #' @examples
 #' \donttest{
-#' data(Red_snapper)
-#' plot_composition(obs = Red_snapper@@CAA[1, , ], plot_type = "annual")
-#' plot_composition(obs = Red_snapper@@CAA[1, , ], plot_type = "bubble_data")
-#'
-#' plot_composition(obs = Red_snapper@@CAL[1, , ], plot_type = "annual", Red_snapper@@CAL_bins[1:43])
-#' plot_composition(obs = Red_snapper@@CAL[1, , ], plot_type = "bubble_data",
-#' CAL_bins = Red_snapper@@CAL_bins[1:43])
+#' plot_composition(obs = SimulatedData@@CAA[1, 1:16, ])
+#' plot_composition(obs = SimulatedData@@CAA[1, , ], plot_type = "bubble_data", 
+#'                  ages = 0:SimulatedData@@MaxAge)
 #' }
 plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c('annual', 'bubble_data', 'bubble_residuals', 'mean'),
                              N = rowSums(obs), CAL_bins = NULL, ages = NULL, ind = 1:nrow(obs),

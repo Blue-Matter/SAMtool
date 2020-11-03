@@ -58,7 +58,7 @@ Selectivity is fixed to the maturity ogive,
 although it can be overridden with the start argument. The sole parameter estimated is R0 (unfished recruitment).
 }
 \examples{
-res <- SSS(1, Data = Red_snapper)
+res <- SSS(Data = Red_snapper)
 
 SSS_MP <- make_MP(SSS, HCR40_10, dep = 0.3) # Always assume depletion = 0.3
 }

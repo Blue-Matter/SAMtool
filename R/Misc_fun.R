@@ -1,48 +1,7 @@
 
-# Now in MSEtool 
-# 
-# #' What objects of this class are available
-# #'
-# #' Generic class finder
-# #'
-# #' Finds objects of the specified class in the global environment or in the
-# #' SAMtool and MSEtool packages. This function is an addendum to the \code{\link[MSEtool]{avail}}
-# #' function in MSEtool.
-# #'
-# #' @param classy A class of object (character string, e.g. 'Fleet')
-# #' @param all_avail Logical. If TRUE, function will return all objects of class \code{classy} available to user.
-# #' If FALSE, returns only those objects included in MSEtool.
-# #' @author Q. Huynh
-# #' @examples
-# #' avail("Assess")
-# #' avail("HCR")
-# #' avail("Stock")
-# #' avail("MP")
-# #' avail("MP", all_avail = FALSE)
-# #' @export
-# avail <- function(classy, all_avail = TRUE) {
-#   temp <- try(class(classy), silent = TRUE)
-#   if(class(temp) == "try-error") classy <- deparse(substitute(classy))
-#   if(temp == "function") classy <- deparse(substitute(classy))
-# 
-#   temp <- ls("package:SAMtool")[vapply(ls("package:SAMtool"), getclass, logical(1), classy = classy)]
-# 
-#   if(all_avail) {
-#     temp_globalenv <- ls(envir = .GlobalEnv)[vapply(ls(envir = .GlobalEnv), getclass, logical(1), classy = classy)]
-#     temp <- c(temp, temp_globalenv)
-# 
-#     temp_MSEtool <- try(MSEtool::avail(classy), silent = TRUE)
-#     if(!inherits(temp_MSEtool, "try-error")) temp <- unique(c(temp, temp_MSEtool)) %>% sort()
-#   }
-# 
-#   if(length(temp) < 1) stop("No objects of class '", classy, "' found", call. = FALSE)
-#   return(temp)
-# }
-# 
-# getclass <- function(x, classy) any(inherits(get(x), classy))
 
 TACfilter <- function(TAC) {
-  TAC[TAC < 0] <- NA_real_  # Have to robustify due to R optmization problems.. work in progress.
+  TAC[TAC < 0] <- NA_real_ 
   TAC[TAC > (mean(TAC, na.rm = TRUE) + 5 * sd(TAC, na.rm = TRUE))] <- NA_real_  # remove very large TAC samples
   return(TAC)
 }
@@ -68,8 +27,8 @@ iVB <- function(t0, K, Linf, L) max(1, ((-log(1 - L/Linf))/K + t0))  # Inverse V
 logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) {
   p <- squeeze(p)
   if(soft_bounds) {
-    p <- pmax(minp, p)
-    p <- pmin(maxp, p)
+    p <- pmax(p, minp)
+    p <- pmin(p, maxp)
   }
   log(p/(1 - p))
 }
@@ -243,7 +202,7 @@ sample_steepness3 <- function(n, mu, cv, SR_type = c("BH", "Ricker")) {
     sigma <- mu * cv
     mu.beta.dist <- (mu - 0.2)/0.8
     sigma.beta.dist <- sigma/0.8
-    beta.par <- derive_beta_par(mu.beta.dist, sigma.beta.dist)
+    beta.par <- MSEtool::derive_beta_par(mu.beta.dist, sigma.beta.dist)
     h.transformed <- rbeta(n, beta.par[1], beta.par[2])
     h <- 0.8 * h.transformed + 0.2
     h[h > 0.99] <- 0.99

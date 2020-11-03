@@ -64,18 +64,13 @@
 #' }
 #' @examples
 #' #### Observation-error delay difference model
-#' res <- cDD(Data = MSEtool::SimulatedData)
-#'
-#' # Provide starting values
-#' start <- list(R0 = 1000, h = 0.95)
-#' res <- cDD(Data = MSEtool::SimulatedData, start = start)
-#'
-#' summary(res@@SD) # Parameter estimates
+#' res <- cDD(Data = MSEtool::Red_snapper)
 #'
 #' ### State-space version
-#' ### Set recruitment variability SD = 0.6 (since fix_tau = TRUE)
-#' res <- cDD_SS(Data = SimulatedData, start = list(tau = 0.6))
+#' ### Also set recruitment variability SD = 0.6 (since fix_tau = TRUE)
+#' res <- cDD_SS(Data = MSEtool::Red_snapper, start = list(tau = 0.6))
 #'
+#' summary(res@@SD) # Parameter estimates
 #' @seealso \link{DD_TMB} \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @export
 cDD <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL, fix_h = TRUE,

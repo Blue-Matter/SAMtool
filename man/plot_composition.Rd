@@ -65,13 +65,9 @@ Plots annual length or age composition data.
 }
 \examples{
 \donttest{
-data(Red_snapper)
-plot_composition(obs = Red_snapper@CAA[1, , ], plot_type = "annual")
-plot_composition(obs = Red_snapper@CAA[1, , ], plot_type = "bubble_data")
-
-plot_composition(obs = Red_snapper@CAL[1, , ], plot_type = "annual", Red_snapper@CAL_bins[1:43])
-plot_composition(obs = Red_snapper@CAL[1, , ], plot_type = "bubble_data",
-CAL_bins = Red_snapper@CAL_bins[1:43])
+plot_composition(obs = SimulatedData@CAA[1, 1:16, ])
+plot_composition(obs = SimulatedData@CAA[1, , ], plot_type = "bubble_data", 
+                 ages = 0:SimulatedData@MaxAge)
 }
 }
 \author{

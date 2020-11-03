@@ -88,7 +88,7 @@ and default arguments for configuring \link{SP}.
 }}
 
 \examples{
-avail("MP", all_avail = FALSE)
+MSEtool::avail("MP", package = "SAMtool")
 
 \dontrun{
 myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_MSY", "SCA_4010"))
