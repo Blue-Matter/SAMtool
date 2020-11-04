@@ -90,7 +90,7 @@ makemov<-function(fracs = c(0.1, 0.2, 0.3, 0.4), prob = c(0.5, 0.8, 0.9, 0.95)){
   opt <- nlminb(start = obj$par, objective = obj$fn, gradient = obj$gr)
 
   if(length(prob) == 1) params.new <- list(log_visc = opt$par[1], log_grav = opt$par[2:nareas])
-  if(length(prob) == nareas)params.new <- list(log_visc = opt$par[1:nareas], log_grav = opt$par[nareas+(1:(nareas-1))])
+  if(length(prob) == nareas) params.new <- list(log_visc = opt$par[1:nareas], log_grav = opt$par[nareas+(1:(nareas-1))])
 
   info <- list(data = data, params = params.new)
   obj.new <- MakeADFun(data = info$data, parameters = info$params, DLL = "SAMtool", silent = TRUE)

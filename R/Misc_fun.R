@@ -43,15 +43,20 @@ ilogitm <- function(x) {
 
 
 optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 1) {
+  
+  old_warn <- options()$warn
+  options(warn = -1)
+  on.exit(options(warn = old_warn))
+  
   restart <- as.integer(restart)
   if(is.null(obj$env$random) && use_hessian) h <- obj$he else h <- NULL
   low <- rep(-Inf, length(obj$par))
   if(any(c("U_equilibrium", "F_equilibrium") %in% names(obj$par))) {
     low[match(c("U_equilibrium", "F_equilibrium"), names(obj$par))] <- 0
   }
-  opt <- suppressWarnings(tryCatch(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low), error = as.character))
+  opt <- try(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low), silent = TRUE)
   if(is.character(opt) && all(is.na(obj$gr()))) {
-    opt <- suppressWarnings(tryCatch(nlminb(obj$par, obj$fn, hessian = h, control = control, lower = low), error = as.character))
+    opt <- try(nlminb(obj$par, obj$fn, hessian = h, control = control, lower = low), silent = TRUE)
   }
   SD <- get_sdreport(obj, opt)
 
@@ -66,14 +71,19 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
 
 
 get_sdreport <- function(obj, opt) {
+  
+  old_warn <- options()$warn
+  options(warn = -1)
+  on.exit(options(warn = old_warn))
+  
   if(is.character(opt)) par.fixed <- NULL else par.fixed <- opt$par
   if(is.null(obj$env$random) && !is.character(opt)) h <- obj$he(opt$par) else h <- NULL
 
-  res <- tryCatch(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), error = as.character)
+  res <- try(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), silent = TRUE)
 
   if(!is.character(res) && !is.character(opt) && !is.null(h) && !res$pdHess) {
     h <- optimHess(opt$par, obj$fn, obj$gr)
-    res <- tryCatch(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), error = as.character)
+    res <- try(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), silent = TRUE)
   }
 
   if(inherits(res, "sdreport") && res$pdHess && all(is.nan(res$cov.fixed))) {
