@@ -36,7 +36,8 @@ setMethod("plot", signature(x = "prof", y = "missing"),
               z.mat <- acast(x@grid, as.list(x@Par), value.var = "nll")
               x.mat <- as.numeric(dimnames(z.mat)[[1]])
               y.mat <- as.numeric(dimnames(z.mat)[[2]])
-              contour(x = x.mat, y = y.mat, z = z.mat, xlab = x@Par[1], ylab = x@Par[2], nlevels = contour_levels)
+              contour(x = x.mat, y = y.mat, z = z.mat - min(z.mat, na.rm = TRUE), 
+                      xlab = x@Par[1], ylab = x@Par[2], nlevels = contour_levels)
               points(x@MLE[1], x@MLE[2], col = "red", cex = 1.5, pch = 16)
 
               if(x@MLE[1] >= min(x.mat) && x@MLE[1] <= max(x.mat) && x@MLE[2] >= min(y.mat) && x@MLE[2] <= max(y.mat)) {
@@ -47,10 +48,11 @@ setMethod("plot", signature(x = "prof", y = "missing"),
             } else {
               profile_par <- x@Par
               x.plot <- getElement(x@grid, profile_par)
-              y.plot <- getElement(x@grid, "nll")
-              plot(x = x.plot, y = y.plot, xlab = profile_par, ylab = "Change in neg. log-likelihood", typ = "l")
+              y.plot <- getElement(x@grid, "nll") - min(getElement(x@grid, "nll"), na.rm = TRUE)
+              plot(x.plot, y.plot, xlab = profile_par, ylab = "Change in neg. log-likelihood", typ = "n")
               abline(h = 0, col = "grey")
-              points(getElement(x@grid, profile_par), getElement(x@grid, "nll"), pch = 16)
+              lines(x.plot, y.plot)
+              points(x.plot, y.plot, pch = 16)
               abline(v = x@MLE, lty = 2)
 
               if(x@MLE >= min(x.plot) && x@MLE <= max(x.plot)) {
