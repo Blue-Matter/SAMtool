@@ -167,7 +167,7 @@ projection_SCA <- projection_SCA_Pope <- function(Assessment, constrain = c("F",
                      FMort = FMort, Catch = Catch, constrain = constrain, TMB_report = TMB_report, TMB_data = TMB_data,
                      Pope = Pope, max_F = max_F)
 
-  CAApred <- array(unlist(lapply(p_output, getElement, "CAApred")), dim = c(50, 15, p_sim))
+  CAApred <- lapply(p_output, getElement, "CAApred") %>% simplify2array()
 
   output <- new("project", Catch = do.call(rbind, lapply(p_output, getElement, "Cpred")),
                 C_at_age = aperm(CAApred, c(3, 1, 2)),

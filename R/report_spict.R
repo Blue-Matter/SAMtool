@@ -111,7 +111,7 @@ retrospective_spict <- function(Assessment, nyr) {
     rbind(out, mNA)
   }
 
-  retro_ts <- lapply(0:nyr, lapply_fn) %>% unlist() %>% array(c(ny, 5, nyr + 1)) %>% aperm(c(3, 1, 2)) %>%
+  retro_ts <- lapply(0:nyr, lapply_fn) %>% simplify2array() %>% aperm(c(3, 1, 2)) %>%
     structure(dimnames = list(Peel = 0:nyr, Year = Year, Var = TS_var))
 
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts)

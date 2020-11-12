@@ -195,7 +195,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
       rbind(x, y)
     }
     V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix)
-    OM@cpars$V <- unlist(V) %>% array(c(nyears + proyears, maxage + 1, nsim)) %>% aperm(c(3, 2, 1))
+    OM@cpars$V <- simplify2array(V) %>% aperm(c(3, 2, 1))
     OM@cpars$Find <- do.call(rbind, apical_F)
     message("Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.")
     message("Selectivity during projection period is set to that in most recent historical year.")
@@ -379,7 +379,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
       real_Data@AddIndType <- vapply(s_sel, process_AddIndType, numeric(1), nfleet = nfleet)
       real_Data@AddIndV <- lapply(1:nsurvey, process_AddIndV, Misc = output@Misc, s_sel = s_sel,
                                   n_age = maxage + 1, nfleet = nfleet, nyears = nyears) %>%
-        unlist() %>% array(c(OM@nsim, maxage + 1, nsurvey)) %>% aperm(c(1, 3, 2))
+        simplify2array() %>% aperm(c(1, 3, 2))
       real_Data@AddIunits <- data$I_units
       message("Historical indices added to OM@cpars$Data@AddInd.")
     }
