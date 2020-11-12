@@ -48,7 +48,7 @@ Type RCM(objective_function<Type> *obj) {
   DATA_INTEGER(nfleet);   // Number of fleets
   DATA_INTEGER(nsurvey);  // Number of surveys
 
-  DATA_MATRIX(M);         // Natural mortality at age
+  DATA_MATRIX(M_data);    // Natural mortality at age and year, overridden if there's a prior for log_M
   DATA_MATRIX(len_age);   // Length-at-age
   DATA_SCALAR(Linf);      // Linf
   DATA_MATRIX(SD_LAA);    // Length-at-age SD (year x age)
@@ -76,9 +76,13 @@ Type RCM(objective_function<Type> *obj) {
   DATA_IVECTOR(yind_F);   // When condition = "catch", the year in F's are estimated and all other F parameters are deviations from this F
   DATA_INTEGER(nit_F);    // When condition = "catch2", the number of iterations for Newton-Raphson method to solve for F
   DATA_INTEGER(plusgroup) // Boolean, whether the maximum age in the plusgroup is modeled.
+  
+  DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
+  DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see RCM_prior fn)
 
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
+  PARAMETER(log_M);                     // Age and time constant M (only if there's a prior, then it will override M_data)
   PARAMETER_MATRIX(vul_par);            // Matrix of vul_par 3 rows and nsel_block columns
   PARAMETER_MATRIX(s_vul_par);          // Matrix of selectivity parameters, 3 rows and nsurvey columns
   PARAMETER_VECTOR(log_q_effort);       // log_q for F when condition = "effort"
@@ -101,12 +105,23 @@ Type RCM(objective_function<Type> *obj) {
     h = exp(transformed_h);
   }
   h += 0.2;
-
+  Type Mest = exp(log_M);
+  matrix<Type> M(n_y, n_age);
+  for(int y=0;y<n_y;y++) {
+    for(int a=0;a<n_age;a++) {
+      if(use_prior(2)) {
+        M(y,a) = Mest;
+      } else {
+        M(y,a) = M_data(y,a);
+      }
+    }
+  }
   Type tau = exp(log_tau);
-
-  // Vulnerability (length-based) and F parameters
+  
   Type penalty = 0;
-  Type prior = 0.;
+  Type prior = 0;
+  
+  // Vulnerability (length-based) and F parameters
   vector<Type> LFS(nsel_block);
   vector<Type> L5(nsel_block);
   vector<Type> Vmaxlen(nsel_block);
@@ -298,8 +313,7 @@ Type RCM(objective_function<Type> *obj) {
     }
   }
 
-  // Calculate nuisance parameters and likelihood
-  // Survey selectivity
+  // Calculate survey q, selectivity, and age/length comps
   vector<Type> s_LFS(nsurvey);
   vector<Type> s_L5(nsurvey);
   vector<Type> s_Vmaxlen(nsurvey);
@@ -332,9 +346,12 @@ Type RCM(objective_function<Type> *obj) {
       }
     }
     if(!I_units(sur)) s_BN.col(sur) = s_CN.col(sur); // Abundance vulnerable to survey
-    q(sur) = calc_q(I_hist, s_BN, sur, sur, Ipred, abs_I);
+    q(sur) = calc_q(I_hist, s_BN, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
   }
 
+  // Calc likelihood and parameter prior
+  prior -= RCM_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
+    
   vector<Type> nll_Catch(nfleet);
   vector<Type> nll_Index(nsurvey);
   vector<Type> nll_s_CAA(nsurvey);
@@ -436,6 +453,10 @@ Type RCM(objective_function<Type> *obj) {
 
   if(CppAD::Variable(R0x)) ADREPORT(R0);
   ADREPORT(h);
+  if(use_prior(2)) {
+    ADREPORT(Mest);
+    REPORT(Mest);
+  }
   if(CppAD::Variable(log_tau)) ADREPORT(tau);
   if(condition == "effort") ADREPORT(q_effort);
   if(nll_Index.sum() != 0) ADREPORT(q);

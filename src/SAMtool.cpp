@@ -13,7 +13,7 @@ Type objective_function<Type>::operator() ()
   } else if(model == "grav") {
     return grav(this);
   } else if(model == "grav_Pbyarea") {
-	return grav_Pbyarea(this);
+    return grav_Pbyarea(this);
   } else if(model == "SCA") {
     return SCA(this);
   } else if(model == "SCA2") {

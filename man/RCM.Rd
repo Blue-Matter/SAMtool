@@ -20,6 +20,7 @@ RCM(OM, data, ...)
   LWT = list(),
   comp_like = c("multinomial", "lognormal"),
   ESS = c(30, 30),
+  prior = list(),
   max_F = 3,
   cores = 1L,
   integrate = FALSE,
@@ -39,6 +40,7 @@ RCM(OM, data, ...)
   LWT = list(),
   comp_like = c("multinomial", "lognormal"),
   ESS = c(30, 30),
+  prior = list(),
   max_F = 3,
   cores = 1L,
   integrate = FALSE,
@@ -78,6 +80,11 @@ see Additional arguments section for setup of survey selectivity parameters. See
 \item{ESS}{If \code{comp_like = "multinomial"}, a numeric vector of length two to cap the maximum effective samples size of the age and length compositions,
 respectively, for the multinomial likelihood function. The effective sample size of an age or length composition sample is the minimum of ESS or the number of observations
 (sum across columns). For more flexibility, set ESS to be very large and alter the age and length arrays as needed.}
+
+\item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0 and M priors
+lognormal (mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors.
+For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). For all others, provide a length-2 vector for the mean and SD.
+See vignette for full description.}
 
 \item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also `drop_highF`.}
 

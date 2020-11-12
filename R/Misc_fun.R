@@ -15,10 +15,7 @@ TACfilter <- function(TAC) {
 #' }
 #' @seealso \link[MSEtool]{userguide}
 #' @export
-userguide <- function() {
-  #message("For the MSEtool user guide, type in \"MSEtool::userguide()\" to the console.")
-  browseVignettes("SAMtool")
-}
+userguide <- function() browseVignettes("SAMtool")
 
 
 squeeze <- function(x) (1 - .Machine$double.eps) * (x - 0.5) + 0.5

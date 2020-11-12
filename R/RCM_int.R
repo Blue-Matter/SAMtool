@@ -1,7 +1,7 @@
 
 #' @importFrom mvtnorm rmvnorm
 RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
+                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                     drop_highF = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
@@ -70,7 +70,10 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
 
   # SR
   message(ifelse(OM@SRrel == 1, "Beverton-Holt", "Ricker"), " stock-recruitment relationship used.")
-
+  
+  # Generate priors
+  prior <- make_prior(prior, nsurvey, OM@SRrel)
+  
   # Test for identical sims
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, ObsPars, data, dots)
 
@@ -79,10 +82,10 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
 
     message("\nResample = TRUE. Running mean fit model first...")
     mean_fit_output <- RCM_est(data = data, selectivity = sel, s_selectivity = s_sel,
-                                     SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
-                                     max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                                     FleetPars = FleetPars, mean_fit = TRUE, dots = dots)
-
+                               SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
+                               prior = prior, max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                               FleetPars = FleetPars, mean_fit = TRUE, dots = dots)
+    
     if(length(mean_fit_output) > 0 && !mean_fit_output$report$conv) {
       warning("Mean fit model did not appear to converge. Will not be able to sample the covariance matrix.")
       message("Model did not converge. Returning the mean-fit model for evaluation.")
@@ -116,7 +119,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
 
       mean_fit_output <- RCM_est(data = data, selectivity = sel, s_selectivity = s_sel,
                                  SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
-                                 max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                                 prior = prior, max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                  FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
 
       mod <- lapply(1:nsim, function(x) return(mean_fit_output))
@@ -127,21 +130,21 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
       if(snowfall::sfIsRunning()) {
         mod <- snowfall::sfClusterApplyLB(1:nsim, RCM_est, data = data, selectivity = sel, s_selectivity = s_sel,
                                           SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
-                                          max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                                          prior = prior, max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                           FleetPars = FleetPars, control = control, dots = dots)
       } else {
         mod <- lapply(1:nsim, RCM_est, data = data, selectivity = sel, s_selectivity = s_sel,
                       SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
-                      max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                      prior = prior, max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                       FleetPars = FleetPars, control = control, dots = dots)
       }
 
       if(mean_fit) { ### Fit to life history means if mean_fit = TRUE
         message("Generating additional model fit from mean values of parameters in the operating model...\n")
         mean_fit_output <- RCM_est(data = data, selectivity = sel, s_selectivity = s_sel,
-                                         SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
-                                         max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                                         FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
+                                   SR_type = ifelse(OM@SRrel == 1, "BH", "Ricker"), LWT = data$LWT, comp_like = comp_like, ESS = ESS,
+                                   prior = prior, max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                                   FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
 
         if(!mean_fit_output$report$conv) warning("Mean fit model did not appear to converge.")
       } else mean_fit_output <- list()
@@ -318,9 +321,17 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   } else {
     OM@cpars$Mat_age <- StockPars$Mat_age
   }
-  OM@cpars$M_ageArray <- StockPars$M_ageArray
-
-  OM@cpars$h <- StockPars$hs
+  if(prior$use_prior[2]) {
+    OM@cpars$h <- vapply(res, getElement, numeric(1), "h")
+  } else {
+    OM@cpars$h <- StockPars$hs
+  }
+  if(prior$use_prior[3]) {
+    OM@cpars$M_ageArray <- vapply(res, getElement, numeric(1), "Mest") %>% array(c(nsim, maxage+1, nyears + proyears))
+  } else {
+    OM@cpars$M_ageArray <- StockPars$M_ageArray
+  }
+  
 
   if(any(data$CAL > 0, na.rm = TRUE) || (any(data$MS > 0, na.rm = TRUE) & data$MS_type == "length") ||
      any(data$s_CAL > 0, na.rm = TRUE)) {
@@ -342,7 +353,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   CAL_pred <- array(sapply(res[keep], getElement, "CALpred"), c(nyears, length(data$length_bin), nfleet, sum(keep)))
 
   output <- new("RCModel", OM = Sub_cpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
-                CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = data, Misc = res[keep])
+                CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = c(data, prior), Misc = res[keep])
 
   # Data in cpars
   if(sum(output@data$Chist > 0, na.rm = TRUE) || nsurvey > 0) {
@@ -412,7 +423,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
 
 
 RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "Ricker"), LWT = list(),
-                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30),
+                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
                     max_F = 3, integrate = FALSE, StockPars, ObsPars, FleetPars, mean_fit = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), dots = list()) {
   
@@ -523,7 +534,8 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
                        s_CAL_hist = data$s_CAL, s_CAL_n = s_CAL_n, length_bin = data$length_bin, msize = data$MS, msize_type = data$MS_type,
                        sel_block = rbind(data$sel_block, data$sel_block[nyears, ]), nsel_block = data$nsel_block,
                        n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
-                       M = t(StockPars$M_ageArray[x, , 1:nyears]), len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
+                       M_data = if(prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
+                       len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
                        Linf = ifelse(age_only_model, n_age, StockPars$Linf[x]),
                        SD_LAA = t(StockPars$LatASD[x, , 1:nyears]), wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
                        mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]), vul_type = as.integer(selectivity),
@@ -531,7 +543,8 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
                        I_units = as.integer(data$I_units), age_error = data$age_error,
                        SR_type = SR_type, LWT_C = LWT_C, LWT_Index = LWT_Index, comp_like = comp_like,
                        max_F = max_F, rescale = rescale, ageM = min(nyears, ceiling(StockPars$ageM[x, 1])),
-                       yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup)
+                       yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup,
+                       use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
 
   if(data$condition == "catch" || data$condition == "catch2") {
     TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = data$C_eq, sigma_C = data$C_sd, sigma_Ceq = data$C_eq_sd, E_hist = E_hist, E_eq = rep(0, nfleet))
@@ -605,8 +618,9 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
     map_s_vul_par <- dots$map_s_vul_par
   }
   
-  TMB_params <- list(R0x = ifelse(TMB_data_all$nll_C | data$condition == "catch2", log(StockPars$R0[x] * rescale), 0),
-                     transformed_h = transformed_h, vul_par = vul_par, s_vul_par = s_vul_par,
+  TMB_params <- list(R0x = ifelse(TMB_data_all$nll_C | data$condition == "catch2" | prior$use_prior[1], log(StockPars$R0[x] * rescale), 0),
+                     transformed_h = transformed_h, log_M = log(mean(StockPars$M_ageArray[x, , nyears])),
+                     vul_par = vul_par, s_vul_par = s_vul_par,
                      log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
                      log_F_equilibrium = rep(log(0.05), nfleet),
                      log_CV_msize = log(data$MS_cv), log_tau = log(StockPars$procsd[x]),
@@ -617,8 +631,10 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   
 
   map <- list()
-  if(data$condition == "effort" && !TMB_data_all$nll_C) map$R0x <- factor(NA)
-  map$transformed_h <- map$log_tau <- factor(NA)
+  if(data$condition == "effort" && !TMB_data_all$nll_C && !prior$use_prior[1]) map$R0x <- factor(NA)
+  if(!prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if(!prior$use_prior[3]) map$log_M <- factor(NA)
+  map$log_tau <- factor(NA)
   map$vul_par <- factor(map_vul_par)
   map$s_vul_par <- factor(map_s_vul_par)
   if(data$condition != "effort") {
@@ -649,7 +665,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   TMB_data$est_rec_dev <- ifelse(is.na(map$log_rec_dev), 0, 1)
 
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev") else random <- NULL
-
+  
   obj <- MakeADFun(data = c(TMB_data, TMB_data_all), parameters = TMB_params, map = map, random = random,
                    inner.control = inner.control, DLL = "SAMtool", silent = TRUE)
 
@@ -793,7 +809,12 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
 
 RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic_SSB0 = TRUE) {
   data <- obj$env$data
-  report$F_at_age <- report$Z - data$M
+  if(data$use_prior[3]) {
+    M <- matrix(report$Mest, data$n_y, data$n_age)
+  } else {
+    M <- data$M_data
+  }
+  report$F_at_age <- report$Z - M
   report$NPR_unfished <- do.call(rbind, report$NPR_unfished)
   length_bin <- obj$env$data$length_bin
   
@@ -949,25 +970,26 @@ RCM_retro_subset <- function(yr, data, params, map) {
   ##### Data object
   data_out <- structure(data, check.passed = NULL)
 
-  mat <- c("C_hist", "E_hist", "I_hist", "sigma_I", "CAA_n", "CAL_n", "s_CAA_n", "s_CAL_n", "msize", "M")
-  mat_ind <- match(mat, names(data_out))
-  data_out[mat_ind] <- lapply(data_out[mat_ind], function(x) x[1:yr, , drop = FALSE])
+  #mat <- c("C_hist", "E_hist", "I_hist", "msize")
+  #mat_ind <- match(mat, names(data_out))
+  #data_out[mat_ind] <- lapply(data_out[mat_ind], function(x) x[1:yr, , drop = FALSE])
 
-  mat2 <- c("len_age", "wt", "mat", "sel_block")
+  #mat2 <- c("len_age", "wt", "mat", "sel_block")
+  mat2 <- "sel_block"
   mat_ind2 <- match(mat2, names(data_out))
-  data_out[mat_ind2] <- lapply(data_out[mat_ind2], function(x) x[1:(yr+1), , drop = FALSE])
+  data_out[match("sel_block", names(data_out))] <- lapply(data_out[mat_ind2], function(x) x[1:(yr+1), , drop = FALSE])
 
   # Update nsel_block, n_y
   data_out$nsel_block <- data_out$sel_block %>% as.vector() %>% unique() %>% length()
   data_out$n_y <- yr
 
   # Array 1:yr first index
-  arr <- c("CAA_hist", "CAL_hist", "s_CAA_hist", "s_CAL_hist")
-  arr_ind <- match(arr, names(data_out))
-  data_out[arr_ind] <- lapply(data_out[arr_ind], function(x) x[1:yr, , , drop = FALSE])
+  #arr <- c("CAA_hist", "CAL_hist", "s_CAA_hist", "s_CAL_hist")
+  #arr_ind <- match(arr, names(data_out))
+  #data_out[arr_ind] <- lapply(data_out[arr_ind], function(x) x[1:yr, , , drop = FALSE])
 
   # Vector 1:yr
-  data_out$est_rec_dev <- data_out$est_rec_dev[1:yr]
+  #data_out$est_rec_dev <- data_out$est_rec_dev[1:yr]
 
   ##### Parameters
   params_out <- structure(params, check.passed = NULL)

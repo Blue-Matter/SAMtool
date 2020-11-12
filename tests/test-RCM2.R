@@ -1,33 +1,31 @@
 library(SAMtool)
 
 ############ Condition operating models with SRA_scope and data
-SRA_data <- readRDS("tests/Data_files/IYE_data.rds")
+#SRA_data <- readRDS("tests/Data_files/IYE_data.rds")
+#SRA_data$s_CAA[!is.na(SRA_data$s_CAA[, 80, 1]), 81, 1] <- 0
+#saveRDS(SRA_data, file = "tests/Data_files/IYE_data.rds")
 
-SRA_data$s_CAA[!is.na(SRA_data$s_CAA[, 80, 1]), 81, 1] <- 0
-
-saveRDS(SRA_data, file = "tests/Data_files/IYE_data.rds")
-
-
-
-data_names <- c("Chist", "Index", "I_sd", "I_type", "length_bin", "s_CAA", "CAA", "CAL", "I_units")
-data_ind <- match(data_names, names(SRA_data))
-
-OM_condition <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
-
+#data_names <- c("Chist", "Index", "I_sd", "I_type", "length_bin", "s_CAA", "CAA", "CAL", "I_units")
+#data_ind <- match(data_names, names(SRA_data))
+#OM_condition <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
 
 # Base
 SRA_data <- readRDS("tests/Data_files/IYE_data.rds")
-OM_conditon <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
+OM_condition <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
+data_names <- c("Chist", "Index", "I_sd", "I_type", "length_bin", "s_CAA", "CAA", "CAL", "I_units")
+data_ind <- match(data_names, names(SRA_data))
 
-SRA <- RCM(OM_condition, data = SRA_data[data_ind], condition = "catch2", selectivity = rep("free", 2),
+SRA <- RCM(OM = OM_condition, data = SRA_data[data_ind], condition = "catch2", selectivity = rep("free", 2),
            s_selectivity = rep("logistic", 5), cores = 1,
            vul_par = SRA_data$vul_par, map_vul_par = matrix(NA, 81, 2),
            map_s_vul_par = SRA_data$map_s_vul_par, map_log_rec_dev = SRA_data$map_log_rec_dev,
+           prior = list(M = c(0.02, 0.05)),
            LWT = list(CAL = 0, CAA = 0))
+SRA@OM@MPA <- FALSE
 saveRDS(SRA, "tests/Data_files/IYE_SRA.rds")
 
 SRA <- readRDS("tests/Data_files/IYE_SRA.rds")
-ret <- retrospective(SRA, 2, figure = FALSE)
+ret <- retrospective(SRA, 3)
 
 saveRDS(ret, "tests/Data_files/IYE_ret.rds")
 ret <- readRDS("tests/Data_files/IYE_ret.rds")
@@ -39,6 +37,14 @@ Hist <- runMSE(SRA@OM, Hist = TRUE)
 
 N <- SRA@mean_fit$report$N[1:102, ]
 NOM <- Hist@AtAge$Number[1, , , ] %>% apply(c(1, 2), sum) %>% t()
+
+
+# Let's play with some priors
+
+
+
+
+
 
 ########
 # Cod
