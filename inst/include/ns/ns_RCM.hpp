@@ -174,30 +174,7 @@ array<Type> calc_vul_sur(matrix<Type> vul_par, vector<int> vul_type, matrix<Type
 }
 
 
-// Calculates analytical solution of catchability when conditioned on catch and
-// index is lognormally distributed.
-template<class Type>
-Type calc_q(matrix<Type> I_y, matrix<Type> B_y, int sur, int ff, matrix<Type> &Ipred, vector<int> abs_I, int n_y) {
-  Type q;
-  if(abs_I(sur)) {
-    q = Type(1);
-  } else {
-    Type num = 0.;
-    Type n_y = 0.;
-
-    for(int y=0;y<n_y;y++) {
-      if(!R_IsNA(asDouble(I_y(y,sur))) && I_y(y,sur)>0) {
-        num += log(I_y(y,sur)/B_y(y,ff));
-        n_y += 1.;
-      }
-    }
-    q = exp(num/n_y);
-  }
-  for(int y=0;y<n_y;y++) Ipred(y,sur) = q * B_y(y,ff);
-  return q;
-}
-
-
+  
 // Multinomial likelihood
 template<class Type>
 Type comp_multinom(array<Type> obs, array<Type> pred, matrix<Type> N, matrix<Type> N_samp, int y, int n_bin, int ff) {

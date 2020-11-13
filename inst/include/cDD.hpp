@@ -8,7 +8,7 @@
 template<class Type>
 Type cDD(objective_function<Type> *obj) {
   using namespace ns_cDD;
-
+  
   DATA_SCALAR(M);
   DATA_SCALAR(Winf);
   DATA_SCALAR(Kappa);
@@ -117,7 +117,7 @@ Type cDD(objective_function<Type> *obj) {
   }
 
   //--ARGUMENTS FOR NLL
-  vector<Type> q = calc_q(I_hist, B, N, Ipred, nsurvey, I_units);
+  vector<Type> q = calc_q(I_hist, B, N, Ipred, nsurvey, I_units, ny);
 
   // Objective function
   //creates storage for jnll and sets value to 0

@@ -133,7 +133,7 @@ Type DD(objective_function<Type> *obj) {
   // Objective function
   //creates storage for nll and sets value to 0
   vector<Type> q(nsurvey);
-  if(condition == "catch") q = calc_q(I_hist, B, N, Ipred, nsurvey, I_units);
+  if(condition == "catch") q = calc_q(I_hist, B, N, Ipred, nsurvey, I_units, ny);
 
   vector<Type> nll_comp(nsurvey + 1);
   nll_comp.setZero();

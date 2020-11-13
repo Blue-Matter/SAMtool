@@ -461,8 +461,8 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
     s_CAL_n <- pmin(s_CAL_n, ESS[2])
   }
 
-  LWT_C <- matrix(c(LWT$Chist, LWT$CAA, LWT$CAL, LWT$MS, LWT$C_eq), nrow = nfleet, ncol = 5)
-  LWT_Index <- cbind(LWT$Index, LWT$s_CAA, LWT$s_CAL)
+  LWT_fleet <- cbind(LWT$Chist, LWT$C_eq, LWT$CAA, LWT$CAL, LWT$MS)
+  LWT_survey <- cbind(LWT$Index, LWT$s_CAA, LWT$s_CAL)
 
   if(mean_fit) {
     # Average across simulations for arrays: M_ageArray, Len_age, Mat_age (mean across index 1)
@@ -541,7 +541,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
                        mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]), vul_type = as.integer(selectivity),
                        s_vul_type = as.integer(s_selectivity), abs_I = data$abs_I,
                        I_units = as.integer(data$I_units), age_error = data$age_error,
-                       SR_type = SR_type, LWT_C = LWT_C, LWT_Index = LWT_Index, comp_like = comp_like,
+                       SR_type = SR_type, LWT_fleet = LWT_fleet, LWT_survey = LWT_survey, comp_like = comp_like,
                        max_F = max_F, rescale = rescale, ageM = min(nyears, ceiling(StockPars$ageM[x, 1])),
                        yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup,
                        use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
@@ -628,7 +628,6 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   if(data$condition == "catch") {
     TMB_params$log_F_dev[TMB_data_all$yind_F + 1, 1:nfleet] <- log(0.5 * mean(TMB_data_all$M[nyears, ]))
   }
-  
 
   map <- list()
   if(data$condition == "effort" && !TMB_data_all$nll_C && !prior$use_prior[1]) map$R0x <- factor(NA)

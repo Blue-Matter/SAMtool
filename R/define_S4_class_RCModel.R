@@ -261,8 +261,12 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                             zlab = "Maturity-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual maturity-at-age.")
               } else mat_persp <- NULL
 
-              NatM <- rmd_at_age(age, data_mean_fit$M[nyears, ], fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
-              if(LH_varies_fn(data_mean_fit$M)) {
+              if(data_mean_fit$use_prior[3]) {
+                NatM <- rmd_at_age(age, rep(report$Mest, length(age)), fig.cap = "Natural mortality (time constant).", label = "Natural mortality")
+              } else {
+                NatM <- rmd_at_age(age, data_mean_fit$M[nyears, ], fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
+              }
+              if(!data_mean_fit$use_prior[3] && LH_varies_fn(data_mean_fit$M)) {
                 NatM_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$M[1:nyears, ]", xlab = "Year", ylab = "Age",
                                              zlab = "Natural mortality", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual M-at-age.")
               } else NatM_persp <- NULL
@@ -1025,29 +1029,29 @@ plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = 
 }
 
 RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
-  f_nll <- rbind(x$nll_Catch + x$nll_Ceq, x$nll_CAA, x$nll_CAL, x$nll_MS)
-  f_nll[is.na(f_nll)] <- 0
-  f_nll <- cbind(f_nll, rowSums(f_nll))
-  f_nll <- rbind(f_nll, colSums(f_nll))
-  colnames(f_nll) <- c(f_name, "Sum")
-  rownames(f_nll) <- c("Catch", "CAA", "CAL", "Mean Size", "Sum")
+  nll_fleet <- x$nll_fleet %>% t()
+  nll_fleet[is.na(nll_fleet)] <- 0
+  nll_fleet <- cbind(nll_fleet, rowSums(nll_fleet))
+  nll_fleet <- rbind(nll_fleet, colSums(nll_fleet))
+  colnames(nll_fleet) <- c(f_name, "Sum")
+  rownames(nll_fleet) <- c("Catch", "Equilibrium Catch", "CAA", "CAL", "Mean Size", "Sum")
 
-  f_wt <- structure(rbind(LWT$Chist, LWT$CAA, LWT$CAL, LWT$MS), dimnames = list(rownames(f_nll)[1:4], f_name))
+  wt_fleet <- rbind(LWT$Chist, LWT$C_eq, LWT$CAA, LWT$CAL, LWT$MS) %>% structure(dimnames = list(rownames(nll_fleet)[1:5], f_name))
+  
+  nll_survey <- x$nll_survey %>% t()
+  nll_survey[is.na(nll_survey)] <- 0
+  nll_survey <- cbind(nll_survey, rowSums(nll_survey))
+  nll_survey <- rbind(nll_survey, colSums(nll_survey))
+  colnames(nll_survey) <- c(s_name, "Sum")
+  rownames(nll_survey) <- c("Index", "CAA", "CAL", "Sum")
 
-  s_nll <- rbind(x$nll_Index, x$nll_s_CAA, x$nll_s_CAL)
-  s_nll[is.na(s_nll)] <- 0
-  s_nll <- cbind(s_nll, rowSums(s_nll))
-  s_nll <- rbind(s_nll, colSums(s_nll))
-  colnames(s_nll) <- c(s_name, "Sum")
-  rownames(s_nll) <- c("Index", "CAA", "CAL", "Sum")
+  wt_survey <- rbind(LWT$Index, LWT$s_CAA, LWT$s_CAL) %>% structure(dimnames = list(rownames(nll_survey)[1:3], s_name))
 
-  s_wt <- structure(rbind(LWT$Index, LWT$s_CAA, LWT$s_CAL), dimnames = list(rownames(s_nll)[1:3], s_name))
+  tot <- c(x$nll, x$nll_log_rec_dev, nll_fleet[6, length(f_name) + 1], nll_survey[4, length(s_name) + 1], x$penalty, x$prior) %>% matrix(ncol = 1)
+  dimnames(tot) <- list(c("Total", "Recruitment Deviations", "Fleets", "Surveys", "Penalty (High F)", "Priors"), 
+                        "Negative log-likelihood")
 
-  tot <- matrix(c(x$nll_log_rec_dev, f_nll[5, length(f_name) + 1], s_nll[4, length(s_name) + 1]), ncol = 1)
-  tot <- rbind(colSums(tot), tot)
-  dimnames(tot) <- list(c("Total", "Recruitment Deviations", "Fleets", "Surveys"), "Negative log-likelihood")
-
-  res <- list(tot, f_nll, f_wt, s_nll, s_wt) %>% lapply(FUN = function(xx) xx %>% round(2) %>% as.data.frame())
+  res <- list(tot, nll_fleet, wt_fleet, nll_survey, wt_survey) %>% lapply(FUN = function(xx) xx %>% round(2) %>% as.data.frame())
   return(res)
 }
 

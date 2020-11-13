@@ -98,22 +98,13 @@ Type calc_q(vector<Type> I_y, vector<Type> B_y) {
 
 template<class Type>
 Type calc_q(vector<Type> I_y, vector<Type> B_y, vector<Type> &Ipred_y) {
-  Type num = 0.;
-  Type n_y = 0.;
-  
-  for(int y=0;y<I_y.size();y++) {
-    if(!R_IsNA(asDouble(I_y(y))) && I_y(y)>0) {
-      num += log(I_y(y)/B_y(y));
-      n_y += 1.;
-    }
-  }
-  Type q = exp(num/n_y);
+  Type q = calc_q(I_y, B_y);
   for(int y=0;y<Ipred_y.size();y++) Ipred_y(y) = q * B_y(y);
   return q;
 }
 
 
-
+// For SP, SCA
 template<class Type>
 vector<Type> calc_q(matrix<Type> I_y, vector<Type> B_y, matrix<Type> &Ipred, int nsurvey) {
   vector<Type> q(nsurvey);
@@ -126,9 +117,10 @@ vector<Type> calc_q(matrix<Type> I_y, vector<Type> B_y, matrix<Type> &Ipred, int
   return q;
 }
 
+// For DD, cDD
 template<class Type>
 vector<Type> calc_q(matrix<Type> I_y, vector<Type> B_y, vector<Type> N_y, matrix<Type> &Ipred, int nsurvey,
-                    vector<int> I_units) {
+                    vector<int> I_units, int n_y) {
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
     vector<Type> I_vec = I_y.col(sur);
@@ -137,7 +129,7 @@ vector<Type> calc_q(matrix<Type> I_y, vector<Type> B_y, vector<Type> N_y, matrix
     } else {
       q(sur) = calc_q(I_vec, N_y);
     }
-    for(int y=0;y<I_y.rows();y++) {
+    for(int y=0;y<n_y;y++) {
       if(I_units(sur)) {
         Ipred(y,sur) = q(sur) * B_y(y);
       } else {
@@ -147,6 +139,23 @@ vector<Type> calc_q(matrix<Type> I_y, vector<Type> B_y, vector<Type> N_y, matrix
   }
   return q;
 }
+
+
+// For RCM
+template<class Type>
+Type calc_q(matrix<Type> I_y, matrix<Type> B_y, int sur, int ff, matrix<Type> &Ipred, vector<int> abs_I, int n_y) {
+  Type q;
+  if(abs_I(sur)) {
+    q = Type(1);
+  } else {
+    vector<Type> I_vec = I_y.col(sur);
+    vector<Type> B_vec = B_y.col(ff);
+    q = calc_q(I_vec, B_vec);
+  }
+  for(int y=0;y<n_y;y++) Ipred(y,sur) = q * B_y(y,ff);
+  return q;
+}
+
 
 
 //////////// Functions for cDD.h, DD.h, SCA.h

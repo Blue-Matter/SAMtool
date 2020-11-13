@@ -63,8 +63,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(age_error); // Ageing error matrix
 
   DATA_STRING(SR_type);   // String indicating whether Beverton-Holt or Ricker stock-recruit is used
-  DATA_MATRIX(LWT_C);     // LIkelihood weights for catch, CAA, CAL, MS, C_eq
-  DATA_MATRIX(LWT_Index); // Likelihood weights for the index
+  DATA_MATRIX(LWT_fleet); // LIkelihood weights for catch, C_eq, CAA, CAL, MS
+  DATA_MATRIX(LWT_survey); // Likelihood weights for the survey data
   DATA_STRING(comp_like); // Whether to use "multinomial" or "lognormal" distribution for age/lengthc comps
 
   DATA_SCALAR(max_F);     // Maximum F in the model
@@ -244,9 +244,8 @@ Type RCM(objective_function<Type> *obj) {
 
     Type Z_eq = M(0,a);
     for(int ff=0;ff<nfleet;ff++) Z_eq += vul(0,a,ff) * F_equilibrium(ff);
-    Type mean_N_eq = N(0,a) * (1 - exp(-Z_eq)) / Z_eq;
     for(int ff=0;ff<nfleet;ff++) {
-      C_eq_pred(ff) += vul(0,a,ff) * F_equilibrium(ff) * mean_N_eq * wt(0,a);
+      C_eq_pred(ff) += vul(0,a,ff) * F_equilibrium(ff) * wt(0,a) * N(0,a) * (1 - exp(-Z_eq)) / Z_eq;
       VB(0,ff) += N(0,a) * wt(0,a) * vul(0,a,ff);
     }
   }
@@ -274,13 +273,11 @@ Type RCM(objective_function<Type> *obj) {
     // Calculate this year's catch, CAA, CAL, mean size; and next year's abundance and SSB (ex. age-0)
     for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) Z(y,a) += vul(y,a,ff) * F(y,ff);
-      Type mean_N = N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
-
       if(a<n_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
       if(plusgroup && a==n_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
 
       for(int ff=0;ff<nfleet;ff++) {
-        CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * mean_N;
+        CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
         CN(y,ff) += CAAtrue(y,a,ff);
         Cpred(y,ff) += CAAtrue(y,a,ff) * wt(y,a);
 
@@ -351,91 +348,81 @@ Type RCM(objective_function<Type> *obj) {
 
   // Calc likelihood and parameter prior
   prior -= RCM_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
-    
-  vector<Type> nll_Catch(nfleet);
-  vector<Type> nll_Index(nsurvey);
-  vector<Type> nll_s_CAA(nsurvey);
-  vector<Type> nll_s_CAL(nsurvey);
-  vector<Type> nll_CAA(nfleet);
-  vector<Type> nll_CAL(nfleet);
-  vector<Type> nll_MS(nfleet);
+  
+  matrix<Type> nll_fleet(nfleet,5);
+  matrix<Type> nll_survey(nsurvey,3);
   Type nll_log_rec_dev = 0;
-  vector<Type> nll_Ceq(nfleet);
 
-  nll_Catch.setZero();
-  nll_Index.setZero();
-  nll_CAA.setZero();
-  nll_CAL.setZero();
-  nll_s_CAA.setZero();
-  nll_s_CAL.setZero();
-  nll_MS.setZero();
-  nll_Ceq.setZero();
+  nll_fleet.setZero();
+  nll_survey.setZero();
 
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
-      if(LWT_Index(sur,0) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
-        nll_Index(sur) -= dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
+      if(LWT_survey(sur,0) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
+        nll_survey(sur,0) -= dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
       }
-
-      if(LWT_Index(sur,1) > 0 && !R_IsNA(asDouble(s_CAA_n(y,sur))) && s_CAA_n(y,sur) > 0) {
+      
+      if(LWT_survey(sur,1) > 0 && !R_IsNA(asDouble(s_CAA_n(y,sur))) && s_CAA_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_s_CAA(sur) -= comp_multinom(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
+          nll_survey(sur,1) -= comp_multinom(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
         } else {
-          nll_s_CAA(sur) -= comp_lognorm(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
+          nll_survey(sur,1) -= comp_lognorm(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
         }
       }
-
-      if(LWT_Index(sur,2) > 0 && !R_IsNA(asDouble(s_CAL_n(y,sur))) && s_CAL_n(y,sur) > 0) {
+      
+      if(LWT_survey(sur,2) > 0 && !R_IsNA(asDouble(s_CAL_n(y,sur))) && s_CAL_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_s_CAL(sur) -= comp_multinom(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
+          nll_survey(sur,2) -= comp_multinom(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
         } else {
-          nll_s_CAL(sur) -= comp_lognorm(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
+          nll_survey(sur,2) -= comp_lognorm(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
         }
       }
     }
-    nll_Index(sur) *= LWT_Index(sur,0);
-    nll_s_CAA(sur) *= LWT_Index(sur,1);
-    nll_s_CAL(sur) *= LWT_Index(sur,2);
+    nll_survey(sur,0) *= LWT_survey(sur,0);
+    nll_survey(sur,1) *= LWT_survey(sur,1);
+    nll_survey(sur,2) *= LWT_survey(sur,2);
   }
 
   for(int ff=0;ff<nfleet;ff++) {
+    if(LWT_fleet(ff,1) > 0 && C_eq(ff) > 0 && condition != "effort") {
+      nll_fleet(ff,1) -= LWT_fleet(ff,1) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), sigma_Ceq(ff), true);
+    }
+    
     for(int y=0;y<n_y;y++) {
-      if(C_hist(y,ff)>0 || E_hist(y,ff)>0) {
-        if(LWT_C(ff,1) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
+      if(C_hist(y,ff) > 0 || E_hist(y,ff) > 0) {
+        
+        if(nll_C && LWT_fleet(ff,0) > 0) nll_fleet(ff,0) -= dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
+        
+        if(LWT_fleet(ff,2) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
-            nll_CAA(ff) -= comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
+            nll_fleet(ff,2) -= comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           } else {
-            nll_CAA(ff) -= comp_lognorm(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
+            nll_fleet(ff,2) -= comp_lognorm(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
+          }
+        }
+        
+        if(LWT_fleet(ff,3) > 0 && !R_IsNA(asDouble(CAL_n(y,ff))) && CAL_n(y,ff) > 0) {
+          if(comp_like == "multinomial") {
+            nll_fleet(ff,3) -= comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
+          } else {
+            nll_fleet(ff,3) -= comp_lognorm(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
           }
         }
 
-        if(LWT_C(ff,2) > 0 && !R_IsNA(asDouble(CAL_n(y,ff))) && CAL_n(y,ff) > 0) {
-          if(comp_like == "multinomial") {
-            nll_CAL(ff) -= comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
-          } else {
-            nll_CAL(ff) -= comp_lognorm(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
-          }
-        }
-
-        if(nll_C && LWT_C(ff,0) > 0) nll_Catch(ff) -= dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
-        if(LWT_C(ff,3) > 0 && !R_IsNA(asDouble(msize(y,ff))) && msize(y,ff) > 0) {
+        if(LWT_fleet(ff,4) > 0 && !R_IsNA(asDouble(msize(y,ff))) && msize(y,ff) > 0) {
           if(msize_type == "length") {
-            nll_MS(ff) -= dnorm_(msize(y,ff), MLpred(y,ff), CV_msize(ff) * msize(y,ff), true);
+            nll_fleet(ff,4) -= dnorm_(msize(y,ff), MLpred(y,ff), CV_msize(ff) * msize(y,ff), true);
           } else {
-            nll_MS(ff) -= dnorm_(msize(y,ff), MWpred(y,ff), CV_msize(ff) * msize(y,ff), true);
+            nll_fleet(ff,4) -= dnorm_(msize(y,ff), MWpred(y,ff), CV_msize(ff) * msize(y,ff), true);
           }
         }
       }
     }
 
-    nll_Catch(ff) *= LWT_C(ff,0);
-    nll_CAA(ff) *= LWT_C(ff,1);
-    nll_CAL(ff) *= LWT_C(ff,2);
-    nll_MS(ff) *= LWT_C(ff,3);
-
-    if(LWT_C(ff,4) > 0 && C_eq(ff) > 0 && condition != "effort") {
-      nll_Ceq(ff) = -1 * LWT_C(ff,4) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), sigma_Ceq(ff), true);
-    }
+    nll_fleet(ff,0) *= LWT_fleet(ff,0);
+    nll_fleet(ff,2) *= LWT_fleet(ff,2);
+    nll_fleet(ff,3) *= LWT_fleet(ff,3);
+    nll_fleet(ff,4) *= LWT_fleet(ff,4);
   }
 
   for(int y=0;y<n_y;y++) {
@@ -445,11 +432,8 @@ Type RCM(objective_function<Type> *obj) {
     if(est_early_rec_dev(a)) nll_log_rec_dev -= dnorm_(log_early_rec_dev(a), Type(0), tau, true);
   }
 
-  Type nll = nll_Catch.sum() + nll_Index.sum();
-  nll += nll_s_CAA.sum() + nll_s_CAL.sum();
-  nll += nll_CAA.sum() + nll_CAL.sum() + nll_MS.sum();
-  nll += nll_log_rec_dev + nll_Ceq.sum();
-  nll += penalty + prior;
+  Type nll = nll_fleet.sum() + nll_survey.sum();
+  nll += nll_log_rec_dev + penalty + prior;
 
   if(CppAD::Variable(R0x)) ADREPORT(R0);
   ADREPORT(h);
@@ -459,7 +443,7 @@ Type RCM(objective_function<Type> *obj) {
   }
   if(CppAD::Variable(log_tau)) ADREPORT(tau);
   if(condition == "effort") ADREPORT(q_effort);
-  if(nll_Index.sum() != 0) ADREPORT(q);
+  if(nll_survey.col(0).sum() != 0) ADREPORT(q);
 
   REPORT(R0x);
   REPORT(transformed_h);
@@ -470,15 +454,13 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(log_q_effort);
   REPORT(log_F_equilibrium);
 
-  if(nll_MS.sum() != 0) REPORT(log_CV_msize);
-  REPORT(log_tau);
   REPORT(log_early_rec_dev);
   REPORT(log_rec_dev);
 
   REPORT(R0);
   REPORT(h);
   REPORT(tau);
-  if(nll_MS.sum() != 0) REPORT(CV_msize);
+  if(nll_fleet.col(4).sum() != 0) REPORT(CV_msize);
   if(condition == "catch") REPORT(log_F_dev);
   REPORT(F_equilibrium);
   REPORT(vul);
@@ -497,7 +479,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(EPR0_SR);
   REPORT(CR_SR);
 
-  if(nll_CAL.sum() != 0 || nll_s_CAL.sum() != 0 || ((nll_MS.sum() != 0) & (msize_type == "length"))) REPORT(ALK);
+  if(nll_fleet.col(3).sum() != 0 || nll_survey.col(2).sum() != 0 || ((nll_fleet.col(4).sum() != 0) & (msize_type == "length"))) REPORT(ALK);
   REPORT(N);
   REPORT(CAApred);
   REPORT(CALpred);
@@ -517,16 +499,10 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(R_eq);
 
   REPORT(C_eq_pred);
-  if(nll_Index.sum() != 0) REPORT(q);
+  if(nll_survey.col(0).sum() != 0) REPORT(q);
 
-  REPORT(nll_Catch);
-  REPORT(nll_Index);
-  REPORT(nll_s_CAA);
-  REPORT(nll_s_CAL);
-  REPORT(nll_CAA);
-  REPORT(nll_CAL);
-  REPORT(nll_MS);
-  REPORT(nll_Ceq);
+  REPORT(nll_fleet);
+  REPORT(nll_survey);
   REPORT(nll_log_rec_dev);
 
   REPORT(nll);
@@ -538,7 +514,7 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(s_CAAtrue);
   }
 
-  if(nll_Index.sum() != 0) {
+  if(nll_survey.col(0).sum() != 0) {
     REPORT(s_vul_par);
     REPORT(s_CAApred);
     REPORT(s_CALpred);
