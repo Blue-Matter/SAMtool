@@ -969,26 +969,26 @@ RCM_retro_subset <- function(yr, data, params, map) {
   ##### Data object
   data_out <- structure(data, check.passed = NULL)
 
-  #mat <- c("C_hist", "E_hist", "I_hist", "msize")
-  #mat_ind <- match(mat, names(data_out))
-  #data_out[mat_ind] <- lapply(data_out[mat_ind], function(x) x[1:yr, , drop = FALSE])
+  mat <- c("C_hist", "E_hist", "I_hist", "sigma_I", "sigma_C", "CAA_n", "CAL_n", "s_CAA_n", "s_CAL_n", "msize")
+  if(!is.null(map$log_M)) mat <- c(mat, "M_data")
+  mat_ind <- match(mat, names(data_out))
+  data_out[mat_ind] <- lapply(data_out[mat_ind], function(x) x[1:yr, , drop = FALSE])
 
-  #mat2 <- c("len_age", "wt", "mat", "sel_block")
-  mat2 <- "sel_block"
+  mat2 <- c("len_age", "wt", "mat", "sel_block")
   mat_ind2 <- match(mat2, names(data_out))
-  data_out[match("sel_block", names(data_out))] <- lapply(data_out[mat_ind2], function(x) x[1:(yr+1), , drop = FALSE])
+  data_out[mat_ind2] <- lapply(data_out[mat_ind2], function(x) x[1:(yr+1), , drop = FALSE])
 
   # Update nsel_block, n_y
   data_out$nsel_block <- data_out$sel_block %>% as.vector() %>% unique() %>% length()
   data_out$n_y <- yr
 
   # Array 1:yr first index
-  #arr <- c("CAA_hist", "CAL_hist", "s_CAA_hist", "s_CAL_hist")
-  #arr_ind <- match(arr, names(data_out))
-  #data_out[arr_ind] <- lapply(data_out[arr_ind], function(x) x[1:yr, , , drop = FALSE])
+  arr <- c("CAA_hist", "CAL_hist", "s_CAA_hist", "s_CAL_hist")
+  arr_ind <- match(arr, names(data_out))
+  data_out[arr_ind] <- lapply(data_out[arr_ind], function(x) x[1:yr, , , drop = FALSE])
 
   # Vector 1:yr
-  #data_out$est_rec_dev <- data_out$est_rec_dev[1:yr]
+  data_out$est_rec_dev <- data_out$est_rec_dev[1:yr]
 
   ##### Parameters
   params_out <- structure(params, check.passed = NULL)
