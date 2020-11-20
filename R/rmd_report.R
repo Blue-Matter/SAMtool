@@ -360,7 +360,7 @@ rmd_U_UMSY <- function(conv_check = TRUE, fig.cap = "U/UMSY") {
 
 rmd_SSB <- function() rmd_assess_timeseries("SSB", "spawning biomass", "\"Spawning biomass\"")
 
-rmd_dynamic_SSB0 <- function() rmd_assess_timeseries("dynamic_SSB0", "dynamic SSB0", "\"Dynamic SSB0\"")
+rmd_dynamic_SSB0 <- function(var = "dynamic_SSB0") rmd_assess_timeseries(var, "dynamic SSB0", "\"Dynamic SSB0\"")
 
 rmd_SSB_SSBMSY <- function(conv_check = TRUE) {
   rmd_assess_timeseries("SSB_SSBMSY", "SSB/SSBMSY", "expression(SSB/SSB[MSY])", conv_check = conv_check, one_line = TRUE)

@@ -397,7 +397,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   opt <- mod[[1]]
   SD <- mod[[2]]
   report <- obj$report(obj$env$last.par.best)
-
+  
   Yearplusone <- c(Year, max(Year) + 1)
   YearEarly <- (Year[1] - n_age + 1):(Year[1] - 1)
   YearDev <- c(YearEarly, Year)
@@ -405,7 +405,8 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   R <- c(rev(report$R_early), report$R)
 
   Dev <- structure(c(rev(report$log_early_rec_dev), report$log_rec_dev), names = YearDev)
-
+  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj) %>% structure(names = Yearplusone)
+  
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
   Assessment <- new("Assessment", Model = "SCA", Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
@@ -564,4 +565,21 @@ SCA_refpt_calc <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
   refpt_unfished <- list(h = h, Arec = Arec, Brec = Brec, E0 = E0, R0 = R0, N0 = N0, VB0 = VB0, B0 = B0, EPR0 = EPR0, NPR0 = NPR0)
   refpt_MSY <- SCA_MSY_calc(Arec, Brec, M, weight, mat, vul, SR = SR)
   return(c(refpt_unfished, refpt_MSY))
+}
+
+
+SCA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
+  if(grepl("Pope", obj$env$data$model)) {
+    dots <- list(...)
+    dots$data$C_hist <- rep(1e-8, length(dots$data$C_hist))
+    
+    obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = new_args$map, 
+                      random = obj$env$random, DLL = "SAMtool", silent = TRUE)
+    out <- obj2$report(par)$E
+  } else {
+    par[names(par) == "log_F_dev"] <- log(1e-8)
+    par[names(par) == "F_equilibrium"] <- 0
+    out <- obj$report(par)$E
+  }
+  return(out)
 }
