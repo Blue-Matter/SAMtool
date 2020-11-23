@@ -195,6 +195,25 @@ rmd_F_FMSY_terminal <- function() {
     "```\n")
 }
 
+rmd_M <- function() {
+  out <- c("```{r, fig.cap = \"Estimates of M with 95% confidence intervals.\"}",
+           "#Year <- names(res@FMort) %>% as.numeric()",
+           "log_M <- SD$value[names(SD$value) == \"log_M\"]",
+           "M <- exp(log_M)",
+           "if(conv) {",
+           "  log_M_sd <- SD$sd[names(SD$value) == \"log_M\"]",
+           "} else {",
+           "  log_M_sd <- rep(0, length(M))",
+           "}",
+           "M_upper <- exp(log_M + 1.96 * log_M_sd)",
+           "M_lower <- exp(log_M - 1.96 * log_M_sd)",
+           "plot(Year, M, typ = \"o\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M_upper)))",
+           "arrows(Year, M_lower, Year, M_upper, length = 0.025, angle = 90, code = 3, col = \"grey30\")",
+           "abline(h = 0, col = \"grey\")",
+           "```\n")
+  return(out)
+}
+
 rmd_B_BMSY_terminal <- function() {
   fig.cap <- paste0("Estimate of B/BMSY in terminal year, distribution based on normal approximation of estimated covariance matrix.")
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),

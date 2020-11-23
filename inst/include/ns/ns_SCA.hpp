@@ -11,6 +11,15 @@ vector<Type> calc_NPR(Type F, vector<Type> vul, vector<Type> M, int n_age) {
 }
 
 template<class Type>
+vector<Type> calc_NPR(Type F, vector<Type> vul, Type M, int n_age) {
+  vector<Type> NPR(n_age);
+  NPR(0) = 1.;
+  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-vul(a-1) * F - M);
+  NPR(n_age-1) /= 1 - exp(-vul(n_age-1) * F - M); // Plus-group
+  return NPR;
+}
+
+template<class Type>
 vector<Type> calc_NPR_U(Type U, vector<Type> vul, vector<Type> M, int n_age) {
   vector<Type> NPR(n_age);
   NPR(0) = 1.;

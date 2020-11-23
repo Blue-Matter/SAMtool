@@ -154,55 +154,58 @@ profile_likelihood_SCA <- function(Assessment, ...) {
 }
 
 
-retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
+retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporate SCA_RWM
   assign_Assessment_slots(Assessment)
   n_y <- info$data$n_y
-
+  
   Year <- c(info$Year, max(info$Year) + 1)
-
+  
   # Array dimension: Retroyr, Year, ts
   # ts includes: Calendar F, F_MSY, B, B/BMSY, B/B0, R, VB
   retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, 7))
   TS_var <- c("F", "F_FMSY", "SSB", "SSB_SSBMSY", "SSB_SSB0", "R", "VB")
   dimnames(retro_ts) <- list(Peel = 0:nyr, Year = Year, Var = TS_var)
-
+  
   SD_nondev <- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev"
-                           & rownames(summary(SD)) != "log_F_dev", ]
+                           & rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "log_M" &
+                             rownames(summary(SD)) != "log_M_walk", ]
   retro_est <- array(NA, dim = c(nyr+1, dim(SD_nondev)))
   dimnames(retro_est) <- list(Peel = 0:nyr, Var = rownames(SD_nondev), Value = c("Estimate", "Std. Error"))
-
+  
   lapply_fn <- function(i, info, obj) {
     n_y_ret <- n_y - i
     info$data$n_y <- n_y_ret
-
+    
     if(info$data$yindF + 1 > n_y_ret) {
       info_old <- info
       info$data$yindF <- as.integer(0.5 * n_y_ret)
       info$params$log_F_dev[info$data$yindF + 1] <- info_old$params$log_F_dev[info_old$data$yindF + 1]
     }
-
+    
     info$data$C_hist <- info$data$C_hist[1:n_y_ret]
     info$data$I_hist <- info$data$I_hist[1:n_y_ret]
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
     info$data$CAA_n <- info$data$CAA_n[1:n_y_ret]
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]
-
+    
     info$params$log_rec_dev <- rep(0, n_y_ret)
     info$params$log_F_dev <- info$params$log_F_dev[1:n_y_ret]
-
+    
+    if(!is.null(info$params$log_M_walk)) info$params$log_M_walk <- rep(0, n_y_ret)
+    
     map <- obj$env$map
     if(any(names(map) == "log_rec_dev")) {
       new_map <- as.numeric(map$log_rec_dev) - i
       map$log_rec_dev <- factor(new_map[new_map > 0])
     }
     if(any(names(map) == "log_F_dev")) map$log_F_dev <- map$log_F_dev[1:n_y_ret]
-
+    
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
     mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
-
+    
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best)
       if(SCA2) {
@@ -210,12 +213,17 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
                                  weight = info$data$weight, mat = info$data$mat, vul = report$vul, SR = info$SR,
                                  fix_h = info$fix_h, h = h)
       } else {
-        ref_pt <- SCA_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = info$data$M, weight = info$data$weight, mat = info$data$mat,
+        if(is.null(info$data$M)) {
+          M <- obj2$report()$M[1] %>% rep(info$data$n_age)
+        } else {
+          M <- info$data$M
+        }
+        ref_pt <- SCA_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = M, weight = info$data$weight, mat = info$data$mat,
                                vul = report$vul, SR = info$data$SR_type)
       }
-
+      
       report <- c(report, ref_pt)
-
+      
       FMort <- c(report$F, rep(NA, i + 1))
       F_FMSY <- FMort/report$FMSY
       SSB <- c(report$E, rep(NA, i))
@@ -224,24 +232,25 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) {
       R <- c(report$R, rep(NA, i))
       VB <- c(report$E, rep(NA, i))
       #log_rec_dev <- c(report$log_rec_dev, rep(NA, i + 1))
-
+      
       retro_ts[i+1, , ] <<- cbind(FMort, F_FMSY, SSB, SSB_SSBMSY, SSB_SSB0, R, VB)
-      retro_est[i+1, , ] <<- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev" &
-                                          rownames(summary(SD)) != "log_F_dev", ]
-
+      retro_est[i+1, , ] <<- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev"
+                                         & rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "log_M" &
+                                           rownames(summary(SD)) != "log_M_walk", ]
+      
       return(SD$pdHess)
     }
     return(FALSE)
   }
-
+  
   conv <- vapply(0:nyr, lapply_fn, logical(1), info = info, obj = obj)
   if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
-
+  
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
   attr(retro, "TS_lab") <- c("Fishing mortality", expression(F/F[MSY]), "Spawning biomass", expression(SSB/SSB[MSY]), "Spawning depletion",
                              "Recruitment", "Vulnerable biomass")
-
+  
   return(retro)
 }
 
