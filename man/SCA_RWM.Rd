@@ -117,16 +117,15 @@ Set the variance to a small value (0.01) in order to estimate a time and age-con
 The model estimates year-specific M (constant with age) as a random walk.
 
 The starting value for the first year M (M_start) is \code{Data@Mort[x]}, and the fixed SD of the random walk
-in logspace (\code{tau_M}) is 0.1. Alternative values can be provided in the start list (see example). 
+in logspace (\code{tau_M}) is 0.05. Alternative values can be provided in the start list (see example). 
 
 See \link{SCA} for all other information about the structure and setup of the model.
 
-The SCA builds in a stock-recruit relationship into the model. Depletion is relative to "unfished" levels which
-typically refers to spawning biomass at the beginning of the model. MSY reference points are still calculated
-and reported using the first-year M, although MSY may be ill-defined with non-stationary dynamics.
+The SCA builds in a stock-recruit relationship into the model. Annual unfished andMSY reference points are still 
+calculated and reported in TMB_report.
 }
 \examples{
-res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.1))
+res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
 res2 <- SCA(Data = MSEtool::SimulatedData)
 res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.001))
 

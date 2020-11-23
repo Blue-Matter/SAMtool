@@ -57,13 +57,12 @@
 #' The model estimates year-specific M (constant with age) as a random walk.
 #' 
 #' The starting value for the first year M (M_start) is \code{Data@@Mort[x]}, and the fixed SD of the random walk
-#' in logspace (\code{tau_M}) is 0.1. Alternative values can be provided in the start list (see example). 
+#' in logspace (\code{tau_M}) is 0.05. Alternative values can be provided in the start list (see example). 
 #' 
 #' See \link{SCA} for all other information about the structure and setup of the model.
 #' 
-#' The SCA builds in a stock-recruit relationship into the model. Depletion is relative to "unfished" levels which
-#' typically refers to spawning biomass at the beginning of the model. MSY reference points are still calculated
-#' and reported using the first-year M, although MSY may be ill-defined with non-stationary dynamics.
+#' The SCA builds in a stock-recruit relationship into the model. Annual unfished andMSY reference points are still 
+#' calculated and reported in TMB_report.
 #'
 #' @examples
 #' res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
@@ -291,7 +290,7 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
     tau_start <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x])
     params$log_tau <- log(tau_start)
   }
-  if(is.null(params$log_tau_M)) params$log_tau_M <- log(0.5)
+  if(is.null(params$log_tau_M)) params$log_tau_M <- log(0.05)
   params$log_M_walk <- rep(0, n_y - 1)
   
   params$log_early_rec_dev <- rep(0, n_age - 1)
@@ -371,7 +370,12 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
                     dependencies = dependencies)
 
   if(Assessment@conv) {
-    ref_pt <- SCA_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = rep(report$M[1], n_age), weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+    year_specific_ref_pt <- lapply(report$M, function(x) {
+      SCA_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = rep(x, n_age), 
+                   weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+    })
+    ref_pt <- lapply(names(year_specific_ref_pt[[1]]), function(x) sapply(year_specific_ref_pt, getElement, x)) %>%
+      structure(names = names(year_specific_ref_pt[[1]]))
     report <- c(report, ref_pt)
     
     if(integrate) {
@@ -397,9 +401,9 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
     Assessment@SSBMSY <- report$EMSY
     Assessment@VBMSY <- report$VBMSY
     Assessment@F_FMSY <- structure(report$F/report$FMSY, names = Year)
-    Assessment@B_BMSY <- structure(report$B/report$BMSY, names = Yearplusone)
-    Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY, names = Yearplusone)
-    Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
+    #Assessment@B_BMSY <- structure(report$B/report$BMSY, names = Yearplusone)
+    #Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY, names = Yearplusone)
+    #Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report
