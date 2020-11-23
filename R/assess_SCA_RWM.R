@@ -66,7 +66,7 @@
 #' and reported using the first-year M, although MSY may be ill-defined with non-stationary dynamics.
 #'
 #' @examples
-#' res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.1))
+#' res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
 #' res2 <- SCA(Data = MSEtool::SimulatedData)
 #' res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.001))
 #'
@@ -291,7 +291,7 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
     tau_start <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x])
     params$log_tau <- log(tau_start)
   }
-  if(is.null(params$log_tau_M)) params$log_tau_M <- log(0.1)
+  if(is.null(params$log_tau_M)) params$log_tau_M <- log(0.5)
   params$log_M_walk <- rep(0, n_y - 1)
   
   params$log_early_rec_dev <- rep(0, n_age - 1)
@@ -330,6 +330,8 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
   SD <- mod[[2]]
   report <- obj$report(obj$env$last.par.best)
   report$NPR0 <- do.call(cbind, report$NPR0)
+  report$E0_tv <- report$EPR0 * report$R0
+  report$E0_tv <- c(report$E0_tv, report$E0_tv[length(report$E0_tv)])
 
   Yearplusone <- c(Year, max(Year) + 1)
   YearEarly <- (Year[1] - n_age + 1):(Year[1] - 1)
@@ -348,7 +350,7 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
                     B = structure(report$B, names = Yearplusone),
                     B_B0 = structure(report$B/report$B0, names = Yearplusone),
                     SSB = structure(report$E, names = Yearplusone),
-                    SSB_SSB0 = structure(report$E/report$E0, names = Yearplusone),
+                    SSB_SSB0 = structure(report$E/report$E0_tv, names = Yearplusone),
                     VB = structure(report$VB, names = Yearplusone),
                     VB_VB0 = structure(report$VB/report$VB0, names = Yearplusone),
                     R = structure(R, names = YearR),
