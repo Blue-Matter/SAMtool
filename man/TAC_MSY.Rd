@@ -6,8 +6,6 @@
 \title{Calculate MSY-based TAC from Assessment object}
 \usage{
 TAC_MSY(Assessment, reps, MSY_frac = 1)
-
-calculate_TAC(Assessment, reps, MSY_frac = 1)
 }
 \arguments{
 \item{Assessment}{An Assessment object with estimates of UMSY or FMSY and

@@ -9,11 +9,12 @@
 HCR_ramp(
   Assessment,
   reps = 1,
-  LRP,
-  TRP,
-  rel_min = 0,
-  rel_max = 1,
-  RP_type = c("SSB_SSB0", "SSB_SSBMSY"),
+  OCP_type = c("SSB_SSB0", "SSB_SSBMSY"),
+  Ftarget_type = "MSY",
+  LOCP = 0.1,
+  TOCP = 0.4,
+  relF_min = 0,
+  relF_max = 1,
   ...
 )
 
@@ -27,16 +28,18 @@ FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal yea
 
 \item{reps}{The number of stochastic samples of the TAC recommendation.}
 
-\item{LRP}{Numeric, the limit reference point.}
+\item{OCP_type}{The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
+By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).}
 
-\item{TRP}{Numeric, the target reference point.}
+\item{Ftarget_type}{The type of F used for the target fishing mortality rate. Currently only FMSY is supported.}
 
-\item{rel_min}{The relative maximum value (e.g. a multiple of FMSY) if \code{Brel < LRP}.}
+\item{LOCP}{Numeric, the limit value for the OCP in the HCR.}
 
-\item{rel_max}{The relative maximum value (e.g. a multiple of FMSY) if \code{Brel > TRP}.}
+\item{TOCP}{Numeric, the target value for the OCP in the HCR.}
 
-\item{RP_type}{The reference point metric for TRP and LRP (\code{"SSB_SSB0"} for spawning depletion by default,
-or \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).}
+\item{relF_min}{The relative value of Ftarget (i.e., as a proportion) if \code{OCP < LOCP}.}
+
+\item{relF_max}{The relative value of Ftarget if \code{OCP > TOCP}.}
 
 \item{...}{Miscellaneous arguments.}
 }
@@ -44,49 +47,51 @@ or \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).}
 An object of class \linkS4class{Rec} with the TAC recommendation.
 }
 \description{
-An output control rule with a ramp that reduces the TAC recommendation linearly
-with respect to fishing mortality (F) or harvest rate (U) when the relative biomass (i.e.,
-spawning depletion or spawning biomass relative to that at MSY) is less than
-the target reference point (TRP). The TAC reduction is linearly reduced with respect to F
-to a minimum value when the relative biomass is less than the limit reference point (LRP). For example,
-the TRP and LRP for spawning depletion is 0.4 and 0.1, respectively, in the 40-10 control rule.
+An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
+as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
+is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
+the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
+The Ftarget is FMSY above the TOCP and zero below the LOCP.
 Class HCR objects are typically used with function \link{make_MP}.
 }
 \details{
-\code{HCR_ramp} is the generic ramped-HCR function where user specifies LRP, TRP, and
-relative biomass metric, as well as minimum and maximum values for adjusting the fishing mortality.
+\code{HCR_ramp} is the generic ramped-HCR function where user specifies OCP and corresponding limit and target
+pointss, as well as minimum and maximum relative F target.
 
-\code{HCR40_10} is a common U.S. west coast control rule (LRP and TRP of 0.1 and 0.4 spawning depletion,
-respectively), while \code{HCR60_20} is more conservative than 40-10, with LRP and TRP of 0.2 and 0.6
+\code{HCR40_10} is a common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
+respectively), while \code{HCR60_20} is more conservative than 40-10, with LOCP and TOCP of 0.2 and 0.6
 spawning depletion, respectively).
 }
 \examples{
 # 40-10 linear ramp
 Brel <- seq(0, 1, length.out = 200)
-plot(Brel, HCRlin(Brel, 0.1, 0.4), xlab = "Estimated SSB/SSB0",
-ylab = "Prescribed F relative to FMSY", main = "40-10 harvest control rule",
-type = "l", col = "blue")
+plot(Brel, HCRlin(Brel, 0.1, 0.4), 
+    xlab = expression("Operational control point: Estimated"~SSB/SSB[0]),
+    ylab = expression(F[target]~~": proportion of"~~F[MSY]), 
+    main = "40-10 harvest control rule", type = "l")
 abline(v = c(0.1, 0.4), col = "red", lty = 2)
 
 # create a 40-10 MP to run in closed-loop MSE
 DD_40_10 <- make_MP(DD_TMB, HCR40_10)
 
 # Alternatively,
-DD_40_10 <- make_MP(DD_TMB, HCR_ramp, LRP = 0.1, TRP = 0.4)
+DD_40_10 <- make_MP(DD_TMB, HCR_ramp, OCP_type = "SSB_SSB0", LOCP = 0.1, TOCP = 0.4)
 
-# An SCA with LRP and TRP at 0.4 and 0.8, respectively, of SSB/SSBMSY
-SCA_80_40 <- make_MP(SCA, HCR_ramp, LRP = 0.4, TRP = 0.8, RP_type = "SSB_SSBMSY")
+# An SCA with LOCP and TOCP at 0.4 and 0.8, respectively, of SSB/SSBMSY
+SCA_80_40 <- make_MP(SCA, HCR_ramp, OCP_type = "SSB_SSBMSY", LOCP = 0.4, TOCP = 0.8)
 
 # A conservative HCR that fishes at 75\% of FMSY at B > 80\% BMSY but only reduces F
 # to 10\% of FMSY if B < 40\% BMSY.
-SCA_conservative <- make_MP(SCA, HCR_ramp, LRP = 0.4, TRP = 0.8, rel_max = 0.75,
-rel_min = 0.1, RP_type = "SSB_SSBMSY")
+SCA_conservative <- make_MP(SCA, HCR_ramp, OCP_type = "SSB_SSBMSY", LOCP = 0.4, TOCP = 0.8, 
+relF_min = 0.1, relF_max = 0.75)
 
 # Figure of this conservative HCR
 Brel <- seq(0, 1, length.out = 200)
-Frel <- HCRlin(Brel, 0.4, 0.8, rel_max = 0.75, rel_min = 0.1)
-plot(Brel, Frel, xlab = "Estimated SSB/SSB_MSY", ylab = "Prescribed F relative to FMSY",
-type = "l", col = "blue")
+Frel <- HCRlin(Brel, 0.4, 0.8, 0.1, 0.75)
+plot(Brel, Frel, 
+    xlab = expression("Operational control point: Estimated"~SSB/SSB[MSY]),
+    ylab = expression(F[target]~":"~~F/F[MSY]), 
+    ylim = c(0, 1), type = "l")
 abline(v = c(0.4, 0.8), col = "red", lty = 2)
 
 \dontrun{

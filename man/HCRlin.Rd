@@ -4,33 +4,31 @@
 \alias{HCRlin}
 \title{Generic linear harvest control rule based on biomass}
 \usage{
-HCRlin(Brel, LRP, TRP, rel_min = 0, rel_max = 1)
+HCRlin(OCP_val, LOCP, TOCP, relF_min = 0, relF_max = 1)
 }
 \arguments{
-\item{Brel}{Improper fraction: An estimate of biomass (either absolute
-or relative, e.g. B/BMSY or B/B0).}
+\item{LOCP}{Numeric, the limit value for the OCP in the HCR.}
 
-\item{LRP}{Improper fraction: the Limit Reference Point, the biomass
-below which the adjustment is at its minimum, e.g. zero, no fishing. Same units as \code{Brel}.}
+\item{TOCP}{Numeric, the target value for the OCP in the HCR.}
 
-\item{TRP}{Improper fraction: the Target Reference Point, the biomass
-above which the adjustment is at its maximum. Same units as \code{Brel}.}
+\item{relF_min}{The relative maximum value (e.g. a multiple of FMSY) if \code{OCP < LOCP}.}
 
-\item{rel_min}{The relative maximum value (e.g. a multiple of FMSY) if \code{Brel < LRP}.}
+\item{relF_max}{The relative maximum value (e.g. a multiple of FMSY) if \code{OCP > TOCP}.}
 
-\item{rel_max}{The relative maximum value (e.g. a multiple of FMSY) if \code{Brel > TRP}.}
+\item{value}{The value of the operational control point (OCP).}
 }
 \value{
-a TAC or TAE adjustment factor.
+Numeric adjustment factor.
 }
 \description{
-A general function used by HCR_ramp that adjusts the TAC by a linear ramp based on estimated biomass.
+A general function used by \link{HCR_ramp} that adjusts the output (e.g., F) by a linear ramp based on 
+the value of the OCP relative to target and limit values.
 }
 \examples{
 #40-10 linear ramp
 Brel <- seq(0, 1, length.out = 200)
 plot(Brel, HCRlin(Brel, 0.1, 0.4), xlab = "Estimated B/B0", ylab = "Relative change in F",
-main = "A 40-10 harvest control rule", type = 'l', col = 'blue')
+     main = "A 40-10 harvest control rule", type = 'l', col = 'blue')
 abline(v = c(0.1,0.4), col = 'red', lty = 2)
 }
 \author{
