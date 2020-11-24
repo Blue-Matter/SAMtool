@@ -66,17 +66,18 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' @slot SE_UMSY Standard error of UMSY estimate.
 #' @slot SE_FMSY Standard error of FMSY estimate.
 #' @slot SE_MSY Standard error of MSY estimate.
-#' @slot SE_U_UMSY_final Standard error of U/UMSY in the terminal year.
-#' @slot SE_F_FMSY_final Standard error of F/FMSY in the terminal year.
-#' @slot SE_B_BMSY_final Standard error of B/BMSY in the terminal year.
-#' @slot SE_B_B0_final Standard error of B/B0 in the terminal year.
-#' @slot SE_SSB_SSBMSY_final Standard error of SSB/SSBMSY in the terminal year.
-#' @slot SE_SSB_SSB0_final Standard error of SSB/SSB0 in the terminal year.
-#' @slot SE_VB_VBMSY_final Standard error of VB/VBMSY in the terminal year.
-#' @slot SE_VB_VB0_final Standard error of VB/VB0 in the terminal year.
+#' @slot SE_U_UMSY Standard error of U/UMSY.
+#' @slot SE_F_FMSY Standard error of F/FMSY.
+#' @slot SE_B_BMSY Standard error of B/BMSY.
+#' @slot SE_B_B0 Standard error of B/B0.
+#' @slot SE_SSB_SSBMSY Standard error of SSB/SSBMSY.
+#' @slot SE_SSB_SSB0 Standard error of SSB/SSB0.
+#' @slot SE_VB_VBMSY Standard error of VB/VBMSY.
+#' @slot SE_VB_VB0 Standard error of VB/VB0.
 #' @slot SE_Dev A vector of standard errors of the deviation parameters.
 #' @slot info A list containing the data and starting values of estimated parameters
 #' for the assessment.
+#' @slot ref_pt A list containing reference points, e.g., FMSY, F0.1, F-SPR%%, etc.
 #' @slot obj A list with components returned from \code{\link[TMB]{MakeADFun}}.
 #' @slot opt A list with components from calling \code{\link[stats]{nlminb}} to \code{obj}.
 #' @slot SD A list (class sdreport) with parameter estimates and their standard errors, obtained from
@@ -105,11 +106,12 @@ Assessment <- setClass("Assessment",
                                  Obs_C_at_age = "matrix", Catch = "numeric", Index = "vectormatrix",
                                  C_at_age = "matrix", Dev = "numeric", Dev_type = "character",
                                  NLL = "numeric", SE_UMSY = "numeric", SE_FMSY = "numeric", SE_MSY = "numeric",
-                                 SE_U_UMSY_final = "numeric", SE_F_FMSY_final = "numeric",
-                                 SE_B_BMSY_final = "numeric", SE_B_B0_final = "numeric",
-                                 SE_SSB_SSBMSY_final = "numeric", SE_SSB_SSB0_final = "numeric",
-                                 SE_VB_VBMSY_final = "numeric", SE_VB_VB0_final = "numeric",
-                                 SE_Dev = "numeric", info = "ANY", obj = "list", opt = "optAssess", SD = "sdreportAssess",
+                                 SE_U_UMSY = "numeric", SE_F_FMSY = "numeric",
+                                 SE_B_BMSY = "numeric", SE_B_B0 = "numeric",
+                                 SE_SSB_SSBMSY = "numeric", SE_SSB_SSB0 = "numeric",
+                                 SE_VB_VBMSY = "numeric", SE_VB_VB0 = "numeric",
+                                 SE_Dev = "numeric", info = "ANY", ref_pt = "list",
+                                 obj = "list", opt = "optAssess", SD = "sdreportAssess",
                                  TMB_report = "list", dependencies = "character"))
 
 #' @name summary.Assessment

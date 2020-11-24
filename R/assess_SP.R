@@ -316,11 +316,11 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
     }
     Assessment@SE_FMSY <- SD$sd[names(SD$value) == "FMSY"]
     Assessment@SE_MSY <- SD$sd[names(SD$value) == "MSY"]
-    Assessment@SE_F_FMSY_final <- SD$sd[names(SD$value) == "F_FMSY_final"]
-    Assessment@SE_B_BMSY_final <- SD$sd[names(SD$value) == "B_BMSY_final"]
-    Assessment@SE_B_B0_final <- SD$sd[names(SD$value) == "B_K_final"]
-    Assessment@SE_VB_VBMSY_final <- SD$sd[names(SD$value) == "B_BMSY_final"]
-    Assessment@SE_VB_VB0_final <- SD$sd[names(SD$value) == "B_K_final"]
+    Assessment@SE_F_FMSY <- SD$sd[names(SD$value) == "F_FMSY_final"] %>% structure(names = max(Year))
+    Assessment@SE_B_BMSY <- Assessment@SE_SSB_SSBMSY <- Assessment@SE_VB_VBMSY <- 
+      SD$sd[names(SD$value) == "B_BMSY_final"] %>% structure(names = max(Year))
+    Assessment@SE_B_B0 <- Assessment@SE_SSB_SSB0 <- Assessment@SE_VB_VB0 <- 
+      SD$sd[names(SD$value) == "B_K_final"] %>% structure(names = max(Year))
   }
   return(Assessment)
 }

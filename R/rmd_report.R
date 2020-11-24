@@ -190,7 +190,7 @@ rmd_F_FMSY_terminal <- function() {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     "if(conv) {",
     "  Fy <- names(F_FMSY)[length(F_FMSY)]",
-    "  plot_normalvar(F_FMSY[length(F_FMSY)], SE_F_FMSY_final, label = bquote(F[.(Fy)]/F[MSY]))",
+    "  plot_normalvar(F_FMSY[length(F_FMSY)], SE_F_FMSY, label = bquote(F[.(Fy)]/F[MSY]))",
     "}",
     "```\n")
 }
@@ -219,7 +219,7 @@ rmd_B_BMSY_terminal <- function() {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     "if(conv) {",
     "  By <- names(B_BMSY)[length(B_BMSY)]",
-    "  plot_normalvar(B_BMSY[length(B_BMSY)], SE_B_BMSY_final, label = bquote(B[.(By)]/B[MSY]))",
+    "  plot_normalvar(B_BMSY[length(B_BMSY)], SE_B_BMSY, label = bquote(B[.(By)]/B[MSY]))",
     "}",
     "```\n")
 }
@@ -229,7 +229,7 @@ rmd_B_B0_terminal <- function() {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     "if(conv) {",
     "  By <- names(B_B0)[length(B_B0)]",
-    "  plot_normalvar(B_B0[length(B_B0)], SE_B_B0_final, label = bquote(B[.(By)]/B[0]))",
+    "  plot_normalvar(B_B0[length(B_B0)], SE_B_B0, label = bquote(B[.(By)]/B[0]))",
     "}",
     "```\n")
 }

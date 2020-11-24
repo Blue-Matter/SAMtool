@@ -101,26 +101,28 @@ and penalty term (applied when \code{U > 0.975} in any year).}
 
 \item{\code{SE_MSY}}{Standard error of MSY estimate.}
 
-\item{\code{SE_U_UMSY_final}}{Standard error of U/UMSY in the terminal year.}
+\item{\code{SE_U_UMSY}}{Standard error of U/UMSY.}
 
-\item{\code{SE_F_FMSY_final}}{Standard error of F/FMSY in the terminal year.}
+\item{\code{SE_F_FMSY}}{Standard error of F/FMSY.}
 
-\item{\code{SE_B_BMSY_final}}{Standard error of B/BMSY in the terminal year.}
+\item{\code{SE_B_BMSY}}{Standard error of B/BMSY.}
 
-\item{\code{SE_B_B0_final}}{Standard error of B/B0 in the terminal year.}
+\item{\code{SE_B_B0}}{Standard error of B/B0.}
 
-\item{\code{SE_SSB_SSBMSY_final}}{Standard error of SSB/SSBMSY in the terminal year.}
+\item{\code{SE_SSB_SSBMSY}}{Standard error of SSB/SSBMSY.}
 
-\item{\code{SE_SSB_SSB0_final}}{Standard error of SSB/SSB0 in the terminal year.}
+\item{\code{SE_SSB_SSB0}}{Standard error of SSB/SSB0.}
 
-\item{\code{SE_VB_VBMSY_final}}{Standard error of VB/VBMSY in the terminal year.}
+\item{\code{SE_VB_VBMSY}}{Standard error of VB/VBMSY.}
 
-\item{\code{SE_VB_VB0_final}}{Standard error of VB/VB0 in the terminal year.}
+\item{\code{SE_VB_VB0}}{Standard error of VB/VB0.}
 
 \item{\code{SE_Dev}}{A vector of standard errors of the deviation parameters.}
 
 \item{\code{info}}{A list containing the data and starting values of estimated parameters
 for the assessment.}
+
+\item{\code{ref_pt}}{A list containing reference points, e.g., FMSY, F0.1, F-SPR%%, etc.}
 
 \item{\code{obj}}{A list with components returned from \code{\link[TMB]{MakeADFun}}.}
 
