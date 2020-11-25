@@ -261,7 +261,6 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   log_rec_dev <- do.call(rbind, lapply(res, getElement, "log_rec_dev"))
 
   if(!all(log_rec_dev == 0)) {
-
     OM@cpars$AC <- apply(log_rec_dev, 1, function(x) {
       out <- acf(x, lag.max = 1, plot = FALSE)$acf[2]
       ifelse(is.na(out), 0, out)
@@ -270,38 +269,20 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
     message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
 
     sample_future_dev <- function() {
-      proc_mu <- -0.5 * StockPars$procsd^2 * (1 - OM@cpars$AC)/sqrt(1 - OM@cpars$AC^2) # http://dx.doi.org/10.1139/cjfas-2016-0167
-
       if(!is.null(dots$map_log_rec_dev) && any(is.na(dots$map_log_rec_dev))) { # Sample historical rec devs for OM for most recent years
         yr_fixed_rec_dev <- which(is.na(dots$map_log_rec_dev))
         if(any(yr_fixed_rec_dev > max(dots$map_log_rec_dev, na.rm = TRUE))) {
           yr_hist_sample <- yr_fixed_rec_dev[yr_fixed_rec_dev > max(dots$map_log_rec_dev, na.rm = TRUE)] %>% min()
-
-          log_rec_dev_u <- rnorm(length(yr_hist_sample:nyears) * nsim, proc_mu, StockPars$procsd) %>%
-            matrix(nsim, length(yr_hist_sample:nyears))
-
-          for(y in 1:ncol(log_rec_dev_u)) {
-            if(y == 1) {
-              log_rec_dev_u[, y] <- OM@cpars$AC * log_rec_dev[, yr_hist_sample - 1] + log_rec_dev_u[, y] * sqrt(1 - OM@cpars$AC^2)
-            } else {
-              log_rec_dev_u[, y] <- OM@cpars$AC * log_rec_dev_u[, y-1] + log_rec_dev_u[, y] * sqrt(1 - OM@cpars$AC^2)
-            }
-          }
-          log_rec_dev[, yr_hist_sample:nyears] <<- log_rec_dev_u
-          OM@cpars$Perr_y[, (OM@maxage + yr_hist_sample):(OM@maxage + nyears)] <<- exp(log_rec_dev_u)
-
+          samp_hist <- Map(dev_AC, AC = OM@cpars$AC, stdev = StockPars$procsd, chain_start = log_rec_dev[, yr_hist_sample - 1],
+                           MoreArgs = list(n = length(yr_hist_sample:nyears), mu = 1))
+          log_rec_dev[, yr_hist_sample:nyears] <<- do.call(rbind, samp_hist)
+          OM@cpars$Perr_y[, (OM@maxage + yr_hist_sample):(OM@maxage + nyears)] <<- exp(log_rec_dev[, yr_hist_sample:nyears])
           message("Historical recruitment deviations sampled with autocorrelation starting in year ", yr_hist_sample, " out of OM@nyears = ", nyears)
         }
       }
-      pro_Perr_y <- rnorm(proyears * nsim, proc_mu, StockPars$procsd) %>% matrix(nsim, proyears)
-      for(y in 2:proyears) {
-        if(y == 1) {
-          pro_Perr_y[, y] <- OM@cpars$AC * log_rec_dev[, ncol(log_rec_dev)] + pro_Perr_y[, y] * sqrt(1 - OM@cpars$AC^2)
-        } else {
-          pro_Perr_y[, y] <- OM@cpars$AC * pro_Perr_y[, y-1] + pro_Perr_y[, y] * sqrt(1 - OM@cpars$AC^2)
-        }
-      }
-      return(exp(pro_Perr_y))
+      samp_proj <- Map(dev_AC, AC = OM@cpars$AC, stdev = StockPars$procsd, chain_start = log_rec_dev[, nyears + OM@maxage],
+                       MoreArgs = list(n = proyears, mu = 1))
+      return(exp(do.call(rbind, samp_proj)))
     }
     OM@cpars$Perr_y[, (OM@maxage+nyears+1):ncol(OM@cpars$Perr_y)] <- sample_future_dev()
     message("Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).\n")
