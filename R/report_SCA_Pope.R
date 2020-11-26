@@ -82,7 +82,7 @@ rmd_SCA_Pope <- function(Assessment, ...) {
 
   productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
                     rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
-                    rmd_yield_U("SCA_Pope"), rmd_yield_depletion("SCA_Pope"), rmd_sp())
+                    rmd_yield_U("SCA_Pope"), rmd_yield_depletion("SCA_Pope"), rmd_sp(), rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
 }
@@ -171,43 +171,17 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   if(xaxis == "U") u.vector = seq(0, max(1, 2.5 * umsy), length.out = 100) else {
     u.vector = seq(0, 1, length.out = 100)
   }
-
-  M <- data$M
-  mat <- data$mat
-  weight <- data$weight
-  n_age <- data$n_age
-  vul <- report$vul
-
+  
+  yield <- lapply(u.vector, yield_fn_SCA_Pope, M = data$M, mat = data$mat, weight = data$weight, 
+                  vul = report$vul, SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, opt = FALSE)
+  
+  Biomass <- vapply(yield, getElement, numeric(1), "E")
+  Yield <- vapply(yield, getElement, numeric(1), "Yield")
+  R <- vapply(yield, getElement, numeric(1), "R")
+  ind <- R >= 0
+  
   BMSY <- report$EMSY
   B0 <- report$E0
-
-  SR <- data$SR_type
-
-  Arec <- report$Arec
-  Brec <- report$Brec
-
-  EPR <- Req <- NA
-  solveMSY <- function(logit_U) {
-    U <- ilogit(logit_U)
-    surv <- exp(-M) * (1 - vul * U)
-    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
-    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
-    EPR <<- sum(NPR * mat * weight)
-    if(SR == "BH") Req <<- (Arec * EPR - 1)/(Brec * EPR)
-    if(SR == "Ricker") Req <<- log(Arec * EPR)/(Brec * EPR)
-    CPR <- vul * U * NPR * exp(-0.5 * M)
-    Yield <- Req * sum(CPR * weight)
-    return(-1 * Yield)
-  }
-
-  Biomass <- Yield <- R <- rep(NA, length(u.vector))
-  for(i in 1:length(u.vector)) {
-    Yield[i] <- -1 * solveMSY(logit(u.vector[i]))
-    R[i] <- Req
-    Biomass[i] <- EPR * Req
-  }
-
-  ind <- R >= 0
 
   if(xaxis == "U") {
     plot(u.vector[ind], Yield[ind], typ = 'l', xlab = "Harvest rate (U)",
@@ -229,10 +203,10 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
     plot(Biomass[ind]/B0, Yield[ind], typ = 'l',
          xlab = expression(SSB/SSB[0]), ylab = "Equilibrium yield")
     segments(x0 = BMSY/B0, y0 = 0, y1 = msy, lty = 2)
-    segments(x0 = 0, y0 = msy, x1 = BMSY/report$B0, lty = 2)
+    segments(x0 = 0, y0 = msy, x1 = BMSY/B0, lty = 2)
     abline(h = 0, col = 'grey')
   }
-  invisible(data.frame(U = u.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/report$B0))
+  invisible(data.frame(U = u.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/B0))
 }
 
 

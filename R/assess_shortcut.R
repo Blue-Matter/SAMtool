@@ -171,6 +171,19 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   Assessment@B_B0 <- Assessment@B/Assessment@B0
   Assessment@SSB_SSB0 <- Assessment@SSB/Assessment@SSB0
   Assessment@VB_VB0 <- Assessment@VB/Assessment@VB0
+  
+  if(method == "B") {
+    catch_eq <- function(Ftarget) {
+      catch_equation(method = "frac", Utarget = 1 - exp(-Ftarget), B = Assessment@VB[length(Assessment@VB)])
+    }
+  } else {
+    catch_eq <- function(Ftarget) {
+      catch_equation(method = "Baranov", Ftarget = Ftarget,
+                     sel = Assessment@Selectivity[nrow(Assessment@Selectivity), ], 
+                     M = Assessment@info$data$M, wt = Assessment@info$data$weight, N = Assessment@N[nrow(Assessment@N), ])
+    }
+  }
+  Assessment@forecast <- list(catch_eq = catch_eq)
   return(Assessment)
 }
 class(Shortcut) <- "Assess"
@@ -193,7 +206,7 @@ project_ASM <- function(x, R_out, F_out, Hist, Data) {
   Wt <- Hist$StockPars$Wt_age[x, , 1 + 0:n_y]
   Mat <- Hist$StockPars$Mat_age[x, , 1 + 0:n_y]
   
-  N <- matrix(NA_real_, nrow = n_age, ncol = n_y + 1) # age x yr
+  N <- matrix(NA_real_, nrow = n_age, ncol = n_y + 1)
   N[, 1] <- Hist$StockPars$N[x, , 1, ] %>% rowSums()
   for(y in 1:n_y) {
     N[1, y+1] <- R_out[y+1]

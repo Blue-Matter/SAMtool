@@ -29,13 +29,54 @@ logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) {
   }
   log(p/(1 - p))
 }
+
 ilogit <- function(x) 1/(1 + exp(-x))
+
 ilogitm <- function(x) {
   if(inherits(x, "matrix")) {
     return(exp(x)/apply(exp(x), 1, sum))
   } else {
     return(exp(x)/sum(exp(x)))
   }
+}
+
+get_F01 <- function(FM, YPR) {
+  if(is.null(FM) && is.null(YPR)) stop("F01 can not be used.")
+  stopifnot(length(FM) == length(YPR))
+  dY_dF <- (YPR[2:length(YPR)] - YPR[2:length(YPR) - 1])/(FM[2:length(FM)] - FM[2:length(FM) - 1])
+  LinInterp(dY_dF, FM[-length(FM)], xlev = 0.1 * dY_dF[1])
+}
+
+get_Fmax <- function(FM, YPR) {
+  if(is.null(FM) && is.null(YPR)) stop("Fmax can not be used.")
+  FM[which.max(YPR)]
+}
+
+get_FSPR <- function(FM, SPR, target = 0.4) {
+  if(is.null(FM) && is.null(SPR)) stop("SPR can not be used.")
+  stopifnot(length(FM) == length(SPR))
+  LinInterp(SPR, FM, xlev = target)
+}
+
+LinInterp <- function(x,y,xlev,ascending=F,zeroint=F){
+  if(zeroint){
+    x<-c(0,x)
+    y<-c(0,y)
+  }
+  if(ascending){
+    cond<-(1:length(x))<which.max(x)
+  }else{
+    cond<-rep(TRUE,length(x))
+  }
+  
+  close<-which.min((x[cond]-xlev)^2)
+  ind<-c(close,close+(x[close]<xlev)*2-1)
+  ind <- ind[ind <= length(x)]
+  if (length(ind)==1) ind <- c(ind, ind-1)
+  ind<-ind[order(ind)]
+  pos<-(xlev-x[ind[1]])/(x[ind[2]]-x[ind[1]])
+  y[ind[1]]+pos*(y[ind[2]]-y[ind[1]])
+  
 }
 
 

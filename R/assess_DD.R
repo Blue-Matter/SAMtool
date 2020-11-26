@@ -282,8 +282,8 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   }
 
   if(Assessment@conv) {
-    ref_pt <- get_MSY_DD(info$data, report$Arec, report$Brec)
-    report <- c(report, ref_pt)
+    ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec)
+    report <- c(report, ref_pt[1:3])
 
     Assessment@UMSY <- report$UMSY
     Assessment@MSY <- report$MSY
@@ -300,33 +300,51 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
       }
       Assessment@SE_Dev <- structure(SE_Dev, names = YearDev)
     }
-
+    
+    catch_eq <- function(Ftarget) {
+      projection_DD_TMB(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)), 
+                        process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    }
+    Assessment@forecast <- list(per_recruit = ref_pt[[4]], catch_eq = catch_eq)
   }
   return(Assessment)
 }
 
 
-get_MSY_DD <- function(TMB_data, Arec, Brec) {
-  S0 <- TMB_data$S0
-  Alpha <- TMB_data$Alpha
-  Rho <- TMB_data$Rho
-  wk <- TMB_data$wk
-  SR <- TMB_data$SR_type
-
-  solveMSY <- function(x) {
-    U <- ilogit(x)
-    SS <- S0 * (1 - U)
-    Spr <- (SS * Alpha/(1 - SS) + wk)/(1 - Rho * SS)
-    if(SR == "BH") Req <- (Arec * Spr - 1)/(Brec * Spr)
-    if(SR == "Ricker") Req <- log(Arec * Spr)/(Brec * Spr)
-    Beq <- Spr * Req
-    Yield <- U * Beq
-    return(-1 * Yield)
-  }
-
-  opt2 <- optimize(solveMSY, interval = c(-50, 6))
-  UMSY <- ilogit(opt2$minimum)
+ref_pt_DD <- function(TMB_data, Arec, Brec) {
+  opt2 <- optimize(yield_fn_DD, interval = c(0, 1), S0 = TMB_data$S0, Alpha = TMB_data$Alpha,
+                   Rho = TMB_data$Rho, wk = TMB_data$wk, SR = TMB_data$SR_type, Arec = Arec, Brec = Brec)
+  UMSY <- opt2$minimum
   MSY <- -1 * opt2$objective
   BMSY <- MSY/UMSY
-  return(list(UMSY = UMSY, MSY = MSY, BMSY = BMSY))
+  
+  U_PR <- seq(0, 0.99, 0.01)
+  yield <- lapply(U_PR, yield_fn_DD, S0 = TMB_data$S0, Alpha = TMB_data$Alpha,
+                  Rho = TMB_data$Rho, wk = TMB_data$wk, SR = TMB_data$SR_type, 
+                  Arec = Arec, Brec = Brec, opt = FALSE)
+  SPR <- vapply(yield, getElement, numeric(1), "SPR")
+  YPR <- vapply(yield, getElement, numeric(1), "YPR")
+  
+  return(list(UMSY = UMSY, MSY = MSY, BMSY = BMSY, 
+              per_recruit = data.frame(U = U_PR, SPR = SPR/SPR[1], YPR = YPR)))
+}
+
+yield_fn_DD <- function(x, S0, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, logit_trans = FALSE) {
+  if(logit_trans) {
+    U <- ilogit(x)
+  } else {
+    U <- x
+  }
+  SS <- S0 * (1 - U)
+  Spr <- (SS * Alpha/(1 - SS) + wk)/(1 - Rho * SS)
+  if(SR == "BH") Req <- (Arec * Spr - 1)/(Brec * Spr)
+  if(SR == "Ricker") Req <- log(Arec * Spr)/(Brec * Spr)
+  Beq <- Spr * Req
+  Ypr <- U * Spr
+  Yield <- U * Beq
+  if(opt) {
+    return(-1 * Yield)
+  } else {
+    return(c(SPR = Spr, Yield = Yield, YPR = Ypr, B = Beq, R = Req))
+  }
 }

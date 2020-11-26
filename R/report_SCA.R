@@ -95,7 +95,7 @@ rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
 
   productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
                     rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
-                    rmd_yield_F("SCA"), rmd_yield_depletion("SCA"), rmd_sp())
+                    rmd_yield_F("SCA"), rmd_yield_depletion("SCA"), rmd_sp(), rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
 }
@@ -301,43 +301,17 @@ retrospective_SCA2 <- function(Assessment, nyr) retrospective_SCA(Assessment, ny
 plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "Depletion")) {
   xaxis <- match.arg(xaxis)
   F.vector = seq(0, 2.5 * fmsy, length.out = 1e2)
-
-  M <- data$M
-  mat <- data$mat
-  weight <- data$weight
-  n_age <- data$n_age
-  SR <- data$SR_type
-
-  vul <- report$vul
-
+  
+  yield <- lapply(F.vector, yield_fn_SCA, M = data$M, mat = data$mat, weight = data$weight, vul = report$vul,
+                  SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, opt = FALSE)
+  
+  Biomass <- vapply(yield, getElement, numeric(1), "E")
+  Yield <- vapply(yield, getElement, numeric(1), "Yield")
+  R <- vapply(yield, getElement, numeric(1), "R")
+  ind <- R >= 0
+  
   BMSY <- report$EMSY
   B0 <- report$E0
-
-  Arec <- report$Arec
-  Brec <- report$Brec
-
-  EPR <- Req <- NA
-  solveMSY <- function(logF) {
-    Fmort <- exp(logF)
-    surv <- exp(-vul * Fmort - M)
-    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
-    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
-    EPR <<- sum(NPR * mat * weight)
-    if(SR == "BH") Req <<- (Arec * EPR - 1)/(Brec * EPR)
-    if(SR == "Ricker") Req <<- log(Arec * EPR)/(Brec * EPR)
-    CPR <- vul * Fmort/(vul * Fmort + M) * NPR * (1 - exp(-vul * Fmort - M))
-    Yield <- Req * sum(CPR * weight)
-    return(-1 * Yield)
-  }
-
-  Biomass <- Yield <- R <- rep(NA, length(F.vector))
-  for(i in 1:length(F.vector)) {
-    Yield[i] <- -1 * solveMSY(log(F.vector[i]))
-    R[i] <- Req
-    Biomass[i] <- EPR * Req
-  }
-
-  ind <- R >= 0
 
   if(xaxis == "F") {
     plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing Mortality",
@@ -362,7 +336,7 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
     segments(x0 = 0, y0 = msy, x1 = BMSY/B0, lty = 2)
     abline(h = 0, col = 'grey')
   }
-  invisible(data.frame(F = F.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/report$B0))
+  invisible(data.frame(F = F.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/B0))
 }
 
 

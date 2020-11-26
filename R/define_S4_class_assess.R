@@ -77,7 +77,7 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' @slot SE_Dev A vector of standard errors of the deviation parameters.
 #' @slot info A list containing the data and starting values of estimated parameters
 #' for the assessment.
-#' @slot ref_pt A list containing reference points, e.g., FMSY, F0.1, F-SPR\%, etc.
+#' @slot forecast A list containing components for forecasting, including reference points (e.g., FMSY, F0.1, F-SPR\%), projections, etc.
 #' @slot obj A list with components returned from \code{\link[TMB]{MakeADFun}}.
 #' @slot opt A list with components from calling \code{\link[stats]{nlminb}} to \code{obj}.
 #' @slot SD A list (class sdreport) with parameter estimates and their standard errors, obtained from
@@ -110,7 +110,7 @@ Assessment <- setClass("Assessment",
                                  SE_B_BMSY = "numeric", SE_B_B0 = "numeric",
                                  SE_SSB_SSBMSY = "numeric", SE_SSB_SSB0 = "numeric",
                                  SE_VB_VBMSY = "numeric", SE_VB_VB0 = "numeric",
-                                 SE_Dev = "numeric", info = "ANY", ref_pt = "list",
+                                 SE_Dev = "numeric", info = "ANY", forecast = "list",
                                  obj = "list", opt = "optAssess", SD = "sdreportAssess",
                                  TMB_report = "list", dependencies = "character"))
 

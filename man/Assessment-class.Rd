@@ -122,7 +122,7 @@ and penalty term (applied when \code{U > 0.975} in any year).}
 \item{\code{info}}{A list containing the data and starting values of estimated parameters
 for the assessment.}
 
-\item{\code{ref_pt}}{A list containing reference points, e.g., FMSY, F0.1, F-SPR\%, etc.}
+\item{\code{forecast}}{A list containing components for forecasting, including reference points (e.g., FMSY, F0.1, F-SPR\%), projections, etc.}
 
 \item{\code{obj}}{A list with components returned from \code{\link[TMB]{MakeADFun}}.}
 

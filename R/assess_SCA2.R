@@ -226,10 +226,10 @@ SCA2 <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logisti
 
   if(Assessment@conv) {
     info$h <- ifelse(fix_h, Data@steep[x], NA)
-    refpt <- SCA_refpt_calc(E = report$E, R = report$R, weight = Wa,
-                            mat = mat_age, M = M, vul = report$vul, SR = SR, fix_h = fix_h, h = info$h)
+    ref_pt <- ref_pt_SCA2(E = report$E, R = report$R, weight = Wa,
+                          mat = mat_age, M = M, vul = report$vul, SR = SR, fix_h = fix_h, h = info$h)
 
-    report <- c(report, refpt)
+    report <- c(report, ref_pt[-length(ref_pt)])
     if(integrate) {
       SE_Early <- sqrt(SD$diag.cov.random[names(SD$par.random) == "log_early_rec_dev"])
       SE_Main <- sqrt(SD$diag.cov.random[names(SD$par.random) == "log_rec_dev"])[map_log_rec_dev]
@@ -259,8 +259,69 @@ SCA2 <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logisti
     Assessment@VB_VB0 <- structure(report$VB/report$VB0, names = Yearplusone)
     Assessment@SE_Dev <- structure(SE_Dev, names = YearDev)
     Assessment@TMB_report <- report
+    
+    catch_eq <- function(Ftarget) {
+      projection_SCA2(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
+                      process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    }
+    Assessment@forecast <- list(per_recruit = ref_pt[[length(ref_pt)]], catch_eq = catch_eq)
   }
   return(Assessment)
 }
 class(SCA2) <- "Assess"
 
+
+ref_pt_SCA2 <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
+  # Unfished spawners per recruit
+  n_age <- length(M)
+  surv0 <- exp(-M)
+  NPR0 <- c(1, cumprod(surv0[1:(n_age-1)]))
+  NPR0[n_age] <- NPR0[n_age]/(1 - exp(-M[n_age]))
+  EPR0 <- sum(NPR0 * weight * mat)
+  
+  # Fit stock-recruit curve
+  Rpred <- sigmaR <- NULL
+  solve_SR_par <- function(x, h = NULL) {
+    R0 <- exp(x[1])
+    E0 <- R0 * EPR0
+    if(!fix_h) {
+      if(SR == "BH") h <- 0.2 + 0.8 * ilogit(x[2])
+      if(SR == "Ricker") h <- 0.2 + exp(x[2])
+    }
+    if(SR == "BH") Rpred <<- (0.8 * R0 * h * E)/(0.2 * EPR0 * R0 *(1-h)+(h-0.2)*E)
+    if(SR == "Ricker") Rpred <<- E/EPR0 * (5*h)^(1.25 * (1 - E/E0))
+    sigmaR <<- sqrt(sum((log(R/Rpred))^2)/length(Rpred))
+    nLL <- -sum(dnorm(log(R/Rpred), -0.5 * sigmaR^2, sigmaR, log = TRUE))
+    return(nLL)
+  }
+  
+  if(fix_h) {
+    opt <- optimize(solve_SR_par, interval = c(-10, 10), h = h)$minimum
+    R0 <- exp(opt)
+  } else {
+    opt <- nlminb(c(10, 10), solve_SR_par)
+    R0 <- exp(opt$par[1])
+    if(SR == "BH") h <- 0.2 + 0.8 * ilogit(opt$par[2])
+    if(SR == "Ricker") h <- 0.2 + exp(opt$par[2])
+  }
+  
+  # Unfished reference points
+  N0 <- R0 * sum(NPR0)
+  E0 <- R0 * EPR0
+  VB0 <- R0 * sum(NPR0 * weight * vul)
+  B0 <- R0 * sum(NPR0 * weight)
+  
+  # Alpha/Beta from steepness
+  if(SR == "BH") {
+    Arec <- 4*h/(1-h)/EPR0
+    Brec <- (5*h-1)/(1-h)/E0
+  }
+  if(SR == "Ricker") {
+    Arec <- 1/EPR0 * (5*h)^1.25
+    Brec <- 1.25 * log(5*h) / E0
+  }
+  
+  refpt_unfished <- list(h = h, Arec = Arec, Brec = Brec, E0 = E0, R0 = R0, N0 = N0, VB0 = VB0, B0 = B0, EPR0 = EPR0, NPR0 = NPR0)
+  refpt_MSY <- ref_pt_SCA(Arec, Brec, M, weight, mat, vul, SR = SR)
+  return(c(refpt_unfished, refpt_MSY))
+}

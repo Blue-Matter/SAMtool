@@ -1,47 +1,12 @@
-#' Harvest control rule to fish at some fraction of maximum sustainable yield
-#'
-#' A simple control rule that specifies the total allowable catch (TAC) to be the
-#' product of current vulnerable biomass and UMSY.
-#'
-#' @param Assessment An object of class \linkS4class{Assessment} with estimates of
-#' FMSY or UMSY and vulnerable biomass in terminal year.
-#' @param reps The number of stochastic samples of the TAC recommendation.
-#' @param MSY_frac The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75\% of FMSY).
-#' @param ... Miscellaneous arguments.
-#' @return An object of class \linkS4class{Rec} with the TAC recommendation.
-#' @author Q. Huynh
-#' @references
-#' Punt, A. E, Dorn, M. W., and Haltuch, M. A. 2008. Evaluation of threshold management strategies
-#' for groundfish off the U.S. West Coast. Fisheries Research 94:251-266.
-#' @seealso \link{make_MP} \link{HCR_ramp}
-#' @examples
-#' # create an MP to run in closed-loop MSE (fishes at UMSY)
-#' DD_MSY <- make_MP(DD_TMB, HCR_MSY)
-#' class(DD_MSY)
-#'
-#' # The same MP which fishes at 75% of UMSY
-#' DD_75MSY <- make_MP(DD_TMB, HCR_MSY, MSY_frac = 0.75)
-#' class(DD_75MSY)
-#'
-#' \dontrun{
-#' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_75MSY"))
-#' }
-#' @export
-HCR_MSY <- function(Assessment, reps = 1, MSY_frac = 1, ...) {
-  TAC <- TAC_MSY(Assessment, reps, MSY_frac)
-  Rec <- new("Rec")
-  Rec@TAC <- TACfilter(TAC)
-  return(Rec)
-}
-class(HCR_MSY) <- "HCR"
+
 
 #' Linearly ramped harvest control rules
 #'
 #' An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
 #' as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
 #' is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
-#' the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
-#' The Ftarget is FMSY above the TOCP and zero below the LOCP.
+#' the target F is minimized. For example, the TOCP and LOCP for 40\% and 10\% spawning depletion, respectively, in the 40-10 control rule.
+#' Ftarget is FMSY above the TOCP and zero below the LOCP.
 #' Class HCR objects are typically used with function \link{make_MP}.
 #'
 #' @param Assessment An object of class \linkS4class{Assessment} with estimates of
@@ -51,16 +16,19 @@ class(HCR_MSY) <- "HCR"
 #' By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).
 #' @param LOCP Numeric, the limit value for the OCP in the HCR.
 #' @param TOCP Numeric, the target value for the OCP in the HCR.
-#' @param Ftarget_type The type of F used for the target fishing mortality rate. Currently only FMSY is supported.
+#' @param Ftarget_type The type of F used for the target fishing mortality rate.
 #' @param relF_min The relative value of Ftarget (i.e., as a proportion) if \code{OCP < LOCP}.
 #' @param relF_max The relative value of Ftarget if \code{OCP > TOCP}.
+#' @param SPR The target value of spawning potential ratio if \code{Ftarget_type = "FSPR"}. By default, 0.4 (F40\%).
 #' @param ... Miscellaneous arguments.
 #' @details \code{HCR_ramp} is the generic ramped-HCR function where user specifies OCP and corresponding limit and target
-#' pointss, as well as minimum and maximum relative F target.
+#' points, as well as minimum and maximum relative F target.
 #'
 #' \code{HCR40_10} is a common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
 #' respectively), while \code{HCR60_20} is more conservative than 40-10, with LOCP and TOCP of 0.2 and 0.6
-#' spawning depletion, respectively).
+#' spawning depletion, respectively). 
+#' 
+#' \code{HCR80_40MSY} uses 0.8 and 0.4 SSBMSY as the LOCP and TOCP, respectively.
 #' @return An object of class \linkS4class{Rec} with the TAC recommendation.
 #' @author Q. Huynh & T. Carruthers
 #' @references
@@ -113,20 +81,64 @@ class(HCR_MSY) <- "HCR"
 #' }
 #' @export
 HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY"),
-                     Ftarget_type = "MSY", LOCP = 0.1, TOCP = 0.4, relF_min = 0, relF_max = 1, ...) {
+                     Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"), 
+                     LOCP = 0.1, TOCP = 0.4, relF_min = 0, relF_max = 1, SPR, ...) {
   OCP_type <- match.arg(OCP_type)
-
-  if(OCP_type == "SSB_SSB0" && length(Assessment@SSB_SSB0) > 0) {
-    relB <- Assessment@SSB_SSB0[length(Assessment@SSB_SSB0)]
-  } else if(OCP_type == "SSB_SSBMSY" && length(Assessment@SSB_SSBMSY) > 0) {
-    relB <- Assessment@SSB_SSBMSY[length(Assessment@SSB_SSBMSY)]
-  } else relB <- NA_real_
-
-  if(!is.na(relB)) {
-    alpha <- HCRlin(relB, LOCP, TOCP, relF_min, relF_max)
-    TAC <- TAC_MSY(Assessment, reps, MSY_frac = alpha)
-  } else TAC <- rep(NA_real_, reps)
-
+  Ftarget_type <- match.arg(Ftarget_type)
+  
+  if(Assessment@conv) {
+    
+    if(OCP_type == "SSB_SSB0" && length(Assessment@SSB_SSB0) > 0) {
+      OCP <- Assessment@SSB_SSB0[length(Assessment@SSB_SSB0)]
+    } else if(OCP_type == "SSB_SSBMSY" && length(Assessment@SSB_SSBMSY) > 0) {
+      OCP <- Assessment@SSB_SSBMSY[length(Assessment@SSB_SSBMSY)]
+    } else OCP <- NA_real_
+    
+    if(!is.na(OCP)) {
+      alpha <- HCRlin(OCP, LOCP, TOCP, relF_min, relF_max)
+      
+      if(Ftarget_type == "FMSY") {
+        if(length(Assessment@UMSY)) {
+          Fout <- -log(1 - alpha * Assessment@UMSY)
+          SE <- alpha * Assessment@SE_UMSY
+        } else if(length(Assessment@FMSY)) {
+          Fout <- alpha * Assessment@FMSY
+          SE <- alpha * Assessment@SE_FMSY
+        } 
+      } else if(Ftarget_type == "F01") {
+        if(!is.null(res@forecast$per_recruit$U)) {
+          U01 <- get_F01(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
+          Fout <- -log(1 - alpha * U01)
+        } else {
+          Fout <- alpha * get_F01(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$YPR)
+        }
+      } else if(Ftarget_type == "Fmax") {
+        if(!is.null(res@forecast$per_recruit$U)) {
+          Umax <- get_Fmax(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
+          Fout <- -log(1 - alpha * Umax)
+        } else {
+          Fout <- alpha * get_Fmax(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$YPR)
+        }
+      } else if(Ftarget_type == "FSPR") {
+        if(missing(SPR)) SPR <- 0.4
+        if(!is.null(res@forecast$per_recruit$U)) {
+          U_SPR <- get_FSPR(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$SPR, target = SPR)
+          Fout <- -log(1 - alpha * U_SPR)
+        } else {
+          Fout <- alpha * get_FSPR(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$SPR,
+                                   target = SPR)
+        }
+      }
+      
+      if(exists("Fout", inherits = FALSE)) {
+        if(!exists("SE", inherits = FALSE) || !length(SE)) SE <- 0
+        FM <- trlnorm(reps, Fout, SE/Fout)
+        TAC <- calculate_TAC(Assessment, Ftarget = FM)
+      }
+    }
+  }
+  if(!exists("TAC", inherits = FALSE)) TAC <- rep(NA_real_, reps)
+  
   Rec <- new("Rec")
   Rec@TAC <- TACfilter(TAC)
   return(Rec)
@@ -136,16 +148,63 @@ class(HCR_ramp) <- "HCR"
 
 #' @rdname HCR_ramp
 #' @export
-HCR40_10 <- function(Assessment, reps = 1, ...) HCR_ramp(Assessment, reps, LOCP = 0.1, TOCP = 0.4)
+HCR40_10 <- function(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...) {
+  HCR_ramp(Assessment, reps, LOCP = 0.1, TOCP = 0.4, Ftarget_type = Ftarget_type, 
+           relF_min = 0, relF_max = 1, SPR = SPR, ...)
+}
 class(HCR40_10) <- "HCR"
 
 
 #' @rdname HCR_ramp
 #' @export
-HCR60_20 <- function(Assessment, reps = 1, ...) HCR_ramp(Assessment, reps, LOCP = 0.2, TOCP = 0.6)
+HCR60_20 <- function(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...) {
+  HCR_ramp(Assessment, reps, LOCP = 0.2, TOCP = 0.6, Ftarget_type = Ftarget_type, 
+           relF_min = 0, relF_max = 1, SPR = SPR, ...)
+}
 class(HCR60_20) <- "HCR"
 
+#' @rdname HCR_ramp
+#' @export
+HCR80_40MSY <- function(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...) {
+  HCR_ramp(Assessment, reps, OCP_type = "SSB_SSBMSY", LOCP = 0.4, TOCP = 0.8, 
+           Ftarget_type = Ftarget_type, relF_min = 0, relF_max = 1, SPR = SPR, ...)
+}
+class(HCR60_20) <- "HCR"
 
+#' Harvest control rule to fish at some fraction of maximum sustainable yield
+#'
+#' A simple control rule that specifies the total allowable catch (TAC) to be the
+#' product of current vulnerable biomass and UMSY.
+#'
+#' @param Assessment An object of class \linkS4class{Assessment} with estimates of
+#' FMSY or UMSY and vulnerable biomass in terminal year.
+#' @param reps The number of stochastic samples of the TAC recommendation.
+#' @param MSY_frac The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75\% of FMSY).
+#' @param ... Miscellaneous arguments.
+#' @return An object of class \linkS4class{Rec} with the TAC recommendation.
+#' @author Q. Huynh
+#' @references
+#' Punt, A. E, Dorn, M. W., and Haltuch, M. A. 2008. Evaluation of threshold management strategies
+#' for groundfish off the U.S. West Coast. Fisheries Research 94:251-266.
+#' @seealso \link{make_MP} \link{HCR_ramp}
+#' @examples
+#' # create an MP to run in closed-loop MSE (fishes at UMSY)
+#' DD_MSY <- make_MP(DD_TMB, HCR_MSY)
+#' class(DD_MSY)
+#'
+#' # The same MP which fishes at 75% of UMSY
+#' DD_75MSY <- make_MP(DD_TMB, HCR_MSY, MSY_frac = 0.75)
+#' class(DD_75MSY)
+#'
+#' \dontrun{
+#' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_75MSY"))
+#' }
+#' @export
+HCR_MSY <- function(Assessment, reps = 1, MSY_frac = 1, ...) {
+  HCR_ramp(Assessment = Assessment, reps = reps, LOCP = 0, TOCP = 0, 
+           relF_min = MSY_frac, relF_max = MSY_frac)
+}
+class(HCR_MSY) <- "HCR"
 
 #' Generic linear harvest control rule based on biomass
 #'
@@ -170,7 +229,7 @@ HCRlin <- function(OCP_val, LOCP, TOCP, relF_min = 0, relF_max = 1){
   adj <- rep(relF_max, length(OCP_val))
   adj[OCP_val <= LOCP] <- relF_min
   cond <- OCP_val > LOCP & OCP_val < TOCP
-  adj[cond] <- (relF_max - relF_min)/(TOCP - LOCP) * (adj[cond] - LOCP) + relF_min
+  adj[cond] <- (relF_max - relF_min)/(TOCP - LOCP) * (OCP_val[cond] - LOCP) + relF_min
   return(adj)
 }
 
@@ -238,29 +297,78 @@ powdif<-function(x,z,g){
 #' @aliases calculate_TAC
 #' @export
 TAC_MSY <- function(Assessment, reps, MSY_frac = 1) {
-  has_UMSY <- length(Assessment@UMSY) > 0
-  has_FMSY <- length(Assessment@FMSY) > 0
-  has_VB <- length(Assessment@VB) > 0
-
-  if(Assessment@conv && has_VB && (has_UMSY || has_FMSY)) {
-    VB_current <- Assessment@VB[length(Assessment@VB)]
-    if(has_UMSY) {
-      if(length(Assessment@SE_UMSY) > 0) {
-        SE_UMSY <- Assessment@SE_UMSY
-      } else SE_UMSY <- 1e-8
-      UMSY_vector <- trlnorm(reps, Assessment@UMSY, SE_UMSY)
-      TAC <- MSY_frac * UMSY_vector * VB_current
-    }
-    if(has_FMSY) {
-      if(length(Assessment@SE_FMSY) > 0) {
-        SE_FMSY <- Assessment@SE_FMSY
-      } else SE_FMSY <- 1e-8
-      FMSY_vector <- trlnorm(reps, Assessment@FMSY, SE_FMSY)
-      TAC <- (1 - exp(-MSY_frac * FMSY_vector)) * VB_current
-    }
+  if(length(Assessment@UMSY)) {
+    Fout <- -log(1 - MSY_frac * Assessment@UMSY)
+    SE <- MSY_frac * Assessment@SE_UMSY
+  } else if(length(Assessment@FMSY)) {
+    Fout <- MSY_frac * Assessment@FMSY
+    SE <- MSY_frac * Assessment@SE_FMSY
   } else {
-    TAC <- rep(NA_real_, reps) # Missing estimates for HCR.
+    Fout <- SE <- numeric(0)
   }
-  return(as.numeric(TAC))
+  
+  if(length(Fout) && length(SE)) {
+    FM <- trlnorm(reps, Fout, SE/Fout)
+    TAC <- calculate_TAC(Assessment, Ftarget = FM)
+  } else {
+    TAC <- rep(NA_real_, reps)
+  }
+  return(TAC)
 }
 
+calculate_TAC <- function(Assessment, Ftarget, Utarget) { # Vectorized for Ftarget or Utarget
+  if(Assessment@conv) {
+    TAC <- try(vapply(Ftarget, Assessment@forecast$catch_eq, numeric(1)), silent = TRUE)
+    if(is.character(TAC)) {
+      TAC <- try(mapply(catch_equation, Utarget = 1 - exp(-Ftarget), 
+                        MoreArgs = list(method = "frac", B = Assessment@VB[length(Assessment@VB)])),
+                 silent = TRUE)
+    }
+  } 
+  if(!exists("TAC", inherits = FALSE) || is.character(TAC)) TAC <- rep(NA_real_, length(Ftarget))
+  return(TAC)
+}
+
+
+catch_equation <- function(method = c("frac", "Baranov", "cDD", "SP"), ...) {
+  method <- match.arg(method)
+  dots <- list(...)
+  
+  if(method == "frac") {
+    args <- dots_check(c("Utarget", "B"), dots)
+    catch <- args$Utarget * args$B
+    
+  } else if(method == "Baranov") {
+    args <- dots_check(c("sel", "Ftarget", "M", "wt", "N"), dots)
+    catch <- SCA_catch_solver(FM = args$Ftarget, N = args$N, weight = args$weight, vul = args$sel, M = args$M)$Cpred
+  
+  } else if(method == "cDD") {
+    args <- dots_check(c("Ftarget", "B", "N", "R", "M", "Kappa", "Winf", "wk"), dots)
+    catch <- cDD_catch_solver(FM = args$Ftarget, B = args$B, N = args$N, R = args$R, M = args$M, Kappa = args$Kappa,
+                              Winf = args$Winf, wk = args$wk)[1]
+    
+  } else if(method == "SP") {
+    args <- dots_check(c("Ftarget", "B", "MSY", "K", "n"), dots)
+    if(is.null(dots$n_seas)) {
+      dt <- 1
+    } else {
+      dt <- 1/dots$n_seas
+    }
+    n_term <- ifelse(args$n == 1, exp(1), args$n^(args$n/(args$n-1)))
+    
+    catch <- SP_catch_solver(FM = args$Ftarget, B = args$B, dt = dt, MSY = args$MSY, 
+                             K = args$K, n = args$n, n_term = n_term)[1]
+  }
+  if(!exists("catch", inherits = FALSE)) catch <- NA_real_
+  return(catch)
+}
+
+dots_check <- function(vars, dots) {
+  out <- lapply(vars, function(x) getElement(dots, x))
+  check <- vapply(out, is.null, logical(1))
+  if(any(check)) {
+    stop(paste0(paste(vars[check], collapse = ", "), " was not found in call to catch_equation()."),
+         call.= FALSE)
+  }
+  return(out)
+}

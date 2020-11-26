@@ -4,23 +4,27 @@
 \alias{HCR_ramp}
 \alias{HCR40_10}
 \alias{HCR60_20}
+\alias{HCR80_40MSY}
 \title{Linearly ramped harvest control rules}
 \usage{
 HCR_ramp(
   Assessment,
   reps = 1,
   OCP_type = c("SSB_SSB0", "SSB_SSBMSY"),
-  Ftarget_type = "MSY",
+  Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"),
   LOCP = 0.1,
   TOCP = 0.4,
   relF_min = 0,
   relF_max = 1,
+  SPR,
   ...
 )
 
-HCR40_10(Assessment, reps = 1, ...)
+HCR40_10(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...)
 
-HCR60_20(Assessment, reps = 1, ...)
+HCR60_20(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...)
+
+HCR80_40MSY(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...)
 }
 \arguments{
 \item{Assessment}{An object of class \linkS4class{Assessment} with estimates of
@@ -31,7 +35,7 @@ FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal yea
 \item{OCP_type}{The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
 By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).}
 
-\item{Ftarget_type}{The type of F used for the target fishing mortality rate. Currently only FMSY is supported.}
+\item{Ftarget_type}{The type of F used for the target fishing mortality rate.}
 
 \item{LOCP}{Numeric, the limit value for the OCP in the HCR.}
 
@@ -40,6 +44,8 @@ By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"
 \item{relF_min}{The relative value of Ftarget (i.e., as a proportion) if \code{OCP < LOCP}.}
 
 \item{relF_max}{The relative value of Ftarget if \code{OCP > TOCP}.}
+
+\item{SPR}{The target value of spawning potential ratio if \code{Ftarget_type = "FSPR"}. By default, 0.4 (F40\%).}
 
 \item{...}{Miscellaneous arguments.}
 }
@@ -50,17 +56,19 @@ An object of class \linkS4class{Rec} with the TAC recommendation.
 An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
 as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
 is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
-the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
-The Ftarget is FMSY above the TOCP and zero below the LOCP.
+the target F is minimized. For example, the TOCP and LOCP for 40\% and 10\% spawning depletion, respectively, in the 40-10 control rule.
+Ftarget is FMSY above the TOCP and zero below the LOCP.
 Class HCR objects are typically used with function \link{make_MP}.
 }
 \details{
 \code{HCR_ramp} is the generic ramped-HCR function where user specifies OCP and corresponding limit and target
-pointss, as well as minimum and maximum relative F target.
+points, as well as minimum and maximum relative F target.
 
 \code{HCR40_10} is a common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
 respectively), while \code{HCR60_20} is more conservative than 40-10, with LOCP and TOCP of 0.2 and 0.6
-spawning depletion, respectively).
+spawning depletion, respectively). 
+
+\code{HCR80_40MSY} uses 0.8 and 0.4 SSBMSY as the LOCP and TOCP, respectively.
 }
 \examples{
 # 40-10 linear ramp

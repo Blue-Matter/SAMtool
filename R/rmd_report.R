@@ -479,6 +479,43 @@ rmd_sp <- function(conv_check = TRUE, depletion = TRUE) {
     "```\n")
 }
 
+rmd_SPR <- function(conv_check = TRUE) {
+  if(conv_check) conv <- "if(conv) " else conv <- ""
+  c("```{r, fig.cap=\"Spawning potential ratio.\"}",
+    paste0(conv, " {"),
+    "  if(!is.null(forecast$per_recruit$U)) {",
+    "    plot(forecast$per_recruit$U, forecast$per_recruit$SPR, ylim = c(0, 1), typ = \"l\", xlab = \"Harvest rate (U)\", ylab = \"Spawning potential ratio\")",
+    "  } else {",
+    "    plot(forecast$per_recruit$FM, forecast$per_recruit$SPR, ylim = c(0, 1), typ = \"l\", xlab = \"Fishing mortality\", ylab = \"Spawning potential ratio\")",
+    "  }",
+    "  abline(h = 0, col = \"grey\")",
+    "}",
+    "```\n")
+}
+
+rmd_YPR <- function(conv_check = TRUE) {
+  if(conv_check) conv <- "if(conv) " else conv <- ""
+  c("```{r, fig.cap=\"Yield per recruit.\"}",
+    paste0(conv, " {"),
+    "  if(!is.null(forecast$per_recruit$U)) {",
+    "    plot(forecast$per_recruit$U, forecast$per_recruit$YPR, typ = \"l\", xlab = \"Harvest rate (U)\", ylab = \"Yield per recruit\")",
+    "    U01 <- get_F01(forecast$per_recruit$U, forecast$per_recruit$YPR)",
+    "    Umax <- get_Fmax(forecast$per_recruit$U, forecast$per_recruit$YPR)",
+    "    abline(h = 0, col = \"grey\")",
+    "    abline(v = c(U01, Umax), lty = c(2, 4))",
+    "    legend(\"bottomright\", c(expression(U[0.1]), expression(U[max])), lty = c(2, 4))",
+    "  } else {",
+    "    plot(forecast$per_recruit$FM, forecast$per_recruit$YPR, typ = \"l\", xlab = \"Fishing mortality\", ylab = \"Yield per recruit\")",
+    "    F01 <- get_F01(forecast$per_recruit$FM, forecast$per_recruit$YPR)",
+    "    Fmax <- get_Fmax(forecast$per_recruit$FM, forecast$per_recruit$YPR)",
+    "    abline(h = 0, col = \"grey\")",
+    "    abline(v = c(F01, Fmax), lty = c(2, 4))",
+    "    legend(\"bottomright\", c(expression(F[0.1]), expression(F[max])), lty = c(2, 4))",
+    "  }",
+    "}",
+    "```\n")
+}
+
 rmd_retrospective <- function() {
   c("## Retrospective\n",
     "```{r}",

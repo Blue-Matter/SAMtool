@@ -272,8 +272,8 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
                     dependencies = dependencies)
 
   if(Assessment@conv) {
-    ref_pt <- SCA_Pope_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
-    report <- c(report, ref_pt)
+    ref_pt <- ref_pt_SCA_Pope(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+    report <- c(report, ref_pt[1:6])
 
     if(integrate) {
       SE_Early <- ifelse(est_early_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_early_rec_dev"]), NA)
@@ -304,44 +304,68 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report
+    
+    catch_eq <- function(Ftarget) {
+      projection_SCA_Pope(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
+                          process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    }
+    Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq)
   }
   return(Assessment)
 }
 class(SCA_Pope) <- "Assess"
 
-
-
-SCA_Pope_MSY_calc <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
+ref_pt_SCA_Pope <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
   SR <- match.arg(SR)
-  n_age <- length(M)
-
-  solveMSY <- function(logit_U) {
-    U <- ilogit(logit_U)
-    surv <- exp(-M) * (1 - vul * U)
-    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
-    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
-    EPR <- sum(NPR * mat * weight)
-    if(SR == "BH") Req <- (Arec * EPR - 1)/(Brec * EPR)
-    if(SR == "Ricker") Req <- log(Arec * EPR)/(Brec * EPR)
-    CPR <- vul * U * NPR * exp(-0.5 * M)
-    Yield <- Req * sum(CPR * weight)
-    return(-1 * Yield)
-  }
-
-  opt2 <- optimize(solveMSY, interval = c(0.01, 0.99) %>% logit())
-  UMSY <- ilogit(opt2$minimum)
+  
+  opt2 <- optimize(yield_fn_SCA_Pope, interval = c(0, 1), M = M, mat = mat, weight = weight, vul = vul, 
+                   SR = SR, Arec = Arec, Brec = Brec)
+  UMSY <- opt2$minimum
   MSY <- -1 * opt2$objective
-  VBMSY <- MSY/UMSY
-
-  surv_UMSY <- exp(-M) * (1 - vul * UMSY)
-  NPR_UMSY <- c(1, cumprod(surv_UMSY[1:(n_age-1)]))
-  NPR_UMSY[n_age] <- NPR_UMSY[n_age]/(1 - surv_UMSY[n_age])
-
-  RMSY <- VBMSY/sum(vul * NPR_UMSY * weight)
-  BMSY <- RMSY * sum(NPR_UMSY * weight)
-  EMSY <- RMSY * sum(NPR_UMSY * weight * mat)
-
-  return(list(UMSY = UMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY))
+  
+  opt3 <- yield_fn_SCA_Pope(UMSY, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                            Arec = Arec, Brec = Brec, opt = FALSE)
+  VBMSY <- opt3["VB"]
+  RMSY <- opt3["R"]
+  BMSY <- opt3["B"]
+  EMSY <- opt3["E"]
+  
+  U_PR <- seq(0, 0.99, 0.01)
+  yield <- lapply(U_PR, yield_fn_SCA_Pope, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                  Arec = Arec, Brec = Brec, opt = FALSE)
+  SPR <- vapply(yield, getElement, numeric(1), "SPR")
+  YPR <- vapply(yield, getElement, numeric(1), "YPR")
+  
+  return(list(UMSY = UMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
+              per_recruit = data.frame(U = U_PR, SPR = SPR/SPR[1], YPR = YPR)))
 }
 
+yield_fn_SCA_Pope <- function(x, M, mat, weight, vul, SR, Arec, Brec, opt = TRUE, logit_trans = FALSE) {
+  if(logit_trans) {
+    U <- ilogit(x)
+  } else {
+    U <- x
+  }
+  n_age <- length(M)
+  
+  surv <- exp(-M) * (1 - vul * U)
+  NPR <- c(1, cumprod(surv[1:(n_age-1)]))
+  NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
+  EPR <- sum(NPR * mat * weight)
+  if(SR == "BH") Req <- (Arec * EPR - 1)/(Brec * EPR)
+  if(SR == "Ricker") Req <- log(Arec * EPR)/(Brec * EPR)
+  CPR <- vul * U * NPR * exp(-0.5 * M)
+  YPR <- sum(CPR * weight)
+  Yield <- Req * YPR
+  if(opt) {
+    return(-1 * Yield)
+  } else {
+    
+    B <- Req * sum(NPR * weight)
+    E <- Req * EPR
+    VB <- Req * sum(NPR * exp(-0.5 * M) * vul * weight)
+    
+    return(c(SPR = EPR, Yield = Yield, YPR = YPR, B = B, E = E, VB = VB, R = Req))
+  }
+}
 

@@ -11,8 +11,8 @@ projection(
   Catch = NULL,
   p_years = 50,
   p_sim = 200,
-  obs_error = NULL,
-  process_error = NULL,
+  obs_error,
+  process_error,
   max_F = 3,
   seed = 499
 )
@@ -31,10 +31,12 @@ projection(
 \item{p_sim}{Integer for the number of simulations for the projection.}
 
 \item{obs_error}{Vector of length two for standard deviation of error to be added to the index and catch, respectively. If \code{NULL},
-uses values from assessment model.}
+uses values from assessment model. Alternatively, a list of length two (first entry for index, second for catch) containing matrices of 
+simulation and year-specific error structure (p_sim rows and p_year columns; a matrix of ones indicates perfect data).}
 
 \item{process_error}{Numeric, standard deviation for process error (e.g., recruitment or biomass deviates). If \code{NULL},
-uses values from assessment model.}
+uses values from assessment model. Alternatively, a matrix of simulation and year-specific recruitment deviates (p_sim rows and p_year columns,
+a matrix of ones indicates no recruitment deviates).}
 
 \item{max_F}{The maximum allowable F if the projection is constrained on catch.}
 

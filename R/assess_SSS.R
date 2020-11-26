@@ -177,8 +177,8 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
                     dependencies = dependencies)
 
   if(Assessment@conv) {
-    ref_pt <- SCA_Pope_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
-    report <- c(report, ref_pt)
+    ref_pt <- ref_pt_SCA_Pope(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+    report <- c(report, ref_pt[1:6])
 
     Assessment@UMSY <- report$UMSY
     Assessment@MSY <- report$MSY
@@ -190,6 +190,12 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
     Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY, names = Yearplusone)
     Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
     Assessment@TMB_report <- report
+    
+    catch_eq <- function(Ftarget) {
+      projection_SCA_Pope(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
+                          process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    }
+    Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq)
   }
   return(Assessment)
 }

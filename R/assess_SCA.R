@@ -436,8 +436,8 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
                     dependencies = dependencies)
 
   if(Assessment@conv) {
-    ref_pt <- SCA_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
-    report <- c(report, ref_pt)
+    ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+    report <- c(report, ref_pt[1:6])
 
     if(integrate) {
       SE_Early <- ifelse(est_early_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_early_rec_dev"]), NA)
@@ -468,12 +468,71 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report
+    
+    catch_eq <- function(Ftarget) {
+      projection_SCA(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
+                     process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    }
+    Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq)
   }
   return(Assessment)
 }
 class(SCA) <- "Assess"
 
+ref_pt_SCA <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
+  SR <- match.arg(SR)
+  
+  opt2 <- optimize(yield_fn_SCA, interval = c(0, 4), M = M, mat = mat, weight = weight, vul = vul, 
+                   SR = SR, Arec = Arec, Brec = Brec)
+  FMSY <- opt2$minimum
+  MSY <- -1 * opt2$objective
+  
+  opt3 <- yield_fn_SCA(FMSY, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                       Arec = Arec, Brec = Brec, opt = FALSE)
+  VBMSY <- opt3["VB"]
+  RMSY <- opt3["R"]
+  BMSY <- opt3["B"]
+  EMSY <- opt3["E"]
+  
+  F_PR <- seq(0, 2.5 * FMSY, length.out = 100)
+  yield <- lapply(F_PR, yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                  Arec = Arec, Brec = Brec, opt = FALSE)
+  SPR <- vapply(yield, getElement, numeric(1), "SPR")
+  YPR <- vapply(yield, getElement, numeric(1), "YPR")
+  
+  return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
+              per_recruit = data.frame(FM = F_PR, SPR = SPR/SPR[1], YPR = YPR)))
+}
 
+yield_fn_SCA <- function(x, M, mat, weight, vul, SR, Arec, Brec, opt = TRUE, log_trans = FALSE) {
+  if(log_trans) {
+    FMort <- exp(x)
+  } else {
+    FMort <- x
+  }
+  n_age <- length(M)
+  FF <- vul * FMort
+  Z <- FF + M
+  surv <- exp(-Z)
+  NPR <- c(1, cumprod(surv[1:(n_age-1)]))
+  NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
+  EPR <- sum(NPR * mat * weight)
+  if(SR == "BH") Req <- (Arec * EPR - 1)/(Brec * EPR)
+  if(SR == "Ricker") Req <- log(Arec * EPR)/(Brec * EPR)
+  CPR <- Baranov(vul, FMort, M, NPR)
+  YPR <- sum(CPR * weight)
+  Yield <- YPR * Req
+  if(opt) {
+    return(-1 * Yield)
+  } else {
+    
+    B <- Req * sum(NPR * weight)
+    E <- Req * EPR
+    VB <- Req * sum(NPR * vul * weight)
+    
+    return(c(SPR = EPR, Yield = Yield, YPR = YPR, B = B, E = E, VB = VB, R = Req))
+  }
+}
 
 SCA_MSY_calc <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
   SR <- match.arg(SR)

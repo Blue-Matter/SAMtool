@@ -141,7 +141,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
 
   mod_formula <- formula(W2 ~ Winf + (W - Winf) * exp(-Kappa))
   fit_mod <- nls(mod_formula, wt_df, start = list(Kappa = Data@vbK[x]))
-  Kappa <- coef(fit_mod)["Kappa"]
+  Kappa <- coef(fit_mod)[["Kappa"]]
 
   M <- Data@Mort[x]
 
@@ -246,8 +246,8 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   }
 
   if(Assessment@conv) {
-    ref_pt <- get_MSY_cDD(info$data, report$Arec, report$Brec)
-    report <- c(report, ref_pt)
+    ref_pt <- ref_pt_cDD(info$data, report$Arec, report$Brec)
+    report <- c(report, ref_pt[1:3])
 
     Assessment@FMSY <- report$FMSY
     Assessment@MSY <- report$MSY
@@ -264,38 +264,52 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
       }
       Assessment@SE_Dev <- structure(SE_Dev, names = YearDev)
     }
+    
+    catch_eq <- function(Ftarget) {
+      projection_SP(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)), 
+                    process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    }
+    Assessment@forecast <- list(per_recruit = ref_pt[[4]], catch_eq = catch_eq)
   }
   return(Assessment)
 }
 
-
-
-
-
-get_MSY_cDD <- function(TMB_data, Arec, Brec) {
-  Kappa <- TMB_data$Kappa
-  M <- TMB_data$M
-  Winf <- TMB_data$Winf
-  wk <- TMB_data$wk
-  SR <- TMB_data$SR_type
-
-  solveMSY <- function(x) {
-    FMort <- exp(x)
-    Z <- FMort + M
-    BPR <- (wk + Kappa * Winf/Z)/(Z+Kappa)
-    if(SR == "BH") Req <- (Arec * BPR - 1)/Brec/BPR
-    if(SR == "Ricker") Req <- log(Arec * BPR)/Brec/BPR
-    Beq <- BPR * Req
-    Yield <- FMort * Beq
-    return(-1 * Yield)
-  }
-
-  opt2 <- optimize(solveMSY, interval = c(-50, 2))
-  FMSY <- exp(opt2$minimum)
+ref_pt_cDD <- function(TMB_data, Arec, Brec) {
+  opt2 <- optimize(yield_fn_cDD, interval = c(0, 3), M = TMB_data$M, Kappa = TMB_data$Kappa, 
+                   Winf = TMB_data$Winf, wk = TMB_data$wk, SR = TMB_data$SR_type, 
+                   Arec = Arec, Brec = Brec)
+  FMSY <- opt2$minimum
   MSY <- -1 * opt2$objective
   BMSY <- MSY/FMSY
-  return(list(FMSY = FMSY, MSY = MSY, BMSY = BMSY))
+  
+  F_PR <- seq(0, 2.5 * FMSY, length.out = 100)
+  yield <- lapply(F_PR, yield_fn_cDD, M = TMB_data$M, Kappa = TMB_data$Kappa, 
+                  Winf = TMB_data$Winf, wk = TMB_data$wk, SR = TMB_data$SR_type, 
+                  Arec = Arec, Brec = Brec, opt = FALSE)
+  
+  SPR <- vapply(yield, getElement, numeric(1), "SPR")
+  YPR <- vapply(yield, getElement, numeric(1), "YPR")
+  
+  return(list(FMSY = FMSY, MSY = MSY, BMSY = BMSY,
+              per_recruit = data.frame(FM = F_PR, SPR = SPR/SPR[1], YPR = YPR)))
 }
 
-
-
+yield_fn_cDD <- function(x, M, Kappa, Winf, wk, SR, Arec, Brec, opt = TRUE, log_trans = FALSE) {
+  if(log_trans) {
+    FMort <- exp(x)
+  } else {
+    FMort <- x
+  } 
+  Z <- FMort + M
+  BPR <- (wk + Kappa * Winf/Z)/(Z+Kappa)
+  if(SR == "BH") Req <- (Arec * BPR - 1)/Brec/BPR
+  if(SR == "Ricker") Req <- log(Arec * BPR)/Brec/BPR
+  Beq <- BPR * Req
+  YPR <- FMort * BPR
+  Yield <- FMort * Beq
+  if(opt) {
+    return(-1 * Yield)
+  } else {
+    return(c(SPR = BPR, Yield = Yield, YPR = YPR, B = Beq, R = Req))
+  }
+}

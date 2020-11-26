@@ -321,6 +321,12 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
       SD$sd[names(SD$value) == "B_BMSY_final"] %>% structure(names = max(Year))
     Assessment@SE_B_B0 <- Assessment@SE_SSB_SSB0 <- Assessment@SE_VB_VB0 <- 
       SD$sd[names(SD$value) == "B_K_final"] %>% structure(names = max(Year))
+    
+    catch_eq <- function(Ftarget) {
+      projection_SP(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)), 
+                    process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    }
+    Assessment@forecast <- list(catch_eq = catch_eq)
   }
   return(Assessment)
 }

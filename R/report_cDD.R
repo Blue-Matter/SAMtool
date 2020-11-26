@@ -88,7 +88,7 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
 
   productivity <- c(rmd_SR(SSB, expectedR, rec_dev, header = "### Productivity\n\n\n"),
                     rmd_SR(SSB, expectedR, rec_dev, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
-                    rmd_yield_F("cDD"), rmd_yield_depletion("cDD"), rmd_sp())
+                    rmd_yield_F("cDD"), rmd_yield_depletion("cDD"), rmd_sp(), rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
 }
@@ -271,24 +271,13 @@ retrospective_cDD_SS <- function(Assessment, nyr) retrospective_cDD(Assessment, 
 plot_yield_cDD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "Depletion")) {
   xaxis <- match.arg(xaxis)
   if(xaxis == "F") F.vector <- seq(0, 2.5 * fmsy, length.out = 1e2) else F.vector <- seq(0, 5 * fmsy, length.out = 1e2)
-
-  Kappa <- data$Kappa
-  M <- data$M
-  Winf <- data$Winf
-  wk <- data$wk
-  SR_type <- data$SR_type
-
-  Arec <- report$Arec
-  Brec <- report$Brec
-  BMSY <- report$BMSY
-
-  Z <- F.vector + M
-  BPR <- (wk + Kappa * Winf/Z)/(Z+Kappa)
-  if(SR_type == "BH") R <- (Arec * BPR - 1)/Brec/BPR
-  if(SR_type == "Ricker") R <- log(Arec * BPR)/Brec/BPR
-
-  Biomass <- BPR * R
-  Yield <- F.vector * Biomass
+  
+  yield <- lapply(F.vector, yield_fn_cDD, M = data$M, Kappa = data$Kappa, 
+                  Winf = data$Winf, wk = data$wk, SR = data$SR_type, 
+                  Arec = report$Arec, Brec = report$Brec, opt = FALSE)
+  Biomass <- vapply(yield, getElement, numeric(1), "B")
+  Yield <- vapply(yield, getElement, numeric(1), "Yield")
+  R <- vapply(yield, getElement, numeric(1), "R")
   ind <- R >= 0
 
   if(xaxis == "F") {
@@ -300,15 +289,15 @@ plot_yield_cDD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
 
   if(xaxis == "Biomass") {
     plot(Biomass[ind], Yield[ind], typ = 'l', xlab = "Biomass", ylab = "Equilibrium yield")
-    segments(x0 = BMSY, y0 = 0, y1 = msy, lty = 2)
-    segments(x0 = 0, y0 = msy, x1 = BMSY, lty = 2)
+    segments(x0 = report$BMSY, y0 = 0, y1 = msy, lty = 2)
+    segments(x0 = 0, y0 = msy, x1 = report$BMSY, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
   if(xaxis == "Depletion") {
     plot(Biomass[ind]/report$B0, Yield[ind], typ = 'l', xlab = expression(B/B[0]), ylab = "Equilibrium yield")
-    segments(x0 = BMSY/report$B0, y0 = 0, y1 = msy, lty = 2)
-    segments(x0 = 0, y0 = msy, x1 = BMSY/report$B0, lty = 2)
+    segments(x0 = report$BMSY/report$B0, y0 = 0, y1 = msy, lty = 2)
+    segments(x0 = 0, y0 = msy, x1 = report$BMSY/report$B0, lty = 2)
     abline(h = 0, col = 'grey')
   }
   invisible(data.frame(F = F.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/report$B0))
