@@ -169,7 +169,8 @@ class(HCR60_20) <- "HCR"
 HCRlin <- function(OCP_val, LOCP, TOCP, relF_min = 0, relF_max = 1){
   adj <- rep(relF_max, length(OCP_val))
   adj[OCP_val <= LOCP] <- relF_min
-  adj[OCP_val > LOCP & OCP_val < TOCP] <- (rel_max - rel_min)/(TRP - LRP) * (Brel[cond] - LRP) + rel_min
+  cond <- OCP_val > LOCP & OCP_val < TOCP
+  adj[cond] <- (relF_max - relF_min)/(TOCP - LOCP) * (adj[cond] - LOCP) + relF_min
   return(adj)
 }
 
