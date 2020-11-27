@@ -711,16 +711,18 @@ check_OM_for_sampling <- function(OM, data) {
   OM@EffLower <- OM@EffUpper <- c(0, 1)
 
   ###### Observation Parameters - Iobs
+  
   if(any(data$Index > 0, na.rm = TRUE)) {
     Isd_check <- !is.null(data$I_sd) && any(data$I_sd > 0, na.rm = TRUE)
     if(!Isd_check) {
       Isd_check2 <- length(OM@Iobs) == 2 || !is.null(cpars$Iobs)
       if(!Isd_check2) stop("OM@Iobs is needed.", call. = FALSE)
     }
+    
   }
   Iobs <- OM@Iobs
   OM <- Replace(OM, MSEtool::Generic_Obs, silent = TRUE)
-  OM@Iobs <- Iobs
+  if(length(Iobs) == 2) OM@Iobs <- Iobs
 
   ###### Imp
   OM <- Replace(OM, MSEtool::Perfect_Imp, silent = TRUE)
