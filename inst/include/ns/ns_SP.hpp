@@ -7,7 +7,7 @@ Type SP_F(Type U_start, Type C_hist, Type MSY, Type K, Type n, Type nterm, Type 
           vector<Type> &Cpred, vector<Type> &B, int y, Type &penalty) {
 
   Type F = -log(1 - U_start);
-  if(dt < 1) {
+  if(nstep > 1) {
     for(int i=0;i<nitF;i++) {
       Type Catch = 0;
       Type B_next = B(y);
@@ -28,12 +28,11 @@ Type SP_F(Type U_start, Type C_hist, Type MSY, Type K, Type n, Type nterm, Type 
       }
     }
   } else {
-    Cpred(y) = C_hist;
     F = CppAD::CondExpLt(1 - C_hist/B(y), Type(0.025), 1 - posfun(1 - C_hist/B(y), Type(0.025), penalty), C_hist/B(y));
+    Cpred(y) = F * B(y);
     B(y+1) = B(y) + CppAD::CondExpEq(n, Type(1), -exp(Type(1.0)) * MSY * B(y) / K * log(B(y)/K),
       nterm/(n-1) * MSY * (B(y)/K - pow(B(y)/K, n))) - F * B(y);
   }
-
   return F;
 }
 

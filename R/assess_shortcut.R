@@ -60,7 +60,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   n_y <- length(Data@Year)
   year_p <- max(Data@Year) - Data@LHYear
   Hist <- Data@Misc[-c(1:nrow(Data@Cat))]
-  #browser(expr = year_p == 0)
+  
   n_age <- Data@MaxAge + 1
   
   SSB_hist <- Hist$StockPars$SSB[x, , , ] %>% apply(2, sum)
