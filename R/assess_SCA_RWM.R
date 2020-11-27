@@ -48,6 +48,7 @@
 #' in convergence rate). Ignored if \code{integrate = TRUE}.
 #' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
+#' @param refyear An expression for the year for which M is used to report MSY and depletion reference points. By default, terminal year.
 #' @param control A named list of agruments for optimization to be passed to
 #' \code{\link[stats]{nlminb}}.
 #' @param inner.control A named list of arguments for optimization of the random effects, which
@@ -81,8 +82,9 @@
 SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
                     CAA_multiplier = 50, I_type = c("B", "VB", "SSB"), rescale = "mean1", max_age = Data@MaxAge,
                     start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_sigma = FALSE, fix_tau = TRUE,
-                    early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
-                    silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                    early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", 
+                    refyear = expression(length(Data@Year)),
+                    integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                     control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
   dots <- list(...)
@@ -329,8 +331,10 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
   SD <- mod[[2]]
   report <- obj$report(obj$env$last.par.best)
   report$NPR0 <- do.call(cbind, report$NPR0)
-  report$E0_tv <- report$EPR0 * report$R0
-  report$E0_tv <- c(report$E0_tv, report$E0_tv[length(report$E0_tv)])
+  report$BPR0 <- report$NPR0 * data$weight
+  report$B0 <- colSums(report$BPR0) * report$R0
+  report$E0 <- report$EPR0 * report$R0
+  report$E0 <- c(report$E0, report$E0[length(report$E0)])
 
   Yearplusone <- c(Year, max(Year) + 1)
   YearEarly <- (Year[1] - n_age + 1):(Year[1] - 1)
@@ -341,17 +345,18 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
   Dev <- structure(c(rev(report$log_early_rec_dev), report$log_rec_dev), names = YearDev)
   report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj) %>% structure(names = Yearplusone)
   
+  refyear <- eval(refyear)
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
   Assessment <- new("Assessment", Model = "SCA_RWM", Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
                     SSB0 = report$E0, VB0 = report$VB0,
                     h = report$h, FMort = structure(report$F, names = Year),
                     B = structure(report$B, names = Yearplusone),
-                    B_B0 = structure(report$B/report$B0, names = Yearplusone),
+                    #B_B0 = structure(report$B/report$B0, names = Yearplusone),
                     SSB = structure(report$E, names = Yearplusone),
-                    SSB_SSB0 = structure(report$E/report$E0_tv, names = Yearplusone),
+                    SSB_SSB0 = structure(report$E/report$E0[refyear], names = Yearplusone),
                     VB = structure(report$VB, names = Yearplusone),
-                    VB_VB0 = structure(report$VB/report$VB0, names = Yearplusone),
+                    #VB_VB0 = structure(report$VB/report$VB0, names = Yearplusone),
                     R = structure(R, names = YearR),
                     N = structure(rowSums(report$N), names = Yearplusone),
                     N_at_age = report$N,
@@ -368,6 +373,7 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
                                     names = c("Total", "Index", "CAA", "Catch", "RecDev", "M_Walk", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
+
 
   if(Assessment@conv) {
     year_specific_ref_pt <- lapply(report$M, function(x) {
@@ -395,15 +401,15 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
       SE_Dev[is.na(SE_Dev)] <- 0
     }
     
-    Assessment@FMSY <- report$FMSY
-    Assessment@MSY <- report$MSY
-    Assessment@BMSY <- report$BMSY
-    Assessment@SSBMSY <- report$EMSY
-    Assessment@VBMSY <- report$VBMSY
-    Assessment@F_FMSY <- structure(report$F/report$FMSY, names = Year)
-    #Assessment@B_BMSY <- structure(report$B/report$BMSY, names = Yearplusone)
-    #Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY, names = Yearplusone)
-    #Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
+    Assessment@FMSY <- report$FMSY[refyear]
+    Assessment@MSY <- report$MSY[refyear]
+    Assessment@BMSY <- report$BMSY[refyear]
+    Assessment@SSBMSY <- report$EMSY[refyear]
+    Assessment@VBMSY <- report$VBMSY[refyear]
+    Assessment@F_FMSY <- Assessment@FMort/Assessment@FMSY
+    Assessment@B_BMSY <- Assessment@B/Assessment@BMSY
+    Assessment@SSB_SSBMSY <- Assessment@SSB/Assessment@SSBMSY
+    Assessment@VB_VBMSY <- Assessment@VB/Assessment@VBMSY
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report

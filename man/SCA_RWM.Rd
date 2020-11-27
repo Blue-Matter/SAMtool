@@ -22,6 +22,7 @@ SCA_RWM(
   fix_tau = TRUE,
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
+  refyear = expression(length(Data@Year)),
   integrate = FALSE,
   silent = TRUE,
   opt_hess = FALSE,
@@ -81,6 +82,8 @@ If numeric, the number of years after the first year of the model for which to s
 not be estimated in \code{SCA} (recruitment in these years will be based on the mean predicted by stock-recruit relationship).
 By default, \code{"comp50"} uses the number of ages (smaller than the mode)
 for which the catch-at-age matrix has less than half the abundance than that at the mode.}
+
+\item{refyear}{An expression for the year for which M is used to report MSY and depletion reference points. By default, terminal year.}
 
 \item{integrate}{Logical, whether the likelihood of the model integrates over the likelihood
 of the recruitment deviations (thus, treating it as a random effects/state-space variable).
