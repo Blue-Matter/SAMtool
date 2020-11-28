@@ -280,7 +280,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
           message("Historical recruitment deviations sampled with autocorrelation starting in year ", yr_hist_sample, " out of OM@nyears = ", nyears)
         }
       }
-      samp_proj <- Map(dev_AC, AC = OM@cpars$AC, stdev = StockPars$procsd, chain_start = log_rec_dev[, nyears + OM@maxage],
+      samp_proj <- Map(dev_AC, AC = OM@cpars$AC, stdev = StockPars$procsd, chain_start = log_rec_dev[, nyears],
                        MoreArgs = list(n = proyears, mu = 1))
       return(exp(do.call(rbind, samp_proj)))
     }
