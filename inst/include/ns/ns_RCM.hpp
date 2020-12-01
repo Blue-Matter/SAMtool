@@ -210,7 +210,7 @@ Type RCM_prior(matrix<int> use_prior, matrix<Type> prior_dist, Type R0, Type h, 
       Type y = (h - 0.2)/0.8;
       prior += dbeta_(y, prior_dist(1,0), prior_dist(1,1), true) - log(y - y * y); 
     } else { // Ricker - normal on h with log Jacobian transform
-      prior += dnorm_(h, prior_dist(1,0), prior_dist(1,1), true) - log(h - 0.2);
+      prior += dnorm_(h, prior_dist(1,0), prior_dist(1,1), true) + CppAD::CondExpLt(log(h - 0.2), Type(0), -log(h - 0.2), log(h - 0.2));
     }
   }
   if(use_prior(2)) { // Prior for constant M - normal on log_M

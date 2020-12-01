@@ -107,14 +107,10 @@ Type RCM(objective_function<Type> *obj) {
   h += 0.2;
   Type Mest = exp(log_M);
   matrix<Type> M(n_y, n_age);
-  for(int y=0;y<n_y;y++) {
-    for(int a=0;a<n_age;a++) {
-      if(use_prior(2)) {
-        M(y,a) = Mest;
-      } else {
-        M(y,a) = M_data(y,a);
-      }
-    }
+  if(use_prior(2)) {
+    M.fill(Mest);
+  } else {
+    M = M_data;
   }
   Type tau = exp(log_tau);
   
