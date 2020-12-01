@@ -414,23 +414,27 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                              rmd_N(), N_bubble, CAA_bubble, CAL_bubble)
 
               nll <- RCM_get_likelihoods(report, data$LWT, f_name, s_name)
-                nll_table <- c("### Likelihood components\n",
-                                 "#### Summary\n",
-                                 "`r nll[[1]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
-                                 "#### Fleet likelihoods\n",
-                                 "`r nll[[2]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
-                                 "#### Fleet weights\n",
-                                 "`r nll[[3]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
-                                 "#### Survey likelihoods\n",
-                                 "`r nll[[4]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
-                                 "#### Survey weights\n",
-                                 "`r nll[[5]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n")
+              
+              nll_table <- c("### Likelihood components\n",
+                             "#### Summary\n",
+                             "`r nll[[1]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
+                             "#### Fleet likelihoods\n",
+                             "`r nll[[2]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
+                             "#### Fleet weights\n",
+                             "`r nll[[3]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
+                             "#### Survey likelihoods\n",
+                             "`r nll[[4]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
+                             "#### Survey weights\n",
+                             "`r nll[[5]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n")
+              
+              corr_matrix <- c("### Correlation matrix\n",
+                               "`r SD$env$corr.fixed %>% as.data.frame()`\n\n")
 
               if(exists("retro", inherits = FALSE)) {
                 ret <- rmd_RCM_retrospective(render_args)
               } else ret <- NULL
 
-              mean_fit_rmd <- c(sumry, LH_section, data_section, ts_output, nll_table, ret)
+              mean_fit_rmd <- c(sumry, LH_section, data_section, ts_output, nll_table, corr_matrix, ret)
             } else mean_fit_rmd <- c("## Fit to mean parameters of OM {.tabset}\n",
                                      "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")
 

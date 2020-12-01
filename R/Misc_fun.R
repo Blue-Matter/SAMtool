@@ -57,12 +57,12 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
   }
   SD <- get_sdreport(obj, opt)
 
-  if((is.character(SD) || !SD$pdHess) && !is.character(opt) && restart > 0) {
-    obj$par <- opt$par
+  if(restart > 0 && !is.character(SD) && !SD$pdHess) {
+    if(!is.character(opt)) obj$par <- opt$par
+    obj$par <- obj$par * exp(rnorm(length(obj$par), 0, 1e-3))
     Recall(obj, control, use_hessian, restart - 1)
   } else {
-    res <- list(opt = opt, SD = SD)
-    return(res)
+    return(list(opt = opt, SD = SD))
   }
 }
 
@@ -78,17 +78,17 @@ get_sdreport <- function(obj, opt) {
 
   res <- try(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), silent = TRUE)
 
-  if(!is.character(res) && !is.character(opt) && !is.null(h) && !res$pdHess) {
+  if(!is.character(res) && !res$pdHess && !is.character(opt) && !is.null(h)) {
     h <- optimHess(opt$par, obj$fn, obj$gr)
     res <- try(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), silent = TRUE)
   }
 
-  if(inherits(res, "sdreport") && res$pdHess && all(is.nan(res$cov.fixed))) {
+  if(!is.character(res) && res$pdHess && all(is.nan(res$cov.fixed))) {
     if(is.null(h)) h <- optimHess(opt$par, obj$fn, obj$gr)
     if(!is.character(try(chol(h), silent = TRUE))) res$cov.fixed <- chol2inv(chol(h))
   }
 
-  if(inherits(res, "sdreport") && !is.null(par.fixed)) {
+  if(!is.character(res) && !is.null(par.fixed)) {
     obj2 <- MakeADFun(obj$env$data, obj$env$parameters, type = "ADFun",
                       ADreport = TRUE, DLL = obj$env$DLL, silent = obj$env$silent)
     gr <- obj2$gr(obj$env$last.par.best)
@@ -99,6 +99,10 @@ get_sdreport <- function(obj, opt) {
       if(!is.null(obj$env$random)) inv_gr <- inv_gr[-obj$env$random, , drop = FALSE]
       res$env$gradient.AD <- colSums(inv_gr * as.vector(res$gradient.fixed))
     }
+  }
+  if(!is.character(res)) {
+    res$env$corr.fixed <- res$cov.fixed %>% cov2cor() %>% round(3) %>% 
+      structure(dimnames = list(names(res$par.fixed), names(res$par.fixed)))
   }
   return(res)
 }

@@ -24,11 +24,11 @@ rmd_summary <- function(modname) {
            "## Summary Tables {.tabset}\n",
            "```{r}",
            "  sx <- summary(Assessment)[-1]",
-           "  for(i in 1:length(sx)) {",
-           "    dat <- as.data.frame(sx[[i]])",
+           "  sx <- lapply(sx, function(x) {",
+           "    dat <- as.data.frame(x)",
            "    for(j in 1:ncol(dat)) if(nrow(dat) > 0 && is.numeric(dat[, j])) dat[, j] <- ifelse(dat[, j] > 1e3, round(dat[, j], 0), signif(dat[, j], 3))",
-           "    sx[[i]] <- dat",
-           "  }",
+           "    return(dat)",
+           "  })",
            "```\n\n",
            "### Current Status",
            "`r sx[[1]]`\n",
@@ -39,7 +39,9 @@ rmd_summary <- function(modname) {
            "### Model Estimates",
            "`r sx[[4]]`\n",
            "### Likelihoods",
-           "`r sx[[5]]`\n")
+           "`r sx[[5]]`\n",
+           "### Correlation Matrix",
+           "`r Assessment@SD$env$corr.fixed %>% as.data.frame()`\n")
   return(ans)
 }
 
