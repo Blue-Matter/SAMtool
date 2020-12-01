@@ -215,8 +215,8 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
   return(LWT)
 }
 
-make_prior <- function(prior, nsurvey, SR_rel) { # log_R0, log_M, h, q
-  if(is.null(prior)) prior <- list()
+make_prior <- function(prior, nsurvey, SR_rel, dots) { # log_R0, log_M, h, q
+  if(length(prior) == 0 && !is.null(dots$priors)) prior <- dots$priors
   
   no_survey <- nsurvey == 0
   if(no_survey) nsurvey <- 1 # Use only on next two lines

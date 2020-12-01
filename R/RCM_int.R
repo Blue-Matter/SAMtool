@@ -72,7 +72,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   message(ifelse(OM@SRrel == 1, "Beverton-Holt", "Ricker"), " stock-recruitment relationship used.")
   
   # Generate priors
-  prior <- make_prior(prior, nsurvey, OM@SRrel)
+  prior <- make_prior(prior, nsurvey, OM@SRrel, dots)
   
   # Test for identical sims
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, ObsPars, data, dots)
