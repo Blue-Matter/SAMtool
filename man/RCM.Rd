@@ -84,9 +84,9 @@ respectively, for the multinomial likelihood function. The effective sample size
 \item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0 and M priors
 lognormal (mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors.
 For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). For all others, provide a length-2 vector for the mean and SD.
-See vignette for full description.}
+See \href{../doc/RCM_eq.html}{vignette} for full description.}
 
-\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also `drop_highF`.}
+\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also \code{drop_highF}.}
 
 \item{cores}{Integer for the number of CPU cores for the stock reduction analysis.}
 

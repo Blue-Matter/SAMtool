@@ -222,7 +222,7 @@ Unfished recruitment is estimated in log-space, $R_0 = \dfrac{1}{z}\exp(x^{R_0})
 Recruitment deviations $\delta_y$ are estimated in log space.
 
 The support of the steepness parameter $x^h$ is over all real numbers and is transformed. With the Beverton-Holt SR function:
-$$ h = 0.8 \times \dfrac{\exp(x^h)}{1 + \exp(x^h)} + 0.2. $$
+$$ h = 0.8 \times \dfrac{1}{1 + \exp(-x^h)} + 0.2. $$
 With a Ricker SR function:
 $$ h = \exp(x^h) + 0.2.$$
 
@@ -238,7 +238,7 @@ Age- and time-constant natural mortality $M$ can be estimated with a prior. Othe
 The total objective function $\textrm{LL}$ to be maximized is
 $$\textrm{LL} = \sum_{i=1}^9\Lambda_i + \sum \textrm{pr} + \sum_y\sum_f\textrm{pen}_{y,f},$$
 
-including likelihood, parameter priors, and penalty functions, described below.
+including the log likelihoods $\Lambda_i$, logarithm of the parameter priors $pr$, and penalty functions, described below.
 
 ## Likelihoods
 
@@ -290,13 +290,16 @@ x^{\textrm{L5}}_b &\sim N(0,3)\\
 V^{L_{\infty}}_b &\sim \textrm{Beta}(1.01, 1.01)
 \end{align}$$
 
+If free selectivity parameters are estimated, then 
+$$v_{y,a,f} \sim \textrm{Beta}(1.01, 1.01)$$
+
 ## Optional priors 
 A lognormal prior on $R_0$ can be specified. The penalty term $\textrm{pr}$ to the objective function is:
 $$\textrm{pr}^{R_0} = -\log(\sigma^{R_0}) - 0.5\left[\dfrac{\log(R_0/\mu^{R_0})}{\sigma^{R_0}}\right]^2,$$
 where $\mu^{R_0}$ and $\sigma^{R_0}$ are the mean and standard deviations for the prior provided by the user.
 
-A Beverton-Holt steepness prior uses a beta distribution on $y = (h - 0.2)/0.8$. The penalty to the objective function is:
-$$\textrm{pr}^{h} = \log(y) (\alpha-1) + \log(1-y) * (\beta-1) - \dfrac{1}{y - y^2},$$
+Recall that the parameter corresponding to Beverton-Holt steepness $x^h$ is estimable over all real numbers and is transformed such that $h = 0.8 \times \textrm{logit}^{-1}(x^h) + 0.2$. The prior uses a beta distribution on $y = (h - 0.2)/0.8$. The penalty to the objective function is:
+$$\textrm{pr}^{h} = \log(y) (\alpha-1) + \log(1-y) * (\beta-1) - \log(y - y^2),$$
 where $\alpha = \mu^h \left(\frac{\mu^h (1 - \mu^h)}{(\sigma^h)^2} - 1\right)$, $\beta = (1-\mu^h)\left(\frac{\mu^h (1 - \mu^h)}{(\sigma^h)^2} - 1\right)$, and the last term is the log Jacobian transform of the logit function.
 
 With a Ricker SR function, a normal distribution is used:
