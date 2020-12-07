@@ -95,9 +95,13 @@ get_sdreport <- function(obj, opt) {
     if(any(is.na(gr))) {
       res$env$gradient.AD <- rep(NA_real_, nrow(gr))
     } else {
-      inv_gr <- gr %>% pseudoinverse(tol = 1e-4)
-      if(!is.null(obj$env$random)) inv_gr <- inv_gr[-obj$env$random, , drop = FALSE]
-      res$env$gradient.AD <- colSums(inv_gr * as.vector(res$gradient.fixed))
+      inv_gr <- try(gr %>% pseudoinverse(tol = 1e-4), silent = TRUE)
+      if(is.character(inv_gr)) {
+        res$env$gradient.AD <- rep(NA_real_, nrow(gr))
+      } else {
+        if(!is.null(obj$env$random)) inv_gr <- inv_gr[-obj$env$random, , drop = FALSE]
+        res$env$gradient.AD <- colSums(inv_gr * as.vector(res$gradient.fixed))
+      }
     }
   }
   if(!is.character(res)) {
