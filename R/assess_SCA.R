@@ -571,9 +571,10 @@ SCA_refpt_calc <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
 SCA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   if(grepl("Pope", obj$env$data$model)) {
     dots <- list(...)
-    dots$data$C_hist <- rep(1e-8, length(dots$data$C_hist))
+    dots$data$C_hist <- rep(1e-8, dots$data$n_y)
+    par[names(par) == "U_equilibrium"] <- 0
     
-    obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = new_args$map, 
+    obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
                       random = obj$env$random, DLL = "SAMtool", silent = TRUE)
     out <- obj2$report(par)$E
   } else {
