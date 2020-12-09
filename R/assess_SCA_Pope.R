@@ -213,7 +213,7 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
 
   # Add starting values for rec-devs and increase R0 start value if U is too high (> 0.975)
   high_U <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0, silent = TRUE)
-  if(!is.character(high_U) && high_U) {
+  if(!is.character(high_U) && !is.na(high_U) && high_U) {
     Recruit <- try(Data@Rec[x, ], silent = TRUE)
     if(is.numeric(Recruit) && length(Recruit) == n_y && any(!is.na(Recruit))) {
       log_rec_dev <- log(Recruit/mean(Recruit, na.rm = TRUE))
