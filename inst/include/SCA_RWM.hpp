@@ -17,7 +17,7 @@ Type SCA_RWM(objective_function<Type> *obj) {
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
   DATA_INTEGER(n_y);      // Number of years in model
   DATA_INTEGER(n_age);    // Maximum age (plus-group)
-  //DATA_VECTOR(M);         // Natural mortality at age
+  //DATA_VECTOR(M);       // Natural mortality at age
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
@@ -27,6 +27,7 @@ Type SCA_RWM(objective_function<Type> *obj) {
   DATA_IVECTOR(est_early_rec_dev);
   DATA_IVECTOR(est_rec_dev); // Indicator of whether rec_dev is estimated in model or fixed at zero
   DATA_INTEGER(yindF);    // Year for which to estimate F, all other F are deviations from this F
+  DATA_VECTOR(M_bounds);  // Lower and upper bounds for M walk
 
   PARAMETER(R0x);
   PARAMETER(transformed_h);
@@ -36,7 +37,7 @@ Type SCA_RWM(objective_function<Type> *obj) {
   PARAMETER_VECTOR(log_F_dev);
   
   PARAMETER(log_M_start);
-  PARAMETER_VECTOR(log_M_walk);
+  PARAMETER_VECTOR(logit_M_walk);
 
   PARAMETER(log_sigma);
   PARAMETER(log_omega);
@@ -73,14 +74,17 @@ Type SCA_RWM(objective_function<Type> *obj) {
   
   // Set up M vector
   vector<Type> M(n_y);
-  vector<Type> log_M(n_y);
+  vector<Type> logit_M(n_y);
   vector< vector<Type>> NPR0(n_y);
   vector<Type> EPR0(n_y);
   
-  log_M(0) = log_M_start;
+  M(0) = exp(log_M_start);
+  logit_M(0) = logit2(M(0), M_bounds(0), M_bounds(1), M(0));
   for(int y=0;y<n_y;y++) {
-    if(y > 0) log_M(y) = log_M(y-1) + log_M_walk(y-1);
-    M(y) = exp(log_M(y));
+    if(y > 0) {
+      logit_M(y) = logit_M(y-1) + logit_M_walk(y-1);
+      M(y) = invlogit2(logit_M(y), M_bounds(0), M_bounds(1), M(0));
+    }
     NPR0(y) = calc_NPR(Type(0), vul, M(y), n_age);
     EPR0(y) = sum_EPR(NPR0(y), weight, mat);
   }
@@ -221,7 +225,7 @@ Type SCA_RWM(objective_function<Type> *obj) {
       nll_comp(2) -= dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
     }
     if(est_rec_dev(y)) nll_comp(3) -= dnorm(log_rec_dev(y), Type(0), tau, true);
-    if(y<n_y-1) nll_comp(4) -= dnorm(log_M_walk(y), Type(0), tau_M, true);
+    if(y<n_y-1) nll_comp(4) -= dnorm(logit_M_walk(y), Type(0), tau_M, true);
   }
   for(int a=0;a<n_age-1;a++) {
     if(est_early_rec_dev(a)) nll_comp(3) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
@@ -236,14 +240,15 @@ Type SCA_RWM(objective_function<Type> *obj) {
   ADREPORT(tau);
   ADREPORT(tau_M);
   ADREPORT(q);
-  ADREPORT(log_M);
+  ADREPORT(logit_M);
 
   REPORT(omega);
   REPORT(sigma);
   REPORT(tau);
+  REPORT(tau_M);
   
-  REPORT(log_M);
-  REPORT(log_M_walk);
+  REPORT(logit_M);
+  REPORT(logit_M_walk);
   REPORT(M);
   
   REPORT(NPR0);

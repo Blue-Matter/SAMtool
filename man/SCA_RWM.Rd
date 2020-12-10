@@ -23,6 +23,7 @@ SCA_RWM(
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
   refyear = expression(length(Data@Year)),
+  M_bounds = c(0.5, 2),
   integrate = FALSE,
   silent = TRUE,
   opt_hess = FALSE,
@@ -85,9 +86,12 @@ for which the catch-at-age matrix has less than half the abundance than that at 
 
 \item{refyear}{An expression for the year for which M is used to report MSY and depletion reference points. By default, terminal year.}
 
+\item{M_bounds}{A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
+(M_start). The default min and max are 50\% and 200\%, respectively.}
+
 \item{integrate}{Logical, whether the likelihood of the model integrates over the likelihood
-of the recruitment deviations (thus, treating it as a random effects/state-space variable).
-Otherwise, recruitment deviations are penalized parameters.}
+of the recruitment deviations and M random walk (thus, treating it as a random effects/state-space variable).
+Otherwise, recruitment deviations and the random walk are penalized parameters.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 will print trace information during optimization. Used for dignostics for model convergence.}
@@ -106,25 +110,26 @@ hasn't converged. The optimization continues from the parameters from the previo
 is passed on to \code{\link[TMB]{newton}}.}
 
 \item{...}{Other arguments to be passed.}
-
-\item{fix_U_equilibrium}{Logical, same as `fix_F_equilibrium` for `SCA_Pope`.}
 }
 \value{
 An object of class \linkS4class{Assessment}.
 }
 \description{
-\code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M (constant with age. 
-Set the variance to a small value (0.01) in order to estimate a time and age-constant M.
+\code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age). 
+Set the variance to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
 }
 \details{
-The model estimates year-specific M (constant with age) as a random walk.
+The model estimates year-specific M (constant with age) as a random walk in logit space, bounded by
+a proportion of \code{M_start} (specified in \code{M_bounds}).
 
-The starting value for the first year M (M_start) is \code{Data@Mort[x]}, and the fixed SD of the random walk
-in logspace (\code{tau_M}) is 0.05. Alternative values can be provided in the start list (see example). 
+The starting value for the first year M (M_start) is \code{Data@Mort[x]} and is fixed. 
+The fixed SD of the random walk (\code{tau_M}) is 0.05. 
+
+Alternative values can be provided in the start list (see example). 
 
 See \link{SCA} for all other information about the structure and setup of the model.
 
-The SCA builds in a stock-recruit relationship into the model. Annual unfished andMSY reference points are still 
+The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are 
 calculated and reported in TMB_report.
 }
 \examples{

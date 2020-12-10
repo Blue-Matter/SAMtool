@@ -1,8 +1,8 @@
 
 #' SCA with random walk in M
 #'
-#' \code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M (constant with age. 
-#' Set the variance to a small value (0.01) in order to estimate a time and age-constant M.
+#' \code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age). 
+#' Set the variance to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
 #' 
 #' @param x A position in the Data object (by default, equal to one for assessments).
 #' @param Data An object of class Data
@@ -23,7 +23,6 @@
 #' @param fix_F_equilibrium Logical, whether the equilibrium fishing mortality prior to the first year of the model
 #' is estimated. If \code{TRUE}, \code{F_equilibrium} is fixed to value provided in \code{start} (if provided),
 #' otherwise, equal to zero (assumes unfished conditions).
-#' @param fix_U_equilibrium Logical, same as `fix_F_equilibrium` for `SCA_Pope`.
 #' @param fix_omega Logical, whether the standard deviation of the catch is fixed. If \code{TRUE},
 #' sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Cat}.
 #' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
@@ -39,8 +38,8 @@
 #' By default, \code{"comp50"} uses the number of ages (smaller than the mode)
 #' for which the catch-at-age matrix has less than half the abundance than that at the mode.
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
-#' of the recruitment deviations (thus, treating it as a random effects/state-space variable).
-#' Otherwise, recruitment deviations are penalized parameters.
+#' of the recruitment deviations and M random walk (thus, treating it as a random effects/state-space variable).
+#' Otherwise, recruitment deviations and the random walk are penalized parameters.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 #' will print trace information during optimization. Used for dignostics for model convergence.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
@@ -49,20 +48,25 @@
 #' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param refyear An expression for the year for which M is used to report MSY and depletion reference points. By default, terminal year.
+#' @param M_bounds A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
+#' (M_start). The default min and max are 50\% and 200\%, respectively.
 #' @param control A named list of agruments for optimization to be passed to
 #' \code{\link[stats]{nlminb}}.
 #' @param inner.control A named list of arguments for optimization of the random effects, which
 #' is passed on to \code{\link[TMB]{newton}}.
 #' @param ... Other arguments to be passed.
 #' @details
-#' The model estimates year-specific M (constant with age) as a random walk.
+#' The model estimates year-specific M (constant with age) as a random walk in logit space, bounded by
+#' a proportion of \code{M_start} (specified in \code{M_bounds}).
 #' 
-#' The starting value for the first year M (M_start) is \code{Data@@Mort[x]}, and the fixed SD of the random walk
-#' in logspace (\code{tau_M}) is 0.05. Alternative values can be provided in the start list (see example). 
+#' The starting value for the first year M (M_start) is \code{Data@@Mort[x]} and is fixed. 
+#' The fixed SD of the random walk (\code{tau_M}) is 0.05. 
+#' 
+#' Alternative values can be provided in the start list (see example). 
 #' 
 #' See \link{SCA} for all other information about the structure and setup of the model.
 #' 
-#' The SCA builds in a stock-recruit relationship into the model. Annual unfished andMSY reference points are still 
+#' The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are 
 #' calculated and reported in TMB_report.
 #'
 #' @examples
@@ -83,7 +87,7 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
                     CAA_multiplier = 50, I_type = c("B", "VB", "SSB"), rescale = "mean1", max_age = Data@MaxAge,
                     start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_sigma = FALSE, fix_tau = TRUE,
                     early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", 
-                    refyear = expression(length(Data@Year)),
+                    refyear = expression(length(Data@Year)), M_bounds = c(0.5, 2),
                     integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                     control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
@@ -278,7 +282,7 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
     params$log_F_dev <- Fstart
   }
   if(is.null(params$log_M_start)) params$log_M_start <- log(Data@Mort[x])
-  params$log_M_walk <- rep(0, n_y - 1)
+  params$logit_M_walk <- rep(0, n_y - 1)
   
   if(is.null(params$log_omega)) {
     sigmaC <- max(0.01, sdconv(1, Data@CV_Cat[x]), na.rm = TRUE)
@@ -293,10 +297,10 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
     params$log_tau <- log(tau_start)
   }
   if(is.null(params$log_tau_M)) params$log_tau_M <- log(0.05)
-  params$log_M_walk <- rep(0, n_y - 1)
   
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
+  data$M_bounds <- M_bounds * exp(params$log_M_start)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control,
                inner.control = inner.control)
@@ -318,11 +322,11 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
   if(any(!est_early_rec_dev)) map$log_early_rec_dev <- factor(ifelse(est_early_rec_dev, 1:sum(est_early_rec_dev), NA))
   if(any(!est_rec_dev)) map$log_rec_dev <- factor(ifelse(est_rec_dev, 1:sum(est_rec_dev), NA))
   if(vulnerability == "dome") map$vul_par <- factor(c(1, 2, NA, 3))
-  map$log_tau_M <- factor(NA)
+  map$log_M_start <- map$log_tau_M <- factor(NA)
 
   random <- NULL
-  if(integrate) random <- c("log_early_rec_dev", "log_rec_dev", "log_M_walk")
-
+  if(integrate) random <- c("log_early_rec_dev", "log_rec_dev", "logit_M_walk")
+  
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                    map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
 

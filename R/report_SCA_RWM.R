@@ -16,7 +16,7 @@ summary_SCA_RWM <- function(Assessment) {
   rownames(input_parameters) <- rownam
   if(!"transformed_h" %in% names(obj$env$map)) input_parameters <- input_parameters[-1, ]
 
-  if(conv) Value <- c(VB0, SSB0, MSY, FMSY, VBMSY, SSBMSY, SSBMSY/SSB0)
+  if(conv) Value <- c(VB0, SSB0[length(SSB0)], MSY, FMSY, VBMSY, SSBMSY, SSBMSY/SSB0[length(SSB0)])
   else Value <- rep(NA, 7)
 
   Description <- c("Unfished vulnerable biomass",
@@ -29,7 +29,7 @@ summary_SCA_RWM <- function(Assessment) {
   if(!is.character(model_estimates)) {
     rownames(model_estimates)[rownames(model_estimates) == "log_F_"] <- paste0("log_F_dev_", names(FMort))
     rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(FMort)[as.logical(obj$env$data$est_rec_dev)])
-    rownames(model_estimates)[rownames(model_estimates) == "log_M"] <- paste0("log_rec_dev_", names(FMort))
+    rownames(model_estimates)[rownames(model_estimates) == "logit_M"] <- paste0("logit_M_", names(FMort))
   }
 
   output <- list(model = "Statistical Catch-at-Age with Random Walk in M",
@@ -86,8 +86,9 @@ rmd_SCA_RWM <- function(Assessment, ...) {
   }
   estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
 
-  productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
-                    rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
+  productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n", unfished = FALSE),
+                    rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", 
+                           trajectory = TRUE, unfished = FALSE),
                     rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))

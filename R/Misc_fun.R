@@ -21,16 +21,16 @@ userguide <- function() browseVignettes("SAMtool")
 squeeze <- function(x) (1 - .Machine$double.eps) * (x - 0.5) + 0.5
 iVB <- function(t0, K, Linf, L) max(1, ((-log(1 - L/Linf))/K + t0))  # Inverse Von-B
 
-logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) {
+logit <- function(p, soft_bounds = TRUE, minp = 0.01, maxp = 0.99) { #log(p/(1 - p))
   p <- squeeze(p)
   if(soft_bounds) {
     p <- pmax(p, minp)
     p <- pmin(p, maxp)
   }
-  log(p/(1 - p))
+  qlogis(p)
 }
 
-ilogit <- function(x) 1/(1 + exp(-x))
+ilogit <- function(x) plogis(x) #1/(1 + exp(-x))
 
 ilogitm <- function(x) {
   if(inherits(x, "matrix")) {
@@ -38,6 +38,17 @@ ilogitm <- function(x) {
   } else {
     return(exp(x)/sum(exp(x)))
   }
+}
+
+ilogit2 <- function(x, ymin = 0, ymax = 1, y0 = 0.5, scale = 1) {
+  location <- scale * log((ymax - ymin)/(y0 - ymin) - 1)
+  return((ymax - ymin) * plogis(x, location, scale) + ymin)
+}
+
+logit2 <- function(v, ymin = 0, ymax = 1, y0 = 0.5, scale = 1) {
+  location <- scale * log((ymax - ymin)/(y0 - ymin) - 1)
+  p <- (v - ymin)/(ymax - ymin)
+  return(qlogis(p, location, scale))
 }
 
 get_F01 <- function(FM, YPR) {

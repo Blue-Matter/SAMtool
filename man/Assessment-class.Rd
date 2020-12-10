@@ -122,7 +122,13 @@ and penalty term (applied when \code{U > 0.975} in any year).}
 \item{\code{info}}{A list containing the data and starting values of estimated parameters
 for the assessment.}
 
-\item{\code{forecast}}{A list containing components for forecasting, including reference points (e.g., FMSY, F0.1, F-SPR\%), projections, etc.}
+\item{\code{forecast}}{A list containing components for forecasting:
+\itemize{
+\item \code{per_recruit} A data frame of SPR (spawning potential ratio) and YPR (yield-per-recruit), calculated for
+a range of harvest rate of 0 - 0.99 or instantaneous F from 0 - 2.5 FMSY. 
+\item \code{catch_eq} A function that calculates the catch for the next year (after the model terminal year) when an
+apical F is provided. 
+}}
 
 \item{\code{obj}}{A list with components returned from \code{\link[TMB]{MakeADFun}}.}
 

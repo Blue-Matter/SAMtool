@@ -23,8 +23,7 @@ rmd_summary <- function(modname) {
   ans <- c(nametag,
            "## Summary Tables {.tabset}\n",
            "```{r}",
-           "  sx <- summary(Assessment)[-1]",
-           "  sx <- lapply(sx, function(x) {",
+           "  sx <- summary(Assessment)[-1] %>% lapply(function(x) {",
            "    dat <- as.data.frame(x)",
            "    for(j in 1:ncol(dat)) if(nrow(dat) > 0 && is.numeric(dat[, j])) dat[, j] <- ifelse(dat[, j] > 1e3, round(dat[, j], 0), signif(dat[, j], 3))",
            "    return(dat)",
@@ -198,20 +197,21 @@ rmd_F_FMSY_terminal <- function() {
 }
 
 rmd_M <- function() {
-  out <- c("```{r, fig.cap = \"Estimates of M with 95% confidence intervals.\"}",
-           "#Year <- names(res@FMort) %>% as.numeric()",
-           "log_M <- SD$value[names(SD$value) == \"log_M\"]",
-           "M <- exp(log_M)",
+  out <- c("```{r, fig.cap = \"Estimates of M with 95% confidence intervals. Dotted horizontal lines indicate bounds specified in model.\"}",
+           "logit_M <- SD$value[names(SD$value) == \"logit_M\"]",
+           "M_bounds <- obj$env$data$M_bounds",
+           "M <- ilogit2(logit_M, M_bounds[1], M_bounds[2], TMB_report$M[1])",
            "if(conv) {",
-           "  log_M_sd <- SD$sd[names(SD$value) == \"log_M\"]",
+           "  logit_M_sd <- SD$sd[names(SD$value) == \"logit_M\"]",
            "} else {",
-           "  log_M_sd <- rep(0, length(M))",
+           "  logit_M_sd <- rep(0, length(M))",
            "}",
-           "M_upper <- exp(log_M + 1.96 * log_M_sd)",
-           "M_lower <- exp(log_M - 1.96 * log_M_sd)",
-           "plot(Year, M, typ = \"o\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M_upper)))",
-           "arrows(Year, M_lower, Year, M_upper, length = 0.025, angle = 90, code = 3, col = \"grey30\")",
+           "M_upper <- ilogit2(logit_M + 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], TMB_report$M[1])",
+           "M_lower <- ilogit2(logit_M - 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], TMB_report$M[1])",
+           "plot(info$Year, M, typ = \"o\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M_upper)))",
+           "if(conv) arrows(info$Year, M_lower, info$Year, M_upper, length = 0.025, angle = 90, code = 3, col = \"grey30\")",
            "abline(h = 0, col = \"grey\")",
+           "abline(h = M_bounds, lty = 2)",
            "```\n")
   return(out)
 }
@@ -426,15 +426,16 @@ rmd_Kobe <- function(Bvar = "B_BMSY", Fvar = "F_FMSY", xlab = "expression(B/B[MS
 
 #### Productivity
 rmd_SR <- function(Bvec, expectedR, Rpoints, fig.cap = "Stock-recruit relationship.", trajectory = FALSE, ylab = "Recruitment",
-                   conv_check = FALSE, header = NULL) {
+                   conv_check = FALSE, unfished = TRUE, header = NULL) {
   Bvec <- vector2char(Bvec)
   expectedR <- vector2char(expectedR)
   Rpoints <- vector2char(Rpoints)
-
+  
+  if(unfished) refpt <- "R0 = R0, S0 = SSB0, " else refpt <- ""
   if(conv_check) conv <- "if(conv) " else conv <- ""
   ans <- c(paste0("```{r fig.cap=\"", fig.cap, "\"}"),
            paste0(conv, "plot_SR(", Bvec, ", ", expectedR, ", rec_dev = ", Rpoints, ","),
-           paste0("R0 = R0, S0 = SSB0, ylab = \"", ylab, "\", trajectory = ", as.character(trajectory), ")"),
+           paste0(refpt, "ylab = \"", ylab, "\", trajectory = ", as.character(trajectory), ")"),
            "```\n")
   if(!is.null(header)) ans <- c(header, ans)
   return(ans)

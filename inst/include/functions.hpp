@@ -1,4 +1,37 @@
 
+
+// plogis
+template<class Type>
+Type plogis(Type x, Type location = 0, Type scale = 1) {
+  return 1/(1 + exp(-(x - location)/scale));
+}
+
+template<class Type>
+Type qlogis(Type p, Type location = 0, Type scale = 1) {
+  return scale * log(p/(1 - p)) + location;
+}
+
+
+//
+template<class Type>
+Type invlogit2(Type x, Type ymin = 0, Type ymax = 1, Type y0 = 0.5, Type scale = 1) {
+  Type location = log((ymax - ymin)/(y0 - ymin) - 1);
+  location *= scale;
+  Type res = plogis(x, location, scale);
+  res *= ymax - ymin;
+  res += ymin;
+  return res;
+}
+
+
+template<class Type>
+Type logit2(Type v, Type ymin = 0, Type ymax = 1, Type y0 = 0.5, Type scale = 1) {
+  Type location = log((ymax - ymin)/(y0 - ymin) - 1);
+  location *= scale;
+  Type p = (v - ymin)/(ymax - ymin);
+  return qlogis(p, location, scale);
+}
+
 //posfun from ADMB
 template<class Type>
 Type posfun(Type x, Type eps, Type &penalty) {
