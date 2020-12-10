@@ -87,7 +87,8 @@ rmd_SCA_RWM <- function(Assessment, ...) {
   estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
 
   productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
-                    rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE))
+                    rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
+                    rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
 }

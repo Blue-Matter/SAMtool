@@ -88,9 +88,9 @@ HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY"
   
   if(Assessment@conv) {
     
-    if(OCP_type == "SSB_SSB0" && length(Assessment@SSB_SSB0) > 0) {
+    if(OCP_type == "SSB_SSB0" && length(Assessment@SSB_SSB0)) {
       OCP <- Assessment@SSB_SSB0[length(Assessment@SSB_SSB0)]
-    } else if(OCP_type == "SSB_SSBMSY" && length(Assessment@SSB_SSBMSY) > 0) {
+    } else if(OCP_type == "SSB_SSBMSY" && length(Assessment@SSB_SSBMSY)) {
       OCP <- Assessment@SSB_SSBMSY[length(Assessment@SSB_SSBMSY)]
     } else OCP <- NA_real_
     
@@ -340,7 +340,7 @@ catch_equation <- function(method = c("frac", "Baranov", "cDD", "SP"), ...) {
     
   } else if(method == "Baranov") {
     args <- dots_check(c("sel", "Ftarget", "M", "wt", "N"), dots)
-    catch <- SCA_catch_solver(FM = args$Ftarget, N = args$N, weight = args$weight, vul = args$sel, M = args$M)$Cpred
+    catch <- SCA_catch_solver(FM = args$Ftarget, N = args$N, weight = args$wt, vul = args$sel, M = args$M)$Cpred
   
   } else if(method == "cDD") {
     args <- dots_check(c("Ftarget", "B", "N", "R", "M", "Kappa", "Winf", "wk"), dots)
@@ -364,7 +364,7 @@ catch_equation <- function(method = c("frac", "Baranov", "cDD", "SP"), ...) {
 }
 
 dots_check <- function(vars, dots) {
-  out <- lapply(vars, function(x) getElement(dots, x))
+  out <- lapply(vars, function(x) getElement(dots, x)) %>% structure(names = vars)
   check <- vapply(out, is.null, logical(1))
   if(any(check)) {
     stop(paste0(paste(vars[check], collapse = ", "), " was not found in call to catch_equation()."),

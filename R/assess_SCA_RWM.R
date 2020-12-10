@@ -377,11 +377,11 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
 
   if(Assessment@conv) {
     year_specific_ref_pt <- lapply(report$M, function(x) {
-      SCA_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = rep(x, n_age), 
-                   weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+      ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = rep(x, n_age), 
+                 weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
     })
-    ref_pt <- lapply(names(year_specific_ref_pt[[1]]), function(x) sapply(year_specific_ref_pt, getElement, x)) %>%
-      structure(names = names(year_specific_ref_pt[[1]]))
+    ref_pt <- lapply(names(year_specific_ref_pt[[1]])[1:6], function(x) sapply(year_specific_ref_pt, getElement, x) %>% as.numeric()) %>%
+      structure(names = names(year_specific_ref_pt[[1]])[1:6])
     report <- c(report, ref_pt)
     
     if(integrate) {
@@ -413,6 +413,14 @@ SCA_RWM <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logi
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report
+    
+    catch_eq <- function(Ftarget) {
+      catch_equation(method = "Baranov", Ftarget = Ftarget, sel = report$vul, 
+                     M = report$M[length(report$M)] %>% rep(n_age), 
+                     wt = Wa, N = report$N[nrow(report$N), ])
+    }
+    Assessment@forecast <- list(per_recruit = year_specific_ref_pt[[refyear]]$per_recruit,
+                                catch_eq = catch_eq)
   }
   return(Assessment)
 }
