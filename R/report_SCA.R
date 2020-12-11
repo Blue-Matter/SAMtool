@@ -154,23 +154,27 @@ profile_likelihood_SCA <- function(Assessment, ...) {
 }
 
 
-retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporate SCA_RWM
+retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SCA, SCA2, and SCA_RWM
   assign_Assessment_slots(Assessment)
   n_y <- info$data$n_y
   
   Year <- c(info$Year, max(info$Year) + 1)
   
   # Array dimension: Retroyr, Year, ts
-  # ts includes: Calendar F, F_MSY, B, B/BMSY, B/B0, R, VB
-  retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, 7))
-  TS_var <- c("F", "F_FMSY", "SSB", "SSB_SSBMSY", "SSB_SSB0", "R", "VB")
-  dimnames(retro_ts) <- list(Peel = 0:nyr, Year = Year, Var = TS_var)
+  # ts includes: Calendar F, B, R, VB
+  if(grepl("RWM", Assessment@Model)) {
+    TS_var <- c("F", "SSB", "R", "VB")
+  } else {
+    TS_var <- c("F", "F_FMSY", "SSB", "SSB_SSBMSY", "SSB_SSB0", "R", "VB")
+  }
+  retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, length(TS_var))) %>% 
+    structure(dimnames = list(Peel = 0:nyr, Year = Year, Var = TS_var))
   
-  SD_nondev <- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev"
-                           & rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "log_M" &
-                             rownames(summary(SD)) != "log_M_walk", ]
-  retro_est <- array(NA, dim = c(nyr+1, dim(SD_nondev)))
-  dimnames(retro_est) <- list(Peel = 0:nyr, Var = rownames(SD_nondev), Value = c("Estimate", "Std. Error"))
+  SD_nondev <- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev" &
+                             rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "logit_M" &
+                             rownames(summary(SD)) != "logit_M_walk", ]
+  retro_est <- array(NA, dim = c(nyr+1, dim(SD_nondev))) %>% 
+    structure(dimnames = list(Peel = 0:nyr, Var = rownames(SD_nondev), Value = c("Estimate", "Std. Error")))
   
   lapply_fn <- function(i, info, obj) {
     n_y_ret <- n_y - i
@@ -191,7 +195,7 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporate SCA
     info$params$log_rec_dev <- rep(0, n_y_ret)
     info$params$log_F_dev <- info$params$log_F_dev[1:n_y_ret]
     
-    if(!is.null(info$params$log_M_walk)) info$params$log_M_walk <- rep(0, n_y_ret)
+    if(!is.null(info$params$logit_M_walk)) info$params$logit_M_walk <- rep(0, n_y_ret - 1)
     
     map <- obj$env$map
     if(any(names(map) == "log_rec_dev")) {
@@ -209,34 +213,34 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporate SCA
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best)
       if(SCA2) {
-        ref_pt <- SCA_refpt_calc(E = report$E, R = report$R, M = info$data$M,
-                                 weight = info$data$weight, mat = info$data$mat, vul = report$vul, SR = info$SR,
-                                 fix_h = info$fix_h, h = h)
-      } else {
-        if(is.null(info$data$M)) {
-          M <- obj2$report()$M[1] %>% rep(info$data$n_age)
-        } else {
-          M <- info$data$M
-        }
-        ref_pt <- SCA_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = M, weight = info$data$weight, mat = info$data$mat,
-                               vul = report$vul, SR = info$data$SR_type)
+        ref_pt <- ref_pt_SCA2(E = report$E, R = report$R, M = info$data$M,
+                              weight = info$data$weight, mat = info$data$mat, vul = report$vul, SR = info$SR,
+                              fix_h = info$fix_h, h = h)
+      } else if(!is.null(info$data[["M"]])) {
+        ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = info$data$M, weight = info$data$weight, mat = info$data$mat,
+                             vul = report$vul, SR = info$data$SR_type)
       }
       
-      report <- c(report, ref_pt)
-      
       FMort <- c(report$F, rep(NA, i + 1))
-      F_FMSY <- FMort/report$FMSY
       SSB <- c(report$E, rep(NA, i))
-      SSB_SSBMSY <- SSB/report$EMSY
-      SSB_SSB0 <- SSB/report$E0
       R <- c(report$R, rep(NA, i))
-      VB <- c(report$E, rep(NA, i))
+      VB <- c(report$VB, rep(NA, i))
+      
+      if(exists("ref_pt", inherits = FALSE)) {
+        report <- c(report, ref_pt)
+        
+        F_FMSY <- FMort/report$FMSY
+        SSB_SSBMSY <- SSB/report$EMSY
+        SSB_SSB0 <- SSB/report$E0
+        retro_ts[i+1, , ] <<- cbind(FMort, F_FMSY, SSB, SSB_SSBMSY, SSB_SSB0, R, VB)
+      } else {
+        retro_ts[i+1, , ] <<- cbind(FMort, SSB, R, VB)
+      }
       #log_rec_dev <- c(report$log_rec_dev, rep(NA, i + 1))
       
-      retro_ts[i+1, , ] <<- cbind(FMort, F_FMSY, SSB, SSB_SSBMSY, SSB_SSB0, R, VB)
-      retro_est[i+1, , ] <<- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev"
-                                         & rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "log_M" &
-                                           rownames(summary(SD)) != "log_M_walk", ]
+      retro_est[i+1, , ] <<- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev" &
+                                           rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "logit_M" &
+                                           rownames(summary(SD)) != "logit_M_walk", ]
       
       return(SD$pdHess)
     }
@@ -248,8 +252,13 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporate SCA
   
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
-  attr(retro, "TS_lab") <- c("Fishing mortality", expression(F/F[MSY]), "Spawning biomass", expression(SSB/SSB[MSY]), "Spawning depletion",
-                             "Recruitment", "Vulnerable biomass")
+  
+  if(grepl("RWM", Assessment@Model)) {
+    attr(retro, "TS_lab") <- c("Fishing mortality", "Spawning biomass", "Recruitment", "Vulnerable biomass")
+  } else {
+    attr(retro, "TS_lab") <- c("Fishing mortality", expression(F/F[MSY]), "Spawning biomass", expression(SSB/SSB[MSY]), "Spawning depletion",
+                               "Recruitment", "Vulnerable biomass")
+  }
   
   return(retro)
 }

@@ -111,7 +111,11 @@ retrospective_SCA_Pope <- function(Assessment, nyr) {
     n_y_ret <- n_y - i
     info$data$n_y <- n_y_ret
     info$data$C_hist <- info$data$C_hist[1:n_y_ret]
+
+    if(grepl("SSS", Assessment@Model)) dep <- info$data$I_hist[n_y]
     info$data$I_hist <- info$data$I_hist[1:n_y_ret]
+    if(grepl("SSS", Assessment@Model)) info$data$I_hist[n_y_ret] <- dep
+
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
     info$data$CAA_n <- info$data$CAA_n[1:n_y_ret]
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]
@@ -121,7 +125,11 @@ retrospective_SCA_Pope <- function(Assessment, nyr) {
     map <- obj$env$map
     if(any(names(map) == "log_rec_dev")) {
       new_map <- as.numeric(map$log_rec_dev) - i
-      map$log_rec_dev <- factor(new_map[new_map > 0])
+      if(all(is.na(new_map))) {
+        map$log_rec_dev <- factor(rep(NA, n_y_ret))
+      } else {
+        map$log_rec_dev <- factor(new_map[new_map > 0])
+      }
     }
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
@@ -132,8 +140,8 @@ retrospective_SCA_Pope <- function(Assessment, nyr) {
 
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best)
-      ref_pt <- SCA_Pope_MSY_calc(Arec = report$Arec, Brec = report$Brec, M = info$data$M, weight = info$data$weight, mat = info$data$mat,
-                                  vul = report$vul, SR = info$data$SR_type)
+      ref_pt <- ref_pt_SCA_Pope(Arec = report$Arec, Brec = report$Brec, M = info$data$M, weight = info$data$weight, mat = info$data$mat,
+                                vul = report$vul, SR = info$data$SR_type)
 
       report <- c(report, ref_pt)
 
@@ -143,7 +151,7 @@ retrospective_SCA_Pope <- function(Assessment, nyr) {
       SSB_SSBMSY <- SSB/report$EMSY
       SSB_SSB0 <- SSB/report$E0
       R <- c(report$R, rep(NA, i))
-      VB <- c(report$E, rep(NA, i))
+      VB <- c(report$VB, rep(NA, i))
       #log_rec_dev <- c(report$log_rec_dev, rep(NA, i + 1))
 
       retro_ts[i+1, , ] <<- cbind(U, U_UMSY, SSB, SSB_SSBMSY, SSB_SSB0, R, VB)

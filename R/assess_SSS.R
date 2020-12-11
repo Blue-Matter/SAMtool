@@ -138,7 +138,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
 
   # Add starting values for rec-devs and increase R0 start value if U is too high (> 0.975)
   high_U <- try(obj$report(obj$par)$penalty > 0, silent = TRUE)
-  if(!is.character(high_U) && high_U) {
+  if(!is.character(high_U) && !is.na(high_U) && high_U) {
     while(obj$par["R0x"] < 30 && obj$report(obj$par)$penalty > 0) {
       obj$par["R0x"] <- obj$par["R0x"] + 1
     }

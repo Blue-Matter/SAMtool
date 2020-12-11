@@ -331,3 +331,96 @@ projection_VPA_internal <- function(report, info, nR) {
 
   return(report)
 }
+
+
+SCA_MSY_calc <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
+  SR <- match.arg(SR)
+  n_age <- length(M)
+  
+  solveMSY <- function(logF) {
+    Fmort <- exp(logF)
+    surv <- exp(-vul * Fmort - M)
+    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
+    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
+    EPR <- sum(NPR * mat * weight)
+    if(SR == "BH") Req <- (Arec * EPR - 1)/(Brec * EPR)
+    if(SR == "Ricker") Req <- log(Arec * EPR)/(Brec * EPR)
+    CPR <- vul * Fmort/(vul * Fmort + M) * NPR * (1 - exp(-vul * Fmort - M))
+    Yield <- Req * sum(CPR * weight)
+    return(-1 * Yield)
+  }
+  
+  opt2 <- optimize(solveMSY, interval = c(-6, 6))
+  FMSY <- exp(opt2$minimum)
+  MSY <- -1 * opt2$objective
+  
+  surv_MSY <- exp(-vul * FMSY - M)
+  NPR_MSY <- c(1, cumprod(surv_MSY[1:(n_age-1)]))
+  NPR_MSY[n_age] <- NPR_MSY[n_age]/(1 - surv_MSY[n_age])
+  
+  EPR_MSY <- sum(NPR_MSY * weight * mat)
+  if(SR == "BH") RMSY <- (Arec * EPR_MSY - 1)/(Brec * EPR_MSY)
+  if(SR == "Ricker") RMSY <- log(Arec * EPR_MSY)/(Brec * EPR_MSY)
+  
+  VBMSY <- RMSY * sum(NPR_MSY * weight * vul)
+  BMSY <- RMSY * sum(NPR_MSY * weight)
+  EMSY <- RMSY * EPR_MSY
+  
+  return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY))
+}
+
+
+SCA_refpt_calc <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
+  # Per-recruit quantities
+  n_age <- length(M)
+  surv0 <- exp(-M)
+  NPR0 <- c(1, cumprod(surv0[1:(n_age-1)]))
+  NPR0[n_age] <- NPR0[n_age]/(1 - exp(-M[n_age]))
+  EPR0 <- sum(NPR0 * weight * mat)
+  
+  # Fit stock-recruit curve
+  Rpred <- sigmaR <- NULL
+  solve_SR_par <- function(x, h = NULL) {
+    R0 <- exp(x[1])
+    E0 <- R0 * EPR0
+    if(!fix_h) {
+      if(SR == "BH") h <- 0.2 + 0.8 * ilogit(x[2])
+      if(SR == "Ricker") h <- 0.2 + exp(x[2])
+    }
+    if(SR == "BH") Rpred <<- (0.8 * R0 * h * E)/(0.2 * EPR0 * R0 *(1-h)+(h-0.2)*E)
+    if(SR == "Ricker") Rpred <<- E/EPR0 * (5*h)^(1.25 * (1 - E/E0))
+    sigmaR <<- sqrt(sum((log(R/Rpred))^2)/length(Rpred))
+    nLL <- -sum(dnorm(log(R/Rpred), -0.5 * sigmaR^2, sigmaR, log = TRUE))
+    return(nLL)
+  }
+  
+  if(fix_h) {
+    opt <- optimize(solve_SR_par, interval = c(-10, 10), h = h)$minimum
+    R0 <- exp(opt)
+  } else {
+    opt <- nlminb(c(10, 10), solve_SR_par)
+    R0 <- exp(opt$par[1])
+    if(SR == "BH") h <- 0.2 + 0.8 * ilogit(opt$par[2])
+    if(SR == "Ricker") h <- 0.2 + exp(opt$par[2])
+  }
+  
+  # Virgin reference points
+  N0 <- R0 * sum(NPR0)
+  E0 <- R0 * EPR0
+  VB0 <- R0 * sum(NPR0 * weight * vul)
+  B0 <- R0 * sum(NPR0 * weight)
+  
+  # Steepness
+  if(SR == "BH") {
+    Arec <- 4*h/(1-h)/EPR0
+    Brec <- (5*h-1)/(1-h)/E0
+  }
+  if(SR == "Ricker") {
+    Arec <- 1/EPR0 * (5*h)^1.25
+    Brec <- 1.25 * log(5*h) / E0
+  }
+  
+  refpt_unfished <- list(h = h, Arec = Arec, Brec = Brec, E0 = E0, R0 = R0, N0 = N0, VB0 = VB0, B0 = B0, EPR0 = EPR0, NPR0 = NPR0)
+  refpt_MSY <- SCA_MSY_calc(Arec, Brec, M, weight, mat, vul, SR = SR)
+  return(c(refpt_unfished, refpt_MSY))
+}

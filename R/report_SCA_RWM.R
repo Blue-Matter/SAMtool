@@ -94,9 +94,7 @@ rmd_SCA_RWM <- function(Assessment, ...) {
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
 }
 
-
-
-retrospective_SCA_RWM <- function(Assessment, nyr) retrospective_SCA(Assessment, nyr)
+retrospective_SCA_RWM <- function(Assessment, nyr, ...) retrospective_SCA(Assessment, nyr)
 
 profile_likelihood_SCA_RWM <- function(Assessment, ...) profile_likelihood_SCA(Assessment, ...)
 

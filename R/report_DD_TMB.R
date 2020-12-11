@@ -209,7 +209,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
 
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best)
-      ref_pt <- get_MSY_DD(info$data, report$Arec, report$Brec)
+      ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec)
       report <- c(report, ref_pt)
 
       U <- c(report$U, rep(NA, k + i))
