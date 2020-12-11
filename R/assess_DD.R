@@ -302,7 +302,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     }
     
     catch_eq <- function(Ftarget) {
-      projection_DD_TMB(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)), 
+      projection_DD_TMB(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)), 
                         process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
     }
     Assessment@forecast <- list(per_recruit = ref_pt[[4]], catch_eq = catch_eq)

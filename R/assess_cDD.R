@@ -266,8 +266,8 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
     }
     
     catch_eq <- function(Ftarget) {
-      projection_SP(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)), 
-                    process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+      projection_cDD(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)), 
+                     process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
     }
     Assessment@forecast <- list(per_recruit = ref_pt[[4]], catch_eq = catch_eq)
   }

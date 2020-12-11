@@ -106,14 +106,14 @@ HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY"
           SE <- alpha * Assessment@SE_FMSY
         } 
       } else if(Ftarget_type == "F01") {
-        if(!is.null(res@forecast$per_recruit$U)) {
+        if(!is.null(Assessment@forecast$per_recruit$U)) {
           U01 <- get_F01(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
           Fout <- -log(1 - alpha * U01)
         } else {
           Fout <- alpha * get_F01(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$YPR)
         }
       } else if(Ftarget_type == "Fmax") {
-        if(!is.null(res@forecast$per_recruit$U)) {
+        if(!is.null(Assessment@forecast$per_recruit$U)) {
           Umax <- get_Fmax(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
           Fout <- -log(1 - alpha * Umax)
         } else {
@@ -121,7 +121,7 @@ HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY"
         }
       } else if(Ftarget_type == "FSPR") {
         if(missing(SPR)) SPR <- 0.4
-        if(!is.null(res@forecast$per_recruit$U)) {
+        if(!is.null(Assessment@forecast$per_recruit$U)) {
           U_SPR <- get_FSPR(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$SPR, target = SPR)
           Fout <- -log(1 - alpha * U_SPR)
         } else {
@@ -211,7 +211,7 @@ class(HCR_MSY) <- "HCR"
 #' A general function used by \link{HCR_ramp} that adjusts the output (e.g., F) by a linear ramp based on 
 #' the value of the OCP relative to target and limit values.
 #'
-#' @param value The value of the operational control point (OCP).
+#' @param OCP_val The value of the operational control point (OCP).
 #' @param LOCP Numeric, the limit value for the OCP in the HCR.
 #' @param TOCP Numeric, the target value for the OCP in the HCR.
 #' @param relF_min The relative maximum value (e.g. a multiple of FMSY) if \code{OCP < LOCP}.

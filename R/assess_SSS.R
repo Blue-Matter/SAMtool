@@ -192,7 +192,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
     Assessment@TMB_report <- report
     
     catch_eq <- function(Ftarget) {
-      projection_SCA_Pope(Assessment, FMort = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
+      projection_SCA_Pope(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
                           process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
     }
     Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq)

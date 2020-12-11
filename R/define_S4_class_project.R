@@ -32,7 +32,7 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 #'
 #' @param Assessment An object of class \linkS4class{Assessment}.
 #' @param constrain Whether to project on future F or catch. By default, projects on F.
-#' @param FMort The projection F, either of length 1 for constant F for the entirety of the projection or length p_years.
+#' @param Ftarget The projection F, either of length 1 for constant F for the entirety of the projection or length p_years.
 #' @param Catch The projection catch, either of length 1 for constant catch for the entirety of the projection or length p_years.
 #' @param p_years Integer for the number of projection years.
 #' @param p_sim Integer for the number of simulations for the projection.
@@ -47,39 +47,45 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 #' @examples
 #' \donttest{
 #' myAssess <- SCA(Data = SimulatedData)
-#' do_projection <- projection(myAssess, FMort = myAssess@@FMSY)
+#' do_projection <- projection(myAssess, Ftarget = myAssess@@FMSY)
 #' }
 #' @export
-projection <- function(Assessment, constrain = c("F", "Catch"), FMort = NULL, Catch = NULL, p_years = 50, p_sim = 200,
+projection <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch, p_years = 50, p_sim = 200,
                        obs_error, process_error, max_F = 3, seed = 499) {
   constrain <- match.arg(constrain)
   if(constrain == "Catch") {
-    if(is.null("Catch")) stop("Need a value of argument Catch.")
+    if(missing(Catch)) stop("Need a value of argument Catch.")
     if(length(Catch) == 1) {
       Catch <- rep(Catch, p_years)
     } else {
       stop(paste0("Catch needs to be of length p_years (", p_years, ")"))
     }
+    Ftarget <- NULL 
   }
   if(constrain == "F") {
-    if(is.null(FMort)) stop("Need a value of F (argument \"FMort\").")
-    if(length(FMort) == 1) {
-      FMort <- rep(FMort, p_years)
-    } else stop(paste0("FMort needs to be of length p_years (", p_years, ")"))
+    if(missing(Ftarget)) stop("Need a value of F (argument \"Ftarget\").")
+    if(length(Ftarget) == 1) {
+      Ftarget <- rep(Ftarget, p_years)
+    } else stop(paste0("Ftarget needs to be of length p_years (", p_years, ")"))
+    Catch <- NULL
   }
-  if(!is.null(obs_error) && length(obs_error) < 2) stop("obs_error should be a vector of length 2 for the standard deviation of index and catch, respectively.")
-
+  if(!missing(obs_error)) {
+    if(length(obs_error) < 2) stop("obs_error should be a vector of length 2 for the standard deviation of index and catch, respectively.")
+  } else {
+    obs_error <- list(matrix(1, p_sim, p_years), matrix(1, p_sim, p_years))
+  }
+  if(missing(process_error)) process_error <- matrix(1, p_sim, p_years)
   if(!Assessment@conv) warning("Assessment model did not appear to converge.")
 
   f <- get(paste0("projection_", Assessment@Model))
-  out <- f(Assessment, constrain = constrain, Catch = Catch, FMort = FMort, p_years = p_years, p_sim = p_sim,
+  out <- f(Assessment, constrain = constrain, Catch = Catch, Ftarget = Ftarget, p_years = p_years, p_sim = p_sim,
            process_error = process_error, obs_error = obs_error, max_F = max_F, seed = seed)
   return(out)
 }
 
 
-projection_SP <- function(Assessment, constrain = c("F", "Catch"), FMort = NULL, Catch = NULL, p_years = 50, p_sim = 200,
-                          obs_error = NULL, process_error = NULL, max_F = 3, seed = 499) {
+projection_SP <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch, p_years = 50, p_sim = 200,
+                          obs_error, process_error, max_F = 3, seed = 499) {
   constrain <- match.arg(constrain)
   TMB_report <- Assessment@TMB_report
   TMB_data <- Assessment@obj$env$data
@@ -111,14 +117,14 @@ projection_SP <- function(Assessment, constrain = c("F", "Catch"), FMort = NULL,
   B[, 1] <- TMB_report$B[length(TMB_report$B)] * B_dev[, 1]
   
   if(constrain == "F") {
-    Fout <- matrix(pmin(FMort, ifelse(TMB_data$dt < 1, max_F, 1 - exp(-max_F))), p_sim, p_years, byrow = TRUE)
+    Fout <- matrix(pmin(Ftarget, ifelse(TMB_data$dt < 1, max_F, 1 - exp(-max_F))), p_sim, p_years, byrow = TRUE)
   } else {
     Fout <- matrix(NA, p_sim, p_years)
   }
   
   for(y in 2:(p_years+1)) {
     if(constrain == "F") {
-      one_ts <- lapply(B[, y-1], function(x, ...) SP_catch_solver(B = x, ...), FM = FMort[y-1], dt = TMB_data$dt,
+      one_ts <- lapply(B[, y-1], function(x, ...) SP_catch_solver(B = x, ...), FM = Ftarget[y-1], dt = TMB_data$dt,
                        MSY = TMB_report$MSY, K = TMB_report$K, n = TMB_report$n, n_term = TMB_report$n_term)
     } else {
       Fout[, y-1] <- vapply(B[, y-1], function(x, ...) optimize(SP_catch_solver, c(1e-8, ifelse(TMB_data$dt < 1, max_F, 1 - exp(-max_F))),
@@ -156,8 +162,8 @@ SP_catch_solver <- function(FM, B, dt, MSY, K, n, n_term, TAC = NULL) {
 
 projection_SP_SS <- projection_SP
 
-projection_SCA <- projection_SCA_Pope <- projection_SCA2 <- function(Assessment, constrain = c("F", "Catch"), FMort = NULL, Catch = NULL,
-                                                                     p_years = 50, p_sim = 200, obs_error = NULL, process_error = NULL,
+projection_SCA <- projection_SCA_Pope <- projection_SCA2 <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch,
+                                                                     p_years = 50, p_sim = 200, obs_error, process_error,
                                                                      max_F = 3, seed = 499, ...) {
   
   constrain <- match.arg(constrain)
@@ -191,7 +197,7 @@ projection_SCA <- projection_SCA_Pope <- projection_SCA2 <- function(Assessment,
 
   p_output <- lapply(1:p_sim, function(x, ...) projection_SCA_internal(p_log_rec_dev = p_log_rec_dev[x, ], Cobs_err = Cobs_err[x, ],
                                                                        Iobs_err = Iobs_err[x, ], ...),
-                     FMort = FMort, Catch = Catch, constrain = constrain, TMB_report = TMB_report, TMB_data = TMB_data,
+                     FMort = Ftarget, Catch = Catch, constrain = constrain, TMB_report = TMB_report, TMB_data = TMB_data,
                      Pope = Pope, max_F = max_F)
 
   CAApred <- lapply(p_output, getElement, "CAApred") %>% simplify2array()
@@ -205,7 +211,7 @@ projection_SCA <- projection_SCA_Pope <- projection_SCA2 <- function(Assessment,
   return(output)
 }
 
-projection_SCA_internal <- function(FMort = NULL, Catch = NULL, constrain, TMB_report, TMB_data, p_log_rec_dev, Cobs_err,
+projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_data, p_log_rec_dev, Cobs_err,
                                     Iobs_err, Pope = FALSE, max_F = 3) {
 
   weight <- TMB_data$weight
@@ -317,8 +323,8 @@ R_pred <- function(SSB, h, R0, SSB0, SR_type = c("BH", "Ricker")) {
   return(RR)
 }
 
-projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "Catch"), FMort = NULL, Catch = NULL,
-                                                p_years = 50, p_sim = 200, obs_error = NULL, process_error = NULL, max_F = 3,
+projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch,
+                                                p_years = 50, p_sim = 200, obs_error, process_error, max_F = 3,
                                                 seed = 499, ...) {
   constrain <- match.arg(constrain)
   
@@ -356,7 +362,7 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
     p_log_rec_dev[, 1:TMB_data$k]
 
   if(constrain == "F") {
-    Fout <- matrix(pmin(FMort, max_F), p_sim, p_years, byrow = TRUE)
+    Fout <- matrix(pmin(Ftarget, max_F), p_sim, p_years, byrow = TRUE)
   } else {
     Fout <- matrix(NA, p_sim, p_years)
   }
@@ -369,7 +375,7 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
 
     if(constrain == "F") {
       one_ts <- Map(function(x, y, z, ...) cDD_catch_solver(B = x, N = y, R = z, ...), x = B[, y-1], y = N[, y-1], z = R[, y-1],
-                    MoreArgs = list(FM = FMort[y-1], Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_data$M))
+                    MoreArgs = list(FM = Ftarget[y-1], Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_data$M))
     } else {
       Fout[, y-1] <- mapply(function(x, y, z, ...) optimize(cDD_catch_solver, c(1e-8, max_F), B = x, N = y, R = z, ...)$minimum,
                             x = B[, y-1], y = N[, y-1], z = R[, y-1],
@@ -419,8 +425,8 @@ cDD_catch_solver <- function(FM, B, N, R, M, Kappa, Winf, wk, TAC = NULL) {
   }
 }
 
-projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F", "Catch"), FMort = NULL, Catch = NULL,
-                                                  p_years = 50, p_sim = 200, obs_error = NULL, process_error = NULL,
+projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch,
+                                                  p_years = 50, p_sim = 200, obs_error, process_error,
                                                   max_F = 3, seed = 499, ...) {
   constrain <- match.arg(constrain)
   
@@ -458,7 +464,7 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
     p_log_rec_dev[, 1:TMB_data$k]
 
   if(constrain == "F") {
-    Fout <- U <- matrix(pmin(FMort, 1 - exp(-max_F)), p_sim, p_years, byrow = TRUE)
+    Fout <- U <- matrix(pmin(Ftarget, 1 - exp(-max_F)), p_sim, p_years, byrow = TRUE)
     surv <- (1 - U) * TMB_data$S0
   } else {
     Fout <- U <- surv <- matrix(NA, p_sim, p_years)

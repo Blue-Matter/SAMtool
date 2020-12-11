@@ -76,3 +76,6 @@ MSE <- runMSE(testOM, MPs = c("Perfect_4010", "Perfect_6020", "Perfect_8040MSY")
 Wiedenmann, J., Wilberg, M.J., Sylvia, A., and Miller, T.J. 2015. Autocorrelated error in stock assessment 
 estimates: Implications for management strategy evaluation. Fisheries Research 172: 325-334.
 }
+\author{
+Q. Huynh
+}

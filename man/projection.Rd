@@ -7,8 +7,8 @@
 projection(
   Assessment,
   constrain = c("F", "Catch"),
-  FMort = NULL,
-  Catch = NULL,
+  Ftarget,
+  Catch,
   p_years = 50,
   p_sim = 200,
   obs_error,
@@ -22,7 +22,7 @@ projection(
 
 \item{constrain}{Whether to project on future F or catch. By default, projects on F.}
 
-\item{FMort}{The projection F, either of length 1 for constant F for the entirety of the projection or length p_years.}
+\item{Ftarget}{The projection F, either of length 1 for constant F for the entirety of the projection or length p_years.}
 
 \item{Catch}{The projection catch, either of length 1 for constant catch for the entirety of the projection or length p_years.}
 
@@ -48,6 +48,6 @@ This function takes an assessment model and runs a stochastic projection based o
 \examples{
 \donttest{
 myAssess <- SCA(Data = SimulatedData)
-do_projection <- projection(myAssess, FMort = myAssess@FMSY)
+do_projection <- projection(myAssess, Ftarget = myAssess@FMSY)
 }
 }

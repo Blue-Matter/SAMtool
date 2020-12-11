@@ -7,6 +7,8 @@
 HCRlin(OCP_val, LOCP, TOCP, relF_min = 0, relF_max = 1)
 }
 \arguments{
+\item{OCP_val}{The value of the operational control point (OCP).}
+
 \item{LOCP}{Numeric, the limit value for the OCP in the HCR.}
 
 \item{TOCP}{Numeric, the target value for the OCP in the HCR.}
@@ -14,8 +16,6 @@ HCRlin(OCP_val, LOCP, TOCP, relF_min = 0, relF_max = 1)
 \item{relF_min}{The relative maximum value (e.g. a multiple of FMSY) if \code{OCP < LOCP}.}
 
 \item{relF_max}{The relative maximum value (e.g. a multiple of FMSY) if \code{OCP > TOCP}.}
-
-\item{value}{The value of the operational control point (OCP).}
 }
 \value{
 Numeric adjustment factor.

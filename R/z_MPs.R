@@ -119,12 +119,13 @@ Assess_dep <- list(DD_SS = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, D
                    SCA = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge",
                    SCA2 = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge",
                    SCA_Pope = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge",
+                   SCA_RWM = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge",
+                   SSS = "Data@Cat, Data@steep, Data@Mort, Data@L50, Data@L95, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge, Data@LFC, Data@LFS",
                    VPA = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge",
                    SP = "Data@Cat, Data@Ind",
-                   SP_SS = "Data@Cat, Data@Ind, Data@CV_Ind",
+                   SP_SS = "Data@Cat, Data@Ind",
                    cDD = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge",
-                   cDD_SS = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge",
-                   SSS = "Data@Cat, Data@steep, Data@Mort, Data@L50, Data@L95, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge")
+                   cDD_SS = "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge")
 
 
 get_dependencies <- function(Assess, arg = list()) {
@@ -137,7 +138,6 @@ get_dependencies <- function(Assess, arg = list()) {
   more_deps <- dep_args[do.call(c, formals2[dep_match])]
 
   if(length(more_deps) > 0) {
-    #if(Assess == "DD_SS" && any(names(more_deps) == "fix_sigma")) more_deps$fix_sigma <- "Data@CV_Cat"
     more_deps <- paste(do.call(c, more_deps), collapse = ", ")
     dep <- paste(c(dep, more_deps), collapse = ", ")
   }
