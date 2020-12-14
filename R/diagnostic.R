@@ -90,8 +90,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' \dontrun{
 #' DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
 #' show(DD_MSY)
-#'
-#' ##### Ensure that PPD = TRUE in runMSE function
+#' 
 #' myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
 #' diagnostic(myMSE)
 #' }

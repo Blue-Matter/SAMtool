@@ -20,7 +20,7 @@ testOM@nsim <- 200
 for(i in MP_vec) {
   setup(12)
   tim <- proc.time()
-  res <- runMSE(testOM, MPs = i, PPD = TRUE, parallel = TRUE)
+  res <- runMSE(testOM, MPs = i, parallel = TRUE)
   message(paste0("Run time: ", (proc.time() - tim)[3], " seconds"))
   sfStop()
   cat(diagnostic(res, figure = FALSE))
