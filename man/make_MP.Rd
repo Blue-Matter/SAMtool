@@ -39,10 +39,10 @@ DD_Ricker <- make_MP(DD_TMB, HCR_MSY, SR = "Ricker")
 \dontrun{
 myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 
-diagnostic_AM(myMSE)
+diagnostic(myMSE)
 }
 
 }
 \seealso{
-\link{HCR_ramp} \link{HCR_MSY} \link{diagnostic_AM} \link{retrospective_AM}
+\link{HCR_ramp} \link{HCR_MSY} \link{diagnostic} \link{retrospective_AM}
 }

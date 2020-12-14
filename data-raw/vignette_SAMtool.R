@@ -29,7 +29,7 @@ ggplot2::ggsave("vignettes/fig_assess/Tplot.png", width = 5, height = 3.5)
 
 myMSE <- readRDS("data-raw/myMSE.rds")
 png("vignettes/fig_assess/diagnostic_AM.png", units = "in", res = 400, width = 9, height = 6)
-diagnostic_AM(myMSE, "SCA_MSY_")
+diagnostic(myMSE, "SCA_MSY_")
 dev.off()
 
 png("vignettes/fig_assess/retrospective_AM.png", units = "in", res = 400, width = 8.5, height = 5.5)

@@ -29,10 +29,10 @@
 #' \dontrun{
 #' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 #' 
-#' diagnostic_AM(myMSE)
+#' diagnostic(myMSE)
 #' }
 #'
-#' @seealso \link{HCR_ramp} \link{HCR_MSY} \link{diagnostic_AM} \link{retrospective_AM}
+#' @seealso \link{HCR_ramp} \link{HCR_MSY} \link{diagnostic} \link{retrospective_AM}
 #' @export
 make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
   diagnostic <- match.arg(diagnostic)

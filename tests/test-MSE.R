@@ -23,6 +23,6 @@ for(i in MP_vec) {
   res <- runMSE(testOM, MPs = i, PPD = TRUE, parallel = TRUE)
   message(paste0("Run time: ", (proc.time() - tim)[3], " seconds"))
   sfStop()
-  cat(diagnostic_AM(res, figure = FALSE))
+  cat(diagnostic(res, figure = FALSE))
   save(res, file = paste0("tests_results/", i, ".RData"))
 }

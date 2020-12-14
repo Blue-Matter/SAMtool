@@ -69,15 +69,14 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 
 
 
-#' diagnostic_AM (diagnostic of Assessments in MSE): Did Assess models converge during MSE?
+#' Diagnostic of assessments in MSE: did Assess models converge during MSE?
 #'
-#' Diagnostic check for convergence of Assess models during MSE.
-#' Assess models write output to the DLMenv environment if the MP was created with \link{make_MP}
-#' with argument \code{diagnostic = TRUE}. This function summarizes and plots the diagnostic information.
+#' Diagnostic check for convergence of Assess models during closed-loop simulation. Use when the MP was 
+#' created with \link{make_MP} with argument \code{diagnostic = "min"} or \code{"full"}. 
+#' This function summarizes and plots the diagnostic information.
 #'
-#' @param MSE An object of class MSE created by \code{\link[MSEtool]{runMSE}}. If no MSE object
-#' is available, use argument \code{MP} instead.
-#' @param MP A character vector of MPs with assessment models.
+#' @param MSE An object of class MSE created by \code{\link[MSEtool]{runMSE}}.
+#' @param MP Optional, a character vector of MPs that use assessment models.
 #' @param gradient_threshold The maximum magnitude (absolute value) desired for the gradient of the likelihood.
 #' @param figure Logical, whether a figure will be drawn.
 #' @return A matrix with diagnostic performance of assessment models in the MSE. If \code{figure = TRUE},
@@ -86,6 +85,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' and the maximum gradient of the likelihood in each assessment run. Also includes the number of optimization iterations
 #' function evaluations reported by \code{\link[stats]{nlminb}} for each application of the assessment model.
 #' @author Q. Huynh
+#' @aliases diagnostic_AM
 #' @examples
 #' \dontrun{
 #' DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
@@ -93,11 +93,11 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #'
 #' ##### Ensure that PPD = TRUE in runMSE function
 #' myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
-#' diagnostic_AM(myMSE)
+#' diagnostic(myMSE)
 #' }
 #' @seealso \link{retrospective_AM}
 #' @export
-diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRUE) {
+diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
   if(!inherits(MSE, "MSE")) stop("No object of class MSE was provided.")
 
   if(figure) {
@@ -119,7 +119,7 @@ diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRU
   
   MPs <- MPs[has_diagnostic]
 
-  if(!is.null(MP)) {
+  if(!missing(MPs)) {
     match_ind <- pmatch(MP, MPs)
     if(is.na(match_ind)) stop(paste(MP, "MP was not found in the MSE object. Available options are:", paste(MPs, collapse = " ")))
     MPs <- MPs[match_ind]
@@ -176,6 +176,10 @@ diagnostic_AM <- function(MSE, MP = NULL, gradient_threshold = 0.1, figure = TRU
                          "Median iterations", "Median function evaluations")
   return(res_mat)
 }
+
+#' @rdname diagnostic
+#' @export
+diagnostic_AM <- function(...) .Deprecated("diagnostic")
 
 plot_hessian_convergence <- function(convergence_code, Year) {
   nsim <- length(convergence_code)

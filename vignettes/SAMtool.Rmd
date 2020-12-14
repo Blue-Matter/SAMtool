@@ -195,7 +195,7 @@ This MP will call `SCA(..., SR = "Ricker", fix_h = TRUE)` in closed-loop.
 
 ## Diagnostic of assessment models in MSE
 
-Three functions are designed to evaluate the performance of __Assess__ models in MSE: `prelim_AM`, `diagnostic_AM`, and `retrospective_AM` (where _AM_ stands for "assessment in MSE").
+Three functions are designed to evaluate the performance of __Assess__ models in MSE: `prelim_AM`, `diagnostic`, and `retrospective_AM` (where _AM_ stands for "assessment in MSE").
 
 `prelim_AM` is designed to evaluate the configuration of the assessment model before running the closed-loop simulation. Given an operating model, this function generates data from the historical period of the MSE, applies the assessment model to those data, then returns the convergence rate of the model. Low convergence rate could be be indicative of an OM for which the assessment model behaves pathologically. A list of __Assessment__ objects are returned and can be used for troubleshooting. Additional arguments are passed to the __Assess__ function via `...`:
 
@@ -215,10 +215,10 @@ SCA_MSY_ <- make_MP(SCA, HCR_MSY, diagnostic = "full")
 
 By setting `diagnostic = "min"` (the default option), simple diagnostic information (e.g., convergence) from each model fit in closed-loop simulation is returned in the MSE object. With `diagnostic = "full"`, biomass and F estimates are also returned from each model fit in addition to the diagnostics.
 
-The `diagnostic_AM` function plots the convergence information, and `retrospective_AM` plots the assessment model's retrospective patterns (for a single simulation within the closed-loop simulation).
+The `diagnostic` function plots the convergence information, and `retrospective_AM` plots the assessment model's retrospective patterns (for a single simulation within the closed-loop simulation).
 
 ```{r, eval = FALSE}
-diagnostic_AM(myMSE)
+diagnostic(myMSE)
 retrospective_AM(myMSE, MP = "SCA_MSY_", sim = 3)
 ```
 <img src="fig_assess/diagnostic_AM.png" width = 700>

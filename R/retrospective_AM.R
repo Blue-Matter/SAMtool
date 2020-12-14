@@ -22,7 +22,7 @@
 #' myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "DD_MSY")
 #' retrospective_AM(myMSE, MP = "DD_MSY", sim = 1)
 #' }
-#' @seealso \link{diagnostic_AM}
+#' @seealso \link{diagnostic}
 #' @importFrom gplots rich.colors
 #' @export
 retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {

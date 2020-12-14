@@ -41,7 +41,7 @@ retrospective_AM(myMSE, MP = "DD_MSY", sim = 1)
 }
 }
 \seealso{
-\link{diagnostic_AM}
+\link{diagnostic}
 }
 \author{
 Q. Huynh
