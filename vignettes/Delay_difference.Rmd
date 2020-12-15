@@ -92,12 +92,13 @@ where $u_t$ is the annual harvest rate and $M$ is the instantaneous natural mort
 If the model is conditioned on catch ($C_t$), the harvest rate $u_t$ is
 $$ u_t = C_t/B_t. $$
 
-The predicted index is 
+The predicted biomass-based index is 
 $$\hat{I}_t = \hat{q}^I \hat{B}_t ,$$
-where the circumflex $^$ denotes the model estimate.
+where the circumflex $^$ denotes the model estimate. Otherwise, the predicted abundance-based index, is
+$$\hat{I}_t = \hat{q}^I \hat{N}_t .$$
 
-The likelihood $L$ of the observed catch $I_t$, assuming a lognormal distribution, is
-$$L^C = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right),$$
+The likelihood $L$ of the observed index $I_t$, assuming a lognormal distribution, is
+$$L^I = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right),$$
 where $\sigma$ is the standard deviation of the index.
 
 
@@ -189,7 +190,10 @@ C_t &= \int F_t B_s ds\\
 To match the predicted catch to the observed catch in the model, $F_t$ is solved iteratively.
 
 The predicted index is
-$$\hat{I}_t=\hat{q}\hat{B}_t.$$
+$$\hat{I}_t=\hat{q}\hat{B}_t$$
+or
+$$\hat{I}_t=\hat{q}\hat{N}_t$$
+for a biomass and abundance-based index, respectively.
 
 The likelihood of the observed index $I_t$, assuming a lognormal distribution, is
 $$L^I = \sum_t \left(-\log(\sigma) - 0.5\left[\dfrac{\log(I_t) - \log(\hat{I}_t)}{\sigma}\right]^2\right),$$

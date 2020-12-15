@@ -3,7 +3,7 @@
 #' A simple delay-difference assessment model using a
 #' time-series of catches and a relative abundance index and coded in TMB. The model
 #' can be conditioned on either (1) effort and estimates predicted catch or (2) catch and estimates a predicted index.
-#' In the state-space version, recruitment deviations from the stock-recruit relationship are estimated.
+#' In the state-space version \code{DD_SS}, recruitment deviations from the stock-recruit relationship are estimated.
 #'
 #' @param x An index for the objects in \code{Data} when running in closed loop simulation.
 #' Otherwise, equals to 1 when running an assessment.
@@ -31,7 +31,7 @@
 #' of the recruitment deviations (thus, treating it as a random effects/state-space variable).
 #' Otherwise, recruitment deviations are penalized parameters.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-#' will print trace information during optimization. Used for dignostics for model convergence.
+#' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 #' in convergence rate). Ignored if \code{integrate = TRUE}.
@@ -43,13 +43,23 @@
 #' is passed on to \code{\link[TMB]{newton}} via \code{\link[TMB]{MakeADFun}}.
 #' @param ... Additional arguments (not currently used).
 #' @return An object of \code{\linkS4class{Assessment}} containing objects and output from TMB.
-#' @details
-#' To provide starting values for \code{DD_TMB}, a named list can be provided for \code{R0} (virgin recruitment),
-#' \code{h} (steepness), and \code{q} (catchability coefficient) via the \code{start} argument (see example).
-#'
-#' For \code{DD_SS}, additional start values can be provided for and \code{omega} and \code{tau}, the standard
-#' deviation of the catch and recruitment variability, respectively.
-#' @note Similar to many other assessment
+#' @details 
+#' For \code{start} (optional), a named list of starting values of estimates can be provided for:
+#' \itemize{
+#' \item \code{R0} Unfished recruitment. Otherwise, Data@@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
+#' \item \code{h} Steepness. Otherwise, Data@@steep[x] is used, or 0.9 if empty.
+#' \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
+#' \item \code{U_equilibrium} Equilibrium harvest rate leading into first year of the model (to determine initial depletion). By default, 0.
+#' \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@@CV_Cat[x].
+#' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@@sigmaR[x].
+#' \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@@CV_Ind[x]. Not
+#' used if multiple indices are used.
+#' }
+#' 
+#' Multiple indices are supported in the model. Data@@Ind, Data@@VInd, and Data@@SpInd are all assumed to be biomass-based.
+#' For Data@@AddInd, Data@@I_units are used to identify a biomass vs. abundance-based index.
+#' 
+#' Similar to many other assessment
 #' models, the model depends on assumptions such as stationary productivity and
 #' proportionality between the abundance index and real abundance.
 #' Unsurprisingly the extent to which these assumptions are
@@ -61,7 +71,6 @@
 #'
 #' Hilborn, R., and Walters, C., 1992. Quantitative Fisheries Stock Assessment: Choice,
 #' Dynamics and Uncertainty. Chapman and Hall, New York.
-#' @describeIn DD_TMB Observation-error only model
 #' @section Required Data:
 #' \itemize{
 #' \item \code{DD_TMB}: Cat, Ind, Mort, L50, vbK, vbLinf, vbt0, wla, wlb, MaxAge

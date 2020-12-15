@@ -111,11 +111,18 @@ much better for populations with high turnover (e.g. high F or M, continuous rep
 to the observed index. In the state-space version (cDD_SS), recruitment deviations from the stock-recruit relationship are estimated.
 }
 \details{
-To provide starting values for \code{cDD}, a named list can be provided for \code{R0} (unfished recruitment) and
-and \code{h} (steepness) via the \code{start} argument (see example).
+For \code{start} (optional), a named list of starting values of estimates can be provided for:
+\itemize{
+\item \code{R0} Unfished recruitment. Otherwise, Data@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
+\item \code{h} Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.
+\item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
+\item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@sigmaR[x].
+\item \code{sigma} Lognormal SD of the index (observation error). By default, Data@CV_Ind[x]. Not
+used if multiple indices are used.
+}
 
-For \code{cDD_SS}, additional start values can be provided for and \code{sigma} and \code{tau}, the standard
-deviation of the index and recruitment variability, respectively.
+Multiple indices are supported in the model. Data@Ind, Data@VInd, and Data@SpInd are all assumed to be biomass-based.
+For Data@AddInd, Data@I_units are used to identify a biomass vs. abundance-based index.
 }
 \section{Required Data}{
 

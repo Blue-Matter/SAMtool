@@ -139,12 +139,18 @@ prior for the intrinsic rate of increase.
 The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[MSEtool]{DLMextra}.
 }
 \details{
-To provide starting values for the \code{SP}, a named list can be provided for \code{FMSY},
-\code{MSY}, \code{dep}, and \code{n} via the start argument (see example).
+For \code{start} (optional), a named list of starting values of estimates can be provided for:
+\itemize{
+\item \code{MSY} Maximum sustainable yield.. Otherwise, 300\% of mean catch by default.
+\item \code{FMSY} Steepness. Otherwise, Data@Mort[x] or 0.2 is used.
+\item \code{dep} Iniial depletion (B/B0) in the first year of the model. By default, 1.
+\item \code{n} The production function exponent that determines BMSY/B0. By default, 2 so that BMSY/B0 = 0.5.
+\item \code{sigma} Lognormal SD of the index (observation error). By default, 0.05. Not
+used with multiple indices.
+\item \code{tau} Lognormal SD of the biomass deviations (process error) in \code{SP_SS}. By default, 0.1.
+}
 
-For \code{SP_SS}, a start value can also be provided for \code{sigma} and \code{tau}, the standard deviation
-of the index and log-biomass deviates, respectively. Default for tau is 0.1. Deviations are estimated beginning in the year when index
-data are available.
+Multiple indices are supported in the model. 
 
 If \code{use_r_prior = TRUE}, \code{SP} and \code{SP_SS} will use a prior for the intrinsic rate of increase in the objective function.
 A vector of length two can be passed in the \code{start} list for the mean and standard deviation of the prior (see example). The normal

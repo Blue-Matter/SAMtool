@@ -33,8 +33,8 @@ Output is re-converted back to original units.}
 
 \item{start}{Optional named list of starting values. Entries can be expressions that are evaluated in the function:
 \itemize{
-\item R0 - unfished recruitment
-\item vul_par - a length-two vector for the age of 95\% and 50\% fleet selectivity. Fixed to maturity otherwise.
+\item \code{R0} Unfished recruitment
+\item \code{vul_par} A length-two vector for the age of 95\% and 50\% fleet selectivity. Fixed to maturity otherwise.
 }}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
@@ -53,9 +53,13 @@ hasn't converged. The optimization continues from the parameters from the previo
 }
 \description{
 A simple age-structured model (\link{SCA_Pope}) fitted to a time series of catch going back to unfished conditions.
-Terminal depletion (ratio of current biomass to unfished biomass) is by default fixed to 0.4.
-Selectivity is fixed to the maturity ogive,
-although it can be overridden with the start argument. The sole parameter estimated is R0 (unfished recruitment).
+Terminal depletion (ratio of current biomass to unfished biomass) is by default fixed to 0.4. Selectivity is fixed 
+to the maturity ogive, although it can be overridden with the start argument. The sole parameter estimated is 
+R0 (unfished recruitment), with no process error.
+}
+\details{
+In SAMtool, SSS is an implementation of \link{SCA_Pope} with fixed final depletion 
+(in terms of total biomass, not spawning biomass) assumption.
 }
 \examples{
 res <- SSS(Data = Red_snapper)

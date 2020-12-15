@@ -180,34 +180,30 @@ catch, and Pope's approximation is used to calculate the annual harvest rate (U)
 }
 \details{
 The basic data inputs are catch (by weight), index (by weight/biomass), and catch-at-age matrix (by numbers).
-Annual F's are estimated parameters assuming continuous fishing over the year. Note: prior to version 1.2, catches were assumed
-to be known perfectly with an annual harvest rate from pulse fishing in \code{SCA}. That feature has now moved to \code{SCA_Pope}.
 
-By default, steepness is fixed in the model to the value in \code{Data@steep}.
+In \code{SCA} and \code{SCA2}, annual F's are estimated parameters assuming continuous fishing over the year, while
+an annual harvest rate from pulse fishing in the middle of the year is estimated in \code{SCA_Pope}. 
 
 The annual sample sizes of the catch-at-age matrix is provided to the model (used in the likelihood for catch-at-age assuming
-a multinomial distribution),
-and is manipulated via argument \code{CAA_multiplier}. This argument is
-interpreted in two different ways depending on the value provided.
-If \code{CAA_multiplier > 1}, then this value will cap the annual sample sizes
-to that number. If \code{CAA_multiplier <= 1}, then all the annual samples sizes
-will be re-scaled by that number. By default, sample sizes are capped at 50.
+a multinomial distribution) and is manipulated via argument \code{CAA_multiplier}. This argument is
+interpreted in two different ways depending on the value provided. If \code{CAA_multiplier > 1}, then this value will cap the annual sample sizes
+to that number. If \code{CAA_multiplier <= 1}, then all the annual samples sizes will be re-scaled by that number, e.g. \code{CAA_multiplier = 0.1}
+multiplies the sample size to 10\% of the original number. By default, sample sizes are capped at 50.
 
 Alternatively, a lognormal distribution with inverse proportion variance can be used for the catch at age (Punt and Kennedy, 1994, as
 cited by Maunder 2011).
 
 For \code{start} (optional), a named list of starting values of estimates can be provided for:
 \itemize{
-\item \code{R0} Virgin recruitment, only for \code{SCA}.
-\item \code{h} Steepness, only for \code{SCA}. If not provided, the value in \code{Data@steep} is used.
-\item \code{meanR} Mean recruitment, only for \code{SCA2}.
-\item \code{F_equilibrium} Fishing mortality prior to the first year of model, e.g. zero means unfished conditions. Defaults to zero.
-\item \code{vul_par} Vulnerability parameters (length 2 vector for logistic or length 4 for dome, see below). Users should provide
-estimates of the parameters in normal space, e.g. \code{vul_max} between 0-1, and the function will perform the appropriate transformations for the model.
-\item \code{F} A vector of F's of length nyears, \code{length(Data@Year)}. If not provided, defaults to 0.1.
-\item \code{omega} Standard deviation of catch. If not provided, the value based on \code{Data@CV_Cat} is used.
-\item \code{sigma} Standard deviation of index. If not provided, the value based on \code{Data@CV_Ind} is used.
-\item \code{tau} Standard deviation of recruitment deviations. If not provided, the value in \code{Data@sigmaR} is used.
+\item \code{R0} For all models except \code{SCA2}, unfished recruitment. Otherwise, 150\% Data@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
+\item \code{h} Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.
+\item \code{meanR} For \code{SCA2}, mean recruitment.
+\item \code{vul_par} Vulnerability parameters, see next paragraph.
+\item \code{F} A vector of length nyears for year-specific fishing mortality.
+\item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
+\item \code{omega} Lognormal SD of the catch (observation error) for all models except \code{SCA_Pope}. By default, Data@CV_Cat[x].
+\item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].
+\item \code{sigma} Lognormal SD of the index (observation error). By default, Data@CV_Ind[x].
 }
 
 Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter
