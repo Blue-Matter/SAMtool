@@ -7,17 +7,20 @@
 VPA(
   x = 1,
   Data,
+  AddInd = "B",
   expanded = FALSE,
   SR = c("BH", "Ricker"),
   vulnerability = c("logistic", "dome", "free"),
-  I_type = c("B", "VB", "SSB"),
-  start = NULL,
+  start = list(),
   fix_h = TRUE,
-  fix_sigma = FALSE,
   fix_Fratio = TRUE,
-  vul_pen = c(3, 0.4),
-  R_pen = c(3, Data@sigmaR[x]),
+  fix_Fterm = FALSE,
+  LWT = NULL,
+  shrinkage = list(),
   nitF = 5L,
+  min_age = "auto",
+  max_age = "auto",
+  refpt = list(),
   silent = TRUE,
   opt_hess = FALSE,
   n_restart = ifelse(opt_hess, 0, 1),
@@ -30,6 +33,10 @@ VPA(
 
 \item{Data}{An object of class Data}
 
+\item{AddInd}{A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
+the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in
+Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd.}
+
 \item{expanded}{Whether the catch at age in \code{Data} has been expanded. If \code{FALSE}, then the catch in weight
 should be provided in \code{Data@Cat} so that the function can calculate annual expansion factors.}
 
@@ -39,26 +46,34 @@ should be provided in \code{Data@Cat} so that the function can calculate annual 
 independent F's are calculated in the terminal year (subject to the assumed ratio of F of the plus-group to the previous age class).
 See details for parameterization.}
 
-\item{I_type}{Whether the index surveys population biomass (B),
-vulnerable biomass (VB), or spawning stock biomass (SSB).}
-
 \item{start}{Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.}
 
 \item{fix_h}{Logical, whether to fix steepness to value in \code{Data@steep}. This only affects
-calculation of reference points.}
-
-\item{fix_sigma}{Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
-sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@CV_Ind}.}
+calculation of MSY and unfished reference points.}
 
 \item{fix_Fratio}{Logical, whether the ratio of F of the plus-group to the previous age class is fixed in the model.}
 
-\item{vul_pen}{A length two vector that parameterizes how the model constrains the vulnerability in the most recent years. The first number
-is the number of years in which vulnerability will be constrained (as a random walk), the second number is the standard deviation of the random walk.}
+\item{fix_Fterm}{Logical, whether to fix the value of the terminal F.}
 
-\item{R_pen}{A length two vector that parameterizes how the model constrains the recruitment in the most recent years. The first number
-is the number of years in which recruitment will be constrained (as a random walk), the second number is the standard deviation of the random walk.}
+\item{LWT}{A vector of likelihood weights for each survey.}
+
+\item{shrinkage}{A named list of up to length 2 to constrain parameters:
+\itemize{
+\item \code{vul} - a length two vector that constrains the vulnerability-at-age in the most recent years. The first number
+is the number of years in which vulnerability will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
+The default 
+\item \code{R} - a length two vector that constrains the recruitment estimates in the most recent years. The first number
+is the number of years in which recruitment will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
+}}
 
 \item{nitF}{The number of iterations for solving F in the model (via Newton's method).}
+
+\item{refpt}{A named list of how many years to average parameters for calculating reference points, yield per recruit, and spawning potential ratio:
+\itemize{
+\item \code{vul} An integer for the number of most recent years to average the vulnerability schedule (default is 3).
+\item \code{R} A length two for the quantile used to calculate recruitment in the year following the terminal year and the number of years
+from which that quantile is used, i.e., \code{c(0.5, 5)} is the default that calculates median recruitment from the most recent 5 years of the model.
+}}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 will print trace information during optimization. Used for dignostics for model convergence.}
@@ -82,30 +97,31 @@ description of fishing pressure (and UMSY = MSY/VBMSY).
 }
 \description{
 A VPA model that back-calculates abundance-at-age assuming that the catch-at-age is known without error and tuned to an index.
-The population dynamics equations are primarily drawn from VPA-2BOX (Porch 2018). MSY reference points are then calculated from the
-VPA output.
+The population dynamics equations are primarily drawn from VPA-2BOX (Porch 2018). MSY reference points and per-recruit quantitites
+are then calculated from the VPA output.
 }
 \details{
-The VPA is initialized by estimating the terminal F-at-age. Parameter \code{F_term} is the apical terminal F if
-a functional form for vulnerability is used in the terminal year. If the terminal F-at-age are otherwise independent parameters,
-\code{F_term} is the F for the reference age which is half the maximum age. Once terminal-year abundance is
+The VPA is initialized by estimating the terminal F-at-age. Parameter \code{Fterm} is the apical terminal F if
+a functional form for vulnerability is used in the terminal year, i.e., when \code{vulnerability = "logistic"} or \code{"free"}.
+If the terminal F-at-age are otherwise independent parameters,
+\code{Fterm} is the F for the reference age which is half the maximum age. Once terminal-year abundance is
 estimated, the abundance in historical years can be back-calculated. The oldest age group is a plus-group, and requires
 an assumption regarding the ratio of F's between the plus-group and the next youngest age class. The F-ratio can
 be fixed (default) or estimated.
 
-
-
 For \code{start} (optional), a named list of starting values of estimates can be provided for:
 \itemize{
-\item \code{F_term} The terminal year fishing mortality.
-\item \code{F_ratio} The ratio of F in the plus-group to the next youngest age. If not provided, a value of 1 is used.
+\item \code{Fterm} The terminal year fishing mortality. This is the apical F when \code{vulnerability = "logistic"} or \code{"free"}.
+\item \code{Fratio} The ratio of F in the plus-group to the next youngest age. If not provided, a value of 1 is used.
 \item \code{vul_par} Vulnerability parameters in the terminal year. This will be of length 2 vector for \code{"logistic"} or length 4 for
 \code{"dome"}, see \link{SCA} for further documentation on parameterization. For option \code{"free"}, this will be a vector of length
 A-2 where A is the number of age classes in the model. To estimate parameters, vulnerability is initially set to one at half the max age
 (and subsequently re-calculated relative to the maximum F experienced in that year). Vulnerability in the plus-group is also constrained
 by the Fratio.
-\item \code{sigma} Standard deviation of the index. If not provided, the value based on \code{Data@CV_Ind} is used.
 }
+
+MSY and depletion reference points are calculated by fitting the stock recruit relationship to the recruitment and SSB estimates. Per-recruit
+quantities are also calculated, which may be used in harvest control rules.
 }
 \references{
 Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.

@@ -491,4 +491,16 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
   new("project", Catch = Cpred * Cobs_err, Index = Ipred, B = B, VB = B, SSB = B, R = R, N = N, FMort = Fout)
 }
 
-projection_VPA <- function(...) stop("Projection function for VPA is not yet available.", call. = FALSE)
+projection_VPA <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch,
+                           p_years = 50, p_sim = 200, obs_error, process_error,
+                           max_F = 3, seed = 499, ...) {
+  
+  Assessment@TMB_report$meanR <- mean(Assessment@R)
+  Assessment@TMB_report$vul <- Assessment@TMB_report$vul_p
+  Assessment@obj$env$data$mat <- Assessment@info$LH$mat
+  
+  projection_SCA(Assessment, constrain, Ftarget, Catch, p_years, p_sim, obs_error, process_error,
+                 max_F, seed, ...)
+}
+
+

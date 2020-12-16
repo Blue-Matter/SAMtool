@@ -405,13 +405,17 @@ rmd_R <- function() rmd_assess_timeseries("R", "recruitment", "\"Recruitment (R)
 
 rmd_N <- function() rmd_assess_timeseries("N", "abundance", "\"Abundance (N)\"")
 
-rmd_N_at_age <- function() rmd_bubble("c(info$Year, max(info$Year)+1)", "N_at_age", ages = "0:(info$data$n_age-1)", fig.cap = "Abundance-at-age bubble plot.")
+rmd_N_at_age <- function(ages = "0:(info$data$n_age-1)") {
+  rmd_bubble("c(info$Year, max(info$Year)+1)", "N_at_age", ages = ages, fig.cap = "Abundance-at-age bubble plot.")
+}
 
-rmd_C_at_age <- function() rmd_bubble("info$Year", "C_at_age", ages = "0:(info$data$n_age-1)", fig.cap = "Predicted catch-at-age bubble plot.")
+rmd_C_at_age <- function(ages = "0:(info$data$n_age-1)") {
+  rmd_bubble("info$Year", "C_at_age", ages = ages, fig.cap = "Predicted catch-at-age bubble plot.")
+}
 
-rmd_C_mean_age <- function() {
-  c(paste0("```{r, fig.cap=\"Observed (black) and predicted (red) mean age of the composition data.\"}"),
-    "plot_composition(info$Year, Obs_C_at_age, C_at_age, ages = 0:(info$data$n_age-1), plot_type = \"mean\")",
+rmd_C_mean_age <- function(ages = "0:(info$data$n_age-1)") {
+  c("```{r, fig.cap=\"Observed (black) and predicted (red) mean age of the composition data.\"}",
+    paste0("plot_composition(info$Year, Obs_C_at_age, C_at_age, ages = ", ages, ", plot_type = \"mean\")"),
     "```\n")
 }
 
@@ -443,7 +447,11 @@ rmd_SR <- function(Bvec, expectedR, Rpoints, fig.cap = "Stock-recruit relationsh
 
 rmd_yield_F <- function(model, conv_check = TRUE, header = NULL) {
   if(conv_check) conv <- "if(conv) " else conv <- ""
-  if(model == "VPA") extra_code <- "info$data$SR_type <- info$SR; TMB_report$vul <- TMB_report$vul_refpt" else extra_code <- ""
+  if(model == "VPA") {
+    extra_code <- "info$data$SR_type <- info$SR; info$data$mat <- info$LH$mat; TMB_report$vul <- TMB_report$vul_p" 
+  } else {
+    extra_code <- ""
+  }
 
   ans <- c("```{r, fig.cap=\"Yield plot relative to fishing mortality.\"}",
            extra_code,

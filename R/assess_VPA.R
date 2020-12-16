@@ -1,29 +1,41 @@
 #' Virtual population analysis (VPA)
 #'
 #' A VPA model that back-calculates abundance-at-age assuming that the catch-at-age is known without error and tuned to an index.
-#' The population dynamics equations are primarily drawn from VPA-2BOX (Porch 2018). MSY reference points are then calculated from the
-#' VPA output.
+#' The population dynamics equations are primarily drawn from VPA-2BOX (Porch 2018). MSY reference points and per-recruit quantitites
+#' are then calculated from the VPA output.
 #'
 #' @param x A position in the Data object (by default, equal to one for assessments).
 #' @param Data An object of class Data
+#' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
+#' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
+#' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd.
 #' @param expanded Whether the catch at age in \code{Data} has been expanded. If \code{FALSE}, then the catch in weight
 #' should be provided in \code{Data@@Cat} so that the function can calculate annual expansion factors.
 #' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}) for calculating MSY reference points.
 #' @param vulnerability Whether the terminal year vulnerability is \code{"logistic"} or \code{"dome"} (double-normal). If \code{"free"},
 #' independent F's are calculated in the terminal year (subject to the assumed ratio of F of the plus-group to the previous age class).
 #' See details for parameterization.
-#' @param I_type Whether the index surveys population biomass (B),
-#' vulnerable biomass (VB), or spawning stock biomass (SSB).
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
 #' @param fix_Fratio Logical, whether the ratio of F of the plus-group to the previous age class is fixed in the model.
 #' @param fix_h Logical, whether to fix steepness to value in \code{Data@@steep}. This only affects
-#' calculation of reference points.
-#' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
-#' sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Ind}.
-#' @param vul_pen A length two vector that parameterizes how the model constrains the vulnerability in the most recent years. The first number
-#' is the number of years in which vulnerability will be constrained (as a random walk), the second number is the standard deviation of the random walk.
-#' @param R_pen A length two vector that parameterizes how the model constrains the recruitment in the most recent years. The first number
-#' is the number of years in which recruitment will be constrained (as a random walk), the second number is the standard deviation of the random walk.
+#' calculation of MSY and unfished reference points.
+#' @param fix_Fterm Logical, whether to fix the value of the terminal F.
+#' @param LWT A vector of likelihood weights for each survey.
+#' @param shrinkage A named list of up to length 2 to constrain parameters:
+#' \itemize{
+#' \item \code{vul} - a length two vector that constrains the vulnerability-at-age in the most recent years. The first number
+#' is the number of years in which vulnerability will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
+#' The default 
+#' \item \code{R} - a length two vector that constrains the recruitment estimates in the most recent years. The first number
+#' is the number of years in which recruitment will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
+#' }
+#' @param refpt A named list of how many years to average parameters for calculating reference points, yield per recruit, and spawning potential ratio:
+#' \itemize{
+# #' \item \code{weight} An integer for the number of most recent years to average the weight-at-age schedule (default is 3).
+#' \item \code{vul} An integer for the number of most recent years to average the vulnerability schedule (default is 3).
+#' \item \code{R} A length two for the quantile used to calculate recruitment in the year following the terminal year and the number of years
+#' from which that quantile is used, i.e., \code{c(0.5, 5)} is the default that calculates median recruitment from the most recent 5 years of the model.
+#' }
 #' @param nitF The number of iterations for solving F in the model (via Newton's method).
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 #' will print trace information during optimization. Used for dignostics for model convergence.
@@ -36,62 +48,63 @@
 #' \code{\link[stats]{nlminb}}.
 #' @param ... Other arguments to be passed.
 #' @details
-#' The VPA is initialized by estimating the terminal F-at-age. Parameter \code{F_term} is the apical terminal F if
-#' a functional form for vulnerability is used in the terminal year. If the terminal F-at-age are otherwise independent parameters,
-#' \code{F_term} is the F for the reference age which is half the maximum age. Once terminal-year abundance is
+#' The VPA is initialized by estimating the terminal F-at-age. Parameter \code{Fterm} is the apical terminal F if
+#' a functional form for vulnerability is used in the terminal year, i.e., when \code{vulnerability = "logistic"} or \code{"free"}.
+#' If the terminal F-at-age are otherwise independent parameters,
+#' \code{Fterm} is the F for the reference age which is half the maximum age. Once terminal-year abundance is
 #' estimated, the abundance in historical years can be back-calculated. The oldest age group is a plus-group, and requires
 #' an assumption regarding the ratio of F's between the plus-group and the next youngest age class. The F-ratio can
 #' be fixed (default) or estimated.
 #'
-#'
-#'
 #' For \code{start} (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
-#' \item \code{F_term} The terminal year fishing mortality.
-#' \item \code{F_ratio} The ratio of F in the plus-group to the next youngest age. If not provided, a value of 1 is used.
+#' \item \code{Fterm} The terminal year fishing mortality. This is the apical F when \code{vulnerability = "logistic"} or \code{"free"}.
+#' \item \code{Fratio} The ratio of F in the plus-group to the next youngest age. If not provided, a value of 1 is used.
 #' \item \code{vul_par} Vulnerability parameters in the terminal year. This will be of length 2 vector for \code{"logistic"} or length 4 for
 #' \code{"dome"}, see \link{SCA} for further documentation on parameterization. For option \code{"free"}, this will be a vector of length
 #' A-2 where A is the number of age classes in the model. To estimate parameters, vulnerability is initially set to one at half the max age
 #' (and subsequently re-calculated relative to the maximum F experienced in that year). Vulnerability in the plus-group is also constrained
 #' by the Fratio.
-#' \item \code{sigma} Standard deviation of the index. If not provided, the value based on \code{Data@@CV_Ind} is used.
 #' }
+#' 
+#' MSY and depletion reference points are calculated by fitting the stock recruit relationship to the recruitment and SSB estimates. Per-recruit
+#' quantities are also calculated, which may be used in harvest control rules.
+#' 
 #' @return An object of class \linkS4class{Assessment}. The F vector is the apical fishing mortality experienced by any
 #' age class in a given year. The U vector is the ratio of catch (weight) and vulnerable biomass, which may be a better
 #' description of fishing pressure (and UMSY = MSY/VBMSY).
 #' @references
 #' Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.
 #' @export
-VPA <- function(x = 1, Data, expanded = FALSE, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome", "free"),
-                I_type = c("B", "VB", "SSB"), start = NULL, fix_h = TRUE,
-                fix_sigma = FALSE, fix_Fratio = TRUE, vul_pen = c(3, 0.4), R_pen = c(3, Data@sigmaR[x]), nitF = 5L,
+VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome", "free"),
+                start = list(), fix_h = TRUE, fix_Fratio = TRUE, fix_Fterm = FALSE, LWT = NULL, shrinkage = list(), nitF = 5L,
+                min_age = "auto", max_age = "auto", refpt = list(),
                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), ...) {
   dependencies <- "Data@Cat, Data@CAA, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
   dots <- list(...)
   start <- lapply(start, eval, envir = environment())
-
+  
   vulnerability <- match.arg(vulnerability)
   SR <- match.arg(SR)
-  I_type <- match.arg(I_type)
 
   # Life history
-  max_age <- Data@MaxAge
-  M <- rep(Data@Mort[x], max_age)
+  if(is.null(refpt$weight)) refpt$weight <- 3L
+  if(is.null(refpt$vul)) refpt$vul <- 3L
+  if(is.null(refpt$R)) refpt$R <- c(0.5, 5)
+  n_age <- Data@MaxAge + 1
+  M <- rep(Data@Mort[x], n_age)
   a <- Data@wla[x]
   b <- Data@wlb[x]
   Linf <- Data@vbLinf[x]
   K <- Data@vbK[x]
   t0 <- Data@vbt0[x]
-  La <- Linf * (1 - exp(-K * (c(1:max_age) - t0)))
+  La <- Linf * (1 - exp(-K * (c(0:Data@MaxAge) - t0)))
   Wa <- a * La ^ b
-  A50 <- min(0.5 * max_age, iVB(t0, K, Linf, Data@L50[x]))
+  A50 <- min(0.5 * Data@MaxAge, iVB(t0, K, Linf, Data@L50[x]))
   A95 <- max(A50+0.5, iVB(t0, K, Linf, Data@L95[x]))
-  mat_age <- 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50)))
+  mat_age <- 1/(1 + exp(-log(19) * (c(0:Data@MaxAge) - A50)/(A95 - A50)))
   mat_age <- mat_age/max(mat_age)
-
-  # Data
-  Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
 
   if(any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
@@ -100,7 +113,6 @@ VPA <- function(x = 1, Data, expanded = FALSE, SR = c("BH", "Ricker"), vulnerabi
   }
 
   Year <- Data@Year[yind]
-  I_hist <- Data@Ind[x, yind]
   CAA_hist <- Data@CAA[x, yind, ]
 
   if(!expanded) {
@@ -109,139 +121,165 @@ VPA <- function(x = 1, Data, expanded = FALSE, SR = c("BH", "Ricker"), vulnerabi
     expansion_factors <- C_hist/colSums(t(CAA_hist) * Wa)
     CAA_hist <- CAA_hist * expansion_factors
   }
-
-  if(any(names(dots) == "ages")) {
-    ages <- dots$ages
-
-    CAA_hist2 <- CAA_hist[, 1:max(ages)]
-    CAA_hist2[, max(ages)] <- rowSums(CAA_hist[, max(ages):max_age, drop = FALSE])
-    if(min(ages) > 1) {
-      CAA_hist2 <- CAA_hist2[, -c(1:(min(ages)-1)), drop = FALSE]
-      CAA_hist2[, 1] <- rowSums(CAA_hist[, 1:min(ages), drop = FALSE])
+  
+  # Reduce max_age until no zero's are observed
+  CAA_hist2 <- CAA_hist
+  if(is.character(max_age) && max_age == "auto") {
+    max_age <- n_age - 1
+    while(any(CAA_hist2[, max_age + 1] <= 0)) {
+      max_age <- max_age - 1
+      CAA_hist2 <- CAA_hist[, 0:max_age + 1]
+      CAA_hist2[, max_age + 1] <- rowSums(CAA_hist[, (max_age+1):ncol(CAA_hist), drop = FALSE])
     }
-
+  } else if(is.numeric(max_age) && length(max_age) == 1) {
+    CAA_hist2 <- CAA_hist[, 0:max_age + 1]
+    CAA_hist2[, max_age + 1] <- rowSums(CAA_hist[, (max_age+1):ncol(CAA_hist), drop = FALSE])
   } else {
-
-    max_age2 <- max_age  # Reduce max-age until no zero's are observed
-    CAA_hist2 <- CAA_hist
-    while(any(CAA_hist2[, max_age2] <= 0)) {
-      max_age2 <- max_age2 - 1
-      CAA_hist2 <- CAA_hist[, 1:max_age2]
-      CAA_hist2[, max_age2] <- rowSums(CAA_hist[, max_age2:max_age, drop = FALSE])
-    }
-
-    min_age <- 1 # Increase min-age until no zero's in terminal year
-    while(CAA_hist2[nrow(CAA_hist), min_age] <= 0) min_age <- min_age + 1
-    if(colSums(CAA_hist2)[1] < 0.01 * sum(CAA_hist2)) min_age <- min_age + 1
-    if(min_age > 1) {
-      CAA_hist2 <- CAA_hist2[, -c(1:(min_age-1)), drop = FALSE]
-      CAA_hist2 <- rowSums(CAA_hist[, 1:min_age, drop = FALSE])
-    }
-    if(ncol(CAA_hist2) == 1) stop("Only one age class left after consolidating plus- and minus- groups to remove zeros.")
-
-    # Any missing zeros
-    ages <- min_age:max_age2
-
+    stop("max_age must be an integer or \"auto\".")
+  }
+  
+  # Increase min-age until no zero's in terminal year
+  if(is.character(min_age) && min_age == "auto") {
+    min_age <- 0
+    while(CAA_hist[nrow(CAA_hist), min_age + 1] <= 0) min_age <- min_age + 1
+    #if(colSums(CAA_hist2)[1] < 0.01 * sum(CAA_hist2)) min_age <- min_age + 1
+  } 
+  if(is.numeric(min_age) && length(min_age) == 1) {
+    if(min_age > 0) {
+      CAA_hist2 <- CAA_hist2[, -c(0:min_age + 1), drop = FALSE]
+      CAA_hist2 <- CAA_hist[, 0:min_age + 1, drop = FALSE] %>% rowSums() %>% cbind(CAA_hist2)
+      if(ncol(CAA_hist2) == 1) stop("Only one age class left after consolidating plus- and minus- groups to remove zeros.")
+    } 
+  } else {
+    stop("min_age must be an integer or \"auto\".")
+  }
+    
+  ages <- min_age:max_age
+  
+  # Any missing zeros
+  CAA_hist2[is.na(CAA_hist2) | CAA_hist2 < 1e-8] <- 1e-8
+  
+  # Avoid numerical instability with maxage and maxage-1
+  maxage_ind <- CAA_hist2[, ncol(CAA_hist2) - 1] == 1e-8 
+  CAA_hist2[maxage_ind, ncol(CAA_hist2) - 1] <- CAA_hist2[maxage_ind, ncol(CAA_hist2)]
+  
+  update_age_schedule <- function(x, ages) {
+    xout <- x[ages + 1]
+    xout[length(xout)] <- mean(x[(max(ages)+1):length(x)])
+    return(xout %>% structure(names = ages))
   }
 
-  CAA_hist2[is.na(CAA_hist2) | CAA_hist2 < 1e-8] <- 1e-8
-  max_ind <- CAA_hist2[, ncol(CAA_hist2) - 1] == 1e-8
-  CAA_hist2[max_ind, ncol(CAA_hist2) - 1] <- CAA_hist2[max_ind, ncol(CAA_hist2)]
-
-  Wa2 <- Wa[min_age:max_age2]
-  Wa2[length(Wa2)] <- mean(Wa[max_age2:max_age])
-  La2 <- La[min_age:max_age2]
-  La2[length(Wa2)] <- mean(La[max_age2:max_age])
-  mat_age2 <- mat_age[min_age:max_age2]
-  mat_age2[length(mat_age2)] <- mean(mat_age[max_age2:max_age])
-  mat_age2 <- mat_age2/max(mat_age2)
-
-  LH <- list(LAA = La2, WAA = Wa2, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
-
-  data <- list(model = "VPA", I_hist = I_hist, CAA_hist = CAA_hist2, n_y = length(Year), max_age = length(ages),
-               M = M[min_age:max_age2], weight = Wa2, mat = mat_age2, vul_type_term = vulnerability,
-               I_type = I_type, nitF = as.integer(nitF),
-               n_vulpen = vul_pen[1], sigma_vulpen = vul_pen[2], n_Rpen = R_pen[1], sigma_Rpen = R_pen[2])
+  LH <- list(LAA = update_age_schedule(La, ages), WAA = update_age_schedule(Wa, ages), 
+             Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95, 
+             mat = update_age_schedule(mat_age, ages))
+  
+  Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
+  I_hist <- do.call(cbind, lapply(Ind, getElement, "I_hist"))
+  I_sd <- do.call(cbind, lapply(Ind, getElement, "I_sd")) %>% pmax(0.05)
+  I_units <- do.call(c, lapply(Ind, getElement, "I_units"))
+  I_vul <- vapply(AddInd, function(xx) {
+    if(xx == "B") {
+      return(rep(1, length(ages)))
+    } else if(xx == "SSB") {
+      return(LH$mat)
+    } else if(xx == "VB") {
+      return(rep(0, length(ages)))
+    } else {
+      return(Data@AddIndV[x, suppressWarnings(as.numeric(xx)), ages + 1])
+    }
+  }, numeric(length(ages)))
+  nsurvey <- ncol(I_hist)
+  if(is.null(LWT)) LWT <- rep(1, nsurvey)
+  if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  
+  # Shrinkage
+  if(is.null(shrinkage$vul)) shrinkage$vul <- c(3, 0.4)
+  if(is.null(shrinkage$R)) {
+    sigmaR <- Data@sigmaR[x]
+    if(is.null(sigmaR)) sigmaR <- 0.6
+    shrinkage$R <- c(3, sigmaR)
+  }
+  
+  data <- list(model = "VPA", I_hist = I_hist, I_sd = I_sd, I_units = I_units, I_vul = I_vul, 
+               abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
+               CAA_hist = CAA_hist2, n_y = length(Year), n_age = length(ages),
+               M = update_age_schedule(M, ages), weight = LH$WAA, 
+               vul_type_term = vulnerability, nitF = as.integer(nitF),
+               n_vulpen = shrinkage$vul[1], vulpen = shrinkage$vul[2], 
+               n_Rpen = shrinkage$R[1], Rpen = shrinkage$R[2])
 
   # Starting values
   params <- list()
   if(!is.null(start)) {
-    if(!is.null(start$F_term) && is.numeric(start$F_term)) params$logF_term <- log(start$F_term)
-    if(!is.null(start$F_ratio) && is.numeric(start$F_ratio)) params$logF_ratio <- log(start$F_ratio)
+    if(!is.null(start$Fterm) && is.numeric(start$Fterm)) params$log_Fterm <- log(start$Fterm)
+    if(!is.null(start$Fratio) && is.numeric(start$Fratio)) params$log_Fratio <- log(start$Fratio)
     if(!is.null(start$vul_par) && is.numeric(start$vul_par)) {
       if(vulnerability == "logistic") {
-        if(start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * Data@MaxAge (see help).")
+        if(start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * max_age (", max_age, ")")
         if(length(start$vul_par) < 2) stop("Two parameters needed for start$vul_par with logistic vulnerability (see help).")
         if(start$vul_par[1] <= start$vul_par[2]) stop("start$vul_par[1] needs to be greater than start$vul_par[2] (see help).")
 
-        params$vul_par_sep <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]))
-      }
-      if(vulnerability == "dome") {
-        if(start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * Data@MaxAge (see help).")
+        params$vul_par <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]))
+      } else if(vulnerability == "dome") {
+        if(start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * max_age (", max_age, ")")
         if(length(start$vul_par) < 4) stop("Four parameters needed for start$vul_par with dome vulnerability (see help).")
         if(start$vul_par[1] <= start$vul_par[2]) stop("start$vul_par[1] needs to be greater than start$vul_par[2] (see help).")
         if(start$vul_par[3] <= start$vul_par[1] || start$vul_par[3] >= max_age) {
-          stop("start$vul_par[3] needs to be between start$vul_par[1] and Data@MaxAge (see help).")
+          stop("start$vul_par[3] needs to be between start$vul_par[1] and max_age (", max_age, ")")
         }
         if(start$vul_par[4] <= 0 || start$vul_par[4] >= 1) stop("start$vul_par[4] needs to be between 0-1 (see help).")
 
-        params$vul_par_sep <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]),
-                                logit(1/(max_age - start$vul_par[1])), logit(start$vul_par[4]))
-      }
-      if(vulnerability == "free") {
+        params$vul_par <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]),
+                            logit(1/(max_age - start$vul_par[1])), logit(start$vul_par[4]))
+      } else if(vulnerability == "free") {
         if(length(start$vul_par) < length(ages)) stop(paste0("start$vul_par needs to be of length", length(ages), "."))
-        params$vul_par_sep <- log(start$vul_par[1:length(ages)])
+        params$vul_par <- log(start$vul_par[1:length(ages)])
       }
     }
-    if(!is.null(start$sigma) && is.numeric(start$sigma)) params$log_sigma <- log(start$sigma)
   }
 
-  if(is.null(params$logF_term)) params$logF_term <- log(0.2)
-  if(is.null(params$logF_ratio)) params$logF_ratio <- log(1)
+  if(is.null(params$log_Fterm)) params$log_Fterm <- log(0.2)
+  if(is.null(params$log_Fratio)) params$log_Fratio <- log(1)
   if(is.null(params$vul_par)) {
+    CAA_mode <- ages[which.max(colSums(CAA_hist, na.rm = TRUE))]
+    CAA_mode <- ifelse(CAA_mode + 1 > max_age, max_age - 1, CAA_mode)
     if(vulnerability == "free") {
-      params$vul_par <- rep(0, length(ages) - 1)
+      params$vul_par <- ifelse(ages[-length(ages)] < CAA_mode, 0.5, 1) %>% log()
     } else {
-      CAA_mode <- which.max(colSums(CAA_hist, na.rm = TRUE))
-      CAA_mode <- ifelse(CAA_mode + 1 > max_age2, max_age2 - 1, CAA_mode)
       if((is.na(Data@LFC[x]) && is.na(Data@LFS[x])) || (Data@LFC[x] > Linf) || (Data@LFS[x] > Linf)) {
-        if(vulnerability == "logistic") params$vul_par <- c(logit(CAA_mode/(max_age2 - min_age)/0.75), log(1))
+        if(vulnerability == "logistic") params$vul_par <- c(logit(CAA_mode/(max_age - min_age)/0.75), log(1))
         if(vulnerability == "dome") {
-          params$vul_par <- c(logit(CAA_mode/(max_age2 - min_age)/0.75), log(1), logit(1/(max_age2 - CAA_mode)), logit(0.5))
+          params$vul_par <- c(logit(CAA_mode/(max_age - min_age)/0.75), log(1), logit(1/(max_age - CAA_mode)), logit(0.5))
         }
       } else {
         A5 <- min(iVB(t0, K, Linf, Data@LFC[x]), CAA_mode-1)
-        Afull <- min(iVB(t0, K, Linf, Data@LFS[x]), 0.5 * max_age2)
+        Afull <- min(iVB(t0, K, Linf, Data@LFS[x]), 0.5 * max_age)
         A5 <- min(A5, Afull - 0.5)
         A50_vul <- mean(c(A5, Afull))
 
-        if(vulnerability == "logistic") params$vul_par <- c(logit(Afull/(max_age2 - min_age)/0.75), log(Afull - A50_vul))
+        if(vulnerability == "logistic") params$vul_par <- c(logit(Afull/(max_age - min_age)/0.75), log(Afull - A50_vul))
         if(vulnerability == "dome") {
-          params$vul_par <- c(logit(Afull/max_age2/0.75), log(Afull - A50_vul), logit(1/(max_age2 - Afull)), logit(0.5))
+          params$vul_par <- c(logit(Afull/max_age/0.75), log(Afull - A50_vul), logit(1/(max_age - Afull)), logit(0.5))
         }
       }
     }
   }
-  if(is.null(params$log_sigma)) {
-    sigmaI <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE)
-    params$log_sigma <- log(sigmaI)
-  }
 
-  info <- list(Year = Year, data = data, params = params, LH = LH, SR = SR, ages = ages, control = control, fix_h = fix_h)
+  info <- list(Year = Year, data = data, params = params, LH = LH, SR = SR, ages = ages, control = control,
+               fix_h = fix_h, refpt = refpt)
 
   map <- list()
-  if(fix_sigma) map$log_sigma <- factor(NA)
   if(vulnerability == "free") {
     fixed_ind <- round(0.5 * length(ages))
     free_vul_par <- rep(log(1), length(ages) - 1)
     free_vul_par[fixed_ind] <- NA
     free_vul_par[!is.na(free_vul_par)] <- 1:(length(ages)-2)
     map$vul_par <- factor(free_vul_par)
+  } else if(vulnerability == "dome") {
+    map$vul_par <- c(1, 2, NA, 3) %>% factor()
   }
-  if(fix_Fratio) map$logF_ratio <- factor(NA)
-  if(any(names(dots) == "fix_F")) {
-    if(dots$fixF) map$logF_term <- factor(NA)
-  }
+  if(fix_Fratio) map$log_Fratio <- factor(NA)
+  if(fix_Fterm) map$log_Fterm <- factor(NA)
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                    map = map, DLL = "SAMtool", silent = silent)
@@ -249,46 +287,41 @@ VPA <- function(x = 1, Data, expanded = FALSE, SR = c("BH", "Ricker"), vulnerabi
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]
   SD <- mod[[2]]
-  report <- obj$report(obj$env$last.par.best)
-
-  # Terminal-year + 1 abundance
-  report <- projection_VPA_internal(report, info, R_pen[1])
+  report <- obj$report(obj$env$last.par.best) %>% VPA_posthoc(info = info)
+  
   Yearplusone <- c(Year, max(Year) + 1)
 
   Assessment <- new("Assessment", Model = "VPA",
                     Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
-                    FMort = structure(apply(report$F, 1, max), names = Year),
+                    FMort = structure(report$F, names = Year),
                     B = structure(report$B, names = Yearplusone), SSB = structure(report$E, names = Yearplusone),
                     VB = structure(report$VB, names = Yearplusone),
                     R = structure(report$N[, 1], names = Yearplusone), N = structure(rowSums(report$N), names = Yearplusone),
-                    N_at_age = report$N, Selectivity = report$vul, h = NaN,
+                    N_at_age = report$N, Selectivity = report$vul, h = NA_real_,
                     Obs_Catch = structure(if(expanded) colSums(t(CAA_hist2) * data$weight) else C_hist, names = Year),
-                    Obs_Index = structure(I_hist, names = Year), Obs_C_at_age = CAA_hist2,
+                    Obs_Index = structure(I_hist, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
+                    Obs_C_at_age = CAA_hist2,
                     Catch = structure(colSums(t(report$CAApred) * data$weight), names = Year),
-                    Index = structure(I_hist, names = Year), C_at_age = report$CAApred,
-                    NLL = structure(c(report$fn, report$nll_comp[1], sum(report$nll_comp[2:3], report$penalty, report$prior)),
-                                    names = c("Total", "Index", "Penalty")),
+                    Index = structure(report$Ipred, dimnames = list(Year, paste0("Index_", 1:nsurvey))), 
+                    C_at_age = report$CAApred,
+                    NLL = structure(c(report$nll, report$nll_comp, report$prior, report$penalty),
+                                    names = c("Total", paste0("Index_", 1:nsurvey), "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
 
   if(Assessment@conv) {
+    ref_pt <- ref_pt_SCA2(E = report$E[1:(length(report$E)-min_age)], R = report$N[(min_age + 1):length(report$E), 1], 
+                          weight = info$data$weight, mat = info$LH$mat, M = info$data$M, vul = report$vul_p, 
+                          SR = SR, fix_h = fix_h, h = ifelse(fix_h, Data@steep[x], NA_real_)) 
+    report <- c(report, ref_pt[-17])
 
-    report$vul_refpt <- apply(report$vul[(length(Year)-vul_pen[1]+1):length(Year), , drop = FALSE], 2, mean)
-    report$vul_refpt <- report$vul_refpt/max(report$vul_refpt)
-
-    E <- report$E[1:(length(report$E)-min_age)]
-    R <- report$N[(min_age + 1):length(report$E), 1]
-    ref_pt <- SCA_refpt_calc(E, R, data$weight, data$mat, data$M, report$vul_refpt, SR, fix_h, ifelse(fix_h, Data@steep[x], NA))
-
-    report <- c(report, ref_pt)
-
-    Z_mat <- t(report$F) + data$M
-    VB_mid <- t(report$N[-ncol(report$N), ]) * data$weight * (1 - exp(-Z_mat))/Z_mat
+    #Z_mat <- t(report$F) + data$M
+    #VB_mid <- t(report$N[-ncol(report$N), ]) * data$weight * (1 - exp(-Z_mat))/Z_mat
 
     Assessment@FMSY <- report$FMSY
-    Assessment@U <- structure(Assessment@Catch/colSums(VB_mid), names = Year)
-    Assessment@UMSY <- report$MSY/report$VBMSY
-    Assessment@U_UMSY <- Assessment@U/Assessment@UMSY
+    #Assessment@U <- structure(Assessment@Catch/colSums(VB_mid), names = Year)
+    #Assessment@UMSY <- report$MSY/report$VBMSY
+    #Assessment@U_UMSY <- Assessment@U/Assessment@UMSY
     Assessment@MSY <- report$MSY
     Assessment@BMSY <- report$BMSY
     Assessment@SSBMSY <- report$EMSY
@@ -307,120 +340,39 @@ VPA <- function(x = 1, Data, expanded = FALSE, SR = c("BH", "Ricker"), vulnerabi
     Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
     Assessment@VB_VB0 <- structure(report$VB/report$VB0, names = Yearplusone)
     Assessment@TMB_report <- report
-    Assessment@info <- info
+    
+    catch_eq <- function(Ftarget) {
+      catch_equation(method = "Baranov", sel = report$vul_p, M = infodata$M,
+                     wt = info$data$weight, N = report@N[nrow(report$N), ])
+    }
+    Assessment@forecast <- list(per_recruit = ref_pt[[17]], catch_eq = catch_eq)
   }
 
   return(Assessment)
 }
 
-
-
-
-projection_VPA_internal <- function(report, info, nR) {
-  max_age <- info$data$max_age
-  termY <- nrow(report$N)
-  N <- numeric(max_age)
-  N[2:max_age] <- report$N[termY, 1:(max_age-1)] * exp(-info$data$M[1:(max_age-1)] - report$F[termY, 1:(max_age-1)])
-  N[max_age] <- N[max_age] + report$N[termY, max_age] * exp(-info$data$M[max_age] - report$F[termY, max_age])
-  N[1] <- exp(sum(log(report$N[(termY - nR + 1):termY, 1]))/nR)
-
+VPA_posthoc <- function(report, info) { # Calculate Terminal year + 1 abundance
+  n_age <- info$data$n_age
+  Y <- nrow(report$N)
+  N <- numeric(n_age)
+  M <- info$data$M
+  FF <- report$F_at_age[Y, ]
+  Z <- M + FF
+  
+  refpt <- info$refpt
+  
+  N[2:n_age] <- report$N[Y, 1:(n_age-1)] * exp(-Z[1:(n_age-1)])
+  N[n_age] <- N[n_age] + report$N[Y, n_age] * exp(-Z[n_age])
+  N[1] <- quantile(report$N[(Y-refpt$R[2]+1):Y, 1], refpt$R[1])
+  
+  report$vul_p <- report$vul[(Y-refpt$vul+1):Y, , drop = FALSE] %>% apply(2, mean)
+  report$vul_p <- report$vul_p/max(report$vul_p)
+  
   report$N <- rbind(report$N, N)
-  report$E <- c(report$E, sum(N * info$data$mat * info$data$weight))
-  report$VB <- c(report$VB, sum(N * report$vul[termY, ] * info$data$weight))
+  report$E <- colSums(t(report$N) * info$LH$mat * info$data$weight)
+  report$VB <- c(report$VB, sum(N * report$vul_p * info$data$weight))
   report$B <- c(report$B, sum(N * info$data$weight))
-
+  
   return(report)
 }
 
-
-SCA_MSY_calc <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
-  SR <- match.arg(SR)
-  n_age <- length(M)
-  
-  solveMSY <- function(logF) {
-    Fmort <- exp(logF)
-    surv <- exp(-vul * Fmort - M)
-    NPR <- c(1, cumprod(surv[1:(n_age-1)]))
-    NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
-    EPR <- sum(NPR * mat * weight)
-    if(SR == "BH") Req <- (Arec * EPR - 1)/(Brec * EPR)
-    if(SR == "Ricker") Req <- log(Arec * EPR)/(Brec * EPR)
-    CPR <- vul * Fmort/(vul * Fmort + M) * NPR * (1 - exp(-vul * Fmort - M))
-    Yield <- Req * sum(CPR * weight)
-    return(-1 * Yield)
-  }
-  
-  opt2 <- optimize(solveMSY, interval = c(-6, 6))
-  FMSY <- exp(opt2$minimum)
-  MSY <- -1 * opt2$objective
-  
-  surv_MSY <- exp(-vul * FMSY - M)
-  NPR_MSY <- c(1, cumprod(surv_MSY[1:(n_age-1)]))
-  NPR_MSY[n_age] <- NPR_MSY[n_age]/(1 - surv_MSY[n_age])
-  
-  EPR_MSY <- sum(NPR_MSY * weight * mat)
-  if(SR == "BH") RMSY <- (Arec * EPR_MSY - 1)/(Brec * EPR_MSY)
-  if(SR == "Ricker") RMSY <- log(Arec * EPR_MSY)/(Brec * EPR_MSY)
-  
-  VBMSY <- RMSY * sum(NPR_MSY * weight * vul)
-  BMSY <- RMSY * sum(NPR_MSY * weight)
-  EMSY <- RMSY * EPR_MSY
-  
-  return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY))
-}
-
-
-SCA_refpt_calc <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
-  # Per-recruit quantities
-  n_age <- length(M)
-  surv0 <- exp(-M)
-  NPR0 <- c(1, cumprod(surv0[1:(n_age-1)]))
-  NPR0[n_age] <- NPR0[n_age]/(1 - exp(-M[n_age]))
-  EPR0 <- sum(NPR0 * weight * mat)
-  
-  # Fit stock-recruit curve
-  Rpred <- sigmaR <- NULL
-  solve_SR_par <- function(x, h = NULL) {
-    R0 <- exp(x[1])
-    E0 <- R0 * EPR0
-    if(!fix_h) {
-      if(SR == "BH") h <- 0.2 + 0.8 * ilogit(x[2])
-      if(SR == "Ricker") h <- 0.2 + exp(x[2])
-    }
-    if(SR == "BH") Rpred <<- (0.8 * R0 * h * E)/(0.2 * EPR0 * R0 *(1-h)+(h-0.2)*E)
-    if(SR == "Ricker") Rpred <<- E/EPR0 * (5*h)^(1.25 * (1 - E/E0))
-    sigmaR <<- sqrt(sum((log(R/Rpred))^2)/length(Rpred))
-    nLL <- -sum(dnorm(log(R/Rpred), -0.5 * sigmaR^2, sigmaR, log = TRUE))
-    return(nLL)
-  }
-  
-  if(fix_h) {
-    opt <- optimize(solve_SR_par, interval = c(-10, 10), h = h)$minimum
-    R0 <- exp(opt)
-  } else {
-    opt <- nlminb(c(10, 10), solve_SR_par)
-    R0 <- exp(opt$par[1])
-    if(SR == "BH") h <- 0.2 + 0.8 * ilogit(opt$par[2])
-    if(SR == "Ricker") h <- 0.2 + exp(opt$par[2])
-  }
-  
-  # Virgin reference points
-  N0 <- R0 * sum(NPR0)
-  E0 <- R0 * EPR0
-  VB0 <- R0 * sum(NPR0 * weight * vul)
-  B0 <- R0 * sum(NPR0 * weight)
-  
-  # Steepness
-  if(SR == "BH") {
-    Arec <- 4*h/(1-h)/EPR0
-    Brec <- (5*h-1)/(1-h)/E0
-  }
-  if(SR == "Ricker") {
-    Arec <- 1/EPR0 * (5*h)^1.25
-    Brec <- 1.25 * log(5*h) / E0
-  }
-  
-  refpt_unfished <- list(h = h, Arec = Arec, Brec = Brec, E0 = E0, R0 = R0, N0 = N0, VB0 = VB0, B0 = B0, EPR0 = EPR0, NPR0 = NPR0)
-  refpt_MSY <- SCA_MSY_calc(Arec, Brec, M, weight, mat, vul, SR = SR)
-  return(c(refpt_unfished, refpt_MSY))
-}

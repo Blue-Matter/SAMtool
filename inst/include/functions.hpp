@@ -12,7 +12,7 @@ Type qlogis(Type p, Type location = 0, Type scale = 1) {
 }
 
 
-//
+
 template<class Type>
 Type invlogit2(Type x, Type ymin = 0, Type ymax = 1, Type y0 = 0.5, Type scale = 1) {
   Type location = log((ymax - ymin)/(y0 - ymin) - 1);
@@ -174,7 +174,7 @@ vector<Type> calc_q(matrix<Type> I_y, vector<Type> B_y, vector<Type> N_y, matrix
 }
 
 
-// For RCM
+// For RCM, VPA
 template<class Type>
 Type calc_q(matrix<Type> I_y, matrix<Type> B_y, int sur, int ff, matrix<Type> &Ipred, vector<int> abs_I, int n_y) {
   Type q;
