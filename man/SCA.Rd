@@ -10,19 +10,19 @@
 SCA(
   x = 1,
   Data,
+  AddInd = "B",
   SR = c("BH", "Ricker"),
   vulnerability = c("logistic", "dome"),
   CAA_dist = c("multinomial", "lognormal"),
   CAA_multiplier = 50,
-  I_type = c("B", "VB", "SSB"),
   rescale = "mean1",
   max_age = Data@MaxAge,
   start = NULL,
   fix_h = TRUE,
   fix_F_equilibrium = TRUE,
   fix_omega = TRUE,
-  fix_sigma = FALSE,
   fix_tau = TRUE,
+  LWT = NULL,
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
   integrate = FALSE,
@@ -37,19 +37,19 @@ SCA(
 SCA2(
   x = 1,
   Data,
+  AddInd = "B",
   SR = c("BH", "Ricker"),
   vulnerability = c("logistic", "dome"),
   CAA_dist = c("multinomial", "lognormal"),
   CAA_multiplier = 50,
-  I_type = c("B", "VB", "SSB"),
   rescale = "mean1",
   max_age = Data@MaxAge,
   start = NULL,
   fix_h = TRUE,
   fix_F_equilibrium = TRUE,
   fix_omega = TRUE,
-  fix_sigma = FALSE,
   fix_tau = TRUE,
+  LWT = NULL,
   common_dev = "comp50",
   integrate = FALSE,
   silent = TRUE,
@@ -63,18 +63,18 @@ SCA2(
 SCA_Pope(
   x = 1,
   Data,
+  AddInd = "B",
   SR = c("BH", "Ricker"),
   vulnerability = c("logistic", "dome"),
   CAA_dist = c("multinomial", "lognormal"),
   CAA_multiplier = 50,
-  I_type = c("B", "VB", "SSB"),
   rescale = "mean1",
   max_age = Data@MaxAge,
   start = NULL,
   fix_h = TRUE,
   fix_U_equilibrium = TRUE,
-  fix_sigma = FALSE,
   fix_tau = TRUE,
+  LWT = NULL,
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
   integrate = FALSE,
@@ -91,6 +91,10 @@ SCA_Pope(
 
 \item{Data}{An object of class Data}
 
+\item{AddInd}{A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
+the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in
+Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd. Vulnerability to the survey is fixed in the model.}
+
 \item{SR}{Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).}
 
 \item{vulnerability}{Whether estimated vulnerability is \code{"logistic"} or \code{"dome"} (double-normal).
@@ -99,9 +103,6 @@ See details for parameterization.}
 \item{CAA_dist}{Whether a multinomial or lognormal distribution is used for likelihood of the catch-at-age matrix. See details.}
 
 \item{CAA_multiplier}{Numeric for data weighting of catch-at-age matrix if \code{CAA_hist = "multinomial"}. Otherwise ignored. See details.}
-
-\item{I_type}{Whether the index surveys population biomass (B; this is the default in the MSEtool operating model),
-vulnerable biomass (VB), or spawning stock biomass (SSB).}
 
 \item{rescale}{A multiplicative factor that rescales the catch in the assessment model, which
 can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
@@ -119,13 +120,12 @@ is estimated. If \code{TRUE}, \code{F_equilibrium} is fixed to value provided in
 otherwise, equal to zero (assumes unfished conditions).}
 
 \item{fix_omega}{Logical, whether the standard deviation of the catch is fixed. If \code{TRUE},
-sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@CV_Cat}.}
-
-\item{fix_sigma}{Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
-sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@CV_Ind}.}
+omega is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@CV_Cat}.}
 
 \item{fix_tau}{Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
 tau is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@sigmaR}.}
+
+\item{LWT}{A vector of likelihood weights for each survey.}
 
 \item{early_dev}{Numeric or character string describing the years for which recruitment deviations are estimated in \code{SCA}. By default,
 equal to \code{"comp_onegen"}, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
@@ -203,7 +203,6 @@ For \code{start} (optional), a named list of starting values of estimates can be
 \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
 \item \code{omega} Lognormal SD of the catch (observation error) for all models except \code{SCA_Pope}. By default, Data@CV_Cat[x].
 \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].
-\item \code{sigma} Lognormal SD of the index (observation error). By default, Data@CV_Ind[x].
 }
 
 Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter

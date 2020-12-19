@@ -27,11 +27,11 @@ An S4 class for the output from \link{projection}.
 
 \item{\code{N}}{A matrix of abundance over \code{p_sim} rows and \code{p_years} columns.}
 
-\item{\code{Catch}}{A matrix of observed catch over \code{p_sim} rows and \code{p_years} columns.}
+\item{\code{Catch}}{A matrix of simulated observed catch over \code{p_sim} rows and \code{p_years} columns.}
 
-\item{\code{Index}}{A matrix of observed index over \code{p_sim} rows and \code{p_years} columns.}
+\item{\code{Index}}{An array of simulated observed index of dimension \code{c(p_sim, p_years, nsurvey)}.}
 
-\item{\code{C_at_age}}{An array for catch-at-age with dimension \code{c(p_sim, p_years, maxage)}.}
+\item{\code{C_at_age}}{An array for catch-at-age with dimension \code{c(p_sim, p_years, n_age)}.}
 }}
 
 \seealso{

@@ -12,7 +12,13 @@ Type SCA_RWM(objective_function<Type> *obj) {
 
   DATA_VECTOR(C_hist);    // Total catch
   DATA_SCALAR(rescale);   // Scalar for R0
-  DATA_VECTOR(I_hist);    // Index
+  DATA_MATRIX(I_hist);    // Index
+  DATA_MATRIX(I_sd);
+  DATA_IVECTOR(I_units);
+  DATA_MATRIX(I_vul);
+  DATA_IVECTOR(abs_I);
+  DATA_INTEGER(nsurvey);
+  DATA_VECTOR(LWT);
   DATA_MATRIX(CAA_hist);  // Catch-at-age proportions
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
   DATA_INTEGER(n_y);      // Number of years in model
@@ -21,7 +27,6 @@ Type SCA_RWM(objective_function<Type> *obj) {
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
-  DATA_STRING(I_type);    // String whether index surveys B, VB, or SSB
   DATA_STRING(SR_type);   // String indicating whether Beverton-Holt or Ricker stock-recruit is used
   DATA_STRING(CAA_dist);  // String indicating whether CAA is multinomial or lognormal
   DATA_IVECTOR(est_early_rec_dev);
@@ -39,7 +44,6 @@ Type SCA_RWM(objective_function<Type> *obj) {
   PARAMETER(log_M_start);
   PARAMETER_VECTOR(logit_M_walk);
 
-  PARAMETER(log_sigma);
   PARAMETER(log_omega);
   PARAMETER(log_tau);
   PARAMETER(log_tau_M);
@@ -56,7 +60,6 @@ Type SCA_RWM(objective_function<Type> *obj) {
   }
   h += 0.2;
 
-  Type sigma = exp(log_sigma);
   Type omega = exp(log_omega);
   Type tau = exp(log_tau);
   Type tau_M = exp(log_tau_M);
@@ -114,7 +117,6 @@ Type SCA_RWM(objective_function<Type> *obj) {
   vector<Type> CN(n_y);             // Catch in numbers
   vector<Type> Cpred(n_y);
   vector<Type> F(n_y);
-  vector<Type> Ipred(n_y);          // Predicted index at year
   vector<Type> R(n_y+1);            // Recruitment at year
   vector<Type> R_early(n_age-1);
   vector<Type> VB(n_y+1);           // Vulnerable biomass at year
@@ -196,19 +198,35 @@ Type SCA_RWM(objective_function<Type> *obj) {
 
   // Calculate nuisance parameters and likelihood
   // Ipred updated in calc_q function
-  Type q;
-  if(I_type == "B") {
-    q = calc_q(I_hist, B, Ipred);
-  } else if(I_type == "VB") {
-    q = calc_q(I_hist, VB, Ipred);
-  } else {
-    q = calc_q(I_hist, E, Ipred);
+  vector<Type> q(nsurvey);
+  array<Type> s_CAA(n_y,n_age,nsurvey);
+  matrix<Type> s_CN(n_y,nsurvey);
+  matrix<Type> s_BN(n_y,nsurvey);
+  matrix<Type> Ipred(n_y,nsurvey);
+  for(int sur=0;sur<nsurvey;sur++) {
+    for(int y=0;y<n_y;y++) {
+      for(int a=0;a<n_age;a++) {
+        if(I_vul.col(sur).sum() > 0) {
+          s_CAA(y,a,sur) = I_vul(a,sur) * N(y,a);
+        } else {
+          s_CAA(y,a,sur) = vul(y,a) * N(y,a);
+        }
+        s_CN(y,sur) += s_CAA(y,a,sur);
+        if(I_units(sur)) s_BN(y,sur) += s_CAA(y,a,sur) * weight(a); // Biomass vulnerable to survey
+      }
+    }
+    if(!I_units(sur)) s_BN.col(sur) = s_CN.col(sur); // Abundance vulnerable to survey
+    q(sur) = calc_q(I_hist, s_BN, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
   }
-
-  vector<Type> nll_comp(5);
+  
+  vector<Type> nll_comp(nsurvey+3);
   nll_comp.setZero();
   for(int y=0;y<n_y;y++) {
-    if(!R_IsNA(asDouble(I_hist(y)))) nll_comp(0) -= dnorm(log(I_hist(y)), log(Ipred(y)), sigma, true);
+    for(int sur=0;sur<nsurvey;sur++) {
+      if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
+        nll_comp(sur) -= LWT(sur) * dnorm(log(I_hist(y,sur)), log(Ipred(y,sur)), I_sd(y,sur), true);
+      }
+    }
     if(C_hist(y) > 0) {
       if(!R_IsNA(asDouble(CAA_n(y)))) {
         vector<Type> loglike_CAAobs(n_age);
@@ -217,18 +235,18 @@ Type SCA_RWM(objective_function<Type> *obj) {
         loglike_CAAobs = CAA_hist.row(y);
         if(CAA_dist == "multinomial") {
           loglike_CAAobs *= CAA_n(y);
-          nll_comp(1) -= dmultinom_(loglike_CAAobs, loglike_CAApred, true);
+          nll_comp(nsurvey) -= dmultinom_(loglike_CAAobs, loglike_CAApred, true);
         } else {
-          nll_comp(1) -= dlnorm_comp(loglike_CAAobs, loglike_CAApred);
+          nll_comp(nsurvey) -= dlnorm_comp(loglike_CAAobs, loglike_CAApred);
         }
       }
-      nll_comp(2) -= dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
+      nll_comp(nsurvey+1) -= dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
     }
-    if(est_rec_dev(y)) nll_comp(3) -= dnorm(log_rec_dev(y), Type(0), tau, true);
-    if(y<n_y-1) nll_comp(4) -= dnorm(logit_M_walk(y), Type(0), tau_M, true);
+    if(est_rec_dev(y)) nll_comp(nsurvey+2) -= dnorm(log_rec_dev(y), Type(0), tau, true);
+    if(y<n_y-1) nll_comp(nsurvey+2) -= dnorm(logit_M_walk(y), Type(0), tau_M, true);
   }
   for(int a=0;a<n_age-1;a++) {
-    if(est_early_rec_dev(a)) nll_comp(3) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
+    if(est_early_rec_dev(a)) nll_comp(nsurvey+2) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
   }
 
   Type nll = nll_comp.sum() + penalty + prior;
@@ -236,14 +254,12 @@ Type SCA_RWM(objective_function<Type> *obj) {
   ADREPORT(R0);
   ADREPORT(h);
   ADREPORT(omega);
-  ADREPORT(sigma);
   ADREPORT(tau);
   ADREPORT(tau_M);
   ADREPORT(q);
   ADREPORT(logit_M);
 
   REPORT(omega);
-  REPORT(sigma);
   REPORT(tau);
   REPORT(tau_M);
   

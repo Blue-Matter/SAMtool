@@ -53,7 +53,8 @@ rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
                   rmd_mat(age, Assessment@info$data$mat,
                           fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."))
   # Data section
-  data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"), rmd_data_timeseries("Index"),
+  data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"), 
+                    rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)),
                     rmd_data_age_comps("bubble"), rmd_data_age_comps("annual"))
 
   # Assessment
@@ -66,8 +67,8 @@ rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
 
   assess_fit <- c(lead_par,
                   rmd_sel(age, Assessment@Selectivity[nrow(Assessment@Selectivity), ], fig.cap = "Estimated selectivity at age."),
-                  rmd_assess_fit("Index", "index"), rmd_assess_resid("Index"), rmd_assess_qq("Index", "index"),
                   rmd_assess_fit("Catch", "catch"), rmd_assess_resid("Catch"), rmd_assess_qq("Catch", "catch"),
+                  rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
                   rmd_fit_age_comps("bubble"), rmd_fit_age_comps("annual"),
                   rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type,
                                blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])),
@@ -187,7 +188,7 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SC
     }
     
     info$data$C_hist <- info$data$C_hist[1:n_y_ret]
-    info$data$I_hist <- info$data$I_hist[1:n_y_ret]
+    info$data$I_hist <- info$data$I_hist[1:n_y_ret, , drop = FALSE]
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
     info$data$CAA_n <- info$data$CAA_n[1:n_y_ret]
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]

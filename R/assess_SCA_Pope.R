@@ -2,9 +2,9 @@
 #' @rdname SCA
 #' @useDynLib SAMtool
 #' @export
-SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
-                     CAA_multiplier = 50, I_type = c("B", "VB", "SSB"), rescale = "mean1", max_age = Data@MaxAge,
-                     start = NULL, fix_h = TRUE, fix_U_equilibrium = TRUE, fix_sigma = FALSE, fix_tau = TRUE,
+SCA_Pope <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
+                     CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, 
+                     fix_h = TRUE, fix_U_equilibrium = TRUE, fix_tau = TRUE, LWT = NULL,
                      early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                      silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                      control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
@@ -17,7 +17,6 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
   vulnerability <- match.arg(vulnerability)
   CAA_dist <- match.arg(CAA_dist)
   SR <- match.arg(SR)
-  I_type <- match.arg(I_type)
   if(is.character(early_dev)) early_dev <- match.arg(early_dev)
   if(is.numeric(early_dev)) stopifnot(early_dev < length(Data@Year))
   
@@ -30,13 +29,7 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
   Year <- Data@Year[yind]
   C_hist <- Data@Cat[x, yind]
   if(any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
-  if(I_type == "B") {
-    I_hist <- Data@Ind[x, yind]
-  } else if(I_type == "VB") {
-    I_hist <- Data@VInd[x, yind]
-  } else {
-    I_hist <- Data@Sp_Ind[x, yind]
-  }
+  
   Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
   CAA_hist <- Data@CAA[x, yind, 1:n_age]
   if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
@@ -105,10 +98,31 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
   }
 
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
+  
+  Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
+  I_hist <- do.call(cbind, lapply(Ind, getElement, "I_hist"))
+  I_sd <- do.call(cbind, lapply(Ind, getElement, "I_sd")) %>% pmax(0.05)
+  I_units <- do.call(c, lapply(Ind, getElement, "I_units"))
+  I_vul <- vapply(AddInd, function(xx) {
+    if(xx == "B") {
+      return(rep(1, n_age))
+    } else if(xx == "SSB") {
+      return(mat_age)
+    } else if(xx == "VB") {
+      return(rep(0, n_age))
+    } else {
+      return(Data@AddIndV[x, suppressWarnings(as.numeric(xx)), 1:n_age])
+    }
+  }, numeric(n_age))
+  nsurvey <- ncol(I_hist)
+  if(is.null(LWT)) LWT <- rep(1, nsurvey)
+  if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  
   data <- list(model = "SCA_Pope", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
+               I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
                CAA_hist = t(apply(CAA_hist, 1, function(x) x/sum(x))),
                CAA_n = CAA_n_rescale, n_y = n_y, n_age = n_age, M = M,
-               weight = Wa, mat = mat_age, vul_type = vulnerability, I_type = I_type,
+               weight = Wa, mat = mat_age, vul_type = vulnerability,
                SR_type = SR, CAA_dist = CAA_dist, est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev)
   data$CAA_hist[data$CAA_hist < 1e-8] <- 1e-8
 
@@ -145,7 +159,6 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
                             logit(1/(max_age - start$vul_par[1])), logit(start$vul_par[4]))
       }
     }
-    if(!is.null(start$sigma) && is.numeric(start$sigma)) params$log_sigma <- log(start$sigma)
     if(!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau)
   }
 
@@ -182,10 +195,6 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
     }
   }
   if(is.na(params$vul_par[1])) params$vul_par[1] <- 1
-  if(is.null(params$log_sigma)) {
-    sigmaI <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE)
-    params$log_sigma <- log(sigmaI)
-  }
   if(is.null(params$log_tau)) {
     tau_start <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x])
     params$log_tau <- log(tau_start)
@@ -199,7 +208,6 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
   map <- list()
   if(fix_h) map$transformed_h <- factor(NA)
   if(fix_U_equilibrium) map$U_equilibrium <- factor(NA)
-  if(fix_sigma) map$log_sigma <- factor(NA)
   if(fix_tau) map$log_tau <- factor(NA)
   if(any(!est_early_rec_dev)) map$log_early_rec_dev <- factor(ifelse(est_early_rec_dev, 1:sum(est_early_rec_dev), NA))
   if(any(!est_rec_dev)) map$log_rec_dev <- factor(ifelse(est_rec_dev, 1:sum(est_rec_dev), NA))
@@ -260,14 +268,14 @@ SCA_Pope <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("log
                     Selectivity = matrix(report$vul, nrow = length(Year),
                                          ncol = n_age, byrow = TRUE),
                     Obs_Catch = structure(C_hist, names = Year),
-                    Obs_Index = structure(I_hist, names = Year),
+                    Obs_Index = structure(I_hist, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
                     Obs_C_at_age = CAA_hist,
                     Catch = structure(colSums(t(report$CAApred) * Wa), names = Year),
-                    Index = structure(report$Ipred, names = Year),
+                    Index = structure(report$Ipred, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
                     C_at_age = report$CAApred,
                     Dev = Dev, Dev_type = "log-Recruitment deviations",
-                    NLL = structure(c(nll_report, report$nll_comp, report$penalty),
-                                    names = c("Total", "Index", "CAA", "Dev", "Penalty")),
+                    NLL = structure(c(nll_report, report$nll_comp, report$prior, report$penalty),
+                                    names = c("Total", paste0("Index_", 1:nsurvey), "CAA", "Dev", "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
 

@@ -12,13 +12,14 @@
 #' @aliases SCA2 SCA_Pope
 #' @param x A position in the Data object (by default, equal to one for assessments).
 #' @param Data An object of class Data
+#' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
+#' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
+#' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd. Vulnerability to the survey is fixed in the model.
 #' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).
 #' @param vulnerability Whether estimated vulnerability is \code{"logistic"} or \code{"dome"} (double-normal).
 #' See details for parameterization.
 #' @param CAA_dist Whether a multinomial or lognormal distribution is used for likelihood of the catch-at-age matrix. See details.
 #' @param CAA_multiplier Numeric for data weighting of catch-at-age matrix if \code{CAA_hist = "multinomial"}. Otherwise ignored. See details.
-#' @param I_type Whether the index surveys population biomass (B; this is the default in the MSEtool operating model),
-#' vulnerable biomass (VB), or spawning stock biomass (SSB).
 #' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
 #' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
@@ -31,11 +32,10 @@
 #' otherwise, equal to zero (assumes unfished conditions).
 #' @param fix_U_equilibrium Logical, same as `fix_F_equilibrium` for `SCA_Pope`.
 #' @param fix_omega Logical, whether the standard deviation of the catch is fixed. If \code{TRUE},
-#' sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Cat}.
-#' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
-#' sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Ind}.
+#' omega is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Cat}.
 #' @param fix_tau Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
 #' tau is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@sigmaR}.
+#' @param LWT A vector of likelihood weights for each survey.
 #' @param common_dev Typically, a numeric for the number of most recent years in which a common recruitment deviation will
 #' be estimated (in \code{SCA2}, uninformative years will have a recruitment closer to the mean, which can be very misleading,
 #' especially near the end of the time series). By default, \code{"comp50"} uses the number of ages (smaller than the mode)
@@ -88,7 +88,6 @@
 #' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
 #' \item \code{omega} Lognormal SD of the catch (observation error) for all models except \code{SCA_Pope}. By default, Data@@CV_Cat[x].
 #' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@@sigmaR[x].
-#' \item \code{sigma} Lognormal SD of the index (observation error). By default, Data@@CV_Ind[x].
 #' }
 #' 
 #' Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter
@@ -150,10 +149,10 @@
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @useDynLib SAMtool
 #' @export
-SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
-                CAA_multiplier = 50, I_type = c("B", "VB", "SSB"), rescale = "mean1", max_age = Data@MaxAge,
-                start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_sigma = FALSE, fix_tau = TRUE,
-                early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
+SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
+                CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
+                start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
+                LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
@@ -165,7 +164,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   vulnerability <- match.arg(vulnerability)
   CAA_dist <- match.arg(CAA_dist)
   SR <- match.arg(SR)
-  I_type <- match.arg(I_type)
+  
   if(is.character(early_dev)) early_dev <- match.arg(early_dev)
   if(is.numeric(early_dev)) stopifnot(early_dev < length(Data@Year))
 
@@ -178,13 +177,7 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   Year <- Data@Year[yind]
   C_hist <- Data@Cat[x, yind]
   if(any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
-  if(I_type == "B") {
-    I_hist <- Data@Ind[x, yind]
-  } else if(I_type == "VB") {
-    I_hist <- Data@VInd[x, yind]
-  } else {
-    I_hist <- Data@Sp_Ind[x, yind]
-  }
+  
   Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
   CAA_hist <- Data@CAA[x, yind, 1:n_age]
   if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
@@ -209,7 +202,6 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   mat_age <- mat_age/max(mat_age)
   LH <- list(LAA = La, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
   
-
   if(early_dev == "all") {
     est_early_rec_dev <- rep(1, n_age - 1)
     est_rec_dev <- rep(1, n_y)
@@ -254,10 +246,31 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   }
 
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
+  
+  Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
+  I_hist <- do.call(cbind, lapply(Ind, getElement, "I_hist"))
+  I_sd <- do.call(cbind, lapply(Ind, getElement, "I_sd")) %>% pmax(0.05)
+  I_units <- do.call(c, lapply(Ind, getElement, "I_units"))
+  I_vul <- vapply(AddInd, function(xx) {
+    if(xx == "B") {
+      return(rep(1, n_age))
+    } else if(xx == "SSB") {
+      return(mat_age)
+    } else if(xx == "VB") {
+      return(rep(0, n_age))
+    } else {
+      return(Data@AddIndV[x, suppressWarnings(as.numeric(xx)), 1:n_age])
+    }
+  }, numeric(n_age))
+  nsurvey <- ncol(I_hist)
+  if(is.null(LWT)) LWT <- rep(1, nsurvey)
+  if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
+               I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
                CAA_hist = t(apply(CAA_hist, 1, function(x) x/sum(x))),
                CAA_n = CAA_n_rescale, n_y = n_y, n_age = n_age, M = M,
-               weight = Wa, mat = mat_age, vul_type = vulnerability, I_type = I_type,
+               weight = Wa, mat = mat_age, vul_type = vulnerability,
                SR_type = SR, CAA_dist = CAA_dist, est_early_rec_dev = est_early_rec_dev,
                est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y))
   data$CAA_hist[data$CAA_hist < 1e-8] <- 1e-8
@@ -304,7 +317,6 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
     }
 
     if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega)
-    if(!is.null(start$sigma) && is.numeric(start$sigma)) params$log_sigma <- log(start$sigma)
     if(!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau)
   }
 
@@ -351,10 +363,6 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
     sigmaC <- max(0.01, sdconv(1, Data@CV_Cat[x]), na.rm = TRUE)
     params$log_omega <- log(sigmaC)
   }
-  if(is.null(params$log_sigma)) {
-    sigmaI <- max(0.01, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE)
-    params$log_sigma <- log(sigmaI)
-  }
   if(is.null(params$log_tau)) {
     tau_start <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x])
     params$log_tau <- log(tau_start)
@@ -377,7 +385,6 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
   if(fix_h) map$transformed_h <- factor(NA)
   if(fix_F_equilibrium) map$F_equilibrium <- factor(NA)
   if(fix_omega) map$log_omega <- factor(NA)
-  if(fix_sigma) map$log_sigma <- factor(NA)
   if(fix_tau) map$log_tau <- factor(NA)
   if(any(!est_early_rec_dev)) map$log_early_rec_dev <- factor(ifelse(est_early_rec_dev, 1:sum(est_early_rec_dev), NA))
   if(any(!est_rec_dev)) map$log_rec_dev <- factor(ifelse(est_rec_dev, 1:sum(est_rec_dev), NA))
@@ -420,14 +427,14 @@ SCA <- function(x = 1, Data, SR = c("BH", "Ricker"), vulnerability = c("logistic
                     Selectivity = matrix(report$vul, nrow = length(Year),
                                          ncol = n_age, byrow = TRUE),
                     Obs_Catch = structure(C_hist, names = Year),
-                    Obs_Index = structure(I_hist, names = Year),
+                    Obs_Index = structure(I_hist, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
                     Obs_C_at_age = CAA_hist,
                     Catch = structure(report$Cpred, names = Year),
-                    Index = structure(report$Ipred, names = Year),
+                    Index = structure(report$Ipred, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
                     C_at_age = report$CAApred,
                     Dev = Dev, Dev_type = "log-Recruitment deviations",
-                    NLL = structure(c(nll_report, report$nll_comp, report$penalty + report$prior),
-                                    names = c("Total", "Index", "CAA", "Catch", "Dev", "Penalty")),
+                    NLL = structure(c(nll_report, report$nll_comp, report$prior, report$penalty),
+                                    names = c("Total", paste0("Index_", 1:nsurvey), "CAA", "Catch", "Dev", "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
 

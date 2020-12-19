@@ -12,7 +12,13 @@ Type SCA_Pope(objective_function<Type> *obj) {
 
   DATA_VECTOR(C_hist);    // Total catch
   DATA_SCALAR(rescale);   // Scalar for R0
-  DATA_VECTOR(I_hist);    // Index
+  DATA_MATRIX(I_hist);    // Index
+  DATA_MATRIX(I_sd);
+  DATA_IVECTOR(I_units);
+  DATA_MATRIX(I_vul);
+  DATA_IVECTOR(abs_I);
+  DATA_INTEGER(nsurvey);
+  DATA_VECTOR(LWT);
   DATA_MATRIX(CAA_hist);  // Catch-at-age proportions
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
   DATA_INTEGER(n_y);      // Number of years in model
@@ -21,7 +27,6 @@ Type SCA_Pope(objective_function<Type> *obj) {
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
-  DATA_STRING(I_type);    // String whether index surveys B, VB, or SSB
   DATA_STRING(SR_type);   // String indicating whether Beverton-Holt or Ricker stock-recruit is used
   DATA_STRING(CAA_dist);  // String indicating whether CAA is multinomial or lognormal
   DATA_IVECTOR(est_early_rec_dev);
@@ -32,7 +37,6 @@ Type SCA_Pope(objective_function<Type> *obj) {
   PARAMETER(U_equilibrium);
   PARAMETER_VECTOR(vul_par);
 
-  PARAMETER(log_sigma);
   PARAMETER(log_tau);
   PARAMETER_VECTOR(log_early_rec_dev);
   PARAMETER_VECTOR(log_rec_dev);
@@ -45,7 +49,6 @@ Type SCA_Pope(objective_function<Type> *obj) {
     h = exp(transformed_h);
   }
   h += 0.2;
-  Type sigma = exp(log_sigma);
   Type tau = exp(log_tau);
 
   Type penalty = 0;
@@ -87,7 +90,6 @@ Type SCA_Pope(objective_function<Type> *obj) {
   matrix<Type> CAApred(n_y, n_age);   // Catch (in numbers) at year and age at the mid-point of the season
   vector<Type> CN(n_y);             // Catch in numbers
   vector<Type> U(n_y);              // Harvest rate at year
-  vector<Type> Ipred(n_y);          // Predicted index at year
   vector<Type> R(n_y+1);            // Recruitment at year
   vector<Type> R_early(n_age-1);
   vector<Type> VB(n_y+1);           // Vulnerable biomass at the midpoint of the year
@@ -162,19 +164,36 @@ Type SCA_Pope(objective_function<Type> *obj) {
   }
 
   // Calculate nuisance parameters and likelihood
-  Type q;
-  if(I_type == "B") {
-    q = calc_q(I_hist, B, Ipred);
-  } else if(I_type == "VB") {
-    q = calc_q(I_hist, VB, Ipred);
-  } else {
-    q = calc_q(I_hist, E, Ipred);
+  // Ipred updated in calc_q function
+  vector<Type> q(nsurvey);
+  array<Type> s_CAA(n_y,n_age,nsurvey);
+  matrix<Type> s_CN(n_y,nsurvey);
+  matrix<Type> s_BN(n_y,nsurvey);
+  matrix<Type> Ipred(n_y,nsurvey);
+  for(int sur=0;sur<nsurvey;sur++) {
+    for(int y=0;y<n_y;y++) {
+      for(int a=0;a<n_age;a++) {
+        if(I_vul.col(sur).sum() > 0) {
+          s_CAA(y,a,sur) = I_vul(a,sur) * N(y,a);
+        } else {
+          s_CAA(y,a,sur) = vul(y,a) * N(y,a);
+        }
+        s_CN(y,sur) += s_CAA(y,a,sur);
+        if(I_units(sur)) s_BN(y,sur) += s_CAA(y,a,sur) * weight(a); // Biomass vulnerable to survey
+      }
+    }
+    if(!I_units(sur)) s_BN.col(sur) = s_CN.col(sur); // Abundance vulnerable to survey
+    q(sur) = calc_q(I_hist, s_BN, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
   }
-
-  vector<Type> nll_comp(3);
+  
+  vector<Type> nll_comp(nsurvey+2);
   nll_comp.setZero();
   for(int y=0;y<n_y;y++) {
-    if(!R_IsNA(asDouble(I_hist(y)))) nll_comp(0) -= dnorm(log(I_hist(y)), log(Ipred(y)), sigma, true);
+    for(int sur=0;sur<nsurvey;sur++) {
+      if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
+        nll_comp(sur) -= LWT(sur) * dnorm(log(I_hist(y,sur)), log(Ipred(y,sur)), I_sd(y,sur), true);
+      }
+    }
     if(C_hist(y) > 0) {
       if(!R_IsNA(asDouble(CAA_n(y)))) {
         vector<Type> loglike_CAAobs(n_age);
@@ -183,27 +202,25 @@ Type SCA_Pope(objective_function<Type> *obj) {
         loglike_CAAobs = CAA_hist.row(y);
         if(CAA_dist == "multinomial") {
           loglike_CAAobs *= CAA_n(y);
-          nll_comp(1) -= dmultinom_(loglike_CAAobs, loglike_CAApred, true);
+          nll_comp(nsurvey) -= dmultinom_(loglike_CAAobs, loglike_CAApred, true);
         } else {
-          nll_comp(1) -= dlnorm_comp(loglike_CAAobs, loglike_CAApred);
+          nll_comp(nsurvey) -= dlnorm_comp(loglike_CAAobs, loglike_CAApred);
         }
       }
     }
-    if(est_rec_dev(y)) nll_comp(2) -= dnorm(log_rec_dev(y), Type(0), tau, true);
+    if(est_rec_dev(y)) nll_comp(nsurvey+1) -= dnorm(log_rec_dev(y), Type(0), tau, true);
   }
   for(int a=0;a<n_age-1;a++) {
-    if(est_early_rec_dev(a)) nll_comp(2) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
+    if(est_early_rec_dev(a)) nll_comp(nsurvey+1) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
   }
 
   Type nll = nll_comp.sum() + penalty + prior;
 
   ADREPORT(R0);
   ADREPORT(h);
-  ADREPORT(sigma);
   ADREPORT(tau);
   ADREPORT(q);
 
-  REPORT(sigma);
   REPORT(tau);
 
   REPORT(NPR0);

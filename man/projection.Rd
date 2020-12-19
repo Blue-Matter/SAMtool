@@ -30,9 +30,10 @@ projection(
 
 \item{p_sim}{Integer for the number of simulations for the projection.}
 
-\item{obs_error}{Vector of length two for standard deviation of error to be added to the index and catch, respectively. If \code{NULL},
-uses values from assessment model. Alternatively, a list of length two (first entry for index, second for catch) containing matrices of 
-simulation and year-specific error structure (p_sim rows and p_year columns; a matrix of ones indicates perfect data).}
+\item{obs_error}{A list of length two. In the first entry, a vector of length nsurvey giving the standard deviations of each future index, 
+or alternatively an array of dimension p_sim, p_years, and nsurvey giving the deviates. The second entry is
+the standard deviation of the projected catch. Alternatively, a matrix of 
+simulation and year-specific error structure for the catch (p_sim rows and p_year columns; a matrix of ones indicates perfect data).}
 
 \item{process_error}{Numeric, standard deviation for process error (e.g., recruitment or biomass deviates). If \code{NULL},
 uses values from assessment model. Alternatively, a matrix of simulation and year-specific recruitment deviates (p_sim rows and p_year columns,

@@ -7,11 +7,11 @@
 SCA_RWM(
   x = 1,
   Data,
+  AddInd = "B",
   SR = c("BH", "Ricker"),
   vulnerability = c("logistic", "dome"),
   CAA_dist = c("multinomial", "lognormal"),
   CAA_multiplier = 50,
-  I_type = c("B", "VB", "SSB"),
   rescale = "mean1",
   max_age = Data@MaxAge,
   start = NULL,
@@ -20,6 +20,7 @@ SCA_RWM(
   fix_omega = TRUE,
   fix_sigma = FALSE,
   fix_tau = TRUE,
+  LWT = NULL,
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
   refyear = expression(length(Data@Year)),
@@ -47,9 +48,6 @@ See details for parameterization.}
 
 \item{CAA_multiplier}{Numeric for data weighting of catch-at-age matrix if \code{CAA_hist = "multinomial"}. Otherwise ignored. See details.}
 
-\item{I_type}{Whether the index surveys population biomass (B; this is the default in the MSEtool operating model),
-vulnerable biomass (VB), or spawning stock biomass (SSB).}
-
 \item{rescale}{A multiplicative factor that rescales the catch in the assessment model, which
 can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
 Output is re-converted back to original units.}
@@ -68,11 +66,10 @@ otherwise, equal to zero (assumes unfished conditions).}
 \item{fix_omega}{Logical, whether the standard deviation of the catch is fixed. If \code{TRUE},
 sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@CV_Cat}.}
 
-\item{fix_sigma}{Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
-sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@CV_Ind}.}
-
 \item{fix_tau}{Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
 tau is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@sigmaR}.}
+
+\item{LWT}{A vector of likelihood weights for each survey.}
 
 \item{early_dev}{Numeric or character string describing the years for which recruitment deviations are estimated in \code{SCA}. By default,
 equal to \code{"comp_onegen"}, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.

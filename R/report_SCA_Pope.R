@@ -47,14 +47,15 @@ rmd_SCA_Pope <- function(Assessment, ...) {
                   rmd_mat(age, Assessment@info$data$mat,
                           fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."))
   # Data section
-  data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"), rmd_data_timeseries("Index"),
+  data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"), 
+                    rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)),
                     rmd_data_age_comps("bubble"), rmd_data_age_comps("annual"))
 
   # Assessment
   #### Pars and Fit
   assess_fit <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h(),
                   rmd_sel(age, Assessment@Selectivity[nrow(Assessment@Selectivity), ], fig.cap = "Estimated selectivity at age."),
-                  rmd_assess_fit("Index", "index"), rmd_assess_resid("Index"), rmd_assess_qq("Index", "index"),
+                  rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
                   rmd_fit_age_comps("bubble"), rmd_fit_age_comps("annual"),
                   rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type,
                                blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])),
@@ -113,7 +114,7 @@ retrospective_SCA_Pope <- function(Assessment, nyr) {
     info$data$C_hist <- info$data$C_hist[1:n_y_ret]
 
     if(grepl("SSS", Assessment@Model)) dep <- info$data$I_hist[n_y]
-    info$data$I_hist <- info$data$I_hist[1:n_y_ret]
+    info$data$I_hist <- info$data$I_hist[1:n_y_ret, , drop = FALSE]
     if(grepl("SSS", Assessment@Model)) info$data$I_hist[n_y_ret] <- dep
 
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]

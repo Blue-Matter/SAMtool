@@ -60,7 +60,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   if(any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
 
   n_y <- length(C_hist)
-  I_hist <- rep(NA_real_, n_y)
+  I_hist <- matrix(NA_real_, n_y, 1)
   I_hist[1] <- 1
   I_hist[n_y] <- dep
 
@@ -81,9 +81,11 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   LH <- list(LAA = La, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
 
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
-  data <- list(model = "SCA_Pope", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
+  data <- list(model = "SCA_Pope", C_hist = C_hist, rescale = rescale, 
+               I_hist = I_hist, I_sd = matrix(0.01, n_y, 1), I_units = 1, I_vul = matrix(1, n_age, 1), 
+               abs_I = 0, nsurvey = 1, LWT = 1,
                CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(0, n_y), n_y = n_y, n_age = n_age, M = M,
-               weight = Wa, mat = mat_age, vul_type = "logistic", I_type = "B",
+               weight = Wa, mat = mat_age, vul_type = "logistic",
                SR_type = SR, CAA_dist = "multinomial", est_early_rec_dev = rep(0, max_age - 1),
                est_rec_dev = rep(0, n_y))
 
@@ -122,15 +124,14 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   }
   if(is.null(params$vul_par)) params$vul_par <- c(logit(min(A95, 0.74 * max_age)/max_age/0.75), log(A95-A50))
 
-  params$U_equilibrium <- 0
-  params$log_sigma <- params$log_tau <- log(0.01)
+  params$U_equilibrium <- params$log_tau <- 0
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control)
 
   map <- list()
-  map$transformed_h <- map$U_equilibrium <- map$log_sigma <- map$log_tau <- factor(NA)
+  map$transformed_h <- map$U_equilibrium <- map$log_tau <- factor(NA)
   map$vul_par <- factor(c(NA, NA))
   map$log_early_rec_dev <- factor(rep(NA, n_age - 1))
   map$log_rec_dev <- factor(rep(NA, n_y))
@@ -170,9 +171,9 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
                     Selectivity = matrix(report$vul, nrow = length(Year),
                                          ncol = n_age, byrow = TRUE),
                     Obs_Catch = structure(C_hist, names = Year),
-                    Obs_Index = structure(I_hist, names = Year),
+                    Obs_Index = structure(I_hist[, 1], names = Year),
                     Catch = structure(colSums(t(report$CAApred) * Wa), names = Year),
-                    Index = structure(report$Ipred, names = Year),
+                    Index = structure(report$Ipred[, 1], names = Year),
                     C_at_age = report$CAApred,
                     NLL = structure(nll_report, names = "Total"),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
