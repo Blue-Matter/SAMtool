@@ -169,7 +169,7 @@ HCR80_40MSY <- function(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, 
   HCR_ramp(Assessment, reps, OCP_type = "SSB_SSBMSY", LOCP = 0.4, TOCP = 0.8, 
            Ftarget_type = Ftarget_type, relF_min = 0, relF_max = 1, SPR = SPR, ...)
 }
-class(HCR60_20) <- "HCR"
+class(HCR80_40MSY) <- "HCR"
 
 #' Harvest control rule to fish at some fraction of maximum sustainable yield
 #'
