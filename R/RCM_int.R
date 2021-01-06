@@ -682,45 +682,8 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
 #' @rdname RCM
 #' @export
 Sub_cpars <- function(OM, sims = 1:OM@nsim) {
-
-  if(is.numeric(sims)) {
-    sims2 <- logical(OM@nsim)
-    sims2[sims] <- TRUE
-  } else if(is.logical(sims) && length(sims) == OM@nsim) {
-    sims2 <- sims
-  } else stop("Logical vector sims need to be of length ", OM@nsim)
-
-  if(any(!sims2)) {
-    message("Removing simulations: ", paste0(which(!sims2), collapse = " "))
-    cpars <- OM@cpars
-
-    subset_Data <- function(xx, Data, sims) {
-      z <- slot(Data, xx)
-      if(!all(is.na(z))) z <- z[sims, , , drop = FALSE]
-      return(z)
-    }
-    subset_function <- function(x, sims) {
-      if(is.matrix(x)) {
-        return(x[sims, , drop = FALSE])
-      } else if(is.array(x)) {
-        if(length(dim(x)) == 3) return(x[sims, , , drop = FALSE])
-        if(length(dim(x)) == 4) return(x[sims, , , , drop = FALSE])
-        if(length(dim(x)) == 5) return(x[sims, , , , , drop = FALSE])
-      } else if(class(x)[[1]] == "Data") {
-        s_names <- c("AddIndV", "AddInd", "CV_AddInd")
-        update_slots <- lapply(s_names, subset_Data, Data = x, sims = sims)
-        for(i in 1:length(s_names)) slot(x, s_names[i]) <- update_slots[[i]]
-        return(x)
-      } else if(length(x) == OM@nsim) {
-        return(x[sims])
-      } else return(x)
-    }
-    OM@cpars <- lapply(cpars, subset_function, sims = sims2)
-    OM@nsim <- sum(sims2)
-
-    message("Set OM@nsim = ", OM@nsim)
-  }
-
+  .Deprecated("MSEtool::SubCpars", "MSEtool", old = "Sub_cpars")
+  SubCpars(OM, sims)
   return(OM)
 }
 
