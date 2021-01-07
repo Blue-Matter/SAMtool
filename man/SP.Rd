@@ -136,7 +136,7 @@ Continuous surplus production and fishing is modeled with sub-annual time steps 
 the behavior of ASPIC (Prager 1994). The Fox model, \code{SP_Fox}, fixes BMSY/K = 0.37 (1/e).
 The state-space version, \code{SP_SS} estimates annual deviates in biomass. An option allows for setting a
 prior for the intrinsic rate of increase.
-The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[MSEtool]{DLMextra}.
+The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[MSEtool]{MSEextra}.
 }
 \details{
 For \code{start} (optional), a named list of starting values of estimates can be provided for:
