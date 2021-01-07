@@ -59,12 +59,6 @@ options(width = 650)
 # Introduction 
 SAMtool is an extension of the MSEtool package for implementing closed-loop simulation testing of management procedures (MP), a process used in management strategy evaluation (MSE). The components of the operating model (OM) for conducting MSEs for data-rich stocks is wholly contained within MSEtool, but SAMtool provides the tools for implementing additional features to facilitate model-based MPs. Whereas DLMtool is primarily designed for testing data-limited MPs, SAMtool provides an object-oriented framework for building out data-rich MPs, which typically combine an assessment model with a harvest control rule (HCR) to provide a catch recommendation. MPs created by SAMtool are designed to be used with the operating model of MSEtool through the `runMSE` function. 
 
-The user guide to the MSEtool package for building operating models is accessible via:
-
-```{r, eval = FALSE}
-MSEtool::userguide()
-```
-
 The overall structure of a closed-loop simulation for a MSE in MSEtool can be described through the classes deployed in the package. An operating model (class __OM__ object) parameterizes the stock (biology), fleet, observation, and implementation dynamics of the MSE. To begin the MSE, the __OM__ object generates the data to be used for a management procedure and stores them in an object of class __Data__. A function of class __MP__ uses the __Data__ object and returns an object of class __Rec__ containing the management recommendations, e.g., some combination of spatial closures and size, effort and catch limits. Candidate MPs should not see the operating model and interacts solely with data simulated in the __Data__ object. From the management recommendations, the __OM__ object is updated and the process is successively repeated as the operating model projects forward in time. The output from the closed-loop simulation is returned in an object of class __MSE__, from which summary statistics can be calculated.
 
 <img src="fig_assess/MSEtool_design.png" width=400>

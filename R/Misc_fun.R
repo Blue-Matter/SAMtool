@@ -13,7 +13,6 @@ TACfilter <- function(TAC) {
 #' \dontrun{
 #' userguide()
 #' }
-#' @seealso \link[MSEtool]{userguide}
 #' @export
 userguide <- function() browseVignettes("SAMtool")
 

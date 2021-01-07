@@ -14,6 +14,3 @@ A convenient function to open a web browser with the SAMtool package vignettes
 userguide()
 }
 }
-\seealso{
-\link[MSEtool]{userguide}
-}
