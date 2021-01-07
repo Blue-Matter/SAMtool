@@ -296,11 +296,11 @@ Assess_diagnostic <- function(x, Data, Assessment, include_assessment = TRUE) {
   output <- list(diagnostic = diagnostic)
 
   if(include_assessment) {
-    # Remove some objects to save memory/disk space
-    if(inherits(Assessment, "Assessment")) {
-      if(dg$hess) Assessment@obj <- list()
-      Assessment@info <- Assessment@TMB_report <- list()
-      Assessment@N_at_age <- Assessment@C_at_age <- Assessment@Obs_C_at_age <- Assessment@Selectivity <- array(dim = c(0, 0))
+    if(inherits(Assessment, "Assessment")) { # Remove some objects to save memory/disk space
+      Assessment@info <- Assessment@obj <- list()
+      Assessment@SD <- character(0)
+      Assessment@N_at_age <- Assessment@C_at_age <- Assessment@Obs_C_at_age <- 
+        Assessment@Selectivity <- array(dim = c(0, 0))
     }
 
     Assessment_report <- Data@Misc[[x]]$Assessment_report
