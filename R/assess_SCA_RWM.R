@@ -356,6 +356,7 @@ SCA_RWM <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerabi
   report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj) %>% structure(names = Yearplusone)
   
   refyear <- eval(refyear)
+  if(refyear > max(yind)) refyear <- max(yind)
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
   Assessment <- new("Assessment", Model = "SCA_RWM", Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
