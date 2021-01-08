@@ -77,7 +77,7 @@ setMethod("retrospective", signature(x = "RCModel"),
 #' @slot TS_var Character vector of time series variables, e.g. recruitment, biomass, from the assessment.
 #' @slot TS An array of time series assessment output of dimension, indexed by: peel (the number of terminal years removed from the base assessment),
 #' years, and variables (corresponding to \code{TS_var}).
-#' @slot Est_var Character vector of estimated paramters, e.g. R0, steeppness, in the assessment.
+#' @slot Est_var Character vector of estimated parameters, e.g. R0, steepness, in the assessment.
 #' @slot Est An array for estimated parameters of dimension, indexed by: peel, variables (corresponding to \code{Est_var}), and
 #' value (length 2 for estimate and standard error).
 #' @seealso \link{plot.retro} \link{summary.retro} \link{plot.Assessment}
@@ -110,8 +110,6 @@ setMethod("plot", signature(x = "Assessment", y = "retro"),
 #' ret <- retrospective(res, figure = FALSE)
 #'
 #' summary(ret)
-#' }
-#' \dontrun{
 #' plot(ret)
 #' }
 #' @exportMethod plot

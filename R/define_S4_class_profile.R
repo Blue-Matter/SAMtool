@@ -26,14 +26,16 @@ prof <- setClass("prof", slots = c(Model = "character", Name = "character", Par 
 #' @param contour_levels Integer, passed to \code{nlevels} argument of \link[graphics]{contour}.
 #' @param ... Miscellaneous. Not used.
 #' @author Q. Huynh
-#' @importFrom reshape2 acast
 #' @exportMethod plot
 setMethod("plot", signature(x = "prof", y = "missing"),
           function(x, contour_levels = 20, ...) {
             joint_profile <- length(x@MLE) == 2
+            if(joint_profile && !requireNamespace("reshape2", quietly = TRUE)) {
+              stop("Please install the reshape2 package.", call. = FALSE)
+            }
 
             if(joint_profile) {
-              z.mat <- acast(x@grid, as.list(x@Par), value.var = "nll")
+              z.mat <- reshape2::acast(x@grid, as.list(x@Par), value.var = "nll")
               x.mat <- as.numeric(dimnames(z.mat)[[1]])
               y.mat <- as.numeric(dimnames(z.mat)[[2]])
               contour(x = x.mat, y = y.mat, z = z.mat - min(z.mat, na.rm = TRUE), 

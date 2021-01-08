@@ -2,19 +2,19 @@ Package: SAMtool
 Type: Package
 Title: Stock Assessment Methods Toolkit
 Version: 1.0.0
-Authors@R: c(person("Quang", "Huynh", email = "quang@bluematterscience.com", role = "aut"), 
-  person("Tom", "Carruthers", email = "tom@bluematterscience.com", role = c("aut", "cre")),
+Authors@R: c(person("Quang", "Huynh", email = "quang@bluematterscience.com", role = c("aut", "cre")), 
+  person("Tom", "Carruthers", email = "tom@bluematterscience.com", role = "aut"),
   person("Adrian", "Hordyk", email = "adrian@bluematterscience.com", role = "aut"))
-Date: 2021-01-06
-Maintainer: Tom Carruthers <tom@bluematterscience.com>
+Date: 2021-01-08
+Maintainer: Quang Huynh <quang@bluematterscience.com>
 Description: Simulation tools for closed-loop simulation are provided for the 'MSEtool' operating model to inform data-rich fisheries. 
   'SAMtool' provides an OM conditioning model, assessment models of varying complexity with standardized reporting, diagnostic tools for evaluating 
   assessments within closed-loop simulation, and helper functions for building more complex operating models and model-based management procedures.
 License: GPL-3
 Depends: R (>= 3.5.0), MSEtool (>= 3.0.0)
-Imports: TMB, corpcor, abind, dplyr, gplots, grDevices, graphics, methods, mvtnorm, reshape2, snowfall, stats, utils, rmarkdown
+Imports: TMB, corpcor, dplyr, gplots, grDevices, graphics, methods, snowfall, stats, utils, rmarkdown
 LinkingTo: TMB, RcppEigen
-Suggests: knitr, testthat, shiny, DLMtool (>= 6.0.0)
+Suggests: knitr, testthat, shiny, mvtnorm, reshape2, DLMtool (>= 6.0.0)
 LazyData: yes
 LazyLoad: yes
 RoxygenNote: 7.1.1

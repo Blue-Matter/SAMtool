@@ -17,6 +17,8 @@ diagnostic_AM(...)
 \item{gradient_threshold}{The maximum magnitude (absolute value) desired for the gradient of the likelihood.}
 
 \item{figure}{Logical, whether a figure will be drawn.}
+
+\item{...}{Arguments to pass to \code{diagnostic}.}
 }
 \value{
 A matrix with diagnostic performance of assessment models in the MSE. If \code{figure = TRUE},
@@ -31,10 +33,10 @@ created with \link{make_MP} with argument \code{diagnostic = "min"} or \code{"fu
 This function summarizes and plots the diagnostic information.
 }
 \examples{
-\dontrun{
 DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
 show(DD_MSY)
 
+\dontrun{
 myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
 diagnostic(myMSE)
 }

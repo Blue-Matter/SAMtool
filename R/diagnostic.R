@@ -79,6 +79,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' @param MP Optional, a character vector of MPs that use assessment models.
 #' @param gradient_threshold The maximum magnitude (absolute value) desired for the gradient of the likelihood.
 #' @param figure Logical, whether a figure will be drawn.
+#' @param ... Arguments to pass to \code{diagnostic}.
 #' @return A matrix with diagnostic performance of assessment models in the MSE. If \code{figure = TRUE},
 #' a set of figures: traffic light (red/green) plots indicating whether the model converged (defined if a positive-definite
 #' Hessian matrix was obtained), the optimizer reached pre-specified iteration limits (as passed to \code{\link[stats]{nlminb}}),
@@ -87,10 +88,10 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' @author Q. Huynh
 #' @aliases diagnostic_AM
 #' @examples
-#' \dontrun{
 #' DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
 #' show(DD_MSY)
 #' 
+#' \dontrun{
 #' myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
 #' diagnostic(myMSE)
 #' }

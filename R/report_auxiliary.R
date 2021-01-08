@@ -172,7 +172,7 @@ report <- function(Assessment, retro = NULL, filename = paste0("report_", Assess
 #' @param sd A vector of standard deviations of the distribution.
 #' @param label Name of the variable to be used as x-axis label.
 #' @param logtransform Indicates whether the mean and standard deviation are in
-#' transformed (normal) or untransformed space.
+#' lognormal (TRUE) or normal (FALSE) space.
 #' @param color A vector of colors.
 #' @return A plot of the probability distribution function. Vertical dotted line
 #' indicates mean of distribution. This function can plot multiple curves when multiple means
@@ -306,7 +306,7 @@ plot_normalvar <- function(m, sd, label = NULL, color = "black") {
 #' @param sd A vector of standard deviations of the distribution.
 #' @param label Name of the variable to be used as x-axis label.
 #' @param is_logit Logical that indicates whether the means and standard deviations are in
-#' transformed (logit) or untransformed space.
+#' logit (TRUE) or normal (FALSE) space.
 #' @param color A vector of colors.
 #' @return A plot of the probability distribution function. Vertical dotted line
 #' indicates mean of distribution. This function can plot multiple curves when multiple means
@@ -869,7 +869,7 @@ plot_Kobe <- function(biomass, exploit, arrow_size = 0.07, color = TRUE, xlab = 
 #' @param trajectory Indicates whether arrows will be drawn showing the trajectory of
 #' spawners and recruitment deviations over time.
 #' @param y_zoom If recruitment deviations are plotted, the y-axis limit relative to
-#' maximum expected recruitment \code{expectedR}. If \code{NULL}, all recruitments are plotted.
+#' maximum expected recruitment \code{expectedR}. If \code{NULL}, all recruitment values are plotted.
 #' @param ylab Character string for label on y-axis.
 #' @author Q. Huynh
 #' @return A stock-recruit plot

@@ -7,7 +7,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Warnings during the fit of the assessment models (through `nlminb`) are turned off. Convergence status and issues can be checked in the `conv` slot of the output Assessment object. In closed-loop simulation, the `diagnostic` function can be used to track the behavior of model-based MPs. By default, pre-packaged model-based MPs and MPs made from the `make_MP` function are designed to report convergence info (stored in `MSE@PPD`). 
 - Assessment functions now calculate and report spawning potential ratio and yield per recruit in the forecast slot of the S4 object. Also in this slot is a catch equation function calculates the TAC for a given F. 
 - HCR nomenclature has changed. Operational control points (OCPs) are used instead of reference points (to help distinguish between reference points in the estimation model vs. the operating model. Various types of F can now be used in the HCR, including F0.1, Fmax, and FSPR, in addition to FMSY for the TAC calculation.
-- A `Shortcut` assess function samples the OM with error and autocorrelation for HCRs as an emulator of a stock asssessment in closed-loop simulation. The `Perfect` function samples the OM without error.
+- A `Shortcut` assess function samples the OM with error and autocorrelation for HCRs as an emulator of a stock assessment in closed-loop simulation. The `Perfect` function samples the OM without error.
 
 ### RCM
 - The function for the OM conditioning model is now re-named to `RCM` (Rapid Conditioning Model). 

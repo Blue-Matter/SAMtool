@@ -6,6 +6,9 @@
 #' 
 #' @param x A position in the Data object (by default, equal to one for assessments).
 #' @param Data An object of class Data
+#' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
+#' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
+#' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd.
 #' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).
 #' @param vulnerability Whether estimated vulnerability is \code{"logistic"} or \code{"dome"} (double-normal).
 #' See details for parameterization.
@@ -38,7 +41,7 @@
 #' of the recruitment deviations and M random walk (thus, treating it as a random effects/state-space variable).
 #' Otherwise, recruitment deviations and the random walk are penalized parameters.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-#' will print trace information during optimization. Used for dignostics for model convergence.
+#' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 #' in convergence rate). Ignored if \code{integrate = TRUE}.
@@ -47,7 +50,7 @@
 #' @param refyear An expression for the year for which M is used to report MSY and depletion reference points. By default, terminal year.
 #' @param M_bounds A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
 #' (M_start). The default min and max are 50\% and 200\%, respectively.
-#' @param control A named list of agruments for optimization to be passed to
+#' @param control A named list of arguments for optimization to be passed to
 #' \code{\link[stats]{nlminb}}.
 #' @param inner.control A named list of arguments for optimization of the random effects, which
 #' is passed on to \code{\link[TMB]{newton}}.
@@ -73,7 +76,7 @@
 #'
 #' compare_models(res, res2, res3)
 #'
-#' \dontrun{
+#' \donttest{
 #' plot(res)
 #' }
 #' @author Q. Huynh
@@ -82,7 +85,7 @@
 #' @export
 SCA_RWM <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
                     CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, 
-                    fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_sigma = FALSE, fix_tau = TRUE, LWT = NULL,
+                    fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE, LWT = NULL,
                     early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", 
                     refyear = expression(length(Data@Year)), M_bounds = c(0.5, 2),
                     integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),

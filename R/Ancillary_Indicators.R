@@ -235,18 +235,8 @@ PRBcalc=function(MSE_null,MSE_alt,
   outlist<-new('list')
 
   for(mm in 1:MSE_null@nMPs){
-
-    if(!is.null(MSE_null@Misc$Data[[mm]])) {
-      PPD <- MSE_null@Misc$Data[[mm]]
-    } else {
-      PPD <- MSE_null@Misc[[mm]]
-    }
-
-    if(!is.null(MSE_alt@Misc$Data[[mm]])) {
-      Data <- MSE_alt@Misc$Data[[mm]]
-    } else {
-      Data<-MSE_alt@Misc[[mm]]
-    }
+    PPD <- MSE_null@PPD[[mm]]
+    Data <- MSE_alt@PPD[[mm]]
 
     indPPD<-getinds(PPD,styr=styr,res=res,tsd=tsd,stat=stat)
     indData<-getinds(Data,styr=styr,res=res,tsd=tsd,stat=stat)

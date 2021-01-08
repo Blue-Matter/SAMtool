@@ -27,8 +27,6 @@ res <- SP(Data = swordfish)
 ret <- retrospective(res, figure = FALSE)
 
 summary(ret)
-}
-\dontrun{
 plot(ret)
 }
 }

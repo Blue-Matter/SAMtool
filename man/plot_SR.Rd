@@ -32,7 +32,7 @@ stock-recruit function) corresponding to values of \code{Spawners}.}
 spawners and recruitment deviations over time.}
 
 \item{y_zoom}{If recruitment deviations are plotted, the y-axis limit relative to
-maximum expected recruitment \code{expectedR}. If \code{NULL}, all recruitments are plotted.}
+maximum expected recruitment \code{expectedR}. If \code{NULL}, all recruitment values are plotted.}
 
 \item{ylab}{Character string for label on y-axis.}
 }

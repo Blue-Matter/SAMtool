@@ -92,11 +92,11 @@ Ignored if \code{n_seas} = 1.}
 mean and standard deviation of the r prior. To override and directly provide the r-prior mean and standard deviation, use the start list, e.g.
 \code{start = list(r_prior = c(0.1, 0.05))} (mean of 0.1 and s.d. of 0.05).}
 
-\item{SR_type}{If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate unfished recruits per spawner at the origin
-of spwaning biomass approaches zero. Used for the r prior.}
+\item{SR_type}{If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
+steepness and unfished spawners-per-recruit. Used to develop the r prior.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-will print trace information during optimization. Used for dignostics for model convergence.}
+will print trace information during optimization. Used for diagnostics for model convergence.}
 
 \item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
@@ -143,7 +143,7 @@ For \code{start} (optional), a named list of starting values of estimates can be
 \itemize{
 \item \code{MSY} Maximum sustainable yield.. Otherwise, 300\% of mean catch by default.
 \item \code{FMSY} Steepness. Otherwise, Data@Mort[x] or 0.2 is used.
-\item \code{dep} Iniial depletion (B/B0) in the first year of the model. By default, 1.
+\item \code{dep} Initial depletion (B/B0) in the first year of the model. By default, 1.
 \item \code{n} The production function exponent that determines BMSY/B0. By default, 2 so that BMSY/B0 = 0.5.
 \item \code{sigma} Lognormal SD of the index (observation error). By default, 0.05. Not
 used with multiple indices.
@@ -192,10 +192,8 @@ res <- SP(Data = swordfish)
 start <- list(dep = 0.875, n = 2)
 res <- SP(Data = swordfish, start = start)
 
-\dontrun{
-plot(res)
-}
 \donttest{
+plot(res)
 profile(res, FMSY = seq(0.1, 0.4, 0.01))
 retrospective(res)
 }
@@ -203,7 +201,7 @@ retrospective(res)
 #### State-space version
 res_SS <- SP_SS(Data = swordfish, start = list(dep = 0.875, sigma = 0.1, tau = 0.1))
 
-\dontrun{
+\donttest{
 plot(res_SS)
 }
 

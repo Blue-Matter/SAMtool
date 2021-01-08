@@ -20,7 +20,7 @@
 #' @param N_err Same as B_err, but for abundance when method = "N".
 #' @param R_err Same as B_err, but for recruitment when method = "RF".
 #' @param F_err Same as B_err, but for fishing mortality when method = "RF".
-#' @param ... Other arguments (un-used).
+#' @param ... Other arguments (not currently used).
 #' @author Q. Huynh
 #' @details Currently there is no error in FMSY (the target F in the HCR in SAMtool).
 #' 
@@ -46,7 +46,6 @@
 #' @references
 #' Wiedenmann, J., Wilberg, M.J., Sylvia, A., and Miller, T.J. 2015. Autocorrelated error in stock assessment 
 #' estimates: Implications for management strategy evaluation. Fisheries Research 172: 325-334.
-#' @importFrom abind abind
 #' @export
 Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7, 1), N_err = c(0.3, 0.7, 1), 
                      R_err = c(0.3, 0.7, 1), F_err = c(0.3, 0.7, 1), ...) {
@@ -82,7 +81,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   B <- c(B_hist, B_P)
   
   N_P <- get("N_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1 + 0:year_p, , drop = FALSE] %>% apply(1:2, sum)
-  N <- abind::abind(N_hist, N_P, along = 2)
+  N <- cbind(N_hist, N_P)
   
   if(year_p > 0) {
     Fapical_P <- get("FM_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, max)

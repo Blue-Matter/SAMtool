@@ -38,7 +38,7 @@ Output is re-converted back to original units.}
 }}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-will print trace information during optimization. Used for dignostics for model convergence.}
+will print trace information during optimization. Used for diagnostics for model convergence.}
 
 \item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
@@ -47,7 +47,7 @@ in convergence rate).}
 \item{n_restart}{The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.}
 
-\item{control}{A named list of agruments for optimization to be passed to \code{\link[stats]{nlminb}}.}
+\item{control}{A named list of arguments for optimization to be passed to \code{\link[stats]{nlminb}}.}
 
 \item{...}{Other arguments to be passed (not currently used).}
 }

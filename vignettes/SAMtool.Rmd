@@ -179,7 +179,7 @@ MSEtool::Tplot(myMSE)
 
 _Figure 6. Tradeoff plot between long-term catch and biomass of the SCA with two different HCRs, an average catch MP, and the FMSY reference (perfect FMSY implementation) MP._
 
-Model configuration arguments can be passed through `...` in `make_MP` when the MP is made. For example, the Ricker stock-recruitment relationship can be used in the SCA instead of the default Beverton-Holt relationship and steepness can be fixed instead of esimated by passing argument `SR = "Ricker"` and `fix_h = TRUE`, respectively:
+Model configuration arguments can be passed through `...` in `make_MP` when the MP is made. For example, the Ricker stock-recruitment relationship can be used in the SCA instead of the default Beverton-Holt relationship and steepness can be fixed instead of estimated by passing argument `SR = "Ricker"` and `fix_h = TRUE`, respectively:
 
 ```{r, eval = FALSE}
 SCA_MSY_Ricker_fixsteep <- make_MP(SCA, HCR_MSY, SR = "Ricker", fix_h = TRUE)
@@ -221,7 +221,7 @@ _Figure 7. Convergence diagnostics (return by TMB objects and nlminb function) f
 
 <img src="fig_assess/retrospective_AM.png" width = 700>
 
-_Figure 8. Retrospective analysis of the SCA in the SCA_MSY MP during the MSE for simulation #3. Operating model (true) values of spawning biomass (SSB), relative spawning biomass (SSB_SSBMSY), spawning biomass depletion (SSB_SSB0), fishing mortality (F), relative F (F_FMSY), and vulnerable bimoass (VB) are in dark black. Colored lines indicate model estimates sequentially over the projection years. In simulation #3, the SCA tends to underestimate SSB (top left sub-plot)._
+_Figure 8. Retrospective analysis of the SCA in the SCA_MSY MP during the MSE for simulation #3. Operating model (true) values of spawning biomass (SSB), relative spawning biomass (SSB_SSBMSY), spawning biomass depletion (SSB_SSB0), fishing mortality (F), relative F (F_FMSY), and vulnerable biomass (VB) are in dark black. Colored lines indicate model estimates sequentially over the projection years. In simulation #3, the SCA tends to underestimate SSB (top left sub-plot)._
 
 Once it is determined that the SAMtool assessment models are performing adequately (no major convergence issues), then the performance of the MPs that use these models can be evaluated using performance metrics relevant to management.
 

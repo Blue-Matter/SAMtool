@@ -142,7 +142,7 @@ of the recruitment deviations (thus, treating it as a random effects/state-space
 Otherwise, recruitment deviations are penalized parameters.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-will print trace information during optimization. Used for dignostics for model convergence.}
+will print trace information during optimization. Used for diagnostics for model convergence.}
 
 \item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
@@ -151,7 +151,7 @@ in convergence rate). Ignored if \code{integrate = TRUE}.}
 \item{n_restart}{The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.}
 
-\item{control}{A named list of agruments for optimization to be passed to
+\item{control}{A named list of arguments for optimization to be passed to
 \code{\link[stats]{nlminb}}.}
 
 \item{inner.control}{A named list of arguments for optimization of the random effects, which
@@ -252,7 +252,7 @@ res2 <- SCA2(Data = MSEtool::SimulatedData)
 
 compare_models(res, res2)
 
-\dontrun{
+\donttest{
 plot(res)
 }
 

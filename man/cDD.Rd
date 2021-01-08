@@ -74,7 +74,7 @@ should not be considered to be an independent model parameter.}
 \item{n_itF}{Integer, the number of iterations to solve F conditional on the observed catch.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-will print trace information during optimization. Used for dignostics for model convergence.}
+will print trace information during optimization. Used for diagnostics for model convergence.}
 
 \item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase

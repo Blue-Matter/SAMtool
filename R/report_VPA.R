@@ -95,8 +95,6 @@ plot_yield_VPA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   plot_yield_SCA(data = data, report = report, fmsy = fmsy, msy = msy, xaxis = xaxis)
 }
 
-
-#' @importFrom reshape2 acast
 profile_likelihood_VPA <- function(Assessment, ...) {
   dots <- list(...)
   if(!"Fterm" %in% names(dots)) stop("Sequence of Fterm was not found. See help file.")
@@ -124,7 +122,6 @@ profile_likelihood_VPA <- function(Assessment, ...) {
 }
 
 
-#' @importFrom gplots rich.colors
 retrospective_VPA <- function(Assessment, nyr) {
   assign_Assessment_slots(Assessment)
   n_y <- info$data$n_y

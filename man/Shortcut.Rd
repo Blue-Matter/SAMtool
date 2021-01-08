@@ -37,7 +37,7 @@ autocorrelation, and bias (1 = unbiased) for biomass.}
 
 \item{F_err}{Same as B_err, but for fishing mortality when method = "RF".}
 
-\item{...}{Other arguments (un-used).}
+\item{...}{Other arguments (not currently used).}
 }
 \value{
 An object of class \linkS4class{Assessment}.

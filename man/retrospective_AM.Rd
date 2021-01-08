@@ -9,7 +9,7 @@ retrospective_AM(MSE, MP, sim = 1, plot_legend = FALSE)
 \arguments{
 \item{MSE}{An object of class \linkS4class{MSE}.}
 
-\item{MP}{Character. The name of the management procedure created by \code{\link{make_MP}} containing the asssessment model.}
+\item{MP}{Character. The name of the management procedure created by \code{\link{make_MP}} containing the assessment model.}
 
 \item{sim}{Integer between 1 and MSE@nsim. The simulation number for which the retrospectives will be plotted.}
 

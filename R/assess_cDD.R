@@ -28,7 +28,7 @@
 #' of the recruitment deviations (thus, treating it as a state-space variable). Otherwise, recruitment deviations are penalized parameters.
 #' @param LWT A vector of likelihood weights for each survey.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-#' will print trace information during optimization. Used for dignostics for model convergence.
+#' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param n_itF Integer, the number of iterations to solve F conditional on the observed catch.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase

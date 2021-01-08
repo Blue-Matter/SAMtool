@@ -264,7 +264,7 @@ $$\Lambda_5 = \sum_f \lambda^{\bar{L}}_f\left[ \sum_y \left(-\log(\eta_{y,f}) - 
 for mean lengths, or
 
 $$\Lambda_5 = \sum_f \lambda^{\bar{w}}_f\left[ \sum_y \left(-\log(\eta_{y,f}) - \dfrac{[\bar{w}^{\textrm{obs}}_{y,f} - \bar{w}^{\textrm{pred}}_{y,f}]^2}{2 \eta^2_{y,f}}\right)\right],$$
-for mean weights, where $\eta_{y,f}$ is the standard deviation of the mean size. With constant cofficient of variation (CV), $\eta_{y,f} = \bar{w}^{\textrm{obs}}_{y,f} CV^{\eta}_f$.
+for mean weights, where $\eta_{y,f}$ is the standard deviation of the mean size. With constant coefficient of variation (CV), $\eta_{y,f} = \bar{w}^{\textrm{obs}}_{y,f} CV^{\eta}_f$.
 
 The log-likelihood component $\Lambda_6$ of annual estimated recruitment deviates $\delta_y$ in log space is
 $$\Lambda_6 = \Sigma_y\left(-\log(\tau) - \dfrac{\delta_y^2}{2 \tau^2}\right),$$

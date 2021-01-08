@@ -14,7 +14,7 @@ plot_lognormalvar(m, sd, label = NULL, logtransform = FALSE, color = "black")
 \item{label}{Name of the variable to be used as x-axis label.}
 
 \item{logtransform}{Indicates whether the mean and standard deviation are in
-transformed (normal) or untransformed space.}
+lognormal (TRUE) or normal (FALSE) space.}
 
 \item{color}{A vector of colors.}
 }

@@ -18,7 +18,6 @@ SCA_RWM(
   fix_h = TRUE,
   fix_F_equilibrium = TRUE,
   fix_omega = TRUE,
-  fix_sigma = FALSE,
   fix_tau = TRUE,
   LWT = NULL,
   early_dev = c("comp_onegen", "comp", "all"),
@@ -38,6 +37,10 @@ SCA_RWM(
 \item{x}{A position in the Data object (by default, equal to one for assessments).}
 
 \item{Data}{An object of class Data}
+
+\item{AddInd}{A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
+the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in
+Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd.}
 
 \item{SR}{Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).}
 
@@ -91,7 +94,7 @@ of the recruitment deviations and M random walk (thus, treating it as a random e
 Otherwise, recruitment deviations and the random walk are penalized parameters.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-will print trace information during optimization. Used for dignostics for model convergence.}
+will print trace information during optimization. Used for diagnostics for model convergence.}
 
 \item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
@@ -100,7 +103,7 @@ in convergence rate). Ignored if \code{integrate = TRUE}.}
 \item{n_restart}{The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.}
 
-\item{control}{A named list of agruments for optimization to be passed to
+\item{control}{A named list of arguments for optimization to be passed to
 \code{\link[stats]{nlminb}}.}
 
 \item{inner.control}{A named list of arguments for optimization of the random effects, which
@@ -136,7 +139,7 @@ res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M
 
 compare_models(res, res2, res3)
 
-\dontrun{
+\donttest{
 plot(res)
 }
 }

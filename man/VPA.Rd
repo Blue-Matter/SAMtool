@@ -68,6 +68,10 @@ is the number of years in which recruitment will be constrained (as a random wal
 
 \item{nitF}{The number of iterations for solving F in the model (via Newton's method).}
 
+\item{min_age}{An integer to specify the smallest age class in the VPA. By default, the youngest age with non-zero CAA in the terminal year is used.}
+
+\item{max_age}{An integer to specify the oldest age class in the VPA. By default, the oldest age with non-zero CAA for all years is used.}
+
 \item{refpt}{A named list of how many years to average parameters for calculating reference points, yield per recruit, and spawning potential ratio:
 \itemize{
 \item \code{vul} An integer for the number of most recent years to average the vulnerability schedule (default is 3).
@@ -76,7 +80,7 @@ from which that quantile is used, i.e., \code{c(0.5, 5)} is the default that cal
 }}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-will print trace information during optimization. Used for dignostics for model convergence.}
+will print trace information during optimization. Used for diagnostics for model convergence.}
 
 \item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
@@ -85,7 +89,7 @@ in convergence rate). Ignored if \code{integrate = TRUE}.}
 \item{n_restart}{The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.}
 
-\item{control}{A named list of agruments for optimization to be passed to
+\item{control}{A named list of arguments for optimization to be passed to
 \code{\link[stats]{nlminb}}.}
 
 \item{...}{Other arguments to be passed.}
@@ -97,7 +101,7 @@ description of fishing pressure (and UMSY = MSY/VBMSY).
 }
 \description{
 A VPA model that back-calculates abundance-at-age assuming that the catch-at-age is known without error and tuned to an index.
-The population dynamics equations are primarily drawn from VPA-2BOX (Porch 2018). MSY reference points and per-recruit quantitites
+The population dynamics equations are primarily drawn from VPA-2BOX (Porch 2018). MSY reference points and per-recruit quantities
 are then calculated from the VPA output.
 }
 \details{

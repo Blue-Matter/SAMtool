@@ -56,7 +56,7 @@
 #' The easiest way to turn off time-varying growth/M is by setting: \code{OM@@Msd <- OM@@Linfsd <- OM@@Ksd <- c(0, 0)}.
 #'
 #' \code{Sub_cpars} is a convenient function to subset simulations
-#' for the operating model, for example, to remove simulations from unconverged model fits or outlier simulations.
+#' for the operating model, for example, to remove simulations from non-converged model fits or outlier simulations.
 #'
 #' To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 #' index but the data won't enter the likelihood. See section on likelihood weights.

@@ -4,7 +4,7 @@
 #' are plotted over the course of the MSE are plotted against the operating model (true) values (in black).
 #'
 #' @param MSE An object of class \linkS4class{MSE}.
-#' @param MP Character. The name of the management procedure created by \code{\link{make_MP}} containing the asssessment model. 
+#' @param MP Character. The name of the management procedure created by \code{\link{make_MP}} containing the assessment model. 
 #' @param sim Integer between 1 and MSE@@nsim. The simulation number for which the retrospectives will be plotted.
 #' @param plot_legend Logical. Whether to plot legend to reference year of assessment in the MSE.
 #' @author Q. Huynh

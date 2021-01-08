@@ -14,7 +14,7 @@ plot_betavar(m, sd, label = NULL, is_logit = FALSE, color = "black")
 \item{label}{Name of the variable to be used as x-axis label.}
 
 \item{is_logit}{Logical that indicates whether the means and standard deviations are in
-transformed (logit) or untransformed space.}
+logit (TRUE) or normal (FALSE) space.}
 
 \item{color}{A vector of colors.}
 }

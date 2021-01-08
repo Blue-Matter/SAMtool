@@ -1,5 +1,4 @@
 
-#' @importFrom mvtnorm rmvnorm
 RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                     comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
@@ -79,6 +78,8 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
 
   # Fit model
   if(!is.null(dots$resample) && dots$resample) { # Re-sample covariance matrix
+    
+    if(!requireNamespace("mvtnorm", quietly = TRUE)) stop("Please install the mvtnorm package.", call. = FALSE)
 
     message("\nResample = TRUE. Running mean fit model first...")
     mean_fit_output <- RCM_est(data = data, selectivity = sel, s_selectivity = s_sel,
@@ -683,8 +684,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
 #' @export
 Sub_cpars <- function(OM, sims = 1:OM@nsim) {
   .Deprecated("MSEtool::SubCpars", "MSEtool", old = "Sub_cpars")
-  SubCpars(OM, sims)
-  return(OM)
+  MSEtool::SubCpars(OM, sims)
 }
 
 par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, data, dots) {

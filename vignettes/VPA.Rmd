@@ -100,7 +100,7 @@ $$\log(I_t) \sim N(\log(\hat{I}_t), \sigma^2).$$
 From the VPA output, reference points can be calculated. Estimates of recruitment (the youngest age class $\tilde{a}$) and spawning biomass are used to estimate a stock-recruitment relationship to obtain MSY and unfished reference points.
 
 ## Additional constraints
-In any VPA model, estimates of F and N of the youngest age classes are highly uncertain. To stabilize estimates, random walk penalties can be applied to the  recruitment and vulnerabilty estimates in the most recent years:
+In any VPA model, estimates of F and N of the youngest age classes are highly uncertain. To stabilize estimates, random walk penalties can be applied to the  recruitment and vulnerability estimates in the most recent years:
 $$ \begin{align}
 \log(N_{\tilde{a},t}) &\sim N(\log(N_{\tilde{a}, t-1}), \sigma_{\tilde{a}}^2)\\
 \log(v_{a,t}) &\sim N(\log(v_{a,t-1}, \sigma_v^2)

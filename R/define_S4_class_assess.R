@@ -159,7 +159,7 @@ setMethod("summary", signature(object = "Assessment"), function(object) {
 #' \donttest{
 #' output <- DD_TMB(Data = Simulation_1)
 #' }
-#' \dontrun{
+#' \donttest{
 #' plot(output)
 #' }
 #' @seealso \link{retrospective}
