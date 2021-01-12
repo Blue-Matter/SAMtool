@@ -190,40 +190,19 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   ### Selectivity and F
   ### Find
   OM@isRel <- FALSE
-  if(data$nsel_block > 1 || sel == -2) {
-    F_matrix <- lapply(res, getElement, "F_at_age")
-    apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
-
-    expand_V_matrix <- function(x) {
-      y <- matrix(x[nyears, ], proyears, maxage + 1, byrow = TRUE)
-      rbind(x, y)
-    }
-    V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix)
-    OM@cpars$V <- simplify2array(V) %>% aperm(c(3, 2, 1))
-    OM@cpars$Find <- do.call(rbind, apical_F)
-    message("Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.")
-    message("Selectivity during projection period is set to that in most recent historical year.")
-
-  } else { # nsel_block = 1
-
-    OM@cpars$L5 <- vapply(res, getElement, numeric(1), "L5")
-    message("Range of OM@cpars$L5: ", paste(round(range(OM@cpars$L5), 2), collapse = " - "))
-
-    OM@cpars$LFS <- vapply(res, getElement, numeric(1), "LFS")
-    message("Range of OM@cpars$LFS: ", paste(round(range(OM@cpars$LFS), 2), collapse = " - "))
-
-    if(selectivity == "logistic") {
-      OM@cpars$Vmaxlen <- rep(1, nsim)
-      message("With logistic selectivity, setting OM@cpars$Vmaxlen = 1")
-
-    } else {
-      OM@cpars$Vmaxlen <- vapply(res, getElement, numeric(1), "Vmaxlen")
-      message("Range of OM@cpars$Vmaxlen: ", paste(round(range(OM@cpars$Vmaxlen), 2), collapse = " - "))
-    }
-
-    OM@cpars$Find <- t(do.call(cbind, lapply(res, getElement, "F")))
-    message("Historical F set in OM@cpars$Find.")
+  
+  F_matrix <- lapply(res, getElement, "F_at_age")
+  apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
+  
+  expand_V_matrix <- function(x) {
+    y <- matrix(x[nyears, ], proyears, maxage + 1, byrow = TRUE)
+    rbind(x, y)
   }
+  V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix)
+  OM@cpars$V <- simplify2array(V) %>% aperm(c(3, 2, 1))
+  OM@cpars$Find <- do.call(rbind, apical_F)
+  message("Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.")
+  message("Selectivity during projection period is set to that in most recent historical year.")
 
   OM@cpars$qs <- rep(1, nsim)
   Eff <- apply(OM@cpars$Find, 2, range)
@@ -295,6 +274,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   OM@cpars$K <- StockPars$K
   OM@cpars$t0 <- StockPars$t0
   OM@cpars$LenCV <- StockPars$LenCV
+  OM@cpars$LatASD <- StockPars$LatASD
   OM@cpars$Wt_age <- StockPars$Wt_age
 
   if(any(apply(StockPars$Mat_age, 1, function(x) all(x >= 0.5)))) { # Any simulations where all mat_age > 0.5?
@@ -314,12 +294,9 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
     OM@cpars$M_ageArray <- StockPars$M_ageArray
   }
   
-
   if(any(data$CAL > 0, na.rm = TRUE) || (any(data$MS > 0, na.rm = TRUE) & data$MS_type == "length") ||
      any(data$s_CAL > 0, na.rm = TRUE)) {
     bw <- data$length_bin[2] - data$length_bin[1]
-    OM@cpars$binWidth <- bw
-    OM@cpars$CAL_binsmid <- data$length_bin
     OM@cpars$CAL_bins <- c(data$length_bin - 0.5 * bw, max(data$length_bin) + 0.5 * bw)
     message("RCM length bins will be added to OM.")
   }
