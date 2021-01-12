@@ -136,10 +136,9 @@ calculated and reported in TMB_report.
 res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
 res2 <- SCA(Data = MSEtool::SimulatedData)
 res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.001))
-
-compare_models(res, res2, res3)
-
+ 
 \donttest{
+compare_models(res, res2, res3)
 plot(res)
 }
 }
