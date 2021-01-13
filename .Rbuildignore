@@ -6,3 +6,4 @@
 ^Workfiles$
 ^tests$
 ^data-raw$
+^.github$

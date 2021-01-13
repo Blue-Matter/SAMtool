@@ -580,6 +580,7 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
   # Without sd interval
   if(is.null(res_sd)) {
     res.lim <- max(abs(res), na.rm = TRUE)
+    if(!res.lim || is.infinite(res.lim)) res.lim <- 1
     if(is.null(res_ind_blue) || all(!res_ind_blue)) {
       plot(Year, res, typ = 'o', ylab = label, ylim = c(-res.lim, res.lim))
     } else {

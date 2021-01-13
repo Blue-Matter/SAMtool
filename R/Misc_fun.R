@@ -1,4 +1,5 @@
 
+max <- function(..., na.rm = TRUE) base::max(..., na.rm = na.rm)
 
 TACfilter <- function(TAC) {
   TAC[TAC < 0] <- NA_real_ 

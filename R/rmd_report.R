@@ -281,8 +281,10 @@ rmd_assess_resid <- function(par, fig.cap = paste(par, "residuals in log-space."
 rmd_assess_qq <- function(par, fig.cap) {
   fig.cap2 <- paste("QQ-plot of", fig.cap, "residuals in log-space.")
   c(paste0("```{r, fig.cap=\"", fig.cap2, "\"}"),
-    paste0("qqnorm(log(Obs_", par, "/", par, "), main = \"\")"),
-    paste0("qqline(log(Obs_", par, "/", par, "))"),
+    paste0("if(!all(is.na(log(Obs_", par, "/", par, ")))) {"), 
+    paste0("  qqnorm(log(Obs_", par, "/", par, "), main = \"\")"),
+    paste0("  qqline(log(Obs_", par, "/", par, "))"),
+    "}",
     "```\n")
 }
 
@@ -297,8 +299,10 @@ rmd_assess_fit_series <- function(par = "Index", fig.cap = "index", label = par,
       paste0("               label = paste(\"", label, "\", ", x, ", \"log-residuals\"))"),
       "```\n",
       paste0("```{r, fig.cap=\"QQ-plot of log-residuals from ", label, " ", x, ".\"}"),
-      paste0("qqnorm(log(Obs_", par, "[, ", x, "]/", par, "[, ", x, "]), main = \"\")"),
-      paste0("qqline(log(Obs_", par, "[, ", x, "]/", par, "[, ", x, "]))"),
+      paste0("if(!all(is.na(log(Obs_", par, "[, ", x, "]/", par, "[, ", x, "])))) {"),
+      paste0("  qqnorm(log(Obs_", par, "[, ", x, "]/", par, "[, ", x, "]), main = \"\")"),
+      paste0("  qqline(log(Obs_", par, "[, ", x, "]/", par, "[, ", x, "]))"),
+      "}",
       "```\n")
   }
   do.call(c, lapply(1:nsets, lapply_fn))
