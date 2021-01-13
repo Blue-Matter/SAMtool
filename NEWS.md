@@ -8,6 +8,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Assessment functions now calculate and report spawning potential ratio and yield per recruit in the forecast slot of the S4 object. Also in this slot is a catch equation function calculates the TAC for a given F. 
 - HCR nomenclature has changed. Operational control points (OCPs) are used instead of reference points (to help distinguish between reference points in the estimation model vs. the operating model. Various types of F can now be used in the HCR, including F0.1, Fmax, and FSPR, in addition to FMSY for the TAC calculation.
 - A `Shortcut` assess function samples the OM with error and autocorrelation for HCRs as an emulator of a stock assessment in closed-loop simulation. The `Perfect` function samples the OM without error.
+- All assessment models now accommodate multiple indices in model fitting, specify in the `AddInd` argument of functions which index slots in the Data object will be used among Data@Ind, Data@SpInd, Data@VInd, and Data@AddInd. Within series weighting is applied by using the corresponding CV slot, i.e., Data@CV_Ind for Data@Ind, etc. Among series weighting can also be tuned using likelihood weights with `LWT` argument. For SCA and VPA models, the selectivity is fixed in the model using Data@AddIndV for indices in Data@AddInd. 
 
 ### RCM
 - The function for the OM conditioning model is now re-named to `RCM` (Rapid Conditioning Model). 

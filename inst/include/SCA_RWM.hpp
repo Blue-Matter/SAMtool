@@ -209,7 +209,7 @@ Type SCA_RWM(objective_function<Type> *obj) {
         if(I_vul.col(sur).sum() > 0) {
           s_CAA(y,a,sur) = I_vul(a,sur) * N(y,a);
         } else {
-          s_CAA(y,a,sur) = vul(y,a) * N(y,a);
+          s_CAA(y,a,sur) = vul(a) * N(y,a);
         }
         s_CN(y,sur) += s_CAA(y,a,sur);
         if(I_units(sur)) s_BN(y,sur) += s_CAA(y,a,sur) * weight(a); // Biomass vulnerable to survey
