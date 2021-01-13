@@ -191,7 +191,14 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   ### Find
   OM@isRel <- FALSE
   
-  F_matrix <- lapply(res, getElement, "F_at_age")
+  make_F <- function(x, data) { # Extra step to avoid apical F = 0
+    apicalF <- x$F
+    apicalF[apicalF < 1e-4] <- 1e-4
+    F_at_age <- lapply(1:ncol(apicalF), function(xx) apicalF[, xx] * x$vul[1:nyears, , xx]) %>% 
+      simplify2array() %>% apply(1:2, sum)
+    return(F_at_age)
+  }
+  F_matrix <- lapply(res, make_F, data = data)
   apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
   
   expand_V_matrix <- function(x) {
@@ -311,7 +318,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   CAA_pred <- array(sapply(res[keep], getElement, "CAApred"), c(nyears, maxage+1, nfleet, sum(keep)))
   CAL_pred <- array(sapply(res[keep], getElement, "CALpred"), c(nyears, length(data$length_bin), nfleet, sum(keep)))
 
-  output <- new("RCModel", OM = Sub_cpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
+  output <- new("RCModel", OM = SubCpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
                 CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = c(data, prior), Misc = res[keep])
 
   # Data in cpars
