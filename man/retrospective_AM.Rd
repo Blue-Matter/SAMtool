@@ -16,10 +16,9 @@ retrospective_AM(MSE, MP, sim = 1, plot_legend = FALSE)
 \item{plot_legend}{Logical. Whether to plot legend to reference year of assessment in the MSE.}
 }
 \value{
-A series of figures for spawning stock biomass
-(SSB, including absolute magnitude and relative to MSY and unfished), fishing mortality (F, including absolute
-magnitude and relative to MSY), and vulnerable biomass (VB) estimates over the course of the MSE are plotted
-against the operating model (true) values (in black).
+A series of figures for SSB, depletion, fishing mortality, and vulnerable biomass (VB) estimated in the MP
+over the course of the closed-loop simulation against the values generated in the operating model (both historical
+and projected).
 }
 \description{
 Plots the true retrospective of an assessment model during the closed-loop simulation. A series of time series estimates of SSB, F, and VB
@@ -35,7 +34,7 @@ may not be indicative of general assessment behavior and performance overall.
 }
 \examples{
 \donttest{
-DD_MSY <- makeMP(DD_TMB, HCR_MSY, diagnostic = "full")
+DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "full")
 myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "DD_MSY")
 retrospective_AM(myMSE, MP = "DD_MSY", sim = 1)
 }
