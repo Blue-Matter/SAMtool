@@ -1,13 +1,7 @@
 
-max <- function(..., na.rm = TRUE) base::max(..., na.rm = na.rm)
+max <- function(..., na.rm = TRUE) suppressWarnings(base::max(..., na.rm = na.rm))
 
 arrows <- function(...) suppressWarnings(graphics::arrows(...))
-
-TACfilter <- function(TAC) {
-  TAC[TAC < 0] <- NA_real_ 
-  TAC[TAC > (mean(TAC, na.rm = TRUE) + 5 * sd(TAC, na.rm = TRUE))] <- NA_real_  # remove very large TAC samples
-  return(TAC)
-}
 
 #' Get the SAMtool vignettes
 #'
@@ -149,7 +143,7 @@ get_sdreport <- function(obj, opt) {
     }
   }
   if(!is.character(res)) {
-    res$env$corr.fixed <- res$cov.fixed %>% cov2cor() %>% round(3) %>% 
+    res$env$corr.fixed <- suppressWarnings(res$cov.fixed %>% cov2cor() %>% round(3)) %>% 
       structure(dimnames = list(names(res$par.fixed), names(res$par.fixed)))
   }
   return(res)
