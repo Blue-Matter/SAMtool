@@ -34,7 +34,7 @@ This function only plots retrospectives from a single simulation in the MSE. Res
 may not be indicative of general assessment behavior and performance overall.
 }
 \examples{
-\dontrun{
+\donttest{
 DD_MSY <- makeMP(DD_TMB, HCR_MSY, diagnostic = "full")
 myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "DD_MSY")
 retrospective_AM(myMSE, MP = "DD_MSY", sim = 1)

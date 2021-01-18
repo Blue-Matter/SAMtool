@@ -15,6 +15,9 @@ mahplot(outlist, res = 6, maxups = 5, MPs)
 
 \item{MPs}{Character vector of MP names}
 }
+\value{
+Density plots of Mahalanobis distance.
+}
 \description{
 Plot statistical power of the indicator with increasing time blocks
 }

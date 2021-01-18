@@ -6,11 +6,13 @@
 \usage{
 userguide()
 }
+\value{
+Displays a browser webpage of URL links to package vignettes.
+}
 \description{
 A convenient function to open a web browser with the SAMtool package vignettes
 }
 \examples{
-\dontrun{
 userguide()
-}
+
 }

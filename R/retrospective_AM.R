@@ -17,7 +17,7 @@
 #' magnitude and relative to MSY), and vulnerable biomass (VB) estimates over the course of the MSE are plotted
 #' against the operating model (true) values (in black).
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' DD_MSY <- makeMP(DD_TMB, HCR_MSY, diagnostic = "full")
 #' myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "DD_MSY")
 #' retrospective_AM(myMSE, MP = "DD_MSY", sim = 1)

@@ -38,6 +38,9 @@ plot_residuals(
 
 \item{label}{Character string that describes the data to label the y-axis.}
 }
+\value{
+A plot of model residuals by year (optionally, with error bars).
+}
 \description{
 Plots figure of residuals (or any time series with predicted mean of zero).
 }

@@ -32,7 +32,7 @@ class(DD_MSY)
 DD_75MSY <- make_MP(DD_TMB, HCR_MSY, MSY_frac = 0.75)
 class(DD_75MSY)
 
-\dontrun{
+\donttest{
 myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_75MSY"))
 }
 }

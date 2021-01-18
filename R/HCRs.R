@@ -76,7 +76,7 @@
 #'     ylim = c(0, 1), type = "l")
 #' abline(v = c(0.4, 0.8), col = "red", lty = 2)
 #'
-#' \dontrun{
+#' \donttest{
 #' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 #' }
 #' @export
@@ -196,7 +196,7 @@ class(HCR80_40MSY) <- "HCR"
 #' DD_75MSY <- make_MP(DD_TMB, HCR_MSY, MSY_frac = 0.75)
 #' class(DD_75MSY)
 #'
-#' \dontrun{
+#' \donttest{
 #' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_75MSY"))
 #' }
 #' @export

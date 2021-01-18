@@ -43,6 +43,9 @@ a matrix of ones indicates no recruitment deviates).}
 
 \item{seed}{An integer to set the seed for the sampling observation and process error deviates.}
 }
+\value{
+An object of class \linkS4class{project} that contains future predicted values of F, catch, biomass, recruitment, etc.
+}
 \description{
 This function takes an assessment model and runs a stochastic projection based on future F or catch.
 }

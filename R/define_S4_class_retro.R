@@ -32,12 +32,8 @@ setGeneric("retrospective", function(x, ...) standardGeneric("retrospective"))
 setMethod("retrospective", signature(x = "Assessment"),
           function(x, nyr = 5, figure = TRUE) {
             if(figure) {
-              old.warning <- options()$warn
-              options(warn = -1)
-              on.exit(options(warn = old.warning))
-
               old_par <- par(no.readonly = TRUE)
-              on.exit(par(old_par), add = TRUE)
+              on.exit(par(old_par))
             }
 
             f <- get(paste0('retrospective_', x@Model))
@@ -53,12 +49,8 @@ setMethod("retrospective", signature(x = "Assessment"),
 setMethod("retrospective", signature(x = "RCModel"),
           function(x, nyr = 5, figure = TRUE) {
             if(figure) {
-              old.warning <- options()$warn
-              options(warn = -1)
-              on.exit(options(warn = old.warning))
-
               old_par <- par(no.readonly = TRUE)
-              on.exit(par(old_par), add = TRUE)
+              on.exit(par(old_par))
             }
             res <- RCM_retro(x, nyr)
             if(figure) plot(res)
@@ -104,6 +96,7 @@ setMethod("plot", signature(x = "Assessment", y = "retro"),
 #' @param color An optional character vector of colors for plotting.
 #' @author Q. Huynh
 #' @aliases plot.retro plot,retro,missing-method
+#' @return A series of plots showing retrospective patterns in fishing mortality, spawning biomass, recruitment, etc.
 #' @examples
 #' \donttest{
 #' res <- SP(Data = swordfish)

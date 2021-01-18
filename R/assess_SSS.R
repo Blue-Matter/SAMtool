@@ -33,6 +33,7 @@
 #' Cope, J.M. 2013. Implementing a statistical catch-at-age model (Stock Synthesis) as a tool for
 #' deriving overfishing limits in data-limited situations. Fisheries Research 142:3-14.
 #' @author Q. Huynh
+#' @return An object of class \linkS4class{Assessment}.
 #' @examples
 #' res <- SSS(Data = Red_snapper)
 #'

@@ -51,6 +51,9 @@ hasn't converged. The optimization continues from the parameters from the previo
 
 \item{...}{Other arguments to be passed (not currently used).}
 }
+\value{
+An object of class \linkS4class{Assessment}.
+}
 \description{
 A simple age-structured model (\link{SCA_Pope}) fitted to a time series of catch going back to unfished conditions.
 Terminal depletion (ratio of current biomass to unfished biomass) is by default fixed to 0.4. Selectivity is fixed 

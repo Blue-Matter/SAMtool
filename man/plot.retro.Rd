@@ -18,6 +18,9 @@
 
 \item{object}{An object of class \linkS4class{retro}.}
 }
+\value{
+A series of plots showing retrospective patterns in fishing mortality, spawning biomass, recruitment, etc.
+}
 \description{
 plot and summary functions for retro object.
 }

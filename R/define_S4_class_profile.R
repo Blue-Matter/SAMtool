@@ -25,6 +25,7 @@ prof <- setClass("prof", slots = c(Model = "character", Name = "character", Par 
 #' @param x An object of class \linkS4class{prof} returned by \link{profile}.
 #' @param contour_levels Integer, passed to \code{nlevels} argument of \link[graphics]{contour}.
 #' @param ... Miscellaneous. Not used.
+#' @return A likelihood profile plot, either a one-dimensional line plot or a two-dimensional contour plot.
 #' @author Q. Huynh
 #' @exportMethod plot
 setMethod("plot", signature(x = "prof", y = "missing"),

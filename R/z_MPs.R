@@ -26,7 +26,7 @@
 #' # MP that uses a Delay-Difference which assumes a Ricker stock-recruit function.
 #' DD_Ricker <- make_MP(DD_TMB, HCR_MSY, SR = "Ricker")
 #'
-#' \dontrun{
+#' \donttest{
 #' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 #' 
 #' diagnostic(myMSE)
@@ -104,8 +104,8 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
 #' @examples
 #' MSEtool::avail("MP", package = "SAMtool")
 #'
-#' \dontrun{
-#' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_MSY", "SCA_4010"))
+#' \donttest{
+#' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_4010"))
 #' }
 #' @return An object of class \linkS4class{Rec} which contains the management recommendation.
 NULL

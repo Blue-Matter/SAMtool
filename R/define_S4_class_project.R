@@ -45,6 +45,7 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 #' a matrix of ones indicates no recruitment deviates).
 #' @param max_F The maximum allowable F if the projection is constrained on catch.
 #' @param seed An integer to set the seed for the sampling observation and process error deviates.
+#' @return An object of class \linkS4class{project} that contains future predicted values of F, catch, biomass, recruitment, etc.
 #' @examples
 #' \donttest{
 #' myAssess <- SCA(Data = SimulatedData)

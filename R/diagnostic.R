@@ -13,8 +13,8 @@
 #' @return Returns invisibly a list of \linkS4class{Assessment} objects of length \code{OM@@nsim}. Messages via console.
 #' @author Q. Huynh
 #' @examples
-#' \dontrun{
-#' prelim_AM(MSEtool::testOM, DD_TMB)
+#' \donttest{
+#' prelim_AM(MSEtool::SimulatedData, SP)
 #' }
 #' @export
 prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
@@ -87,12 +87,9 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' function evaluations reported by \code{\link[stats]{nlminb}} for each application of the assessment model.
 #' @author Q. Huynh
 #' @aliases diagnostic_AM
-#' @examples
-#' DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
-#' show(DD_MSY)
-#' 
-#' \dontrun{
-#' myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
+#' @examples 
+#' \donttest{
+#' myMSE <- runMSE(MSEtool::testOM, MPs = "SSS_MSY")
 #' diagnostic(myMSE)
 #' }
 #' @seealso \link{retrospective_AM}
@@ -119,7 +116,7 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
   
   MPs <- MPs[has_diagnostic]
 
-  if(!missing(MPs)) {
+  if(!missing(MP) && !is.null(MP)) {
     match_ind <- pmatch(MP, MPs)
     if(is.na(match_ind)) stop(paste(MP, "MP was not found in the MSE object. Available options are:", paste(MPs, collapse = " ")))
     MPs <- MPs[match_ind]

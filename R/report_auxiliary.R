@@ -500,6 +500,7 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
 #' @param label Character string that describes the data to label the y-axis.
 #' @author Q. Huynh
 #' @seealso \code{\link{plot_residuals}}
+#' @return A plot of annual observed data and predicted values from a model.
 #' @examples
 #' data(Red_snapper)
 #' plot_timeseries(Red_snapper@@Year, Red_snapper@@Cat[1, ],
@@ -508,9 +509,6 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
 plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.95,
                             obs_upper = NULL, obs_lower = NULL, obs_ind_blue = NULL, fit_linewidth = 3,
                             fit_color = "red", label = "Observed data") {
-  old.warning <- options()$warn
-  options(warn = -1)
-  on.exit(options(warn = old.warning))
 
   # Without CV interval
   if(is.null(obs_CV)) {
@@ -569,14 +567,11 @@ plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.
 #' @param label Character string that describes the data to label the y-axis.
 #' @author Q. Huynh
 #' @seealso \code{\link{plot_timeseries}}
+#' @return A plot of model residuals by year (optionally, with error bars).
 #' @export plot_residuals
 plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
                            res_upper = NULL, res_lower = NULL, res_ind_blue = NULL, draw_zero = TRUE,
                            zero_linetype = 2, label = "Residual") {
-  old.warning <- options()$warn
-  options(warn = -1)
-  on.exit(options(warn = old.warning))
-
   # Without sd interval
   if(is.null(res_sd)) {
     res.lim <- max(abs(res), na.rm = TRUE)
@@ -789,10 +784,6 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c(
 
 
 plot_surplus_production <- function(B, B0 = NULL, C, yield_fn = NULL, arrow_size = 0.07, xlab = NULL) {
-  old.warning <- options()$warn
-  options(warn = -1)
-  on.exit(options(warn = old.warning))
-
   if(!is.null(B0)) {
     B <- B/B0
     if(is.null(xlab)) xlab <- expression(B/B[0])
@@ -821,10 +812,6 @@ plot_surplus_production <- function(B, B0 = NULL, C, yield_fn = NULL, arrow_size
 
 
 plot_Kobe <- function(biomass, exploit, arrow_size = 0.07, color = TRUE, xlab = expression(B/B[MSY]), ylab = expression(F/F[MSY])) {
-  old.warning <- options()$warn
-  on.exit(options(warn = old.warning))
-  options(warn = -1)
-
   n.arrows <- length(exploit)
   if(length(biomass) > n.arrows) biomass <- biomass[1:n.arrows]
 
@@ -891,9 +878,6 @@ plot_SR <- function(Spawners, expectedR, R0 = NULL, S0 = NULL, rec_dev = NULL, t
     if(!is.null(rec_dev)) points(Spawners, rec_dev)
   }
   if(trajectory) {
-    old.warning <- options()$warn
-    on.exit(options(warn = old.warning), add = TRUE)
-    options(warn = -1)
     n.arrows <- length(Spawners)
 
     arrows(x0 = Spawners[1:(n.arrows-1)], y0 = rec_dev[1:(n.arrows-1)],

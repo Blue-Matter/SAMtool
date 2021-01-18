@@ -24,8 +24,8 @@ apply the assessment model for Data generated during the historical period of th
 the convergence rate for the model and total time elapsed in running the assessments.
 }
 \examples{
-\dontrun{
-prelim_AM(MSEtool::testOM, DD_TMB)
+\donttest{
+prelim_AM(MSEtool::SimulatedData, SP)
 }
 }
 \author{

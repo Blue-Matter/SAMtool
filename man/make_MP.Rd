@@ -36,7 +36,7 @@ DD_40_10 <- make_MP(DD_TMB, HCR40_10, diagnostic = "min")
 # MP that uses a Delay-Difference which assumes a Ricker stock-recruit function.
 DD_Ricker <- make_MP(DD_TMB, HCR_MSY, SR = "Ricker")
 
-\dontrun{
+\donttest{
 myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
 
 diagnostic(myMSE)

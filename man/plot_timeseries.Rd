@@ -41,6 +41,9 @@ plot_timeseries(
 
 \item{label}{Character string that describes the data to label the y-axis.}
 }
+\value{
+A plot of annual observed data and predicted values from a model.
+}
 \description{
 Plot time series of observed (with lognormally-distributed error bars) vs.
 predicted data.

@@ -308,6 +308,7 @@ mahalanobis_contribution<-function(ind3Data,mu,covr){
 #' @param MPs Character vector of MP names
 #' @author T. Carruthers
 #' @references Carruthers and Hordyk 2018
+#' @return Density plots of Mahalanobis distance.
 #' @export
 mahplot<-function(outlist,res=6,maxups=5,MPs){
 

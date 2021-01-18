@@ -33,11 +33,8 @@ created with \link{make_MP} with argument \code{diagnostic = "min"} or \code{"fu
 This function summarizes and plots the diagnostic information.
 }
 \examples{
-DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "min")
-show(DD_MSY)
-
-\dontrun{
-myMSE <- runMSE(MSEtool::testOM, MPs = "DD_MSY")
+\donttest{
+myMSE <- runMSE(MSEtool::testOM, MPs = "SSS_MSY")
 diagnostic(myMSE)
 }
 }

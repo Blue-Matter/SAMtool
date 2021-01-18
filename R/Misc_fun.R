@@ -1,6 +1,8 @@
 
 max <- function(..., na.rm = TRUE) base::max(..., na.rm = na.rm)
 
+arrows <- function(...) suppressWarnings(graphics::arrows(...))
+
 TACfilter <- function(TAC) {
   TAC[TAC < 0] <- NA_real_ 
   TAC[TAC > (mean(TAC, na.rm = TRUE) + 5 * sd(TAC, na.rm = TRUE))] <- NA_real_  # remove very large TAC samples
@@ -11,9 +13,9 @@ TACfilter <- function(TAC) {
 #'
 #' A convenient function to open a web browser with the SAMtool package vignettes
 #' @examples
-#' \dontrun{
 #' userguide()
-#' }
+#' 
+#' @return Displays a browser webpage of URL links to package vignettes.
 #' @export
 userguide <- function() browseVignettes("SAMtool")
 
@@ -92,20 +94,15 @@ LinInterp <- function(x,y,xlev,ascending=F,zeroint=F){
 
 
 optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 1) {
-  
-  old_warn <- options()$warn
-  options(warn = -1)
-  on.exit(options(warn = old_warn))
-  
   restart <- as.integer(restart)
   if(is.null(obj$env$random) && use_hessian) h <- obj$he else h <- NULL
   low <- rep(-Inf, length(obj$par))
   if(any(c("U_equilibrium", "F_equilibrium") %in% names(obj$par))) {
     low[match(c("U_equilibrium", "F_equilibrium"), names(obj$par))] <- 0
   }
-  opt <- try(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low), silent = TRUE)
+  opt <- try(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low)), silent = TRUE)
   if(is.character(opt) && all(is.na(obj$gr()))) {
-    opt <- try(nlminb(obj$par, obj$fn, hessian = h, control = control, lower = low), silent = TRUE)
+    opt <- try(suppressWarnings(nlminb(obj$par, obj$fn, hessian = h, control = control, lower = low)), silent = TRUE)
   }
   SD <- get_sdreport(obj, opt)
 
@@ -120,23 +117,18 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
 
 
 get_sdreport <- function(obj, opt) {
-  
-  old_warn <- options()$warn
-  options(warn = -1)
-  on.exit(options(warn = old_warn))
-  
   if(is.character(opt)) par.fixed <- NULL else par.fixed <- opt$par
   if(is.null(obj$env$random) && !is.character(opt)) h <- obj$he(opt$par) else h <- NULL
 
-  res <- try(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), silent = TRUE)
+  res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE))
 
   if(!is.character(res) && !res$pdHess && !is.character(opt) && !is.null(h)) {
-    h <- optimHess(opt$par, obj$fn, obj$gr)
-    res <- try(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE), silent = TRUE)
+    h <- suppressWarnings(optimHess(opt$par, obj$fn, obj$gr))
+    res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE))
   }
 
   if(!is.character(res) && res$pdHess && all(is.nan(res$cov.fixed))) {
-    if(is.null(h)) h <- optimHess(opt$par, obj$fn, obj$gr)
+    if(is.null(h)) h <- suppressWarnings(optimHess(opt$par, obj$fn, obj$gr))
     if(!is.character(try(chol(h), silent = TRUE))) res$cov.fixed <- chol2inv(chol(h))
   }
 
