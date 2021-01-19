@@ -27,17 +27,17 @@ class \code{HCR} to create a management procedure (MP). The resulting function
 can then be tested in closed-loop simulation via \code{\link[MSEtool]{runMSE}}.
 }
 \examples{
-# A delay-difference model with a 40-10 control rule
-DD_40_10 <- make_MP(DD_TMB, HCR40_10)
+# A statistical catch-at-age model with a 40-10 control rule
+SCA_40_10 <- make_MP(SCA, HCR40_10)
 
-# A delay difference model that will produce convergence diagnostics
-DD_40_10 <- make_MP(DD_TMB, HCR40_10, diagnostic = "min")
+# An SCA that will produce convergence diagnostics
+SCA_40_10 <- make_MP(SCA, HCR40_10, diagnostic = "min")
 
-# MP that uses a Delay-Difference which assumes a Ricker stock-recruit function.
-DD_Ricker <- make_MP(DD_TMB, HCR_MSY, SR = "Ricker")
+# MP with an SCA that uses a Ricker stock-recruit function.
+SCA_Ricker <- make_MP(SCA, HCR_MSY, SR = "Ricker")
 
 \donttest{
-myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
+myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_Ricker"))
 
 diagnostic(myMSE)
 }

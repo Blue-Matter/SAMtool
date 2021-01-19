@@ -139,7 +139,6 @@ res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M
  
 \donttest{
 compare_models(res, res2, res3)
-plot(res)
 }
 }
 \seealso{

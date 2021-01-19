@@ -156,9 +156,8 @@ setMethod("summary", signature(object = "Assessment"), function(object) {
 #' @param ... Other arguments.
 #' @return Returns invisibly the output from \link[rmarkdown]{render}.
 #' @examples
-#' \donttest{
 #' output <- DD_TMB(Data = Simulation_1)
-#' }
+#' 
 #' \donttest{
 #' plot(output)
 #' }

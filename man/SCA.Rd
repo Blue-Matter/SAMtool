@@ -251,11 +251,6 @@ res <- SCA(Data = MSEtool::SimulatedData)
 res2 <- SCA2(Data = MSEtool::SimulatedData)
 
 compare_models(res, res2)
-
-\donttest{
-plot(res)
-}
-
 }
 \references{
 Cadigan, N.G. 2016. A state-space stock assessment model for northern cod, including under-reported catches and

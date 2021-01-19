@@ -89,7 +89,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' @aliases diagnostic_AM
 #' @examples 
 #' \donttest{
-#' myMSE <- runMSE(MSEtool::testOM, MPs = "SSS_MSY")
+#' myMSE <- runMSE(MSEtool::testOM, MPs = "SP_MSY")
 #' diagnostic(myMSE)
 #' }
 #' @seealso \link{retrospective_AM}

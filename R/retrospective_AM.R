@@ -17,9 +17,9 @@
 #' and projected).
 #' @examples
 #' \donttest{
-#' DD_MSY <- make_MP(DD_TMB, HCR_MSY, diagnostic = "full")
-#' myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "DD_MSY")
-#' retrospective_AM(myMSE, MP = "DD_MSY", sim = 1)
+#' SPMSY <- make_MP(SP, HCR_MSY, diagnostic = "full")
+#' myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "SPMSY")
+#' retrospective_AM(myMSE, MP = "SPMSY", sim = 1)
 #' }
 #' @seealso \link{diagnostic}
 #' @importFrom gplots rich.colors

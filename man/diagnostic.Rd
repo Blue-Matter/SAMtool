@@ -34,7 +34,7 @@ This function summarizes and plots the diagnostic information.
 }
 \examples{
 \donttest{
-myMSE <- runMSE(MSEtool::testOM, MPs = "SSS_MSY")
+myMSE <- runMSE(MSEtool::testOM, MPs = "SP_MSY")
 diagnostic(myMSE)
 }
 }

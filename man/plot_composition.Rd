@@ -64,11 +64,10 @@ Plots depending on \code{plot_type}.
 Plots annual length or age composition data.
 }
 \examples{
-\donttest{
 plot_composition(obs = SimulatedData@CAA[1, 1:16, ])
 plot_composition(obs = SimulatedData@CAA[1, , ], plot_type = "bubble_data", 
                  ages = 0:SimulatedData@MaxAge)
-}
+
 }
 \author{
 Q. Huynh

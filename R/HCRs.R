@@ -75,10 +75,6 @@
 #'     ylab = expression(F[target]~":"~~F/F[MSY]), 
 #'     ylim = c(0, 1), type = "l")
 #' abline(v = c(0.4, 0.8), col = "red", lty = 2)
-#'
-#' \donttest{
-#' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
-#' }
 #' @export
 HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY"),
                      Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"), 
@@ -189,15 +185,13 @@ class(HCR80_40MSY) <- "HCR"
 #' @seealso \link{make_MP} \link{HCR_ramp}
 #' @examples
 #' # create an MP to run in closed-loop MSE (fishes at UMSY)
-#' DD_MSY <- make_MP(DD_TMB, HCR_MSY)
-#' class(DD_MSY)
+#' SPMSY <- make_MP(SP, HCR_MSY)
 #'
-#' # The same MP which fishes at 75% of UMSY
-#' DD_75MSY <- make_MP(DD_TMB, HCR_MSY, MSY_frac = 0.75)
-#' class(DD_75MSY)
+#' # The MP which fishes at 75% of FMSY
+#' SP75MSY <- make_MP(SP, HCR_MSY, MSY_frac = 0.75)
 #'
 #' \donttest{
-#' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_MSY", "DD_75MSY"))
+#' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SPMSY", "SP75MSY"))
 #' }
 #' @export
 HCR_MSY <- function(Assessment, reps = 1, MSY_frac = 1, ...) {

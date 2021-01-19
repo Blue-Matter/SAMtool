@@ -642,11 +642,10 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' @author Q. Huynh
 #' @export plot_composition
 #' @examples
-#' \donttest{
 #' plot_composition(obs = SimulatedData@@CAA[1, 1:16, ])
 #' plot_composition(obs = SimulatedData@@CAA[1, , ], plot_type = "bubble_data", 
 #'                  ages = 0:SimulatedData@@MaxAge)
-#' }
+#' 
 plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c('annual', 'bubble_data', 'bubble_residuals', 'mean'),
                              N = rowSums(obs), CAL_bins = NULL, ages = NULL, ind = 1:nrow(obs),
                              annual_ylab = "Frequency", annual_yscale = c("proportions", "raw"),

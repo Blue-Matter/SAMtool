@@ -101,10 +101,6 @@ plot(Brel, Frel,
     ylab = expression(F[target]~":"~~F/F[MSY]), 
     ylim = c(0, 1), type = "l")
 abline(v = c(0.4, 0.8), col = "red", lty = 2)
-
-\donttest{
-myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "DD_40_10"))
-}
 }
 \references{
 Deroba, J.J. and Bence, J.R. 2008. A review of harvest policies: Understanding relative

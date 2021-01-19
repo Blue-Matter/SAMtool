@@ -56,9 +56,8 @@ Returns invisibly the output from \link[rmarkdown]{render}.
 Produces HTML file (via markdown) figures of parameter estimates and output from an \linkS4class{Assessment} object.
 }
 \examples{
-\donttest{
 output <- DD_TMB(Data = Simulation_1)
-}
+
 \donttest{
 plot(output)
 }

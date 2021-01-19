@@ -76,7 +76,6 @@
 #'  
 #' \donttest{
 #' compare_models(res, res2, res3)
-#' plot(res)
 #' }
 #' @author Q. Huynh
 #' @return An object of class \linkS4class{Assessment}.

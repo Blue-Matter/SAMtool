@@ -129,11 +129,6 @@
 #' res2 <- SCA2(Data = MSEtool::SimulatedData)
 #'
 #' compare_models(res, res2)
-#'
-#' \donttest{
-#' plot(res)
-#' }
-#'
 #' @section Required Data:
 #' \itemize{
 #' \item \code{SCA}, \code{SCA_Pope}, and \code{SCA_Pope}: Cat, Ind, Mort, L50, L95, CAA, vbK, vbLinf, vbt0, wla, wlb, MaxAge
