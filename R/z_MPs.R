@@ -25,12 +25,7 @@
 #'
 #' # MP with an SCA that uses a Ricker stock-recruit function.
 #' SCA_Ricker <- make_MP(SCA, HCR_MSY, SR = "Ricker")
-#'
-#' \donttest{
-#' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_Ricker"))
-#' 
-#' diagnostic(myMSE)
-#' }
+#' show(SCA_Ricker)
 #'
 #' @seealso \link{HCR_ramp} \link{HCR_MSY} \link{diagnostic} \link{retrospective_AM}
 #' @export

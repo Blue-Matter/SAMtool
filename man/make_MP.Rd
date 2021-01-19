@@ -35,12 +35,7 @@ SCA_40_10 <- make_MP(SCA, HCR40_10, diagnostic = "min")
 
 # MP with an SCA that uses a Ricker stock-recruit function.
 SCA_Ricker <- make_MP(SCA, HCR_MSY, SR = "Ricker")
-
-\donttest{
-myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_Ricker"))
-
-diagnostic(myMSE)
-}
+show(SCA_Ricker)
 
 }
 \seealso{

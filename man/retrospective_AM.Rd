@@ -34,9 +34,10 @@ may not be indicative of general assessment behavior and performance overall.
 }
 \examples{
 \donttest{
-SPMSY <- make_MP(SP, HCR_MSY, diagnostic = "full")
-myMSE <- MSEtool::runMSE(OM = MSEtool::testOM, MPs = "SPMSY")
-retrospective_AM(myMSE, MP = "SPMSY", sim = 1)
+SCA_40_10 <- make_MP(SP, HCR_MSY, diagnostic = "full")
+OM <- MSEtool::testOM; OM@proyears <- 20
+myMSE <- MSEtool::runMSE(OM = OM, MPs = "SCA_40_10")
+retrospective_AM(myMSE, MP = "SCA_40_10", sim = 1)
 }
 }
 \seealso{

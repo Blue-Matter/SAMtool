@@ -3,12 +3,12 @@
 on:
   push:
     branches:
-      - main
       - master
+      - dev
   pull_request:
     branches:
-      - main
       - master
+      - dev
 
 name: R-CMD-check
 
@@ -73,7 +73,7 @@ jobs:
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--run-donttest"), error_on = "never", check_dir = "check")
         shell: Rscript {0}
 
       - name: Upload check results
