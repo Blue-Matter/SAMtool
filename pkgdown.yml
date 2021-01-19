@@ -1,0 +1,14 @@
+pandoc: 2.7.3
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  Delay_difference: Delay_difference.html
+  RCM: RCM.html
+  RCM_eq: RCM_eq.html
+  RCM_sel: RCM_sel.html
+  SAMtool: SAMtool.html
+  SCA: SCA.html
+  Surplus_production: Surplus_production.html
+  VPA: VPA.html
+last_built: 2021-01-19T00:41Z
+
