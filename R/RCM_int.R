@@ -320,6 +320,12 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
 
   output <- new("RCModel", OM = SubCpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
                 CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = c(data, prior), Misc = res[keep])
+  
+  if(any(!keep)) {
+    output$data$drop_sim <- which(!keep)
+  } else {
+    output$data$drop_sim <- numeric(0)
+  }
 
   # Data in cpars
   if(sum(output@data$Chist > 0, na.rm = TRUE) || nsurvey > 0) {
