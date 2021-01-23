@@ -144,7 +144,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             if(is.null(render_args$quiet)) render_args$quiet <- quiet
 
             ####### Assign variables
-            OM <- Sub_cpars(x@OM, sims)
+            OM <- MSEtool::SubCpars(x@OM, sims)
             mean_fit <- x@mean_fit
             report_list <- x@Misc[sims]
 

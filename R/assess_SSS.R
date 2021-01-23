@@ -87,7 +87,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
                abs_I = 0, nsurvey = 1, LWT = 1,
                CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(0, n_y), n_y = n_y, n_age = n_age, M = M,
                weight = Wa, mat = mat_age, vul_type = "logistic",
-               SR_type = SR, CAA_dist = "multinomial", est_early_rec_dev = rep(0, max_age - 1),
+               SR_type = SR, CAA_dist = "multinomial", est_early_rec_dev = rep(0, n_age - 1),
                est_rec_dev = rep(0, n_y))
 
   # Starting values
