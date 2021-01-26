@@ -322,9 +322,9 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
                 CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = c(data, prior), Misc = res[keep])
   
   if(any(!keep)) {
-    output$data$drop_sim <- which(!keep)
+    output@data$drop_sim <- which(!keep)
   } else {
-    output$data$drop_sim <- numeric(0)
+    output@data$drop_sim <- numeric(0)
   }
 
   # Data in cpars
@@ -491,38 +491,35 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   if(!is.null(data$Ehist) && any(data$Ehist > 0, na.rm = TRUE)) {
     rescale_effort <- 1/mean(data$Ehist, na.rm = TRUE)
     E_hist <- data$Ehist * rescale_effort
+    E_eq <- data$E_eq * rescale_effort
   } else {
     rescale_effort <- 1
     E_hist <- matrix(0, nyears, nfleet)
+    E_eq <- rep(0, data$nfleet)
   }
-
+  
   if(is.null(dots$nit_F)) nit_F <- 3L else nit_F <- dots$nit_F
   if(is.null(dots$plusgroup)) plusgroup <- 1L else plusgroup <- as.integer(dots$plusgroup)
   age_only_model <- StockPars$Len_age[x, , 1:(nyears+1)] %>% apply(2, function(xx) length(xx) == n_age & max(xx) == n_age) %>% all()
-  TMB_data_all <- list(condition = data$condition,
-                       nll_C = as.integer((data$condition == "effort" & nfleet > 1) || data$condition == "catch"),
-                       I_hist = data$Index, sigma_I = data$I_sd, CAA_hist = data$CAA, CAA_n = pmin(CAA_n, ESS[1]),
-                       CAL_hist = data$CAL, CAL_n = pmin(CAL_n, ESS[2]), s_CAA_hist = data$s_CAA, s_CAA_n = s_CAA_n,
-                       s_CAL_hist = data$s_CAL, s_CAL_n = s_CAL_n, length_bin = data$length_bin, msize = data$MS, msize_type = data$MS_type,
-                       sel_block = rbind(data$sel_block, data$sel_block[nyears, ]), nsel_block = data$nsel_block,
-                       n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
-                       M_data = if(prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
-                       len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
-                       Linf = ifelse(age_only_model, n_age, StockPars$Linf[x]),
-                       SD_LAA = t(StockPars$LatASD[x, , 1:nyears]), wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
-                       mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]), vul_type = as.integer(selectivity),
-                       s_vul_type = as.integer(s_selectivity), abs_I = data$abs_I,
-                       I_units = as.integer(data$I_units), age_error = data$age_error,
-                       SR_type = SR_type, LWT_fleet = LWT_fleet, LWT_survey = LWT_survey, comp_like = comp_like,
-                       max_F = max_F, rescale = rescale, ageM = min(nyears, ceiling(StockPars$ageM[x, 1])),
-                       yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup,
-                       use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
-
-  if(data$condition == "catch" || data$condition == "catch2") {
-    TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = data$C_eq, sigma_C = data$C_sd, sigma_Ceq = data$C_eq_sd, E_hist = E_hist, E_eq = rep(0, nfleet))
-  } else {
-    TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = rep(0, nfleet), sigma_C = data$C_sd, sigma_Ceq = data$C_eq_sd, E_hist = E_hist, E_eq = data$E_eq * rescale_effort)
-  }
+  TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = data$C_eq, sigma_C = data$C_sd, sigma_Ceq = data$C_eq_sd, 
+                   E_hist = E_hist, E_eq = E_eq,
+                   condition = data$condition, nll_C = as.integer(data$condition != "catch2"),
+                   I_hist = data$Index, sigma_I = data$I_sd, CAA_hist = data$CAA, CAA_n = pmin(CAA_n, ESS[1]),
+                   CAL_hist = data$CAL, CAL_n = pmin(CAL_n, ESS[2]), s_CAA_hist = data$s_CAA, s_CAA_n = s_CAA_n,
+                   s_CAL_hist = data$s_CAL, s_CAL_n = s_CAL_n, length_bin = data$length_bin, msize = data$MS, msize_type = data$MS_type,
+                   sel_block = rbind(data$sel_block, data$sel_block[nyears, ]), nsel_block = data$nsel_block,
+                   n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
+                   M_data = if(prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
+                   len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
+                   Linf = ifelse(age_only_model, n_age, StockPars$Linf[x]),
+                   SD_LAA = t(StockPars$LatASD[x, , 1:nyears]), wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
+                   mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]), vul_type = as.integer(selectivity),
+                   s_vul_type = as.integer(s_selectivity), abs_I = data$abs_I,
+                   I_units = as.integer(data$I_units), age_error = data$age_error,
+                   SR_type = SR_type, LWT_fleet = LWT_fleet, LWT_survey = LWT_survey, comp_like = comp_like,
+                   max_F = max_F, rescale = rescale, ageM = min(nyears, ceiling(StockPars$ageM[x, 1])),
+                   yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup,
+                   use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
 
   if(SR_type == "BH") {
     transformed_h <- logit((StockPars$hs[x] - 0.2)/0.8)
@@ -541,7 +538,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
 
   sel_check <- selectivity == -1 | selectivity == 0
   vul_par[2, sel_check] <- log(vul_par[1, sel_check] - vul_par[2, sel_check])
-  vul_par[1, sel_check] <- logit(pmin(vul_par[1, sel_check]/TMB_data_all$Linf/0.99, 0.99))
+  vul_par[1, sel_check] <- logit(pmin(vul_par[1, sel_check]/TMB_data$Linf/0.99, 0.99))
   vul_par[3, sel_check] <- logit(pmin(vul_par[3, sel_check], 0.99))
   if(any(selectivity == -2)) vul_par[, selectivity == -2] <- logit(vul_par[, selectivity == -2], soft_bounds = TRUE)
 
@@ -571,7 +568,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
 
   parametric_sel <- s_selectivity == -1 | s_selectivity == 0
   s_vul_par[2, parametric_sel] <- log(s_vul_par[1, parametric_sel] - s_vul_par[2, parametric_sel])
-  s_vul_par[1, parametric_sel] <- logit(s_vul_par[1, parametric_sel]/TMB_data_all$Linf/0.99)
+  s_vul_par[1, parametric_sel] <- logit(s_vul_par[1, parametric_sel]/TMB_data$Linf/0.99)
   s_vul_par[3, parametric_sel] <- logit(s_vul_par[3, parametric_sel])
   if(any(s_selectivity == -2)) s_vul_par[, s_selectivity == -2] <- logit(s_vul_par[, s_selectivity == -2], soft_bounds = TRUE)
 
@@ -590,7 +587,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
     map_s_vul_par <- dots$map_s_vul_par
   }
   
-  TMB_params <- list(R0x = ifelse(TMB_data_all$nll_C | data$condition == "catch2" | prior$use_prior[1], log(StockPars$R0[x] * rescale), 0),
+  TMB_params <- list(R0x = ifelse(TMB_data$nll_C | prior$use_prior[1], log(StockPars$R0[x] * rescale), 0),
                      transformed_h = transformed_h, log_M = log(mean(StockPars$M_ageArray[x, , nyears])),
                      vul_par = vul_par, s_vul_par = s_vul_par,
                      log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
@@ -598,11 +595,11 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
                      log_CV_msize = log(data$MS_cv), log_tau = log(StockPars$procsd[x]),
                      log_early_rec_dev = rep(0, n_age - 1), log_rec_dev = rep(0, nyears))
   if(data$condition == "catch") {
-    TMB_params$log_F_dev[TMB_data_all$yind_F + 1, 1:nfleet] <- log(0.5 * mean(TMB_data_all$M[nyears, ]))
+    TMB_params$log_F_dev[TMB_data$yind_F + 1, 1:nfleet] <- log(0.5 * mean(TMB_data$M[nyears, ]))
   }
 
   map <- list()
-  if(data$condition == "effort" && !TMB_data_all$nll_C && !prior$use_prior[1]) map$R0x <- factor(NA)
+  if(!TMB_data$nll_C && !prior$use_prior[1]) map$R0x <- factor(NA)
   if(!prior$use_prior[2]) map$transformed_h <- factor(NA)
   if(!prior$use_prior[3]) map$log_M <- factor(NA)
   map$log_tau <- factor(NA)
@@ -637,7 +634,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
 
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev") else random <- NULL
   
-  obj <- MakeADFun(data = c(TMB_data, TMB_data_all), parameters = TMB_params, map = map, random = random,
+  obj <- MakeADFun(data = TMB_data, parameters = TMB_params, map = map, random = random,
                    inner.control = inner.control, DLL = "SAMtool", silent = TRUE)
 
   if(data$condition == "catch2") {
@@ -654,16 +651,16 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   SD <- mod[[2]]
   report <- obj$report(obj$env$last.par.best) %>% RCM_posthoc_adjust(obj)
 
-  if(data$condition == "effort" && any(data$Chist > 0, na.rm = TRUE)) {
-    vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
-                  "R", "R_early", "R_eq", "R0", "B0", "E0", "N0", "E0_SR")
-    vars_mult <- c("Brec", "q")
-    var_trans <- c("R0", "q")
-    fun_trans <- c("/", "*")
-    rescale <- 1/exp(mean(log(data$Chist/report$Cpred), na.rm = TRUE))
-    fun_fixed <- c(NA, NA)
-    rescale_report(vars_div, vars_mult, var_trans, fun_trans, fun_fixed)
-  }
+  #if(data$condition == "effort" && any(data$Chist > 0, na.rm = TRUE)) {
+  #  vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
+  #                "R", "R_early", "R_eq", "R0", "B0", "E0", "N0", "E0_SR")
+  #  vars_mult <- c("Brec", "q")
+  #  var_trans <- c("R0", "q")
+  #  fun_trans <- c("/", "*")
+  #  rescale <- 1/exp(mean(log(data$Chist/report$Cpred), na.rm = TRUE))
+  #  fun_fixed <- c(NA, NA)
+  #  rescale_report(vars_div, vars_mult, var_trans, fun_trans, fun_fixed)
+  #}
 
   return(list(obj = obj, opt = opt, SD = SD, report = c(report, list(conv = !is.character(opt) && SD$pdHess))))
 }
@@ -859,16 +856,16 @@ RCM_retro <- function(x, nyr = 5) {
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2, dynamic_SSB0 = FALSE)
 
-      if(new_args[[i+1]]$data$condition == "effort" && any(new_args[[i+1]]$data$Chist > 0, na.rm = TRUE)) {
-        vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
-                      "R", "R_early", "R_eq", "R0", "B0", "E0", "N0", "E0_SR")
-        vars_mult <- c("Brec", "q")
-        var_trans <- c("R0", "q")
-        fun_trans <- c("/", "*")
-        rescale <- 1/exp(mean(log(new_args[[i+1]]$data$Chist/report$Cpred), na.rm = TRUE))
-        fun_fixed <- c(NA, NA)
-        rescale_report(vars_div, vars_mult, var_trans, fun_trans, fun_fixed)
-      }
+      #if(new_args[[i+1]]$data$condition == "effort" && any(new_args[[i+1]]$data$Chist > 0, na.rm = TRUE)) {
+      #  vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
+      #                "R", "R_early", "R_eq", "R0", "B0", "E0", "N0", "E0_SR")
+      #  vars_mult <- c("Brec", "q")
+      #  var_trans <- c("R0", "q")
+      #  fun_trans <- c("/", "*")
+      #  rescale <- 1/exp(mean(log(new_args[[i+1]]$data$Chist/report$Cpred), na.rm = TRUE))
+      #  fun_fixed <- c(NA, NA)
+      #  rescale_report(vars_div, vars_mult, var_trans, fun_trans, fun_fixed)
+      #}
 
       FMort <- rbind(report$F, matrix(NA, i + 1, ncol(report$F)))
       if(data$nfleet > 1) FMort <- cbind(FMort, apply(report$F_at_age, 1, max, na.rm = TRUE) %>% c(rep(NA, i+1)))

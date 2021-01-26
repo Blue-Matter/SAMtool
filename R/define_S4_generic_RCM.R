@@ -218,14 +218,11 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
                   extra_args$OMeff <- TRUE
                 }
               }
-            } else {
-              if(is.null(data_vec$Cat)) {
-                stop("Conditioning on catch but no catch data found", call. = FALSE)
-              } else {
-                data_list$Chist <- data_vec$Cat
-                if(!is.null(data_vec$CV_Cat)) data_list$C_sd <- sdconv(1, data_vec$CV_Cat) 
-              }
+            } else if(is.null(data_vec$Cat)) {
+              stop("Conditioning on catch but no catch data found", call. = FALSE)
             }
+            data_list$Chist <- data_vec$Cat
+            if(!is.null(data_vec$CV_Cat)) data_list$C_sd <- sdconv(1, data_vec$CV_Cat) 
 
             # Index
             Ind <- pull_Index(data, OM@maxage)

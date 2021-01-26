@@ -366,7 +366,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                  lapply(1:nsurvey, individual_array_fn, obs = "data$s_CAL", pred = "report$s_CALpred", comps = "length", label = s_name))
               } else s_CAL_plots <- NULL
 
-              data_section <- c(C_matplot, E_matplot, C_plots, I_plots, CAA_plots, CAL_plots, MS_plots, s_CAA_plots, s_CAL_plots)
+              data_section <- c(C_matplot, C_plots, E_matplot, I_plots, CAA_plots, CAL_plots, MS_plots, s_CAA_plots, s_CAL_plots)
 
               # Model output
               sel_matplot <- rmd_matplot(x = "matrix(age, max_age + 1, nfleet)", y = "matrix(report$vul[nyears, , ], max_age + 1, nfleet)", col = "rich.colors(nfleet)",

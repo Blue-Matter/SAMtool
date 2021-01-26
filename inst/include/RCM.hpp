@@ -380,14 +380,16 @@ Type RCM(objective_function<Type> *obj) {
   }
 
   for(int ff=0;ff<nfleet;ff++) {
-    if(LWT_fleet(ff,1) > 0 && C_eq(ff) > 0 && condition != "effort") {
+    if(LWT_fleet(ff,1) > 0 && C_eq(ff) > 0) {
       nll_fleet(ff,1) -= LWT_fleet(ff,1) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), sigma_Ceq(ff), true);
     }
     
     for(int y=0;y<n_y;y++) {
-      if(C_hist(y,ff) > 0 || E_hist(y,ff) > 0) {
+      if((!R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) || E_hist(y,ff) > 0) {
         
-        if(nll_C && LWT_fleet(ff,0) > 0) nll_fleet(ff,0) -= dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
+        if(nll_C && LWT_fleet(ff,0) > 0) {
+          nll_fleet(ff,0) -= dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
+        }
         
         if(LWT_fleet(ff,2) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
           if(comp_like == "multinomial") {

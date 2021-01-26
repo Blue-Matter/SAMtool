@@ -43,7 +43,7 @@ pull_Ind <- function(Data, maxage) {
               s_sel = do.call(c, lapply(get_Ind, getElement, "s_sel")),
               slotname = do.call(c, lapply(get_Ind, getElement, "slotname")))
   if(!is.null(out$Index)) {
-    out$V <- matrix(NA_real_, maxage, ncol(out$Index))
+    out$V <- matrix(NA_real_, maxage + 1, ncol(out$Index))
     out$I_units <- rep(1, ncol(out$Index))
   } else {
     out$V <- out$I_units <- NULL
@@ -65,7 +65,7 @@ pull_AddInd <- function(Data, maxage) {
       I_sd <- array(NA_real_, dim(Index))
     }
 
-    V <- matrix(NA_real_, maxage, nindex)
+    V <- matrix(NA_real_, maxage + 1, nindex)
     s_sel <- rep(NA_character_, nindex)
     for(i in 1:nindex) {
       if(!all(is.na(Data@AddIndV[1, i, ]))) {
@@ -286,7 +286,10 @@ update_RCM_data <- function(data, OM, condition, dots) {
 
   lapply(dat_names, assign_for_compatibility)
 
-  if(is.null(data$Chist) && !is.null(data$Ehist)) condition <- "effort"
+  if(is.null(data$Chist) && !is.null(data$Ehist) && condition != "effort") {
+    message("No catch found. Only effort found. Switching condition = \"effort\".")
+    data$condition <- "effort"
+  }
 
   if(condition == "catch" || condition == "catch2") {
     if(is.null(data$Chist)) {
@@ -314,13 +317,13 @@ update_RCM_data <- function(data, OM, condition, dots) {
       }
     }
   }
-
+  
   if(condition == "effort") {
     data$condition <- "effort"
     if(is.null(data$Ehist)) {
       stop("Full time series of effort is needed.")
     } else {
-      if(any(is.na(data$Ehist))) stop("Effort time series is not complete (contains NA's")
+      if(any(is.na(data$Ehist))) stop("Effort time series is not complete (contains NA's)")
       if(any(data$Ehist < 0)) stop("All effort values should be positive.")
 
       if(!is.matrix(data$Ehist)) data$Ehist <- matrix(data$Ehist, ncol = 1)
@@ -504,7 +507,7 @@ update_RCM_data <- function(data, OM, condition, dots) {
   } else if(length(data$C_eq_sd) == 1) data$C_eq_sd <- rep(data$C_eq_sd, data$nfleet)
   if(length(data$C_eq_sd) != data$nfleet) stop("C_eq_sd needs to be of length nfleet (", data$nfleet, ").", call. = FALSE)
   
-  if(data$condition == "catch2" && any(data$C_eq > 0)) {
+  if(data$condition != "effort" && any(data$C_eq > 0)) {
     message("Equilibrium catch was detected. The corresponding equilibrium F will be estimated.")
   }
 
@@ -512,6 +515,9 @@ update_RCM_data <- function(data, OM, condition, dots) {
   if(data$condition == "effort") {
     if(length(data$E_eq) == 1) data$E_eq <- rep(data$E_eq, data$nfleet)
     if(length(data$E_eq) < data$nfleet) stop("E_eq needs to be of length nfleet (", data$nfleet, ").", call. = FALSE)
+  }
+  if(data$condition == "effort" && any(data$E_eq > 0)) {
+    message("Equilibrium effort was detected. The corresponding equilibrium F will be estimated.")
   }
 
   # Process survey age comps
@@ -707,7 +713,6 @@ check_OM_for_sampling <- function(OM, data) {
   OM@EffLower <- OM@EffUpper <- c(0, 1)
 
   ###### Observation Parameters - Iobs
-  
   if(any(data$Index > 0, na.rm = TRUE)) {
     Isd_check <- !is.null(data$I_sd) && any(data$I_sd > 0, na.rm = TRUE)
     if(!Isd_check) {
