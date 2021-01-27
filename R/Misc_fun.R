@@ -209,45 +209,6 @@ expand_comp_matrix <- function(Data, comp_type = c("CAA", "CAL")) {
   return(Data)
 }
 
-# var_div - report variables which are divided by the catch rescale
-# var_mult - report variables which are multiplied by the catch rescale
-# var_trans - transformed variables which need to be rescaled
-# fun_trans - the function for rescaling the transformed variables (usually either "*" or "/")
-# fun_fixed - the transformation from the output variable to the estimated variable indicated in var_trans (e.g. log, logit, NULL)
-#srescale_report <- function(var_div, var_mult, var_trans = NULL, fun_trans = NULL, fun_fixed = NULL) {
-#s  output <- mget(c("report", "rescale", "SD"), envir = parent.frame(), ifnotfound = list(NULL))
-#s  report <- output$report
-#s
-#s  if(!is.null(var_div)) report[var_div] <- lapply(report[var_div], "/", output$rescale)
-#s  if(!is.null(var_mult)) report[var_mult] <- lapply(report[var_mult], "*", output$rescale)
-#s  assign("report", report, envir = parent.frame())
-#s
-#s  if(!is.null(output$SD) && !is.character(output$SD)) {
-#s    SD <- output$SD
-#s    if(!is.null(var_trans)) {
-#s      for(i in 1:length(var_trans)) {
-#s        var_trans2 <- var_trans[i]
-#s        fun_trans2 <- fun_trans[i]
-#s        fun_fixed2 <- fun_fixed[i]
-#s
-#s        ind <- var_trans2 == names(SD$value)
-#s        if(any(ind)) {
-#s          SD$value[ind] <- do.call(match.fun(fun_trans2), list(SD$value[ind], output$rescale))
-#s          SD$sd[ind] <- do.call(match.fun(fun_trans2), list(SD$sd[ind], output$rescale))
-#s        }
-#s        if(!is.na(fun_fixed2)) {
-#s          fixed_name <- paste0(fun_fixed2, "_", var_trans2)
-#s          ind_fixed <- fixed_name == names(SD$par.fixed)
-#s          if(any(ind_fixed)) SD$par.fixed[ind_fixed] <- do.call(match.fun(fun_fixed2), list(SD$value[var_trans2]))
-#s        }
-#s      }
-#s    }
-#s    assign("SD", SD, envir = parent.frame())
-#s  }
-#s  invisible()
-#s}
-
-
 sample_steepness3 <- function(n, mu, cv, SR_type = c("BH", "Ricker")) {
   if(n == 1) {
     return(mu)

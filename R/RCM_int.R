@@ -651,17 +651,6 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   SD <- mod[[2]]
   report <- obj$report(obj$env$last.par.best) %>% RCM_posthoc_adjust(obj)
 
-  #if(data$condition == "effort" && any(data$Chist > 0, na.rm = TRUE)) {
-  #  vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
-  #                "R", "R_early", "R_eq", "R0", "B0", "E0", "N0", "E0_SR")
-  #  vars_mult <- c("Brec", "q")
-  #  var_trans <- c("R0", "q")
-  #  fun_trans <- c("/", "*")
-  #  rescale <- 1/exp(mean(log(data$Chist/report$Cpred), na.rm = TRUE))
-  #  fun_fixed <- c(NA, NA)
-  #  rescale_report(vars_div, vars_mult, var_trans, fun_trans, fun_fixed)
-  #}
-
   return(list(obj = obj, opt = opt, SD = SD, report = c(report, list(conv = !is.character(opt) && SD$pdHess))))
 }
 
@@ -855,17 +844,6 @@ RCM_retro <- function(x, nyr = 5) {
 
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2, dynamic_SSB0 = FALSE)
-
-      #if(new_args[[i+1]]$data$condition == "effort" && any(new_args[[i+1]]$data$Chist > 0, na.rm = TRUE)) {
-      #  vars_div <- c("B", "E", "C_eq_pred", "CAApred", "CALpred", "s_CAApred", "s_CALpred", "CN", "Cpred", "N", "VB",
-      #                "R", "R_early", "R_eq", "R0", "B0", "E0", "N0", "E0_SR")
-      #  vars_mult <- c("Brec", "q")
-      #  var_trans <- c("R0", "q")
-      #  fun_trans <- c("/", "*")
-      #  rescale <- 1/exp(mean(log(new_args[[i+1]]$data$Chist/report$Cpred), na.rm = TRUE))
-      #  fun_fixed <- c(NA, NA)
-      #  rescale_report(vars_div, vars_mult, var_trans, fun_trans, fun_fixed)
-      #}
 
       FMort <- rbind(report$F, matrix(NA, i + 1, ncol(report$F)))
       if(data$nfleet > 1) FMort <- cbind(FMort, apply(report$F_at_age, 1, max, na.rm = TRUE) %>% c(rep(NA, i+1)))
