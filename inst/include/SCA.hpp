@@ -183,6 +183,8 @@ Type SCA(objective_function<Type> *obj) {
   matrix<Type> s_CN(n_y,nsurvey);
   matrix<Type> s_BN(n_y,nsurvey);
   matrix<Type> Ipred(n_y,nsurvey);
+  s_CN.setZero();
+  s_BN.setZero();
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
       for(int a=0;a<n_age;a++) {
