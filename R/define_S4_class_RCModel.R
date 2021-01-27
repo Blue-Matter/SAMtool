@@ -1033,7 +1033,11 @@ plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = 
 }
 
 RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
-  nll_fleet <- x$nll_fleet %>% t()
+  if(inherits(x$nll_fleet, "array")) {
+    nll_fleet <- apply(x$nll_fleet, 2:3, sum) %>% t()
+  } else {
+    nll_fleet <- x$nll_fleet %>% t()
+  }
   nll_fleet[is.na(nll_fleet)] <- 0
   nll_fleet <- cbind(nll_fleet, rowSums(nll_fleet))
   nll_fleet <- rbind(nll_fleet, colSums(nll_fleet))
@@ -1042,7 +1046,11 @@ RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
 
   wt_fleet <- rbind(LWT$Chist, LWT$C_eq, LWT$CAA, LWT$CAL, LWT$MS) %>% structure(dimnames = list(rownames(nll_fleet)[1:5], f_name))
   
-  nll_survey <- x$nll_survey %>% t()
+  if(inherits(x$nll_survey, "array")) {
+    nll_survey <- apply(x$nll_survey, 2:3, sum) %>% t()
+  } else {
+    nll_survey <- x$nll_survey %>% t()
+  }
   nll_survey[is.na(nll_survey)] <- 0
   nll_survey <- cbind(nll_survey, rowSums(nll_survey))
   nll_survey <- rbind(nll_survey, colSums(nll_survey))

@@ -519,7 +519,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
                    SR_type = SR_type, LWT_fleet = LWT_fleet, LWT_survey = LWT_survey, comp_like = comp_like,
                    max_F = max_F, rescale = rescale, ageM = min(nyears, ceiling(StockPars$ageM[x, 1])),
                    yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup,
-                   use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
+                   use_prior = prior$use_prior, prior_dist = prior$pr_matrix, nll_gr = 0L)
 
   if(SR_type == "BH") {
     transformed_h <- logit((StockPars$hs[x] - 0.2)/0.8)

@@ -79,6 +79,8 @@ Type RCM(objective_function<Type> *obj) {
   
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see RCM_prior fn)
+  
+  DATA_INTEGER(nll_gr);    // Whether to ADREPORT annual likelihoods
 
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
@@ -345,8 +347,8 @@ Type RCM(objective_function<Type> *obj) {
   // Calc likelihood and parameter prior
   prior -= RCM_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
   
-  matrix<Type> nll_fleet(nfleet,5);
-  matrix<Type> nll_survey(nsurvey,3);
+  array<Type> nll_fleet(n_y,nfleet,5);
+  array<Type> nll_survey(n_y,nsurvey,3);
   Type nll_log_rec_dev = 0;
 
   nll_fleet.setZero();
@@ -355,72 +357,64 @@ Type RCM(objective_function<Type> *obj) {
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
       if(LWT_survey(sur,0) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
-        nll_survey(sur,0) -= dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
+        nll_survey(y,sur,0) -= LWT_survey(sur,0) * dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
       }
       
       if(LWT_survey(sur,1) > 0 && !R_IsNA(asDouble(s_CAA_n(y,sur))) && s_CAA_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_survey(sur,1) -= comp_multinom(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
+          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_multinom(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
         } else {
-          nll_survey(sur,1) -= comp_lognorm(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
+          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_lognorm(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
         }
       }
       
       if(LWT_survey(sur,2) > 0 && !R_IsNA(asDouble(s_CAL_n(y,sur))) && s_CAL_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_survey(sur,2) -= comp_multinom(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
+          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_multinom(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
         } else {
-          nll_survey(sur,2) -= comp_lognorm(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
+          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_lognorm(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
         }
       }
     }
-    nll_survey(sur,0) *= LWT_survey(sur,0);
-    nll_survey(sur,1) *= LWT_survey(sur,1);
-    nll_survey(sur,2) *= LWT_survey(sur,2);
   }
 
   for(int ff=0;ff<nfleet;ff++) {
     if(LWT_fleet(ff,1) > 0 && C_eq(ff) > 0) {
-      nll_fleet(ff,1) -= LWT_fleet(ff,1) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), sigma_Ceq(ff), true);
+      nll_fleet(0,ff,1) -= LWT_fleet(ff,1) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), sigma_Ceq(ff), true);
     }
     
     for(int y=0;y<n_y;y++) {
-      if((!R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) || E_hist(y,ff) > 0) {
+      if((condition != "effort" & C_hist(y,ff) > 0) || (condition == "effort" & E_hist(y,ff) > 0)) {
         
-        if(nll_C && LWT_fleet(ff,0) > 0) {
-          nll_fleet(ff,0) -= dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
+        if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff)))) {
+          nll_fleet(y,ff,0) -= LWT_fleet(ff,0) * dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
         }
         
         if(LWT_fleet(ff,2) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
-            nll_fleet(ff,2) -= comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
+            nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           } else {
-            nll_fleet(ff,2) -= comp_lognorm(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
+            nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_lognorm(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           }
         }
         
         if(LWT_fleet(ff,3) > 0 && !R_IsNA(asDouble(CAL_n(y,ff))) && CAL_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
-            nll_fleet(ff,3) -= comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
+            nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
           } else {
-            nll_fleet(ff,3) -= comp_lognorm(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
+            nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_lognorm(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
           }
         }
 
         if(LWT_fleet(ff,4) > 0 && !R_IsNA(asDouble(msize(y,ff))) && msize(y,ff) > 0) {
           if(msize_type == "length") {
-            nll_fleet(ff,4) -= dnorm_(msize(y,ff), MLpred(y,ff), CV_msize(ff) * msize(y,ff), true);
+            nll_fleet(y,ff,4) -= LWT_fleet(ff,4) * dnorm_(msize(y,ff), MLpred(y,ff), CV_msize(ff) * msize(y,ff), true);
           } else {
-            nll_fleet(ff,4) -= dnorm_(msize(y,ff), MWpred(y,ff), CV_msize(ff) * msize(y,ff), true);
+            nll_fleet(y,ff,4) -= LWT_fleet(ff,4) * dnorm_(msize(y,ff), MWpred(y,ff), CV_msize(ff) * msize(y,ff), true);
           }
         }
       }
     }
-
-    nll_fleet(ff,0) *= LWT_fleet(ff,0);
-    nll_fleet(ff,2) *= LWT_fleet(ff,2);
-    nll_fleet(ff,3) *= LWT_fleet(ff,3);
-    nll_fleet(ff,4) *= LWT_fleet(ff,4);
   }
 
   for(int y=0;y<n_y;y++) {
@@ -520,6 +514,11 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(s_L5);
     REPORT(s_LFS);
     REPORT(s_Vmaxlen);
+  }
+  
+  if(nll_gr) {
+    ADREPORT(nll_fleet);
+    ADREPORT(nll_survey);
   }
 
   return nll;
