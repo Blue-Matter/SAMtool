@@ -610,7 +610,7 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name) {
               "",
               "obj2 <- MakeADFun(data = new_dat, parameters = new_par, map = obj$env$map, random = obj$env$random, ADreport = TRUE,",
               "                  DLL = obj$env$DLL, silent = obj$env$silent)",
-              "gr <- obj2$gr() %>% structure(dimnames = list(rownames = names(fn), colnames = names(SD$par.fixed)))",
+              "gr <- obj2$gr() %>% structure(dimnames = list(rownames = names(obj2$fn()), colnames = names(SD$par.fixed)))",
               "unique_names <- SD$par.fixed %>% names() %>% unique()",
               "par_new <- lapply(unique_names, function(x) {",
               "  ind <- names(SD$par.fixed) == x",
