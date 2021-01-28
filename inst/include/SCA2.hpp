@@ -70,7 +70,8 @@ Type SCA2(objective_function<Type> *obj) {
   vector<Type> VB(n_y+1);           // Vulnerable biomass at year
   vector<Type> B(n_y+1);            // Total biomass at year
   vector<Type> E(n_y+1);            // Spawning biomass at year
-
+  
+  N.setZero();
   CN.setZero();
   Cpred.setZero();
   VB.setZero();
@@ -162,7 +163,7 @@ Type SCA2(objective_function<Type> *obj) {
   nll_comp.setZero();
   for(int y=0;y<n_y;y++) {
     for(int sur=0;sur<nsurvey;sur++) {
-      if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
+      if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(y,sur))) && I_hist(y,sur) > 0) {
         nll_comp(sur) -= LWT(sur) * dnorm(log(I_hist(y,sur)), log(Ipred(y,sur)), I_sd(y,sur), true);
       }
     }
