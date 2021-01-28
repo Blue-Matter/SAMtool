@@ -587,8 +587,7 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
     map_s_vul_par <- dots$map_s_vul_par
   }
   
-  TMB_params <- list(R0x = ifelse(data$condition == "catch2" | TMB_data$nll_C | prior$use_prior[1], 
-                                  log(StockPars$R0[x] * rescale), 0),
+  TMB_params <- list(R0x = ifelse(!is.na(StockPars$R0[x]), log(StockPars$R0[x] * rescale), 0),
                      transformed_h = transformed_h, log_M = log(mean(StockPars$M_ageArray[x, , nyears])),
                      vul_par = vul_par, s_vul_par = s_vul_par,
                      log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
@@ -598,9 +597,9 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
   if(data$condition == "catch") {
     TMB_params$log_F_dev[TMB_data$yind_F + 1, 1:nfleet] <- log(0.5 * mean(TMB_data$M[nyears, ]))
   }
-
+  
   map <- list()
-  if(data$condition != "catch2" && !TMB_data$nll_C && !prior$use_prior[1]) map$R0x <- factor(NA)
+  if(data$condition == "effort" && !sum(TMB_data$C_hist, na.rm = TRUE) && !prior$use_prior[1]) map$R0x <- factor(NA)
   if(!prior$use_prior[2]) map$transformed_h <- factor(NA)
   if(!prior$use_prior[3]) map$log_M <- factor(NA)
   map$log_tau <- factor(NA)
