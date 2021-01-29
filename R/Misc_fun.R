@@ -174,6 +174,7 @@ sdreport_int <- function(object, select = c("all", "fixed", "random", "report"),
 
   out <- rbind(AD, fix, random)
   out <- cbind(out, "CV" = ifelse(abs(out[, "Estimate"]) > 0, out[, "Std. Error"]/abs(out[, "Estimate"]), NA_real_))
+  rownames(out) <- make_unique_names(rownames(out))
   return(out)
 }
 

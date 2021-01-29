@@ -428,10 +428,10 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                              "`r nll[[5]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n")
               
               corr_matrix <- c("### Correlation matrix\n",
-                               "`r SD$env$corr.fixed %>% as.data.frame()`\n\n")
+                               "`r SD$env$corr.fixed %>% structure(dimnames = list(make_unique_names(rownames(.)), make_unique_names(colnames(.)))) %>% as.data.frame()`\n\n")
               
               if(is.array(report$nll_fleet)) {
-                like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name))
+                like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_survey = any(data$Index > 0, na.rm = TRUE)))
               } else {
                 like_gradients <- NULL
               }

@@ -14,7 +14,7 @@ License: GPL-3
 Depends: R (>= 3.5.0), MSEtool (>= 3.0.0)
 Imports: TMB, corpcor, dplyr, gplots, graphics, methods, snowfall, stats, utils, rmarkdown
 LinkingTo: TMB, RcppEigen
-Suggests: knitr, testthat, shiny, mvtnorm, reshape2
+Suggests: knitr, testthat, shiny, mvtnorm, reshape2, caret, ggplot2
 LazyData: yes
 LazyLoad: yes
 RoxygenNote: 7.1.1

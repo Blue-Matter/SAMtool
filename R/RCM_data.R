@@ -307,7 +307,8 @@ update_RCM_data <- function(data, OM, condition, dots) {
       data$nfleet <- ncol(data$Chist)
       data$Ehist <- matrix(0, data$nyears, data$nfleet)
 
-      if(is.null(data$Index) && is.null(data$CAA) && is.null(data$CAL) && is.null(data$ML) && is.null(data$Ehist)) {
+      if(is.null(data$Index) && is.null(data$CAA) && is.null(data$CAL) && is.null(data$ML) && 
+         is.null(data$MS) && is.null(data$Ehist)) {
         message("No data other than Chist is provided. Model will switch to conditioning on equilibrium effort.")
         data$condition <- "effort"
         data$Ehist <- matrix(1, data$nyears, data$nfleet)
@@ -477,8 +478,8 @@ update_RCM_data <- function(data, OM, condition, dots) {
       if(length(data$MS) != data$nyears) stop("Mean size vector (MS) must be of length ", data$nyears, ".", call. = FALSE)
       data$MS <- matrix(data$MS, ncol = 1)
     }
-    if(nrow(data$MS) != data$nyears) stop("Number of MS rows (", nrow(data$ML), ") does not equal nyears (", data$nyears, "). NAs are acceptable.", call. = FALSE)
-    if(ncol(data$MS) != data$nfleet) stop("Number of MS columns (", ncol(data$ML), ") does not equal nfleet (", data$nfleet, "). NAs are acceptable.", call. = FALSE)
+    if(nrow(data$MS) != data$nyears) stop("Number of MS rows (", nrow(data$MS), ") does not equal nyears (", data$nyears, "). NAs are acceptable.", call. = FALSE)
+    if(ncol(data$MS) != data$nfleet) stop("Number of MS columns (", ncol(data$MS), ") does not equal nfleet (", data$nfleet, "). NAs are acceptable.", call. = FALSE)
 
     if(!is.null(data$ML_sd) && is.null(data$MS_cv)) { # Backwards compatibility
       message("\n\n ** data$ML_sd is no longer used. Use data$MS_cv instead. ** \n\n")
@@ -623,7 +624,7 @@ check_OM_for_sampling <- function(OM, data) {
   LenCV_check <- length(OM@LenCV) == 2 || !is.null(cpars$LenCV) || !is.null(cpars$LatASD)
   if(!LenCV_check) {
     any_CAL <- !is.null(data$CAL) && any(data$CAL > 0, na.rm = TRUE)
-    any_ML <- !is.null(data$ML) && any(data$ML > 0, na.rm = TRUE)
+    any_ML <- data$MS_type == "length" && !is.null(data$MS) && any(data$MS > 0, na.rm = TRUE)
     any_s_CAL <- !is.null(data$s_CAL) && any(data$s_CAL > 0, na.rm = TRUE)
     if(any_CAL || any_ML || any_s_CAL) {
       stop("OM@LenCV not found in OM.", call. = FALSE)

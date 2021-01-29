@@ -370,7 +370,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
   }
 
   # Check whether observed matches predicted
-  if(data$condition == "catch" || data$condition == "catch2") {
+  if(data$condition == "catch2") {
     catch_check_fn <- function(x, report, data) {
       if(report[[x]]$conv) {
         catch_diff <- report[[x]]$Cpred/data$Chist - 1
@@ -672,7 +672,8 @@ par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, data, dots) {
   run_test <- function(x) if(is.null(dim(x))) vector_fn(x) else array_fn(x)
 
   StockPars_subset <- StockPars[c("hs", "procsd", "ageMarray", "M_ageArray", "Linf", "Len_age", "Wt_age", "Mat_age")]
-  if(any(data$CAL > 0, na.rm = TRUE) || any(data$s_CAL > 0, na.rm = TRUE) || any(data$ML > 0, na.rm = TRUE)) {
+  if(any(data$CAL > 0, na.rm = TRUE) || any(data$s_CAL > 0, na.rm = TRUE) || 
+     (data$MS_type == "length" & any(data$MS > 0, na.rm = TRUE))) {
     StockPars_subset <- c(StockPars_subset, StockPars["LenCV"])
   }
   S_test <- vapply(StockPars_subset, run_test, logical(1))

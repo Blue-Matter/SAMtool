@@ -600,8 +600,7 @@ RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
 }
 
 
-rmd_RCM_likelihood_gradients <- function(f_name, s_name) {
-  
+rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
   header <- c("```{r}",
               "obj <- x@mean_fit$obj",
               "new_dat <- structure(obj$env$data, check.passed = NULL)",
@@ -611,52 +610,86 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name) {
               "obj2 <- MakeADFun(data = new_dat, parameters = new_par, map = obj$env$map, random = obj$env$random, ADreport = TRUE,",
               "                  DLL = obj$env$DLL, silent = obj$env$silent)",
               "gr <- obj2$gr() %>% structure(dimnames = list(rownames = names(obj2$fn()), colnames = names(SD$par.fixed)))",
-              "unique_names <- SD$par.fixed %>% names() %>% unique()",
-              "par_new <- lapply(unique_names, function(x) {",
-              "  ind <- names(SD$par.fixed) == x",
-              "  if(sum(ind) > 1) {",
-              "    paste0(x, \"_\", 1:sum(ind))",
-              "  } else x",
-              "})",
-              "par_names <- data.frame(par_type = colnames(gr), par = do.call(c, par_new))",
-              "",
+              "par_names <- data.frame(par_type = colnames(gr), par = make_unique_names(names(SD$par.fixed)))",
+              "```\n\n")
+  
+  if(!requireNamespace("ggplot2", quietly = TRUE) || !requireNamespace("reshape2", quietly = TRUE)) {
+    body <- c("#### NULL \n\nInstall the ggplot2 and reshape2 packages to plot gradients.\n\n")
+  } else {
+    
+    fleet_lapply_fn <- function(ff) {
+      c(paste("####", f_name[ff], "\n"),
+        "```{r, fig.cap = \"Likelihood gradients (annual values by data type in columns) with respect to model parameters (rows).\"}",
+        paste0("gr_plot <- dplyr::filter(gr_fleet, Fleet == \"", f_name[ff], "\")"),
+        "if(nrow(gr_plot)) {",
+        "  ggplot(gr_plot, aes(Year, Gradient, group = par, colour = par)) + facet_grid(par_type ~ data_type, scales = \"free_y\") +",
+        paste0("  geom_hline(yintercept = 0, linetype = 3) + geom_line() + theme_bw() + theme(legend.position = \"none\") + ggtitle(\"", f_name[ff], "\")"),
+        "}",
+        "```\n\n")
+    }
+    survey_lapply_fn <- function(sur) {
+      c(paste("####", s_name[sur], "\n"),
+        "```{r, fig.cap = \"Likelihood gradients (annual values by data type in columns) with respect to model parameters (rows).\"}",
+        paste0("gr_plot <- dplyr::filter(gr_survey, Survey == \"", s_name[sur], "\")"),
+        "if(nrow(gr_plot)) {",
+        "  ggplot(gr_plot, aes(Year, Gradient, group = par, colour = par)) + facet_grid(par_type ~ data_type, scales = \"free_y\") +",
+        paste0("  geom_hline(yintercept = 0, linetype = 3) + geom_line() + theme_bw() + theme(legend.position = \"none\") + ggtitle(\"", s_name[sur], "\")"),
+        "}",
+        "```\n\n")
+    }
+    
+    f_plots <- lapply(1:length(f_name), fleet_lapply_fn) %>% unlist()
+    if(do_survey) {
+      s_plots <- lapply(1:length(s_name), survey_lapply_fn) %>% unlist()
+    } else {
+      s_plots <- NULL
+    }
+    body <- c("```{r}",
               "gr_fleet <- gr[rownames(gr) == \"nll_fleet\", ] %>% array(dim = dim(report$nll_fleet) %>% c(length(SD$par.fixed))) %>%",
               "  structure(dimnames = list(Year = Year, Fleet = f_name, data_type = c(\"Catch\", \"Equilibrium Catch\", \"CAA\", \"CAL\", \"Mean size\"),",
               "                            par = par_names$par)) %>%", 
               "  reshape2::melt(value.name = \"Gradient\") %>% dplyr::left_join(par_names, by = \"par\") %>%",
-              "  group_by(data_type) %>% dplyr::filter(any(Gradient != 0))",
+              "  dplyr::group_by(data_type) %>% dplyr::filter(any(Gradient != 0))",
               "",
               "gr_survey <- gr[rownames(gr) == \"nll_survey\", ] %>% array(dim = dim(report$nll_survey) %>% c(length(SD$par.fixed))) %>%",
               "  structure(dimnames = list(Year = Year, Survey = s_name, data_type = c(\"Index\", \"CAA\", \"CAL\"),",
               "                            par = par_names$par)) %>%", 
               "  reshape2::melt(value.name = \"Gradient\") %>% dplyr::left_join(par_names, by = \"par\") %>%",
-              "  group_by(data_type) %>% dplyr::filter(any(Gradient != 0))",
-              "```")
-  
-  fleet_lapply_fn <- function(ff) {
-    c(paste("####", f_name[ff], "\n"),
-      "```{r, fig.cap = \"Likelihood gradients (annual values by data type in columns) with respect to model parameters (rows).\"}",
-      paste0("gr_plot <- dplyr::filter(gr_fleet, Fleet == \"", f_name[ff], "\")"),
-      "if(nrow(gr_plot)) {",
-      "  ggplot(gr_plot, aes(Year, Gradient, group = par, colour = par)) + facet_grid(par_type ~ data_type, scales = \"free_y\") +",
-      paste0("  geom_hline(yintercept = 0, linetype = 3) + geom_line() + theme_bw() + theme(legend.position = \"none\") + ggtitle(\"", f_name[ff], "\")"),
-      "}",
-      "```")
+              "  dplyr::group_by(data_type) %>% dplyr::filter(any(Gradient != 0))",
+              "```\n\n", f_plots, s_plots)
   }
   
-  survey_lapply_fn <- function(sur) {
-    c(paste("####", s_name[sur], "\n"),
-      "```{r, fig.cap = \"Likelihood gradients (annual values by data type in columns) with respect to model parameters (rows).\"}",
-      paste0("gr_plot <- dplyr::filter(gr_survey, Survey == \"", s_name[sur], "\")"),
-      "if(nrow(gr_plot)) {",
-      "  ggplot(gr_plot, aes(Year, Gradient, group = par, colour = par)) + facet_grid(par_type ~ data_type, scales = \"free_y\") +",
-      paste0("  geom_hline(yintercept = 0, linetype = 3) + geom_line() + theme_bw() + theme(legend.position = \"none\") + ggtitle(\"", s_name[sur], "\")"),
-      "}",
-      "```")
+  if(requireNamespace("caret", quietly = TRUE)) {
+    jac <- c("#### Linear combos\n",
+             "",
+             "```{r}",
+             "gr_combo <- gr[rownames(gr) %in% c(\"nll_fleet\", \"nll_survey\"), ] %>% caret::findLinearCombos()",
+             "if(is.null(gr_combo$remove)) {",
+             "  print(\"Jacobian matrix is of full rank, according to caret::findLinearCombos().\")",
+             "} else {",
+             "  combo_report <- data.frame(`Parameter Number` = gr_combo$remove, `Parameter Name` = par_names$par[gr_combo$remove])",
+             "  print(\"Jacobian matrix is not of full rank, according to caret::findLinearCombos(). Reduce number of model parameters?\")",
+             "  print(\"See table below:\")",
+             "}",
+             "```\n\n",
+             "```{r} \nif(!is.null(gr_combo$remove)) combo_report\n```\n\n",
+             "Output of caret::findLinearCombos():\n",
+             "```{r}\n gr_combo\n```\n\n")
+  } else {
+    jac <-  c("#### Linear combos\n",
+              "",
+              "Install the caret package to evaluate if Jacobian matrix is of full rank.\n\n")
   }
-  
-  f_plots <- lapply(1:length(f_name), fleet_lapply_fn)
-  s_plots <- lapply(1:length(s_name), survey_lapply_fn)
-  
-  c(header, do.call(c, f_plots), do.call(c, s_plots))
+  c(header, body, jac)
+}
+
+make_unique_names <- function(par_names) {
+  unique_names <- par_names %>% unique()
+  par_new <- lapply(unique_names, function(x) {
+    ind <- par_names == x
+    if(sum(ind) > 1) {
+      paste0(x, "_", 1:sum(ind))
+    } else x
+  })
+  do.call(c, par_new)
 }

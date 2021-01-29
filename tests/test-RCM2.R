@@ -102,3 +102,42 @@ Hist@Data@Misc$StockPars$R0a
 Hist@Data@Misc$StockPars$SSBpR
 
 
+
+
+
+###### Condition on effort with patchy catch
+datS<-readRDS("tests/snapper/datS.rda")
+OM<-readRDS("tests/snapper/OM.rda")
+
+input<-list()
+input$ESS<-100
+input$wt_comp<-1
+input$max_F<-5
+input$C_eq_val=0
+selectivity="logistic"
+ncpus=1
+condition="effort"
+
+out<-RCM(OM,datS,
+         ESS = rep(input$ESS,2),
+         LWT = list(CAA=input$Wt_comp,CAL=input$Wt_comp),
+         max_F = input$max_F,
+         C_eq=input$C_eq_val,
+         selectivity=selectivity,
+         condition=condition,
+         cores = ncpus,
+         mean_fit=TRUE,
+         #drop_nonconv=TRUE,
+         control=list(eval.max=1E4, iter.max=1E4, abs.tol=1e-6))
+
+plot(out)
+
+###### Issue with catch2?
+dat <- readRDS("tests/tiger_flathead/dat.rda")
+OM <- readRDS("tests/tiger_flathead/OM.rda")
+out <- RCM(OM, dat, mean_fit = TRUE, cores = 4, condition = 'catch2')
+
+
+
+
+

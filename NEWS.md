@@ -1,5 +1,10 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.1.0
+- Edits to fix valgrind and sanitizer issues in TMB code.
+- Likelihood gradients, the derivatives of the likelihood of each annual data point with respect to model parameters, are plotted in the RCM markdown report. For this purpose, the annual age or length composition is considered to be a single piece of data. This diagnostic could be informative on how informative the data are to model parameters, with more influential data points having larger gradients.
+- When conditioned on effort, the `RCM` will now incorporate catches into the likelihood as a default. This allows the model to estimate F and R0 when conditioned on effort and there is patchy catch data.
+
 ## SAMtool 1.0.0
 - Development of the assessment models and OM conditioning model in SAMtool 1.0.0 continues from MSEtool 2.0.1. `multiMSE` remains in MSEtool.
 - The age structure of the SCA models (`SCA`, `SCA_Pope`, `SSS`) start at age 0 following the change in the MSEtool OM.
