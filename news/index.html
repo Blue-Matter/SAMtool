@@ -147,6 +147,15 @@
       <small>Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="samtool-110" class="section level2">
+<h2 class="hasAnchor">
+<a href="#samtool-110" class="anchor"></a>SAMtool 1.1.0</h2>
+<ul>
+<li>Edits to fix valgrind and sanitizer issues in TMB code.</li>
+<li>Likelihood gradients, the derivatives of the likelihood of each annual data point with respect to model parameters, are plotted in the RCM markdown report. For this purpose, the annual age or length composition is considered to be a single piece of data. This diagnostic could be informative on how informative the data are to model parameters, with more influential data points having larger gradients.</li>
+<li>When conditioned on effort, the <code>RCM</code> will now incorporate catches into the likelihood as a default. This allows the model to estimate F and R0 when conditioned on effort and there is patchy catch data.</li>
+</ul>
+</div>
     <div id="samtool-100" class="section level2">
 <h2 class="hasAnchor">
 <a href="#samtool-100" class="anchor"></a>SAMtool 1.0.0</h2>
