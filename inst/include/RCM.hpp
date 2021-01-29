@@ -384,9 +384,11 @@ Type RCM(objective_function<Type> *obj) {
     }
     
     for(int y=0;y<n_y;y++) {
-      if((condition != "effort" & C_hist(y,ff) > 0) || (condition == "effort" & E_hist(y,ff) > 0)) {
+      int check1 = (condition != "effort") & (C_hist(y,ff) > 0);
+      int check2 = (condition == "effort") & (E_hist(y,ff) > 0);
+      if(check1 || check2) {
         
-        if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff)))) {
+        if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {
           nll_fleet(y,ff,0) -= LWT_fleet(ff,0) * dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
         }
         
