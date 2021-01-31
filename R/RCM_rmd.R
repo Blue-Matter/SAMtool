@@ -504,6 +504,7 @@ rmd_RCM_Hist_compare <- function() {
     "}",
     "```\n")
 }
+
 plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = NULL, annual_ylab = "Frequency",
                                  annual_yscale = c("proportions", "raw"), N = if(is.null(dat)) NULL else round(rowSums(dat)), dat_linewidth = 2, dat_color = "black") {
   old_par <- par(no.readonly = TRUE)
@@ -622,8 +623,8 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
         "```{r, fig.cap = \"Likelihood gradients (annual values by data type in columns) with respect to model parameters (rows).\"}",
         paste0("gr_plot <- dplyr::filter(gr_fleet, Fleet == \"", f_name[ff], "\")"),
         "if(nrow(gr_plot)) {",
-        "  ggplot(gr_plot, aes(Year, Gradient, group = par, colour = par)) + facet_grid(par_type ~ data_type, scales = \"free_y\") +",
-        paste0("  geom_hline(yintercept = 0, linetype = 3) + geom_line() + theme_bw() + theme(legend.position = \"none\") + ggtitle(\"", f_name[ff], "\")"),
+        "  ggplot2::ggplot(gr_plot, ggplot2::aes(Year, Gradient, group = par, colour = par)) + ggplot2::facet_grid(par_type ~ data_type, scales = \"free_y\") +",
+        paste0("  ggplot2::geom_hline(yintercept = 0, linetype = 3) + ggplot2::geom_line() + ggplot2::theme_bw() + ggplot2::theme(legend.position = \"none\") + ggplot2::ggtitle(\"", f_name[ff], "\")"),
         "}",
         "```\n\n")
     }
@@ -632,8 +633,8 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
         "```{r, fig.cap = \"Likelihood gradients (annual values by data type in columns) with respect to model parameters (rows).\"}",
         paste0("gr_plot <- dplyr::filter(gr_survey, Survey == \"", s_name[sur], "\")"),
         "if(nrow(gr_plot)) {",
-        "  ggplot(gr_plot, aes(Year, Gradient, group = par, colour = par)) + facet_grid(par_type ~ data_type, scales = \"free_y\") +",
-        paste0("  geom_hline(yintercept = 0, linetype = 3) + geom_line() + theme_bw() + theme(legend.position = \"none\") + ggtitle(\"", s_name[sur], "\")"),
+        "  ggplot2::ggplot(gr_plot, ggplot2::aes(Year, Gradient, group = par, colour = par)) + ggplot2::facet_grid(par_type ~ data_type, scales = \"free_y\") +",
+        paste0("  ggplot2::geom_hline(yintercept = 0, linetype = 3) + ggplot2::geom_line() + ggplot2::theme_bw() + ggplot2::theme(legend.position = \"none\") + ggplot2::ggtitle(\"", s_name[sur], "\")"),
         "}",
         "```\n\n")
     }
