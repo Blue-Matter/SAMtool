@@ -85,7 +85,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   data <- list(model = "SCA_Pope", C_hist = C_hist, rescale = rescale, 
                I_hist = I_hist, I_sd = matrix(0.01, n_y, 1), I_units = 1, I_vul = matrix(1, n_age, 1), 
                abs_I = 0, nsurvey = 1, LWT = 1,
-               CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(0, n_y), n_y = n_y, n_age = n_age, M = M,
+               CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(NA_real_, n_y), n_y = n_y, n_age = n_age, M = M,
                weight = Wa, mat = mat_age, vul_type = "logistic",
                SR_type = SR, CAA_dist = "multinomial", est_early_rec_dev = rep(0, n_age - 1),
                est_rec_dev = rep(0, n_y))
