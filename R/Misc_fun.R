@@ -95,14 +95,10 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
     low[match(c("U_equilibrium", "F_equilibrium"), names(obj$par))] <- 0
   }
   opt <- try(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low)), silent = TRUE)
-  if(is.character(opt) && all(is.na(obj$gr()))) {
-    opt <- try(suppressWarnings(nlminb(obj$par, obj$fn, hessian = h, control = control, lower = low)), silent = TRUE)
-  }
-  SD <- get_sdreport(obj, opt)
+  SD <- get_sdreport(obj)
 
-  if(restart > 0 && !is.character(SD) && !SD$pdHess) {
-    if(!is.character(opt)) obj$par <- opt$par
-    obj$par <- obj$par * exp(rnorm(length(obj$par), 0, 1e-3))
+  if(!SD$pdHess && restart > 0) {
+    if(!is.character(opt)) obj$par <- opt$par * exp(rnorm(length(opt$par), 0, 1e-3))
     Recall(obj, control, use_hessian, restart - 1)
   } else {
     return(list(opt = opt, SD = SD))
@@ -110,42 +106,59 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
 }
 
 
-get_sdreport <- function(obj, opt) {
-  if(is.character(opt)) par.fixed <- NULL else par.fixed <- opt$par
-  if(is.null(obj$env$random) && !is.character(opt)) h <- obj$he(opt$par) else h <- NULL
+check_det <- function(h, abs_val = 0.1, is_null = TRUE) {
+  if(is.null(h)) return(is_null)
+  det_h <- det(h) %>% abs()
+  !is.na(det_h) && det_h < abs_val
+}
 
-  res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE))
-
-  if(!is.character(res) && !res$pdHess && !is.character(opt) && !is.null(h)) {
-    h <- suppressWarnings(optimHess(opt$par, obj$fn, obj$gr))
-    res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = FALSE))
+get_sdreport <- function(obj, getReportCovariance = FALSE) {
+  par.fixed <- obj$env$last.par.best
+  if(is.null(obj$env$random)) {
+    h <- obj$he(par.fixed)
+    if(any(is.na(h)) || det(h) <= 0) {
+      h <- NULL
+    } else {
+      res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
+      if(!res$pdHess) h <- NULL
+    }
+  } else {
+    par.fixed <- par.fixed[-obj$env$random] 
+    h <- NULL
   }
-
-  if(!is.character(res) && res$pdHess && all(is.nan(res$cov.fixed))) {
-    if(is.null(h)) h <- suppressWarnings(optimHess(opt$par, obj$fn, obj$gr))
+  
+  if(check_det(h)) {  # If hessian doesn't exist or marginal positive-definite cases, with -0.1 < det(h) <= 0
+    h <- suppressWarnings(optimHess(par.fixed, obj$fn, obj$gr))
+    res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
+  }
+  
+  if(requireNamespace("numDeriv", quietly = TRUE) && !res$pdHess && check_det(h)) {
+    h <- numDeriv::jacobian(obj$gr, par.fixed)
+    res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
+  }
+  
+  if(res$pdHess && all(is.na(res$cov.fixed))) {
     if(!is.character(try(chol(h), silent = TRUE))) res$cov.fixed <- chol2inv(chol(h))
   }
 
-  if(!is.character(res) && !is.null(par.fixed)) {
-    obj2 <- MakeADFun(obj$env$data, obj$env$parameters, type = "ADFun",
-                      ADreport = TRUE, DLL = obj$env$DLL, silent = obj$env$silent)
-    gr <- obj2$gr(obj$env$last.par.best)
-    if(any(is.na(gr))) {
+  obj2 <- MakeADFun(obj$env$data, obj$env$parameters, type = "ADFun", ADreport = TRUE, 
+                    DLL = obj$env$DLL, silent = obj$env$silent)
+  gr <- obj2$gr(obj$env$last.par.best)
+  if(any(is.na(gr))) {
+    res$env$gradient.AD <- rep(NA_real_, nrow(gr))
+  } else {
+    inv_gr <- try(pseudoinverse(gr, tol = 1e-4), silent = TRUE)
+    if(is.character(inv_gr)) {
       res$env$gradient.AD <- rep(NA_real_, nrow(gr))
     } else {
-      inv_gr <- try(gr %>% pseudoinverse(tol = 1e-4), silent = TRUE)
-      if(is.character(inv_gr)) {
-        res$env$gradient.AD <- rep(NA_real_, nrow(gr))
-      } else {
-        if(!is.null(obj$env$random)) inv_gr <- inv_gr[-obj$env$random, , drop = FALSE]
-        res$env$gradient.AD <- colSums(inv_gr * as.vector(res$gradient.fixed))
-      }
+      if(!is.null(obj$env$random)) inv_gr <- inv_gr[-obj$env$random, , drop = FALSE]
+      res$env$gradient.AD <- colSums(inv_gr * as.vector(res$gradient.fixed))
     }
   }
-  if(!is.character(res)) {
-    res$env$corr.fixed <- suppressWarnings(res$cov.fixed %>% cov2cor() %>% round(3)) %>% 
-      structure(dimnames = list(names(res$par.fixed), names(res$par.fixed)))
-  }
+  
+  res$env$corr.fixed <- suppressWarnings(cov2cor(res$cov.fixed) %>% round(3)) %>% 
+    structure(dimnames = list(names(res$par.fixed), names(res$par.fixed)))
+  
   return(res)
 }
 
