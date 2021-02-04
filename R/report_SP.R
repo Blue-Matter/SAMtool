@@ -112,6 +112,17 @@ profile_likelihood_SP <- function(Assessment, ...) {
       }
       obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map,
                         random = Assessment@obj$env$random, DLL = "SAMtool", silent = TRUE)
+      high_F <- try(obj2$report(c(obj2$par, obj2$env$last.par[obj2$env$random]))$penalty > 0)
+      if(!is.character(high_F) && !is.na(high_F) && high_F) {
+        for(ii in 1:10) {
+          if(profile_par == "MSY") {
+            obj2$par["log_FMSY"] <- -0.5 + obj2$par["log_FMSY"]
+          } else {
+            obj2$par["MSYx"] <- 0.5 + obj2$par["MSYx"]
+          }
+          if(obj2$report(c(obj2$par, obj2$env$last.par[obj2$env$random]))$penalty > 0) break
+        }
+      }
       opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
       if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
     }
