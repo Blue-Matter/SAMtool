@@ -112,7 +112,8 @@ profile_likelihood_SP <- function(Assessment, ...) {
       }
       obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map,
                         random = Assessment@obj$env$random, DLL = "SAMtool", silent = TRUE)
-      high_F <- try(obj2$report(c(obj2$par, obj2$env$last.par[obj2$env$random]))$penalty > 0)
+      high_F <- try(obj2$report(c(obj2$par, obj2$env$last.par[obj$env$random]))$penalty > 0 ||
+                      any(is.na(obj2$report(c(obj2$par, obj2$env$last.par[obj$env$random]))$F)), silent = TRUE)
       if(!is.character(high_F) && !is.na(high_F) && high_F) {
         for(ii in 1:10) {
           if(profile_par == "MSY") {

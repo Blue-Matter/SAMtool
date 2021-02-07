@@ -215,6 +215,16 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
 
   obj <- MakeADFun(data = info$data, parameters = info$params, random = random, map = map, hessian = TRUE,
                    DLL = "SAMtool", inner.control = inner.control, silent = silent)
+  
+  high_F <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0 ||
+                  any(is.na(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$F)), silent = TRUE)
+  if(!is.character(high_F) && !is.na(high_F) && high_F) {
+    for(ii in 1:10) {
+      obj$par["R0x"] <- 0.5 + obj$par["R0x"]
+      if(all(!is.na(obj$report(obj$par)$F)) && 
+         obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty == 0) break
+    }
+  }
 
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]

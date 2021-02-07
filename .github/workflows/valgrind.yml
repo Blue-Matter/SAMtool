@@ -1,0 +1,55 @@
+# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
+# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+on:
+  push:
+    branches:
+      - valgrind
+  pull_request:
+    branches:
+      - valgrind
+
+name: valgrind
+
+jobs:
+  valgrind:
+    runs-on: ubuntu-latest
+    container: wch1/r-debug
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: |
+          install.packages("remotes")
+          remotes::install_deps(dependencies = TRUE)
+        shell: RDscript {0}
+
+      - name: Install package
+        run: RD CMD INSTALL .
+        
+      - name: Save TMB objects
+        run: |
+          library(SAMtool)
+          assess <- c("DD_TMB", "DD_SS", "SCA", "SCA2", "SCA_Pope", "SCA_RWM", "SP", "SP_SS")
+          assess_sim <- lapply(assess, do.call, args = list(Data = MSEtool::SimulatedData))
+          names(assess_sim) <- assess
+          saveRDS(assess_sim, file = "assess_sim.rds")
+          
+          assess_rs <- lapply(assess[!grepl("SCA", assess)], do.call, args = list(Data = MSEtool::Red_snapper))
+          names(assess_rs) <- assess[!grepl("SCA", assess)]
+          saveRDS(assess_rs, file = "assess_rs.rds")
+          
+          writeLines(c("library(SAMtool)",
+          "assess_sim <- readRDS(\"assess_sim.rds\")",
+          "for(i in 1:length(assess_sim)) {",
+          "  print(names(assess_sim)[i])",
+          "  assess_sim[[i]]@obj$retape()",
+          "}",
+          "assess_rs <- readRDS(\"assess_rs.rds\")",
+          "for(i in 1:length(assess_rs)) {",
+          "  print(names(assess_rs)[i])",
+          "  assess_rs[[i]]@obj$retape()",
+          "}"), con = "val.R")
+        shell: RDscript {0}
+      
+      - name: Run valgrind
+        run: RD -d valgrind --vanilla < val.R

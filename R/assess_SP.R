@@ -272,12 +272,13 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                    map = map, random = random, DLL = "SAMtool", silent = silent)
   
-  high_F <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0, silent = TRUE)
+  high_F <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0 ||
+                  any(is.na(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$F)), silent = TRUE)
   if(!is.character(high_F) && !is.na(high_F) && high_F) {
     for(ii in 1:10) {
       obj$par["MSYx"] <- 0.5 + obj$par["MSYx"]
       if(all(!is.na(obj$report(obj$par)$F)) && 
-         obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0) break
+         obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty == 0) break
     }
   }
   

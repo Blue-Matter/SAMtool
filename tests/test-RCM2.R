@@ -132,12 +132,37 @@ out<-RCM(OM,datS,
 
 plot(out)
 
+### Compare RCM to OM
+#OM <- out@OM
+#Hist <- runMSE(out@OM, Hist = TRUE)
+#
+#N_RCM <- lapply(out@Misc, getElement, "N") %>% simplify2array()
+#N_Hist <- Hist@AtAge$Number %>% apply(c(1, 2, 3), sum)
+#
+#range(OM@cpars$Find - Hist@SampPars$Fleet$Find * Hist@SampPars$Fleet$qs)
+#range(OM@cpars$V - Hist@AtAge$Select)
+#OM@cpars$R0 - Hist@SampPars$Stock$R0
+#
+#SSB_RCM <- lapply(out@Misc, getElement, "E") %>% simplify2array()
+#SSB_Hist <- Hist@AtAge$SBiomass %>% apply(c(1, 3), sum)
+#
+#OM2 <- out@OM
+#OM2@cpars$initD <- NULL
+#OM2@cpars$qs <- NULL
+#OM2@cpars$Fdisc <- rep(0, 24)
+#OM2@cpars$Asize <- OM2@cpars$control <- NULL
+#OM2@Prob_staying <- OM2@Size_area_1 <- OM2@Frac_area_1 <- rep(0.5, 2)
+#OM2@cpars$mov <- OM2@cpars$MPA <- NULL
+#
+#out2 <- out
+#out2@OM <- OM2
+#
+#plot(out2)
+#Hist2 <- runMSE(out@OM, Hist = TRUE)
+
+
+
 ###### Issue with catch2?
 dat <- readRDS("tests/tiger_flathead/dat.rda")
 OM <- readRDS("tests/tiger_flathead/OM.rda")
 out <- RCM(OM, dat, mean_fit = TRUE, cores = 4, condition = 'catch2')
-
-
-
-
-
