@@ -19,12 +19,12 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/SAMtool)](https://CRAN.R-project.org/package=SAMtool)
 [![R build status](https://github.com/Blue-Matter/SAMtool/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions)
-`r badge_devel("blue-matter/SAMtool", "blue")`
+`r badge_devel("Blue-Matter/SAMtool", "blue")`
 <!-- badges: end -->
 
 The Stock Assessment Methods toolkit (`SAMtool`) is a collection of assessment methods and management procedures that have been developed for more data-intensive applications. This package includes the Rapid Conditioning Model for conditioning operating models in data-moderate and data-rich fisheries. 
 
-DLMtool is part of the `openMSE` collection of packages. 
+SAMtool is part of the `openMSE` collection of packages. 
 
 You can learn more about the `openMSE` packages at the [openMSE documentation site](https://openMSE.com).
 

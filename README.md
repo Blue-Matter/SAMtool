@@ -18,7 +18,7 @@ for more data-intensive applications. This package includes the Rapid
 Conditioning Model for conditioning operating models in data-moderate
 and data-rich fisheries.
 
-DLMtool is part of the `openMSE` collection of packages.
+SAMtool is part of the `openMSE` collection of packages.
 
 You can learn more about the `openMSE` packages at the [openMSE
 documentation site](https://openMSE.com).
