@@ -12,9 +12,28 @@ Description: Simulation tools for closed-loop simulation are provided for the 'M
   model-based management procedures, and diagnostic tools for evaluating assessments inside closed-loop simulation.
 License: GPL-3
 Depends: R (>= 3.5.0), MSEtool (>= 3.0.0)
-Imports: TMB, corpcor, dplyr, gplots, graphics, methods, rmarkdown, snowfall, stats, utils 
+Imports: 
+    TMB,
+    corpcor,
+    dplyr,
+    gplots,
+    graphics,
+    methods,
+    rmarkdown,
+    snowfall,
+    stats,
+    utils
 LinkingTo: TMB, RcppEigen
-Suggests: caret, ggplot2, knitr, mvtnorm, numDeriv, reshape2, shiny, testthat
+Suggests: 
+    caret,
+    covr,
+    ggplot2,
+    knitr,
+    mvtnorm,
+    numDeriv,
+    reshape2,
+    shiny,
+    testthat
 LazyData: yes
 LazyLoad: yes
 RoxygenNote: 7.1.1
