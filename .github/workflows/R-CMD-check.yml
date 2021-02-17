@@ -84,7 +84,7 @@ jobs:
           path: check
           
       - name: Send to codecov
-        if: success() && runner.os == "Windows"
+        if: success() && runner.os == 'Windows'
         run: |
           covr::codecov(type = "examples")
         shell: Rscript {0}
