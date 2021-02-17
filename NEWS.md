@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.1.1
+- Fix year range for depletion calculation from time-varying SSB0 in RCM.
+
 ## SAMtool 1.1.0
 - Edits to fix valgrind and sanitizer issues in TMB code.
 - Likelihood gradients, the derivatives of the likelihood of each annual data point with respect to model parameters, are plotted in the RCM markdown report. For this purpose, the annual age or length composition is considered to be a single piece of data. This diagnostic could be informative on how informative the data are to model parameters, with more influential data points having larger gradients.

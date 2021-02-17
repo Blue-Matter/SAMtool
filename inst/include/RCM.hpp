@@ -160,9 +160,9 @@ Type RCM(objective_function<Type> *obj) {
     B0(y) = R0 * sum_BPR(NPR_unfished(y), wt, n_age, y);
     N0(y) = R0 * NPR_unfished(y).sum();
 
-    if(y < ageM) E0_SR += E0(y);
+    if(y <= ageM) E0_SR += E0(y);
   }
-  E0_SR /= Type(ageM);
+  E0_SR /= Type(ageM + 1);
   Type EPR0_SR = E0_SR/R0;
 
   Type CR_SR, Brec;
