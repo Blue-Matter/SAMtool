@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.1.2
+- Minor fix to vignette to fix MSEtool reverse dependency issue.
+
 ## SAMtool 1.1.1
 - Fix year range for depletion calculation from time-varying SSB0 in RCM.
 

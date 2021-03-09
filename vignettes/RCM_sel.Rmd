@@ -51,6 +51,7 @@ options(width = 650)
 ```
 
 ```{r echo = FALSE}
+library(SAMtool, quietly = TRUE)
 OM <- MSEtool::testOM
 data <- list()
 
