@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.1.3
+- Fix plotting bug in `compare_RCM`.
+
 ## SAMtool 1.1.2
 - Minor fix to vignette to fix MSEtool reverse dependency issue.
 

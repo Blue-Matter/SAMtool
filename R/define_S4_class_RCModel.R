@@ -482,7 +482,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
                         open_file = TRUE, quiet = TRUE, render_args) {
 
   dots <- list(...)
-  test <- vapply(dots, inherits, character(1), what = "RCModel") %>% all()
+  test <- vapply(dots, inherits, logical(1), what = "RCModel") %>% all()
   if(!test) stop("Objects provided are not of class RCModel.", call. = FALSE)
   
   # Update scenario
@@ -607,7 +607,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   nll <- Map(RCM_get_likelihoods, x = report_list, LWT = lapply(dots, function(xx) xx@data$LWT),
              MoreArgs = list(f_name = f_name, s_name = s_name))
 
-  summary_nll <- vapply(nll, function(xx) xx[[1]] %>% as.matrix(), numeric(4)) %>%
+  summary_nll <- vapply(nll, function(xx) xx[[1]] %>% as.matrix(), numeric(6)) %>%
     structure(dimnames = list(rownames(nll[[1]][[1]]), scenario$names)) %>% as.data.frame()
 
   if(render_args$output_format == "html_document") {
