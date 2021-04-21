@@ -47,12 +47,6 @@
 
 
 <meta property="og:title" content="Linearly ramped harvest control rules — HCR_ramp" />
-<meta property="og:description" content="An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
-as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
-is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
-the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
-Ftarget is FMSY above the TOCP and zero below the LOCP.
-Class HCR objects are typically used with function make_MP." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -163,32 +157,27 @@ Class HCR objects are typically used with function make_MP." />
     </div>
 
     <div class="ref-description">
-    <p>An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
-as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
-is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
-the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
-Ftarget is FMSY above the TOCP and zero below the LOCP.
-Class HCR objects are typically used with function <a href='make_MP.html'>make_MP</a>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>HCR_ramp</span><span class='op'>(</span>
   <span class='va'>Assessment</span>,
   reps <span class='op'>=</span> <span class='fl'>1</span>,
-  OCP_type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"SSB_SSB0"</span>, <span class='st'>"SSB_SSBMSY"</span><span class='op'>)</span>,
+  OCP_type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"SSB_SSB0"</span>, <span class='st'>"SSB_SSBMSY"</span>, <span class='st'>"F_FMSY"</span>, <span class='st'>"F_F01"</span>, <span class='st'>"F_FSPR"</span><span class='op'>)</span>,
   Ftarget_type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FMSY"</span>, <span class='st'>"F01"</span>, <span class='st'>"Fmax"</span>, <span class='st'>"FSPR"</span><span class='op'>)</span>,
   LOCP <span class='op'>=</span> <span class='fl'>0.1</span>,
   TOCP <span class='op'>=</span> <span class='fl'>0.4</span>,
   relF_min <span class='op'>=</span> <span class='fl'>0</span>,
   relF_max <span class='op'>=</span> <span class='fl'>1</span>,
-  <span class='va'>SPR</span>,
+  <span class='va'>SPR_OCP</span>,
+  <span class='va'>SPR_targ</span>,
   <span class='va'>...</span>
 <span class='op'>)</span>
 
-<span class='fu'>HCR40_10</span><span class='op'>(</span><span class='va'>Assessment</span>, reps <span class='op'>=</span> <span class='fl'>1</span>, Ftarget_type <span class='op'>=</span> <span class='st'>"FMSY"</span>, SPR <span class='op'>=</span> <span class='fl'>0.4</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>HCR40_10</span><span class='op'>(</span><span class='va'>Assessment</span>, reps <span class='op'>=</span> <span class='fl'>1</span>, Ftarget_type <span class='op'>=</span> <span class='st'>"FMSY"</span>, SPR_targ <span class='op'>=</span> <span class='fl'>0.4</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>HCR60_20</span><span class='op'>(</span><span class='va'>Assessment</span>, reps <span class='op'>=</span> <span class='fl'>1</span>, Ftarget_type <span class='op'>=</span> <span class='st'>"FMSY"</span>, SPR <span class='op'>=</span> <span class='fl'>0.4</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>HCR60_20</span><span class='op'>(</span><span class='va'>Assessment</span>, reps <span class='op'>=</span> <span class='fl'>1</span>, Ftarget_type <span class='op'>=</span> <span class='st'>"FMSY"</span>, SPR_targ <span class='op'>=</span> <span class='fl'>0.4</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>HCR80_40MSY</span><span class='op'>(</span><span class='va'>Assessment</span>, reps <span class='op'>=</span> <span class='fl'>1</span>, Ftarget_type <span class='op'>=</span> <span class='st'>"FMSY"</span>, SPR <span class='op'>=</span> <span class='fl'>0.4</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'>HCR80_40MSY</span><span class='op'>(</span><span class='va'>Assessment</span>, reps <span class='op'>=</span> <span class='fl'>1</span>, Ftarget_type <span class='op'>=</span> <span class='st'>"FMSY"</span>, SPR_targ <span class='op'>=</span> <span class='fl'>0.4</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -205,98 +194,20 @@ FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal yea
     <tr>
       <th>OCP_type</th>
       <td><p>The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
-By default, use (<code>"SSB_SSB0"</code> for spawning depletion. Otherwise use <code>"SSB_SSBMSY"</code> for spawning biomass relative to MSY).</p></td>
-    </tr>
-    <tr>
-      <th>Ftarget_type</th>
-      <td><p>The type of F used for the target fishing mortality rate.</p></td>
-    </tr>
-    <tr>
-      <th>LOCP</th>
-      <td><p>Numeric, the limit value for the OCP in the HCR.</p></td>
-    </tr>
-    <tr>
-      <th>TOCP</th>
-      <td><p>Numeric, the target value for the OCP in the HCR.</p></td>
-    </tr>
-    <tr>
-      <th>relF_min</th>
-      <td><p>The relative value of Ftarget (i.e., as a proportion) if <code>OCP &lt; LOCP</code>.</p></td>
-    </tr>
-    <tr>
-      <th>relF_max</th>
-      <td><p>The relative value of Ftarget if <code>OCP &gt; TOCP</code>.</p></td>
-    </tr>
-    <tr>
-      <th>SPR</th>
-      <td><p>The target value of spawning potential ratio if <code>Ftarget_type = "FSPR"</code>. By default, 0.4 (F40%).</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>Miscellaneous arguments.</p></td>
+By default, use (<code>"SSB_SSB0"</code> for spawning depletion. Otherwise use <code>"SSB_SSBMSY"</code> for spawning biomass relative to MSY).
+For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR<!-- % (see \code{SPR_OCP} argument) can be used.} --></p>
+<p>Ftarget_typeThe type of F used for the target fishing mortality rate.</p>
+<p>LOCPNumeric, the limit value for the OCP in the HCR.</p>
+<p>TOCPNumeric, the target value for the OCP in the HCR.</p>
+<p>relF_minThe relative value of Ftarget (i.e., as a proportion) if <code>OCP &lt; LOCP</code>.</p>
+<p>relF_maxThe relative value of Ftarget if <code>OCP &gt; TOCP</code>.</p>
+<p>SPR_OCPThe value of spawning potential ratio for the OCP if <code>OCP_type = "F_FSPR"</code>. By default, 0.4 (F40%).</p>
+<p>SPR_targThe target value of spawning potential ratio if <code>Ftarget_type = "FSPR"</code>. By default, 0.4 (F40%).</p>
+<p>...Miscellaneous arguments.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of class Rec with the TAC recommendation.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p><code>HCR_ramp</code> is the generic ramped-HCR function where user specifies OCP and corresponding limit and target
-points, as well as minimum and maximum relative F target.</p>
-<p><code>HCR40_10</code> is a common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
-respectively), while <code>HCR60_20</code> is more conservative than 40-10, with LOCP and TOCP of 0.2 and 0.6
-spawning depletion, respectively).</p>
-<p><code>HCR80_40MSY</code> uses 0.8 and 0.4 SSBMSY as the LOCP and TOCP, respectively.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
-
-    <p>Deroba, J.J. and Bence, J.R. 2008. A review of harvest policies: Understanding relative
-performance of control rules. Fisheries Research 94:210-223.</p>
-<p>Edwards, C.T.T. and Dankel, D.J. (eds.). 2016. Management Science in Fisheries: an introduction
-to simulation methods. Routledge, New York, NY. 460 pp.</p>
-<p>Punt, A. E, Dorn, M. W., and Haltuch, M. A. 2008. Evaluation of threshold management strategies
-for groundfish off the U.S. West Coast. Fisheries Research 94:251-266.</p>
-<p>Restrepo, V.R. and Power, J.E. 1999. Precautionary control rules in US fisheries
-management: specification and performance. ICES Journal of Marine Science 56:846-852.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p><a href='HCR_MSY.html'>HCR_MSY</a> <a href='HCRlin.html'>HCRlin</a> <a href='make_MP.html'>make_MP</a></p></div>
-    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
-
-    <p>Q. Huynh &amp; T. Carruthers</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># 40-10 linear ramp</span>
-<span class='va'>Brel</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, length.out <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>Brel</span>, <span class='fu'><a href='HCRlin.html'>HCRlin</a></span><span class='op'>(</span><span class='va'>Brel</span>, <span class='fl'>0.1</span>, <span class='fl'>0.4</span><span class='op'>)</span>, 
-    xlab <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/expression.html'>expression</a></span><span class='op'>(</span><span class='st'>"Operational control point: Estimated"</span><span class='op'>~</span><span class='va'>SSB</span><span class='op'>/</span><span class='va'>SSB</span><span class='op'>[</span><span class='fl'>0</span><span class='op'>]</span><span class='op'>)</span>,
-    ylab <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/expression.html'>expression</a></span><span class='op'>(</span><span class='cn'>F</span><span class='op'>[</span><span class='va'>target</span><span class='op'>]</span><span class='op'>~</span><span class='op'>~</span><span class='st'>": proportion of"</span><span class='op'>~</span><span class='op'>~</span><span class='cn'>F</span><span class='op'>[</span><span class='va'>MSY</span><span class='op'>]</span><span class='op'>)</span>, 
-    main <span class='op'>=</span> <span class='st'>"40-10 harvest control rule"</span>, type <span class='op'>=</span> <span class='st'>"l"</span><span class='op'>)</span>
-</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='st'>"red"</span>, lty <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-</div><div class='img'><img src='HCR_ramp-1.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='co'># create a 40-10 MP to run in closed-loop MSE</span>
-<span class='va'>DD_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>DD_TMB</span>, <span class='va'>HCR40_10</span><span class='op'>)</span>
-
-<span class='co'># Alternatively,</span>
-<span class='va'>DD_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>DD_TMB</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSB0"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.1</span>, TOCP <span class='op'>=</span> <span class='fl'>0.4</span><span class='op'>)</span>
-
-<span class='co'># An SCA with LOCP and TOCP at 0.4 and 0.8, respectively, of SSB/SSBMSY</span>
-<span class='va'>SCA_80_40</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSBMSY"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.4</span>, TOCP <span class='op'>=</span> <span class='fl'>0.8</span><span class='op'>)</span>
-
-<span class='co'># A conservative HCR that fishes at 75% of FMSY at B &gt; 80% BMSY but only reduces F</span>
-<span class='co'># to 10% of FMSY if B &lt; 40% BMSY.</span>
-<span class='va'>SCA_conservative</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSBMSY"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.4</span>, TOCP <span class='op'>=</span> <span class='fl'>0.8</span>, 
-relF_min <span class='op'>=</span> <span class='fl'>0.1</span>, relF_max <span class='op'>=</span> <span class='fl'>0.75</span><span class='op'>)</span>
-
-<span class='co'># Figure of this conservative HCR</span>
-<span class='va'>Brel</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, length.out <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span>
-<span class='va'>Frel</span> <span class='op'>&lt;-</span> <span class='fu'><a href='HCRlin.html'>HCRlin</a></span><span class='op'>(</span><span class='va'>Brel</span>, <span class='fl'>0.4</span>, <span class='fl'>0.8</span>, <span class='fl'>0.1</span>, <span class='fl'>0.75</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>Brel</span>, <span class='va'>Frel</span>, 
-    xlab <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/expression.html'>expression</a></span><span class='op'>(</span><span class='st'>"Operational control point: Estimated"</span><span class='op'>~</span><span class='va'>SSB</span><span class='op'>/</span><span class='va'>SSB</span><span class='op'>[</span><span class='va'>MSY</span><span class='op'>]</span><span class='op'>)</span>,
-    ylab <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/expression.html'>expression</a></span><span class='op'>(</span><span class='cn'>F</span><span class='op'>[</span><span class='va'>target</span><span class='op'>]</span><span class='op'>~</span><span class='st'>":"</span><span class='op'>~</span><span class='op'>~</span><span class='cn'>F</span><span class='op'>/</span><span class='cn'>F</span><span class='op'>[</span><span class='va'>MSY</span><span class='op'>]</span><span class='op'>)</span>, 
-    ylim <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"l"</span><span class='op'>)</span>
-</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.4</span>, <span class='fl'>0.8</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='st'>"red"</span>, lty <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-</div><div class='img'><img src='HCR_ramp-2.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
