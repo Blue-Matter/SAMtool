@@ -10,21 +10,22 @@
 HCR_ramp(
   Assessment,
   reps = 1,
-  OCP_type = c("SSB_SSB0", "SSB_SSBMSY"),
+  OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "F_FMSY", "F_F01", "F_FSPR"),
   Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"),
   LOCP = 0.1,
   TOCP = 0.4,
   relF_min = 0,
   relF_max = 1,
-  SPR,
+  SPR_OCP,
+  SPR_targ,
   ...
 )
 
-HCR40_10(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...)
+HCR40_10(Assessment, reps = 1, Ftarget_type = "FMSY", SPR_targ = 0.4, ...)
 
-HCR60_20(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...)
+HCR60_20(Assessment, reps = 1, Ftarget_type = "FMSY", SPR_targ = 0.4, ...)
 
-HCR80_40MSY(Assessment, reps = 1, Ftarget_type = "FMSY", SPR = 0.4, ...)
+HCR80_40MSY(Assessment, reps = 1, Ftarget_type = "FMSY", SPR_targ = 0.4, ...)
 }
 \arguments{
 \item{Assessment}{An object of class \linkS4class{Assessment} with estimates of
@@ -33,7 +34,8 @@ FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal yea
 \item{reps}{The number of stochastic samples of the TAC recommendation.}
 
 \item{OCP_type}{The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
-By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).}
+By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).
+For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR% (see \code{SPR_OCP} argument) can be used.}
 
 \item{Ftarget_type}{The type of F used for the target fishing mortality rate.}
 
@@ -45,7 +47,9 @@ By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"
 
 \item{relF_max}{The relative value of Ftarget if \code{OCP > TOCP}.}
 
-\item{SPR}{The target value of spawning potential ratio if \code{Ftarget_type = "FSPR"}. By default, 0.4 (F40\%).}
+\item{SPR_OCP}{The value of spawning potential ratio for the OCP if \code{OCP_type = "F_FSPR"}. By default, 0.4 (F40\%).}
+
+\item{SPR_targ}{The target value of spawning potential ratio if \code{Ftarget_type = "FSPR"}. By default, 0.4 (F40\%).}
 
 \item{...}{Miscellaneous arguments.}
 }

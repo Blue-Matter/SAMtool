@@ -185,14 +185,15 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   }
   
   F_SPR <- Data@Misc$ReferencePoints$ByYear$F_SPR[x, , n_y] %>% rev()
-  SPR <- F_SPR %>% names() %>% substr(3,4) %>% as.numeric() %>% `/`(100) %>% rev()
+  SPR <- F_SPR %>% names() %>% substr(3,4) %>% as.numeric()
+  SPR <- rev(SPR/100)
   if(all(F_SPR != 0)) {
     F_SPR <- c(0, F_SPR) 
     SPR <- c(1, SPR)
   }
-  Assessment@forecast <- list(per_recrit = data.frame(FM = F_SPR, SPR = SPR, 
-                                                      F01 = Data@Misc$ReferencePoints$ByYear$F01_YPR[x, n_y],
-                                                      Fmax = Data@Misc$ReferencePoints$ByYear$Fmax_YPR[x, n_y]), 
+  Assessment@forecast <- list(per_recruit = data.frame(FM = F_SPR, SPR = SPR, 
+                                                       F01 = Data@Misc$ReferencePoints$ByYear$F01_YPR[x, n_y],
+                                                       Fmax = Data@Misc$ReferencePoints$ByYear$Fmax_YPR[x, n_y]), 
                               catch_eq = catch_eq)
   return(Assessment)
 }
