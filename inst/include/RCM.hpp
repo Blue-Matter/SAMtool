@@ -508,7 +508,7 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(s_CAAtrue);
   }
 
-  if(nll_survey.col(0).sum() != 0) {
+  if(nll_survey.sum() != 0) {
     REPORT(s_vul_par);
     REPORT(s_CAApred);
     REPORT(s_CALpred);
