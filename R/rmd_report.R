@@ -134,19 +134,6 @@ rmd_R0 <- function(header = NULL) {
   return(ans)
 }
 
-rmd_meanR <- function(header = NULL) {
-  fig.cap <- "Estimate of mean recruitment, distribution based on normal approximation of estimated covariance matrix."
-  ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
-           "if(conv) {",
-           "  ind <- names(SD$par.fixed) == \"meanRx\"",
-           "  mu <- SD$par.fixed[ind] - log(obj$env$data$rescale)",
-           "  sig <- sqrt(diag(SD$cov.fixed)[ind])",
-           "  plot_lognormalvar(mu, sig, label = \"Mean recruitment\", logtransform = TRUE)",
-           "}",
-           "```\n")
-  if(!is.null(header)) ans <- c(header, ans)
-  return(ans)
-}
 
 
 rmd_h <- function() {
@@ -484,11 +471,12 @@ rmd_yield_depletion <- function(model, conv_check = TRUE) {
     "```\n")
 }
 
-rmd_sp <- function(conv_check = TRUE, depletion = TRUE) {
+rmd_sp <- function(conv_check = TRUE, depletion = TRUE, yield_fn = TRUE) {
   if(conv_check) conv <- "if(conv) " else conv <- ""
   if(depletion) B0 <- "B0" else B0 <- "NULL"
   c("```{r, fig.cap=\"Comparison of historical surplus production and estimated yield curve.\"}",
-    paste0(conv, "plot_surplus_production(B, B0 = ", B0, ", Catch, yield_fn = yield_fn)"),
+    paste0(conv, "plot_surplus_production(B, B0 = ", B0, ", Catch, yield_fn = ", 
+           ifelse(yield_fn, "yield_fn", "NULL"), ")"),
     "```\n")
 }
 

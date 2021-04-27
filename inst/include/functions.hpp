@@ -288,8 +288,6 @@ vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matri
 #include "cDD.hpp"
 #include "DD.hpp"
 #include "SCA.hpp"
-#include "SCA_Pope.hpp"
-#include "SCA2.hpp"
 #include "SCA_RWM.hpp"
 #include "SP.hpp"
 #include "RCM.hpp"

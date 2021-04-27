@@ -27,8 +27,9 @@ Type SCA(objective_function<Type> *obj) {
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
-  DATA_STRING(SR_type);   // String indicating whether Beverton-Holt or Ricker stock-recruit is used
+  DATA_STRING(SR_type);   // String indicating whether Beverton-Holt ("BH"), or Ricker stock-recruit ("Ricker"), or none ("meanR") is used
   DATA_STRING(CAA_dist);  // String indicating whether CAA is multinomial or lognormal
+  DATA_STRING(catch_eq);  // String whether to use "Baranov" or "Pope"'s approximation for the catch equation
   DATA_IVECTOR(est_early_rec_dev);
   DATA_IVECTOR(est_rec_dev); // Indicator of whether rec_dev is estimated in model or fixed at zero
   DATA_INTEGER(yindF);    // Year for which to estimate F, all other F are deviations from this F
@@ -36,6 +37,7 @@ Type SCA(objective_function<Type> *obj) {
   PARAMETER(R0x);
   PARAMETER(transformed_h);
   PARAMETER(F_equilibrium);
+  PARAMETER(U_equilibrium);
   PARAMETER_VECTOR(vul_par);
 
   PARAMETER_VECTOR(log_F_dev);
@@ -48,11 +50,10 @@ Type SCA(objective_function<Type> *obj) {
   Type R0 = exp(R0x)/rescale;
   Type h;
   if(SR_type == "BH") {
-    h = 0.8 * invlogit(transformed_h);
-  } else {
-    h = exp(transformed_h);
+    h = 0.8 * invlogit(transformed_h) + 0.2;
+  } else if(SR_type == "Ricker") {
+    h = exp(transformed_h) + 0.2;
   }
-  h += 0.2;
 
   Type omega = exp(log_omega);
   Type tau = exp(log_tau);
@@ -84,7 +85,7 @@ Type SCA(objective_function<Type> *obj) {
     CR /= 1-h;
     Brec = 5*h - 1;
     Brec /= (1-h);
-  } else {
+  } else if(SR_type == "Ricker") {
     CR = pow(5*h, 1.25);
     Brec = 1.25 * log(5*h);
   }
@@ -97,6 +98,7 @@ Type SCA(objective_function<Type> *obj) {
   vector<Type> CN(n_y);             // Catch in numbers
   vector<Type> Cpred(n_y);
   vector<Type> F(n_y);
+  vector<Type> U(n_y);
   vector<Type> R(n_y+1);            // Recruitment at year
   vector<Type> R_early(n_age-1);
   vector<Type> VB(n_y+1);           // Vulnerable biomass at year
@@ -111,16 +113,24 @@ Type SCA(objective_function<Type> *obj) {
   E.setZero();
 
   // Equilibrium quantities (leading into first year of model)
-  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, M, n_age);
+  vector<Type> NPR_equilibrium(n_age);
+  if(catch_eq == "Baranov") {
+    NPR_equilibrium = calc_NPR(F_equilibrium, vul, M, n_age);
+  } else {
+    NPR_equilibrium = calc_NPR_U(U_equilibrium, vul, M, n_age);
+  }
   Type EPR_eq = sum_EPR(NPR_equilibrium, weight, mat);
+  
   Type R_eq;
-
   if(SR_type == "BH") {
     R_eq = Arec * EPR_eq - 1;
-  } else {
+    R_eq /= Brec * EPR_eq;
+  } else if(SR_type == "Ricker") {
     R_eq = log(Arec * EPR_eq);
+    R_eq /= Brec * EPR_eq;
+  } else {
+    R_eq = R0;
   }
-  R_eq /= Brec * EPR_eq;
 
   R(0) = R_eq;
   if(est_rec_dev(0)) R(0) *= exp(log_rec_dev(0) - 0.5 * tau * tau);
@@ -133,28 +143,51 @@ Type SCA(objective_function<Type> *obj) {
       N(0,a) = R_early(a-1) * NPR_equilibrium(a);
     }
     B(0) += N(0,a) * weight(a);
-    VB(0) += N(0,a) * weight(a) * vul(a);
+    if(catch_eq == "Baranov") {
+      VB(0) += N(0,a) * weight(a) * vul(a);
+    } else {
+      VB(0) += N(0,a) * weight(a) * vul(a) * exp(0.5 * M(a));
+    }
     E(0) += N(0,a) * weight(a) * mat(a);
   }
 
   // Loop over all other years
-  F(yindF) = exp(log_F_dev(yindF));
+  if(catch_eq == "Baranov") F(yindF) = exp(log_F_dev(yindF));
   for(int y=0;y<n_y;y++) {
     // Calculate this year's F
-    if(y != yindF) {
-      Type Ftmp = F(yindF) * exp(log_F_dev(y));
-      F(y) = CppAD::CondExpLt(3 - Ftmp, Type(0), 3 - posfun(3 - Ftmp, Type(0), penalty), Ftmp);
+    if(catch_eq == "Baranov") {
+      if(y != yindF) {
+        Type Ftmp = F(yindF) * exp(log_F_dev(y));
+        F(y) = CppAD::CondExpLt(3 - Ftmp, Type(0), 3 - posfun(3 - Ftmp, Type(0), penalty), Ftmp);
+      }
+    } else {
+      U(y) = CppAD::CondExpLt(1 - C_hist(y)/VB(y), Type(0.025),
+        1 - posfun(1 - C_hist(y)/VB(y), Type(0.025), penalty), C_hist(y)/VB(y));
     }
     
     // Calculate this year's catch, CAA, and next year's abundance and SSB (ex. age-0)
     for(int a=0;a<n_age;a++) {
-      Type meanN = N(y,a) * (1 - exp(-vul(a) * F(y) - M(a))) / (vul(a) * F(y) + M(a));
-      CAApred(y,a) = vul(a) * F(y) * meanN;
-      if(a<n_age-1) {
-        N(y+1,a+1) = N(y,a) * exp(-vul(a) * F(y) - M(a));
+      if(catch_eq == "Baranov") {
+        CAApred(y,a) = N(y,a);
+        CAApred(y,a) *= 1 - exp(-vul(a) * F(y) - M(a));
+        CAApred(y,a) /= vul(a) * F(y) + M(a);
+        CAApred(y,a) *= vul(a) * F(y);
+        
+        if(a<n_age-1) {
+          N(y+1,a+1) = N(y,a) * exp(-vul(a) * F(y) - M(a));
+        } else {
+          N(y+1,a) += N(y,a) * exp(-vul(a) * F(y) - M(a));
+        }
       } else {
-        N(y+1,a) += N(y,a) * exp(-vul(a) * F(y) - M(a));
+        CAApred(y,a) = vul(a) * U(y) * N(y,a) * exp(-0.5 * M(a));
+        
+        if(a<n_age-1) {
+          N(y+1,a+1) = N(y,a) * exp(-M(a)) * (1 - vul(a) * U(y));
+        } else {
+          N(y+1,a) += N(y,a) * exp(-M(a)) * (1 - vul(a) * U(y));
+        }
       }
+      
       CN(y) += CAApred(y,a);
       Cpred(y) += CAApred(y,a) * weight(a);
       E(y+1) += N(y+1,a) * weight(a) * mat(a);
@@ -163,17 +196,21 @@ Type SCA(objective_function<Type> *obj) {
     // Calculate next year's recruitment, total biomass, and vulnerable biomass
     if(SR_type == "BH") {
       R(y+1) = BH_SR(E(y+1), h, R0, E0);
-    } else {
+    } else if(SR_type == "Ricker") {
       R(y+1) = Ricker_SR(E(y+1), h, R0, E0);
+    } else {
+      R(y+1) = R0;
     }
-    if(y<n_y-1) {
-      if(est_rec_dev(y+1)) R(y+1) *= exp(log_rec_dev(y+1) - 0.5 * tau * tau);
-    }
+    if(y<n_y-1 && est_rec_dev(y+1)) R(y+1) *= exp(log_rec_dev(y+1) - 0.5 * tau * tau);
     N(y+1,0) = R(y+1);
 
     for(int a=0;a<n_age;a++) {
       B(y+1) += N(y+1,a) * weight(a);
-      VB(y+1) += N(y+1,a) * weight(a) * vul(a);
+      if(catch_eq == "Baranov") {
+        VB(y+1) += N(y+1,a) * weight(a) * vul(a);
+      } else {
+        VB(y+1) += N(y+1,a) * weight(a) * vul(a) * exp(-0.5 * M(a));
+      }
     }
   }
 
@@ -223,7 +260,7 @@ Type SCA(objective_function<Type> *obj) {
           nll_comp(nsurvey) -= dlnorm_comp(loglike_CAAobs, loglike_CAApred);
         }
       }
-      nll_comp(nsurvey+1) -= dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
+      if(catch_eq == "Baranov") nll_comp(nsurvey+1) -= dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
     }
     if(est_rec_dev(y)) nll_comp(nsurvey+2) -= dnorm(log_rec_dev(y), Type(0), tau, true);
   }
@@ -234,30 +271,39 @@ Type SCA(objective_function<Type> *obj) {
   Type nll = nll_comp.sum() + penalty + prior;
 
   ADREPORT(R0);
-  ADREPORT(h);
+  if(SR_type != "none") ADREPORT(h);
   ADREPORT(omega);
   ADREPORT(tau);
   ADREPORT(q);
 
-  REPORT(omega);
+  if(catch_eq == "Baranov") REPORT(omega);
   REPORT(tau);
-
-  REPORT(NPR0);
-  REPORT(Arec);
-  REPORT(Brec);
-  REPORT(EPR0);
-  REPORT(CR);
-  REPORT(h);
+  
   REPORT(R0);
+  
   REPORT(B0);
   REPORT(N0);
   REPORT(E0);
   REPORT(VB0);
+  
+  REPORT(NPR0);
+  REPORT(EPR0);
+  
+  if(SR_type != "none") {
+    REPORT(CR);
+    REPORT(Arec);
+    REPORT(Brec);
+    REPORT(h);
+  }
 
   REPORT(vul_par);
   REPORT(vul);
-
-  REPORT(F);
+  
+  if(catch_eq == "Baranov") {
+    REPORT(F);
+  } else {
+    REPORT(U);
+  }
   REPORT(q);
 
   REPORT(N);

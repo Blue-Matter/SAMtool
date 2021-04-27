@@ -4,10 +4,10 @@
 #' A generic statistical catch-at-age model (single fleet, single season) that uses catch, index, and catch-at-age composition
 #' data. \code{SCA} parameterizes R0 and steepness as leading productivity parameters in the assessment model. Recruitment is estimated
 #' as deviations from the resulting stock-recruit relationship. In \code{SCA2}, the mean recruitment in the time series is estimated and
-#' recruitment deviations around this mean are estimated as penalized parameters (similar to Cadigan 2016). The standard deviation is set high
-#' so that the recruitment is almost like free parameters. Unfished and MSY reference points are inferred afterwards from the assessment output
-#' (SSB and recruitment estimates). \code{SCA_Pope} is a variant of \code{SCA} that fixes the expected catch to the observed
-#' catch, and Pope's approximation is used to calculate the annual harvest rate (U).
+#' recruitment deviations around this mean are estimated as penalized parameters (\code{SR = "none"}, similar to Cadigan 2016). The standard deviation is set high
+#' so that the recruitment is almost like free parameters. Unfished and MSY reference points are not estimated, it is recommended to use yield per recruit
+#' or spawning potential ratio in harvest control rules. \code{SCA_Pope} is a variant of \code{SCA} that fixes the expected catch to the observed
+#' catch, and Pope's approximation is used to calculate the annual exploitation rate (U; i.e., \code{catch_eq = "Pope"}).
 #'
 #' @aliases SCA2 SCA_Pope
 #' @param x A position in the Data object (by default, equal to one for assessments).
@@ -15,9 +15,10 @@
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 #' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
 #' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd. Vulnerability to the survey is fixed in the model.
-#' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).
+#' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt, \code{"Ricker"}, or \code{"none"} for constant mean recruitment).
 #' @param vulnerability Whether estimated vulnerability is \code{"logistic"} or \code{"dome"} (double-normal).
 #' See details for parameterization.
+#' @param catch_eq Whether to use the Baranov equation or Pope's approximation to calculate the predicted catch at age in the model.
 #' @param CAA_dist Whether a multinomial or lognormal distribution is used for likelihood of the catch-at-age matrix. See details.
 #' @param CAA_multiplier Numeric for data weighting of catch-at-age matrix if \code{CAA_hist = "multinomial"}. Otherwise ignored. See details.
 #' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
@@ -66,8 +67,8 @@
 #' @details
 #' The basic data inputs are catch (by weight), index (by weight/biomass), and catch-at-age matrix (by numbers).
 #' 
-#' In \code{SCA} and \code{SCA2}, annual F's are estimated parameters assuming continuous fishing over the year, while
-#' an annual harvest rate from pulse fishing in the middle of the year is estimated in \code{SCA_Pope}. 
+#' With \code{catch_eq = "Baranov"} (default in SCA and SCA2), annual F's are estimated parameters assuming continuous fishing over the year, while
+#' an annual harvest rate from pulse fishing in the middle of the year is estimated in \code{SCA_Pope} or \code{SCA(catch_eq = "Pope")}. 
 #'
 #' The annual sample sizes of the catch-at-age matrix is provided to the model (used in the likelihood for catch-at-age assuming
 #' a multinomial distribution) and is manipulated via argument \code{CAA_multiplier}. This argument is
@@ -80,13 +81,14 @@
 #'
 #' For \code{start} (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
-#' \item \code{R0} For all models except \code{SCA2}, unfished recruitment. Otherwise, 150\% Data@@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
+#' \item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
+#' By default, 150\% Data@@OM$R0[x] is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
 #' \item \code{h} Steepness. Otherwise, Data@@steep[x] is used, or 0.9 if empty.
-#' \item \code{meanR} For \code{SCA2}, mean recruitment.
 #' \item \code{vul_par} Vulnerability parameters, see next paragraph.
 #' \item \code{F} A vector of length nyears for year-specific fishing mortality.
 #' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-#' \item \code{omega} Lognormal SD of the catch (observation error) for all models except \code{SCA_Pope}. By default, Data@@CV_Cat[x].
+#' \item \code{U_equilibrium} Same as F_equilibrium when \code{catch_eq = "Pope"}. By default, 0.
+#' \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, Data@@CV_Cat[x].
 #' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@@sigmaR[x].
 #' }
 #' 
@@ -142,27 +144,80 @@
 #' @author Q. Huynh
 #' @return An object of class \linkS4class{Assessment}.
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
-#' @useDynLib SAMtool
 #' @export
-SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
+SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
+                vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
+                CAA_dist = c("multinomial", "lognormal"),
                 CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
                 start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
                 LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
+  
+  out <- SCA_(x, Data, AddInd, SR, vulnerability, catch_eq, CAA_dist, CAA_multiplier, rescale, max_age,
+              start, fix_h, fix_F_equilibrium, fix_omega, fix_tau, LWT, early_dev, late_dev, integrate,
+              silent, opt_hess, n_restart, control, inner.control, ...)
+  return(out)
+}
+class(SCA) <- "Assess"
+
+#' @rdname SCA
+#' @export
+SCA2 <- function(x = 1, Data, AddInd = "B", vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
+                 CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, 
+                 fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE, LWT = NULL,
+                 common_dev = "comp50", integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                 control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
+  
+  out <- SCA_(x, Data, AddInd, SR = "none", vulnerability, catch_eq = "Baranov", CAA_dist, CAA_multiplier, rescale, max_age,
+              start, fix_h, fix_F_equilibrium, fix_omega, fix_tau, LWT, early_dev = "all", late_dev = common_dev, integrate,
+              silent, opt_hess, n_restart, control, inner.control, ...) 
+  return(out)
+}
+class(SCA2) <- "Assess"
+
+
+#' @rdname SCA
+#' @export
+SCA_Pope <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
+                     CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, 
+                     fix_h = TRUE, fix_U_equilibrium = TRUE, fix_tau = TRUE, LWT = NULL,
+                     early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
+                     silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                     control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
+  
+  out <- SCA_(x, Data, AddInd, SR, vulnerability, catch_eq = "Pope", CAA_dist, CAA_multiplier, rescale, max_age,
+              start, fix_h, fix_F_equilibrium = fix_U_equilibrium, fix_omega = TRUE, fix_tau, LWT, early_dev, late_dev, integrate,
+              silent, opt_hess, n_restart, control, inner.control, ...) 
+  return(out)
+}
+class(SCA_Pope) <- "Assess"
+
+
+#' @useDynLib SAMtool
+SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
+                 vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
+                 CAA_dist = c("multinomial", "lognormal"), CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
+                 start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
+                 LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
+                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                 control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
+  
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
+  
   dots <- list(...)
   start <- lapply(start, eval, envir = environment())
-
+  
   max_age <- as.integer(min(max_age, Data@MaxAge))
   n_age <- max_age + 1
   vulnerability <- match.arg(vulnerability)
+  catch_eq <- match.arg(catch_eq)
   CAA_dist <- match.arg(CAA_dist)
   SR <- match.arg(SR)
   
   if(is.character(early_dev)) early_dev <- match.arg(early_dev)
   if(is.numeric(early_dev)) stopifnot(early_dev < length(Data@Year))
-
+  
   if(any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
   } else {
@@ -176,12 +231,12 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
   Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
   CAA_hist <- Data@CAA[x, yind, 1:n_age]
   if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
-
+  
   CAA_n_nominal <- rowSums(CAA_hist)
   if(CAA_multiplier <= 1) {
     CAA_n_rescale <- CAA_multiplier * CAA_n_nominal
   } else CAA_n_rescale <- pmin(CAA_multiplier, CAA_n_nominal)
-
+  
   n_y <- length(C_hist)
   M <- rep(Data@Mort[x], n_age)
   a <- Data@wla[x]
@@ -223,8 +278,6 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
       est_early_rec_dev <- c(rep(1, ind1), rep(NA, n_age-ind1-1))
       est_rec_dev <- rep(1, n_y)
     }
-  } else {
-    stop("Invalid early_dev argument.")
   }
   
   if(is.character(late_dev) && late_dev == "comp50") {
@@ -237,9 +290,9 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
   if(is.numeric(late_dev) && late_dev > 0) {
     if(late_dev > length(est_rec_dev)) late_dev <- length(est_rec_dev)
     ind_late <- (length(est_rec_dev) - late_dev + 1):length(est_rec_dev)
-    est_rec_dev[ind_late] <- 0
+    est_rec_dev[ind_late] <- ifelse(SR == "none", max(est_rec_dev[-ind_late]), 0)
   }
-
+  
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
   
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
@@ -266,10 +319,10 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
                CAA_hist = t(apply(CAA_hist, 1, function(x) x/sum(x))),
                CAA_n = CAA_n_rescale, n_y = n_y, n_age = n_age, M = M,
                weight = Wa, mat = mat_age, vul_type = vulnerability,
-               SR_type = SR, CAA_dist = CAA_dist, est_early_rec_dev = est_early_rec_dev,
-               est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y))
+               SR_type = SR, CAA_dist = CAA_dist, catch_eq = catch_eq,
+               est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y))
   data$CAA_hist[data$CAA_hist < 1e-8] <- 1e-8
-
+  
   # Starting values
   params <- list()
   if(!is.null(start)) {
@@ -278,17 +331,22 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
       if(SR == "BH") {
         h_start <- (start$h[1] - 0.2)/0.8
         params$transformed_h <- logit(h_start)
-      } else {
+      } else if(SR == "Ricker") {
         params$transformed_h <- log(start$h[1] - 0.2)
       }
     }
-    if(!is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) params$F_equilibrium <- start$F_equilibrium
+    if(catch_eq == "Baranov" && !is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) {
+      params$F_equilibrium <- start$F_equilibrium
+    }
+    if(catch_eq == "Pope" && !is.null(start$U_equilibrium) && is.numeric(start$U_equilibrium)) {
+      params$U_equilibrium <- start$U_equilibrium
+    }
     if(!is.null(start$vul_par) && is.numeric(start$vul_par)) {
       if(start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * Data@MaxAge (see help).")
       if(vulnerability == "logistic") {
         if(length(start$vul_par) < 2) stop("Two parameters needed for start$vul_par with logistic vulnerability (see help).")
         if(start$vul_par[1] <= start$vul_par[2]) stop("start$vul_par[1] needs to be greater than start$vul_par[2] (see help).")
-
+        
         params$vul_par <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]))
       }
       if(vulnerability == "dome") {
@@ -298,7 +356,7 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
           stop("start$vul_par[3] needs to be between start$vul_par[1] and Data@MaxAge (see help).")
         }
         if(start$vul_par[4] <= 0 || start$vul_par[4] >= 1) stop("start$vul_par[4] needs to be between 0-1 (see help).")
-
+        
         params$vul_par <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]),
                             logit(1/(max_age - start$vul_par[1])), logit(start$vul_par[4]))
       }
@@ -310,11 +368,11 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
       Fstart[-Fstart_ind] <- log(start$F[-Fstart_ind]/Fstart[Fstart_ind])
       params$log_F_dev <- Fstart
     }
-
+    
     if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega)
     if(!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau)
   }
-
+  
   if(is.null(params$R0x)) {
     params$R0x <- ifelse(is.null(Data@OM$R0[x]), log(mean(data$C_hist)) + 4, log(1.5 * rescale * Data@OM$R0[x]))
   }
@@ -323,11 +381,14 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
     if(SR == "BH") {
       h_start <- (h_start - 0.2)/0.8
       params$transformed_h <- logit(h_start)
-    } else {
+    } else if(SR == "Ricker") {
       params$transformed_h <- log(h_start - 0.2)
+    } else {
+      params$transformed_h <- 0
     }
   }
   if(is.null(params$F_equilibrium)) params$F_equilibrium <- 0
+  if(is.null(params$U_equilibrium)) params$U_equilibrium <- 0
   if(is.null(params$vul_par)) {
     CAA_mode <- which.max(colSums(CAA_hist, na.rm = TRUE))
     if((is.na(Data@LFC[x]) && is.na(Data@LFS[x])) || (Data@LFC[x] > Linf) || (Data@LFS[x] > Linf)) {
@@ -340,7 +401,7 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
       Afull <- min(iVB(t0, K, Linf, Data@LFS[x]), 0.5 * max_age)
       A5 <- min(A5, Afull - 0.5)
       A50_vul <- mean(c(A5, Afull))
-
+      
       if(vulnerability == "logistic") params$vul_par <- c(logit(Afull/max_age/0.75), log(Afull - A50_vul))
       if(vulnerability == "dome") {
         params$vul_par <- c(logit(Afull/max_age/0.75), log(Afull - A50_vul), logit(0.1/(max_age - Afull)), logit(0.5))
@@ -353,7 +414,7 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
     Fstart[data$yindF + 1] <- log(0.75 * mean(data$M))
     params$log_F_dev <- Fstart
   }
-
+  
   if(is.null(params$log_omega)) {
     sigmaC <- max(0.01, sdconv(1, Data@CV_Cat[x]), na.rm = TRUE)
     params$log_omega <- log(sigmaC)
@@ -364,33 +425,54 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
   }
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
-
+  
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control,
                inner.control = inner.control)
-
+  
   map <- list()
-  if(any(info$data$C_hist <= 0)) {
+  if(catch_eq == "Baranov" && any(info$data$C_hist <= 0)) {
     ind <- info$data$C_hist <= 0
     info$params$log_F_dev[ind] <- -20
     map_logF <- length(params$log_F_dev)
     map_logF[ind] <- NA
     map_logF[!ind] <- 1:sum(!ind)
     map$log_F_dev <- factor(map_logF)
+  } else if(catch_eq == "Pope") {
+    map$log_F_dev <- factor(rep(NA, n_y))
   }
   if(fix_h) map$transformed_h <- factor(NA)
-  if(fix_F_equilibrium) map$F_equilibrium <- factor(NA)
+  if(fix_F_equilibrium) map$F_equilibrium <- map$U_equilibrium <- factor(NA)
   if(fix_omega) map$log_omega <- factor(NA)
   if(fix_tau) map$log_tau <- factor(NA)
   if(any(!est_early_rec_dev)) map$log_early_rec_dev <- factor(ifelse(est_early_rec_dev, 1:sum(est_early_rec_dev), NA))
   if(any(!est_rec_dev)) map$log_rec_dev <- factor(ifelse(est_rec_dev, 1:sum(est_rec_dev), NA))
   if(vulnerability == "dome") map$vul_par <- factor(c(1, 2, NA, 3))
-
+  
   random <- NULL
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev")
-
+  
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                    map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
-
+  
+  if(catch_eq == "Pope") {
+    # Add starting values for rec-devs and increase R0 start value if U is too high (> 0.975)
+    high_U <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0, silent = TRUE)
+    if(!is.character(high_U) && !is.na(high_U) && high_U) {
+      Recruit <- try(Data@Rec[x, ], silent = TRUE)
+      if(is.numeric(Recruit) && length(Recruit) == n_y && any(!is.na(Recruit))) {
+        log_rec_dev <- log(Recruit/mean(Recruit, na.rm = TRUE))
+        log_rec_dev[is.na(est_rec_dev) | is.na(log_rec_dev) | is.infinite(log_rec_dev)] <- 0
+        info$params$log_rec_dev <- log_rec_dev
+        
+        obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
+                         map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
+      }
+      while(obj$par["R0x"] < 30 && obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0) {
+        obj$par["R0x"] <- obj$par["R0x"] + 1
+      }
+    }
+  }
+  
   mod <- optimize_TMB_model(obj, control, opt_hess, n_restart)
   opt <- mod[[1]]
   SD <- mod[[2]]
@@ -401,15 +483,16 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
   YearDev <- c(YearEarly, Year)
   YearR <- c(YearDev, max(YearDev) + 1)
   R <- c(rev(report$R_early), report$R)
-
+  
   Dev <- structure(c(rev(report$log_early_rec_dev), report$log_rec_dev), names = YearDev)
-  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj) %>% structure(names = Yearplusone)
+  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+    structure(names = Yearplusone)
   
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
-  Assessment <- new("Assessment", Model = "SCA", Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
+  Assessment <- new("Assessment", Model = "SCA", 
+                    Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
                     SSB0 = report$E0, VB0 = report$VB0,
-                    h = report$h, FMort = structure(report$F, names = Year),
                     B = structure(report$B, names = Yearplusone),
                     B_B0 = structure(report$B/report$B0, names = Yearplusone),
                     SSB = structure(report$E, names = Yearplusone),
@@ -432,11 +515,18 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
                                     names = c("Total", paste0("Index_", 1:nsurvey), "CAA", "Catch", "Dev", "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
-
+  if(SR != "none") Assessment@h <- report$h
+  if(catch_eq == "Baranov") {
+    Assessment@FMort <- structure(report$F, names = Year)
+  } else {
+    Assessment@U <- structure(report$U, names = Year)
+  }
+  
   if(Assessment@conv) {
-    ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+    ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, 
+                         SR = SR, catch_eq = catch_eq)
     report <- c(report, ref_pt[1:6])
-
+    
     if(integrate) {
       SE_Early <- ifelse(est_early_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_early_rec_dev"]), NA)
       SE_Main <- ifelse(est_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_rec_dev"]), NA)
@@ -444,80 +534,123 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), vulnerability
       SE_Early <- ifelse(est_early_rec_dev, sqrt(diag(SD$cov.fixed)[names(SD$par.fixed) == "log_early_rec_dev"]), NA)
       SE_Main <- ifelse(est_rec_dev, sqrt(diag(SD$cov.fixed)[names(SD$par.fixed) == "log_rec_dev"]), NA)
     }
-
+    
     SE_Dev <- structure(c(rev(SE_Early), SE_Main), names = YearDev)
-
+    
     first_non_zero <- which(!is.na(SE_Dev))[1]
     if(!is.na(first_non_zero) && first_non_zero > 1) {
       Dev <- Dev[-c(1:(first_non_zero - 1))]
       SE_Dev <- SE_Dev[-c(1:(first_non_zero - 1))]
       SE_Dev[is.na(SE_Dev)] <- 0
     }
-
-    Assessment@FMSY <- report$FMSY
-    Assessment@MSY <- report$MSY
-    Assessment@BMSY <- report$BMSY
-    Assessment@SSBMSY <- report$EMSY
-    Assessment@VBMSY <- report$VBMSY
-    Assessment@F_FMSY <- structure(report$F/report$FMSY, names = Year)
-    Assessment@B_BMSY <- structure(report$B/report$BMSY, names = Yearplusone)
-    Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY, names = Yearplusone)
-    Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
+    
+    if(SR != "none") {
+      if(catch_eq == "Baranov") {
+        Assessment@FMSY <- report$FMSY
+        Assessment@F_FMSY <- structure(report$F/report$FMSY, names = Year)
+      } else {
+        Assessment@UMSY <- report$UMSY
+        Assessment@U_UMSY <- structure(report$U/report$UMSY, names = Year)
+      }
+      Assessment@MSY <- report$MSY
+      Assessment@BMSY <- report$BMSY
+      Assessment@SSBMSY <- report$EMSY
+      Assessment@VBMSY <- report$VBMSY
+      Assessment@B_BMSY <- structure(report$B/report$BMSY, names = Yearplusone)
+      Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY, names = Yearplusone)
+      Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
+    }
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report
     
-    catch_eq <- function(Ftarget) {
+    catch_eq_fn <- function(Ftarget) {
       projection_SCA(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
                      process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
     }
-    Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq)
+    Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq_fn)
   }
   return(Assessment)
 }
-class(SCA) <- "Assess"
 
-ref_pt_SCA <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker")) {
+ref_pt_SCA <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker", "none"), catch_eq) {
   SR <- match.arg(SR)
   
-  opt2 <- optimize(yield_fn_SCA, interval = c(0, 4), M = M, mat = mat, weight = weight, vul = vul, 
-                   SR = SR, Arec = Arec, Brec = Brec)
-  FMSY <- opt2$minimum
-  MSY <- -1 * opt2$objective
+  if(SR != "none") {
+    
+    max_F <- ifelse(catch_eq == "Baranov", 4, 1)
+    
+    if(catch_eq == "Baranov") {
+      opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 4), M = M, mat = mat, weight = weight, vul = vul, 
+                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq)
+      FMSY <- opt2$minimum
+    } else {
+      opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 0.99), M = M, mat = mat, weight = weight, vul = vul, 
+                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq)
+      UMSY <- opt2$minimum
+    }
+    opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                         Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq)
+    MSY <- -1 * opt2$objective
+    VBMSY <- opt3["VB"]
+    RMSY <- opt3["R"]
+    BMSY <- opt3["B"]
+    EMSY <- opt3["E"]
+  } else {
+    FMSY <- UMSY <- MSY <- VBMSY <- RMSY <- BMSY <- EMSY <- NULL
+  }
   
-  opt3 <- yield_fn_SCA(FMSY, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                       Arec = Arec, Brec = Brec, opt = FALSE)
-  VBMSY <- opt3["VB"]
-  RMSY <- opt3["R"]
-  BMSY <- opt3["B"]
-  EMSY <- opt3["E"]
-  
-  F_PR <- seq(0, 2.5 * FMSY, length.out = 100)
-  yield <- lapply(F_PR, yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                  Arec = Arec, Brec = Brec, opt = FALSE)
+  if(catch_eq == "Baranov") {
+    
+    Fvec <- seq(0, 2.5 * ifelse(SR == "none", mean(M), FMSY), length.out = 100)
+    yield <- lapply(Fvec,
+                    yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq)
+  } else {
+    Uvec <- seq(0, 0.99, 0.01)
+    yield <- lapply(Uvec,
+                    yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq)
+  }
   SPR <- vapply(yield, getElement, numeric(1), "SPR")
   YPR <- vapply(yield, getElement, numeric(1), "YPR")
   
-  return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-              per_recruit = data.frame(FM = F_PR, SPR = SPR/SPR[1], YPR = YPR)))
+  if(catch_eq == "Baranov") {
+    return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
+                per_recruit = data.frame(FM = Fvec, SPR = SPR/SPR[1], YPR = YPR)))
+  } else {
+    return(list(UMSY = UMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
+                per_recruit = data.frame(U = Uvec, SPR = SPR/SPR[1], YPR = YPR)))
+  }
+  
 }
 
-yield_fn_SCA <- function(x, M, mat, weight, vul, SR, Arec, Brec, opt = TRUE, log_trans = FALSE) {
-  if(log_trans) {
-    FMort <- exp(x)
+yield_fn_SCA <- function(x, M, mat, weight, vul, SR, Arec, Brec, catch_eq, opt = TRUE, x_transform = FALSE) {
+  
+  if(catch_eq == "Baranov") {
+    FMort <- ifelse(x_transform, exp(x), x)
+    surv <- exp(-vul * FMort - M)
   } else {
-    FMort <- x
+    U <- ifelse(x_transform, ilogit(x), x)
+    surv <- exp(-M) * (1 - vul * U)
   }
   n_age <- length(M)
-  FF <- vul * FMort
-  Z <- FF + M
-  surv <- exp(-Z)
   NPR <- c(1, cumprod(surv[1:(n_age-1)]))
   NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
   EPR <- sum(NPR * mat * weight)
-  if(SR == "BH") Req <- (Arec * EPR - 1)/(Brec * EPR)
-  if(SR == "Ricker") Req <- log(Arec * EPR)/(Brec * EPR)
-  CPR <- Baranov(vul, FMort, M, NPR)
+  if(SR == "BH") {
+    Req <- (Arec * EPR - 1)/(Brec * EPR)
+  } else if(SR == "Ricker") {
+    Req <- log(Arec * EPR)/(Brec * EPR)
+  } else {
+    Req <- 1
+  }
+    
+  if(catch_eq == "Baranov") {
+    CPR <- Baranov(vul, FMort, M, NPR)
+  } else {
+    CPR <- vul * U * NPR * exp(-0.5 * M)
+  }
   YPR <- sum(CPR * weight)
   Yield <- YPR * Req
   if(opt) {
@@ -534,7 +667,7 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR, Arec, Brec, opt = TRUE, log
 
 
 SCA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
-  if(grepl("Pope", obj$env$data$model)) {
+  if(obj$env$data$catch_eq == "Pope") {
     dots <- list(...)
     dots$data$C_hist <- rep(1e-8, dots$data$n_y)
     par[names(par) == "U_equilibrium"] <- 0

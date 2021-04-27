@@ -1,6 +1,6 @@
 
 summary_SSS <- function(Assessment) {
-  output <- summary_SCA_Pope(Assessment)
+  output <- summary_SCA(Assessment)
   output$model <- "Simple Stock Synthesis (SSS)"
   return(output)
 }
@@ -22,11 +22,12 @@ rmd_SSS <- function(Assessment, ...) {
   # Assessment
   #### Pars and Fit
   assess_fit <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"),
-                  rmd_assess_fit("Index", "index"))
+                  rmd_assess_fit_series(nsets = 1))
 
   #### Time Series
-  ts_output <- c(rmd_U(header = "### Time Series Output\n"), rmd_U_UMSY(), rmd_SSB(), rmd_SSB_SSBMSY(),
-                 rmd_SSB_SSB0(), rmd_Kobe("SSB_SSBMSY", "U_UMSY", xlab = "expression(SSB/SSB[MSY])", ylab = "expression(U/U[MSY])"), rmd_R(),
+  ts_output <- c(rmd_U(header = "### Time Series Output\n"), rmd_U_UMSY(), rmd_SSB(), 
+                 rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"), rmd_SSB_SSBMSY(), rmd_SSB_SSB0(), 
+                 rmd_Kobe("SSB_SSBMSY", "U_UMSY", xlab = "expression(SSB/SSB[MSY])", ylab = "expression(U/U[MSY])"), rmd_R(),
                  rmd_N(), rmd_N_at_age())
 
   # Productivity
@@ -52,4 +53,4 @@ profile_likelihood_SSS <- function(Assessment, ...) {
 }
 
 
-retrospective_SSS <- function(Assessment, nyr) retrospective_SCA_Pope(Assessment, nyr)
+retrospective_SSS <- function(Assessment, nyr) retrospective_SCA(Assessment, nyr)

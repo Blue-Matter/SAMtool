@@ -56,7 +56,7 @@ An object of class \linkS4class{Assessment}.
 }
 \description{
 A simple age-structured model (\link{SCA_Pope}) fitted to a time series of catch going back to unfished conditions.
-Terminal depletion (ratio of current biomass to unfished biomass) is by default fixed to 0.4. Selectivity is fixed 
+Terminal depletion (ratio of current total biomass to unfished biomass) is by default fixed to 0.4. Selectivity is fixed 
 to the maturity ogive, although it can be overridden with the start argument. The sole parameter estimated is 
 R0 (unfished recruitment), with no process error.
 }

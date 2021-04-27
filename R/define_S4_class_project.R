@@ -172,15 +172,15 @@ SP_catch_solver <- function(FM, B, dt, MSY, K, n, n_term, TAC = NULL) {
 
 projection_SP_SS <- projection_SP
 
-projection_SCA <- projection_SCA_Pope <- projection_SCA2 <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch,
-                                                                     p_years = 50, p_sim = 200, obs_error, process_error,
-                                                                     max_F = 3, seed = 499, ...) {
+projection_SCA <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch,
+                           p_years = 50, p_sim = 200, obs_error, process_error,
+                           max_F = 3, seed = 499, ...) {
   
   constrain <- match.arg(constrain)
     
   TMB_report <- Assessment@TMB_report
   TMB_data <- Assessment@obj$env$data
-  Pope <- Assessment@Model == "SCA_Pope"
+  Pope <- TMB_data$catch_eq == "Pope"
   
   # Sample rec_devs and obs_error
   set.seed(seed)
@@ -276,12 +276,8 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
       N[y+1, ncol(N)] <- N[y+1, ncol(N)] + N[y, ncol(N)] * surv[ncol(N), y]
       
       E[y+1] <- sum(N[y+1, ] * mat * weight, na.rm = TRUE)
+      N[y+1, 1] <- R_pred(E[y+1], TMB_report$h, TMB_report$R0, TMB_report$E0, TMB_data$SR_type) * p_log_rec_dev[y+1]
       
-      if(is.null(TMB_data$SR_type)) { # SCA2
-        N[y+1, 1] <- TMB_report$meanR * p_log_rec_dev[y+1]
-      } else {
-        N[y+1, 1] <- R_pred(E[y+1], TMB_report$h, TMB_report$R0, TMB_report$E0, TMB_data$SR_type) * p_log_rec_dev[y+1]
-      }
     }
   }
   if(Pope) {
@@ -334,14 +330,16 @@ SCA_catch_solver <- function(FM, N, weight, vul, M, TAC = NULL) {
 }
 
 
-R_pred <- function(SSB, h, R0, SSB0, SR_type = c("BH", "Ricker")) {
+R_pred <- function(SSB, h, R0, SSB0, SR_type = c("BH", "Ricker", "none")) {
   SR_type <- match.arg(SR_type)
   if(SR_type == "BH") {
     den <- SSB0 * (1 - h) + (5*h - 1) * SSB
     RR <- 4 * h * R0 * SSB / den
-  } else {
+  } else if(SR_type == "Ricker") {
     expon <- 1.25 * (1 - SSB/SSB0)
     RR <- (5*h)^expon * SSB * R0 / SSB0
+  } else {
+    RR <- R0
   }
   return(RR)
 }

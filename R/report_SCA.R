@@ -1,31 +1,44 @@
 
-summary_SCA <- function(Assessment, SCA2 = FALSE) {
+summary_SCA <- function(Assessment) {
   assign_Assessment_slots(Assessment)
-
-  if(conv) current_status <- c(F_FMSY[length(F_FMSY)], SSB_SSBMSY[length(SSB_SSBMSY)], SSB_SSB0[length(SSB_SSB0)])
-  else current_status <- c(NA, NA, SSB_SSB0[length(SSB_SSB0)])
-  current_status <- data.frame(Value = current_status)
-  rownames(current_status) <- c("F/FMSY", "SSB/SSBMSY", "SSB/SSB0")
-
+  
+  catch_eq <- obj$env$data$catch_eq
+  SR <- obj$env$data$SR_type
+  
+  if(SR == "none" || !conv) {
+    current_status <- data.frame(Value = c(ifelse(catch_eq == "Baranov", FMort[length(FMort)], U[length(U)]), 
+                                           SSB[length(SSB)], SSB_SSB0[length(SSB_SSB0)]))
+    rownames(current_status) <- c(ifelse(catch_eq == "Baranov", "F", "U"), "SSB", "SSB/SSB0")
+  } else {
+    current_status <- data.frame(Value = c(ifelse(catch_eq == "Baranov", F_FMSY[length(F_FMSY)], U_UMSY[length(U_UMSY)]), 
+                                           SSB_SSBMSY[length(SSB_SSBMSY)], SSB_SSB0[length(SSB_SSB0)]))
+    rownames(current_status) <- c(ifelse(catch_eq == "Baranov", "F/FMSY", "U/UMSY"), "SSB/SSBMSY", "SSB/SSB0")
+  }
+  
+  if(SR == "none") h <- NA_real_
   Value <- c(h, info$data$M[1], info$data$n_age - 1, info$LH$Linf, info$LH$K, info$LH$t0,
              info$LH$a * info$LH$Linf ^ info$LH$b, info$LH$A50, info$LH$A95)
   Description = c("Stock-recruit steepness", "Natural mortality", "Maximum age (plus-group)", "Asymptotic length", "Growth coefficient",
                   "Age at length-zero", "Asymptotic weight", "Age of 50% maturity", "Age of 95% maturity")
-  rownam <- c("h", "M", "maxage", "Linf", "K", "t0", "Winf", "A50", "A95")
   input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
-  rownames(input_parameters) <- rownam
-  if(!"transformed_h" %in% names(obj$env$map) || (SCA2 && !info$fix_h)) input_parameters <- input_parameters[-1, ]
+  rownames(input_parameters) <- c("h", "M", "maxage", "Linf", "K", "t0", "Winf", "A50", "A95")
+  if("transformed_h" %in% names(obj$env$map) || SR != "none") {
+    input_parameters <- input_parameters[-1, ]
+  }
 
-  if(conv) Value <- c(VB0, SSB0, MSY, FMSY, VBMSY, SSBMSY, SSBMSY/SSB0)
-  else Value <- rep(NA, 7)
-
+  if(conv && SR != "none") {
+    Value <- c(VB0, SSB0, MSY, ifelse(catch_eq == "Pope", UMSY, FMSY), VBMSY, SSBMSY, SSBMSY/SSB0)
+  } else {
+    Value <- rep(NA, 7)
+  }
   Description <- c("Unfished vulnerable biomass",
-                   "Unfished spawning stock biomass (SSB)", "Maximum sustainable yield (MSY)", "Fishing mortality at MSY",
+                   "Unfished spawning stock biomass (SSB)", "Maximum sustainable yield (MSY)", 
+                   ifelse(catch_eq == "Pope", "Exploitation rate at MSY", "Fishing mortality at MSY"),
                    "Vulnerable biomass at MSY", "SSB at MSY", "Spawning depletion at MSY")
   derived <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
-  rownames(derived) <- c("VB0", "SSB0", "MSY", "FMSY", "VBMSY", "SSBMSY", "SSBMSY/SSB0")
+  rownames(derived) <- c("VB0", "SSB0", "MSY", ifelse(catch_eq == "Pope", "UMSY", "FMSY"), "VBMSY", "SSBMSY", "SSBMSY/SSB0")
 
-  if(conv && SCA2 && !info$fix_h) {
+  if(conv && SR != "none" && "transformed_h" %in% names(obj$env$map)) {
     derived <- rbind(derived, c(h, "Stock-recruit steepness"))
     rownames(derived)[8] <- "h"
   }
@@ -36,15 +49,15 @@ summary_SCA <- function(Assessment, SCA2 = FALSE) {
     rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(FMort)[as.logical(obj$env$data$est_rec_dev)])
   }
 
-  output <- list(model = paste("Statistical Catch-at-Age", ifelse(SCA2, "(SCA2)", "(SCA)")),
+  output <- list(model = "Statistical Catch-at-Age (SCA)",
                  current_status = current_status, input_parameters = input_parameters,
                  derived_quantities = derived, model_estimates = model_estimates,
                  log_likelihood = matrix(NLL, ncol = 1, dimnames = list(names(NLL), "Neg.LL")))
   return(output)
 }
 
-rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
-  ss <- rmd_summary(paste("Statistical Catch-at-Age", ifelse(SCA2, "(SCA2)", "(SCA)")))
+rmd_SCA <- function(Assessment, ...) {
+  ss <- rmd_summary("Statistical Catch-at-Age (SCA)")
 
   # Life History
   age <- 0:(Assessment@info$data$n_age - 1)
@@ -59,8 +72,8 @@ rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
 
   # Assessment
   #### Pars and Fit
-  if(SCA2) {
-    lead_par <- rmd_meanR(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n")
+  if(Assessment@obj$env$data$SR_type == "none") {
+    lead_par <- rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n")
   } else {
     lead_par <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h())
   }
@@ -76,27 +89,47 @@ rmd_SCA <- function(Assessment, SCA2 = FALSE, ...) {
                                label = Assessment@Dev_type, conv_check = TRUE, blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])))
 
   #### Time Series
-  ts_output <- c(rmd_F(header = "### Time Series Output\n"), rmd_F_FMSY(), rmd_SSB(),
-                 rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"), rmd_SSB_SSBMSY(),
-                 rmd_SSB_SSB0(), rmd_Kobe("SSB_SSBMSY", xlab = "expression(SSB/SSB[MSY])"), rmd_R(),
-                 rmd_N(), rmd_N_at_age(), rmd_C_at_age(), rmd_C_mean_age())
+  if(Assessment@obj$env$data$catch_eq == "Baranov") {
+    F_output <- rmd_F(header = "### Time Series Output\n")
+    if(Assessment@obj$env$data$SR_type != "none") F_output <- c(F_output, rmd_F_FMSY())
+  } else {
+    F_output <- rmd_U(header = "### Time Series Output\n")
+    if(Assessment@obj$env$data$SR_type != "none") F_output <- c(F_output, rmd_U_UMSY())
+  }
+  ts_output <- c(F_output, rmd_SSB(),
+                 rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"), 
+                 ifelse(Assessment@obj$env$data$SR_type != "none", rmd_SSB_SSBMSY(), ""),
+                 rmd_SSB_SSB0(), 
+                 ifelse(Assessment@obj$env$data$SR_type != "none", 
+                        rmd_Kobe("SSB_SSBMSY", xlab = "expression(SSB/SSB[MSY])"), ""), 
+                 rmd_R(), rmd_N(), rmd_N_at_age(), rmd_C_at_age(), rmd_C_mean_age())
 
   # Productivity
-  Arec <- Assessment@TMB_report$Arec
-  Brec <- Assessment@TMB_report$Brec
-  SSB <- Assessment@SSB
-
-  SR <- ifelse(SCA2, Assessment@info$SR, Assessment@info$data$SR_type)
-  if(SR == "BH") {
-    expectedR <- Arec * SSB / (1 + Brec * SSB)
+  if(Assessment@obj$env$data$SR_type != "none") {
+    Arec <- Assessment@TMB_report$Arec
+    Brec <- Assessment@TMB_report$Brec
+    SSB <- Assessment@SSB
+    if(Assessment@info$data$SR_type == "BH") {
+      expectedR <- Arec * SSB / (1 + Brec * SSB)
+    } else {
+      expectedR <- Arec * SSB * exp(-Brec * SSB)
+    }
+    estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
+    
+    SR_header <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
+                   rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE))
+    if(Assessment@obj$env$data$catch_eq == "Baranov") {
+      yield_curve <- c(rmd_yield_F("SCA"), rmd_yield_depletion("SCA"))
+    } else {
+      yield_curve <- c(rmd_yield_U("SCA_Pope"), rmd_yield_depletion("SCA_Pope"))
+    }
+    
   } else {
-    expectedR <- Arec * SSB * exp(-Brec * SSB)
+    SR_header <- "### Productivity\n\n\n"
+    yield_curve <- ""
   }
-  estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
-
-  productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
-                    rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
-                    rmd_yield_F("SCA"), rmd_yield_depletion("SCA"), rmd_sp(), rmd_SPR(), rmd_YPR())
+  productivity <- c(SR_header, yield_curve, rmd_sp(yield_fn = Assessment@obj$env$data$SR_type != "none"), 
+                    rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
 }
@@ -110,7 +143,7 @@ profile_likelihood_SCA <- function(Assessment, ...) {
     profile_par <- "h"
   }
   if(!is.null(dots$h)) h <- dots$h else {
-    h <- Assessment@h
+    h <- ifelse(length(Assessment@h), Assessment@h, NA_real_)
     profile_par <- "R0"
   }
 
@@ -124,7 +157,7 @@ profile_likelihood_SCA <- function(Assessment, ...) {
     params$R0x <- log(profile_grid[i, 1]  * Assessment@obj$env$data$rescale)
     if(Assessment@info$data$SR_type == "BH") {
       params$transformed_h <- logit((profile_grid[i, 2] - 0.2)/0.8)
-    } else {
+    } else if(Assessment@info$data$SR_type == "Ricker") {
       params$transformed_h <- log(profile_grid[i, 2] - 0.2)
     }
 
@@ -155,7 +188,7 @@ profile_likelihood_SCA <- function(Assessment, ...) {
 }
 
 
-retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SCA, SCA2, and SCA_RWM
+retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and SCA_RWM
   assign_Assessment_slots(Assessment)
   n_y <- info$data$n_y
   
@@ -166,7 +199,14 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SC
   if(grepl("RWM", Assessment@Model)) {
     TS_var <- c("F", "SSB", "R", "VB")
   } else {
-    TS_var <- c("F", "F_FMSY", "SSB", "SSB_SSBMSY", "SSB_SSB0", "R", "VB")
+    
+    if(info$data$SR_type == "none") {
+      TS_var <- c(ifelse(info$data$catch_eq == "Baranov", "F", "U"), "SSB", "SSB_SSB0", "R", "VB")
+    } else {
+      TS_var <- c(ifelse(info$data$catch_eq == "Baranov", "F", "U"), 
+                  ifelse(info$data$catch_eq == "Baranov", "F_FMSY", "U_UMSY"), 
+                  "SSB", "SSB_SSBMSY", "SSB_SSB0", "R", "VB")
+    }
   }
   retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, length(TS_var))) %>% 
     structure(dimnames = list(Peel = 0:nyr, Year = Year, Var = TS_var))
@@ -188,7 +228,11 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SC
     }
     
     info$data$C_hist <- info$data$C_hist[1:n_y_ret]
+    
+    if(Assessment@Model == "SSS") dep <- info$data$I_hist[n_y]
     info$data$I_hist <- info$data$I_hist[1:n_y_ret, , drop = FALSE]
+    if(Assessment@Model == "SSS") info$data$I_hist[n_y_ret, ] <- dep
+    
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
     info$data$CAA_n <- info$data$CAA_n[1:n_y_ret]
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]
@@ -201,7 +245,11 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SC
     map <- obj$env$map
     if(any(names(map) == "log_rec_dev")) {
       new_map <- as.numeric(map$log_rec_dev) - i
-      map$log_rec_dev <- factor(new_map[new_map > 0])
+      if(all(is.na(new_map))) {
+        map$log_rec_dev <- factor(rep(NA, n_y_ret))
+      } else {
+        map$log_rec_dev <- factor(new_map[new_map > 0])
+      }
     }
     if(any(names(map) == "log_F_dev")) map$log_F_dev <- map$log_F_dev[1:n_y_ret]
     
@@ -213,31 +261,23 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SC
     
     if(!is.character(opt2) && !is.character(SD)) {
       report <- obj2$report(obj2$env$last.par.best)
-      if(SCA2) {
-        ref_pt <- ref_pt_SCA2(E = report$E, R = report$R, M = info$data$M,
-                              weight = info$data$weight, mat = info$data$mat, vul = report$vul, SR = info$SR,
-                              fix_h = info$fix_h, h = h)
-      } else if(!is.null(info$data[["M"]])) {
+      
+      if(info$data$SR_type != "none") {
         ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = info$data$M, weight = info$data$weight, mat = info$data$mat,
-                             vul = report$vul, SR = info$data$SR_type)
+                             vul = report$vul, SR = info$data$SR_type, catch_eq = info$data$catch_eq)
       }
       
-      FMort <- c(report$F, rep(NA, i + 1))
-      SSB <- c(report$E, rep(NA, i))
-      R <- c(report$R, rep(NA, i))
-      VB <- c(report$VB, rep(NA, i))
+      if("F" %in% TS_var) retro_ts[i+1, , TS_var == "F"] <<- c(report$F, rep(NA, i + 1))
+      if("F_FMSY" %in% TS_var) retro_ts[i+1, , TS_var == "F_FMSY"] <<- c(report$F/ref_pt$FMSY, rep(NA, i + 1))
+      if("U" %in% TS_var) retro_ts[i+1, , TS_var == "U"] <<- c(report$U, rep(NA, i + 1))
+      if("U_UMSY" %in% TS_var) retro_ts[i+1, , TS_var == "U_UMSY"] <<- c(report$U/ref_pt$UMSY, rep(NA, i + 1))
       
-      if(exists("ref_pt", inherits = FALSE)) {
-        report <- c(report, ref_pt)
-        
-        F_FMSY <- FMort/report$FMSY
-        SSB_SSBMSY <- SSB/report$EMSY
-        SSB_SSB0 <- SSB/report$E0
-        retro_ts[i+1, , ] <<- cbind(FMort, F_FMSY, SSB, SSB_SSBMSY, SSB_SSB0, R, VB)
-      } else {
-        retro_ts[i+1, , ] <<- cbind(FMort, SSB, R, VB)
-      }
-      #log_rec_dev <- c(report$log_rec_dev, rep(NA, i + 1))
+      if("SSB_SSBMSY" %in% TS_var) retro_ts[i+1, , TS_var == "SSB_SSBMSY"] <<- c(report$E/ref_pt$EMSY, rep(NA, i))
+      if("SSB_SSB0" %in% TS_var) retro_ts[i+1, , TS_var == "SSB_SSB0"] <<- c(report$E/report$E0, rep(NA, i))
+      
+      retro_ts[i+1, , TS_var == "SSB"] <<- c(report$E, rep(NA, i))
+      retro_ts[i+1, , TS_var == "R"] <<- c(report$R, rep(NA, i))
+      retro_ts[i+1, , TS_var == "VB"] <<- c(report$VB, rep(NA, i))
       
       retro_est[i+1, , ] <<- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev" &
                                            rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "logit_M" &
@@ -254,66 +294,21 @@ retrospective_SCA <- function(Assessment, nyr, SCA2 = FALSE) { # Incorporates SC
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
   
-  if(grepl("RWM", Assessment@Model)) {
-    attr(retro, "TS_lab") <- c("Fishing mortality", "Spawning biomass", "Recruitment", "Vulnerable biomass")
-  } else {
-    attr(retro, "TS_lab") <- c("Fishing mortality", expression(F/F[MSY]), "Spawning biomass", expression(SSB/SSB[MSY]), "Spawning depletion",
-                               "Recruitment", "Vulnerable biomass")
-  }
+  TS_master_var <- c("F", "F_FMSY", "U", "U_UMSY", "SSB", "SSB_SSBMSY", "SSB_SSB0", "R", "VB")
+  TS_master_lab <- c("Fishing mortality", expression(F/F[MSY]), "Exploitation rate", expression(U/U[MSY]),
+                     "Spawning biomass", expression(SSB/SSB[MSY]), "Spawning depletion",
+                     "Recruitment", "Vulnerable biomass")
+  attr(retro, "TS_lab") <- TS_master_lab[match(TS_var, TS_master_var)]
   
   return(retro)
 }
-
-
-summary_SCA2 <- function(Assessment) summary_SCA(Assessment, TRUE)
-
-rmd_SCA2 <- function(Assessment) rmd_SCA(Assessment, TRUE)
-
-
-profile_likelihood_SCA2 <- function(Assessment, ...) {
-  dots <- list(...)
-  if(!"meanR" %in% names(dots)) stop("Sequence of meanR was not found. See help file.")
-  meanR <- dots$meanR
-
-  params <- Assessment@info$params
-  map <- Assessment@obj$env$map
-  map$meanRx <- factor(NA)
-
-  profile_fn <- function(i, Assessment, params, map) {
-
-    params$meanRx <- log(meanR[i] * Assessment@obj$env$data$rescale)
-    if(length(Assessment@opt$par) == 1) {
-      nll <- Assessment@obj$fn(params$meanRx)
-    } else {
-
-      obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
-                        inner.control = Assessment@info$inner.control, DLL = "SAMtool", silent = TRUE)
-      opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
-      if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
-
-    }
-    return(nll)
-  }
-  nll <- vapply(1:length(meanR), profile_fn, numeric(1), Assessment = Assessment, params = params, map = map) - Assessment@opt$objective
-  profile_grid <- data.frame(meanR = meanR, nll = nll)
-
-  pars <- c("meanR")
-  MLE <- Assessment@SD$value["meanR"]
-
-  output <- new("prof", Model = Assessment@Model, Name = Assessment@Name, Par = pars, MLE = MLE, grid = profile_grid)
-  return(output)
-}
-
-
-retrospective_SCA2 <- function(Assessment, nyr) retrospective_SCA(Assessment, nyr, TRUE)
-
 
 plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "Depletion")) {
   xaxis <- match.arg(xaxis)
   F.vector = seq(0, 2.5 * fmsy, length.out = 1e2)
   
   yield <- lapply(F.vector, yield_fn_SCA, M = data$M, mat = data$mat, weight = data$weight, vul = report$vul,
-                  SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, opt = FALSE)
+                  SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, opt = FALSE, catch_eq = "Baranov")
   
   Biomass <- vapply(yield, getElement, numeric(1), "E")
   Yield <- vapply(yield, getElement, numeric(1), "Yield")
@@ -350,3 +345,46 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
 }
 
 
+plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass", "Depletion")) {
+  xaxis <- match.arg(xaxis)
+  if(xaxis == "U") u.vector = seq(0, max(1, 2.5 * umsy), length.out = 100) else {
+    u.vector = seq(0, 1, length.out = 100)
+  }
+  
+  yield <- lapply(u.vector, yield_fn_SCA, M = data$M, mat = data$mat, weight = data$weight, 
+                  vul = report$vul, SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, 
+                  catch_eq = "Pope", opt = FALSE)
+  
+  Biomass <- vapply(yield, getElement, numeric(1), "E")
+  Yield <- vapply(yield, getElement, numeric(1), "Yield")
+  R <- vapply(yield, getElement, numeric(1), "R")
+  ind <- R >= 0
+  
+  BMSY <- report$EMSY
+  B0 <- report$E0
+  
+  if(xaxis == "U") {
+    plot(u.vector[ind], Yield[ind], typ = 'l', xlab = "Harvest rate (U)",
+         ylab = "Equilibrium yield")
+    segments(x0 = umsy, y0 = 0, y1 = msy, lty = 2)
+    segments(x0 = 0, y0 = msy, x1 = umsy, lty = 2)
+    abline(h = 0, col = 'grey')
+  }
+  
+  if(xaxis == "Biomass") {
+    plot(Biomass[ind], Yield[ind], typ = 'l', xlab = "Spawning Stock Biomass",
+         ylab = "Equilibrium yield")
+    segments(x0 = BMSY, y0 = 0, y1 = msy, lty = 2)
+    segments(x0 = 0, y0 = msy, x1 = BMSY, lty = 2)
+    abline(h = 0, col = 'grey')
+  }
+  
+  if(xaxis == "Depletion") {
+    plot(Biomass[ind]/B0, Yield[ind], typ = 'l',
+         xlab = expression(SSB/SSB[0]), ylab = "Equilibrium yield")
+    segments(x0 = BMSY/B0, y0 = 0, y1 = msy, lty = 2)
+    segments(x0 = 0, y0 = msy, x1 = BMSY/B0, lty = 2)
+    abline(h = 0, col = 'grey')
+  }
+  invisible(data.frame(U = u.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/B0))
+}

@@ -12,12 +12,8 @@ Type objective_function<Type>::operator() ()
     return SP(this);
   } else if(model == "SCA") {
     return SCA(this);
-  } else if(model == "SCA2") {
-    return SCA2(this);
   } else if(model == "SCA_RWM") {
     return SCA_RWM(this);
-  } else if(model == "SCA_Pope") {
-    return SCA_Pope(this);
   } else if(model == "VPA") {
     return VPA(this);
   } else if(model == "cDD") {

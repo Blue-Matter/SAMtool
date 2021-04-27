@@ -10,7 +10,7 @@
 HCR_ramp(
   Assessment,
   reps = 1,
-  OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "F_FMSY", "F_F01", "F_FSPR"),
+  OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "SSB_dSSB0", "F_FMSY", "F_F01", "F_FSPR"),
   Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"),
   LOCP = 0.1,
   TOCP = 0.4,

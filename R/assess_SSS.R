@@ -2,7 +2,7 @@
 #' Simple Stock Synthesis
 #'
 #' A simple age-structured model (\link{SCA_Pope}) fitted to a time series of catch going back to unfished conditions.
-#' Terminal depletion (ratio of current biomass to unfished biomass) is by default fixed to 0.4. Selectivity is fixed 
+#' Terminal depletion (ratio of current total biomass to unfished biomass) is by default fixed to 0.4. Selectivity is fixed 
 #' to the maturity ogive, although it can be overridden with the start argument. The sole parameter estimated is 
 #' R0 (unfished recruitment), with no process error.
 #'
@@ -40,11 +40,12 @@
 #' SSS_MP <- make_MP(SSS, HCR40_10, dep = 0.3) # Always assume depletion = 0.3
 #' @useDynLib SAMtool
 #' @export
-SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1",
-                start = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), 
+                rescale = "mean1", start = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), ...) {
-
-  dependencies <- "Data@Cat, Data@steep, Data@Mort, Data@L50, Data@L95, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
+  
+  catch_eq <- "Pope"
+  dependencies <- "Data@Cat, Data@steep, Data@Mort, Data@L50, Data@L95, Data@LFC, Data@LFS, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
   dots <- list(...)
   start <- lapply(start, eval, envir = environment())
   dep <- eval(dep)
@@ -82,13 +83,13 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   LH <- list(LAA = La, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
 
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
-  data <- list(model = "SCA_Pope", C_hist = C_hist, rescale = rescale, 
+  data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, 
                I_hist = I_hist, I_sd = matrix(0.01, n_y, 1), I_units = 1, I_vul = matrix(1, n_age, 1), 
                abs_I = 0, nsurvey = 1, LWT = 1,
                CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(NA_real_, n_y), n_y = n_y, n_age = n_age, M = M,
                weight = Wa, mat = mat_age, vul_type = "logistic",
-               SR_type = SR, CAA_dist = "multinomial", est_early_rec_dev = rep(0, n_age - 1),
-               est_rec_dev = rep(0, n_y))
+               SR_type = SR, CAA_dist = "multinomial", catch_eq = catch_eq,
+               est_early_rec_dev = rep(0, n_age - 1), est_rec_dev = rep(0, n_y), yindF = 0)
 
   # Starting values
   params <- list()
@@ -123,17 +124,22 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
       params$transformed_h <- log(h_start - 0.2)
     }
   }
+
+  params$F_equilibrium <- params$U_equilibrium <- 0 
+  
   if(is.null(params$vul_par)) params$vul_par <- c(logit(min(A95, 0.74 * max_age)/max_age/0.75), log(A95-A50))
 
-  params$U_equilibrium <- params$log_tau <- 0
+  params$log_F_dev <- rep(0, n_y)
+  params$log_omega <- params$log_tau <- 0
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control)
 
   map <- list()
-  map$transformed_h <- map$U_equilibrium <- map$log_tau <- factor(NA)
+  map$transformed_h <- map$F_equilibrium <- map$U_equilibrium <- map$log_omega <- map$log_tau <- factor(NA)
   map$vul_par <- factor(c(NA, NA))
+  map$log_F_dev <- factor(rep(NA, n_y))
   map$log_early_rec_dev <- factor(rep(NA, n_age - 1))
   map$log_rec_dev <- factor(rep(NA, n_y))
 
@@ -154,12 +160,16 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
   report <- obj$report(obj$env$last.par.best)
 
   Yearplusone <- c(Year, max(Year) + 1)
-
+  
+  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+    structure(names = Yearplusone)
+  
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
-  Assessment <- new("Assessment", Model = "SSS", Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
+  
+  Assessment <- new("Assessment", Model = "SSS", 
+                    Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
                     SSB0 = report$E0, VB0 = report$VB0,
-                    h = report$h, U = structure(report$U, names = Year),
                     B = structure(report$B, names = Yearplusone),
                     B_B0 = structure(report$B/report$B0, names = Yearplusone),
                     SSB = structure(report$E, names = Yearplusone),
@@ -172,34 +182,37 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), rescale = "mean1
                     Selectivity = matrix(report$vul, nrow = length(Year),
                                          ncol = n_age, byrow = TRUE),
                     Obs_Catch = structure(C_hist, names = Year),
-                    Obs_Index = structure(I_hist[, 1], names = Year),
-                    Catch = structure(colSums(t(report$CAApred) * Wa), names = Year),
-                    Index = structure(report$Ipred[, 1], names = Year),
+                    Obs_Index = structure(I_hist, dimnames = list(Year, "Depletion")),
+                    Catch = structure(report$Cpred, names = Year),
+                    Index = structure(report$Ipred, dimnames = list(Year, "Depletion")),
                     C_at_age = report$CAApred,
                     NLL = structure(nll_report, names = "Total"),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
-
+  Assessment@h <- report$h
+  Assessment@U <- structure(report$U, names = Year)
+  
   if(Assessment@conv) {
-    ref_pt <- ref_pt_SCA_Pope(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, SR = SR)
+    ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, 
+                         SR = SR, catch_eq = catch_eq)
     report <- c(report, ref_pt[1:6])
-
+    
     Assessment@UMSY <- report$UMSY
+    Assessment@U_UMSY <- structure(report$U/report$UMSY, names = Year)
     Assessment@MSY <- report$MSY
     Assessment@BMSY <- report$BMSY
     Assessment@SSBMSY <- report$EMSY
     Assessment@VBMSY <- report$VBMSY
-    Assessment@U_UMSY <- structure(report$U/report$UMSY, names = Year)
     Assessment@B_BMSY <- structure(report$B/report$BMSY, names = Yearplusone)
     Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY, names = Yearplusone)
     Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY, names = Yearplusone)
     Assessment@TMB_report <- report
     
-    catch_eq <- function(Ftarget) {
-      projection_SCA_Pope(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
-                          process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
+    catch_eq_fn <- function(Ftarget) {
+      projection_SCA(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
+                     process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
     }
-    Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq)
+    Assessment@forecast <- list(per_recruit = ref_pt[[7]], catch_eq = catch_eq_fn)
   }
   return(Assessment)
 }
