@@ -3,11 +3,14 @@
 \name{profile}
 \alias{profile}
 \alias{profile,Assessment-method}
+\alias{profile,RCModel-method}
 \title{Profile likelihood of assessment models}
 \usage{
 profile(fitted, ...)
 
 \S4method{profile}{Assessment}(fitted, figure = TRUE, ...)
+
+\S4method{profile}{RCModel}(fitted, figure = TRUE, ...)
 }
 \arguments{
 \item{fitted, Assessment}{An object of class \linkS4class{Assessment}.}

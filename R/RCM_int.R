@@ -5,7 +5,7 @@ RCM_int <- function(OM, data = list(), condition = c("catch", "catch2", "effort"
                     drop_highF = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
 
-  dots <- list(...) # can be vul_par, s_vul_par, map_vul_par, map_s_vul_par, map_log_rec_dev, map_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
+  dots <- list(...) # can be vul_par, s_vul_par, log_rec_dev, log_early_rec_dev, map_vul_par, map_s_vul_par, map_log_rec_dev, map_log_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
   if(!is.null(dots$maxF)) max_F <- dots$maxF
   if(length(ESS) == 1) ESS <- rep(ESS, 2)
 
@@ -587,15 +587,29 @@ RCM_est <- function(x = 1, data, selectivity, s_selectivity, SR_type = c("BH", "
     map_s_vul_par <- dots$map_s_vul_par
   }
   
+  if(!is.null(dots$log_early_rec_dev)) {
+    if(length(dots$log_early_rec_dev) != n_age - 1) stop("early_rec_dev is not a vector of length n_age - 1")
+    log_early_rec_dev <- dots$log_early_rec_dev
+  } else {
+    log_early_rec_dev <- rep(0, n_age - 1)
+  }
+  
+  if(!is.null(dots$log_rec_dev)) {
+    if(length(dots$log_rec_dev) != nyears) stop("early_rec_dev is not a vector of length nyears")
+    log_rec_dev <- dots$log_rec_dev
+  } else {
+    log_rec_dev <- rep(0, nyears)
+  }
+  
   TMB_params <- list(R0x = ifelse(!is.na(StockPars$R0[x]), log(StockPars$R0[x] * rescale), 0),
                      transformed_h = transformed_h, log_M = log(mean(StockPars$M_ageArray[x, , nyears])),
                      vul_par = vul_par, s_vul_par = s_vul_par,
                      log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
                      log_F_equilibrium = rep(log(0.05), nfleet),
                      log_CV_msize = log(data$MS_cv), log_tau = log(StockPars$procsd[x]),
-                     log_early_rec_dev = rep(0, n_age - 1), log_rec_dev = rep(0, nyears))
+                     log_early_rec_dev = log_early_rec_dev, log_rec_dev = log_rec_dev)
   if(data$condition == "catch") {
-    TMB_params$log_F_dev[TMB_data$yind_F + 1, 1:nfleet] <- log(0.5 * mean(TMB_data$M[nyears, ]))
+    TMB_params$log_F_dev[TMB_data$yind_F + 1, 1:nfleet] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
   }
   
   map <- list()
@@ -928,4 +942,101 @@ RCM_retro_subset <- function(yr, data, params, map) {
   }
 
   return(list(data = data_out, params = params_out, map = map))
+}
+
+
+profile_likelihood_RCM <- function(x, ...) {
+  dots <- list(...)
+  if(!length(x@mean_fit)) stop("No model found. Re-run RCM with mean_fit = TRUE.")
+  if(!any(names(dots) %in% "D")) stop("Sequence of D was not found. See help file.")
+  
+  data <- x@mean_fit$obj$env$data
+  params <- x@mean_fit$obj$env$parameters
+  n_y <- data$n_y
+  map <- x@mean_fit$obj$env$map
+  
+  new_args <- RCM_retro_subset(n_y, data = data, params = params, map = map)
+  
+  if(!is.null(dots$D)) {
+    if(!requireNamespace("abind", quietly = TRUE)) {
+      stop("Please install the abind package to run this profile.")
+    }
+    if(!requireNamespace("reshape2", quietly = TRUE)) {
+      stop("Please install the reshape2 package to run this profile.")
+    }
+    profile_grid <- expand.grid(D = dots$D)
+    
+    new_args$data$s_CAA_hist <- abind::abind(new_args$data$s_CAA_hist, 
+                                             array(NA, c(n_y, new_args$data$n_age, 1)), 
+                                             along = 3)
+    new_args$data$s_CAL_hist <- abind::abind(new_args$data$s_CAL_hist, 
+                                             array(NA, c(n_y, length(new_args$data$length_bin), 1)), 
+                                             along = 3)
+    new_args$data$s_CAA_n <- cbind(new_args$data$s_CAA_n, rep(0, n_y))
+    new_args$data$s_CAL_n <- cbind(new_args$data$s_CAL_n, rep(0, n_y))
+    new_args$data$nsurvey <- new_args$data$nsurvey + 1
+    
+    new_args$data$s_vul_type <- c(new_args$data$s_vul_type, -3)
+    new_args$data$abs_I <- c(new_args$data$abs_I, 0)
+    new_args$data$I_units <- c(new_args$data$I_units, 1) 
+    new_args$data$LWT_survey <- rbind(new_args$data$LWT_survey, rep(1, 3))
+    new_args$data$prior_dist <- rbind(new_args$data$prior_dist, c(0, 25))
+    
+    new_args$params$s_vul_par <- cbind(new_args$params$s_vul_par, rep(0, nrow(new_args$params$s_vul_par)))
+    if(!is.null(new_args$map$s_vul_par)) {
+      new_args$map$s_vul_par <- factor(c(new_args$map$s_vul_par, rep(NA, nrow(new_args$params$s_vul_par))))
+    }
+    
+    LWT <- x@data$LWT
+    LWT$Index <- c(LWT$Index, 1)
+    LWT$s_CAA <- c(LWT$s_CAA, 1)
+    LWT$s_CAL <- c(LWT$s_CAL, 1)
+    
+    profile_fn <- function(i, new_args, x) {
+      # Add new survey of SSB depletion
+      SSB_index <- SSB_Isd <- rep(NA_real_, n_y)
+      SSB_index[1] <- 1
+      SSB_index[n_y] <- profile_grid$D[i]
+      SSB_Isd[c(1, n_y)] <- 0.01
+      
+      new_args$data$I_hist <- cbind(new_args$data$I_hist, SSB_index)
+      new_args$data$sigma_I <- cbind(new_args$data$sigma_I, SSB_Isd)
+      
+      obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, map = new_args$map,
+                        random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
+      mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)
+      report <- obj2$report(obj2$env$last.par.best)
+      RCM_get_likelihoods(report, LWT = LWT, f_name = paste0("Fleet_", 1:new_args$data$nfleet),
+                          s_name = paste0("Survey_", 1:(new_args$data$nsurvey-1)) %>% c("SSB_depletion"))
+    }
+    
+    do_profile <- lapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x)
+    profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
+    
+    prof <- sapply(do_profile, nll_depletion_profile) %>% t()
+    prof_out <- apply(prof, 2, sum) %>% as.logical()
+    
+    profile_grid <- cbind(profile_grid, prof[, prof_out] %>% as.data.frame())
+  }
+  output <- new("prof", Model = "RCM", Par = "D", 
+                MLE = x@mean_fit$report$E[n_y]/x@mean_fit$report$E0_SR, grid = profile_grid)
+  return(output)
+}
+
+
+nll_depletion_profile <- function(xx) {
+  nll_fleet <- xx[[2]][-nrow(xx[[2]]), ] %>% select(starts_with("Fleet"))
+  nll_fleet$Data <- rownames(nll_fleet)
+  nll_fleet <- reshape2::melt(nll_fleet, id.var = "Data", value.var = "nll")
+  
+  nll_survey <- xx[[4]][-nrow(xx[[4]]), ] %>% select(starts_with("Survey"))
+  nll_survey$Data <- rownames(nll_survey)
+  nll_survey <- reshape2::melt(nll_survey, id.var = "Data", value.var = "nll")
+  
+  nll <- rbind(nll_fleet, nll_survey)
+  
+  nll$Name <- paste(nll$variable, nll$Data)
+  
+  c(nll$value, xx[[1]][c(2, 5, 6), 1]) %>% 
+    structure(names = paste(nll$variable, nll$Data) %>% c("Recruitment Deviations", "Penalty", "Prior"))
 }

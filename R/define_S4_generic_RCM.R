@@ -138,13 +138,15 @@
 #' the row specifies the selectivity at age. See the \href{../doc/RCM_sel.html}{selectivity} vignette for more information.
 #' \item s_vul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. These values are only
 #' used if \code{s_selectivity = "est"} for the corresponding fleet. Otherwise, placeholders should be used to complete the matrix.
+#' \item log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.
+#' \item log_early_rec_dev: A numeric vector of length OM@@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.
 #' \item map_vul_par: An integer matrix of the same dimension as vul_par. This is the 'map' argument for vul_par in TMB, see \link[TMB]{MakeADFun}, which indicates whether selectivity parameters are fixed
 #' or estimated. If an entry is \code{NA}, the corresponding parameter is fixed in the model to the starting
 #' value. Otherwise, an integer for each independent parameter. By default, selectivity is fixed if there are no age or length composition for that fleet
 #' or survey, otherwise estimated. Unused cells in the vul_par matrix should be given NA in the map matrix.
 #' \item map_s_vul_par: The map argument for the survey selectivity parameters (same dimension as s_vul_par). Placeholder parameters should have a map value of NA.
-#' \item map_log_early_rec_dev: A vector of length OM@@maxage - 1 that indexes which recruitment deviates for the cohorts in the first year of the model are fixed (using NA) or estimated (a separate integer).
-#' By default, no deviates are estimated.
+#' \item map_log_early_rec_dev: A vector of length OM@@maxage that indexes which recruitment deviates for the cohorts in the first year of the model are fixed (using NA) or estimated (a separate integer).
+#' By default, no deviates are estimated (all are NA).
 #' \item map_log_rec_dev: A vector of length OM@@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
 #' By default, all deviates are estimated.
 #' \item plusgroup: Logical for whether the maximum age is a plusgroup or not. By default, TRUE.

@@ -34,8 +34,22 @@ setMethod("plot", signature(x = "prof", y = "missing"),
             if(joint_profile && !requireNamespace("reshape2", quietly = TRUE)) {
               stop("Please install the reshape2 package.", call. = FALSE)
             }
-
-            if(joint_profile) {
+            
+            if(x@Model == "RCM" && "D" %in% x@Par) {
+              if(!requireNamespace("ggplot2", quietly = TRUE)) {
+                stop("Please install the ggplot2 package.", call. = FALSE)
+              }
+              g <- parse(text = 'reshape2::melt(x@grid, id.vars = "D") %>% 
+                mutate(Type = ifelse(grepl("Fleet", variable), "Fishery", 
+                                     ifelse(grepl("Survey", variable), "Survey", as.character(variable)))) %>%
+                group_by(D, Type) %>% summarise(value = sum(value, na.rm = TRUE), .groups = "drop") %>%
+                group_by(Type) %>%
+                mutate(value = value - min(value, na.rm = TRUE)) %>%
+              ggplot(aes(D, value, colour = Type)) + geom_point() + geom_line() + theme_bw() + 
+                labs(x = "Depletion", y = "Change in neg. log-likelihood")') %>% eval()
+              return(g)
+                
+            } else if(joint_profile) {
               z.mat <- reshape2::acast(x@grid, as.list(x@Par), value.var = "nll")
               x.mat <- as.numeric(dimnames(z.mat)[[1]])
               y.mat <- as.numeric(dimnames(z.mat)[[2]])
@@ -111,7 +125,7 @@ setGeneric("profile", function(fitted, ...) standardGeneric("profile"))
 setMethod("profile", signature(fitted = "Assessment"),
           function(fitted, figure = TRUE, ...) {
             dots <- list(...)
-            if(length(dots) == 0) stop("No parameters for profile was found. See help.")
+            if(!length(dots)) stop("No parameters for profile was found. See help.")
 
             f <- get(paste0('profile_likelihood_', fitted@Model))
             res <- f(fitted, ...)
@@ -119,4 +133,15 @@ setMethod("profile", signature(fitted = "Assessment"),
             return(res)
           })
 
+#' @rdname profile
+#' @exportMethod profile
+setMethod("profile", signature(fitted = "RCModel"),
+          function(fitted, figure = TRUE, ...) {
+            dots <- list(...)
+            if(!length(dots)) stop("No parameters for profile was found. See help.")
+            
+            res <- profile_likelihood_RCM(fitted, ...)
+            if(figure) plot(res)
+            return(res)
+          })
 
