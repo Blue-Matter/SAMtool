@@ -38,6 +38,8 @@ For the following assessment models, possible sequence of values for profiling a
 \item VPA: \code{F_term}
 \item SSS: \code{R0}
 }
+
+For RCM: \code{D} (spawning biomass depletion), \code{R0}, and \code{h} are used.
 }
 \examples{
 \donttest{

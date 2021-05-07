@@ -35,18 +35,18 @@ setMethod("plot", signature(x = "prof", y = "missing"),
               stop("Please install the reshape2 package.", call. = FALSE)
             }
             
-            if(x@Model == "RCM" && "D" %in% x@Par) {
+            if(x@Model == "RCM" && length(x@Par) == 1) {
               if(!requireNamespace("ggplot2", quietly = TRUE)) {
                 stop("Please install the ggplot2 package.", call. = FALSE)
               }
-              g <- parse(text = 'reshape2::melt(x@grid, id.vars = "D") %>% 
+              g <- parse(text = paste0('reshape2::melt(x@grid, id.vars = x@Par) %>% 
                 mutate(Type = ifelse(grepl("Fleet", variable), "Fishery", 
                                      ifelse(grepl("Survey", variable), "Survey", as.character(variable)))) %>%
-                group_by(D, Type) %>% summarise(value = sum(value, na.rm = TRUE), .groups = "drop") %>%
+                group_by(', x@Par, ', Type) %>% summarise(value = sum(value, na.rm = TRUE), .groups = "drop") %>%
                 group_by(Type) %>%
                 mutate(value = value - min(value, na.rm = TRUE)) %>%
-              ggplot(aes(D, value, colour = Type)) + geom_point() + geom_line() + theme_bw() + 
-                labs(x = "Depletion", y = "Change in neg. log-likelihood")') %>% eval()
+              ggplot(aes(', x@Par, ', value, colour = Type)) + geom_point() + geom_line() + theme_bw() + 
+                labs(y = "Change in neg. log-likelihood")')) %>% eval()
               return(g)
                 
             } else if(joint_profile) {
@@ -105,6 +105,8 @@ setGeneric("profile", function(fitted, ...) standardGeneric("profile"))
 #' \item VPA: \code{F_term}
 #' \item SSS: \code{R0}
 #' }
+#' 
+#' For RCM: \code{D} (spawning biomass depletion), \code{R0}, and \code{h} are used.
 #' @author Q. Huynh
 #' @return An object of class \linkS4class{prof} that contains a data frame of negative log-likelihood values from the profile and, optionally,
 #' a figure of the likelihood surface.

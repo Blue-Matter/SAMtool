@@ -948,16 +948,17 @@ RCM_retro_subset <- function(yr, data, params, map) {
 profile_likelihood_RCM <- function(x, ...) {
   dots <- list(...)
   if(!length(x@mean_fit)) stop("No model found. Re-run RCM with mean_fit = TRUE.")
-  if(!any(names(dots) %in% "D")) stop("Sequence of D was not found. See help file.")
   
   data <- x@mean_fit$obj$env$data
   params <- x@mean_fit$obj$env$parameters
   n_y <- data$n_y
   map <- x@mean_fit$obj$env$map
+  LWT <- x@data$LWT
   
   new_args <- RCM_retro_subset(n_y, data = data, params = params, map = map)
   
   if(!is.null(dots$D)) {
+    if(length(dots) > 1) message("Only doing depletion profile...")
     if(!requireNamespace("abind", quietly = TRUE)) {
       stop("Please install the abind package to run this profile.")
     }
@@ -987,7 +988,6 @@ profile_likelihood_RCM <- function(x, ...) {
       new_args$map$s_vul_par <- factor(c(new_args$map$s_vul_par, rep(NA, nrow(new_args$params$s_vul_par))))
     }
     
-    LWT <- x@data$LWT
     LWT$Index <- c(LWT$Index, 1)
     LWT$s_CAA <- c(LWT$s_CAA, 1)
     LWT$s_CAL <- c(LWT$s_CAL, 1)
@@ -1017,9 +1017,77 @@ profile_likelihood_RCM <- function(x, ...) {
     prof_out <- apply(prof, 2, sum) %>% as.logical()
     
     profile_grid <- cbind(profile_grid, prof[, prof_out] %>% as.data.frame())
+    
+    output <- new("prof", Model = "RCM", Par = "D", 
+                  MLE = x@mean_fit$report$E[n_y]/x@mean_fit$report$E0_SR, grid = profile_grid)
+  } else {
+    
+    if(is.null(dots$R0) && is.null(dots$h)) stop("Sequence of neither D, R0, nor h was found. See help file.")
+    if(!is.null(dots$R0)) {
+      R0 <- dots$R0 
+    } else {
+      R0 <- x@mean_fit$report$R0
+      profile_par <- "h"
+    }
+    if(!is.null(dots$h)) {
+      h <- dots$h 
+    } else {
+      h <- x@mean_fit$report$h
+      profile_par <- "R0"
+    }
+    
+    profile_grid <- expand.grid(R0 = R0, h = h)
+    joint_profile <- !exists("profile_par", inherits = FALSE)
+    
+    profile_fn <- function(i, new_args, x) {
+      new_args$params$R0x <- log(profile_grid$R0[i]  * new_args$data$rescale)
+      if(new_args$data$SR_type == "BH") {
+        new_args$params$transformed_h <- logit((profile_grid$h[i] - 0.2)/0.8)
+      } else {
+        new_args$params$transformed_h <- log(profile_grid$h[i] - 0.2)
+      }
+      
+      if(joint_profile) {
+        new_args$map$R0x <- new_args$map$transformed_h <- factor(NA)
+      } else {
+        if(profile_par == "R0") new_args$map$R0x <- factor(NA) else new_args$map$transformed_h <- factor(NA)
+      }
+      
+      obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, map = new_args$map,
+                        random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
+      
+      mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)
+      report <- obj2$report(obj2$env$last.par.best)
+      RCM_get_likelihoods(report, LWT = LWT, f_name = paste0("Fleet_", 1:new_args$data$nfleet),
+                          s_name = paste0("Survey_", 1:new_args$data$nsurvey))
+      
+      #opt2 <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)[[1]]
+      #
+      #if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
+      #return(nll)
+    }
+    
+    do_profile <- lapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x)
+    profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
+    
+    prof <- sapply(do_profile, nll_depletion_profile) %>% t()
+    prof_out <- apply(prof, 2, sum) %>% as.logical()
+    
+    profile_grid <- cbind(profile_grid, prof[, prof_out] %>% as.data.frame())
+    
+    #nll <- vapply(1:nrow(profile_grid), profile_fn, numeric(1), new_args = new_args, x = x)
+    #profile_grid$nll <- nll
+    
+    if(joint_profile) {
+      pars <- c("R0", "h")
+      MLE <- c(x@mean_fit$report$R0, x@mean_fit$report$h)
+    } else {
+      pars <- profile_par
+      MLE <- getElement(x@mean_fit$report, pars)
+    }
+    
+    output <- new("prof", Model = "RCM", Par = pars, MLE = MLE, grid = profile_grid)
   }
-  output <- new("prof", Model = "RCM", Par = "D", 
-                MLE = x@mean_fit$report$E[n_y]/x@mean_fit$report$E0_SR, grid = profile_grid)
   return(output)
 }
 
