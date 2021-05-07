@@ -362,7 +362,7 @@ update_RCM_data <- function(data, OM, condition, dots) {
       data$C_sd <- matrix(data$C_sd, ncol = 1)
     } else if(is.matrix(data$C_sd)) {
       if(nrow(data$C_sd) != data$nyears) stop("Number of rows of C_sd matrix does not equal nyears (", data$nyears, "). NAs are acceptable.", call. = FALSE)
-      if(ncol(data$C_sd) != data$nsurvey) stop("Number of columns of C_sd matrix does not equal nfleet (", data$nfleet, ").", call. = FALSE)
+      if(ncol(data$C_sd) != data$nfleet) stop("Number of columns of C_sd matrix does not equal nfleet (", data$nfleet, ").", call. = FALSE)
     }
     if(any(is.na(data$C_sd))) stop("There are NA's in data$C_sd.", call. = FALSE)
   } else {
