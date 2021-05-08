@@ -262,6 +262,8 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     NLL_name <- "Catch"
   }
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
+  report$dynamic_SSB0 <- DD_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+    structure(names = Yearplusone)
   Assessment <- new("Assessment", Model = ifelse(state_space, "DD_SS", "DD_TMB"),
                     Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
@@ -357,3 +359,19 @@ yield_fn_DD <- function(x, S0, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, logit
     return(c(SPR = Spr, Yield = Yield, YPR = Ypr, B = Beq, R = Req))
   }
 }
+
+DD_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
+  dots <- list(...)
+  
+  if(dots$data$condition == "catch") {
+    dots$data$C_hist <- rep(1e-8, dots$data$ny)
+  } else if(dots$data$condition == "effort") {
+    par[names(par) == "log_q_effort"] <- -1e8
+  }
+  par[names(par) == "U_equilibrium"] <- 0
+  
+  obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
+                    random = obj$env$random, DLL = "SAMtool", silent = TRUE)
+  obj2$report(par)$B
+}
+

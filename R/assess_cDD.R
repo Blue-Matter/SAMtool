@@ -235,6 +235,9 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   Yearplusk <- c(Year, max(Year) + 1:k)
 
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
+  
+  report$dynamic_SSB0 <- cDD_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+    structure(names = Yearplusone)
   Assessment <- new("Assessment", Model = ifelse(state_space, "cDD_SS", "cDD"),
                     Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
@@ -331,3 +334,15 @@ yield_fn_cDD <- function(x, M, Kappa, Winf, wk, SR, Arec, Brec, opt = TRUE, log_
     return(c(SPR = BPR, Yield = Yield, YPR = YPR, B = Beq, R = Req))
   }
 }
+
+
+cDD_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
+  dots <- list(...)
+  dots$data$C_hist <- rep(1e-8, dots$data$ny)
+  par[names(par) == "F_equilibrium"] <- 0
+  
+  obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
+                    random = obj$env$random, DLL = "SAMtool", silent = TRUE)
+  obj2$report(par)$B
+}
+

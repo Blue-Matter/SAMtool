@@ -69,7 +69,8 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
 
   #### Time Series
   ts_output <- c(rmd_F(header = "### Time Series Output\n"), rmd_F_FMSY(), rmd_SSB(), rmd_SSB_SSBMSY(),
-                 rmd_SSB_SSB0(), rmd_Kobe("SSB_SSBMSY", xlab = "expression(SSB/SSB[MSY])"), rmd_R(),
+                 rmd_SSB_SSB0(), rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"),
+                 rmd_Kobe("SSB_SSBMSY", xlab = "expression(SSB/SSB[MSY])"), rmd_R(),
                  rmd_N())
 
   #### Productivity
