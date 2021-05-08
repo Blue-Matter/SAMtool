@@ -13,7 +13,8 @@
 #' FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal year.
 #' @param reps The number of stochastic samples of the TAC recommendation.
 #' @param OCP_type The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
-#' By default, use (\code{"SSB_SSB0"} for spawning depletion. Otherwise use \code{"SSB_SSBMSY"} for spawning biomass relative to MSY).
+#' By default, use (\code{"SSB_SSB0"} for spawning depletion. Other biomass OCPs include \code{"SSB_SSBMSY"} for spawning biomass relative to MSY and
+#' \code{"SSB_dSSB0"}, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
 #' For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR\% (see \code{SPR_OCP} argument) can be used.
 #' @param LOCP Numeric, the limit value for the OCP in the HCR.
 #' @param TOCP Numeric, the target value for the OCP in the HCR.
@@ -78,7 +79,7 @@
 #'     ylim = c(0, 1), type = "l")
 #' abline(v = c(0.4, 0.8), col = "red", lty = 2)
 #' @export
-HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "F_FMSY", "F_F01", "F_FSPR"),
+HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "SSB_dSSB0", "F_FMSY", "F_F01", "F_FSPR"),
                      Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"), 
                      LOCP = 0.1, TOCP = 0.4, relF_min = 0, relF_max = 1, SPR_OCP, SPR_targ, ...) {
   dots <- list(...)
@@ -91,6 +92,9 @@ HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY"
       OCP <- Assessment@SSB_SSB0[length(Assessment@SSB_SSB0)]
     } else if(OCP_type == "SSB_SSBMSY" && length(Assessment@SSB_SSBMSY)) {
       OCP <- Assessment@SSB_SSBMSY[length(Assessment@SSB_SSBMSY)]
+    } else if(OCP_type == "SSB_dSSB0" && !is.null(Assessment@TMB_report$dynamic_SSB0)) {
+      OCP <- Assessment@SSB/Assessment@TMB_report$dynamic_SSB0
+      OCP <- OCP[length(OCP)]
     } else if(OCP_type == "F_FMSY") {
       if(length(Assessment@U_UMSY)) {
         OCP <- Assessment@U_UMSY[length(Assessment@U_UMSY)]
@@ -180,8 +184,12 @@ HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY"
       }
       
       if(exists("Fout", inherits = FALSE)) {
-        if(!exists("SE", inherits = FALSE) || !length(SE)) SE <- 0
-        FM <- trlnorm(reps, Fout, SE/Fout)
+        if(Fout > 0) {
+          if(!exists("SE", inherits = FALSE) || !length(SE)) SE <- 0
+          FM <- trlnorm(reps, Fout, SE/Fout)
+        } else {
+          FM <- rep(0, reps)
+        }
         TAC <- calculate_TAC(Assessment, Ftarget = FM)
       }
     }

@@ -162,7 +162,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   
   ref_pt <- c("N0", "B0", "SSB0", "VB0", "MSY", "SSBMSY", "BMSY", "VBMSY")
   lapply(ref_pt, function(xx) slot(Assessment, xx) <<- mag_bias * getElement(Hist$ReferencePoints$ReferencePoints, xx)[x])
-  Assessment@TMB_report$dynamic_SSB0 <- Hist$ReferencePoints$Dynamic_Unfished$SSB0[x, 1 + 0:ny]
+  Assessment@TMB_report$dynamic_SSB0 <- Hist$ReferencePoints$Dynamic_Unfished$SSB0[x, 1 + 0:n_y] %>% structure(names = Year_plusone)
   
   Assessment@R0 <- mag_bias * Hist$StockPars$R0[x]
   
