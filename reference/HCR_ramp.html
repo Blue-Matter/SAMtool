@@ -206,7 +206,8 @@ FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal yea
     <tr>
       <th>OCP_type</th>
       <td><p>The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
-By default, use (<code>"SSB_SSB0"</code> for spawning depletion. Otherwise use <code>"SSB_SSBMSY"</code> for spawning biomass relative to MSY).
+By default, use (<code>"SSB_SSB0"</code> for spawning depletion. Other biomass OCPs include <code>"SSB_SSBMSY"</code> for spawning biomass relative to MSY and
+<code>"SSB_dSSB0"</code>, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
 For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR% (see <code>SPR_OCP</code> argument) can be used.</p></td>
     </tr>
     <tr>
