@@ -50,10 +50,10 @@
 <meta property="og:description" content="A generic statistical catch-at-age model (single fleet, single season) that uses catch, index, and catch-at-age composition
 data. SCA parameterizes R0 and steepness as leading productivity parameters in the assessment model. Recruitment is estimated
 as deviations from the resulting stock-recruit relationship. In SCA2, the mean recruitment in the time series is estimated and
-recruitment deviations around this mean are estimated as penalized parameters (similar to Cadigan 2016). The standard deviation is set high
-so that the recruitment is almost like free parameters. Unfished and MSY reference points are inferred afterwards from the assessment output
-(SSB and recruitment estimates). SCA_Pope is a variant of SCA that fixes the expected catch to the observed
-catch, and Pope's approximation is used to calculate the annual harvest rate (U)." />
+recruitment deviations around this mean are estimated as penalized parameters (SR = &quot;none&quot;, similar to Cadigan 2016). The standard deviation is set high
+so that the recruitment is almost like free parameters. Unfished and MSY reference points are not estimated, it is recommended to use yield per recruit
+or spawning potential ratio in harvest control rules. SCA_Pope is a variant of SCA that fixes the expected catch to the observed
+catch, and Pope's approximation is used to calculate the annual exploitation rate (U; i.e., catch_eq = &quot;Pope&quot;)." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -159,7 +159,7 @@ catch, and Pope's approximation is used to calculate the annual harvest rate (U)
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Statistical catch-at-age (SCA) model</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA.R'><code>R/assess_SCA.R</code></a>, <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA2.R'><code>R/assess_SCA2.R</code></a>, <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA_Pope.R'><code>R/assess_SCA_Pope.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA.R'><code>R/assess_SCA.R</code></a></small>
     <div class="hidden name"><code>SCA.Rd</code></div>
     </div>
 
@@ -167,18 +167,19 @@ catch, and Pope's approximation is used to calculate the annual harvest rate (U)
     <p>A generic statistical catch-at-age model (single fleet, single season) that uses catch, index, and catch-at-age composition
 data. <code>SCA</code> parameterizes R0 and steepness as leading productivity parameters in the assessment model. Recruitment is estimated
 as deviations from the resulting stock-recruit relationship. In <code>SCA2</code>, the mean recruitment in the time series is estimated and
-recruitment deviations around this mean are estimated as penalized parameters (similar to Cadigan 2016). The standard deviation is set high
-so that the recruitment is almost like free parameters. Unfished and MSY reference points are inferred afterwards from the assessment output
-(SSB and recruitment estimates). <code>SCA_Pope</code> is a variant of <code>SCA</code> that fixes the expected catch to the observed
-catch, and Pope's approximation is used to calculate the annual harvest rate (U).</p>
+recruitment deviations around this mean are estimated as penalized parameters (<code>SR = "none"</code>, similar to Cadigan 2016). The standard deviation is set high
+so that the recruitment is almost like free parameters. Unfished and MSY reference points are not estimated, it is recommended to use yield per recruit
+or spawning potential ratio in harvest control rules. <code>SCA_Pope</code> is a variant of <code>SCA</code> that fixes the expected catch to the observed
+catch, and Pope's approximation is used to calculate the annual exploitation rate (U; i.e., <code>catch_eq = "Pope"</code>).</p>
     </div>
 
     <pre class="usage"><span class='fu'>SCA</span><span class='op'>(</span>
   x <span class='op'>=</span> <span class='fl'>1</span>,
   <span class='va'>Data</span>,
   AddInd <span class='op'>=</span> <span class='st'>"B"</span>,
-  SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span><span class='op'>)</span>,
+  SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
   vulnerability <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"logistic"</span>, <span class='st'>"dome"</span><span class='op'>)</span>,
+  catch_eq <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Baranov"</span>, <span class='st'>"Pope"</span><span class='op'>)</span>,
   CAA_dist <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
   CAA_multiplier <span class='op'>=</span> <span class='fl'>50</span>,
   rescale <span class='op'>=</span> <span class='st'>"mean1"</span>,
@@ -204,7 +205,6 @@ catch, and Pope's approximation is used to calculate the annual harvest rate (U)
   x <span class='op'>=</span> <span class='fl'>1</span>,
   <span class='va'>Data</span>,
   AddInd <span class='op'>=</span> <span class='st'>"B"</span>,
-  SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span><span class='op'>)</span>,
   vulnerability <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"logistic"</span>, <span class='st'>"dome"</span><span class='op'>)</span>,
   CAA_dist <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
   CAA_multiplier <span class='op'>=</span> <span class='fl'>50</span>,
@@ -230,7 +230,7 @@ catch, and Pope's approximation is used to calculate the annual harvest rate (U)
   x <span class='op'>=</span> <span class='fl'>1</span>,
   <span class='va'>Data</span>,
   AddInd <span class='op'>=</span> <span class='st'>"B"</span>,
-  SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span><span class='op'>)</span>,
+  SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
   vulnerability <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"logistic"</span>, <span class='st'>"dome"</span><span class='op'>)</span>,
   CAA_dist <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
   CAA_multiplier <span class='op'>=</span> <span class='fl'>50</span>,
@@ -271,12 +271,16 @@ Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd. Vulnerabil
     </tr>
     <tr>
       <th>SR</th>
-      <td><p>Stock-recruit function (either <code>"BH"</code> for Beverton-Holt or <code>"Ricker"</code>).</p></td>
+      <td><p>Stock-recruit function (either <code>"BH"</code> for Beverton-Holt, <code>"Ricker"</code>, or <code>"none"</code> for constant mean recruitment).</p></td>
     </tr>
     <tr>
       <th>vulnerability</th>
       <td><p>Whether estimated vulnerability is <code>"logistic"</code> or <code>"dome"</code> (double-normal).
 See details for parameterization.</p></td>
+    </tr>
+    <tr>
+      <th>catch_eq</th>
+      <td><p>Whether to use the Baranov equation or Pope's approximation to calculate the predicted catch at age in the model.</p></td>
     </tr>
     <tr>
       <th>CAA_dist</th>
@@ -394,8 +398,8 @@ for which the catch-at-age matrix has less than half the abundance than that at 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The basic data inputs are catch (by weight), index (by weight/biomass), and catch-at-age matrix (by numbers).</p>
-<p>In <code>SCA</code> and <code>SCA2</code>, annual F's are estimated parameters assuming continuous fishing over the year, while
-an annual harvest rate from pulse fishing in the middle of the year is estimated in <code>SCA_Pope</code>.</p>
+<p>With <code>catch_eq = "Baranov"</code> (default in SCA and SCA2), annual F's are estimated parameters assuming continuous fishing over the year, while
+an annual harvest rate from pulse fishing in the middle of the year is estimated in <code>SCA_Pope</code> or <code>SCA(catch_eq = "Pope")</code>.</p>
 <p>The annual sample sizes of the catch-at-age matrix is provided to the model (used in the likelihood for catch-at-age assuming
 a multinomial distribution) and is manipulated via argument <code>CAA_multiplier</code>. This argument is
 interpreted in two different ways depending on the value provided. If <code>CAA_multiplier &gt; 1</code>, then this value will cap the annual sample sizes
@@ -404,13 +408,14 @@ multiplies the sample size to 10% of the original number. By default, sample siz
 <p>Alternatively, a lognormal distribution with inverse proportion variance can be used for the catch at age (Punt and Kennedy, 1994, as
 cited by Maunder 2011).</p>
 <p>For <code>start</code> (optional), a named list of starting values of estimates can be provided for:</p><ul>
-<li><p><code>R0</code> For all models except <code>SCA2</code>, unfished recruitment. Otherwise, 150% Data@OM$R0[x] is used in closed-loop, and 400% of mean catch otherwise.</p></li>
+<li><p><code>R0</code> Unfished recruitment, except when <code>SR = "none"</code> where it is mean recruitment. 
+By default, 150% Data@OM$R0[x] is used as the start value in closed-loop simulation, and 400% of mean catch otherwise.</p></li>
 <li><p><code>h</code> Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.</p></li>
-<li><p><code>meanR</code> For <code>SCA2</code>, mean recruitment.</p></li>
 <li><p><code>vul_par</code> Vulnerability parameters, see next paragraph.</p></li>
 <li><p><code>F</code> A vector of length nyears for year-specific fishing mortality.</p></li>
 <li><p><code>F_equilibrium</code> Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.</p></li>
-<li><p><code>omega</code> Lognormal SD of the catch (observation error) for all models except <code>SCA_Pope</code>. By default, Data@CV_Cat[x].</p></li>
+<li><p><code>U_equilibrium</code> Same as F_equilibrium when <code>catch_eq = "Pope"</code>. By default, 0.</p></li>
+<li><p><code>omega</code> Lognormal SD of the catch (observation error) when <code>catch_eq = "Baranov"</code>. By default, Data@CV_Cat[x].</p></li>
 <li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].</p></li>
 </ul>
 
