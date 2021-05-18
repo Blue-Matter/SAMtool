@@ -41,14 +41,14 @@ An S4 class for the output from \link{RCM}.
 \item F_equilibrium - equilibrium fishing mortality prior to first year - vector of length nfleet
 \item M - natural mortality - matrix of nyears x maxage
 \item Z - total mortality - matrix of nyears x maxage
-\item q - survey catchability - vector of length nsurvey
-\item s_vul - survey selectivity at age - array of dim nyears+1, maxage, nsurvey
-\item s_vul_len - corresponding survey selectivity at length - matrix of nbins x nsurvey
+\item q - index catchability - vector of length nsurvey
+\item ivul - index selectivity at age - array of dim nyears+1, maxage, nsurvey
+\item ivul_len - corresponding index selectivity at length - matrix of nbins x nsurvey
 \item Ipred - predicted index values - matrix of nyears x nsurvey
-\item s_CAApred - predicted survey catch at age - array of dim nyears, maxage, nsurvey
+\item IAApred - predicted index catch at age - array of dim nyears, maxage, nsurvey
 \item vul - fleet selectivity at age - array of dim nyears+1, maxage, nfleet (or nsel_block)
 \item vul_len - corresponding fleet selectivity at length - matrix of nbins x nfleet (or nsel_block)
-\item s_CALpred - predicted survey catch at length - array of dim nyears, nbins, nsurvey
+\item IALpred - predicted index catch at length - array of dim nyears, nbins, nsurvey
 \item MLpred - predicted mean length - matrix of nyears x nfleet
 \item MWpred - predicted mean weight - matrix of nyears x nfleet
 \item CAApred - predicted catch at age - array of nyears, maxage, nfleet

@@ -118,8 +118,8 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Le
 
 
 template<class Type>
-array<Type> calc_vul_sur(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Len_age, vector<Type> &LFS, vector<Type> &L5,
-                         vector<Type> &Vmaxlen, Type Linf, matrix<Type> mat, array<Type> fleet_var, Type &prior) {
+array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Len_age, vector<Type> &LFS, vector<Type> &L5,
+                      vector<Type> &Vmaxlen, Type Linf, matrix<Type> mat, array<Type> fleet_var, Type &prior) {
   array<Type> vul(Len_age.rows(), Len_age.cols(), vul_type.size());
   vul.setZero();
 
@@ -182,18 +182,18 @@ Type comp_multinom(array<Type> obs, array<Type> pred, matrix<Type> N, matrix<Typ
   vector<Type> N_obs(n_bin);
   for(int bb=0;bb<n_bin;bb++) {
     p_pred(bb) = pred(y,bb,ff)/N(y,ff);
-    N_obs(bb) = obs(y,bb,ff);
+    N_obs(bb) = obs(y,bb,ff) * N_samp(y,ff);
   }
   Type log_like = dmultinom_(N_obs, p_pred, true);
   return log_like;
 }
 
 template<class Type>
-Type comp_lognorm(array<Type> obs, array<Type> pred, matrix<Type> N, matrix<Type> N_samp, int y, int n_bin, int ff) {
+Type comp_lognorm(array<Type> obs, array<Type> pred, matrix<Type> N, int y, int n_bin, int ff) {
   Type log_like = 0;
   for(int bb=0;bb<n_bin;bb++) {
     Type p_pred = pred(y,bb,ff)/N(y,ff);
-    Type p_obs = obs(y,bb,ff)/N_samp(y,ff);
+    Type p_obs = obs(y,bb,ff);
     log_like += dnorm_(log(p_obs), log(p_pred), pow(0.02/p_obs, 0.5), true);
   }
   return log_like;

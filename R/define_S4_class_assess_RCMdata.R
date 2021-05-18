@@ -182,3 +182,73 @@ if(getRversion() >= "2.15.1") {
 }
 
 
+
+
+
+#' Class-\code{RCMdata}
+#'
+#' An S4 class for the data inputs into \link{RCM}.
+#'
+#' @name RCMdata-class
+#' @docType class
+#' 
+#' @slot Chist A vector of historical catch, should be of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns.
+#' Ideally, the first year of the catch series represents unfished conditions (see also \code{C_eq}).
+#' @slot C_sd A vector or matrix of lognormal distribution standard deviations (by year and fleet) for the catches in \code{Chist}.
+#' If not provided, the default is 0.01. Not used if \code{RCM(condition = "catch2")}.
+#' @slot Ehist A vector of historical effort, should be of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns. 
+#' See also \code{E_eq}).
+#' @slot CAA Fishery age composition matrix with nyears rows and OM@@maxage+1 columns. If multiple fleets: an array with dimension: nyears, OM@@maxage, and nfleets.
+#' @slot CAA_ESS Annual sample size (for the multinomial distribution) of the fishery age comps. 
+#' A vector of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns.
+#' @slot CAL Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets: an array with dimension: nyears,
+#' length bins (see \code{length_bin}), and nfleets. 
+#' @slot CAL_ESS Annual sample size (for the multinomial distribution) of the fishery length comps. 
+#' A vector of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns.
+#' @slot length_bin - A vector for the midpoints of the length bins for \code{CAL} and \code{IAL}. All bin widths should be equal in size.
+#' @slot MS A vector of fishery mean size (MS, either mean length or mean weight) observations (length OM@@nyears), or if multiple fleets: matrix of dimension: nyears and nfleets.
+#' Generally, mean lengths should not be used if \code{CAL} is also provided, unless mean length and length comps are independently sampled.
+#' @slot MS_type A character (either \code{"length"} (default) or \code{"weight"}) to denote the type of mean size data.
+#' @slot MS_cv The coefficient of variation of the observed mean size. If there are multiple fleets, a vector of length nfleet.
+#' Default is 0.2.
+#' @slot Index A vector of values of an index (of length OM@@nyears). If there are multiple surveys: a matrix of historical indices of abundances, with rows
+#' indexing years and columns indexing surveys. 
+#' @slot I_sd A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
+#' If not provided, this function will use values from \code{OM@@Iobs}.
+#' @slot IAA Index age composition data, an array of dimension nyears, maxage+1, nsurvey.
+#' @slot IAL_ESS Annual sample size (for the multinomial distribution) of the index age comps. 
+#' A vector of length OM@@nyears. If there are multiple indices: a matrix of OM@@nyears rows and nsurvey columns.
+#' @slot IAL Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.
+#' @slot IAL_ESS Annual sample size (for the multinomial distribution) of the index length comps. 
+#' A vector of length OM@@nyears. If there are multiple indices: a matrix of OM@@nyears rows and nsurvey columns.
+#' @slot C_eq A numeric vector of length nfleet for the equilibrium catch for each fleet in \code{Chist} prior to the first year of the operating model.
+#' Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data. Alternatively,
+#' if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial depletion) 
+#' in the first year of the model (see additional arguments in \link{RCM}).
+#' @slot C_eq_sd - A vector of standard deviations (lognormal distribution) for the equilibrium catches in \code{C_eq}.
+#' If not provided, the default is 0.01. Only used if \code{RCM(condition = "catch")}.
+#' @slot E_eq The equilibrium effort for each fleet in \code{Ehist} prior to the first year of the operating model.
+#' Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data.
+#' @slot abs_I An integer vector to indicate which indices are in absolute magnitude. Use 1 to set q = 1, otherwise use 0 (default) to estimate q.
+#' @slot I_units An integer vector to indicate whether indices are biomass based (1) or abundance-based (0). By default, all are biomass-based.
+#' @slot age_error A square matrix of maxage + 1 rows and columns to specify ageing error. The aa-th column assigns a proportion of the true age in the
+#' a-th row to observed age. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).
+#' @slot sel_block For time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function 
+#' to a fleet for certain years. By default, constant selectivity for each individual fleet.
+#' See the \href{../doc/RCM_sel.html}{selectivity} vignette for more details.
+#' @slot Misc A list of miscellaneous inputs. Used internally.
+#'
+#' @seealso \link{RCM}
+#' @author Q. Huynh
+#' @export RCMdata
+#' @exportClass RCMdata
+RCMdata <- setClass("RCMdata", slots = c(Chist = "vectormatrix", C_sd = "vectormatrix", Ehist = "vectormatrix", 
+                                         CAA = "array", CAA_ESS = "vectormatrix", 
+                                         CAL = "array", CAL_ESS = "vectormatrix", length_bin = "vector", 
+                                         MS = "vectormatrix", MS_type = "character", MS_cv = "vectormatrix",
+                                         Index = "vectormatrix", I_sd = "vectormatrix", 
+                                         IAA = "array", IAL = "array", 
+                                         C_eq = "vector", C_eq_sd = "vector", E_eq = "vector",
+                                         abs_I = "vector", I_units = "vector", age_error = "matrix", sel_block = "matrix",
+                                         Misc = "list"))
+

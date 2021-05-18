@@ -10,10 +10,12 @@
 #' provided by the user and fitting a statistical catch-at-age model (with the predicted catch equal to the observed catch).
 #' Alternatively one can do a single model fit and sample the covariance matrix to generate an operating model with uncertainty based on the model fit.
 #' Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.
-#'
+#' \code{check_RCMdata} evaluates whether the inputs in the S4 RCMdata object are correctly formatted.
+#' 
 #' @param OM An object of class \linkS4class{OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 #' steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).
-#' @param data Data inputs formatted in a list object (preferred). Alternatively, \code{data} can be a \linkS4class{Data} S4 object. See Data section below.
+#' @param data Data inputs formatted in a \linkS4class{RCMdata} (preferred) or \linkS4class{Data} object. 
+#' Use of a list is deprecated. See Data section below.
 #' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 #' or "effort".
 #' @param selectivity A character vector of length nfleet to indicate \code{"logistic"}, \code{"dome"}, or \code{"free"} selectivity for each fleet in \code{Chist}.
@@ -45,7 +47,7 @@
 #' @details
 #' Fleet selectivity is fixed to values sampled from \code{OM} if no age or length compositions are provided.
 #'
-#' Survey selectivity is estimable only if \code{s_CAA} or \code{s_CAL} is provided. Otherwise, the selectivity should
+#' Survey selectivity is estimable only if \code{IAA} or \code{IAL} is provided. Otherwise, the selectivity should
 #' be mirrored to a fleet (vulnerable biomass selectivity) or indexed to total or spawning biomass (see \code{s_selectivity}).
 #'
 #' Parameters that were used in the fitting model are placed in the \code{RCM@@OM@@cpars} list.
@@ -73,8 +75,25 @@
 #' One of indices, age compositions, or length compositions should be provided in addition to the historical catch or effort. Not all arguments
 #' are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).
 #'
-#' The \code{data} variable can be a named list that includes:
+#' The \code{data} variable can be an object of class \linkS4class{RCMdata}. See help file for description of inputs.
 #'
+#' Alternatively, the \code{data} input can be a \linkS4class{Data} S4 object which will retrieve data from the following slots:
+#'
+#' \itemize{
+#' \item Data@@Cat - catch series (single fleet with the Data S4 object)
+#' \item Data@@Effort - effort series
+#' \item Data@@CAA - fishery age composition
+#' \item Data@@CAL, Data@@CAL_mids - fishery length composition and corresponding length bins
+#' \item Data@@Ind, Data@@SpInd, Data@@VInd, Data@@AddInd - indices of abundance
+#' \item Data@@CV_Ind, Data@@CV_SpInd, Data@@CV_VInd, Data@@CV_AddInd - annual coefficients of variation for the corresponding indices of abundance. CVs will be converted to lognormal standard deviations.
+#' \item Data@@ML - fishery mean lengths
+#' \item Data@@AddIndV, Data@@AddIndType, Data@@AddIunits - Additional information for indices in Data@@AddInd: selectivity and units (i.e., biomass or abundance).
+#' }
+#'
+#' There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., \code{RCM(OM, Data, C_eq = C_eq, ...)}.
+#'
+#' Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:
+#' 
 #' \itemize{
 #' \item Chist - A vector of historical catch, should be of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns.
 #' Ideally, the first year of the catch series represents unfished conditions (see also \code{C_eq}).
@@ -111,23 +130,7 @@
 #' \item sel_block - Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function to a fleet for certain years.
 #' See the \href{../doc/RCM_sel.html}{selectivity} vignette for more details.
 #' }
-#'
-#' Alternatively, the \code{data} input can be a \linkS4class{Data} S4 object which will retrieve data from the following slots:
-#'
-#' \itemize{
-#' \item Data@@Cat - catch series (single fleet with the Data S4 object)
-#' \item Data@@Effort - effort series
-#' \item Data@@CAA - fishery age composition
-#' \item Data@@CAL, Data@@CAL_mids - fishery length composition and corresponding length bins
-#' \item Data@@Ind, Data@@SpInd, Data@@VInd, Data@@AddInd - indices of abundance
-#' \item Data@@CV_Ind, Data@@CV_SpInd, Data@@CV_VInd, Data@@CV_AddInd - annual coefficients of variation for the corresponding indices of abundance. CVs will be converted to lognormal standard deviations.
-#' \item Data@@ML - fishery mean lengths
-#' \item Data@@AddIndV, Data@@AddIndType, Data@@AddIunits - Additional information for indices in Data@@AddInd: selectivity and units (i.e., biomass or abundance).
-#' }
-#'
-#' There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed in the function call, i.e., \code{RCM(OM, Data, C_eq = C_eq, ...)}.
-#'
-#'
+#' 
 #' @section Additional arguments:
 #' For \code{RCM}, additional arguments can be passed to the model via \code{...}:
 #'
@@ -159,15 +162,13 @@
 #' \code{LWT} is an optional named list containing the likelihood weights (values >= 0) with the possible options:
 #' \itemize{
 #' \item Chist, CAA, CAL, MS, C_eq: A vector of length nfleet for each.
-#' \item Index, s_CAA, s_CAL: A vector of length nsurvey for each.
+#' \item Index, IAA, IAL: A vector of length nsurvey for each.
 #' }
 #'
 #' By default, all likelihood weights are equal to one if not specified by the user.
 #'
-#' Weighting for CAA and CAL can also be adjusted by changing the multinomial sample size. For \code{CAA}, \code{CAL}, \code{s_CAA}, and \code{s_CAL}, the arrays should be set up so that
-#' the annual number of observations will be equal to the presumed multinomial sample size. Argument \code{ESS} provides a shortcut
-#' to cap the multinomial sample size for age and length comps.
-#'
+#' Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
+#' \linkS4class{RCMdata} object.
 #' @author Q. Huynh
 #' @seealso \link{plot.RCModel} \linkS4class{RCModel}
 #' @importFrom dplyr %>%
@@ -176,13 +177,54 @@ setGeneric("RCM", function(OM, data, ...) standardGeneric("RCM"))
 
 #' @rdname RCM
 #' @export
-setMethod("RCM", signature(OM = "OM", data = "list"),
+setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                   comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
+                   comp_like = c("multinomial", "lognormal"), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
             RCM_int(OM = OM, data = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
-                    comp_like = comp_like, ESS = ESS, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
+                    comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
+                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, ...)
+          })
+
+#' @rdname RCM
+#' @export
+setMethod("RCM", signature(OM = "OM", data = "list"),
+          function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
+                   comp_like = c("multinomial", "lognormal"), prior = list(),
+                   max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
+                   drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
+            
+            .Deprecated(new = "RCMdata", msg = "Use RCMdata object to input data instead of a list")
+            
+            dataS4 <- new("RCMdata")
+            
+            if(!is.null(data$Chist)) dataS4@Chist <- data$Chist 
+            if(!is.null(data$C_sd)) dataS4@C_sd <- data$C_sd 
+            if(!is.null(data$Ehist)) dataS4@Ehist <- data$Ehist
+            if(!is.null(data$CAA)) dataS4@CAA <- data$CAA 
+            if(!is.null(data$CAL)) dataS4@CAL <- data$CAL 
+            if(!is.null(data$length_bin)) dataS4@length_bin <- data$length_bin 
+            if(!is.null(data$MS)) dataS4@MS <- data$MS
+            if(!is.null(data$MS_type)) dataS4@MS_type <- data$MS_type
+            if(!is.null(data$MS_cv)) dataS4@MS_cv <- data$MS_cv
+            
+            if(!is.null(data$Index)) dataS4@Index <- data$Index
+            if(!is.null(data$IAA)) dataS4@IAA <- data$IAA
+            if(!is.null(data$IAL)) dataS4@IAL <- data$IAL
+            
+            if(!is.null(data$C_eq)) dataS4@C_eq <- data$C_eq
+            if(!is.null(data$C_eq_sd)) dataS4@C_eq_sd <- data$C_eq_sd
+            if(!is.null(data$E_eq)) dataS4@E_eq <- data$E_eq
+            
+            if(!is.null(data$abs_I)) dataS4@abs_I <- data$abs_I
+            if(!is.null(data$I_units)) dataS4@I_units <- data$I_units
+            
+            if(!is.null(data$age_error)) dataS4@age_error <- data$age_error
+            if(!is.null(data$sel_block)) dataS4@sel_block <- data$sel_block
+            
+            RCM_int(OM = OM, data = dataS4, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
+                    comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
                     drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, ...)
           })
 
@@ -191,7 +233,7 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
 #' @export
 setMethod("RCM", signature(OM = "OM", data = "Data"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                   comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
+                   comp_like = c("multinomial", "lognormal"), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
 
@@ -207,14 +249,14 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             data_matrix <- lapply(matrix_slot, matrix_slot_fn, Data = data) %>% structure(names = matrix_slot)
 
             ####### Generate data list for RCM
-            data_list <- list()
+            dataS4 <- new("RCMdata")
 
             # Catch or effort
             if(condition == "effort") {
               if(all(is.na(data@Effort))) {
                 stop("Conditioning on effort but no effort series found", call. = FALSE)
               } else {
-                data_list$Ehist <- data@Effort[1, ]
+                dataS4@Ehist <- data@Effort[1, ]
                 if(nrow(data@Effort) == OM@nsim) { # Add sketched effort matrix to OM
                   OM@cpars$Find <- data@Effort
                   extra_args$OMeff <- TRUE
@@ -223,41 +265,41 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             } else if(is.null(data_vec$Cat)) {
               stop("Conditioning on catch but no catch data found", call. = FALSE)
             }
-            data_list$Chist <- data_vec$Cat
-            if(!is.null(data_vec$CV_Cat)) data_list$C_sd <- sdconv(1, data_vec$CV_Cat) 
+            dataS4@Chist <- data_vec$Cat
+            if(!is.null(data_vec$CV_Cat)) dataS4@C_sd <- sdconv(1, data_vec$CV_Cat) 
 
             # Index
             Ind <- pull_Index(data, OM@maxage)
             if(!is.null(Ind$Index)) {
-              data_list$Index <- Ind$Index
-              data_list$I_sd <- Ind$I_sd
+              dataS4@Index <- Ind$Index
+              dataS4@I_sd <- Ind$I_sd
 
               if(any(!is.na(Ind$V))) {
                 extra_args$s_vul_par <- Ind$V
                 extra_args$map_s_vul_par <- array(NA, dim = dim(Ind$V))
               }
-              data_list$I_units <- Ind$I_units
+              dataS4@I_units <- Ind$I_units
             }
 
             # Length/age comps
-            data_list$CAA <- data_matrix$CAA
-            data_list$CAL <- data_matrix$CAL
-            if(!is.null(data_list$CAL)) {
+            dataS4@CAA <- data_matrix$CAA
+            dataS4@CAL <- data_matrix$CAL
+            if(!is.null(dataS4@CAL)) {
               if(all(is.na(data@CAL_mids))) {
                 stop("No length bins found in Data@CAL_mids.", call. = FALSE)
-              } else data_list$length_bin <- data@CAL_mids
+              } else dataS4@length_bin <- data@CAL_mids
             }
 
             # Mean length
-            data_list$MS <- data_vec$ML # By default, MS_type = "length" and CV = 0.2
+            dataS4@MS <- data_vec$ML # By default, MS_type = "length" and CV = 0.2
 
             # Equilibrium catches and/or effort - nothing happens if NULL
-            data_list$C_eq <- extra_args$C_eq
-            data_list$E_eq <- extra_args$E_eq
+            dataS4@C_eq <- extra_args$C_eq
+            dataS4@E_eq <- extra_args$E_eq
 
             ####### Run RCM
-            output <- RCM_int(OM = OM, data = data_list, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
-                              comp_like = comp_like, ESS = ESS, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
+            output <- RCM_int(OM = OM, data = dataS4, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
+                              comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
                               drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control,
                               OMeff = extra_args$OMeff, s_vul_par = extra_args$s_vul_par, map_s_vul_par = extra_args$map_s_vul_par, ...)
             

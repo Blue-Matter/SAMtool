@@ -24,17 +24,17 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(I_hist);    // Index by year and survey
   DATA_MATRIX(sigma_I);   // Standard deviation of index by year and survey
 
-  DATA_ARRAY(CAA_hist);   // Catch-at-age re-weighted by year, age, fleet
+  DATA_ARRAY(CAA_hist);   // Catch-at-age proportions by year, age, fleet
   DATA_MATRIX(CAA_n);     // Annual samples in CAA by year and fleet
 
-  DATA_ARRAY(CAL_hist);   // Catch-at-length re-weighted by year, length_bin, fleet
+  DATA_ARRAY(CAL_hist);   // Catch-at-length proportions by year, length_bin, fleet
   DATA_MATRIX(CAL_n);     // Annual samples in CAL by year and fleet
 
-  DATA_ARRAY(s_CAA_hist);  // Catch-at-age re-weighted by year, age, survey
-  DATA_MATRIX(s_CAA_n);    // Annual samples in CAA by year and survey
+  DATA_ARRAY(IAA_hist);   // Index-at-age proportions by year, age, survey
+  DATA_MATRIX(IAA_n);     // Annual samples in IAA by year and survey
 
-  DATA_ARRAY(s_CAL_hist);  // Catch-at-length re-weighted by year, length_bin, survey
-  DATA_MATRIX(s_CAL_n);    // Annual samples in CAL by year and survey
+  DATA_ARRAY(IAL_hist);   // Index-at-length proportions by year, length_bin, survey
+  DATA_MATRIX(IAL_n);     // Annual samples in IAL by year and survey
 
   DATA_VECTOR(length_bin); // Vector of length bins
   DATA_MATRIX(msize);      // Vector of annual mean size by year and fleet
@@ -56,7 +56,7 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(mat);       // Maturity-at-age at the beginning of the year
 
   DATA_IVECTOR(vul_type); // Integer vector indicating whether free (-2), logistic (-1), or dome vul (0) is used
-  DATA_IVECTOR(s_vul_type); // Same but for surveys, but can mirror to B (-4), SSB (-3), or fleet (>0)
+  DATA_IVECTOR(ivul_type); // Same but for surveys, but can also mirror to B (-4), SSB (-3), or fleet (>0)
   DATA_IVECTOR(abs_I);    // Boolean, whether index is an absolute (fix q = 1) or relative terms (estimate q)
   DATA_IVECTOR(I_units);  // Boolean, whether index is biomass based (= 1) or abundance-based (0)
 
@@ -86,7 +86,7 @@ Type RCM(objective_function<Type> *obj) {
   PARAMETER(transformed_h);             // Steepness
   PARAMETER(log_M);                     // Age and time constant M (only if there's a prior, then it will override M_data)
   PARAMETER_MATRIX(vul_par);            // Matrix of vul_par 3 rows and nsel_block columns
-  PARAMETER_MATRIX(s_vul_par);          // Matrix of selectivity parameters, 3 rows and nsurvey columns
+  PARAMETER_MATRIX(ivul_par);           // Matrix of index selectivity parameters, 3 rows and nsurvey columns
   PARAMETER_VECTOR(log_q_effort);       // log_q for F when condition = "effort"
   PARAMETER_MATRIX(log_F_dev);          // log_F_deviations when condition = "catch"
   PARAMETER_VECTOR(log_F_equilibrium);  // Equilibrium F by fleet when condition != "effort"
@@ -309,39 +309,39 @@ Type RCM(objective_function<Type> *obj) {
   }
 
   // Calculate survey q, selectivity, and age/length comps
-  vector<Type> s_LFS(nsurvey);
-  vector<Type> s_L5(nsurvey);
-  vector<Type> s_Vmaxlen(nsurvey);
+  vector<Type> iLFS(nsurvey);
+  vector<Type> iL5(nsurvey);
+  vector<Type> iVmaxlen(nsurvey);
 
-  array<Type> s_CAAtrue(n_y, n_age, nsurvey); // True abundance at age vulnerable to survey
-  array<Type> s_CAApred(n_y, n_age, nsurvey); // Predicted abundance (after ageing error) at age vulnerable to survey
-  array<Type> s_CALpred(n_y, nlbin, nsurvey); // Abundance at length vulnerable to survey
-  matrix<Type> s_CN(n_y, nsurvey); // Total abundance vulnerable to the survey
-  matrix<Type> s_BN(n_y, nsurvey); // Biomass or abundance vulnerable to the survey
+  array<Type> IAAtrue(n_y, n_age, nsurvey); // True abundance at age vulnerable to survey
+  array<Type> IAApred(n_y, n_age, nsurvey); // Predicted abundance (after ageing error) at age vulnerable to survey
+  array<Type> IALpred(n_y, nlbin, nsurvey); // Abundance at length vulnerable to survey
+  matrix<Type> IN(n_y, nsurvey);            // Total abundance vulnerable to the survey
+  matrix<Type> Itot(n_y, nsurvey);          // Ipred/q - biomass or abundance vulnerable to the survey
 
-  s_CAApred.setZero();
-  s_CALpred.setZero();
-  s_CN.setZero();
-  s_BN.setZero();
+  IAApred.setZero();
+  IALpred.setZero();
+  IN.setZero();
+  Itot.setZero();
 
-  array<Type> s_vul = calc_vul_sur(s_vul_par, s_vul_type, len_age, s_LFS, s_L5, s_Vmaxlen, Linf, mat, vul, prior);
+  array<Type> ivul = calc_ivul(ivul_par, ivul_type, len_age, iLFS, iL5, iVmaxlen, Linf, mat, vul, prior);
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
       for(int a=0;a<n_age;a++) {
-        s_CAAtrue(y,a,sur) = s_vul(y,a,sur) * N(y,a);
-        s_CN(y,sur) += s_CAAtrue(y,a,sur);
+        IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a);
+        IN(y,sur) += IAAtrue(y,a,sur);
 
-        for(int aa=0;aa<n_age;aa++) s_CAApred(y,aa,sur) += s_CAAtrue(y,a,sur) * age_error(a,aa);
+        for(int aa=0;aa<n_age;aa++) IAApred(y,aa,sur) += IAAtrue(y,a,sur) * age_error(a,aa);
 
-        if(I_units(sur)) s_BN(y,sur) += s_CAAtrue(y,a,sur) * wt(y,a); // Biomass vulnerable to survey
-        if(Type(n_age) != Linf && s_CAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
-          for(int len=0;len<nlbin;len++) s_CALpred(y,len,sur) += s_CAAtrue(y,a,sur) * ALK(y)(a,len);
+        if(I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * wt(y,a); // Biomass vulnerable to survey
+        if(Type(n_age) != Linf && IAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
+          for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * ALK(y)(a,len);
         }
       }
     }
-    if(!I_units(sur)) s_BN.col(sur) = s_CN.col(sur); // Abundance vulnerable to survey
-    q(sur) = calc_q(I_hist, s_BN, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
+    if(!I_units(sur)) Itot.col(sur) = IN.col(sur); // Abundance vulnerable to survey
+    q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
   }
 
   // Calc likelihood and parameter prior
@@ -360,19 +360,19 @@ Type RCM(objective_function<Type> *obj) {
         nll_survey(y,sur,0) -= LWT_survey(sur,0) * dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
       }
       
-      if(LWT_survey(sur,1) > 0 && !R_IsNA(asDouble(s_CAA_n(y,sur))) && s_CAA_n(y,sur) > 0) {
+      if(LWT_survey(sur,1) > 0 && !R_IsNA(asDouble(IAA_n(y,sur))) && IAA_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_multinom(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
+          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_multinom(IAA_hist, IAApred, IN, IAA_n, y, n_age, sur);
         } else {
-          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_lognorm(s_CAA_hist, s_CAApred, s_CN, s_CAA_n, y, n_age, sur);
+          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_lognorm(IAA_hist, IAApred, IN, y, n_age, sur);
         }
       }
       
-      if(LWT_survey(sur,2) > 0 && !R_IsNA(asDouble(s_CAL_n(y,sur))) && s_CAL_n(y,sur) > 0) {
+      if(LWT_survey(sur,2) > 0 && !R_IsNA(asDouble(IAL_n(y,sur))) && IAL_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_multinom(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
+          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_multinom(IAL_hist, IALpred, IN, IAL_n, y, nlbin, sur);
         } else {
-          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_lognorm(s_CAL_hist, s_CALpred, s_CN, s_CAL_n, y, nlbin, sur);
+          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_lognorm(IAL_hist, IALpred, IN, y, nlbin, sur);
         }
       }
     }
@@ -396,7 +396,7 @@ Type RCM(objective_function<Type> *obj) {
           if(comp_like == "multinomial") {
             nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           } else {
-            nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_lognorm(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
+            nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_lognorm(CAA_hist, CAApred, CN, y, n_age, ff);
           }
         }
         
@@ -404,7 +404,7 @@ Type RCM(objective_function<Type> *obj) {
           if(comp_like == "multinomial") {
             nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
           } else {
-            nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_lognorm(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
+            nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_lognorm(CAL_hist, CALpred, CN, y, nlbin, ff);
           }
         }
 
@@ -505,17 +505,17 @@ Type RCM(objective_function<Type> *obj) {
 
   if(age_error.trace() != Type(n_age)) {
     REPORT(CAAtrue);
-    REPORT(s_CAAtrue);
+    REPORT(IAAtrue);
   }
 
   if(nll_survey.sum() != 0) {
-    REPORT(s_vul_par);
-    REPORT(s_CAApred);
-    REPORT(s_CALpred);
-    REPORT(s_vul);
-    REPORT(s_L5);
-    REPORT(s_LFS);
-    REPORT(s_Vmaxlen);
+    REPORT(ivul_par);
+    REPORT(IAApred);
+    REPORT(IALpred);
+    REPORT(ivul);
+    REPORT(iL5);
+    REPORT(iLFS);
+    REPORT(iVmaxlen);
   }
   
   if(nll_gr) {

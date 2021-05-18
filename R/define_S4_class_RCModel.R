@@ -30,14 +30,14 @@
 #' \item F_equilibrium - equilibrium fishing mortality prior to first year - vector of length nfleet
 #' \item M - natural mortality - matrix of nyears x maxage
 #' \item Z - total mortality - matrix of nyears x maxage
-#' \item q - survey catchability - vector of length nsurvey
-#' \item s_vul - survey selectivity at age - array of dim nyears+1, maxage, nsurvey
-#' \item s_vul_len - corresponding survey selectivity at length - matrix of nbins x nsurvey
+#' \item q - index catchability - vector of length nsurvey
+#' \item ivul - index selectivity at age - array of dim nyears+1, maxage, nsurvey
+#' \item ivul_len - corresponding index selectivity at length - matrix of nbins x nsurvey
 #' \item Ipred - predicted index values - matrix of nyears x nsurvey
-#' \item s_CAApred - predicted survey catch at age - array of dim nyears, maxage, nsurvey
+#' \item IAApred - predicted index catch at age - array of dim nyears, maxage, nsurvey
 #' \item vul - fleet selectivity at age - array of dim nyears+1, maxage, nfleet (or nsel_block)
 #' \item vul_len - corresponding fleet selectivity at length - matrix of nbins x nfleet (or nsel_block)
-#' \item s_CALpred - predicted survey catch at length - array of dim nyears, nbins, nsurvey
+#' \item IALpred - predicted index catch at length - array of dim nyears, nbins, nsurvey
 #' \item MLpred - predicted mean length - matrix of nyears x nfleet
 #' \item MWpred - predicted mean weight - matrix of nyears x nfleet
 #' \item CAApred - predicted catch at age - array of nyears, maxage, nfleet
@@ -65,7 +65,7 @@
 #' @exportClass RCModel
 RCModel <- setClass("RCModel", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
                                          CAA = "array", CAL = "array", conv = "logical", Misc = "list", mean_fit = "list",
-                                         data = "list", config = "data.frame"))
+                                         data = "ANY", config = "data.frame"))
 
 
 #' @name plot.RCModel
@@ -149,7 +149,8 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             report_list <- x@Misc[sims]
 
             nsim <- OM@nsim
-            data <- x@data
+            RCMdata <- x@data
+            stopifnot(inherits(RCMdata, "RCMdata"))
 
             max_age <- OM@maxage
             age <- 0:max_age
@@ -158,16 +159,10 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             if(is.null(Year)) Year <- (OM@CurrentYr - nyears + 1):OM@CurrentYr
             Yearplusone <- c(Year, max(Year) + 1)
 
-            # Backwards compatibility
-            if(is.null(data$nsel_block)) {
-              data$nsel_block <- data$nfleet
-              data$sel_block <- matrix(1:data$nfleet, nyears, data$nfleet, byrow = TRUE)
-            }
-
-            nfleet <- data$nfleet
-            nsel_block <- data$nsel_block
-            nsurvey <- data$nsurvey
-            length_bin <- data$length_bin
+            nfleet <- RCMdata@Misc$nfleet
+            nsel_block <- RCMdata@Misc$nsel_block
+            nsurvey <- RCMdata@Misc$nsurvey
+            length_bin <- RCMdata@length_bin
 
             if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
             if(is.null(s_name)) {
@@ -208,7 +203,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             ####### Output from all simulations {.tabset}
             fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
-            if(any(data$Index > 0, na.rm = TRUE)) {
+            if(any(RCMdata@Index > 0, na.rm = TRUE)) {
               survey_output <- lapply(1:nsurvey, rmd_RCM_survey_output, s_name = s_name)
             } else survey_output <- NULL
 
@@ -223,12 +218,6 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               report <- x@mean_fit$report
               data_mean_fit <- x@mean_fit$obj$env$data
               length_bin <- data_mean_fit$length_bin
-
-              # Backwards compatibility
-              if(is.null(data_mean_fit$nsel_block)) {
-                data_mean_fit$nsel_block <- data$nfleet
-                data_mean_fit$sel_block <- matrix(1:data$nfleet, nyears, data$nfleet, byrow = TRUE)
-              }
 
               conv <- report$conv
 
@@ -298,25 +287,25 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                   rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", ages = "age", fig.cap = fig.cap2)
                   rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", ages = "age", fig.cap = fig.cap3)
                 } else {
-                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", CAL_bins = "data$length_bin", fig.cap = fig.cap)
-                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", CAL_bins = "data$length_bin", fig.cap = fig.cap2)
-                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", CAL_bins = "data$length_bin", fig.cap = fig.cap3)
+                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", CAL_bins = "RCMdata@length_bin", fig.cap = fig.cap)
+                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", CAL_bins = "RCMdata@length_bin", fig.cap = fig.cap2)
+                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", CAL_bins = "RCMdata@length_bin", fig.cap = fig.cap3)
                 }
                 c(rr, rr2, rr3)
               }
 
-              if(any(data$Chist > 0, na.rm = TRUE)) {
-                C_matplot <- rmd_matplot(x = "matrix(Year, nyears, nfleet)", y = "data$Chist", col = "rich.colors(nfleet)",
+              if(any(RCMdata@Chist > 0, na.rm = TRUE)) {
+                C_matplot <- rmd_matplot(x = "matrix(Year, nyears, nfleet)", y = "RCMdata@Chist", col = "rich.colors(nfleet)",
                                          xlab = "Year", ylab = "Catch", legend.lab = "f_name",
                                          fig.cap = "Catch time series.", header = "### Data and Fit {.tabset}\n#### Catch \n")
 
-                if(data_mean_fit$condition == "effort" || ncol(data$Chist) > 1) {
-                  C_plots <- lapply(1:nfleet, individual_matrix_fn, obs = "data$Chist", pred = "report$Cpred",
+                if(data_mean_fit$condition == "effort" || ncol(RCMdata@Chist) > 1) {
+                  C_plots <- lapply(1:nfleet, individual_matrix_fn, obs = "RCMdata@Chist", pred = "report$Cpred",
                                     fig.cap = "catch from fleet", label = f_name, match = data_mean_fit$condition == "catch2")
                 } else C_plots <- NULL
               } else C_matplot <- C_plots <- NULL
 
-              if(any(data$Ehist > 0, na.rm = TRUE)) {
+              if(any(RCMdata@Ehist > 0, na.rm = TRUE)) {
                 if(is.null(C_matplot)) {
                   E_header <- "### Data and Fit {.tabset}\n#### Effort \n"
                 } else {
@@ -326,47 +315,47 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                          xlab = "Year", ylab = "Effort", legend.lab = "f_name", fig.cap = "Effort time series.", header = E_header)
               } else E_matplot <- NULL
 
-              if(any(data$Index > 0, na.rm = TRUE)) {
+              if(any(RCMdata@Index > 0, na.rm = TRUE)) {
                 I_plots <- c("#### Surveys \n",
-                             lapply(1:nsurvey, individual_matrix_fn, obs = "data$Index", pred = "report$Ipred",
+                             lapply(1:nsurvey, individual_matrix_fn, obs = "RCMdata@Index", pred = "report$Ipred",
                                     fig.cap = "index from survey", label = s_name),
-                             lapply(1:nsurvey, individual_matrix_fn, obs = "data$Index", pred = "report$Ipred",
+                             lapply(1:nsurvey, individual_matrix_fn, obs = "RCMdata@Index", pred = "report$Ipred",
                                     fig.cap = "index from survey", label = paste(s_name, "Residuals"), resids = TRUE))
               } else I_plots <- NULL
 
-              if(any(data$CAA > 0, na.rm = TRUE)) {
+              if(any(RCMdata@CAA > 0, na.rm = TRUE)) {
                 CAA_plots <- c("#### Age comps \n",
-                               lapply(1:nfleet, individual_array_fn, obs = "data$CAA", pred = "report$CAApred", comps = "age", label = f_name))
+                               lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAA", pred = "report$CAApred", comps = "age", label = f_name))
               } else CAA_plots <- NULL
 
-              if(any(data$CAL > 0, na.rm = TRUE)) {
+              if(any(RCMdata@CAL > 0, na.rm = TRUE)) {
                 CAL_plots <- c("#### Length comps \n",
-                               lapply(1:nfleet, individual_array_fn, obs = "data$CAL", pred = "report$CALpred", comps = "length", label = f_name))
+                               lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAL", pred = "report$CALpred", comps = "length", label = f_name))
               } else CAL_plots <- NULL
 
-              if(any(data$MS > 0, na.rm = TRUE)) {
-                if(data$MS_type == "length") {
+              if(any(RCMdata@MS > 0, na.rm = TRUE)) {
+                if(RCMdata@MS_type == "length") {
                   MS_label <- paste("Mean Length from", f_name)
                 } else {
                   MS_label <- paste("Mean Weight from", f_name)
                 }
-                MS_plots <- c(paste0("#### Mean ", data$MS_type, "\n"),
-                              lapply(1:nfleet, individual_matrix_fn, obs = "data$MS",
-                                     pred = ifelse(data$MS_type == "length", "report$MLpred", "report$MWpred"),
-                                     fig.cap = paste("mean", data$MS_type, "from fleet"), label = MS_label))
+                MS_plots <- c(paste0("#### Mean ", RCMdata@MS_type, "\n"),
+                              lapply(1:nfleet, individual_matrix_fn, obs = "RCMdata@MS",
+                                     pred = ifelse(RCMdata@MS_type == "length", "report$MLpred", "report$MWpred"),
+                                     fig.cap = paste("mean", RCMdata@MS_type, "from fleet"), label = MS_label))
               } else MS_plots <- NULL
 
-              if(any(data$s_CAA > 0, na.rm = TRUE)) {
-                s_CAA_plots <- c("#### Survey age comps \n",
-                                 lapply(1:nsurvey, individual_array_fn, obs = "data$s_CAA", pred = "report$s_CAApred", comps = "age", label = s_name))
-              } else s_CAA_plots <- NULL
+              if(any(RCMdata@IAA > 0, na.rm = TRUE)) {
+                IAA_plots <- c("#### Survey age comps \n",
+                                 lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", comps = "age", label = s_name))
+              } else IAA_plots <- NULL
 
-              if(any(data$s_CAL > 0, na.rm = TRUE)) {
-                s_CAL_plots <- c("#### Survey length comps \n",
-                                 lapply(1:nsurvey, individual_array_fn, obs = "data$s_CAL", pred = "report$s_CALpred", comps = "length", label = s_name))
-              } else s_CAL_plots <- NULL
+              if(any(RCMdata@IAL > 0, na.rm = TRUE)) {
+                IAL_plots <- c("#### Survey length comps \n",
+                                 lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAL", pred = "report$IALpred", comps = "length", label = s_name))
+              } else IAL_plots <- NULL
 
-              data_section <- c(C_matplot, C_plots, E_matplot, I_plots, CAA_plots, CAL_plots, MS_plots, s_CAA_plots, s_CAL_plots)
+              data_section <- c(C_matplot, C_plots, E_matplot, I_plots, CAA_plots, CAL_plots, MS_plots, IAA_plots, IAL_plots)
 
               # Model output
               sel_matplot <- rmd_matplot(x = "matrix(age, max_age + 1, nfleet)", y = "matrix(report$vul[nyears, , ], max_age + 1, nfleet)", col = "rich.colors(nfleet)",
@@ -413,7 +402,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                           label = "log-Recruitment deviations", conv_check = TRUE),
                              rmd_N(), N_bubble, CAA_bubble, CAL_bubble)
 
-              nll <- RCM_get_likelihoods(report, data$LWT, f_name, s_name)
+              nll <- RCM_get_likelihoods(report, RCMdata@LWT, f_name, s_name)
               
               nll_table <- c("### Likelihood components\n",
                              "#### Summary\n",
@@ -431,7 +420,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                "`r SD$env$corr.fixed %>% structure(dimnames = list(make_unique_names(rownames(.)), make_unique_names(colnames(.)))) %>% as.data.frame()`\n\n")
               
               if(is.array(report$nll_fleet)) {
-                like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_survey = any(data$Index > 0, na.rm = TRUE)))
+                like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_survey = any(RCMdata@Index > 0, na.rm = TRUE)))
               } else {
                 like_gradients <- NULL
               }
@@ -525,15 +514,9 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   if(is.null(Year)) Year <- (dots[[1]]@OM@CurrentYr - nyears + 1):dots[[1]]@OM@CurrentYr
   Yearplusone <- c(Year, max(Year) + 1)
 
-  nfleet <- vapply(dots, function(xx) xx@data$nfleet, numeric(1)) %>% unique()
-  nsurvey <- vapply(dots, function(xx) xx@data$nsurvey, numeric(1)) %>% unique()
-  length_bin <- dots[[1]]@data$length_bin
-
-  # Backwards compatibility
-  if(is.null(data$nsel_block)) {
-    data$nsel_block <- data$nfleet
-    data$sel_block <- matrix(1:data$nfleet, nyears, data$nfleet, byrow = TRUE)
-  }
+  nfleet <- vapply(dots, function(xx) xx@RCMdata@Misc$nfleet, numeric(1)) %>% unique()
+  nsurvey <- vapply(dots, function(xx) xx@RCMdata@Misc$nsurvey, numeric(1)) %>% unique()
+  length_bin <- dots[[1]]@RCMdata@length_bin
 
   if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
   if(is.null(s_name)) s_name <- paste("Survey", 1:nsurvey)
@@ -561,7 +544,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   ####### Output from all simulations {.tabset}
   fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
-  if(any(data$Index > 0, na.rm = TRUE)) {
+  if(any(RCMdata@Index > 0, na.rm = TRUE)) {
     survey_output <- lapply(1:nsurvey, rmd_RCM_survey_output, s_name = s_name)
   } else survey_output <- NULL
 
@@ -604,7 +587,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
                        rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), SSB_MSY, rmd_log_rec_dev())
 
   #### Likelihoods
-  nll <- Map(RCM_get_likelihoods, x = report_list, LWT = lapply(dots, function(xx) xx@data$LWT),
+  nll <- Map(RCM_get_likelihoods, x = report_list, LWT = lapply(dots, function(xx) xx@RCMdata@Misc$LWT),
              MoreArgs = list(f_name = f_name, s_name = s_name))
 
   summary_nll <- vapply(nll, function(xx) xx[[1]] %>% as.matrix(), numeric(6)) %>%
@@ -666,4 +649,6 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   if(open_file) browseURL(output_filename)
   invisible(output_filename)
 }
+
+
 
