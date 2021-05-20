@@ -105,27 +105,27 @@ Type VPA(objective_function<Type> *obj) {
 
   // Calculate nuisance parameters and likelihood
   vector<Type> q(nsurvey);
-  array<Type> s_CAA(n_y,n_age,nsurvey);
-  matrix<Type> s_CN(n_y,nsurvey);
-  matrix<Type> s_BN(n_y,nsurvey);
+  array<Type> IAA(n_y,n_age,nsurvey);
+  matrix<Type> IN(n_y,nsurvey);
+  matrix<Type> Itot(n_y,nsurvey);
   matrix<Type> Ipred(n_y,nsurvey);
-  s_CN.setZero();
-  s_BN.setZero();
+  IN.setZero();
+  Itot.setZero();
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
       for(int a=0;a<n_age;a++) {
         if(I_vul.col(sur).sum() > 0) {
-          s_CAA(y,a,sur) = I_vul(a,sur) * N(y,a);
+          IAA(y,a,sur) = I_vul(a,sur) * N(y,a);
         } else {
-          s_CAA(y,a,sur) = vul(y,a) * N(y,a);
+          IAA(y,a,sur) = vul(a) * N(y,a);
         }
-        s_CN(y,sur) += s_CAA(y,a,sur);
-        if(I_units(sur)) s_BN(y,sur) += s_CAA(y,a,sur) * weight(a); // Biomass vulnerable to survey
+        IN(y,sur) += IAA(y,a,sur);
+        if(I_units(sur)) Itot(y,sur) += IAA(y,a,sur) * weight(a); // Biomass vulnerable to survey
       }
     }
-    if(!I_units(sur)) s_BN.col(sur) = s_CN.col(sur); // Abundance vulnerable to survey
-    q(sur) = calc_q(I_hist, s_BN, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
-  }  
+    if(!I_units(sur)) Itot.col(sur) = IN.col(sur); // Abundance vulnerable to survey
+    q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
+  }
 
   vector<Type> nll_comp(nsurvey);
   nll_comp.setZero();
