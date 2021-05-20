@@ -145,7 +145,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   nsurvey <- ncol(I_hist)
   
   # Generate priors
-  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), dots = list())
+  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
 
   ny <- length(C_hist)
   k <- ceiling(a50V)  # get age nearest to 50% vulnerability (ascending limb)

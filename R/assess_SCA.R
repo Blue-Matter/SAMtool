@@ -321,7 +321,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
   
   # Generate priors
-  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), dots = list())
+  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
   
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
                I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,

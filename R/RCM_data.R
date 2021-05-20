@@ -216,57 +216,6 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
   return(LWT)
 }
 
-make_prior <- function(prior, nsurvey, SR_rel, dots) { # log_R0, log_M, h, q
-  if(length(prior) == 0 && !is.null(dots$priors)) prior <- dots$priors
-  
-  no_survey <- nsurvey == 0
-  if(no_survey) nsurvey <- 1 # Use only on next two lines
-  use_prior <- rep(0L, nsurvey + 3)
-  pr_matrix <- matrix(NA_real_, nsurvey + 3, 2) %>% 
-    structure(dimnames = list(c("log_R0", "h", "log_M", paste0("q_", 1:nsurvey)), c("par1", "par2")))
-  
-  if(!is.null(prior$R0)) {
-    message("Prior for log_R0 found.")
-    use_prior[1] <- 1L
-    pr_matrix[1, ] <- c(log(prior$R0[1]), prior$R0[2])
-  }
-  if(!is.null(prior$h)) {
-    message("Prior for steepness (h) found.")
-    use_prior[2] <- 1L
-    if(SR_rel == 1) { #BH
-      a <- MSEtool::alphaconv(1.25 * prior$h[1] - 0.25, 1.25 * prior$h[2])
-      b <- MSEtool::betaconv(1.25 * prior$h[1] - 0.25, 1.25 * prior$h[2])
-      
-      if(a <= 0) stop("The alpha parameter < 0 (beta distribution) for the steepness prior. Try reducing the prior SD.", call. = FALSE)
-      if(b <= 0) stop("The beta parameter < 0 (beta distribution) for the steepness prior. Try reducing the prior SD.", call. = FALSE)
-      pr_matrix[2, ] <- c(a, b)
-    } else { #Ricker
-      pr_matrix[2, ] <- prior$h
-    }
-  }
-  if(!is.null(prior$M)) {
-    message("Prior for log_M found.")
-    use_prior[3] <- 1L
-    pr_matrix[3, ] <- c(log(prior$M[1]), prior$M[2])
-  }
-  if(!no_survey && !is.null(prior$q)) {
-    use_prior[4:(4+nsurvey-1)] <- 1L
-    message("Prior for q found.")
-    if(nsurvey == 1) {
-      if(is.matrix(prior$q)) {
-        pr_matrix[4, ] <- prior$q[1, ]
-      } else {
-        pr_matrix[4, ] <- prior$q
-      }
-    } else if(is.matrix(prior$q) && nrow(prior$q) == nsurvey) {
-      pr_matrix[4:(4+nsurvey-1), ] <- prior$q[1:nsurvey, ]
-    } else {
-      stop("prior$q should be a matrix of ", nsurvey, "rows and 2 columns.")
-    }
-  }
-  return(list(use_prior = use_prior, pr_matrix = pr_matrix))
-}
-
 #' @rdname RCM
 #' @slot RCMdata An \linkS4class{RCMdata} object.
 #' @export

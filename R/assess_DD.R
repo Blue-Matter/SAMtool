@@ -179,7 +179,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   }
   
   # Generate priors
-  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), dots = list())
+  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
 
   ny <- length(C_hist)
   if(!is.null(start$k)) {
