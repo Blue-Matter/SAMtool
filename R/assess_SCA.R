@@ -26,6 +26,11 @@
 #' Output is re-converted back to original units.
 #' @param max_age Integer, the maximum age (plus-group) in the model.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
+#' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions 
+#' for those parameters. R0 and M priors lognormal (mean in normal space, SD in lognormal space). 
+#' Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors. 
+#' For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). 
+#' For all others, provide a length-2 vector for the mean and SD. See vignette for full description.
 #' @param fix_h Logical, whether to fix steepness to value in \code{Data@@steep} in the model for \code{SCA}. This only affects
 #' calculation of reference points for \code{SCA2}.
 #' @param fix_F_equilibrium Logical, whether the equilibrium fishing mortality prior to the first year of the model
@@ -84,6 +89,7 @@
 #' \item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
 #' By default, 150\% Data@@OM$R0[x] is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
 #' \item \code{h} Steepness. Otherwise, Data@@steep[x] is used, or 0.9 if empty.
+#' \item \code{M} Natural mortality. Otherwise, Data@@Mort[x] is used.
 #' \item \code{vul_par} Vulnerability parameters, see next paragraph.
 #' \item \code{F} A vector of length nyears for year-specific fishing mortality.
 #' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
@@ -149,13 +155,13 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                 vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
                 CAA_dist = c("multinomial", "lognormal"),
                 CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
-                start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
+                start = NULL, prior = list(), fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
                 LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
   out <- SCA_(x, Data, AddInd, SR, vulnerability, catch_eq, CAA_dist, CAA_multiplier, rescale, max_age,
-              start, fix_h, fix_F_equilibrium, fix_omega, fix_tau, LWT, early_dev, late_dev, integrate,
+              start, prior, fix_h, fix_F_equilibrium, fix_omega, fix_tau, LWT, early_dev, late_dev, integrate,
               silent, opt_hess, n_restart, control, inner.control, ...)
   return(out)
 }
@@ -164,13 +170,13 @@ class(SCA) <- "Assess"
 #' @rdname SCA
 #' @export
 SCA2 <- function(x = 1, Data, AddInd = "B", vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
-                 CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, 
+                 CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, prior = list(),
                  fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE, LWT = NULL,
                  common_dev = "comp50", integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                  control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
   out <- SCA_(x, Data, AddInd, SR = "none", vulnerability, catch_eq = "Baranov", CAA_dist, CAA_multiplier, rescale, max_age,
-              start, fix_h, fix_F_equilibrium, fix_omega, fix_tau, LWT, early_dev = "all", late_dev = common_dev, integrate,
+              start, prior, fix_h, fix_F_equilibrium, fix_omega, fix_tau, LWT, early_dev = "all", late_dev = common_dev, integrate,
               silent, opt_hess, n_restart, control, inner.control, ...) 
   return(out)
 }
@@ -180,14 +186,14 @@ class(SCA2) <- "Assess"
 #' @rdname SCA
 #' @export
 SCA_Pope <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
-                     CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, 
+                     CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, prior = list(),
                      fix_h = TRUE, fix_U_equilibrium = TRUE, fix_tau = TRUE, LWT = NULL,
                      early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                      silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                      control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
   out <- SCA_(x, Data, AddInd, SR, vulnerability, catch_eq = "Pope", CAA_dist, CAA_multiplier, rescale, max_age,
-              start, fix_h, fix_F_equilibrium = fix_U_equilibrium, fix_omega = TRUE, fix_tau, LWT, early_dev, late_dev, integrate,
+              start, prior, fix_h, fix_F_equilibrium = fix_U_equilibrium, fix_omega = TRUE, fix_tau, LWT, early_dev, late_dev, integrate,
               silent, opt_hess, n_restart, control, inner.control, ...) 
   return(out)
 }
@@ -198,7 +204,7 @@ class(SCA_Pope) <- "Assess"
 SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
                  vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
                  CAA_dist = c("multinomial", "lognormal"), CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
-                 start = NULL, fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
+                 start = NULL, prior = list(), fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
                  LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                  silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                  control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
@@ -314,13 +320,17 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   if(is.null(LWT)) LWT <- rep(1, nsurvey)
   if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
   
+  # Generate priors
+  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), dots = list())
+  
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
                I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
                CAA_hist = t(apply(CAA_hist, 1, function(x) x/sum(x))),
-               CAA_n = CAA_n_rescale, n_y = n_y, n_age = n_age, M = M,
+               CAA_n = CAA_n_rescale, n_y = n_y, n_age = n_age, M_data = M,
                weight = Wa, mat = mat_age, vul_type = vulnerability,
                SR_type = SR, CAA_dist = CAA_dist, catch_eq = catch_eq,
-               est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y))
+               est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y),
+               use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
   data$CAA_hist[data$CAA_hist < 1e-8] <- 1e-8
   
   # Starting values
@@ -335,6 +345,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
         params$transformed_h <- log(start$h[1] - 0.2)
       }
     }
+    if(!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M)
     if(catch_eq == "Baranov" && !is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) {
       params$F_equilibrium <- start$F_equilibrium
     }
@@ -387,6 +398,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       params$transformed_h <- 0
     }
   }
+  if(is.null(params$log_M)) params$log_M <- log(M) %>% mean()
   if(is.null(params$F_equilibrium)) params$F_equilibrium <- 0
   if(is.null(params$U_equilibrium)) params$U_equilibrium <- 0
   if(is.null(params$vul_par)) {
@@ -440,7 +452,8 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   } else if(catch_eq == "Pope") {
     map$log_F_dev <- factor(rep(NA, n_y))
   }
-  if(fix_h) map$transformed_h <- factor(NA)
+  if(fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if(!prior$use_prior[3]) map$log_M <- factor(NA)
   if(fix_F_equilibrium) map$F_equilibrium <- map$U_equilibrium <- factor(NA)
   if(fix_omega) map$log_omega <- factor(NA)
   if(fix_tau) map$log_tau <- factor(NA)
@@ -523,7 +536,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }
   
   if(Assessment@conv) {
-    ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, 
+    ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = report$M, weight = Wa, mat = mat_age, vul = report$vul, 
                          SR = SR, catch_eq = catch_eq)
     report <- c(report, ref_pt[1:6])
     

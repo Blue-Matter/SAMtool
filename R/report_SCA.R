@@ -16,7 +16,7 @@ summary_SCA <- function(Assessment) {
   }
   
   if(SR == "none") h <- NA_real_
-  Value <- c(h, info$data$M[1], info$data$n_age - 1, info$LH$Linf, info$LH$K, info$LH$t0,
+  Value <- c(h, TMB_report$M[1], info$data$n_age - 1, info$LH$Linf, info$LH$K, info$LH$t0,
              info$LH$a * info$LH$Linf ^ info$LH$b, info$LH$A50, info$LH$A95)
   Description = c("Stock-recruit steepness", "Natural mortality", "Maximum age (plus-group)", "Asymptotic length", "Growth coefficient",
                   "Age at length-zero", "Asymptotic weight", "Age of 50% maturity", "Age of 95% maturity")
@@ -78,7 +78,7 @@ rmd_SCA <- function(Assessment, ...) {
     lead_par <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h())
   }
 
-  assess_fit <- c(lead_par,
+  assess_fit <- c(lead_par, rmd_M_prior(),
                   rmd_sel(age, Assessment@Selectivity[nrow(Assessment@Selectivity), ], fig.cap = "Estimated selectivity at age."),
                   rmd_assess_fit("Catch", "catch"), rmd_assess_resid("Catch"), rmd_assess_qq("Catch", "catch"),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
@@ -307,7 +307,7 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   xaxis <- match.arg(xaxis)
   F.vector = seq(0, 2.5 * fmsy, length.out = 1e2)
   
-  yield <- lapply(F.vector, yield_fn_SCA, M = data$M, mat = data$mat, weight = data$weight, vul = report$vul,
+  yield <- lapply(F.vector, yield_fn_SCA, M = report$M, mat = data$mat, weight = data$weight, vul = report$vul,
                   SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, opt = FALSE, catch_eq = "Baranov")
   
   Biomass <- vapply(yield, getElement, numeric(1), "E")
@@ -351,7 +351,7 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
     u.vector = seq(0, 1, length.out = 100)
   }
   
-  yield <- lapply(u.vector, yield_fn_SCA, M = data$M, mat = data$mat, weight = data$weight, 
+  yield <- lapply(u.vector, yield_fn_SCA, M = report$M, mat = data$mat, weight = data$weight, 
                   vul = report$vul, SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, 
                   catch_eq = "Pope", opt = FALSE)
   

@@ -23,7 +23,7 @@ Type SCA(objective_function<Type> *obj) {
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
   DATA_INTEGER(n_y);      // Number of years in model
   DATA_INTEGER(n_age);    // Maximum age (plus-group)
-  DATA_VECTOR(M);         // Natural mortality at age
+  DATA_VECTOR(M_data);    // Natural mortality at age
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
@@ -33,9 +33,12 @@ Type SCA(objective_function<Type> *obj) {
   DATA_IVECTOR(est_early_rec_dev);
   DATA_IVECTOR(est_rec_dev); // Indicator of whether rec_dev is estimated in model or fixed at zero
   DATA_INTEGER(yindF);    // Year for which to estimate F, all other F are deviations from this F
+  DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
+  DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see make_prior fn)
 
   PARAMETER(R0x);
   PARAMETER(transformed_h);
+  PARAMETER(log_M);
   PARAMETER(F_equilibrium);
   PARAMETER(U_equilibrium);
   PARAMETER_VECTOR(vul_par);
@@ -54,9 +57,16 @@ Type SCA(objective_function<Type> *obj) {
   } else if(SR_type == "Ricker") {
     h = exp(transformed_h) + 0.2;
   }
-
+  Type Mest = exp(log_M);
   Type omega = exp(log_omega);
   Type tau = exp(log_tau);
+  
+  vector<Type> M(n_age);
+  if(use_prior(2)) {
+    M.fill(Mest);
+  } else {
+    M = M_data;
+  }
 
   Type penalty = 0;
   Type prior = 0.;
@@ -267,11 +277,14 @@ Type SCA(objective_function<Type> *obj) {
   for(int a=0;a<n_age-1;a++) {
     if(est_early_rec_dev(a)) nll_comp(nsurvey+2) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
   }
-
+  
+  // Add priors
+  prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
   Type nll = nll_comp.sum() + penalty + prior;
 
   ADREPORT(R0);
   if(SR_type != "none") ADREPORT(h);
+  if(CppAD::Variable(log_M)) ADREPORT(Mest);
   ADREPORT(omega);
   ADREPORT(tau);
   ADREPORT(q);
@@ -305,6 +318,7 @@ Type SCA(objective_function<Type> *obj) {
     REPORT(U);
   }
   REPORT(q);
+  REPORT(M);
 
   REPORT(N);
   REPORT(CN);
