@@ -8,7 +8,6 @@
 template<class Type>
 Type DD(objective_function<Type> *obj) {
 
-  DATA_SCALAR(S0);
   DATA_SCALAR(Alpha);
   DATA_SCALAR(Rho);
   DATA_INTEGER(ny);
@@ -27,9 +26,12 @@ Type DD(objective_function<Type> *obj) {
   DATA_INTEGER(nsurvey);
   DATA_INTEGER(fix_sigma);
   DATA_INTEGER(state_space);
+  DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
+  DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see make_prior fn)
 
   PARAMETER(R0x);
   PARAMETER(transformed_h);
+  PARAMETER(log_M);
   PARAMETER(log_q_effort);
   PARAMETER(U_equilibrium);
   PARAMETER(log_omega);
@@ -43,13 +45,14 @@ Type DD(objective_function<Type> *obj) {
   } else h = exp(transformed_h);
   h += 0.2;
   Type R0 = exp(R0x)/rescale;
+  Type M = exp(log_M);
   Type q_effort = exp(log_q_effort);
   Type omega = exp(log_omega);
   Type sigma = exp(log_sigma);
   Type tau = exp(log_tau);
 
-
   //--DECLARING DERIVED VALUES
+  Type S0 = exp(-M);
   Type Spr0 = (S0 * Alpha/(1 - S0) + wk)/(1 - Rho * S0);
   Type B0 = R0 * Spr0;
   Type N0 = R0/(1 - S0);
@@ -159,11 +162,13 @@ Type DD(objective_function<Type> *obj) {
   }
 
   //Summing individual nll and penalties
+  prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
   Type nll = nll_comp.sum() + penalty + prior;
 
   //-------REPORTING-------//
   ADREPORT(R0);
   ADREPORT(h);
+  if(CppAD::Variable(log_M)) ADREPORT(M);
   if(condition == "effort") ADREPORT(q_effort);
   if(condition == "catch") ADREPORT(q);
   if(CppAD::Variable(log_omega)) ADREPORT(omega);
@@ -189,6 +194,7 @@ Type DD(objective_function<Type> *obj) {
   REPORT(log_rec_dev);
   REPORT(Rec_dev);
   REPORT(U);
+  REPORT(M);
   REPORT(h);
   REPORT(R0);
   REPORT(N0);

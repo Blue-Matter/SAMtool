@@ -146,6 +146,19 @@ rmd_h <- function() {
     "```\n")
 }
 
+rmd_M_prior <- function() {
+  fig.cap <- "Estimate of natural mortality, distribution based on normal approximation of posterior distribution."
+  ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
+           "if(all(names(obj$env$map) != \"log_M\") && conv) {",
+           "  ind <- names(SD$par.fixed) == \"log_M\"",
+           "  mu <- SD$par.fixed[ind]",
+           "  sig <- sqrt(diag(SD$cov.fixed)[ind])",
+           "  plot_lognormalvar(mu, sig, label = \"Natural mortality\", logtransform = TRUE)",
+           "}",
+           "```\n")
+  return(ans)
+}
+
 rmd_FMSY <- function(header = NULL) {
   fig.cap <- "Estimate of FMSY, distribution based on normal approximation of estimated covariance matrix."
   ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
@@ -183,7 +196,7 @@ rmd_F_FMSY_terminal <- function() {
     "```\n")
 }
 
-rmd_M <- function() {
+rmd_M_rw <- function() {
   out <- c("```{r, fig.cap = \"Estimates of M with 95% confidence intervals. Dotted horizontal lines indicate bounds specified in model.\"}",
            "logit_M <- SD$value[names(SD$value) == \"logit_M\"]",
            "M_bounds <- obj$env$data$M_bounds",

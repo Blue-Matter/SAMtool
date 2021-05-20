@@ -9,7 +9,6 @@ template<class Type>
 Type cDD(objective_function<Type> *obj) {
   using namespace ns_cDD;
   
-  DATA_SCALAR(M);
   DATA_SCALAR(Winf);
   DATA_SCALAR(Kappa);
   DATA_INTEGER(ny);
@@ -27,9 +26,12 @@ Type cDD(objective_function<Type> *obj) {
   DATA_INTEGER(nsurvey);
   DATA_INTEGER(fix_sigma);
   DATA_INTEGER(state_space);
+  DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
+  DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see RCM_prior fn)
 
   PARAMETER(R0x);
   PARAMETER(transformed_h);
+  PARAMETER(log_M);
   PARAMETER(F_equilibrium);
   PARAMETER(log_sigma);
   PARAMETER(log_tau);
@@ -41,6 +43,7 @@ Type cDD(objective_function<Type> *obj) {
   } else h = exp(transformed_h);
   h += 0.2;
   Type R0 = exp(R0x)/rescale;
+  Type M = exp(log_M);
   Type sigma = exp(log_sigma);
   Type tau = exp(log_tau);
   int SR_type2 = SR_type == "BH";
@@ -141,11 +144,13 @@ Type cDD(objective_function<Type> *obj) {
   }
 
   //Summing individual jnll and penalties
+  prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
   Type nll = nll_comp.sum() + penalty + prior;
 
   //-------REPORTING-------//
   ADREPORT(R0);
   ADREPORT(h);
+  if(CppAD::Variable(log_M)) ADREPORT(M);
   ADREPORT(q);
   if(CppAD::Variable(log_sigma)) ADREPORT(sigma);
   if(CppAD::Variable(log_tau)) ADREPORT(tau);
@@ -164,6 +169,7 @@ Type cDD(objective_function<Type> *obj) {
   REPORT(N);
   REPORT(R);
   REPORT(F);
+  REPORT(M);
   REPORT(Z);
   REPORT(BPRinf);
   REPORT(Binf);

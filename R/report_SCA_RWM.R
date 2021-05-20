@@ -66,7 +66,7 @@ rmd_SCA_RWM <- function(Assessment, ...) {
                                blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])),
                   rmd_residual("Dev", "SE_Dev", fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
                                label = Assessment@Dev_type, conv_check = TRUE, blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])),
-                  rmd_M())
+                  rmd_M_rw())
   
   #### Time Series
   ts_output <- c(rmd_F(header = "### Time Series Output\n"), rmd_F_FMSY(),  rmd_M(), rmd_SSB(),

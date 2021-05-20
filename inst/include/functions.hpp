@@ -189,7 +189,29 @@ Type calc_q(matrix<Type> I_y, matrix<Type> B_y, int sur, int ff, matrix<Type> &I
   return q;
 }
 
-
+// For RCM, DD, cDD
+template<class Type>
+Type calc_prior(matrix<int> use_prior, matrix<Type> prior_dist, Type R0, Type h, int SR_type, Type log_M, vector<Type> q) {
+  Type prior = 0;
+  if(use_prior(0)) { // Prior for R0 - normal on log_R0, log Jacobian transform = zero
+    prior += dnorm_(log(R0), prior_dist(0,0), prior_dist(0,1), true);
+  }
+  if(use_prior(1)) { // Prior for h
+    if(SR_type) { // Beverton-Holt - beta on y = (h - 0.2)/0.8 with log Jacobian transform of inverse logit fn
+      Type y = (h - 0.2)/0.8;
+      prior += dbeta_(y, prior_dist(1,0), prior_dist(1,1), true) - log(y - y * y); 
+    } else { // Ricker - normal on h with log Jacobian transform
+      prior += dnorm_(h, prior_dist(1,0), prior_dist(1,1), true) + CppAD::CondExpLt(log(h - 0.2), Type(0), -log(h - 0.2), log(h - 0.2));
+    }
+  }
+  if(use_prior(2)) { // Prior for constant M - normal on log_M
+    prior += dnorm_(log_M, prior_dist(2,0), prior_dist(2,1), true);
+  }
+  for(int i=3;i<use_prior.size();i++) { // Prior for q - normal
+    if(use_prior(i)) prior += dnorm_(q(i-3), prior_dist(i,0), prior_dist(i,1), true);
+  }
+  return prior;
+}
 
 //////////// Functions for cDD.h, DD.h, SCA.h
 template<class Type>
@@ -219,7 +241,6 @@ Type Ricker_SR(Type SSB, Type h, Type R0, Type SSB0) {
 #include "ns/ns_VPA.hpp"
 #include "ns/ns_RCM.hpp"
 #include "ns/ns_SP.hpp"
-
 
 // This is the Newton solver for the fleet-specific F in year y given the observed catches.
 // Let vector x = log(F_y,f)

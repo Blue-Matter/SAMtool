@@ -7,12 +7,27 @@ summary_cDD <- function(Assessment, state_space = FALSE) {
   current_status <- data.frame(Value = current_status)
   rownames(current_status) <- c("F/FMSY", "B/BMSY", "B/B0")
 
-  input_parameters <- data.frame(Value = as.numeric(c(h, info$data$M, info$data$Kappa, info$data$k, info$data$wk, info$data$Winf)),
-                                 Description = c("Stock-recruit steepness", "Natural mortality", "Weight coefficient",
-                                                 "Age of knife-edge selectivity", "Weight at age k", "Asymptotic weight"),
-                                 stringsAsFactors = FALSE)
-  rownames(input_parameters) <- c("h", "M", "Kappa", "k", "w_k", "Winf")
-  if(!"transformed_h" %in% names(obj$env$map)) input_parameters <- input_parameters[-1, ]
+  Value <- as.numeric(c(info$data$Kappa, info$data$k, info$data$wk, info$data$Winf))
+  Description <- c("Weight coefficient", "Age of knife-edge selectivity", 
+                   "Weight at age k", "Asymptotic weight")
+  rownam <- c("Kappa", "k", "w_k", "Winf")
+  if(state_space && "log_tau" %in% names(obj$env$map)) {
+    Value <- c(Value, TMB_report$tau)
+    Description <- c(Description, "log-Recruitment deviation SD")
+    rownam <- c(rownam, "tau")
+  }
+  if("transformed_h" %in% names(obj$env$map)) {
+    Value <- c(Value, h)
+    Description <- c(Description, "Stock-recruit steepness")
+    rownam <- c(rownam, "h")
+  }
+  if("log_M" %in% names(obj$env$map)) {
+    Value <- c(Value, TMB_report$M)
+    Description <- c(Description, "Natural mortality")
+    rownam <- c(rownam, "M")
+  }
+  input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
+  rownames(input_parameters) <- rownam
 
   if(conv) derived <- c(B0, N0, MSY, FMSY, BMSY, BMSY/B0)
   else derived <- rep(NA, 6)
@@ -56,7 +71,7 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
 
   # Assessment
   #### Pars and Fit
-  assess_fit <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h(),
+  assess_fit <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h(), rmd_M_prior(),
                   rmd_sel(age, mat, fig.cap = "Knife-edge selectivity set to the age corresponding to the length of 50% maturity."),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)), rmd_assess_fit("Catch", "catch", match = TRUE))
 
@@ -273,7 +288,7 @@ plot_yield_cDD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   xaxis <- match.arg(xaxis)
   if(xaxis == "F") F.vector <- seq(0, 2.5 * fmsy, length.out = 1e2) else F.vector <- seq(0, 5 * fmsy, length.out = 1e2)
   
-  yield <- lapply(F.vector, yield_fn_cDD, M = data$M, Kappa = data$Kappa, 
+  yield <- lapply(F.vector, yield_fn_cDD, M = report$M, Kappa = data$Kappa, 
                   Winf = data$Winf, wk = data$wk, SR = data$SR_type, 
                   Arec = report$Arec, Brec = report$Brec, opt = FALSE)
   Biomass <- vapply(yield, getElement, numeric(1), "B")

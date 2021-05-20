@@ -7,12 +7,12 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
   current_status <- data.frame(Value = current_status)
   rownames(current_status) <- c("U/UMSY", "B/BMSY", "B/B0")
 
-  Value <- c(unlist(info$data[c(2,3,4,6,7)]))
-  Description <- c("Unfished survival = exp(-M)", "alpha = Winf * (1-rho)",
+  Value <- c(unlist(info$data[c(2,3,5,6)]))
+  Description <- c("alpha = Winf * (1-rho)",
                   "rho = (W_k+2 - Winf)/(W_k+1 - Winf)",
                   "Age of knife-edge selectivity",
                   "Weight at age k")
-  rownam <- c("S0", "alpha", "rho", "k", "w_k")
+  rownam <- c("alpha", "rho", "k", "w_k")
   if(Assessment@obj$env$data$condition == "effort" && "log_omega" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$omega)
     Description <- c(Description, "Catch SD (log-space)")
@@ -27,6 +27,11 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
     Value <- c(Value, h)
     Description <- c(Description, "Stock-recruit steepness")
     rownam <- c(rownam, "h")
+  }
+  if("log_M" %in% names(obj$env$map)) {
+    Value <- c(Value, TMB_report$M)
+    Description <- c(Description, "Natural mortality")
+    rownam <- c(rownam, "M")
   }
   input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
   rownames(input_parameters) <- rownam
@@ -73,7 +78,7 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
 
   # Assessment
   #### Pars and Fit
-  assess_all <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h(),
+  assess_all <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h(), rmd_M_prior(),
                   rmd_sel(age, mat, fig.cap = "Knife-edge selectivity set to the age corresponding to the length of 50% maturity."))
 
   if(Assessment@obj$env$data$condition == "effort") {
@@ -258,7 +263,7 @@ plot_yield_DD <- function(data, report, umsy, msy, xaxis = c("U", "Biomass", "De
   xaxis <- match.arg(xaxis)
   u.vector <- seq(0, 0.99, 0.01)
   
-  yield <- lapply(u.vector, yield_fn_DD, S0 = data$S0, Alpha = data$Alpha, 
+  yield <- lapply(u.vector, yield_fn_DD, M = report$M, Alpha = data$Alpha, 
                   Rho = data$Rho, wk = data$wk, SR = data$SR_type,
                   Arec = report$Arec, Brec = report$Brec, opt = FALSE)
   

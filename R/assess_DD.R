@@ -17,7 +17,13 @@
 #' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
+#' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions 
+#' for those parameters. R0 and M priors lognormal (mean in normal space, SD in lognormal space). 
+#' Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors. 
+#' For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). 
+#' For all others, provide a length-2 vector for the mean and SD. See vignette for full description.
 #' @param fix_h Logical, whether to fix steepness to value in \code{Data@@steep} in the assessment model.
+#' Automatically false if a prior is used.
 #' @param fix_sd Logical, whether the standard deviation of the data in the likelihood (index for conditioning on catch or
 #' catch for conditioning on effort). If \code{TRUE}, the SD is fixed to value provided in \code{start} (if provided), otherwise,
 #'  value based on either \code{Data@@CV_Cat} or \code{Data@@CV_Ind}.
@@ -48,6 +54,10 @@
 #' \itemize{
 #' \item \code{R0} Unfished recruitment. Otherwise, Data@@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
 #' \item \code{h} Steepness. Otherwise, Data@@steep[x] is used, or 0.9 if empty.
+#' \item \code{M} Natural mortality. Otherwise, Data@@Mort[x] is used.
+#' \item \code{k} Age of knife-edge maturity. By default, the age of 50\% maturity calculated from the slots in the Data object.
+#' \item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
+#' \item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
 #' \item \code{U_equilibrium} Equilibrium harvest rate leading into first year of the model (to determine initial depletion). By default, 0.
 #' \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@@CV_Cat[x].
@@ -99,11 +109,11 @@
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @export
 DD_TMB <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
-                   start = NULL, fix_h = TRUE, dep = 1, LWT = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                   start = NULL, prior = list(), fix_h = TRUE, dep = 1, LWT = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                    control = list(iter.max = 5e3, eval.max = 1e4), ...) {
   condition <- match.arg(condition)
   DD_(x = x, Data = Data, state_space = FALSE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, start = start,
-      fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = FALSE,
+      prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = FALSE,
       fix_tau = TRUE, integrate = FALSE, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = list(), ...)
 }
@@ -113,12 +123,12 @@ class(DD_TMB) <- "Assess"
 #' @rdname DD_TMB
 #' @export
 DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
-                  start = NULL, fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL,
+                  start = NULL, prior = list(), fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL,
                   integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                   control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   condition <- match.arg(condition)
   DD_(x = x, Data = Data, state_space = TRUE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, start = start,
-      fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = fix_sd,
+      prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = fix_sd,
       fix_tau = fix_tau, integrate = integrate, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = inner.control, ...)
 }
@@ -126,7 +136,7 @@ class(DD_SS) <- "Assess"
 
 #' @useDynLib SAMtool
 DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL,
-                fix_h = TRUE, fix_sd = TRUE, fix_tau = TRUE, dep = 1, LWT = NULL,
+                prior = list(), fix_h = TRUE, fix_sd = TRUE, fix_tau = TRUE, dep = 1, LWT = NULL,
                 integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
@@ -135,7 +145,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
 
   condition <- match.arg(condition)
   SR <- match.arg(SR)
-  Winf = Data@wla[x] * Data@vbLinf[x]^Data@wlb[x]
+  Winf <- Data@wla[x] * Data@vbLinf[x]^Data@wlb[x]
   age <- 1:Data@MaxAge
   la <- Data@vbLinf[x] * (1 - exp(-Data@vbK[x] * ((age - Data@vbt0[x]))))
   wa <- Data@wla[x] * la^Data@wlb[x]
@@ -167,13 +177,28 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   } else {
     E_hist <- rep(1, length(yind))
   }
+  
+  # Generate priors
+  prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), dots = list())
 
   ny <- length(C_hist)
-  k <- ceiling(a50V)  # get age nearest to 50% vulnerability (ascending limb)
-  k[k > Data@MaxAge/2] <- ceiling(Data@MaxAge/2)  # to stop stupidly high estimates of age at 50% vulnerability
-  Rho <- (wa[k + 2] - Winf)/(wa[k + 1] - Winf)
-  Alpha <- Winf * (1 - Rho)
-  S0 <- exp(-Data@Mort[x])  # get So survival rate
+  if(!is.null(start$k)) {
+    k <- start$k
+  } else {
+    k <- ceiling(a50V)  # get age nearest to 50% vulnerability (ascending limb)
+    k[k > Data@MaxAge/2] <- ceiling(Data@MaxAge/2)  # to stop stupidly high estimates of age at 50% vulnerability
+  }
+  if(!is.null(start$Rho)) {
+    Rho <- start$Rho
+  } else {
+    Rho <- (wa[k + 2] - Winf)/(wa[k + 1] - Winf)
+  }
+  if(!is.null(start$Alpha)) {
+    Alpha <- start$Alpha
+  } else {
+    Alpha <- Winf * (1 - Rho)
+  }
+  M <- Data@Mort[x]
   wk <- wa[k]
 
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
@@ -183,10 +208,11 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
 
   fix_sigma <- condition == "effort" | nsurvey > 1 | fix_sd
   fix_omega <- condition == "catch" | fix_sd
-  data <- list(model = "DD", S0 = S0, Alpha = Alpha, Rho = Rho, ny = ny, k = k,
+  data <- list(model = "DD", Alpha = Alpha, Rho = Rho, ny = ny, k = k,
                wk = wk, C_hist = C_hist, dep = dep, rescale = rescale, I_hist = I_hist, I_units = I_units, I_sd = I_sd,
                E_hist = E_hist, SR_type = SR, condition = condition, I_lambda = LWT,
-               nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), state_space = as.integer(state_space))
+               nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), state_space = as.integer(state_space),
+               use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k)
 
   params <- list()
@@ -200,6 +226,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
         params$transformed_h <- log(start$h[1] - 0.2)
       }
     }
+    if(!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M[1])
     if(!is.null(start$q_effort) && is.numeric(start$q_effort)) params$log_q_effort <- log(start$q_effort[1])
     if(!is.null(start$U_equilibrium) && is.numeric(start$U_equilibrium)) params$U_equilibrium <- start$U_equililbrium
     if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega[1])
@@ -218,6 +245,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
       params$transformed_h <- log(h_start - 0.2)
     }
   }
+  if(is.null(params$log_M)) params$log_M <- log(M)
   if(is.null(params$log_q_effort)) params$log_q_effort <- log(1)
   if(is.null(params$U_equilibrium)) params$U_equilibrium <- ifelse(dep < 1, 0.1, 0)
   if(is.null(params$log_omega)) {
@@ -235,7 +263,8 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
 
   map <- list()
   if(condition == "catch") map$log_q_effort <- factor(NA)
-  if(fix_h) map$transformed_h <- factor(NA)
+  if(fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if(!prior$use_prior[3]) map$log_M <- factor(NA)
   if(dep == 1) map$U_equilibrium <- factor(NA)
   if(fix_omega) map$log_omega <- factor(NA)
   if(fix_sigma) map$log_sigma <- factor(NA)
@@ -293,7 +322,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   }
 
   if(Assessment@conv) {
-    ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec)
+    ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec, report$M)
     report <- c(report, ref_pt[1:3])
 
     Assessment@UMSY <- report$UMSY
@@ -322,15 +351,15 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
 }
 
 
-ref_pt_DD <- function(TMB_data, Arec, Brec) {
-  opt2 <- optimize(yield_fn_DD, interval = c(0, 1), S0 = TMB_data$S0, Alpha = TMB_data$Alpha,
+ref_pt_DD <- function(TMB_data, Arec, Brec, M) {
+  opt2 <- optimize(yield_fn_DD, interval = c(0, 1), M = M, Alpha = TMB_data$Alpha,
                    Rho = TMB_data$Rho, wk = TMB_data$wk, SR = TMB_data$SR_type, Arec = Arec, Brec = Brec)
   UMSY <- opt2$minimum
   MSY <- -1 * opt2$objective
   BMSY <- MSY/UMSY
   
   U_PR <- seq(0, 0.99, 0.01)
-  yield <- lapply(U_PR, yield_fn_DD, S0 = TMB_data$S0, Alpha = TMB_data$Alpha,
+  yield <- lapply(U_PR, yield_fn_DD, M = M, Alpha = TMB_data$Alpha,
                   Rho = TMB_data$Rho, wk = TMB_data$wk, SR = TMB_data$SR_type, 
                   Arec = Arec, Brec = Brec, opt = FALSE)
   SPR <- vapply(yield, getElement, numeric(1), "SPR")
@@ -340,12 +369,13 @@ ref_pt_DD <- function(TMB_data, Arec, Brec) {
               per_recruit = data.frame(U = U_PR, SPR = SPR/SPR[1], YPR = YPR)))
 }
 
-yield_fn_DD <- function(x, S0, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, logit_trans = FALSE) {
+yield_fn_DD <- function(x, M, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, logit_trans = FALSE) {
   if(logit_trans) {
     U <- ilogit(x)
   } else {
     U <- x
   }
+  S0 <- exp(-M)
   SS <- S0 * (1 - U)
   Spr <- (SS * Alpha/(1 - SS) + wk)/(1 - Rho * SS)
   if(SR == "BH") Req <- (Arec * Spr - 1)/(Brec * Spr)

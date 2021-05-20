@@ -351,7 +351,6 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
   
   TMB_report <- Assessment@TMB_report
   TMB_data <- Assessment@obj$env$data
-  Pope <- Assessment@Model == "SCA_Pope"
   
   # Sample rec_devs and obs_error
   set.seed(seed)
@@ -382,7 +381,7 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
   }
   
   B <- N <- R <- Cpred <- matrix(NA_real_, p_sim, p_years)
-  Ipred <- array(c(p_sim, p_years, nsurvey))
+  Ipred <- array(NA_real_, c(p_sim, p_years, nsurvey))
   B[, 1] <- TMB_report$B[length(TMB_report$B)]
   N[, 1] <- TMB_report$N[length(TMB_report$N)]
   R[, 1:TMB_data$k] <- rep(TMB_report$R[(length(TMB_report$R) - TMB_data$k + 1):length(TMB_report$R)], each = p_sim) *
@@ -402,15 +401,15 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
 
     if(constrain == "F") {
       one_ts <- Map(function(x, y, z, ...) cDD_catch_solver(B = x, N = y, R = z, ...), x = B[, y-1], y = N[, y-1], z = R[, y-1],
-                    MoreArgs = list(FM = Ftarget[y-1], Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_data$M))
+                    MoreArgs = list(FM = Ftarget[y-1], Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_report$M))
     } else {
       Fout[, y-1] <- mapply(function(x, y, z, ...) optimize(cDD_catch_solver, c(1e-8, max_F), B = x, N = y, R = z, ...)$minimum,
                             x = B[, y-1], y = N[, y-1], z = R[, y-1],
-                            MoreArgs = list(Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_data$M, TAC = Catch[y-1]))
+                            MoreArgs = list(Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_report$M, TAC = Catch[y-1]))
 
       one_ts <- Map(function(x, y, z, w, ...) cDD_catch_solver(B = x, N = y, R = z, FM = w, ...), x = B[, y-1], y = N[, y-1], z = R[, y-1],
                     w = Fout[, y-1],
-                    MoreArgs = list(Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_data$M))
+                    MoreArgs = list(Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_report$M))
     }
 
     Cpred[, y-1] <- vapply(one_ts, getElement, numeric(1), 1)
@@ -497,7 +496,7 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
 
   if(constrain == "F") {
     Fout <- U <- matrix(pmin(Ftarget, 1 - exp(-max_F)), p_sim, p_years, byrow = TRUE)
-    surv <- (1 - U) * TMB_data$S0
+    surv <- (1 - U) * exp(-TMB_report$M)
   } else {
     Fout <- U <- surv <- matrix(NA, p_sim, p_years)
   }
@@ -509,7 +508,7 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
     }
     if(constrain == "Catch") {
       Fout[,y-1] <- U[, y-1] <- ifelse(Catch[y-1]/B[, y-1] < 1 - exp(-max_F), Catch[y-1]/B[, y-1], 1 - exp(-max_F))
-      surv[, y-1] <- (1 - U[, y-1]) * TMB_data$S0
+      surv[, y-1] <- (1 - U[, y-1]) * exp(-TMB_report$M)
     }
     Cpred[, y-1] <- U[, y-1] * B[, y-1]
     if(Assessment@obj$env$data$condition == "catch") {
