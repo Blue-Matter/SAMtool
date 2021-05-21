@@ -119,6 +119,8 @@ RCM_tiny_comp <- function(x) {
     x_out <- x/sum(x, na.rm = TRUE)
     ind <- is.na(x) | x == 0
     if(any(ind)) x_out[ind] <- 1e-8
+  } else {
+    x_out <- x
   }
   return(x_out)
 }
@@ -169,7 +171,7 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
   } else if(length(LWT$Index) == 1 && nsurvey > 1) {
     LWT$Index <- rep(LWT$Index, nsurvey)
   }
-  if(length(LWT$Index) != max(1, nsurvey)) stop("LWT$Index should be a vector of length ", data$nsurvey, ".")
+  if(length(LWT$Index) != max(1, nsurvey)) stop("LWT$Index should be a vector of length ", nsurvey, ".")
 
   if(is.null(LWT$CAA)) {
     LWT$CAA <- rep(1, nfleet)
@@ -291,14 +293,14 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
                      "There will be indexing errors in your custom parameters (OM@cpars).")
       stop(stmt, call. = FALSE)
     } else {
-      message("OM@nyears was updated to length(", ifelse(grepl("catch", RCMdata@Misc$condition), "Chist", "Ehist"), "): ", data$nyears)
-      OM@nyears <- data$nyears
+      message("OM@nyears was updated to length(", ifelse(grepl("catch", RCMdata@Misc$condition), "Chist", "Ehist"), "): ", RCMdata@Misc$nyears)
+      OM@nyears <- RCMdata@Misc$nyears
     }
   }
   if(!length(OM@CurrentYr)) OM@CurrentYr <- RCMdata@Misc$nyears
   
   # C_sd
-  if(!length(RCMdata@C_sd)) {
+  if(length(RCMdata@C_sd)) {
     if(is.vector(RCMdata@C_sd)) {
       if(length(RCMdata@C_sd) != RCMdata@Misc$nyears) stop("Length of C_sd vector does not equal nyears (", RCMdata@Misc$nyears, ").", call. = FALSE)
       RCMdata@C_sd <- matrix(RCMdata@C_sd, ncol = 1)
@@ -311,7 +313,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   }
 
   # Indices
-  if(!length(RCMdata@Index)) {
+  if(length(RCMdata@Index)) {
     if(is.vector(RCMdata@Index)) {
       if(length(RCMdata@Index) != RCMdata@Misc$nyears) stop("Length of Index vector does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
       RCMdata@Index <- matrix(RCMdata@Index, ncol = 1)
@@ -321,7 +323,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
 
     RCMdata@Misc$nsurvey <- ncol(RCMdata@Index)
     
-    if(!length(RCMdata@I_sd)) {
+    if(length(RCMdata@I_sd)) {
       if(is.vector(RCMdata@I_sd)) {
         if(length(RCMdata@I_sd) != RCMdata@Misc$nyears) stop("Length of I_sd vector does not equal nyears (", RCMdata@Misc$nyears, ").", call. = FALSE)
         RCMdata@I_sd <- matrix(RCMdata@I_sd, ncol = 1)
@@ -343,7 +345,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   message(RCMdata@Misc$nsurvey, " survey(s) detected.")
 
   # Process age comps
-  if(!length(RCMdata@CAA)) {
+  if(length(RCMdata@CAA)) {
 
     if(is.matrix(RCMdata@CAA)) RCMdata@CAA <- array(RCMdata@CAA, c(dim(RCMdata@CAA), 1))
 
@@ -393,7 +395,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   })
 
   # Process length comps
-  if(!length(RCMdata@CAL)) {
+  if(length(RCMdata@CAL)) {
     if(is.matrix(RCMdata@CAL)) RCMdata@CAL <- array(RCMdata@CAL, c(dim(RCMdata@CAL), 1))
 
     if(!length(RCMdata@length_bin)) {
@@ -426,7 +428,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   }
 
   # Process mean size
-  if(!length(RCMdata@MS)) {
+  if(length(RCMdata@MS)) {
     if(!nchar(RCMdata@MS_type)) {
       message("Mean size (RCMdata@MS) found, but not type (RCMdata@MS_type). Assuming it's mean length.")
       RCMdata@MS_type <- "length"
@@ -462,15 +464,17 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   
   if(!length(RCMdata@C_eq_sd)) {
     RCMdata@C_eq_sd <- rep(0.01, RCMdata@Misc$nfleet)
-  } else if(length(RCMdata@C_eq_sd) == 1) RCMdata@C_eq_sd <- rep(RCMdata@C_eq_sd, RCMdata@Misc$nfleet)
+  } else if(length(RCMdata@C_eq_sd) == 1) {
+    RCMdata@C_eq_sd <- rep(RCMdata@C_eq_sd, RCMdata@Misc$nfleet)
+  }
   if(length(RCMdata@C_eq_sd) != RCMdata@Misc$nfleet) stop("C_eq_sd needs to be of length nfleet (", RCMdata@Misc$nfleet, ").", call. = FALSE)
   
-  if(data$condition != "effort" && any(RCMdata@C_eq > 0)) {
+  if(RCMdata@Misc$condition != "effort" && any(RCMdata@C_eq > 0)) {
     message("Equilibrium catch was detected. The corresponding equilibrium F will be estimated.")
   }
 
   if(!length(RCMdata@E_eq)) RCMdata@E_eq <- rep(0, RCMdata@Misc$nfleet)
-  if(data$condition == "effort") {
+  if(RCMdata@Misc$condition == "effort") {
     if(length(RCMdata@E_eq) == 1) RCMdata@E_eq <- rep(RCMdata@E_eq, RCMdata@Misc$nfleet)
     if(length(RCMdata@E_eq) < RCMdata@Misc$nfleet) stop("E_eq needs to be of length nfleet (", RCMdata@Misc$nfleet, ").", call. = FALSE)
     if(any(RCMdata@E_eq > 0)) {
@@ -479,7 +483,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   }
 
   # Process survey age comps
-  if(!length(RCMdata@IAA)) {
+  if(length(RCMdata@IAA)) {
     if(is.matrix(RCMdata@IAA)) RCMdata@IAA <- array(RCMdata@IAA, c(dim(RCMdata@IAA), 1))
     if(dim(RCMdata@IAA)[1] != RCMdata@Misc$nyears) {
       stop("Number of IAA rows (", dim(RCMdata@IAA)[1], ") does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
@@ -516,7 +520,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   }
 
   # Process survey length comps
-  if(!length(RCMdata@IAL)) {
+  if(length(RCMdata@IAL)) {
     if(is.matrix(RCMdata@IAL)) RCMdata@IAL <- array(RCMdata@IAL, c(dim(RCMdata@IAL), 1))
 
     if(!length(RCMdata@length_bin)) {

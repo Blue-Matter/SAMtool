@@ -13,6 +13,7 @@ DD_TMB(
   SR = c("BH", "Ricker"),
   rescale = "mean1",
   start = NULL,
+  prior = list(),
   fix_h = TRUE,
   dep = 1,
   LWT = NULL,
@@ -31,6 +32,7 @@ DD_SS(
   SR = c("BH", "Ricker"),
   rescale = "mean1",
   start = NULL,
+  prior = list(),
   fix_h = TRUE,
   fix_sd = FALSE,
   fix_tau = TRUE,
@@ -65,7 +67,14 @@ Output is re-converted back to original units.}
 
 \item{start}{Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.}
 
-\item{fix_h}{Logical, whether to fix steepness to value in \code{Data@steep} in the assessment model.}
+\item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions 
+for those parameters. R0 and M priors lognormal (mean in normal space, SD in lognormal space). 
+Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors. 
+For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). 
+For all others, provide a length-2 vector for the mean and SD. See vignette for full description.}
+
+\item{fix_h}{Logical, whether to fix steepness to value in \code{Data@steep} in the assessment model.
+Automatically false if a prior is used.}
 
 \item{dep}{The initial depletion in the first year of the model. A tight prior is placed on the model objective function
 to estimate the equilibrium exploitation rate that corresponds to the initial depletion. Due to this tight prior, this F
@@ -116,6 +125,10 @@ For \code{start} (optional), a named list of starting values of estimates can be
 \itemize{
 \item \code{R0} Unfished recruitment. Otherwise, Data@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
 \item \code{h} Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.
+\item \code{M} Natural mortality. Otherwise, Data@Mort[x] is used.
+\item \code{k} Age of knife-edge maturity. By default, the age of 50\% maturity calculated from the slots in the Data object.
+\item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
+\item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
 \item \code{U_equilibrium} Equilibrium harvest rate leading into first year of the model (to determine initial depletion). By default, 0.
 \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@CV_Cat[x].

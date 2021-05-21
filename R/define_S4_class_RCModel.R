@@ -402,7 +402,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                           label = "log-Recruitment deviations", conv_check = TRUE),
                              rmd_N(), N_bubble, CAA_bubble, CAL_bubble)
 
-              nll <- RCM_get_likelihoods(report, RCMdata@LWT, f_name, s_name)
+              nll <- RCM_get_likelihoods(report, RCMdata@Misc$LWT, f_name, s_name)
               
               nll_table <- c("### Likelihood components\n",
                              "#### Summary\n",
@@ -587,7 +587,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
                        rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), SSB_MSY, rmd_log_rec_dev())
 
   #### Likelihoods
-  nll <- Map(RCM_get_likelihoods, x = report_list, LWT = lapply(dots, function(xx) xx@RCMdata@Misc$LWT),
+  nll <- Map(RCM_get_likelihoods, x = report_list, LWT = lapply(dots, function(xx) xx@data@Misc$LWT),
              MoreArgs = list(f_name = f_name, s_name = s_name))
 
   summary_nll <- vapply(nll, function(xx) xx[[1]] %>% as.matrix(), numeric(6)) %>%

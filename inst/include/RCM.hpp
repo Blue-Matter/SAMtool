@@ -71,8 +71,6 @@ Type RCM(objective_function<Type> *obj) {
   DATA_SCALAR(rescale);   // R0 rescaler
   DATA_INTEGER(ageM);     // Age of maturity used for averaging E0 and EPR0
 
-  DATA_IVECTOR(est_early_rec_dev); // Indicates years in which log_early_rec_dev are estimated. Then, lognormal bias correction estimates are added..
-  DATA_IVECTOR(est_rec_dev); // Indicates years in which log_rec_dev are estimated.
   DATA_IVECTOR(yind_F);   // When condition = "catch", the year in F's are estimated and all other F parameters are deviations from this F
   DATA_INTEGER(nit_F);    // When condition = "catch2", the number of iterations for Newton-Raphson method to solve for F
   DATA_INTEGER(plusgroup) // Boolean, whether the maximum age in the plusgroup is modeled.
@@ -81,6 +79,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see RCM_prior fn)
   
   DATA_INTEGER(nll_gr);    // Whether to ADREPORT annual likelihoods
+  DATA_IVECTOR(est_early_rec_dev); // Indicates years in which log_early_rec_dev are estimated. Then, lognormal bias correction estimates are added..
+  DATA_IVECTOR(est_rec_dev); // Indicates years in which log_rec_dev are estimated.
 
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness

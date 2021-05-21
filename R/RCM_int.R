@@ -1,11 +1,11 @@
 
-RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
+RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = "B", LWT = list(),
                     comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                     drop_highF = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
 
-  dots <- list(...) # can be vul_par, s_vul_par, log_rec_dev, log_early_rec_dev, map_vul_par, map_s_vul_par, map_log_rec_dev, map_log_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
+  dots <- list(...) # can be vul_par, ivul_par, log_rec_dev, log_early_rec_dev, map_vul_par, map_ivul_par, map_log_rec_dev, map_log_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
   if(!is.null(dots$maxF)) max_F <- dots$maxF
   if(length(ESS) == 1) ESS <- rep(ESS, 2)
 
@@ -166,10 +166,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   message("Range of unfished age-0 recruitment (OM@cpars$R0): ", paste(round(range(OM@cpars$R0), 2), collapse = " - "))
 
   ### Depletion and init D - init D is only reported, OM setup for initD by adjusting rec devs
-  if(any(RCMdata@C_eq > 0) || any(RCMdata@E_eq > 0)) {
-    initD <- vapply(res, function(x) x$E[1]/x$E0_SR, numeric(1))
-    message("Estimated range in initial spawning depletion: ", paste(round(range(initD), 2), collapse = " - "))
-  }
+  initD <- vapply(res, function(x) x$E[1]/x$E0_SR, numeric(1))
+  message("Range of initial spawning depletion: ", paste(round(range(initD), 2), collapse = " - "))
 
   OM@cpars$D <- vapply(res, function(x) x$E[length(x$E)-1]/x$E0_SR, numeric(1))
   message("Range of spawning depletion (OM@cpars$D): ", paste(round(range(OM@cpars$D), 2), collapse = " - "), "\n")
@@ -304,10 +302,10 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   E <- do.call(rbind, lapply(res[keep], getElement, "E"))
   N <- array(sapply(res[keep], getElement, "N"), c(nyears+1, maxage+1, sum(keep)))
   CAA_pred <- array(sapply(res[keep], getElement, "CAApred"), c(nyears, maxage+1, nfleet, sum(keep)))
-  CAL_pred <- array(sapply(res[keep], getElement, "CALpred"), c(nyears, length(data$length_bin), nfleet, sum(keep)))
+  CAL_pred <- array(sapply(res[keep], getElement, "CALpred"), c(nyears, length(RCMdata@length_bin), nfleet, sum(keep)))
 
   RCMdata@Misc$prior <- prior
-  output <- new("RCModel", OM = SubCpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
+  output <- new("RCModel", OM = MSEtool::SubCpars(OM, keep), SSB = E, NAA = aperm(N, c(3, 1, 2)), CAA = aperm(CAA_pred, c(4, 1:3)),
                 CAL = aperm(CAL_pred, c(4, 1:3)), mean_fit = mean_fit_output, conv = conv[keep], data = RCMdata, Misc = res[keep])
   
   #if(any(!keep)) {
@@ -330,11 +328,11 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       if(nfleet > 1) message("Annual catch CV is a weighted average by fleet-specific catch.")
     }
     if(nfleet == 1) {
-      if(sum(RCMdata@CAA, na.rm = TRUE) > 0) {
+      if(sum(RCMdata@CAA, na.rm = TRUE)) {
         real_Data@CAA <- aperm(RCMdata@CAA, c(3, 1, 2))
         message("Age comps added to OM@cpars$Data@CAA (nfleet = 1).")
       }
-      if(sum(RCMdata@CAL, na.rm = TRUE) > 0) {
+      if(sum(RCMdata@CAL, na.rm = TRUE)) {
         real_Data@CAL <- aperm(RCMdata@CAL, c(3, 1, 2))
         real_Data@CAL_mids <- RCMdata@length_bin
         real_Data@CAL_bins <- c(RCMdata@length_bin - 0.5 * bw, max(RCMdata@length_bin) + 0.5 * bw)
@@ -390,12 +388,12 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   
   comp_like <- match.arg(comp_like)
   
-  SR_type <- unique(StockPars$SRrel)
+  SR_type <- ifelse(StockPars$SRrel[x] == 1, "BH", "Ricker")
 
-  nyears <- data$nyears
-  nfleet <- data$nfleet
-  n_age <- dim(data$CAA)[2]
-  nsurvey <- ncol(data$Index)
+  nyears <- RCMdata@Misc$nyears
+  nfleet <- RCMdata@Misc$nfleet
+  n_age <- dim(RCMdata@CAA)[2]
+  nsurvey <- ncol(RCMdata@Index)
   
   # Convert to proportions?
   RCMdata@CAA <- apply(RCMdata@CAA, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
@@ -406,11 +404,11 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   
   #Backwards compatibility
   if(!is.null(dots$ESS) && length(dots$ESS) == 2) {
-    RCMdata@CAA_ESS <- pmax(RCMdata@CAA_ESS, dots$ESS[1])
-    RCMdata@CAL_ESS <- pmax(RCMdata@CAL_ESS, dots$ESS[2])
+    RCMdata@CAA_ESS <- pmin(RCMdata@CAA_ESS, dots$ESS[1])
+    RCMdata@CAL_ESS <- pmin(RCMdata@CAL_ESS, dots$ESS[2])
     
-    RCMdata@IAA_ESS <- pmax(RCMdata@IAA_ESS, dots$ESS[1])
-    RCMdata@IAL_ESS <- pmax(RCMdata@IAL_ESS, dots$ESS[1])
+    RCMdata@IAA_ESS <- pmin(RCMdata@IAA_ESS, dots$ESS[1])
+    RCMdata@IAL_ESS <- pmin(RCMdata@IAL_ESS, dots$ESS[1])
   }
 
   LWT_fleet <- cbind(LWT$Chist, LWT$C_eq, LWT$CAA, LWT$CAL, LWT$MS)
@@ -454,7 +452,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
     RCMdata@I_sd <- matrix(sdconv(1, ObsPars$Isd[x]), nyears, nsurvey)
   }
 
-  if(!length(RCMdata@Chist) && any(RCMdata@Chist > 0, na.rm = TRUE)) {
+  if(length(RCMdata@Chist) && any(RCMdata@Chist > 0, na.rm = TRUE)) {
     if(is.null(dots$rescale)) {
       rescale <- 1/mean(RCMdata@Chist, na.rm = TRUE)
     } else {
@@ -470,7 +468,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
     data$Ehist <- matrix(FleetPars$Find[x, ], nyears, nfleet)
   }
 
-  if(!length(RCMdata@Ehist) && any(RCMdata@Ehist > 0, na.rm = TRUE)) {
+  if(length(RCMdata@Ehist) && any(RCMdata@Ehist > 0, na.rm = TRUE)) {
     rescale_effort <- 1/mean(data$Ehist, na.rm = TRUE)
     E_hist <- RCMdata@Ehist * rescale_effort
     E_eq <- RCMdata@E_eq * rescale_effort
@@ -517,7 +515,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
 
   if(is.null(dots$vul_par)) {
     if(any(selectivity == -2)) stop("Some (fleet) selectivity specified to be free parameters. Provide vul_par matrix to RCM.")
-    vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, data$nsel_block)
+    vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, RCMdata@Misc$nsel_block)
   } else {
     vul_par <- dots$vul_par
   }
@@ -530,18 +528,22 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
 
   if(is.null(dots$map_vul_par)) {
     if(any(selectivity == -2)) stop("Some (fleet) selectivity specified to be free parameters. Provide map_vul_par matrix to RCM.")
-    map_vul_par <- matrix(0, 3, data$nsel_block)
+    map_vul_par <- matrix(0, 3, RCMdata@Misc$nsel_block)
     map_vul_par[3, selectivity == -1] <- NA # Fix third parameter for logistic sel
     if(!is.null(dots$fix_dome) && dots$fix_dome) map_vul_par[3, selectivity == 0] <- NA # Fix dome
 
     for(ff in 1:nfleet) {
       if(all(RCMdata@CAA[,,ff] <= 0, na.rm = TRUE) && all(RCMdata@CAL[,,ff] <= 0, na.rm = TRUE)) {
-        map_vul_par[, unique(data$sel_block[, ff])] <- NA # Fix sel if no comp data
+        map_vul_par[, unique(RCMdata@sel_block[, ff])] <- NA # Fix sel if no comp data
       }
     }
     if(any(!is.na(map_vul_par))) map_vul_par[!is.na(map_vul_par)] <- 1:sum(!is.na(map_vul_par))
   } else {
     map_vul_par <- dots$map_vul_par
+  }
+  if(any(selectivity == -2)) {
+    test <- dots$vul_par[, selectivity == -2] %in% c(0, 1) & is.na(map_vul_par[, selectivity == -2])
+    vul_par[, selectivity == -2][test] <- logit(dots$vul_par[, selectivity == -2][test], soft_bounds = FALSE)
   }
 
   # ivul_par, and map
@@ -574,6 +576,10 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   } else {
     map_ivul_par <- dots$map_ivul_par
   }
+  if(any(s_selectivity == -2)) {
+    test <- dots$ivul_par[, s_selectivity == -2] %in% c(0, 1) & is.na(map_ivul_par[, s_selectivity == -2])
+    ivul_par[, s_selectivity == -2][test] <- logit(dots$ivul_par[, s_selectivity == -2][test], soft_bounds = FALSE)
+  }
   
   if(!is.null(dots$log_early_rec_dev)) {
     if(length(dots$log_early_rec_dev) != n_age - 1) stop("early_rec_dev is not a vector of length n_age - 1")
@@ -583,7 +589,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   }
   
   if(!is.null(dots$log_rec_dev)) {
-    if(length(dots$log_rec_dev) != nyears) stop("early_rec_dev is not a vector of length nyears")
+    if(length(dots$log_rec_dev) != nyears) stop("log_rec_dev is not a vector of length nyears")
     log_rec_dev <- dots$log_rec_dev
   } else {
     log_rec_dev <- rep(0, nyears)
@@ -594,7 +600,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
                      vul_par = vul_par, ivul_par = ivul_par,
                      log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
                      log_F_equilibrium = rep(log(0.05), nfleet),
-                     log_CV_msize = log(data$MS_cv), log_tau = log(StockPars$procsd[x]),
+                     log_CV_msize = log(RCMdata@MS_cv), log_tau = log(StockPars$procsd[x]),
                      log_early_rec_dev = log_early_rec_dev, log_rec_dev = log_rec_dev)
   if(RCMdata@Misc$condition == "catch") {
     TMB_params$log_F_dev[TMB_data$yind_F + 1, 1:nfleet] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
@@ -674,7 +680,7 @@ par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, RCMdata, dots) 
 
   if(RCMdata@Misc$nfleet == 1 && !any(RCMdata@CAL > 0, na.rm = TRUE) && !any(RCMdata@CAA > 0, na.rm = TRUE)) {
     FleetPars_subset <- FleetPars[c("L5_y", "LFS_y", "Vmaxlen_y")]
-    FleetPars_subset <- lapply(FleetPars_subset, function(x) x[, data$nyears])
+    FleetPars_subset <- lapply(FleetPars_subset, function(x) x[, RCMdata@Misc$nyears])
     F_test_sel <- vapply(FleetPars_subset, run_test, logical(1))
   } else F_test_sel <- NULL
 
@@ -795,11 +801,12 @@ process_AddIndType <- function(s_sel, nfleet) {
     return(ifelse(nfleet > 1, 1, 3))
   }
 }
+
 process_AddIndV <- function(sur, Misc, s_sel, n_age, nfleet, nyears) { # Return a matrix of nsim x nages
   if(s_sel[sur] < -2 || (s_sel[sur] == 1 & nfleet == 1)) { # -4 = B, -3 = SSB, single-fleet VB
     out <- matrix(1, length(Misc), n_age)
   } else { # custom sel or multi-fleet
-    out <- do.call(rbind, lapply(Misc, function(x) x$s_vul[nyears, , sur]))
+    out <- do.call(rbind, lapply(Misc, function(x) x$ivul[nyears, , sur]))
   }
   return(out)
 }
@@ -958,15 +965,15 @@ profile_likelihood_RCM <- function(x, ...) {
     new_args$data$IAL_n <- cbind(new_args$data$IAL_n, rep(0, n_y))
     new_args$data$nsurvey <- new_args$data$nsurvey + 1
     
-    new_args$data$s_vul_type <- c(new_args$data$s_vul_type, -3)
+    new_args$data$ivul_type <- c(new_args$dataivul_type, -3)
     new_args$data$abs_I <- c(new_args$data$abs_I, 0)
     new_args$data$I_units <- c(new_args$data$I_units, 1) 
     new_args$data$LWT_survey <- rbind(new_args$data$LWT_survey, rep(1, 3))
     new_args$data$prior_dist <- rbind(new_args$data$prior_dist, c(0, 25))
     
-    new_args$params$s_vul_par <- cbind(new_args$params$s_vul_par, rep(0, nrow(new_args$params$s_vul_par)))
-    if(!is.null(new_args$map$s_vul_par)) {
-      new_args$map$s_vul_par <- factor(c(new_args$map$s_vul_par, rep(NA, nrow(new_args$params$s_vul_par))))
+    new_args$params$ivul_par <- cbind(new_args$params$ivul_par, rep(0, nrow(new_args$params$ivul_par)))
+    if(!is.null(new_args$map$ivul_par)) {
+      new_args$map$ivul_par <- factor(c(new_args$map$ivul_par, rep(NA, nrow(new_args$params$ivul_par))))
     }
     
     LWT$Index <- c(LWT$Index, 1)

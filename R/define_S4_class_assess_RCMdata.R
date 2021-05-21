@@ -216,7 +216,7 @@ if(getRversion() >= "2.15.1") {
 #' @slot I_sd A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
 #' If not provided, this function will use values from \code{OM@@Iobs}.
 #' @slot IAA Index age composition data, an array of dimension nyears, maxage+1, nsurvey.
-#' @slot IAL_ESS Annual sample size (for the multinomial distribution) of the index age comps. 
+#' @slot IAA_ESS Annual sample size (for the multinomial distribution) of the index age comps. 
 #' A vector of length OM@@nyears. If there are multiple indices: a matrix of OM@@nyears rows and nsurvey columns.
 #' @slot IAL Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.
 #' @slot IAL_ESS Annual sample size (for the multinomial distribution) of the index length comps. 
@@ -247,7 +247,7 @@ RCMdata <- setClass("RCMdata", slots = c(Chist = "vectormatrix", C_sd = "vectorm
                                          CAL = "array", CAL_ESS = "vectormatrix", length_bin = "vector", 
                                          MS = "vectormatrix", MS_type = "character", MS_cv = "vectormatrix",
                                          Index = "vectormatrix", I_sd = "vectormatrix", 
-                                         IAA = "array", IAL = "array", 
+                                         IAA = "array", IAA_ESS = "vectormatrix", IAL = "array", IAL_ESS = "vectormatrix",
                                          C_eq = "vector", C_eq_sd = "vector", E_eq = "vector",
                                          abs_I = "vector", I_units = "vector", age_error = "matrix", sel_block = "matrix",
                                          Misc = "list"))

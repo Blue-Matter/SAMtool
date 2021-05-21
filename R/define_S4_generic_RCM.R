@@ -137,17 +137,19 @@
 #' \itemize{
 #' \item vul_par: A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
 #' to LFS (length of full selectivity), L5 (length of 5 percent selectivity), and Vmaxlen (selectivity at length Linf). By default,
-#' the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage rows where
+#' the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage+1 rows where
 #' the row specifies the selectivity at age. See the \href{../doc/RCM_sel.html}{selectivity} vignette for more information.
-#' \item s_vul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. These values are only
-#' used if \code{s_selectivity = "est"} for the corresponding fleet. Otherwise, placeholders should be used to complete the matrix.
+#' \item ivul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. Values in the column are ignored
+#' if \code{s_selectivity} is mapped to a fishing fleet (add NA placeholders in that case). 
+#' If any \code{s_selectivity = "free"}, then this matrix needs to be of maxage+1 rows where
+#' the row specifies the selectivity at age. 
 #' \item log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.
 #' \item log_early_rec_dev: A numeric vector of length OM@@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.
 #' \item map_vul_par: An integer matrix of the same dimension as vul_par. This is the 'map' argument for vul_par in TMB, see \link[TMB]{MakeADFun}, which indicates whether selectivity parameters are fixed
 #' or estimated. If an entry is \code{NA}, the corresponding parameter is fixed in the model to the starting
 #' value. Otherwise, an integer for each independent parameter. By default, selectivity is fixed if there are no age or length composition for that fleet
 #' or survey, otherwise estimated. Unused cells in the vul_par matrix should be given NA in the map matrix.
-#' \item map_s_vul_par: The map argument for the survey selectivity parameters (same dimension as s_vul_par). Placeholder parameters should have a map value of NA.
+#' \item map_ivul_par: The map argument for the survey selectivity parameters (same dimension as ivul_par). Placeholder parameters should have a map value of NA.
 #' \item map_log_early_rec_dev: A vector of length OM@@maxage that indexes which recruitment deviates for the cohorts in the first year of the model are fixed (using NA) or estimated (a separate integer).
 #' By default, no deviates are estimated (all are NA).
 #' \item map_log_rec_dev: A vector of length OM@@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
@@ -182,7 +184,7 @@ setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
                    comp_like = c("multinomial", "lognormal"), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
-            RCM_int(OM = OM, data = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
+            RCM_int(OM = OM, RCMdata = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
                     comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
                     drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, ...)
           })
@@ -195,7 +197,7 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
             
-            .Deprecated(new = "RCMdata", msg = "Use RCMdata object to input data instead of a list")
+            .Deprecated(msg = "Using a list of input data to RCM is now deprecated. Use an RCMdata object, i.e., new(\"RCMdata\")")
             
             dataS4 <- new("RCMdata")
             
@@ -223,7 +225,7 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
             if(!is.null(data$age_error)) dataS4@age_error <- data$age_error
             if(!is.null(data$sel_block)) dataS4@sel_block <- data$sel_block
             
-            RCM_int(OM = OM, data = dataS4, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
+            RCM_int(OM = OM, RCMdata = dataS4, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
                     comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
                     drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, ...)
           })
@@ -275,8 +277,8 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
               dataS4@I_sd <- Ind$I_sd
 
               if(any(!is.na(Ind$V))) {
-                extra_args$s_vul_par <- Ind$V
-                extra_args$map_s_vul_par <- array(NA, dim = dim(Ind$V))
+                extra_args$ivul_par <- Ind$V
+                extra_args$map_ivul_par <- array(NA, dim = dim(Ind$V))
               }
               dataS4@I_units <- Ind$I_units
             }
@@ -298,10 +300,10 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             dataS4@E_eq <- extra_args$E_eq
 
             ####### Run RCM
-            output <- RCM_int(OM = OM, data = dataS4, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
+            output <- RCM_int(OM = OM, RCMdata = dataS4, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
                               comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
                               drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control,
-                              OMeff = extra_args$OMeff, s_vul_par = extra_args$s_vul_par, map_s_vul_par = extra_args$map_s_vul_par, ...)
+                              OMeff = extra_args$OMeff, ivul_par = extra_args$ivul_par, map_ivul_par = extra_args$map_ivul_par, ...)
             
             ####### Re-assign index slots from AddInd to their original places
             if(any(Ind$slotname != "AddInd")) {

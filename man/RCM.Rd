@@ -129,6 +129,7 @@ unfished recruitment (R0), historical fishing effort, and recruitment deviations
 provided by the user and fitting a statistical catch-at-age model (with the predicted catch equal to the observed catch).
 Alternatively one can do a single model fit and sample the covariance matrix to generate an operating model with uncertainty based on the model fit.
 Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.
+\code{check_RCMdata} evaluates whether the inputs in the S4 RCMdata object are correctly formatted.
 }
 \details{
 Fleet selectivity is fixed to values sampled from \code{OM} if no age or length compositions are provided.
@@ -146,6 +147,12 @@ The easiest way to turn off time-varying growth/M is by setting: \code{OM@Msd <-
 To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 index but the data won't enter the likelihood. See section on likelihood weights.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{RCMdata}}{An \linkS4class{RCMdata} object.}
+}}
+
 \section{Vignette}{
 
 Three vignettes are available for the RCM:
@@ -226,17 +233,19 @@ For \code{RCM}, additional arguments can be passed to the model via \code{...}:
 \itemize{
 \item vul_par: A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
 to LFS (length of full selectivity), L5 (length of 5 percent selectivity), and Vmaxlen (selectivity at length Linf). By default,
-the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage rows where
+the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage+1 rows where
 the row specifies the selectivity at age. See the \href{../doc/RCM_sel.html}{selectivity} vignette for more information.
-\item s_vul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. These values are only
-used if \code{s_selectivity = "est"} for the corresponding fleet. Otherwise, placeholders should be used to complete the matrix.
+\item ivul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. Values in the column are ignored
+if \code{s_selectivity} is mapped to a fishing fleet (add NA placeholders in that case). 
+If any \code{s_selectivity = "free"}, then this matrix needs to be of maxage+1 rows where
+the row specifies the selectivity at age. 
 \item log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.
 \item log_early_rec_dev: A numeric vector of length OM@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.
 \item map_vul_par: An integer matrix of the same dimension as vul_par. This is the 'map' argument for vul_par in TMB, see \link[TMB]{MakeADFun}, which indicates whether selectivity parameters are fixed
 or estimated. If an entry is \code{NA}, the corresponding parameter is fixed in the model to the starting
 value. Otherwise, an integer for each independent parameter. By default, selectivity is fixed if there are no age or length composition for that fleet
 or survey, otherwise estimated. Unused cells in the vul_par matrix should be given NA in the map matrix.
-\item map_s_vul_par: The map argument for the survey selectivity parameters (same dimension as s_vul_par). Placeholder parameters should have a map value of NA.
+\item map_ivul_par: The map argument for the survey selectivity parameters (same dimension as ivul_par). Placeholder parameters should have a map value of NA.
 \item map_log_early_rec_dev: A vector of length OM@maxage that indexes which recruitment deviates for the cohorts in the first year of the model are fixed (using NA) or estimated (a separate integer).
 By default, no deviates are estimated (all are NA).
 \item map_log_rec_dev: A vector of length OM@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).

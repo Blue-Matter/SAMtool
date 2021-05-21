@@ -49,7 +49,7 @@ If not provided, this function will use values from \code{OM@Iobs}.}
 
 \item{\code{IAA}}{Index age composition data, an array of dimension nyears, maxage+1, nsurvey.}
 
-\item{\code{IAL_ESS}}{Annual sample size (for the multinomial distribution) of the index age comps. 
+\item{\code{IAA_ESS}}{Annual sample size (for the multinomial distribution) of the index age comps. 
 A vector of length OM@nyears. If there are multiple indices: a matrix of OM@nyears rows and nsurvey columns.}
 
 \item{\code{IAL}}{Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.}
