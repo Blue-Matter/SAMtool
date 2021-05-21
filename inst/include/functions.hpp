@@ -207,8 +207,8 @@ Type calc_prior(matrix<int> use_prior, matrix<Type> prior_dist, Type R0, Type h,
   if(use_prior(2)) { // Prior for constant M - normal on log_M
     prior += dnorm_(log_M, prior_dist(2,0), prior_dist(2,1), true);
   }
-  for(int i=3;i<use_prior.size();i++) { // Prior for q - normal
-    if(use_prior(i)) prior += dnorm_(q(i-3), prior_dist(i,0), prior_dist(i,1), true);
+  for(int i=3;i<use_prior.size();i++) { // Prior for q - normal on log(q)
+    if(use_prior(i)) prior += dnorm_(log(q(i-3)), prior_dist(i,0), prior_dist(i,1), true);
   }
   return prior;
 }

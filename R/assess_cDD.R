@@ -16,11 +16,10 @@
 #' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
-#' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions 
-#' for those parameters. R0 and M priors lognormal (mean in normal space, SD in lognormal space). 
-#' Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors. 
-#' For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). 
-#' For all others, provide a length-2 vector for the mean and SD. See vignette for full description.
+#' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
+#' lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
+#' For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors. For all others, provide a length-2 vector for the mean and SD.
+#' See vignette for full description.
 #' @param fix_h Logical, whether to fix steepness to value in \code{Data@@steep} in the assessment model.
 #' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
 #' sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Ind}.

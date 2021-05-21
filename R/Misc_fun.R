@@ -336,7 +336,6 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
     pr_matrix[3, ] <- c(log(prior$M[1]), prior$M[2])
   }
   if(!no_index && !is.null(prior$q)) {
-    use_prior[4:(4+nsurvey-1)] <- 1L
     if(msg) message("Prior for q found.")
     if(nsurvey == 1) {
       if(is.matrix(prior$q)) {
@@ -344,11 +343,14 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
       } else {
         pr_matrix[4, ] <- prior$q
       }
+      use_prior[4] <- !is.na(pr_matrix[4, 1])
     } else if(is.matrix(prior$q) && nrow(prior$q) == nsurvey) {
       pr_matrix[4:(4+nsurvey-1), ] <- prior$q[1:nsurvey, ]
+      use_prior[4:(4+nsurvey-1)] <- !is.na(pr_matrix[4:(4+nsurvey-1), 1])
     } else {
       stop("prior$q should be a matrix of ", nsurvey, "rows and 2 columns.")
     }
+    prior$q[, 1] <- log(prior$q[, 1])
   }
   return(list(use_prior = use_prior, pr_matrix = pr_matrix))
 }
