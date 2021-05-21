@@ -64,7 +64,7 @@ Type RCM(objective_function<Type> *obj) {
 
   DATA_STRING(SR_type);   // String indicating whether Beverton-Holt or Ricker stock-recruit is used
   DATA_MATRIX(LWT_fleet); // LIkelihood weights for catch, C_eq, CAA, CAL, MS
-  DATA_MATRIX(LWT_survey); // Likelihood weights for the survey data
+  DATA_MATRIX(LWT_index); // Likelihood weights for the indices data
   DATA_STRING(comp_like); // Whether to use "multinomial" or "lognormal" distribution for age/lengthc comps
 
   DATA_SCALAR(max_F);     // Maximum F in the model
@@ -348,31 +348,31 @@ Type RCM(objective_function<Type> *obj) {
   prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
   
   array<Type> nll_fleet(n_y,nfleet,5);
-  array<Type> nll_survey(n_y,nsurvey,3);
+  array<Type> nll_index(n_y,nsurvey,3);
   Type nll_log_rec_dev = 0;
 
   nll_fleet.setZero();
-  nll_survey.setZero();
+  nll_index.setZero();
 
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
-      if(LWT_survey(sur,0) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
-        nll_survey(y,sur,0) -= LWT_survey(sur,0) * dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
+      if(LWT_index(sur,0) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
+        nll_index(y,sur,0) -= LWT_index(sur,0) * dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
       }
       
-      if(LWT_survey(sur,1) > 0 && !R_IsNA(asDouble(IAA_n(y,sur))) && IAA_n(y,sur) > 0) {
+      if(LWT_index(sur,1) > 0 && !R_IsNA(asDouble(IAA_n(y,sur))) && IAA_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_multinom(IAA_hist, IAApred, IN, IAA_n, y, n_age, sur);
+          nll_index(y,sur,1) -= LWT_index(sur,1) * comp_multinom(IAA_hist, IAApred, IN, IAA_n, y, n_age, sur);
         } else {
-          nll_survey(y,sur,1) -= LWT_survey(sur,1) * comp_lognorm(IAA_hist, IAApred, IN, y, n_age, sur);
+          nll_index(y,sur,1) -= LWT_index(sur,1) * comp_lognorm(IAA_hist, IAApred, IN, y, n_age, sur);
         }
       }
       
-      if(LWT_survey(sur,2) > 0 && !R_IsNA(asDouble(IAL_n(y,sur))) && IAL_n(y,sur) > 0) {
+      if(LWT_index(sur,2) > 0 && !R_IsNA(asDouble(IAL_n(y,sur))) && IAL_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
-          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_multinom(IAL_hist, IALpred, IN, IAL_n, y, nlbin, sur);
+          nll_index(y,sur,2) -= LWT_index(sur,2) * comp_multinom(IAL_hist, IALpred, IN, IAL_n, y, nlbin, sur);
         } else {
-          nll_survey(y,sur,2) -= LWT_survey(sur,2) * comp_lognorm(IAL_hist, IALpred, IN, y, nlbin, sur);
+          nll_index(y,sur,2) -= LWT_index(sur,2) * comp_lognorm(IAL_hist, IALpred, IN, y, nlbin, sur);
         }
       }
     }
@@ -426,7 +426,7 @@ Type RCM(objective_function<Type> *obj) {
     if(est_early_rec_dev(a)) nll_log_rec_dev -= dnorm_(log_early_rec_dev(a), Type(0), tau, true);
   }
 
-  Type nll = nll_fleet.sum() + nll_survey.sum();
+  Type nll = nll_fleet.sum() + nll_index.sum();
   nll += nll_log_rec_dev + penalty + prior;
 
   if(CppAD::Variable(R0x)) ADREPORT(R0);
@@ -437,7 +437,7 @@ Type RCM(objective_function<Type> *obj) {
   }
   if(CppAD::Variable(log_tau)) ADREPORT(tau);
   if(condition == "effort") ADREPORT(q_effort);
-  if(nll_survey.col(0).sum() != 0) ADREPORT(q);
+  if(nll_index.col(0).sum() != 0) ADREPORT(q);
 
   REPORT(R0x);
   REPORT(transformed_h);
@@ -473,7 +473,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(EPR0_SR);
   REPORT(CR_SR);
 
-  if(nll_fleet.col(3).sum() != 0 || nll_survey.col(2).sum() != 0 || ((nll_fleet.col(4).sum() != 0) & (msize_type == "length"))) REPORT(ALK);
+  if(nll_fleet.col(3).sum() != 0 || nll_index.col(2).sum() != 0 || ((nll_fleet.col(4).sum() != 0) & (msize_type == "length"))) REPORT(ALK);
   REPORT(N);
   REPORT(CAApred);
   REPORT(CALpred);
@@ -493,10 +493,10 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(R_eq);
 
   REPORT(C_eq_pred);
-  if(nll_survey.col(0).sum() != 0) REPORT(q);
+  if(nll_index.col(0).sum() != 0) REPORT(q);
 
   REPORT(nll_fleet);
-  REPORT(nll_survey);
+  REPORT(nll_index);
   REPORT(nll_log_rec_dev);
 
   REPORT(nll);
@@ -508,7 +508,7 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(IAAtrue);
   }
 
-  if(nll_survey.sum() != 0) {
+  if(nll_index.sum() != 0) {
     REPORT(ivul_par);
     REPORT(IAApred);
     REPORT(IALpred);
@@ -520,7 +520,7 @@ Type RCM(objective_function<Type> *obj) {
   
   if(nll_gr) {
     ADREPORT(nll_fleet);
-    ADREPORT(nll_survey);
+    ADREPORT(nll_index);
   }
 
   return nll;

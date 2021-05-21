@@ -134,12 +134,12 @@ int_s_sel <- function(s_selectivity, nfleet = 1) {
   s_sel[s_selectivity == "dome"] <- 0
 
   if(any(s_sel > nfleet, na.rm = TRUE)) {
-    stop(paste("There are undefined fishing fleets in s_selectivity (for surveys). There are only", nfleet, "fleets."),
+    stop(paste("There are undefined fishing fleets in s_selectivity (for indices). There are only", nfleet, "fleets."),
          call. = FALSE)
   }
 
   if(any(is.na(s_sel))) {
-    stop("Character entries for s_selectivity (for surveys) must be either: \"B\", \"SSB\", \"logistic\", \"dome\", or \"free\"", call. = FALSE)
+    stop("Character entries for s_selectivity (for indices) must be either: \"B\", \"SSB\", \"logistic\", \"dome\", or \"free\"", call. = FALSE)
   }
 
   return(s_sel)

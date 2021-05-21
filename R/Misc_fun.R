@@ -305,8 +305,8 @@ dev_AC <- function(n, mu = 1, stdev, AC, seed, chain_start) {
 make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # log_R0, log_M, h, q
   if(length(prior) == 0 && !is.null(dots$priors)) prior <- dots$priors
   
-  no_survey <- nsurvey == 0
-  if(no_survey) nsurvey <- 1 # Use only on next two lines
+  no_index <- nsurvey == 0
+  if(no_index) nsurvey <- 1 # Use only on next two lines
   use_prior <- rep(0L, nsurvey + 3)
   pr_matrix <- matrix(NA_real_, nsurvey + 3, 2) %>% 
     structure(dimnames = list(c("log_R0", "h", "log_M", paste0("q_", 1:nsurvey)), c("par1", "par2")))
@@ -335,7 +335,7 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
     use_prior[3] <- 1L
     pr_matrix[3, ] <- c(log(prior$M[1]), prior$M[2])
   }
-  if(!no_survey && !is.null(prior$q)) {
+  if(!no_index && !is.null(prior$q)) {
     use_prior[4:(4+nsurvey-1)] <- 1L
     if(msg) message("Prior for q found.")
     if(nsurvey == 1) {

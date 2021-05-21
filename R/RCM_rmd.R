@@ -241,7 +241,7 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
   c(header, ans)
 }
 
-rmd_RCM_survey_output <- function(sur, s_name) {
+rmd_RCM_index_output <- function(sur, s_name) {
   ans <- c(paste0("### ", s_name[sur], " \n"),
            "",
            paste0("```{r, fig.cap = \"Selectivity of ", s_name[sur], " in last historical year.\"}"),
@@ -579,29 +579,29 @@ RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
   
   wt_fleet <- rbind(LWT$Chist, LWT$C_eq, LWT$CAA, LWT$CAL, LWT$MS) %>% structure(dimnames = list(rownames(nll_fleet)[1:5], f_name))
   
-  if(inherits(x$nll_survey, "array")) {
-    nll_survey <- apply(x$nll_survey, 2:3, sum) %>% t()
+  if(inherits(x$nll_index, "array")) {
+    nll_index <- apply(x$nll_index, 2:3, sum) %>% t()
   } else {
-    nll_survey <- x$nll_survey %>% t()
+    nll_index <- x$nll_index %>% t()
   }
-  nll_survey[is.na(nll_survey)] <- 0
-  nll_survey <- cbind(nll_survey, rowSums(nll_survey))
-  nll_survey <- rbind(nll_survey, colSums(nll_survey))
-  colnames(nll_survey) <- c(s_name, "Sum")
-  rownames(nll_survey) <- c("Index", "CAA", "CAL", "Sum")
+  nll_index[is.na(nll_index)] <- 0
+  nll_index <- cbind(nll_index, rowSums(nll_index))
+  nll_index <- rbind(nll_index, colSums(nll_index))
+  colnames(nll_index) <- c(s_name, "Sum")
+  rownames(nll_index) <- c("Index", "CAA", "CAL", "Sum")
   
-  wt_survey <- rbind(LWT$Index, LWT$IAA, LWT$IAL) %>% structure(dimnames = list(rownames(nll_survey)[1:3], s_name))
+  wt_index <- rbind(LWT$Index, LWT$IAA, LWT$IAL) %>% structure(dimnames = list(rownames(nll_index)[1:3], s_name))
   
-  tot <- c(x$nll, x$nll_log_rec_dev, nll_fleet[6, length(f_name) + 1], nll_survey[4, length(s_name) + 1], x$penalty, x$prior) %>% matrix(ncol = 1)
-  dimnames(tot) <- list(c("Total", "Recruitment Deviations", "Fleets", "Surveys", "Penalty (High F)", "Priors"), 
+  tot <- c(x$nll, x$nll_log_rec_dev, nll_fleet[6, length(f_name) + 1], nll_index[4, length(s_name) + 1], x$penalty, x$prior) %>% matrix(ncol = 1)
+  dimnames(tot) <- list(c("Total", "Recruitment Deviations", "Fleets", "Indices", "Penalty (High F)", "Priors"), 
                         "Negative log-likelihood")
   
-  res <- list(tot, nll_fleet, wt_fleet, nll_survey, wt_survey) %>% lapply(FUN = function(xx) xx %>% round(2) %>% as.data.frame())
+  res <- list(tot, nll_fleet, wt_fleet, nll_index, wt_index) %>% lapply(FUN = function(xx) xx %>% round(2) %>% as.data.frame())
   return(res)
 }
 
 
-rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
+rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_index) {
   header <- c("```{r}",
               "obj <- x@mean_fit$obj",
               "new_dat <- structure(obj$env$data, check.passed = NULL)",
@@ -628,10 +628,10 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
         "}",
         "```\n\n")
     }
-    survey_lapply_fn <- function(sur) {
+    index_lapply_fn <- function(sur) {
       c(paste("####", s_name[sur], "\n"),
         "```{r, fig.cap = \"Likelihood gradients (annual values by data type in columns) with respect to model parameters (rows).\"}",
-        paste0("gr_plot <- dplyr::filter(gr_survey, Survey == \"", s_name[sur], "\")"),
+        paste0("gr_plot <- dplyr::filter(gr_index, Index == \"", s_name[sur], "\")"),
         "if(nrow(gr_plot)) {",
         "  ggplot2::ggplot(gr_plot, ggplot2::aes(Year, Gradient, group = par, colour = par)) + ggplot2::facet_grid(par_type ~ data_type, scales = \"free_y\") +",
         paste0("  ggplot2::geom_hline(yintercept = 0, linetype = 3) + ggplot2::geom_line() + ggplot2::theme_bw() + ggplot2::theme(legend.position = \"none\") + ggplot2::ggtitle(\"", s_name[sur], "\")"),
@@ -640,8 +640,8 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
     }
     
     f_plots <- lapply(1:length(f_name), fleet_lapply_fn) %>% unlist()
-    if(do_survey) {
-      s_plots <- lapply(1:length(s_name), survey_lapply_fn) %>% unlist()
+    if(do_index) {
+      s_plots <- lapply(1:length(s_name), index_lapply_fn) %>% unlist()
     } else {
       s_plots <- NULL
     }
@@ -652,8 +652,8 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
               "  reshape2::melt(value.name = \"Gradient\") %>% dplyr::left_join(par_names, by = \"par\") %>%",
               "  dplyr::group_by(data_type) %>% dplyr::filter(any(Gradient != 0))",
               "",
-              "gr_survey <- gr[rownames(gr) == \"nll_survey\", ] %>% array(dim = dim(report$nll_survey) %>% c(length(SD$par.fixed))) %>%",
-              "  structure(dimnames = list(Year = Year, Survey = s_name, data_type = c(\"Index\", \"CAA\", \"CAL\"),",
+              "gr_index <- gr[rownames(gr) == \"nll_index\", ] %>% array(dim = dim(report$nll_index) %>% c(length(SD$par.fixed))) %>%",
+              "  structure(dimnames = list(Year = Year, Index = s_name, data_type = c(\"Index\", \"CAA\", \"CAL\"),",
               "                            par = par_names$par)) %>%", 
               "  reshape2::melt(value.name = \"Gradient\") %>% dplyr::left_join(par_names, by = \"par\") %>%",
               "  dplyr::group_by(data_type) %>% dplyr::filter(any(Gradient != 0))",
@@ -664,7 +664,7 @@ rmd_RCM_likelihood_gradients <- function(f_name, s_name, do_survey) {
     jac <- c("#### Linear combos\n",
              "",
              "```{r}",
-             "gr_combo <- gr[rownames(gr) %in% c(\"nll_fleet\", \"nll_survey\"), ] %>% caret::findLinearCombos()",
+             "gr_combo <- gr[rownames(gr) %in% c(\"nll_fleet\", \"nll_index\"), ] %>% caret::findLinearCombos()",
              "if(is.null(gr_combo$remove)) {",
              "  print(\"Jacobian matrix is of full rank, according to caret::findLinearCombos().\")",
              "} else {",

@@ -27,9 +27,6 @@
 #' see Additional arguments section for setup of survey selectivity parameters. See \href{../doc/RCM_sel.html}{selectivity vignette} for more information.
 #' @param LWT A named list of likelihood weights for the RCM. See below.
 #' @param comp_like A string indicating either \code{"multinomial"} (default) or \code{"lognormal"} distributions for the composition data.
-#' @param ESS If \code{comp_like = "multinomial"}, a numeric vector of length two to cap the maximum effective samples size of the age and length compositions,
-#' respectively, for the multinomial likelihood function. The effective sample size of an age or length composition sample is the minimum of ESS or the number of observations
-#' (sum across columns). For more flexibility, set ESS to be very large and alter the age and length arrays as needed.
 #' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0 and M priors
 #' lognormal (mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors.
 #' For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). For all others, provide a length-2 vector for the mean and SD.
@@ -100,8 +97,8 @@
 #' \item C_sd - A vector or matrix of standard deviations (lognormal distribution) for the catches in \code{Chist}.
 #' If not provided, the default is 0.01. Only used if \code{condition = "catch"}.
 #' \item Ehist - A vector of historical effort, should be of length OM@@nyears (see also \code{E_eq}).
-#' \item Index - A vector of values of an index (of length OM@@nyears). If there are multiple surveys: a matrix of historical indices of abundances, with rows
-#' indexing years and columns indexing surveys. Age-specific indices should be numbers-specific while all others are weight-based.
+#' \item Index - A vector of values of an index (of length OM@@nyears). If there are multiple indices: a matrix of historical indices of abundances, with rows
+#' indexing years and columns indexing the index.
 #' \item I_sd - A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
 #' If not provided, this function will use values from \code{OM@@Iobs}.
 #' \item I_type - Obsolete as of version 2.0. See \code{s_selectivity} argument.

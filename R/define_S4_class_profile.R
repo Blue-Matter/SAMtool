@@ -41,7 +41,7 @@ setMethod("plot", signature(x = "prof", y = "missing"),
               }
               g <- parse(text = paste0('reshape2::melt(x@grid, id.vars = x@Par) %>% 
                 mutate(Type = ifelse(grepl("Fleet", variable), "Fishery", 
-                                     ifelse(grepl("Survey", variable), "Survey", as.character(variable)))) %>%
+                                     ifelse(grepl("Index", variable), "Index", as.character(variable)))) %>%
                 group_by(', x@Par, ', Type) %>% summarise(value = sum(value, na.rm = TRUE), .groups = "drop") %>%
                 group_by(Type) %>%
                 mutate(value = value - min(value, na.rm = TRUE)) %>%

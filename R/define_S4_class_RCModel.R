@@ -167,9 +167,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
             if(is.null(s_name)) {
               if(nsurvey > 0) {
-                s_name <- paste("Survey", 1:nsurvey)
+                s_name <- paste("Index", 1:nsurvey)
               } else {
-                s_name <- "Survey"
+                s_name <- "Index"
               }
             }
 
@@ -204,7 +204,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
             if(any(RCMdata@Index > 0, na.rm = TRUE)) {
-              survey_output <- lapply(1:nsurvey, rmd_RCM_survey_output, s_name = s_name)
+              survey_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
             } else survey_output <- NULL
 
             all_sims_output <- c(fleet_output, survey_output, "### Model predictions\n",
@@ -316,7 +316,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               } else E_matplot <- NULL
 
               if(any(RCMdata@Index > 0, na.rm = TRUE)) {
-                I_plots <- c("#### Surveys \n",
+                I_plots <- c("#### Index \n",
                              lapply(1:nsurvey, individual_matrix_fn, obs = "RCMdata@Index", pred = "report$Ipred",
                                     fig.cap = "index from survey", label = s_name),
                              lapply(1:nsurvey, individual_matrix_fn, obs = "RCMdata@Index", pred = "report$Ipred",
@@ -420,7 +420,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                "`r SD$env$corr.fixed %>% structure(dimnames = list(make_unique_names(rownames(.)), make_unique_names(colnames(.)))) %>% as.data.frame()`\n\n")
               
               if(is.array(report$nll_fleet)) {
-                like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_survey = any(RCMdata@Index > 0, na.rm = TRUE)))
+                like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_index = any(RCMdata@Index > 0, na.rm = TRUE)))
               } else {
                 like_gradients <- NULL
               }
@@ -519,7 +519,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   length_bin <- dots[[1]]@RCMdata@length_bin
 
   if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
-  if(is.null(s_name)) s_name <- paste("Survey", 1:nsurvey)
+  if(is.null(s_name)) s_name <- paste("Index", 1:nsurvey)
 
   ####### Document header
   if(is.null(title)) title <- "Comparisons of OM conditioning"
@@ -545,7 +545,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
   if(any(RCMdata@Index > 0, na.rm = TRUE)) {
-    survey_output <- lapply(1:nsurvey, rmd_RCM_survey_output, s_name = s_name)
+    survey_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
   } else survey_output <- NULL
 
   #### MSY comparisons
