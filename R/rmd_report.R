@@ -149,8 +149,8 @@ rmd_h <- function() {
 rmd_M_prior <- function() {
   fig.cap <- "Estimate of natural mortality, distribution based on normal approximation of posterior distribution."
   ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
-           "if(all(names(obj$env$map) != \"log_M\") && conv) {",
-           "  ind <- names(SD$par.fixed) == \"log_M\"",
+           "if(any(grepl(\"log_M\", names(SD$par.fixed))) && conv) {",
+           "  ind <- grepl(\"log_M\", names(SD$par.fixed))",
            "  mu <- SD$par.fixed[ind]",
            "  sig <- sqrt(diag(SD$cov.fixed)[ind])",
            "  plot_lognormalvar(mu, sig, label = \"Natural mortality\", logtransform = TRUE)",
@@ -198,20 +198,24 @@ rmd_F_FMSY_terminal <- function() {
 
 rmd_M_rw <- function() {
   out <- c("```{r, fig.cap = \"Estimates of M with 95% confidence intervals. Dotted horizontal lines indicate bounds specified in model.\"}",
-           "logit_M <- SD$value[names(SD$value) == \"logit_M\"]",
-           "M_bounds <- obj$env$data$M_bounds",
-           "M <- ilogit2(logit_M, M_bounds[1], M_bounds[2], TMB_report$M[1])",
-           "if(conv) {",
-           "  logit_M_sd <- SD$sd[names(SD$value) == \"logit_M\"]",
-           "} else {",
-           "  logit_M_sd <- rep(0, length(M))",
+           "tv_M <- grepl(\"logit_M\", names(SD$value)) %>% any()",
+           "if(tv_M) {",
+           "  logit_M <- SD$value[grepl(\"logit_M\", names(SD$value))]",
+           "  M_bounds <- obj$env$data$M_bounds",
+           "  M0 <- TMB_report$M[1, 1]",
+           "  M <- ilogit2(logit_M, M_bounds[1], M_bounds[2], M0)",
+           "  if(conv) {",
+           "    logit_M_sd <- SD$sd[names(SD$value) == \"logit_M\"]",
+           "  } else {",
+           "    logit_M_sd <- rep(0, length(M))",
+           "  }",
+           "  M_upper <- ilogit2(logit_M + 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], M0)",
+           "  M_lower <- ilogit2(logit_M - 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], M0)",
+           "  plot(info$Year, M, typ = \"o\", xlab = \"Year\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M_upper)))",
+           "  if(conv) arrows(info$Year, M_lower, info$Year, M_upper, length = 0.025, angle = 90, code = 3, col = \"grey30\")",
+           "  abline(h = 0, col = \"grey\")",
+           "  abline(h = M_bounds, lty = 2)",
            "}",
-           "M_upper <- ilogit2(logit_M + 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], TMB_report$M[1])",
-           "M_lower <- ilogit2(logit_M - 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], TMB_report$M[1])",
-           "plot(info$Year, M, typ = \"o\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M_upper)))",
-           "if(conv) arrows(info$Year, M_lower, info$Year, M_upper, length = 0.025, angle = 90, code = 3, col = \"grey30\")",
-           "abline(h = 0, col = \"grey\")",
-           "abline(h = M_bounds, lty = 2)",
            "```\n")
   return(out)
 }

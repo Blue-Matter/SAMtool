@@ -45,8 +45,12 @@ summary_SCA <- function(Assessment) {
 
   model_estimates <- sdreport_int(SD)
   if(!is.character(model_estimates)) {
-    rownames(model_estimates)[rownames(model_estimates) == "log_F_"] <- paste0("log_F_dev_", names(FMort))
-    rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(FMort)[as.logical(obj$env$data$est_rec_dev)])
+    rownames(model_estimates)[grepl("logit_M_walk", rownames(model_estimates))] <- 
+      paste0("logit_M_walk_", names(SSB)[-c(1, length(SSB))])
+    rownames(model_estimates)[grepl("log_F_dev", rownames(model_estimates))] <- 
+      paste0("log_F_dev_", names(SSB)[-length(SSB)])
+    rownames(model_estimates)[grepl("log_rec_dev", rownames(model_estimates))] <- 
+      paste0("log_rec_dev_", names(FMort)[as.logical(obj$env$data$est_rec_dev)])
   }
 
   output <- list(model = "Statistical Catch-at-Age (SCA)",
@@ -78,7 +82,7 @@ rmd_SCA <- function(Assessment, ...) {
     lead_par <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h())
   }
 
-  assess_fit <- c(lead_par, rmd_M_prior(),
+  assess_fit <- c(lead_par, rmd_M_prior(), rmd_M_rw(),
                   rmd_sel(age, Assessment@Selectivity[nrow(Assessment@Selectivity), ], fig.cap = "Estimated selectivity at age."),
                   rmd_assess_fit("Catch", "catch"), rmd_assess_resid("Catch"), rmd_assess_qq("Catch", "catch"),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
@@ -86,7 +90,8 @@ rmd_SCA <- function(Assessment, ...) {
                   rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type,
                                blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])),
                   rmd_residual("Dev", "SE_Dev", fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
-                               label = Assessment@Dev_type, conv_check = TRUE, blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])))
+                               label = Assessment@Dev_type, conv_check = TRUE, 
+                               blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])))
 
   #### Time Series
   if(Assessment@obj$env$data$catch_eq == "Baranov") {
@@ -96,7 +101,7 @@ rmd_SCA <- function(Assessment, ...) {
     F_output <- rmd_U(header = "### Time Series Output\n")
     if(Assessment@obj$env$data$SR_type != "none") F_output <- c(F_output, rmd_U_UMSY())
   }
-  ts_output <- c(F_output, rmd_SSB(),
+  ts_output <- c(F_output, rmd_M_rw(), rmd_SSB(),
                  rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"), 
                  ifelse(Assessment@obj$env$data$SR_type != "none", rmd_SSB_SSBMSY(), ""),
                  rmd_SSB_SSB0(), 
@@ -196,8 +201,8 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
   
   # Array dimension: Retroyr, Year, ts
   # ts includes: Calendar F, B, R, VB
-  if(grepl("RWM", Assessment@Model)) {
-    TS_var <- c("F", "SSB", "R", "VB")
+  if(any(grepl("logit_M", names(Assessment@SD$value)))) {
+    TS_var <- c(ifelse(info$data$catch_eq == "Baranov", "F", "U"), "SSB", "R", "VB")
   } else {
     
     if(info$data$SR_type == "none") {
@@ -211,9 +216,8 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
   retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, length(TS_var))) %>% 
     structure(dimnames = list(Peel = 0:nyr, Year = Year, Var = TS_var))
   
-  SD_nondev <- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev" &
-                             rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "logit_M" &
-                             rownames(summary(SD)) != "logit_M_walk", ]
+  SD_nondev <- summary(SD)[!rownames(summary(SD)) %in% 
+                             c("log_rec_dev", "log_early_rec_dev", "log_F_dev", "logit_M", "logit_M_walk"), ]
   retro_est <- array(NA, dim = c(nyr+1, dim(SD_nondev))) %>% 
     structure(dimnames = list(Peel = 0:nyr, Var = rownames(SD_nondev), Value = c("Estimate", "Std. Error")))
   
@@ -239,8 +243,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
     
     info$params$log_rec_dev <- rep(0, n_y_ret)
     info$params$log_F_dev <- info$params$log_F_dev[1:n_y_ret]
-    
-    if(!is.null(info$params$logit_M_walk)) info$params$logit_M_walk <- rep(0, n_y_ret - 1)
+    info$params$logit_M_walk <- rep(0, n_y_ret - 1)
     
     map <- obj$env$map
     if(any(names(map) == "log_rec_dev")) {
@@ -252,6 +255,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
       }
     }
     if(any(names(map) == "log_F_dev")) map$log_F_dev <- map$log_F_dev[1:n_y_ret]
+    if(any(names(map) == "logit_M_walk")) map$logit_M_walk <- map$logit_M_walk[1:(n_y_ret-1)]
     
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
@@ -263,7 +267,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
       report <- obj2$report(obj2$env$last.par.best)
       
       if(info$data$SR_type != "none") {
-        ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = info$data$M, weight = info$data$weight, mat = info$data$mat,
+        ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = report$M[n_y_ret, ], weight = info$data$weight, mat = info$data$mat,
                              vul = report$vul, SR = info$data$SR_type, catch_eq = info$data$catch_eq)
       }
       
@@ -279,9 +283,8 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
       retro_ts[i+1, , TS_var == "R"] <<- c(report$R, rep(NA, i))
       retro_ts[i+1, , TS_var == "VB"] <<- c(report$VB, rep(NA, i))
       
-      retro_est[i+1, , ] <<- summary(SD)[rownames(summary(SD)) != "log_rec_dev" & rownames(summary(SD)) != "log_early_rec_dev" &
-                                           rownames(summary(SD)) != "log_F_dev" & rownames(summary(SD)) != "logit_M" &
-                                           rownames(summary(SD)) != "logit_M_walk", ]
+      retro_est[i+1, , ] <<- summary(SD)[!rownames(summary(SD)) %in% 
+                                           c("log_rec_dev", "log_early_rec_dev", "log_F_dev", "logit_M", "logit_M_walk"), ]
       
       return(SD$pdHess)
     }

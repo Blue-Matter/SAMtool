@@ -231,7 +231,7 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
   weight <- TMB_data$weight
   mat <- TMB_data$mat
   vul <- TMB_report$vul
-  M <- TMB_report$M
+  M <- TMB_report$M[nrow(TMB_report$M), ]
 
   if(constrain == "F") {
     if(Pope) {

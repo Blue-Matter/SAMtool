@@ -23,7 +23,6 @@ Type SCA(objective_function<Type> *obj) {
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
   DATA_INTEGER(n_y);      // Number of years in model
   DATA_INTEGER(n_age);    // Maximum age (plus-group)
-  DATA_VECTOR(M_data);    // Natural mortality at age
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
@@ -33,12 +32,16 @@ Type SCA(objective_function<Type> *obj) {
   DATA_IVECTOR(est_early_rec_dev);
   DATA_IVECTOR(est_rec_dev); // Indicator of whether rec_dev is estimated in model or fixed at zero
   DATA_INTEGER(yindF);    // Year for which to estimate F, all other F are deviations from this F
+  DATA_STRING(tv_M);      // String to indicate whether there is time-varying M (random walk or density dependent M)
+  DATA_VECTOR(M_bounds);  // Bounds of M random walk or density dependent M
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see make_prior fn)
 
   PARAMETER(R0x);
   PARAMETER(transformed_h);
-  PARAMETER(log_M);
+  PARAMETER(log_M0);
+  PARAMETER_VECTOR(logit_M_walk);
+  
   PARAMETER(F_equilibrium);
   PARAMETER(U_equilibrium);
   PARAMETER_VECTOR(vul_par);
@@ -47,6 +50,7 @@ Type SCA(objective_function<Type> *obj) {
 
   PARAMETER(log_omega);
   PARAMETER(log_tau);
+  PARAMETER(log_tau_M);
   PARAMETER_VECTOR(log_early_rec_dev);
   PARAMETER_VECTOR(log_rec_dev);
 
@@ -57,20 +61,14 @@ Type SCA(objective_function<Type> *obj) {
   } else if(SR_type == "Ricker") {
     h = exp(transformed_h) + 0.2;
   }
-  Type Mest = exp(log_M);
+  Type M0 = exp(log_M0);
   Type omega = exp(log_omega);
   Type tau = exp(log_tau);
+  Type tau_M = exp(log_tau_M);
   
-  vector<Type> M(n_age);
-  if(use_prior(2)) {
-    M.fill(Mest);
-  } else {
-    M = M_data;
-  }
-
   Type penalty = 0;
   Type prior = 0.;
-
+  
   // Vulnerability
   vector<Type> vul(n_age);
   if(vul_type == "logistic") {
@@ -78,28 +76,43 @@ Type SCA(objective_function<Type> *obj) {
   } else {
     vul = calc_dome_vul(vul_par, n_age, prior);
   }
-
+  
+  // Set-up M
+  matrix<Type> M(n_y+1,n_age);
+  vector<Type> logit_M(n_y);
+  
+  vector< vector<Type>> NPR0(n_y);
+  vector<Type> EPR0(n_y);
+  
+  for(int a=0;a<n_age;a++) M(0,a) = exp(log_M0);
+  logit_M(0) = logit2(M(0,0), M_bounds(0), M_bounds(1), M(0,0));
+  for(int y=0;y<n_y;y++) {
+    if(y > 0) {
+      logit_M(y) = logit_M(y-1) + logit_M_walk(y-1);
+      for(int a=0;a<n_age;a++) M(y,a) = invlogit2(logit_M(y), M_bounds(0), M_bounds(1), M(0,0));
+    }
+    NPR0(y) = calc_NPR(Type(0), vul, M, n_age, y);
+    EPR0(y) = sum_EPR(NPR0(y), weight, mat);
+  }
+  M.row(n_y) = M.row(n_y-1);
+  
   ////// Equilibrium reference points and per-recruit quantities
-  vector<Type> NPR0 = calc_NPR(Type(0), vul, M, n_age);
-
-  Type EPR0 = sum_EPR(NPR0, weight, mat);
-
-  Type B0 = R0 * sum_BPR(NPR0, weight);
-  Type N0 = R0 * NPR0.sum();
-  Type E0 = R0 * EPR0;
-  Type VB0 = R0 * sum_VBPR(NPR0, weight, vul);
-
+  Type B0 = R0 * sum_BPR(NPR0(0), weight);
+  Type N0 = R0 * NPR0(0).sum();
+  Type E0 = R0 * EPR0(0);
+  Type VB0 = R0 * sum_VBPR(NPR0(0), weight, vul);
+  
   Type CR, Brec;
   if(SR_type == "BH") {
     CR = 4 * h;
     CR /= 1-h;
     Brec = 5*h - 1;
     Brec /= (1-h);
-  } else if(SR_type == "Ricker") {
+  } else {
     CR = pow(5*h, 1.25);
     Brec = 1.25 * log(5*h);
   }
-  Type Arec = CR/EPR0;
+  Type Arec = CR/EPR0(0);
   Brec /= E0;
 
   ////// During time series year = 1, 2, ..., n_y
@@ -125,9 +138,9 @@ Type SCA(objective_function<Type> *obj) {
   // Equilibrium quantities (leading into first year of model)
   vector<Type> NPR_equilibrium(n_age);
   if(catch_eq == "Baranov") {
-    NPR_equilibrium = calc_NPR(F_equilibrium, vul, M, n_age);
+    NPR_equilibrium = calc_NPR(F_equilibrium, vul, M, n_age, 0);
   } else {
-    NPR_equilibrium = calc_NPR_U(U_equilibrium, vul, M, n_age);
+    NPR_equilibrium = calc_NPR_U(U_equilibrium, vul, M, n_age, 0);
   }
   Type EPR_eq = sum_EPR(NPR_equilibrium, weight, mat);
   
@@ -156,7 +169,7 @@ Type SCA(objective_function<Type> *obj) {
     if(catch_eq == "Baranov") {
       VB(0) += N(0,a) * weight(a) * vul(a);
     } else {
-      VB(0) += N(0,a) * weight(a) * vul(a) * exp(0.5 * M(a));
+      VB(0) += N(0,a) * weight(a) * vul(a) * exp(0.5 * M(0,a));
     }
     E(0) += N(0,a) * weight(a) * mat(a);
   }
@@ -179,22 +192,22 @@ Type SCA(objective_function<Type> *obj) {
     for(int a=0;a<n_age;a++) {
       if(catch_eq == "Baranov") {
         CAApred(y,a) = N(y,a);
-        CAApred(y,a) *= 1 - exp(-vul(a) * F(y) - M(a));
-        CAApred(y,a) /= vul(a) * F(y) + M(a);
+        CAApred(y,a) *= 1 - exp(-vul(a) * F(y) - M(y,a));
+        CAApred(y,a) /= vul(a) * F(y) + M(y,a);
         CAApred(y,a) *= vul(a) * F(y);
         
         if(a<n_age-1) {
-          N(y+1,a+1) = N(y,a) * exp(-vul(a) * F(y) - M(a));
+          N(y+1,a+1) = N(y,a) * exp(-vul(a) * F(y) - M(y,a));
         } else {
-          N(y+1,a) += N(y,a) * exp(-vul(a) * F(y) - M(a));
+          N(y+1,a) += N(y,a) * exp(-vul(a) * F(y) - M(y,a));
         }
       } else {
-        CAApred(y,a) = vul(a) * U(y) * N(y,a) * exp(-0.5 * M(a));
+        CAApred(y,a) = vul(a) * U(y) * N(y,a) * exp(-0.5 * M(y,a));
         
         if(a<n_age-1) {
-          N(y+1,a+1) = N(y,a) * exp(-M(a)) * (1 - vul(a) * U(y));
+          N(y+1,a+1) = N(y,a) * exp(-M(y,a)) * (1 - vul(a) * U(y));
         } else {
-          N(y+1,a) += N(y,a) * exp(-M(a)) * (1 - vul(a) * U(y));
+          N(y+1,a) += N(y,a) * exp(-M(y,a)) * (1 - vul(a) * U(y));
         }
       }
       
@@ -219,7 +232,7 @@ Type SCA(objective_function<Type> *obj) {
       if(catch_eq == "Baranov") {
         VB(y+1) += N(y+1,a) * weight(a) * vul(a);
       } else {
-        VB(y+1) += N(y+1,a) * weight(a) * vul(a) * exp(-0.5 * M(a));
+        VB(y+1) += N(y+1,a) * weight(a) * vul(a) * exp(-0.5 * M(y+1,a));
       }
     }
   }
@@ -249,7 +262,7 @@ Type SCA(objective_function<Type> *obj) {
     q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
   }
 
-  vector<Type> nll_comp(nsurvey+3);
+  vector<Type> nll_comp(nsurvey+4);
   nll_comp.setZero();
   for(int y=0;y<n_y;y++) {
     for(int sur=0;sur<nsurvey;sur++) {
@@ -273,24 +286,28 @@ Type SCA(objective_function<Type> *obj) {
       if(catch_eq == "Baranov") nll_comp(nsurvey+1) -= dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
     }
     if(est_rec_dev(y)) nll_comp(nsurvey+2) -= dnorm(log_rec_dev(y), Type(0), tau, true);
+    if(y<n_y-1) nll_comp(nsurvey+3) -= dnorm(logit_M_walk(y), Type(0), tau_M, true);
   }
   for(int a=0;a<n_age-1;a++) {
     if(est_early_rec_dev(a)) nll_comp(nsurvey+2) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
   }
   
   // Add priors
-  prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
+  prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M0, q);
   Type nll = nll_comp.sum() + penalty + prior;
 
   ADREPORT(R0);
   if(SR_type != "none") ADREPORT(h);
-  if(CppAD::Variable(log_M)) ADREPORT(Mest);
+  if(CppAD::Variable(log_M0)) ADREPORT(M0);
+  if(tv_M == "walk") ADREPORT(logit_M);
   ADREPORT(omega);
   ADREPORT(tau);
+  if(CppAD::Variable(log_tau_M)) ADREPORT(tau_M);
   ADREPORT(q);
 
   if(catch_eq == "Baranov") REPORT(omega);
   REPORT(tau);
+  if(tv_M == "walk") REPORT(tau_M);
   
   REPORT(R0);
   
@@ -319,6 +336,11 @@ Type SCA(objective_function<Type> *obj) {
   }
   REPORT(q);
   REPORT(M);
+  
+  if(tv_M == "walk") {
+    REPORT(logit_M);
+    REPORT(logit_M_walk);
+  }
 
   REPORT(N);
   REPORT(CN);

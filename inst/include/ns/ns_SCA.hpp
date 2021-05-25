@@ -20,11 +20,39 @@ vector<Type> calc_NPR(Type F, vector<Type> vul, Type M, int n_age) {
 }
 
 template<class Type>
+vector<Type> calc_NPR(Type F, vector<Type> vul, matrix<Type> M, int n_age, int y) {
+  vector<Type> NPR(n_age);
+  NPR(0) = 1.;
+  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-vul(a-1) * F - M(y,a-1));
+  NPR(n_age-1) /= 1 - exp(-vul(n_age-1) * F - M(y,n_age-1)); // Plus-group
+  return NPR;
+}
+
+
+template<class Type>
 vector<Type> calc_NPR_U(Type U, vector<Type> vul, vector<Type> M, int n_age) {
   vector<Type> NPR(n_age);
   NPR(0) = 1.;
   for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M(a-1)) * (1 - vul(a-1) * U);
   NPR(n_age-1) /= 1 - exp(-M(n_age-1)) * (1 - vul(n_age-1) * U); // Plus-group
+  return NPR;
+}
+
+template<class Type>
+vector<Type> calc_NPR_U(Type U, vector<Type> vul, Type M, int n_age) {
+  vector<Type> NPR(n_age);
+  NPR(0) = 1.;
+  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M) * (1 - vul(a-1) * U);
+  NPR(n_age-1) /= 1 - exp(-M) * (1 - vul(n_age-1) * U); // Plus-group
+  return NPR;
+}
+
+template<class Type>
+vector<Type> calc_NPR_U(Type U, vector<Type> vul, matrix<Type> M, int n_age, int y) {
+  vector<Type> NPR(n_age);
+  NPR(0) = 1.;
+  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M(y,a-1)) * (1 - vul(a-1) * U);
+  NPR(n_age-1) /= 1 - exp(-M(y,n_age-1)) * (1 - vul(n_age-1) * U); // Plus-group
   return NPR;
 }
 
