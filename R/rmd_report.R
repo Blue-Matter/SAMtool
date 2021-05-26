@@ -198,8 +198,8 @@ rmd_F_FMSY_terminal <- function() {
 
 rmd_M_rw <- function() {
   out <- c("```{r, fig.cap = \"Estimates of M with 95% confidence intervals. Dotted horizontal lines indicate bounds specified in model.\"}",
-           "tv_M <- grepl(\"logit_M\", names(SD$value)) %>% any()",
-           "if(tv_M) {",
+           "RWM <- info$data$tv_M == \"walk\"",
+           "if(RWM) {",
            "  logit_M <- SD$value[grepl(\"logit_M\", names(SD$value))]",
            "  M_bounds <- obj$env$data$M_bounds",
            "  M0 <- TMB_report$M[1, 1]",
@@ -211,14 +211,30 @@ rmd_M_rw <- function() {
            "  }",
            "  M_upper <- ilogit2(logit_M + 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], M0)",
            "  M_lower <- ilogit2(logit_M - 1.96 * logit_M_sd, M_bounds[1], M_bounds[2], M0)",
-           "  plot(info$Year, M, typ = \"o\", xlab = \"Year\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M_upper)))",
-           "  if(conv) arrows(info$Year, M_lower, info$Year, M_upper, length = 0.025, angle = 90, code = 3, col = \"grey30\")",
+           "  plot(c(info$Year, max(info$Year) + 1), M, typ = \"o\", xlab = \"Year\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M_upper)))",
+           "  if(conv) arrows(c(info$Year, max(info$Year) + 1), M_lower, y1 = M_upper, length = 0.025, angle = 90, code = 3, col = \"grey30\")",
            "  abline(h = 0, col = \"grey\")",
            "  abline(h = M_bounds, lty = 2)",
            "}",
            "```\n")
   return(out)
 }
+
+
+rmd_M_DD <- function() {
+  out <- c("```{r, fig.cap = \"Density-dependent M as a function of depletion (B/B0). Dotted horizontal lines indicate bounds specified in model.\"}",
+           "DDM <- info$data$tv_M == \"DD\"",
+           "if(DDM) {",
+           "  M <- TMB_report$M[, 1]",
+           "  M_bounds <- obj$env$data$M_bounds",
+           "  plot(c(info$Year, max(info$Year) + 1), M, typ = \"o\", xlab = \"Year\", ylab = \"Natural Mortality\", ylim = c(0, 1.1 * max(M)))",
+           "  abline(h = 0, col = \"grey\")",
+           "  abline(h = M_bounds, lty = 2)",
+           "}",
+           "```\n")
+  return(out)
+}
+
 
 rmd_B_BMSY_terminal <- function() {
   fig.cap <- paste0("Estimate of B/BMSY in terminal year, distribution based on normal approximation of estimated covariance matrix.")

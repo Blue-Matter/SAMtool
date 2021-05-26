@@ -232,16 +232,19 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
   mat <- TMB_data$mat
   vul <- TMB_report$vul
   M <- TMB_report$M[nrow(TMB_report$M), ]
+  
+  tv_M <- TMB_data$tv_M
+  M_bounds <- TMB_data$M_bounds
 
   if(constrain == "F") {
     if(Pope) {
       Fout <- pmin(FMort, 1 - exp(-max_F))
       UU <- vul %o% FMort
-      surv <- (1 - UU) * exp(-M)
+      #surv <- (1 - UU) * exp(-M)
     } else {
       Fout <- pmin(FMort, max_F)
       FF <- vul %o% FMort
-      surv <- exp(-FF - M)
+      #surv <- exp(-FF - M)
     }
   } else {
     Fout <- numeric(length(p_log_rec_dev))

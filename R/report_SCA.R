@@ -45,11 +45,13 @@ summary_SCA <- function(Assessment) {
 
   model_estimates <- sdreport_int(SD)
   if(!is.character(model_estimates)) {
-    rownames(model_estimates)[grepl("logit_M_walk", rownames(model_estimates))] <- 
-      paste0("logit_M_walk_", names(SSB)[-c(1, length(SSB))])
-    rownames(model_estimates)[grepl("log_F_dev", rownames(model_estimates))] <- 
+    rownames(model_estimates)[rownames(model_estimates) %in% "logit_M_walk"] <- 
+      paste0("logit_M_walk_", names(SSB)[-1])
+    rownames(model_estimates)[rownames(model_estimates) %in% "logit_M"] <- 
+      paste0("logit_M_", names(SSB))
+    rownames(model_estimates)[rownames(model_estimates) %in% "log_F_dev"] <- 
       paste0("log_F_dev_", names(SSB)[-length(SSB)])
-    rownames(model_estimates)[grepl("log_rec_dev", rownames(model_estimates))] <- 
+    rownames(model_estimates)[rownames(model_estimates) %in% "log_rec_dev"] <- 
       paste0("log_rec_dev_", names(FMort)[as.logical(obj$env$data$est_rec_dev)])
   }
 
@@ -101,7 +103,7 @@ rmd_SCA <- function(Assessment, ...) {
     F_output <- rmd_U(header = "### Time Series Output\n")
     if(Assessment@obj$env$data$SR_type != "none") F_output <- c(F_output, rmd_U_UMSY())
   }
-  ts_output <- c(F_output, rmd_M_rw(), rmd_SSB(),
+  ts_output <- c(F_output, rmd_M_rw(), rmd_M_DD(), rmd_SSB(),
                  rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"), 
                  ifelse(Assessment@obj$env$data$SR_type != "none", rmd_SSB_SSBMSY(), ""),
                  rmd_SSB_SSB0(), 
@@ -255,7 +257,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
       }
     }
     if(any(names(map) == "log_F_dev")) map$log_F_dev <- map$log_F_dev[1:n_y_ret]
-    if(any(names(map) == "logit_M_walk")) map$logit_M_walk <- map$logit_M_walk[1:(n_y_ret-1)]
+    if(any(names(map) == "logit_M_walk")) map$logit_M_walk <- map$logit_M_walk[1:n_y_ret]
     
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
@@ -267,8 +269,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
       report <- obj2$report(obj2$env$last.par.best)
       
       if(info$data$SR_type != "none") {
-        ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = report$M[n_y_ret, ], weight = info$data$weight, mat = info$data$mat,
-                             vul = report$vul, SR = info$data$SR_type, catch_eq = info$data$catch_eq)
+        ref_pt <- ref_pt_SCA(obj = obj2, report = report)
       }
       
       if("F" %in% TS_var) retro_ts[i+1, , TS_var == "F"] <<- c(report$F, rep(NA, i + 1))
@@ -311,7 +312,8 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   F.vector = seq(0, 2.5 * fmsy, length.out = 1e2)
   
   yield <- lapply(F.vector, yield_fn_SCA, M = report$M, mat = data$mat, weight = data$weight, vul = report$vul,
-                  SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, opt = FALSE, catch_eq = "Baranov")
+                  SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, catch_eq = "Baranov", opt = FALSE,
+                  B0 = report$B0, tv_M = data$tv_M, M_bounds = data$M_bounds)
   
   Biomass <- vapply(yield, getElement, numeric(1), "E")
   Yield <- vapply(yield, getElement, numeric(1), "Yield")
@@ -354,9 +356,9 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
     u.vector = seq(0, 1, length.out = 100)
   }
   
-  yield <- lapply(u.vector, yield_fn_SCA, M = report$M, mat = data$mat, weight = data$weight, 
-                  vul = report$vul, SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, 
-                  catch_eq = "Pope", opt = FALSE)
+  yield <- lapply(u.vector, yield_fn_SCA, M = report$M, mat = data$mat, weight = data$weight, vul = report$vul, 
+                  SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, catch_eq = "Pope", opt = FALSE,
+                  B0 = report$B0, tv_M = data$tv_M, M_bounds = data$M_bounds)
   
   Biomass <- vapply(yield, getElement, numeric(1), "E")
   Yield <- vapply(yield, getElement, numeric(1), "Yield")

@@ -2,60 +2,32 @@
 namespace ns_SCA {
 
 template<class Type>
-vector<Type> calc_NPR(Type F, vector<Type> vul, vector<Type> M, int n_age) {
+vector<Type> calc_NPR(Type F, vector<Type> vul, vector<Type> M, int n_age, int Pope = 0) {
   vector<Type> NPR(n_age);
   NPR(0) = 1.;
-  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-vul(a-1) * F - M(a-1));
-  NPR(n_age-1) /= 1 - exp(-vul(n_age-1) * F - M(n_age-1)); // Plus-group
+  if(Pope) {
+    for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M(a-1)) * (1 - vul(a-1) * F);
+    NPR(n_age-1) /= 1 - exp(-M(n_age-1)) * (1 - vul(n_age-1) * F); // Plus-group
+  } else {
+    for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-vul(a-1) * F - M(a-1));
+    NPR(n_age-1) /= 1 - exp(-vul(n_age-1) * F - M(n_age-1)); // Plus-group
+  }
   return NPR;
 }
 
 template<class Type>
-vector<Type> calc_NPR(Type F, vector<Type> vul, Type M, int n_age) {
-  vector<Type> NPR(n_age);
-  NPR(0) = 1.;
-  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-vul(a-1) * F - M);
-  NPR(n_age-1) /= 1 - exp(-vul(n_age-1) * F - M); // Plus-group
-  return NPR;
+vector<Type> calc_NPR(Type F, vector<Type> vul, Type M, int n_age, int Pope = 0) {
+  vector<Type> Mv(n_age);
+  Mv.fill(M);
+  return calc_NPR(F, vul, Mv, n_age, Pope);
 }
 
 template<class Type>
-vector<Type> calc_NPR(Type F, vector<Type> vul, matrix<Type> M, int n_age, int y) {
-  vector<Type> NPR(n_age);
-  NPR(0) = 1.;
-  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-vul(a-1) * F - M(y,a-1));
-  NPR(n_age-1) /= 1 - exp(-vul(n_age-1) * F - M(y,n_age-1)); // Plus-group
-  return NPR;
+vector<Type> calc_NPR(Type F, vector<Type> vul, matrix<Type> M, int n_age, int y, int Pope = 0) {
+  vector<Type> Mv(n_age);
+  Mv = M.row(y);
+  return calc_NPR(F, vul, Mv, n_age, Pope);
 }
-
-
-template<class Type>
-vector<Type> calc_NPR_U(Type U, vector<Type> vul, vector<Type> M, int n_age) {
-  vector<Type> NPR(n_age);
-  NPR(0) = 1.;
-  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M(a-1)) * (1 - vul(a-1) * U);
-  NPR(n_age-1) /= 1 - exp(-M(n_age-1)) * (1 - vul(n_age-1) * U); // Plus-group
-  return NPR;
-}
-
-template<class Type>
-vector<Type> calc_NPR_U(Type U, vector<Type> vul, Type M, int n_age) {
-  vector<Type> NPR(n_age);
-  NPR(0) = 1.;
-  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M) * (1 - vul(a-1) * U);
-  NPR(n_age-1) /= 1 - exp(-M) * (1 - vul(n_age-1) * U); // Plus-group
-  return NPR;
-}
-
-template<class Type>
-vector<Type> calc_NPR_U(Type U, vector<Type> vul, matrix<Type> M, int n_age, int y) {
-  vector<Type> NPR(n_age);
-  NPR(0) = 1.;
-  for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M(y,a-1)) * (1 - vul(a-1) * U);
-  NPR(n_age-1) /= 1 - exp(-M(y,n_age-1)) * (1 - vul(n_age-1) * U); // Plus-group
-  return NPR;
-}
-
 
 template<class Type>
 Type sum_EPR(vector<Type> NPR, vector<Type> weight, vector<Type> mat) {
@@ -145,6 +117,21 @@ Type dlnorm_comp(vector<Type> obs, vector<Type> pred) {
   for(int a=0;a<obs.size();a++) log_lik += dnorm_(log(obs(a)), log(pred(a)), 0.1/pow(pred(a), 0.5), true);
   return log_lik;
 }
+
+template<class Type>
+Type calc_M_eq(Type F_eq, Type B0, Type R0, vector<Type> M_bounds, vector<Type> vul, vector<Type> weight, 
+               int n_age, int Pope) {
+  Type D = 0.4;
+  Type Meq;
+  for(int i=0;i<20;i++) {
+    Meq = CppAD::CondExpLe(D, Type(1), M_bounds(0) + (M_bounds(1) - M_bounds(0)) * (1 - D), M_bounds(0));
+    vector<Type> NPR = calc_NPR(F_eq, vul, Meq, n_age, Pope);
+    Type B_eq = R0 * sum_BPR(NPR, weight);
+    D = B_eq/B0;
+  }
+  return Meq;
+}
+
 
 
 }

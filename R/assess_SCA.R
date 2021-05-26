@@ -211,7 +211,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                  vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
                  CAA_dist = c("multinomial", "lognormal"), CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
                  start = NULL, prior = list(), fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
-                 tv_M = c("none", "walk", "DD"), M_bounds = c(0.01, 5), refyear = 1,
+                 tv_M = c("none", "walk", "DD"), M_bounds = NULL, refyear = 1,
                  LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                  silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                  control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
@@ -293,6 +293,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       est_rec_dev <- rep(1, n_y)
     }
   }
+  if(tv_M == "DD") est_early_rec_dev <- rep(0, n_age-1) # Temporary for now
   
   if(is.character(late_dev) && late_dev == "comp50") {
     CAA_all <- colSums(CAA_hist, na.rm = TRUE)/max(colSums(CAA_hist, na.rm = TRUE))
@@ -331,6 +332,15 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   # Generate priors
   prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
   
+  # M_bounds
+  if(is.null(M_bounds)) {
+    if(tv_M == "none") {
+      M_bounds <- c(0, 1e4)
+    } else {
+      M_bounds <- c(0.75, 1.25) * mean(M)
+    }
+  }
+  
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
                I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
                CAA_hist = t(apply(CAA_hist, 1, function(x) x/sum(x))),
@@ -338,8 +348,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                weight = Wa, mat = mat_age, vul_type = vulnerability,
                SR_type = SR, CAA_dist = CAA_dist, catch_eq = catch_eq,
                est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y),
-               tv_M = tv_M, M_bounds = M_bounds,
-               use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
+               tv_M = tv_M, M_bounds = M_bounds, use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
   data$CAA_hist[data$CAA_hist < 1e-8] <- 1e-8
   
   # Starting values
@@ -359,7 +368,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       params$F_equilibrium <- start$F_equilibrium
     }
     if(catch_eq == "Pope" && !is.null(start$U_equilibrium) && is.numeric(start$U_equilibrium)) {
-      params$U_equilibrium <- start$U_equilibrium
+      params$F_equilibrium <- start$U_equilibrium
     }
     if(!is.null(start$vul_par) && is.numeric(start$vul_par)) {
       if(start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * Data@MaxAge (see help).")
@@ -409,9 +418,8 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     }
   }
   if(is.null(params$log_M0)) params$log_M0 <- log(M) %>% mean()
-  if(is.null(params$logit_M_walk)) params$logit_M_walk <- rep(0, n_y-1)
+  if(is.null(params$logit_M_walk)) params$logit_M_walk <- rep(0, n_y)
   if(is.null(params$F_equilibrium)) params$F_equilibrium <- 0
-  if(is.null(params$U_equilibrium)) params$U_equilibrium <- 0
   if(is.null(params$vul_par)) {
     CAA_mode <- which.max(colSums(CAA_hist, na.rm = TRUE))
     if((is.na(Data@LFC[x]) && is.na(Data@LFS[x])) || (Data@LFC[x] > Linf) || (Data@LFS[x] > Linf)) {
@@ -467,8 +475,8 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }
   if(fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
   if(!prior$use_prior[3]) map$log_M0 <- factor(NA)
-  if(tv_M != "walk") map$logit_M_walk <- factor(rep(NA, n_y - 1))
-  if(fix_F_equilibrium) map$F_equilibrium <- map$U_equilibrium <- factor(NA)
+  if(tv_M != "walk") map$logit_M_walk <- factor(rep(NA, n_y))
+  if(fix_F_equilibrium) map$F_equilibrium <- factor(NA)
   if(fix_omega) map$log_omega <- factor(NA)
   if(fix_tau) map$log_tau <- factor(NA)
   map$log_tau_M <- factor(NA)
@@ -504,13 +512,6 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   opt <- mod[[1]]
   SD <- mod[[2]]
   report <- obj$report(obj$env$last.par.best)
-  
-  if(tv_M != "none") {
-    refyear <- eval(refyear)
-    report$NPR0 <- do.call(cbind, report$NPR0)
-  } else {
-    report$NPR0 <- report$NPR0[[1]]
-  }
   
   Yearplusone <- c(Year, max(Year) + 1)
   YearEarly <- (Year[1] - n_age + 1):(Year[1] - 1)
@@ -558,10 +559,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }
   
   if(Assessment@conv) {
-    ref_pt <- lapply(seq_len(ifelse(tv_M == "none", 1, n_y)), function(xx) {
-      ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = report$M[xx, ], 
-                 weight = Wa, mat = mat_age, vul = report$vul, SR = SR, catch_eq = catch_eq)
-    })
+    ref_pt <- lapply(seq_len(ifelse(tv_M == "walk", n_y, 1)), ref_pt_SCA, obj = obj, report = report)
     
     if(catch_eq == "Baranov") {
       report$FMSY <- vapply(ref_pt, getElement, numeric(1), "FMSY")
@@ -592,6 +590,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     }
     
     if(SR != "none") {
+      refyear <- eval(refyear)
       if(catch_eq == "Baranov") {
         Assessment@FMSY <- report$FMSY[refyear]
         Assessment@F_FMSY <- structure(report$F/report$FMSY[refyear], names = Year)
@@ -620,26 +619,34 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   return(Assessment)
 }
 
-ref_pt_SCA <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker", "none"), 
-                       catch_eq = c("Baranov", "Pope")) {
-  SR <- match.arg(SR)
-  catch_eq <- match.arg(catch_eq)
+ref_pt_SCA <- function(y = 1, obj, report) {
+  Arec <- report$Arec
+  Brec <- report$Brec
+  M <- report$M[y, ]
+  weight <- obj$env$data$weight
+  mat <- obj$env$data$mat
+  vul <- report$vul
+  SR <- obj$env$data$SR_type
+  catch_eq <- obj$env$data$catch_eq
+  B0 <- report$B0
+  
+  tv_M <- obj$env$data$tv_M
+  M_bounds <- obj$env$data$M_bounds
   
   if(SR != "none") {
-    
     max_F <- ifelse(catch_eq == "Baranov", 4, 1)
     
     if(catch_eq == "Baranov") {
       opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 4), M = M, mat = mat, weight = weight, vul = vul, 
-                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq)
+                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
       FMSY <- opt2$minimum
     } else {
       opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 0.99), M = M, mat = mat, weight = weight, vul = vul, 
-                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq)
+                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
       UMSY <- opt2$minimum
     }
     opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                         Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq)
+                         Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
     MSY <- -1 * opt2$objective
     VBMSY <- opt3["VB"]
     RMSY <- opt3["R"]
@@ -653,12 +660,12 @@ ref_pt_SCA <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker", "
     Fvec <- seq(0, 2.5 * ifelse(SR == "none", mean(M), FMSY), length.out = 100)
     yield <- lapply(Fvec,
                     yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq)
+                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
   } else {
     Uvec <- seq(0, 0.99, 0.01)
     yield <- lapply(Uvec,
                     yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq)
+                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
   }
   SPR <- vapply(yield, getElement, numeric(1), "SPR")
   YPR <- vapply(yield, getElement, numeric(1), "YPR")
@@ -674,7 +681,31 @@ ref_pt_SCA <- function(Arec, Brec, M, weight, mat, vul, SR = c("BH", "Ricker", "
 }
 
 yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"), Arec, Brec, 
-                         catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE) {
+                         catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE, B0 = 1,
+                         tv_M = "none", M_bounds = NULL) {
+  if(tv_M != "DD") {
+    yield_fn_SCA_int(x, M, mat, weight, vul, SR, Arec, Brec, catch_eq, opt, x_transform)
+  } else {
+    
+    dep <- 0.4
+    for(i in 1:20) {
+      M_DD <- ifelse(dep >= 1, M_bounds[1], M_bounds[1] + (M_bounds[2] - M_bounds[1]) * (1 - dep))
+      out <- yield_fn_SCA_int(x, M = rep(M_DD, length(mat)), mat, weight, vul, SR, Arec, Brec, catch_eq, 
+                              opt = FALSE, x_transform = x_transform)
+      if(abs(out["B"]/B0 - dep) <= 1e-4) break
+      dep <- out["B"]/B0
+    }
+    
+    if(opt) {
+      return(-1 * out["Yield"])
+    } else {
+      return(out)
+    }
+  }
+}
+
+yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"), Arec, Brec, 
+                             catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE) {
   SR <- match.arg(SR)
   catch_eq <- match.arg(catch_eq)
   if(catch_eq == "Baranov") {
@@ -695,7 +726,7 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"),
   } else {
     Req <- 1
   }
-    
+  
   if(catch_eq == "Baranov") {
     CPR <- Baranov(vul, FMort, M, NPR)
   } else {
@@ -715,12 +746,11 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"),
   }
 }
 
-
 SCA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   if(obj$env$data$catch_eq == "Pope") {
     dots <- list(...)
     dots$data$C_hist <- rep(1e-8, dots$data$n_y)
-    par[names(par) == "U_equilibrium"] <- 0
+    par[names(par) == "F_equilibrium"] <- 0
     
     obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
                       random = obj$env$random, DLL = "SAMtool", silent = TRUE)

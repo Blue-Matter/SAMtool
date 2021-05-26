@@ -86,10 +86,11 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, 
                I_hist = I_hist, I_sd = matrix(0.01, n_y, 1), I_units = 1, I_vul = matrix(1, n_age, 1), 
                abs_I = 0, nsurvey = 1, LWT = 1,
-               CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(NA_real_, n_y), n_y = n_y, n_age = n_age, M = M,
+               CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(NA_real_, n_y), n_y = n_y, n_age = n_age,
                weight = Wa, mat = mat_age, vul_type = "logistic",
                SR_type = SR, CAA_dist = "multinomial", catch_eq = catch_eq,
-               est_early_rec_dev = rep(0, n_age - 1), est_rec_dev = rep(0, n_y), yindF = 0)
+               est_early_rec_dev = rep(0, n_age - 1), est_rec_dev = rep(0, n_y), yindF = 0,
+               tv_M = "none", M_bounds = c(0, 1e4), use_prior = rep(0, 4), prior_dist = matrix(NA, 4, 2))
 
   # Starting values
   params <- list()
@@ -124,22 +125,26 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
       params$transformed_h <- log(h_start - 0.2)
     }
   }
-
-  params$F_equilibrium <- params$U_equilibrium <- 0 
+  params$log_M0 <- log(M) %>% mean()
+  params$logit_M_walk <- rep(0, n_y)
+  params$F_equilibrium <- 0 
   
   if(is.null(params$vul_par)) params$vul_par <- c(logit(min(A95, 0.74 * max_age)/max_age/0.75), log(A95-A50))
 
   params$log_F_dev <- rep(0, n_y)
-  params$log_omega <- params$log_tau <- 0
+  params$log_omega <- params$log_tau <- params$log_tau_M <- 0
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control)
 
   map <- list()
-  map$transformed_h <- map$F_equilibrium <- map$U_equilibrium <- map$log_omega <- map$log_tau <- factor(NA)
+  map$transformed_h <- map$log_M0 <- factor(NA)
+  map$logit_M_walk <- factor(rep(NA, n_y))
+  map$F_equilibrium <- factor(NA)
   map$vul_par <- factor(c(NA, NA))
   map$log_F_dev <- factor(rep(NA, n_y))
+  map$log_omega <- map$log_tau <- map$log_tau_M <- factor(NA)
   map$log_early_rec_dev <- factor(rep(NA, n_age - 1))
   map$log_rec_dev <- factor(rep(NA, n_y))
 
@@ -165,7 +170,6 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
     structure(names = Yearplusone)
   
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
-  
   Assessment <- new("Assessment", Model = "SSS", 
                     Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
@@ -193,8 +197,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
   Assessment@U <- structure(report$U, names = Year)
   
   if(Assessment@conv) {
-    ref_pt <- ref_pt_SCA(Arec = report$Arec, Brec = report$Brec, M = M, weight = Wa, mat = mat_age, vul = report$vul, 
-                         SR = SR, catch_eq = catch_eq)
+    ref_pt <- ref_pt_SCA(obj = obj, report = report)
     report <- c(report, ref_pt[1:6])
     
     Assessment@UMSY <- report$UMSY
