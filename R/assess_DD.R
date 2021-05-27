@@ -59,7 +59,7 @@
 #' \item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
-#' \item \code{U_equilibrium} Equilibrium harvest rate leading into first year of the model (to determine initial depletion). By default, 0.
+#' \item \code{U_equilibrium} Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.
 #' \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@@CV_Cat[x].
 #' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@@sigmaR[x].
 #' \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@@CV_Ind[x]. Not

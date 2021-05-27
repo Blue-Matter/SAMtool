@@ -73,7 +73,7 @@
 #' The basic data inputs are catch (by weight), index (by weight/biomass), and catch-at-age matrix (by numbers).
 #' 
 #' With \code{catch_eq = "Baranov"} (default in SCA and SCA2), annual F's are estimated parameters assuming continuous fishing over the year, while
-#' an annual harvest rate from pulse fishing in the middle of the year is estimated in \code{SCA_Pope} or \code{SCA(catch_eq = "Pope")}. 
+#' an annual exploitation rate from pulse fishing in the middle of the year is estimated in \code{SCA_Pope} or \code{SCA(catch_eq = "Pope")}. 
 #'
 #' The annual sample sizes of the catch-at-age matrix is provided to the model (used in the likelihood for catch-at-age assuming
 #' a multinomial distribution) and is manipulated via argument \code{CAA_multiplier}. This argument is
@@ -687,13 +687,15 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"),
     yield_fn_SCA_int(x, M, mat, weight, vul, SR, Arec, Brec, catch_eq, opt, x_transform)
   } else {
     
-    dep <- 0.4
+    dep <- M_DD <- numeric(21)
+    dep[1] <- 0.4
     for(i in 1:20) {
-      M_DD <- ifelse(dep >= 1, M_bounds[1], M_bounds[1] + (M_bounds[2] - M_bounds[1]) * (1 - dep))
-      out <- yield_fn_SCA_int(x, M = rep(M_DD, length(mat)), mat, weight, vul, SR, Arec, Brec, catch_eq, 
+      M_DD[i] <- ifelse(dep[i] >= 1, M_bounds[1], 
+                        ifelse(dep[i] <= 0, M_bounds[2], M_bounds[1] + (M_bounds[2] - M_bounds[1]) * (1 - dep[i])))
+      out <- yield_fn_SCA_int(x, M = rep(M_DD[i], length(mat)), mat, weight, vul, SR, Arec, Brec, catch_eq, 
                               opt = FALSE, x_transform = x_transform)
-      if(abs(out["B"]/B0 - dep) <= 1e-4) break
-      dep <- out["B"]/B0
+      if(abs(out["B"]/B0 - dep[i]) <= 1e-4) break
+      dep[i+1] <- out["B"]/B0
     }
     
     if(opt) {

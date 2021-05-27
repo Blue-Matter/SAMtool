@@ -369,7 +369,7 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   B0 <- report$E0
   
   if(xaxis == "U") {
-    plot(u.vector[ind], Yield[ind], typ = 'l', xlab = "Harvest rate (U)",
+    plot(u.vector[ind], Yield[ind], typ = 'l', xlab = "Exploitation rate (U)",
          ylab = "Equilibrium yield")
     segments(x0 = umsy, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = umsy, lty = 2)

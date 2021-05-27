@@ -8,7 +8,7 @@
 #' @param sim Integer between 1 and MSE@@nsim. The simulation number for which the retrospectives will be plotted.
 #' @param plot_legend Logical. Whether to plot legend to reference year of assessment in the MSE.
 #' @author Q. Huynh
-#' @details For assessment models that utilize annual harvest rates (u), the instantaneous fishing mortality rates
+#' @details For assessment models that utilize annual exploitation rates (u), the instantaneous fishing mortality rates
 #' are obtained as F = -log(1 - u).
 #' @note This function only plots retrospectives from a single simulation in the MSE. Results from one figure
 #' may not be indicative of general assessment behavior and performance overall.

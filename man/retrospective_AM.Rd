@@ -25,7 +25,7 @@ Plots the true retrospective of an assessment model during the closed-loop simul
 are plotted over the course of the MSE are plotted against the operating model (true) values (in black).
 }
 \details{
-For assessment models that utilize annual harvest rates (u), the instantaneous fishing mortality rates
+For assessment models that utilize annual exploitation rates (u), the instantaneous fishing mortality rates
 are obtained as F = -log(1 - u).
 }
 \note{

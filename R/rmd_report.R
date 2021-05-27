@@ -395,8 +395,8 @@ rmd_F_FMSY <- function(conv_check = TRUE) {
   rmd_assess_timeseries("F_FMSY", "F/FMSY", "expression(F/F[MSY])", conv_check = conv_check, one_line = TRUE)
 }
 
-rmd_U <- function(header = NULL, fig.cap = "harvest rate") {
-  rmd_assess_timeseries("U", fig.cap, "\"Harvest rate (U)\"", header = header)
+rmd_U <- function(header = NULL, fig.cap = "exploitation rate") {
+  rmd_assess_timeseries("U", fig.cap, "\"Exploitation rate (U)\"", header = header)
 }
 
 rmd_U_UMSY <- function(conv_check = TRUE, fig.cap = "U/UMSY") {
@@ -405,7 +405,7 @@ rmd_U_UMSY <- function(conv_check = TRUE, fig.cap = "U/UMSY") {
 
 rmd_SSB <- function() rmd_assess_timeseries("SSB", "spawning biomass", "\"Spawning biomass\"")
 
-rmd_dynamic_SSB0 <- function(var = "dynamic_SSB0") rmd_assess_timeseries(var, "dynamic SSB0", "\"Dynamic SSB0\"")
+rmd_dynamic_SSB0 <- function(var = "dynamic_SSB0") rmd_assess_timeseries(var, "dynamic SSB0", "expression(\"Dynamic\"~SSB[0])")
 
 rmd_SSB_SSBMSY <- function(conv_check = TRUE) {
   rmd_assess_timeseries("SSB_SSBMSY", "SSB/SSBMSY", "expression(SSB/SSB[MSY])", conv_check = conv_check, one_line = TRUE)
@@ -488,7 +488,7 @@ rmd_yield_F <- function(model, conv_check = TRUE, header = NULL) {
 rmd_yield_U <- function(model, conv_check = TRUE, header = NULL) {
   if(conv_check) conv <- "if(conv) " else conv <- ""
 
-  ans <- c("```{r, fig.cap=\"Yield plot relative to harvest rate.\"}",
+  ans <- c("```{r, fig.cap=\"Yield plot relative to exploitation rate.\"}",
            paste0(conv, "plot_yield_", model, "(info$data, TMB_report, UMSY, MSY, xaxis = \"U\")"),
            "```\n")
   if(!is.null(header)) ans <- c(header, ans)
@@ -518,7 +518,7 @@ rmd_SPR <- function(conv_check = TRUE) {
   c("```{r, fig.cap=\"Spawning potential ratio.\"}",
     paste0(conv, " {"),
     "  if(!is.null(forecast$per_recruit$U)) {",
-    "    plot(forecast$per_recruit$U, forecast$per_recruit$SPR, ylim = c(0, 1), typ = \"l\", xlab = \"Harvest rate (U)\", ylab = \"Spawning potential ratio\")",
+    "    plot(forecast$per_recruit$U, forecast$per_recruit$SPR, ylim = c(0, 1), typ = \"l\", xlab = \"Exploitation rate (U)\", ylab = \"Spawning potential ratio\")",
     "  } else {",
     "    plot(forecast$per_recruit$FM, forecast$per_recruit$SPR, ylim = c(0, 1), typ = \"l\", xlab = \"Fishing mortality\", ylab = \"Spawning potential ratio\")",
     "  }",
@@ -532,7 +532,7 @@ rmd_YPR <- function(conv_check = TRUE) {
   c("```{r, fig.cap=\"Yield per recruit.\"}",
     paste0(conv, " {"),
     "  if(!is.null(forecast$per_recruit$U)) {",
-    "    plot(forecast$per_recruit$U, forecast$per_recruit$YPR, typ = \"l\", xlab = \"Harvest rate (U)\", ylab = \"Yield per recruit\")",
+    "    plot(forecast$per_recruit$U, forecast$per_recruit$YPR, typ = \"l\", xlab = \"Exploitation rate (U)\", ylab = \"Yield per recruit\")",
     "    U01 <- get_F01(forecast$per_recruit$U, forecast$per_recruit$YPR)",
     "    Umax <- get_Fmax(forecast$per_recruit$U, forecast$per_recruit$YPR)",
     "    abline(h = 0, col = \"grey\")",

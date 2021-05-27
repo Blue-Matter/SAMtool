@@ -94,9 +94,9 @@ see Additional arguments section for setup of survey selectivity parameters. See
 
 \item{comp_like}{A string indicating either \code{"multinomial"} (default) or \code{"lognormal"} distributions for the composition data.}
 
-\item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0 and M priors
-lognormal (mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors.
-For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). For all others, provide a length-2 vector for the mean and SD.
+\item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
+lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
+For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors. For all others, provide a length-2 vector for the mean and SD.
 See \href{../doc/RCM_eq.html}{vignette} for full description.}
 
 \item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also \code{drop_highF}.}

@@ -40,7 +40,7 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
   else derived <- rep(NA, 6)
   derived <- data.frame(Value = derived,
                         Description = c("Unfished biomass", "Unfished abundance", "Maximum sustainable yield (MSY)",
-                                        "Harvest rate at MSY", "Biomass at MSY", "Depletion at MSY"),
+                                        "Exploitation rate at MSY", "Biomass at MSY", "Depletion at MSY"),
                         stringsAsFactors = FALSE)
   rownames(derived) <- c("B0", "N0", "MSY", "UMSY", "BMSY", "BMSY/B0")
 
@@ -242,7 +242,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
 
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
-  attr(retro, "TS_lab") <- c("Harvest rate", expression(U/U[MSY]), "Biomass", expression(B/B[MSY]), expression(B/B[0]),
+  attr(retro, "TS_lab") <- c("Exploitation rate", expression(U/U[MSY]), "Biomass", expression(B/B[MSY]), expression(B/B[0]),
                              "Recruitment", "Vulnerable biomass")
 
   return(retro)
