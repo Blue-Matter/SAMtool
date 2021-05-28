@@ -262,7 +262,7 @@ rmd_RCM_index_output <- function(sur, s_name) {
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) index values for ", s_name[sur], ". Error bars indicate 95% confidence intervals for observed values.\"}"),
-           "if(length(RCMdata@I_sd)) {",
+           "if(length(RCMdata@I_sd) && any(RCMdata@I_sd > 0, na.rm = TRUE)) {",
            paste0("  II <- RCMdata@Index[, ", sur, "]"),
            "  ind <- seq(min(which(!is.na(II))), max(which(!is.na(II))), 1)",
            paste0("  err <- exp(log(II) + outer(RCMdata@I_sd[, ", sur, "], c(-1.96, 1.96)))"),

@@ -245,7 +245,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
     
     info$params$log_rec_dev <- rep(0, n_y_ret)
     info$params$log_F_dev <- info$params$log_F_dev[1:n_y_ret]
-    info$params$logit_M_walk <- rep(0, n_y_ret - 1)
+    info$params$logit_M_walk <- rep(0, n_y_ret)
     
     map <- obj$env$map
     if(any(names(map) == "log_rec_dev")) {

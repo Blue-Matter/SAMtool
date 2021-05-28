@@ -88,7 +88,7 @@ and additional modifications for fixing selectivity parameters will likely be ne
 \item{s_selectivity}{A vector of length nsurvey to indicate the selectivity of the corresponding columns in \code{data$Index}. Use \code{"B"} for
 total biomass, or \code{"SSB"} for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
 If the survey selectivity is otherwise independent of anything else in the model, use \code{"logistic"}, \code{"dome"}, or \code{"free"} to specify the functional form of selectivity, and
-see Additional arguments section for setup of survey selectivity parameters. See \href{../doc/RCM_sel.html}{selectivity vignette} for more information.}
+see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.}
 
 \item{LWT}{A named list of likelihood weights for the RCM. See below.}
 
@@ -97,7 +97,7 @@ see Additional arguments section for setup of survey selectivity parameters. See
 \item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
 lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
 For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors. For all others, provide a length-2 vector for the mean and SD.
-See \href{../doc/RCM_eq.html}{vignette} for full description.}
+See Articles section for full description.}
 
 \item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also \code{drop_highF}.}
 
@@ -149,14 +149,15 @@ index but the data won't enter the likelihood. See section on likelihood weights
 \item{\code{RCMdata}}{An \linkS4class{RCMdata} object.}
 }}
 
-\section{Vignette}{
+\section{Articles}{
 
-Three vignettes are available for the RCM:
+Three articles are available for the RCM:
 
 \itemize{
-\item \href{../doc/RCM.html}{General overview of approach}
-\item \href{../doc/RCM_eq.html}{Mathematical description}
-\item \href{../doc/RCM_sel.html}{Setup of selectivity settings} (useful for more data-rich cases)
+\item \href{https://openmse.com/tutorial-rcm/}{General overview of approach}
+\item \href{https://openmse.com/tutorial-rcm-eq/}{Mathematical description}
+\item \href{https://openmse.com/tutorial-rcm-select/}{Setup of selectivity settings} (useful for more data-rich cases)
+\item \href{https://openmse.com/features-assessment-models/5-priors/}{Description of priors}
 }
 }
 
@@ -218,7 +219,6 @@ Zero (default) implies unfished conditions in year one. Otherwise, this is used 
 \item age_error - Optional, a square matrix of maxage + 1 rows and columns to specify ageing error. The aa-th column assigns a proportion of the true age in the
 a-th row to observed age. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).
 \item sel_block - Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function to a fleet for certain years.
-See the \href{../doc/RCM_sel.html}{selectivity} vignette for more details.
 }
 }
 
@@ -230,7 +230,7 @@ For \code{RCM}, additional arguments can be passed to the model via \code{...}:
 \item vul_par: A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
 to LFS (length of full selectivity), L5 (length of 5 percent selectivity), and Vmaxlen (selectivity at length Linf). By default,
 the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage+1 rows where
-the row specifies the selectivity at age. See the \href{../doc/RCM_sel.html}{selectivity} vignette for more information.
+the row specifies the selectivity at age. See Articles section.
 \item ivul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. Values in the column are ignored
 if \code{s_selectivity} is mapped to a fishing fleet (add NA placeholders in that case). 
 If any \code{s_selectivity = "free"}, then this matrix needs to be of maxage+1 rows where

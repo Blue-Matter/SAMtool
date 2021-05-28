@@ -15,20 +15,14 @@
 #' assessment models with harvest control rules. Such MPs can be used and tested in management strategy evaluation
 #' with MSEtool operating models. An overview of these features is available in the \href{../doc/SAMtool.html}{SAMtool vignette}.
 #'
-#' The following assessment models are available:
+#' The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. 
+#' 
+#' The following articles are available on the openMSE website:
 #' \itemize{
-#' \item \href{../doc/Surplus_production.html}{Surplus production} (\link{SP}, \link{SP_SS}, \link{SP_Fox}, and \code{spict})
-#' \item \href{../doc/Delay_difference.html}{Delay difference} (\link{DD_TMB}, \link{cDD}, \link{DD_SS}, and \link{cDD_SS})
-#' \item \href{../doc/SCA.html}{Statistical catch-at-age} (\link{SCA}, \link{SCA2}, and \link{SCA_Pope})
-#' \item Simple Stock Synthesis (\link{SSS} which implements \link{SCA_Pope} with fixed depletion assumption)
-#' \item \href{../doc/VPA.html}{Virtual population analysis} (\link{VPA})
+#' \item \href{https://openmse.com/features-assessment-models/}{Description of assessment models}
+#' \item \href{https://openmse.com/tutorial-rcm/}{General overview of RCM}
 #' }
 #'
-#' The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. Information can be found
-#' \href{../doc/RCM.html}{here}.
-#'
-#' All SAMtool vignettes can also be viewed by typing \code{browseVignettes("SAMtool")} into the R console or through the
-#' SAMtool webpage on \href{https://cran.r-project.org/package=SAMtool}{CRAN}.
 #'
 #' @references
 #' Carruthers, T.R., Punt, A.E., Walters, C.J., MacCall, A.,

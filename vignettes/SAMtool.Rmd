@@ -1,7 +1,7 @@
 ---
-title: "1. User guide to SAMtool and model-based MPs"
+title: "Introduction to SAMtool and model-based MPs"
 subtitle: "Development, testing, and implementation of model-based management procedures"
-author: "Quang Huynh (<quang@bluematterscience.com), Tom Carruthers (tom@bluematterscience.com>), 
+author: "Quang Huynh (<quang@bluematterscience.com>), Tom Carruthers (<tom@bluematterscience.com>), 
          Adrian Hordyk (<adrian@bluematterscience.com>)"
 date: "`r Sys.Date()`"
 output: 
@@ -57,7 +57,7 @@ options(width = 650)
 
 
 # Introduction 
-SAMtool is an extension of the MSEtool package for implementing closed-loop simulation testing of management procedures (MP), a process used in management strategy evaluation (MSE). The components of the operating model (OM) for conducting MSEs for data-rich stocks is wholly contained within MSEtool, but SAMtool provides the tools for implementing additional features to facilitate model-based MPs. Whereas DLMtool is primarily designed for testing data-limited MPs, SAMtool provides an object-oriented framework for building out data-rich MPs, which typically combine an assessment model with a harvest control rule (HCR) to provide a catch recommendation. MPs created by SAMtool are designed to be used with the operating model of MSEtool through the `runMSE` function. 
+As part of openMSE, SAMtool implements closed-loop simulation testing of management procedures (MP), a process used in management strategy evaluation (MSE). The components of the operating model (OM) for conducting MSEs for data-rich stocks is wholly contained within MSEtool, but SAMtool provides the tools for implementing additional features to facilitate model-based MPs. Whereas DLMtool is primarily designed for testing data-limited MPs, SAMtool provides an object-oriented framework for building out data-rich MPs, which typically combine an assessment model with a harvest control rule (HCR) to provide a catch recommendation. MPs created by SAMtool are designed to be used with the operating model of MSEtool through the `runMSE` function. 
 
 The overall structure of a closed-loop simulation for a MSE in MSEtool can be described through the classes deployed in the package. An operating model (class __OM__ object) parameterizes the stock (biology), fleet, observation, and implementation dynamics of the MSE. To begin the MSE, the __OM__ object generates the data to be used for a management procedure and stores them in an object of class __Data__. A function of class __MP__ uses the __Data__ object and returns an object of class __Rec__ containing the management recommendations, e.g., some combination of spatial closures and size, effort and catch limits. Candidate MPs should not see the operating model and interacts solely with data simulated in the __Data__ object. From the management recommendations, the __OM__ object is updated and the process is successively repeated as the operating model projects forward in time. The output from the closed-loop simulation is returned in an object of class __MSE__, from which summary statistics can be calculated.
 
@@ -75,9 +75,10 @@ Additionally, __Assess__ functions can be used in an assessment-only context (ex
 
 _Figure 2: Design of SAMtool package for building management procedures from assessment models and harvest control rules for closed-loop simulation with the MSEtool package. Assess and HCR functions and the Assessment object are unique to SAMtool, but work within the framework of MSEtool. Separate functions are also available for standardized reporting of output from assessment models in a stock assessment setting._
 
+## Additional features
+SAMtool provides a conditioning model (RCM, for Rapid Conditioning Model) for generating operating models fitted to data. 
 
-### Additional features
-SAMtool provides a conditioning model (RCM, for Rapid Conditioning Model) for generating operating models fitted to data. For more information, see the <a href="RCM.html">RCM vignette</a>.
+Articles with the description of the [assessment models](https://openmse.com/features-assessment-models/) and the [RCM](https://openmse.com/tutorial-rcm/) are available on the [openMSE](https://openmse.com/) website.
 
 To support multiple-area operating models, the `simmov` function estimates the movement matrix based on the prescribed number of areas, biomass distribution among areas in unfished conditions, and the probability of staying in each area in the next time step.
 
@@ -88,7 +89,7 @@ Assessment models in SAMtool are functions of class __Assess__. Currently, the f
 - `DD_TMB` (Delay-Difference model and its state-space counterpart, `DD_SS`)
 - `cDD` (Continuous Delay-Differential model and its state-space counterpart, `cDD_SS`)
 - `SP` (Surplus Production model and its state-space counterpart, `SP_SS`)
-- `SCA` (Statistical Catch at age model and variants `SCA2` and `SCA_Pope`)
+- `SCA` (Statistical Catch at age model and variants for time varying M: `SCA_RWM` and `SCA_DDM`)
 - `SSS` (Simple Stock Synthesis implementation with fixed terminal depleton assumption)
 - `VPA` (Virtual Population Analysis)
 
@@ -230,5 +231,5 @@ Once it is determined that the SAMtool assessment models are performing adequate
 
 SAMtool development is funded by the Canadian Department of Fisheries and Oceans and benefits from ongoing collaborations with the Natural Resources Defense Council and number of Canadian government scientists including Robyn Forrest, Sean Anderson and Daniel Duplisea. 
 
-Development of the features in the [SAMtool](https://github.com/Blue-Matter/SAMtool/) originated at the University of British Columbia in collaboration with the Natural Resources Defense Council. Further development has been funded by the Gordon and Betty Moore Foundation, the Packard Foundation, U.S. National Oceanic and Atmospheric Administration, Fisheries and Oceans Canada, the Walton Foundation, Resources Legacy Fund, the Natural Resources Defense Council, the United Nations Food and Agricultural Organization and the California Department of Fish and Wildlife. 
+Development of the features in the [SAMtool](https://github.com/Blue-Matter/SAMtool/) package originated at the University of British Columbia in collaboration with the Natural Resources Defense Council. Further development has been funded by the Gordon and Betty Moore Foundation, the Packard Foundation, U.S. National Oceanic and Atmospheric Administration, Fisheries and Oceans Canada, the Walton Foundation, Resources Legacy Fund, the Natural Resources Defense Council, the United Nations Food and Agricultural Organization and the California Department of Fish and Wildlife. 
 

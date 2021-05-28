@@ -204,10 +204,10 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
             if(any(RCMdata@Index > 0, na.rm = TRUE)) {
-              survey_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
-            } else survey_output <- NULL
+              index_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
+            } else index_output <- NULL
 
-            all_sims_output <- c(fleet_output, survey_output, "### Model predictions\n",
+            all_sims_output <- c(fleet_output, index_output, "### Model predictions\n",
                                  rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), rmd_log_rec_dev())
 
             ####### Fit to mean inputs from operating model
@@ -346,12 +346,12 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               } else MS_plots <- NULL
 
               if(any(RCMdata@IAA > 0, na.rm = TRUE)) {
-                IAA_plots <- c("#### Survey age comps \n",
+                IAA_plots <- c("#### Index age comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", comps = "age", label = s_name))
               } else IAA_plots <- NULL
 
               if(any(RCMdata@IAL > 0, na.rm = TRUE)) {
-                IAL_plots <- c("#### Survey length comps \n",
+                IAL_plots <- c("#### Index length comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAL", pred = "report$IALpred", comps = "length", label = s_name))
               } else IAL_plots <- NULL
 

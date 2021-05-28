@@ -179,7 +179,7 @@ SCA2 <- function(x = 1, Data, AddInd = "B", vulnerability = c("logistic", "dome"
   
   out <- SCA_(x, Data, AddInd, SR = "none", vulnerability, catch_eq = "Baranov", CAA_dist, CAA_multiplier, rescale, max_age,
               start, prior, fix_h, fix_F_equilibrium, fix_omega, fix_tau,
-              LWT = LWT, early_dev = "all", late_dev = late_dev, integrate = integrate,
+              LWT = LWT, early_dev = "all", late_dev = common_dev, integrate = integrate,
               silent = silent, opt_hess = opt_hess, n_restart = n_restart, control = control, 
               inner.control = inner.control, ...)
   return(out)

@@ -77,7 +77,7 @@ a-th row to observed age. Thus, all rows should sum to 1. Default is an identity
 
 \item{\code{sel_block}}{For time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function 
 to a fleet for certain years. By default, constant selectivity for each individual fleet.
-See the \href{../doc/RCM_sel.html}{selectivity} vignette for more details.}
+See the \href{https://openmse.com/tutorial-rcm-select/}{selectivity} article for more details.}
 
 \item{\code{Misc}}{A list of miscellaneous inputs. Used internally.}
 }}
