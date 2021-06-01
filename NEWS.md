@@ -1,7 +1,7 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
-## SAMtool 2.0.0
-- A new S4 object, `RCMdata`, used to send data to the RCM model, i.e., `RCM(OM, RCMdata)`. Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms 'survey' and 'index' to focus on 'index' as much as possible when maintaining backwards compatibility. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v2.0) to fit the model.
+## SAMtool 1.2.0
+- A new S4 object, `RCMdata`, used to send data to the RCM model, i.e., `RCM(OM, RCMdata)`. Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms 'survey' and 'index' to focus on 'index' as much as possible when maintaining backwards compatibility. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.
 - Create a profiling function for `RCM` models. Steepness, R0, and final depletion can be profiled.
 - Fix plotting bug in `compare_RCM`.
 - A new SCA assessment model that incorporates density-dependent natural mortality (`SCA_DDM`) is added.

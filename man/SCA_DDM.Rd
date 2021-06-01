@@ -83,7 +83,7 @@ tau is fixed to value provided in \code{start} (if provided), otherwise, value b
 
 \item{LWT}{A vector of likelihood weights for each survey.}
 
-\item{early_dev}{Numeric or character string describing the years for which recruitment deviations are estimated in \code{SCA}. By default,
+\item{early_dev}{Numeric or character string describing the years for which recruitment deviations are estimated. By default,
 equal to \code{"comp_onegen"}, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
 With \code{"comp"}, rec devs are estimated starting in the first year with CAA. With \code{"all"}, rec devs start at the beginning of the model.
 If numeric, the number of years after the first year of the model for which to start estimating rec devs. Use negative numbers for years prior to the first year.}
@@ -117,11 +117,6 @@ hasn't converged. The optimization continues from the parameters from the previo
 is passed on to \code{\link[TMB]{newton}}.}
 
 \item{...}{Other arguments to be passed.}
-
-\item{common_dev}{Typically, a numeric for the number of most recent years in which a common recruitment deviation will
-be estimated (in \code{SCA2}, uninformative years will have a recruitment closer to the mean, which can be very misleading,
-especially near the end of the time series). By default, \code{"comp50"} uses the number of ages (smaller than the mode)
-for which the catch-at-age matrix has less than half the abundance than that at the mode.}
 }
 \value{
 An object of class \linkS4class{Assessment}.

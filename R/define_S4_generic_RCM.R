@@ -35,7 +35,6 @@
 #' @param cores Integer for the number of CPU cores for the stock reduction analysis.
 #' @param integrate Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).
 #' @param mean_fit Logical, whether to run an additional with mean values of life history parameters from the OM.
-#' @param sims A logical vector of length \code{OM@@nsim} or a numeric vector indicating which simulations to keep.
 #' @param drop_nonconv Logical, whether to drop non-converged fits of the RCM, including fits where F = NA.
 #' @param drop_highF Logical, whether to drop fits of the RCM where F = \code{max_F}.
 #' @param control A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.
@@ -58,6 +57,9 @@
 #' index but the data won't enter the likelihood. See section on likelihood weights.
 #'
 #' @return An object of class \linkS4class{RCModel} (see link for description of output).
+#' 
+#' \code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
+#' from the OM.
 #'
 #' @section Articles:
 #' Three articles are available for the RCM:

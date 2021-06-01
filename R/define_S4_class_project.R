@@ -296,7 +296,7 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
     }
   }
   if(Pope) {
-    CAApred <- t(t(N) * exp(-0.5 * M) * UU)
+    CAApred <- t(t(N) * exp(-0.5 * M_p) * UU)
     if(constrain == "F") VB <- colSums(t(N) * TMB_report$vul * weight * exp(-0.5 * M_p))
     Cpred <- colSums(t(CAApred) * weight)
   } else {

@@ -465,11 +465,11 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   }
   
   if(RCMdata@Misc$condition == "effort" && !is.null(dots$OMeff) && dots$OMeff) {
-    data$Ehist <- matrix(FleetPars$Find[x, ], nyears, nfleet)
+    RCMdata@Ehist <- matrix(FleetPars$Find[x, ], nyears, nfleet)
   }
   
   if(length(RCMdata@Ehist) && any(RCMdata@Ehist > 0, na.rm = TRUE)) {
-    rescale_effort <- 1/mean(data$Ehist, na.rm = TRUE)
+    rescale_effort <- 1/mean(RCMdata@Ehist, na.rm = TRUE)
     E_hist <- RCMdata@Ehist * rescale_effort
     E_eq <- RCMdata@E_eq * rescale_effort
   } else {
@@ -1079,7 +1079,7 @@ profile_likelihood_RCM <- function(x, ...) {
   return(output)
 }
 
-
+#' @importFrom dplyr select starts_with
 nll_depletion_profile <- function(xx) {
   nll_fleet <- xx[[2]][-nrow(xx[[2]]), ] %>% select(starts_with("Fleet"))
   nll_fleet$Data <- rownames(nll_fleet)

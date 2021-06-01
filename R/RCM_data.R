@@ -219,7 +219,7 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
 }
 
 #' @rdname RCM
-#' @slot RCMdata An \linkS4class{RCMdata} object.
+#' @param RCMdata An \linkS4class{RCMdata} object.
 #' @export
 check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort")) {
 
@@ -611,7 +611,7 @@ check_OM_for_sampling <- function(OM, RCMdata) {
     any_CAL <- !is.null(RCMdata@CAL) && any(RCMdata@CAL > 0, na.rm = TRUE)
     any_ML <- RCMdata@MS_type == "length" && any(RCMdata@MS > 0, na.rm = TRUE)
     any_IAL <- !is.null(RCMdata@IAL) && any(RCMdata@IAL > 0, na.rm = TRUE)
-    if(any_CAL || any_ML || any_s_CAL) {
+    if(any_CAL || any_ML || any_IAL) {
       stop("OM@LenCV not found in OM.", call. = FALSE)
     } else {
       OM@LenCV <- c(0.1, 0.1)

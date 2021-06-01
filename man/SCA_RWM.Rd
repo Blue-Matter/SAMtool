@@ -120,11 +120,6 @@ hasn't converged. The optimization continues from the parameters from the previo
 is passed on to \code{\link[TMB]{newton}}.}
 
 \item{...}{Other arguments to be passed.}
-
-\item{common_dev}{Typically, a numeric for the number of most recent years in which a common recruitment deviation will
-be estimated (in \code{SCA2}, uninformative years will have a recruitment closer to the mean, which can be very misleading,
-especially near the end of the time series). By default, \code{"comp50"} uses the number of ages (smaller than the mode)
-for which the catch-at-age matrix has less than half the abundance than that at the mode.}
 }
 \value{
 An object of class \linkS4class{Assessment}.

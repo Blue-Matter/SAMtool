@@ -682,7 +682,7 @@ ref_pt_SCA <- function(y = 1, obj, report) {
                 per_recruit = data.frame(FM = Fvec, SPR = SPR/SPR[1], YPR = YPR), SR_par = SR_par))
   } else {
     return(list(UMSY = UMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                per_recruit = data.frame(U = Uvec, SPR = SPR/SPR[1], YPR = YPR), SR_par = SR_par))
+                per_recruit = data.frame(U = Fvec, SPR = SPR/SPR[1], YPR = YPR), SR_par = SR_par))
   }
   
 }

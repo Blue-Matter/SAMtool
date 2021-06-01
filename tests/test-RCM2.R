@@ -10,8 +10,8 @@ library(SAMtool)
 #OM_condition <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
 
 # Base
-SRA_data <- readRDS("tests/Data_files/IYE_data.rds")
-OM_condition <- readRDS("tests/Data_files/IYE_OM_2sim.rds")
+SRA_data <- readRDS("tests/yelloweye_rockfish/IYE_data.rds")
+OM_condition <- readRDS("tests/yelloweye_rockfish/IYE_OM_2sim.rds")
 
 # Update OM to include Eobs slots
 #OM <- new("OM")
@@ -41,13 +41,12 @@ OM_250@cpars$Mat_age <- OM_condition@cpars$Mat_age[1, , 1] %>% array(c(81, 250, 
 saveRDS(OM_250, file = "tests/Data_files/IYE_OM_250sim.rds")
 
 
-data_names <- c("Chist", "Index", "I_sd", "I_type", "length_bin", "s_CAA", "CAA", "CAL", "I_units")
-data_ind <- match(data_names, names(SRA_data))
+data_names <- c("Chist", "Index", "I_sd", "length_bin", "s_CAA", "CAA", "CAL", "I_units")
 
-SRA <- RCM(OM = OM_condition, data = SRA_data[data_ind], condition = "catch2", selectivity = rep("free", 2),
-           s_selectivity = rep("logistic", 5), resample = TRUE, #cores = 1,
+SRA <- RCM(OM = OM_condition, data = SRA_data[match(data_names, names(SRA_data))], condition = "catch2", selectivity = rep("free", 2),
+           s_selectivity = rep("logistic", 5), #resample = TRUE, #cores = 1,
            vul_par = SRA_data$vul_par, map_vul_par = matrix(NA, 81, 2),
-           map_s_vul_par = SRA_data$map_s_vul_par, map_log_rec_dev = SRA_data$map_log_rec_dev,
+           map_ivul_par = SRA_data$map_s_vul_par, map_log_rec_dev = SRA_data$map_log_rec_dev,
            #prior = list(M = c(0.02, 0.05)),
            LWT = list(CAL = 0, CAA = 0))
 SRA@OM@MPA <- FALSE

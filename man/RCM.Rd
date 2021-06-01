@@ -70,6 +70,8 @@ RCM(OM, data, ...)
 )
 }
 \arguments{
+\item{RCMdata}{An \linkS4class{RCMdata} object.}
+
 \item{OM}{An object of class \linkS4class{OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).}
 
@@ -112,11 +114,12 @@ See Articles section for full description.}
 \item{drop_highF}{Logical, whether to drop fits of the RCM where F = \code{max_F}.}
 
 \item{control}{A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.}
-
-\item{sims}{A logical vector of length \code{OM@nsim} or a numeric vector indicating which simulations to keep.}
 }
 \value{
 An object of class \linkS4class{RCModel} (see link for description of output).
+
+\code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
+from the OM.
 }
 \description{
 Intended for conditioning operating models for MSEtool. For data-limited stocks, this function can generate a range of potential depletion scenarios inferred from sparse data.
@@ -143,12 +146,6 @@ The easiest way to turn off time-varying growth/M is by setting: \code{OM@Msd <-
 To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 index but the data won't enter the likelihood. See section on likelihood weights.
 }
-\section{Slots}{
-
-\describe{
-\item{\code{RCMdata}}{An \linkS4class{RCMdata} object.}
-}}
-
 \section{Articles}{
 
 Three articles are available for the RCM:
