@@ -92,6 +92,13 @@ rmd_VPA <- function(Assessment, ...) {
 
 
 plot_yield_VPA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "Depletion")) {
+  
+  # For plot_yield_VPA
+  Assessment@TMB_report$M <- matrix(Assessment@info$data$M, nrow = 1)
+  Assessment@TMB_report$vul <- Assessment@TMB_report$report$vul_p
+  Assessment@info$data$mat <- Assessment@info$LH$mat
+  Assessment@info$data$SR_type <- Assessment@info$SR
+  
   plot_yield_SCA(data = data, report = report, fmsy = fmsy, msy = msy, xaxis = xaxis)
 }
 

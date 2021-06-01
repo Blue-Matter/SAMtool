@@ -559,19 +559,6 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }
   
   if(Assessment@conv) {
-    ref_pt <- lapply(seq_len(ifelse(tv_M == "walk", n_y, 1)), ref_pt_SCA, obj = obj, report = report)
-    
-    if(catch_eq == "Baranov") {
-      report$FMSY <- vapply(ref_pt, getElement, numeric(1), "FMSY")
-    } else {
-      report$UMSY <- vapply(ref_pt, getElement, numeric(1), "UMSY")
-    }
-    report$MSY <- vapply(ref_pt, getElement, numeric(1), "MSY")
-    report$VBMSY <- vapply(ref_pt, getElement, numeric(1), "VBMSY")
-    report$RMSY <- vapply(ref_pt, getElement, numeric(1), "RMSY")
-    report$BMSY <- vapply(ref_pt, getElement, numeric(1), "BMSY")
-    report$EMSY <- vapply(ref_pt, getElement, numeric(1), "EMSY")
-    
     if(integrate) {
       SE_Early <- ifelse(est_early_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_early_rec_dev"]), NA)
       SE_Main <- ifelse(est_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_rec_dev"]), NA)
@@ -589,23 +576,34 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       SE_Dev[is.na(SE_Dev)] <- 0
     }
     
-    if(SR != "none") {
-      refyear <- eval(refyear)
-      if(catch_eq == "Baranov") {
-        Assessment@FMSY <- report$FMSY[refyear]
-        Assessment@F_FMSY <- structure(report$F/report$FMSY[refyear], names = Year)
-      } else {
-        Assessment@UMSY <- report$UMSY[refyear]
-        Assessment@U_UMSY <- structure(report$U/report$UMSY[refyear], names = Year)
-      }
-      Assessment@MSY <- report$MSY[refyear]
-      Assessment@BMSY <- report$BMSY[refyear]
-      Assessment@SSBMSY <- report$EMSY[refyear]
-      Assessment@VBMSY <- report$VBMSY[refyear]
-      Assessment@B_BMSY <- structure(report$B/report$BMSY[refyear], names = Yearplusone)
-      Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY[refyear], names = Yearplusone)
-      Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY[refyear], names = Yearplusone)
+    ref_pt <- lapply(seq_len(ifelse(tv_M == "walk", n_y, 1)), ref_pt_SCA, obj = obj, report = report)
+    
+    if(catch_eq == "Baranov") {
+      report$FMSY <- vapply(ref_pt, getElement, numeric(1), "FMSY")
+    } else {
+      report$UMSY <- vapply(ref_pt, getElement, numeric(1), "UMSY")
     }
+    report$MSY <- vapply(ref_pt, getElement, numeric(1), "MSY")
+    report$VBMSY <- vapply(ref_pt, getElement, numeric(1), "VBMSY")
+    report$RMSY <- vapply(ref_pt, getElement, numeric(1), "RMSY")
+    report$BMSY <- vapply(ref_pt, getElement, numeric(1), "BMSY")
+    report$EMSY <- vapply(ref_pt, getElement, numeric(1), "EMSY")
+    
+    refyear <- eval(refyear)
+    if(catch_eq == "Baranov") {
+      Assessment@FMSY <- report$FMSY[refyear]
+      Assessment@F_FMSY <- structure(report$F/report$FMSY[refyear], names = Year)
+    } else {
+      Assessment@UMSY <- report$UMSY[refyear]
+      Assessment@U_UMSY <- structure(report$U/report$UMSY[refyear], names = Year)
+    }
+    Assessment@MSY <- report$MSY[refyear]
+    Assessment@BMSY <- report$BMSY[refyear]
+    Assessment@SSBMSY <- report$EMSY[refyear]
+    Assessment@VBMSY <- report$VBMSY[refyear]
+    Assessment@B_BMSY <- structure(report$B/report$BMSY[refyear], names = Yearplusone)
+    Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY[refyear], names = Yearplusone)
+    Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY[refyear], names = Yearplusone)
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report
@@ -620,69 +618,81 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
 }
 
 ref_pt_SCA <- function(y = 1, obj, report) {
-  Arec <- report$Arec
-  Brec <- report$Brec
+
+  if(obj$env$data$SR_type == "none") {
+    # Fit BH 
+    R0_start <- log(mean(report$R))
+    h_start <- logit((0.7 - 0.2)/0.8)
+    opt <- nlminb(c(R0_start, h_start), get_SR, E = report$E, R = report$R, EPR0 = report$EPR0)
+    SR_par <- get_SR(opt$par, E = report$E, R = report$R, EPR0 = report$EPR0, opt = FALSE)
+    
+    Arec <- SR_par$Arec
+    Brec <- SR_par$Brec
+    SR <- "BH"
+  } else {
+    
+    SR_par <- NULL
+    SR <- obj$env$data$SR_type
+    Arec <- report$Arec
+    Brec <- report$Brec
+  }
+  
   M <- report$M[y, ]
   weight <- obj$env$data$weight
   mat <- obj$env$data$mat
   vul <- report$vul
-  SR <- obj$env$data$SR_type
+  
   catch_eq <- obj$env$data$catch_eq
-  B0 <- report$B0
   
   tv_M <- obj$env$data$tv_M
   M_bounds <- obj$env$data$M_bounds
+  B0 <- report$B0
   
-  if(SR != "none") {
-    max_F <- ifelse(catch_eq == "Baranov", 4, 1)
-    
-    if(catch_eq == "Baranov") {
-      opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 4), M = M, mat = mat, weight = weight, vul = vul, 
-                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
-      FMSY <- opt2$minimum
-    } else {
-      opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 0.99), M = M, mat = mat, weight = weight, vul = vul, 
-                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
-      UMSY <- opt2$minimum
-    }
-    opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                         Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
-    MSY <- -1 * opt2$objective
-    VBMSY <- opt3["VB"]
-    RMSY <- opt3["R"]
-    BMSY <- opt3["B"]
-    EMSY <- opt3["E"]
-  } else {
-    FMSY <- UMSY <- MSY <- VBMSY <- RMSY <- BMSY <- EMSY <- NULL
-  }
+  max_F <- ifelse(catch_eq == "Baranov", 4, 0.99)
+  opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, max_F), M = M, mat = mat, weight = weight, vul = vul, 
+                   SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
+  opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                       Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
   
   if(catch_eq == "Baranov") {
-    Fvec <- seq(0, 2.5 * ifelse(SR == "none", mean(M), FMSY), length.out = 100)
-    yield <- lapply(Fvec,
-                    yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
+    FMSY <- opt2$minimum
   } else {
-    Uvec <- seq(0, 0.99, 0.01)
-    yield <- lapply(Uvec,
-                    yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
+    UMSY <- opt2$minimum
   }
+  MSY <- -1 * opt2$objective
+  VBMSY <- opt3["VB"]
+  RMSY <- opt3["R"]
+  BMSY <- opt3["B"]
+  EMSY <- opt3["E"]
+  
+  if(catch_eq == "Baranov") {
+    Fvec <- seq(0, 2.5 * FMSY, length.out = 100)
+  } else {
+    Fvec <- seq(0, 0.99, 0.01)
+  }
+  
+  yield <- lapply(Fvec,
+                  yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                  Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
   SPR <- vapply(yield, getElement, numeric(1), "SPR")
   YPR <- vapply(yield, getElement, numeric(1), "YPR")
   
   if(catch_eq == "Baranov") {
     return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                per_recruit = data.frame(FM = Fvec, SPR = SPR/SPR[1], YPR = YPR)))
+                per_recruit = data.frame(FM = Fvec, SPR = SPR/SPR[1], YPR = YPR), SR_par = SR_par))
   } else {
     return(list(UMSY = UMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                per_recruit = data.frame(U = Uvec, SPR = SPR/SPR[1], YPR = YPR)))
+                per_recruit = data.frame(U = Uvec, SPR = SPR/SPR[1], YPR = YPR), SR_par = SR_par))
   }
   
 }
 
-yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"), Arec, Brec, 
+yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, Brec, 
                          catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE, B0 = 1,
-                         tv_M = "none", M_bounds = NULL) {
+                         tv_M = c("none", "walk", "DD"), M_bounds = NULL) {
+  if(is.null(tv_M)) tv_M <- "none"
+  tv_M <- match.arg(tv_M)
+  
   if(tv_M != "DD") {
     yield_fn_SCA_int(x, M, mat, weight, vul, SR, Arec, Brec, catch_eq, opt, x_transform)
   } else {
@@ -706,7 +716,7 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"),
   }
 }
 
-yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "none"), Arec, Brec, 
+yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, Brec, 
                              catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE) {
   SR <- match.arg(SR)
   catch_eq <- match.arg(catch_eq)
@@ -725,8 +735,6 @@ yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker", "non
     Req <- (Arec * EPR - 1)/(Brec * EPR)
   } else if(SR == "Ricker") {
     Req <- log(Arec * EPR)/(Brec * EPR)
-  } else {
-    Req <- 1
   }
   
   if(catch_eq == "Baranov") {
@@ -764,3 +772,44 @@ SCA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   }
   return(out)
 }
+
+get_SR <- function(pars, E, R, EPR0, opt = TRUE, figure = FALSE, type = c("BH", "Ricker"), fix_h = FALSE, h = NULL) {
+  type <- match.arg(type)
+  
+  R0 <- exp(pars[1])
+  E0 <- R0 * EPR0
+  if(type == "BH") {
+    if(!fix_h) h <- 0.2 + 0.8 * ilogit(pars[1])
+    Arec <- 4*h/(1-h)/EPR0
+    Brec <- (5*h-1)/(1-h)/E0
+    
+    Rpred <- Arec * E / (1 + Brec * E)
+  } else if(type == "Ricker") {
+    if(!fix_h) h <- 0.2 + exp(pars[1])
+    Arec <- 1/EPR0 * (5*h)^1.25
+    Brec <- 1.25 * log(5*h) / E0
+    
+    Rpred <- Arec * E * exp(-Brec * E)
+  }
+  sigmaR <- sqrt(sum((log(R/Rpred))^2)/length(R))
+  
+  if(opt){
+    return(-sum(dnorm(log(R/Rpred), 0, sigmaR, log = TRUE)))
+  } else {
+    
+    if(figure) {
+      plot(E, R, ylim = c(0, max(R, R0)), xlim = c(0, max(E, E0)), xlab = "SSB", ylab = "Recruitment")
+      
+      E2 <- seq(0, E0, length.out = 500)
+      if(type == "BH") Rpred2 <- Arec * E2 / (1 + Brec * E2)
+      if(type == "Ricker") Rpred2 <- Arec * E2 * exp(-Brec * E2)
+      
+      lines(E2, Rpred2, col = "blue")
+      abline(v = c(0.2 * E0, E0), h = c(h * R0, R0), lty = 2, col = "red")
+      legend("topright", legend = c(paste0("h = ", round(h, 3)), paste0("log(R0) = ", round(log(R0), 3))), bty = "n")
+    }
+    
+    return(list(Rpred = Rpred, R0 = R0, h = h, E0 = E0, sigmaR = sigmaR, Arec = Arec, Brec = Brec))
+  }
+}
+
