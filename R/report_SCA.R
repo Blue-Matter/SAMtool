@@ -311,7 +311,7 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   xaxis <- match.arg(xaxis)
   F.vector = seq(0, 2.5 * fmsy, length.out = 1e2)
   
-  yield <- lapply(F.vector, yield_fn_SCA, M = report$M, mat = data$mat, weight = data$weight, vul = report$vul,
+  yield <- lapply(F.vector, yield_fn_SCA, M = report$M[nrow(report$M), ], mat = data$mat, weight = data$weight, vul = report$vul,
                   SR = data$SR_type, Arec = report$Arec, Brec = report$Brec, catch_eq = "Baranov", opt = FALSE,
                   B0 = report$B0, tv_M = data$tv_M, M_bounds = data$M_bounds)
   

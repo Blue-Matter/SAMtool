@@ -243,7 +243,7 @@ Type SCA(objective_function<Type> *obj) {
     
     // Calculate next year's M
     if(tv_M == "DD") {
-      Type M_y = CppAD::CondExpLe(B(y+1)/B0, Type(1), M_bounds(0) + (M_bounds(1) - M_bounds(0)) * (1 - B(y+1)/B0),
+      Type M_y = CppAD::CondExpLe(B(y+1), B0, M_bounds(0) + (M_bounds(1) - M_bounds(0)) * (1 - B(y+1)/B0),
                                   M_bounds(0));
       M.row(y+1).fill(M_y);
     } else {

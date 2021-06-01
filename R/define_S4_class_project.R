@@ -220,6 +220,7 @@ projection_SCA <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Cat
   output <- new("project", Catch = do.call(rbind, lapply(p_output, getElement, "Cpred")),
                 C_at_age = aperm(CAApred, c(3, 1, 2)), Index = aperm(Ipred, c(3, 1, 2)),
                 SSB = do.call(rbind, lapply(p_output, getElement, "E")),
+                R = do.call(rbind, lapply(p_output, function(x) x$N[, 1])),
                 N = do.call(rbind, lapply(p_output, function(x) rowSums(x$N))), VB = do.call(rbind, lapply(p_output, getElement, "VB")),
                 B = do.call(rbind, lapply(p_output, getElement, "B")), FMort = do.call(rbind, lapply(p_output, getElement, "Fout")))
   return(output)
@@ -231,7 +232,6 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
   weight <- TMB_data$weight
   mat <- TMB_data$mat
   vul <- TMB_report$vul
-  M <- TMB_report$M[nrow(TMB_report$M), ]
   
   tv_M <- TMB_data$tv_M
   M_bounds <- TMB_data$M_bounds
@@ -240,39 +240,44 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
     if(Pope) {
       Fout <- pmin(FMort, 1 - exp(-max_F))
       UU <- vul %o% FMort
-      #surv <- (1 - UU) * exp(-M)
     } else {
       Fout <- pmin(FMort, max_F)
       FF <- vul %o% FMort
-      #surv <- exp(-FF - M)
     }
   } else {
     Fout <- numeric(length(p_log_rec_dev))
     if(Pope) {
-      surv <- UU <- matrix(NA, length(vul), length(p_log_rec_dev))
+      UU <- matrix(NA, length(vul), length(p_log_rec_dev))
     } else {
-      surv <- FF <- matrix(NA, length(vul), length(p_log_rec_dev))
+      FF <- matrix(NA, length(vul), length(p_log_rec_dev))
     }
   }
+  surv <- M_p <- matrix(NA, length(vul), length(p_log_rec_dev))
 
   N <- CAApred <- matrix(NA, length(p_log_rec_dev), ncol(TMB_report$N))
   N[1, ] <- TMB_report$N[nrow(TMB_report$N), ]
   N[1, 1] <- N[1, 1] * p_log_rec_dev[1]
+  M_p[, 1] <- TMB_report$M[nrow(TMB_report$M), ]
 
-  E <- VB <- Cpred <- numeric(length(p_log_rec_dev))
+  E <- VB <- B <- Cpred <- numeric(length(p_log_rec_dev))
   E[1] <- sum(N[1, ] * mat * weight)
+  B[1] <- sum(N[1, ] * weight)
   for(y in 1:length(p_log_rec_dev)) {
     if(constrain == "Catch") {
       if(Pope) {
-        VB[y] <- sum(N[y, ] * exp(-0.5 * M) * vul * weight)
+        VB[y] <- sum(N[y, ] * exp(-0.5 * M_p[, y]) * vul * weight)
         Fout[y] <- ifelse(Catch[y]/VB[y] > 1 - exp(-max_F), 1 - exp(-max_F), Catch[y]/VB[y])
         UU[, y] <- vul * Fout[y]
-        surv[, y] <- (1 - UU[, y]) * exp(-M)
       } else {
-        Fout[y] <- optimize(SCA_catch_solver, c(1e-8, max_F), N = N[y, ], weight = weight, vul = vul, M = M, TAC = Catch[y])$minimum
+        Fout[y] <- optimize(SCA_catch_solver, c(1e-8, max_F), N = N[y, ], weight = weight, vul = vul, M = M_p[, y], TAC = Catch[y])$minimum
         FF[, y] <- vul * Fout[y]
-        surv[, y] <- exp(-FF[, y] - M)
       }
+    }
+    
+    if(Pope) {
+      surv[, y] <- (1 - UU[, y]) * exp(-M_p[, y])
+    } else {
+      surv[, y] <- exp(-FF[, y] - M_p[, y])
     }
 
     if(y < length(p_log_rec_dev)) {
@@ -280,21 +285,26 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
       N[y+1, ncol(N)] <- N[y+1, ncol(N)] + N[y, ncol(N)] * surv[ncol(N), y]
       
       E[y+1] <- sum(N[y+1, ] * mat * weight, na.rm = TRUE)
-      N[y+1, 1] <- R_pred(E[y+1], TMB_report$h, TMB_report$R0, TMB_report$E0, TMB_data$SR_type) * p_log_rec_dev[y+1]
+      B[y+1] <- sum(N[y+1, ] * weight, na.rm = TRUE)
       
+      if(tv_M == "DD") {
+        M_p[, y+1] <- ifelse(B[y+1] <= TMB_report$B0, M_bounds[1] + (M_bounds[2] - M_bounds[1]) * (1 - B[y+1]/TMB_report$B0), M_bounds[1])
+      } else {
+        M_p[, y+1] <- M_p[, 1]
+      }
+      N[y+1, 1] <- R_pred(E[y+1], TMB_report$h, TMB_report$R0, TMB_report$E0, TMB_data$SR_type) * p_log_rec_dev[y+1]
     }
   }
   if(Pope) {
     CAApred <- t(t(N) * exp(-0.5 * M) * UU)
-    if(constrain == "F") VB <- colSums(t(N) * TMB_report$vul * weight * exp(-0.5 * M))
+    if(constrain == "F") VB <- colSums(t(N) * TMB_report$vul * weight * exp(-0.5 * M_p))
     Cpred <- colSums(t(CAApred) * weight)
   } else {
-    out <- lapply(1:length(Fout), function(x) SCA_catch_solver(FM = Fout[x], N = N[x, ], weight = weight, vul = vul, M = M))
+    out <- lapply(1:length(Fout), function(x) SCA_catch_solver(FM = Fout[x], N = N[x, ], weight = weight, vul = vul, M = M_p[, x]))
     CAApred <- do.call(rbind, lapply(out, getElement, 1))
     VB <- colSums(t(N) * TMB_report$vul * weight)
     Cpred <- vapply(out, getElement, numeric(1), 2)
   }
-  B <- colSums(t(N) * weight)
   
   if(!is.matrix(Iobs_err)) Iobs_err <- matrix(Iobs_err, ncol = 1)
   Ipred <- vapply(1:TMB_data$nsurvey, function(sur) {
