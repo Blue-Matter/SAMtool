@@ -965,11 +965,13 @@ profile_likelihood_RCM <- function(x, ...) {
     new_args$data$IAL_n <- cbind(new_args$data$IAL_n, rep(0, n_y))
     new_args$data$nsurvey <- new_args$data$nsurvey + 1
     
-    new_args$data$ivul_type <- c(new_args$dataivul_type, -3)
+    new_args$data$ivul_type <- c(new_args$data$ivul_type, -3)
     new_args$data$abs_I <- c(new_args$data$abs_I, 0)
     new_args$data$I_units <- c(new_args$data$I_units, 1) 
     new_args$data$LWT_index <- rbind(new_args$data$LWT_index, rep(1, 3))
-    new_args$data$prior_dist <- rbind(new_args$data$prior_dist, c(0, 25))
+    
+    new_args$data$use_prior <- c(new_args$data$use_prior, 0)
+    new_args$data$prior_dist <- rbind(new_args$data$prior_dist, rep(NA_real_, 2))
     
     new_args$params$ivul_par <- cbind(new_args$params$ivul_par, rep(0, nrow(new_args$params$ivul_par)))
     if(!is.null(new_args$map$ivul_par)) {
