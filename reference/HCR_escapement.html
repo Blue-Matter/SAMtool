@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot Assessment object — plot.Assessment • SAMtool</title>
+<title>Fixed escapement harvest control rule — HCR_escapement • SAMtool</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,8 +46,9 @@
 
 
 
-<meta property="og:title" content="Plot Assessment object — plot.Assessment" />
-<meta property="og:description" content="Produces HTML file (via markdown) figures of parameter estimates and output from an Assessment object." />
+<meta property="og:title" content="Fixed escapement harvest control rule — HCR_escapement" />
+<meta property="og:description" content="A simple control rule that allows fishing when the operational control point (OCP) is above some threshold.
+By default, this function sets the TAC at F = 100% FMSY when spawning depletion &amp;gt; 0.1." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -122,36 +123,23 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot Assessment object</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/define_S4_class_assess_RCMdata.R'><code>R/define_S4_class_assess_RCMdata.R</code></a>, <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/define_S4_class_retro.R'><code>R/define_S4_class_retro.R</code></a></small>
-    <div class="hidden name"><code>plot.Assessment.Rd</code></div>
+    <h1>Fixed escapement harvest control rule</h1>
+    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/HCRs.R'><code>R/HCRs.R</code></a></small>
+    <div class="hidden name"><code>HCR_escapement.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Produces HTML file (via markdown) figures of parameter estimates and output from an <a href='Assessment-class.html'>Assessment</a> object.</p>
+    <p>A simple control rule that allows fishing when the operational control point (OCP) is above some threshold.
+By default, this function sets the TAC at F = 100% FMSY when spawning depletion &gt; 0.1.</p>
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for Assessment,missing</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span>
-  <span class='va'>x</span>,
-  filename <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='st'>"report_"</span>, <span class='va'>x</span><span class='op'>@</span><span class='va'>Model</span><span class='op'>)</span>,
-  dir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
-  ret_yr <span class='op'>=</span> <span class='fl'>0L</span>,
-  open_file <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  render_args <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
-  <span class='va'>...</span>
-<span class='op'>)</span>
-
-<span class='co'># S4 method for Assessment,retro</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span>
-  <span class='va'>x</span>,
-  <span class='va'>y</span>,
-  filename <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='st'>"report_"</span>, <span class='va'>x</span><span class='op'>@</span><span class='va'>Model</span><span class='op'>)</span>,
-  dir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
-  open_file <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  render_args <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+    <pre class="usage"><span class='fu'>HCR_escapement</span><span class='op'>(</span>
+  <span class='va'>Assessment</span>,
+  reps <span class='op'>=</span> <span class='fl'>1</span>,
+  OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSB0"</span>,
+  OCP_threshold <span class='op'>=</span> <span class='fl'>0.2</span>,
+  Ftarget_type <span class='op'>=</span> <span class='st'>"FMSY"</span>,
+  relF_max <span class='op'>=</span> <span class='fl'>1</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
@@ -159,57 +147,67 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>An object of class <a href='Assessment-class.html'>Assessment</a>.</p></td>
+      <th>Assessment</th>
+      <td><p>An object of class <a href='Assessment-class.html'>Assessment</a> with estimates of
+FMSY or UMSY and vulnerable biomass in terminal year.</p></td>
     </tr>
     <tr>
-      <th>filename</th>
-      <td><p>Character string for the name of the markdown and HTML files.</p></td>
+      <th>reps</th>
+      <td><p>The number of stochastic samples of the TAC recommendation.</p></td>
     </tr>
     <tr>
-      <th>dir</th>
-      <td><p>The directory in which the markdown and HTML files will be saved.</p></td>
+      <th>OCP_type</th>
+      <td><p>The type of operational control points (OCPs) for the harvest control rule used to determine 
+whether there is fishing. By default, use (<code>"SSB_SSB0"</code> for spawning depletion. Other biomass OCPs include <code>"SSB_SSBMSY"</code> for spawning biomass relative to MSY and
+<code>"SSB_dSSB0"</code>, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
+For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR% (see <code>SPR_OCP</code> argument) can be used.</p></td>
     </tr>
     <tr>
-      <th>ret_yr</th>
-      <td><p>If greater than zero, then a retrospective analysis will be performed and results will be reported. The integer here corresponds
-to the number of peels (the maximum number of terminal years for which the data are removed).</p></td>
+      <th>OCP_threshold</th>
+      <td><p>The value of the OCP above which fishing can occur.</p></td>
     </tr>
     <tr>
-      <th>open_file</th>
-      <td><p>Logical, whether the HTML document is opened after it is rendered.</p></td>
+      <th>Ftarget_type</th>
+      <td><p>The type of F used for the target fishing mortality rate.</p></td>
     </tr>
     <tr>
-      <th>quiet</th>
-      <td><p>Logical, whether to silence the markdown rendering function.</p></td>
-    </tr>
-    <tr>
-      <th>render_args</th>
-      <td><p>Arguments to pass to <a href='https://pkgs.rstudio.com/rmarkdown/reference/render.html'>render</a>.</p></td>
+      <th>relF_max</th>
+      <td><p>The relative value of Ftarget if <code>OCP &gt; OCP_treshold</code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Other arguments.</p></td>
-    </tr>
-    <tr>
-      <th>y</th>
-      <td><p>An object of class <a href='retro-class.html'>retro</a>.</p></td>
+      <td><p>Miscellaneous arguments.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Returns invisibly the output from <a href='https://pkgs.rstudio.com/rmarkdown/reference/render.html'>render</a>.</p>
+    <p>An object of class Rec with the TAC recommendation.</p>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p>Deroba, J.J. and Bence, J.R. 2008. A review of harvest policies: Understanding relative
+performance of control rules. Fisheries Research 94:210-223.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><a href='retrospective.html'>retrospective</a></p></div>
+    <div class='dont-index'><p><a href='make_MP.html'>make_MP</a> <a href='HCR_ramp.html'>HCR_ramp</a></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Q. Huynh</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>output</span> <span class='op'>&lt;-</span> <span class='fu'><a href='DD_TMB.html'>DD_TMB</a></span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>Simulation_1</span><span class='op'>)</span>
+    <pre class="examples"><div class='input'><span class='co'># create an MP to run in closed-loop MSE (fishes at FMSY when B/B0 &gt; 0.2)</span>
+<span class='va'>SP_escapement</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SP</span>, <span class='va'>HCR_escapement</span><span class='op'>)</span>
+
+<span class='co'># The MP which fishes at 75% of FMSY</span>
+<span class='va'>SP_escapement75</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SP</span>, <span class='va'>HCR_escapement</span>, relF_max <span class='op'>=</span> <span class='fl'>0.75</span><span class='op'>)</span>
+
+<span class='co'># The MP which fishes at FMSY when BMSY &gt; 0.5</span>
+<span class='va'>SP_BMSY_escapement</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SP</span>, <span class='va'>HCR_escapement</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSBMSY"</span>, OCP_threshold <span class='op'>=</span> <span class='fl'>0.5</span>, relF_max <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
 
 <span class='co'># \donttest{</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>output</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp1qGEUn/report_DD_TMB.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp1qGEUn/report_DD_TMB.html</span></div><div class='input'><span class='co'># }</span>
+<span class='va'>myOM</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></span><span class='op'>(</span><span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html'>testOM</a></span>, MPs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FMSYref"</span>, <span class='st'>"SP_escapement"</span>, <span class='st'>"SP_BMSY_escapement"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'><span style='color: #0000BB;'>Checking MPs </span>
+#&gt; <span class='message'></span></span></div><div class='output co'>#&gt; <span class='error'>Error: Some MPs are not a functions of class `MP`: SP_escapement, SP_BMSY_escapement</span></div><div class='input'><span class='co'># }</span>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
