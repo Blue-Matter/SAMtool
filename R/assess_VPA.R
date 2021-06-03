@@ -73,8 +73,9 @@
 #' quantities are also calculated, which may be used in harvest control rules.
 #' 
 #' @return An object of class \linkS4class{Assessment}. The F vector is the apical fishing mortality experienced by any
-#' age class in a given year. The U vector is the ratio of catch (weight) and vulnerable biomass, which may be a better
-#' description of fishing pressure (and UMSY = MSY/VBMSY).
+#' age class in a given year. 
+#' @examples
+#' out <- VPA(x = 2, Data = MSEtool::SimulatedData, vulnerability = "dome")
 #' @references
 #' Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.
 #' @export

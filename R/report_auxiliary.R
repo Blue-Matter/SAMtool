@@ -871,16 +871,17 @@ plot_SR <- function(Spawners, expectedR, R0 = NULL, S0 = NULL, rec_dev = NULL, t
   }
   S.max <- 1.1 * max(c(Spawners, S0))
   plot(Spawners[order(Spawners)], expectedR[order(Spawners)], typ = "l", xlim = c(0, 1.05 * S.max), ylim = c(0, 1.1 * R.max),
-       xlab = "Spawning Stock Biomass (SSB)", ylab = ylab)
-  if(!trajectory) {
-    if(is.null(rec_dev)) points(Spawners, expectedR)
-    if(!is.null(rec_dev)) points(Spawners, rec_dev)
-  }
+       xlab = "Spawning Stock Biomass (SSB)", lwd = ifelse(is.null(rec_dev), 1, 3), ylab = ylab)
   if(trajectory) {
     n.arrows <- length(Spawners)
-
     arrows(x0 = Spawners[1:(n.arrows-1)], y0 = rec_dev[1:(n.arrows-1)],
            x1 = Spawners[2:n.arrows], y1 = rec_dev[2:n.arrows], length = 0.07)
+  } else {
+    if(is.null(rec_dev)) {
+      points(Spawners, expectedR)
+    } else {
+      points(Spawners, rec_dev)
+    }
   }
   if(!is.null(R0) && !is.null(S0)) points(S0, R0, col = "red", pch = 16)
   abline(h = 0, col = "grey")

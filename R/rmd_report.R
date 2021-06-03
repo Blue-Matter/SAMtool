@@ -472,11 +472,11 @@ rmd_SR <- function(Bvec, expectedR, Rpoints, fig.cap = "Stock-recruit relationsh
 rmd_yield_F <- function(model, conv_check = TRUE, header = NULL) {
   if(conv_check) conv <- "if(conv) " else conv <- ""
   if(model == "VPA") {
-    extra_code <- "info$data$SR_type <- info$SR; info$data$mat <- info$LH$mat; TMB_report$vul <- TMB_report$vul_p" 
+    extra_code <- "info$data$SR_type <- info$SR; info$data$mat <- info$LH$mat; TMB_report$vul <- TMB_report$vul_p; TMB_report$M <- matrix(info$data$M, nrow = 1)" 
   } else {
     extra_code <- ""
   }
-
+  
   ans <- c("```{r, fig.cap=\"Yield plot relative to fishing mortality.\"}",
            extra_code,
            paste0(conv, "plot_yield_", model, "(info$data, TMB_report, FMSY, MSY, xaxis = \"F\")"),

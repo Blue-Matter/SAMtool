@@ -81,9 +81,9 @@ rmd_VPA <- function(Assessment, ...) {
   ind_recruit <- first_recruit_year:last_recruit_year
   rec_dev <- Assessment@R[ind_recruit]
   
-  productivity <- c(rmd_SR(SSB, expectedR, rec_dev, ylab = paste0("Recruitment (age- ", min(age), ")"),
+  productivity <- c(rmd_SR(SSB, expectedR, rec_dev, ylab = paste0("Recruitment (age ", min(age), ")"),
                            header = "### Productivity\n\n\n", conv_check = TRUE),
-                    rmd_SR(SSB, expectedR, rec_dev, ylab = paste0("Recruitment (age- ", min(age), ")"),
+                    rmd_SR(SSB, expectedR, rec_dev, ylab = paste0("Recruitment (age ", min(age), ")"),
                            fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE, conv_check = TRUE),
                     rmd_yield_F("VPA"), rmd_yield_depletion("VPA"), rmd_sp(depletion = FALSE), rmd_YPR(), rmd_SPR())
 
@@ -92,13 +92,6 @@ rmd_VPA <- function(Assessment, ...) {
 
 
 plot_yield_VPA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "Depletion")) {
-  
-  # For plot_yield_VPA
-  Assessment@TMB_report$M <- matrix(Assessment@info$data$M, nrow = 1)
-  Assessment@TMB_report$vul <- Assessment@TMB_report$report$vul_p
-  Assessment@info$data$mat <- Assessment@info$LH$mat
-  Assessment@info$data$SR_type <- Assessment@info$SR
-  
   plot_yield_SCA(data = data, report = report, fmsy = fmsy, msy = msy, xaxis = xaxis)
 }
 
