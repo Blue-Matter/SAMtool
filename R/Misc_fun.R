@@ -350,7 +350,8 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
     } else {
       stop("prior$q should be a matrix of ", nsurvey, "rows and 2 columns.")
     }
-    prior$q[, 1] <- log(prior$q[, 1])
+    if(any(pr_matrix[4:(4+nsurvey-1), 1] <= 0, na.rm = TRUE)) stop("Ensure q prior mean is greater than > 0.")
+    pr_matrix[4:(4+nsurvey-1), 1] <- log(pr_matrix[4:(4+nsurvey-1), 1])
   }
   return(list(use_prior = use_prior, pr_matrix = pr_matrix))
 }
