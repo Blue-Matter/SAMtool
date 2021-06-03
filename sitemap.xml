@@ -34,6 +34,9 @@
     <loc>https://SAMtool.openMSE.com/reference/RCM.html</loc>
   </url>
   <url>
+    <loc>https://SAMtool.openMSE.com/reference/RCMdata-class.html</loc>
+  </url>
+  <url>
     <loc>https://SAMtool.openMSE.com/reference/RCModel-class.html</loc>
   </url>
   <url>
@@ -41,6 +44,9 @@
   </url>
   <url>
     <loc>https://SAMtool.openMSE.com/reference/SCA.html</loc>
+  </url>
+  <url>
+    <loc>https://SAMtool.openMSE.com/reference/SCA_DDM.html</loc>
   </url>
   <url>
     <loc>https://SAMtool.openMSE.com/reference/SCA_RWM.html</loc>
@@ -151,27 +157,6 @@
     <loc>https://SAMtool.openMSE.com/reference/userguide.html</loc>
   </url>
   <url>
-    <loc>https://SAMtool.openMSE.com/articles/Delay_difference.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/RCM.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/RCM_eq.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/RCM_sel.html</loc>
-  </url>
-  <url>
     <loc>https://SAMtool.openMSE.com/articles/SAMtool.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/SCA.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/Surplus_production.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/VPA.html</loc>
   </url>
 </urlset>

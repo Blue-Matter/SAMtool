@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SCA with random walk in M — SCA_RWM • SAMtool</title>
+<title>SCA model with density-dependent M — SCA_DDM • SAMtool</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,9 +46,11 @@
 
 
 
-<meta property="og:title" content="SCA with random walk in M — SCA_RWM" />
-<meta property="og:description" content="SCA_RWM is a modification of SCA that incorporates a random walk in M in logit space (constant with age). 
-Set the variance (start$tau_M) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to SCA." />
+<meta property="og:title" content="SCA model with density-dependent M — SCA_DDM" />
+<meta property="og:description" content="A modification of SCA that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).
+Set the bounds of M in the M_bounds argument, a length-2 vector where the first entry is M0, the M as B/B0 &amp;gt;= 1,
+and the second entry is M1, the M as B/B0 approaches zero. Note that M0 can be greater than M1 (compensatory) 
+or M0 can be less than M1 (depensatory)." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -123,17 +125,19 @@ Set the variance (start$tau_M) to a small value (0.001) in order to fix M for al
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>SCA with random walk in M</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA_RWM.R'><code>R/assess_SCA_RWM.R</code></a></small>
-    <div class="hidden name"><code>SCA_RWM.Rd</code></div>
+    <h1>SCA model with density-dependent M</h1>
+    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA_DDM.R'><code>R/assess_SCA_DDM.R</code></a></small>
+    <div class="hidden name"><code>SCA_DDM.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>SCA_RWM</code> is a modification of <a href='SCA.html'>SCA</a> that incorporates a random walk in M in logit space (constant with age). 
-Set the variance (<code>start$tau_M</code>) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to <a href='SCA.html'>SCA</a>.</p>
+    <p>A modification of <code>SCA</code> that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).
+Set the bounds of M in the <code>M_bounds</code> argument, a length-2 vector where the first entry is M0, the M as B/B0 &gt;= 1,
+and the second entry is M1, the M as B/B0 approaches zero. Note that M0 can be greater than M1 (compensatory) 
+or M0 can be less than M1 (depensatory).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>SCA_RWM</span><span class='op'>(</span>
+    <pre class="usage"><span class='fu'>SCA_DDM</span><span class='op'>(</span>
   x <span class='op'>=</span> <span class='fl'>1</span>,
   <span class='va'>Data</span>,
   AddInd <span class='op'>=</span> <span class='st'>"B"</span>,
@@ -153,7 +157,6 @@ Set the variance (<code>start$tau_M</code>) to a small value (0.001) in order to
   LWT <span class='op'>=</span> <span class='cn'>NULL</span>,
   early_dev <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"comp_onegen"</span>, <span class='st'>"comp"</span>, <span class='st'>"all"</span><span class='op'>)</span>,
   late_dev <span class='op'>=</span> <span class='st'>"comp50"</span>,
-  refyear <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/expression.html'>expression</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>Data</span><span class='op'>@</span><span class='va'>Year</span><span class='op'>)</span><span class='op'>)</span>,
   M_bounds <span class='op'>=</span> <span class='cn'>NULL</span>,
   integrate <span class='op'>=</span> <span class='cn'>FALSE</span>,
   silent <span class='op'>=</span> <span class='cn'>TRUE</span>,
@@ -251,7 +254,7 @@ tau is fixed to value provided in <code>start</code> (if provided), otherwise, v
     </tr>
     <tr>
       <th>early_dev</th>
-      <td><p>Numeric or character string describing the years for which recruitment deviations are estimated in <code>SCA</code>. By default,
+      <td><p>Numeric or character string describing the years for which recruitment deviations are estimated. By default,
 equal to <code>"comp_onegen"</code>, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
 With <code>"comp"</code>, rec devs are estimated starting in the first year with CAA. With <code>"all"</code>, rec devs start at the beginning of the model.
 If numeric, the number of years after the first year of the model for which to start estimating rec devs. Use negative numbers for years prior to the first year.</p></td>
@@ -264,13 +267,9 @@ By default, <code>"comp50"</code> uses the number of ages (smaller than the mode
 for which the catch-at-age matrix has less than half the abundance than that at the mode.</p></td>
     </tr>
     <tr>
-      <th>refyear</th>
-      <td><p>An expression for the year for which M is used to report MSY reference points. By default, terminal year.</p></td>
-    </tr>
-    <tr>
       <th>M_bounds</th>
-      <td><p>A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
-(<code>start$M</code>). The default min and max are 75% and 125%, respectively.</p></td>
+      <td><p>A numeric vector of length 2 to indicate the M as B/B0 approaches zero and one, respectively.
+By default, set to 75% and 125%, respectively, of Data@Mort[x].</p></td>
     </tr>
     <tr>
       <th>integrate</th>
@@ -315,42 +314,21 @@ is passed on to <code><a href='https://rdrr.io/pkg/TMB/man/newton.html'>newton</
     <p>An object of class <a href='Assessment-class.html'>Assessment</a>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The model estimates year-specific M (constant with age) as a random walk in logit space, bounded by
-a proportion of <code>start$M</code> (specified in <code>M_bounds</code>).</p>
-<p>The starting value for the first year M (start$M) is <code>Data@Mort[x]</code> and is fixed, unless a prior is provided (<code>prior$M</code>). 
-The fixed SD of the random walk (<code>tau_M</code>) is 0.05, by default.</p>
-<p>Alternative values can be provided in the start list (see examples):</p><ul>
-<li><p><code>R0</code> Unfished recruitment, except when <code>SR = "none"</code> where it is mean recruitment. 
-By default, 150% Data@OM$R0[x] is used as the start value in closed-loop simulation, and 400% of mean catch otherwise.</p></li>
-<li><p><code>h</code> Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.</p></li>
-<li><p><code>M</code> Natural mortality in the first year. Otherwise, Data@Mort[x] is used.</p></li>
-<li><p><code>vul_par</code> Vulnerability parameters, see next paragraph.</p></li>
-<li><p><code>F</code> A vector of length nyears for year-specific fishing mortality.</p></li>
-<li><p><code>F_equilibrium</code> Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.</p></li>
-<li><p><code>U_equilibrium</code> Same as F_equilibrium when <code>catch_eq = "Pope"</code>. By default, 0.</p></li>
-<li><p><code>omega</code> Lognormal SD of the catch (observation error) when <code>catch_eq = "Baranov"</code>. By default, Data@CV_Cat[x].</p></li>
-<li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].</p></li>
-<li><p><code>tau_M</code> The fixed SD of the random walk in M. By default, 0.05.</p></li>
-</ul>
+    <p>See <a href='SCA.html'>SCA</a> for more information on all arguments.</p>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-<p>See <a href='SCA.html'>SCA</a> for all other information about the structure and setup of the model.</p>
-<p>The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are 
-calculated and reported in TMB_report of the <a href='Assessment-class.html'>Assessment</a> object.</p>
+    <p>Forrest, R.E., Holt, K.R., and Kronlund, A.R. 2018. Performance of alternative harvest control rules for two Pacific groundfish
+stocks with uncertain natural mortality: Bias, robustness and trade-offs. Fisheries Research 2016: 259-286.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><a href='SCA.html'>SCA</a></p></div>
+    <div class='dont-index'><p><a href='plot.Assessment.html'>plot.Assessment</a> <a href='summary.Assessment.html'>summary.Assessment</a> <a href='retrospective.html'>retrospective</a> <a href='profile.html'>profile</a> <a href='make_MP.html'>make_MP</a></p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Q. Huynh</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>SCA_RWM</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>M_start <span class='op'>=</span> <span class='fl'>0.4</span>, tau_M <span class='op'>=</span> <span class='fl'>0.05</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>res2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='SCA.html'>SCA</a></span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span><span class='op'>)</span>
-<span class='va'>res3</span> <span class='op'>&lt;-</span> <span class='fu'>SCA_RWM</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>M_start <span class='op'>=</span> <span class='fl'>0.4</span>, tau_M <span class='op'>=</span> <span class='fl'>0.001</span><span class='op'>)</span><span class='op'>)</span>
- 
-<span class='co'># \donttest{</span>
-<span class='fu'><a href='compare_models.html'>compare_models</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>res2</span>, <span class='va'>res3</span><span class='op'>)</span>
-</div><div class='img'><img src='SCA_RWM-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># }</span>
+    <pre class="examples"><div class='input'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>SCA_DDM</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span><span class='op'>)</span>
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -86,7 +86,7 @@ catch, and Pope's approximation is used to calculate the annual exploitation rat
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -103,36 +103,6 @@ catch, and Pope's approximation is used to calculate the annual exploitation rat
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/Delay_difference.html">1a. Delay-difference and delay-differential models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM.html">2. Description of the RCM (Rapid Conditioning Model) for conditioning MSEtool operating models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_eq.html">2a. Mathematical description of the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_sel.html">2b. Configuring selectivity for the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/SCA.html">1b. Statistical catch-at-age (SCA) model</a>
-    </li>
-    <li>
-      <a href="../articles/Surplus_production.html">1c. Surplus production model</a>
-    </li>
-    <li>
-      <a href="../articles/VPA.html">1d. Virtual population analysis (VPA)</a>
-    </li>
-  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -185,6 +155,7 @@ catch, and Pope's approximation is used to calculate the annual exploitation rat
   rescale <span class='op'>=</span> <span class='st'>"mean1"</span>,
   max_age <span class='op'>=</span> <span class='va'>Data</span><span class='op'>@</span><span class='va'>MaxAge</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
+  prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   fix_h <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_F_equilibrium <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_omega <span class='op'>=</span> <span class='cn'>TRUE</span>,
@@ -211,6 +182,7 @@ catch, and Pope's approximation is used to calculate the annual exploitation rat
   rescale <span class='op'>=</span> <span class='st'>"mean1"</span>,
   max_age <span class='op'>=</span> <span class='va'>Data</span><span class='op'>@</span><span class='va'>MaxAge</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
+  prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   fix_h <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_F_equilibrium <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_omega <span class='op'>=</span> <span class='cn'>TRUE</span>,
@@ -237,6 +209,7 @@ catch, and Pope's approximation is used to calculate the annual exploitation rat
   rescale <span class='op'>=</span> <span class='st'>"mean1"</span>,
   max_age <span class='op'>=</span> <span class='va'>Data</span><span class='op'>@</span><span class='va'>MaxAge</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
+  prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   fix_h <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_U_equilibrium <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_tau <span class='op'>=</span> <span class='cn'>TRUE</span>,
@@ -303,6 +276,14 @@ Output is re-converted back to original units.</p></td>
     <tr>
       <th>start</th>
       <td><p>Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.</p></td>
+    </tr>
+    <tr>
+      <th>prior</th>
+      <td><p>A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
+lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
+For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors
+For all others, provide a length-2 vector for the mean and SD.
+See vignette for full description.</p></td>
     </tr>
     <tr>
       <th>fix_h</th>
@@ -399,7 +380,7 @@ for which the catch-at-age matrix has less than half the abundance than that at 
 
     <p>The basic data inputs are catch (by weight), index (by weight/biomass), and catch-at-age matrix (by numbers).</p>
 <p>With <code>catch_eq = "Baranov"</code> (default in SCA and SCA2), annual F's are estimated parameters assuming continuous fishing over the year, while
-an annual harvest rate from pulse fishing in the middle of the year is estimated in <code>SCA_Pope</code> or <code>SCA(catch_eq = "Pope")</code>.</p>
+an annual exploitation rate from pulse fishing in the middle of the year is estimated in <code>SCA_Pope</code> or <code>SCA(catch_eq = "Pope")</code>.</p>
 <p>The annual sample sizes of the catch-at-age matrix is provided to the model (used in the likelihood for catch-at-age assuming
 a multinomial distribution) and is manipulated via argument <code>CAA_multiplier</code>. This argument is
 interpreted in two different ways depending on the value provided. If <code>CAA_multiplier &gt; 1</code>, then this value will cap the annual sample sizes
@@ -411,6 +392,7 @@ cited by Maunder 2011).</p>
 <li><p><code>R0</code> Unfished recruitment, except when <code>SR = "none"</code> where it is mean recruitment. 
 By default, 150% Data@OM$R0[x] is used as the start value in closed-loop simulation, and 400% of mean catch otherwise.</p></li>
 <li><p><code>h</code> Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.</p></li>
+<li><p><code>M</code> Natural mortality. Otherwise, Data@Mort[x] is used.</p></li>
 <li><p><code>vul_par</code> Vulnerability parameters, see next paragraph.</p></li>
 <li><p><code>F</code> A vector of length nyears for year-specific fishing mortality.</p></li>
 <li><p><code>F_equilibrium</code> Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.</p></li>

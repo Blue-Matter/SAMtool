@@ -81,7 +81,7 @@ product of current vulnerable biomass and UMSY." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -98,36 +98,6 @@ product of current vulnerable biomass and UMSY." />
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/Delay_difference.html">1a. Delay-difference and delay-differential models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM.html">2. Description of the RCM (Rapid Conditioning Model) for conditioning MSEtool operating models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_eq.html">2a. Mathematical description of the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_sel.html">2b. Configuring selectivity for the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/SCA.html">1b. Statistical catch-at-age (SCA) model</a>
-    </li>
-    <li>
-      <a href="../articles/Surplus_production.html">1c. Surplus production model</a>
-    </li>
-    <li>
-      <a href="../articles/VPA.html">1d. Virtual population analysis (VPA)</a>
-    </li>
-  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -211,8 +181,8 @@ for groundfish off the U.S. West Coast. Fisheries Research 94:251-266.</p>
 <span class='co'># \donttest{</span>
 <span class='va'>myOM</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></span><span class='op'>(</span><span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html'>testOM</a></span>, MPs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FMSYref"</span>, <span class='st'>"SPMSY"</span>, <span class='st'>"SP75MSY"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'><span style='color: #0000BB;'>Checking MPs </span>
-#&gt; <span class='message'></span><span></span></div><div class='output co'>#&gt; <span class='error'>Error: Some MPs are not a functions of class `MP`: SPMSY, SP75MSY</span></div><div class='input'><span class='co'># }</span>
-</div></span></pre>
+#&gt; <span class='message'></span></span></div><div class='output co'>#&gt; <span class='error'>Error: Some MPs are not a functions of class `MP`: SPMSY, SP75MSY</span></div><div class='input'><span class='co'># }</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

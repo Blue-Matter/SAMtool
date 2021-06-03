@@ -82,7 +82,7 @@ assessments within closed-loop simulation, and helper functions for building mor
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -99,36 +99,6 @@ assessments within closed-loop simulation, and helper functions for building mor
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/Delay_difference.html">1a. Delay-difference and delay-differential models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM.html">2. Description of the RCM (Rapid Conditioning Model) for conditioning MSEtool operating models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_eq.html">2a. Mathematical description of the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_sel.html">2b. Configuring selectivity for the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/SCA.html">1b. Statistical catch-at-age (SCA) model</a>
-    </li>
-    <li>
-      <a href="../articles/Surplus_production.html">1c. Surplus production model</a>
-    </li>
-    <li>
-      <a href="../articles/VPA.html">1d. Virtual population analysis (VPA)</a>
-    </li>
-  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -174,18 +144,12 @@ assessments within closed-loop simulation, and helper functions for building mor
 <p>The main features of SAMtool are the assessment models and the ability to make model-based management procedures by combining
 assessment models with harvest control rules. Such MPs can be used and tested in management strategy evaluation
 with MSEtool operating models. An overview of these features is available in the <a href='../doc/SAMtool.html'>SAMtool vignette</a>.</p>
-<p>The following assessment models are available:</p><ul>
-<li><p><a href='../doc/Surplus_production.html'>Surplus production</a> (<a href='SP.html'>SP</a>, <a href='SP.html'>SP_SS</a>, <a href='SP.html'>SP_Fox</a>, and <code>spict</code>)</p></li>
-<li><p><a href='../doc/Delay_difference.html'>Delay difference</a> (<a href='DD_TMB.html'>DD_TMB</a>, <a href='cDD.html'>cDD</a>, <a href='DD_TMB.html'>DD_SS</a>, and <a href='cDD.html'>cDD_SS</a>)</p></li>
-<li><p><a href='../doc/SCA.html'>Statistical catch-at-age</a> (<a href='SCA.html'>SCA</a>, <a href='SCA.html'>SCA2</a>, and <a href='SCA.html'>SCA_Pope</a>)</p></li>
-<li><p>Simple Stock Synthesis (<a href='SSS.html'>SSS</a> which implements <a href='SCA.html'>SCA_Pope</a> with fixed depletion assumption)</p></li>
-<li><p><a href='../doc/VPA.html'>Virtual population analysis</a> (<a href='VPA.html'>VPA</a>)</p></li>
+<p>The <code><a href='check_RCMdata.html'>RCM</a></code> (Rapid Conditioning Model) can be used to condition operating models from real data.</p>
+<p>The following articles are available on the openMSE website:</p><ul>
+<li><p><a href='https://openmse.com/features-assessment-models/'>Description of assessment models</a></p></li>
+<li><p><a href='https://openmse.com/tutorial-rcm/'>General overview of RCM</a></p></li>
 </ul>
 
-<p>The <code><a href='Sub_cpars.html'>RCM</a></code> (Rapid Conditioning Model) can be used to condition operating models from real data. Information can be found
-<a href='../doc/RCM.html'>here</a>.</p>
-<p>All SAMtool vignettes can also be viewed by typing <code><a href='https://rdrr.io/r/utils/browseVignettes.html'>browseVignettes("SAMtool")</a></code> into the R console or through the
-SAMtool webpage on <a href='https://cran.r-project.org/package=SAMtool'>CRAN</a>.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Carruthers, T.R., Punt, A.E., Walters, C.J., MacCall, A.,

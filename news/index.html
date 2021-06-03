@@ -79,7 +79,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -96,36 +96,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/Delay_difference.html">1a. Delay-difference and delay-differential models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM.html">2. Description of the RCM (Rapid Conditioning Model) for conditioning MSEtool operating models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_eq.html">2a. Mathematical description of the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_sel.html">2b. Configuring selectivity for the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/SCA.html">1b. Statistical catch-at-age (SCA) model</a>
-    </li>
-    <li>
-      <a href="../articles/Surplus_production.html">1c. Surplus production model</a>
-    </li>
-    <li>
-      <a href="../articles/VPA.html">1d. Virtual population analysis (VPA)</a>
-    </li>
-  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -155,11 +125,18 @@
       <small>Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="samtool-113" class="section level2">
+    <div id="samtool-120" class="section level2">
 <h2 class="hasAnchor">
-<a href="#samtool-113" class="anchor"></a>SAMtool 1.1.3</h2>
+<a href="#samtool-120" class="anchor"></a>SAMtool 1.2.0</h2>
 <ul>
+<li>A new S4 object, <code>RCMdata</code>, used to send data to the RCM model, i.e., <code><a href="../reference/check_RCMdata.html">RCM(OM, RCMdata)</a></code>. Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms ‘survey’ and ‘index’ to focus on ‘index’ as much as possible when maintaining backwards compatibility. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.</li>
+<li>Create a profiling function for <code>RCM</code> models. Steepness, R0, and final depletion can be profiled.</li>
 <li>Fix plotting bug in <code>compare_RCM</code>.</li>
+<li>A new SCA assessment model that incorporates density-dependent natural mortality (<code>SCA_DDM</code>) is added.</li>
+<li>Priors for index q in <code>RCM</code> is now lognormal instead of normal. They have also been added to assessment models.</li>
+<li>Dynamic SSB0 is calculated for assessment models.</li>
+<li>Priors on M, steepness, R0, and index q can be created SCA, DD, and cDD assessment models.</li>
+<li>Additional OCP types in <code>HCR_ramp</code> to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).</li>
 </ul>
 </div>
     <div id="samtool-112" class="section level2">

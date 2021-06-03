@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rapid Conditioning Model (RCM) — Sub_cpars • SAMtool</title>
+<title>Rapid Conditioning Model (RCM) — check_RCMdata • SAMtool</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,13 +46,14 @@
 
 
 
-<meta property="og:title" content="Rapid Conditioning Model (RCM) — Sub_cpars" />
+<meta property="og:title" content="Rapid Conditioning Model (RCM) — check_RCMdata" />
 <meta property="og:description" content="Intended for conditioning operating models for MSEtool. For data-limited stocks, this function can generate a range of potential depletion scenarios inferred from sparse data.
 From a historical time series of total catch or effort, and potentially age/length compositions and multiple indices of abundance, the RCM returns a range of values for depletion, selectivity,
 unfished recruitment (R0), historical fishing effort, and recruitment deviations for the operating model. This is done by sampling life history parameters
 provided by the user and fitting a statistical catch-at-age model (with the predicted catch equal to the observed catch).
 Alternatively one can do a single model fit and sample the covariance matrix to generate an operating model with uncertainty based on the model fit.
-Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types." />
+Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.
+check_RCMdata evaluates whether the inputs in the S4 RCMdata object are correctly formatted." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -85,7 +86,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -102,36 +103,6 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/Delay_difference.html">1a. Delay-difference and delay-differential models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM.html">2. Description of the RCM (Rapid Conditioning Model) for conditioning MSEtool operating models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_eq.html">2a. Mathematical description of the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_sel.html">2b. Configuring selectivity for the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/SCA.html">1b. Statistical catch-at-age (SCA) model</a>
-    </li>
-    <li>
-      <a href="../articles/Surplus_production.html">1c. Surplus production model</a>
-    </li>
-    <li>
-      <a href="../articles/VPA.html">1d. Virtual population analysis (VPA)</a>
-    </li>
-  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -158,7 +129,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Rapid Conditioning Model (RCM)</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/RCM_int.R'><code>R/RCM_int.R</code></a>, <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/define_S4_generic_RCM.R'><code>R/define_S4_generic_RCM.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/RCM_data.R'><code>R/RCM_data.R</code></a>, <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/define_S4_generic_RCM.R'><code>R/define_S4_generic_RCM.R</code></a></small>
     <div class="hidden name"><code>RCM.Rd</code></div>
     </div>
 
@@ -168,12 +139,33 @@ From a historical time series of total catch or effort, and potentially age/leng
 unfished recruitment (R0), historical fishing effort, and recruitment deviations for the operating model. This is done by sampling life history parameters
 provided by the user and fitting a statistical catch-at-age model (with the predicted catch equal to the observed catch).
 Alternatively one can do a single model fit and sample the covariance matrix to generate an operating model with uncertainty based on the model fit.
-Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.</p>
+Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.
+<code>check_RCMdata</code> evaluates whether the inputs in the S4 RCMdata object are correctly formatted.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>Sub_cpars</span><span class='op'>(</span><span class='va'>OM</span>, sims <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='va'>OM</span><span class='op'>@</span><span class='va'>nsim</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>check_RCMdata</span><span class='op'>(</span><span class='va'>RCMdata</span>, <span class='va'>OM</span>, condition <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"catch"</span>, <span class='st'>"catch2"</span>, <span class='st'>"effort"</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='fu'>RCM</span><span class='op'>(</span><span class='va'>OM</span>, <span class='va'>data</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S4 method for OM,RCMdata</span>
+<span class='fu'>RCM</span><span class='op'>(</span>
+  <span class='va'>OM</span>,
+  <span class='va'>data</span>,
+  condition <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"catch"</span>, <span class='st'>"catch2"</span>, <span class='st'>"effort"</span><span class='op'>)</span>,
+  selectivity <span class='op'>=</span> <span class='st'>"logistic"</span>,
+  s_selectivity <span class='op'>=</span> <span class='cn'>NULL</span>,
+  LWT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  comp_like <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
+  prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  max_F <span class='op'>=</span> <span class='fl'>3</span>,
+  cores <span class='op'>=</span> <span class='fl'>1L</span>,
+  integrate <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  mean_fit <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  drop_nonconv <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  drop_highF <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  control <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>iter.max <span class='op'>=</span> <span class='fl'>2e+05</span>, eval.max <span class='op'>=</span> <span class='fl'>4e+05</span><span class='op'>)</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S4 method for OM,list</span>
 <span class='fu'>RCM</span><span class='op'>(</span>
@@ -184,7 +176,6 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
   s_selectivity <span class='op'>=</span> <span class='cn'>NULL</span>,
   LWT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   comp_like <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
-  ESS <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>30</span>, <span class='fl'>30</span><span class='op'>)</span>,
   prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   max_F <span class='op'>=</span> <span class='fl'>3</span>,
   cores <span class='op'>=</span> <span class='fl'>1L</span>,
@@ -205,7 +196,6 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
   s_selectivity <span class='op'>=</span> <span class='cn'>NULL</span>,
   LWT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   comp_like <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
-  ESS <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>30</span>, <span class='fl'>30</span><span class='op'>)</span>,
   prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   max_F <span class='op'>=</span> <span class='fl'>3</span>,
   cores <span class='op'>=</span> <span class='fl'>1L</span>,
@@ -221,26 +211,27 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>RCMdata</th>
+      <td><p>An <a href='RCMdata-class.html'>RCMdata</a> object.</p></td>
+    </tr>
+    <tr>
       <th>OM</th>
       <td><p>An object of class OM that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).</p></td>
     </tr>
     <tr>
-      <th>sims</th>
-      <td><p>A logical vector of length <code>OM@nsim</code> or a numeric vector indicating which simulations to keep.</p></td>
+      <th>condition</th>
+      <td><p>String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
+or "effort".</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>Data inputs formatted in a list object (preferred). Alternatively, <code>data</code> can be a Data S4 object. See Data section below.</p></td>
+      <td><p>Data inputs formatted in a <a href='RCMdata-class.html'>RCMdata</a> (preferred) or Data object. 
+Use of a list is deprecated. See Data section below.</p></td>
     </tr>
     <tr>
       <th>...</th>
       <td><p>Other arguments to pass in for starting values of parameters and fixing parameters. See details.</p></td>
-    </tr>
-    <tr>
-      <th>condition</th>
-      <td><p>String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
-or "effort".</p></td>
     </tr>
     <tr>
       <th>selectivity</th>
@@ -253,7 +244,7 @@ and additional modifications for fixing selectivity parameters will likely be ne
       <td><p>A vector of length nsurvey to indicate the selectivity of the corresponding columns in <code>data$Index</code>. Use <code>"B"</code> for
 total biomass, or <code>"SSB"</code> for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
 If the survey selectivity is otherwise independent of anything else in the model, use <code>"logistic"</code>, <code>"dome"</code>, or <code>"free"</code> to specify the functional form of selectivity, and
-see Additional arguments section for setup of survey selectivity parameters. See <a href='../doc/RCM_sel.html'>selectivity vignette</a> for more information.</p></td>
+see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.</p></td>
     </tr>
     <tr>
       <th>LWT</th>
@@ -264,17 +255,11 @@ see Additional arguments section for setup of survey selectivity parameters. See
       <td><p>A string indicating either <code>"multinomial"</code> (default) or <code>"lognormal"</code> distributions for the composition data.</p></td>
     </tr>
     <tr>
-      <th>ESS</th>
-      <td><p>If <code>comp_like = "multinomial"</code>, a numeric vector of length two to cap the maximum effective samples size of the age and length compositions,
-respectively, for the multinomial likelihood function. The effective sample size of an age or length composition sample is the minimum of ESS or the number of observations
-(sum across columns). For more flexibility, set ESS to be very large and alter the age and length arrays as needed.</p></td>
-    </tr>
-    <tr>
       <th>prior</th>
-      <td><p>A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0 and M priors
-lognormal (mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while survey q and Ricker steepness use normal priors.
-For survey q, provide a matrix for nsurvey rows and 2 columns (for mean and SD). For all others, provide a length-2 vector for the mean and SD.
-See <a href='../doc/RCM_eq.html'>vignette</a> for full description.</p></td>
+      <td><p>A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
+lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
+For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors. For all others, provide a length-2 vector for the mean and SD.
+See Articles section for full description.</p></td>
     </tr>
     <tr>
       <th>max_F</th>
@@ -309,10 +294,12 @@ See <a href='../doc/RCM_eq.html'>vignette</a> for full description.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>An object of class <a href='RCModel-class.html'>RCModel</a> (see link for description of output).</p>
+<p><code>check_RCMdata</code> returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
+from the OM.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>Fleet selectivity is fixed to values sampled from <code>OM</code> if no age or length compositions are provided.</p>
-<p>Survey selectivity is estimable only if <code>s_CAA</code> or <code>s_CAL</code> is provided. Otherwise, the selectivity should
+<p>Survey selectivity is estimable only if <code>IAA</code> or <code>IAL</code> is provided. Otherwise, the selectivity should
 be mirrored to a fleet (vulnerable biomass selectivity) or indexed to total or spawning biomass (see <code>s_selectivity</code>).</p>
 <p>Parameters that were used in the fitting model are placed in the <code>RCM@OM@cpars</code> list.</p>
 <p>If the operating model <code>OM</code> uses time-varying growth or M, then those trends will be used in the RCM as well.
@@ -320,15 +307,16 @@ Non-stationary productivity creates ambiguity in the calculation and interpretat
 <p>The easiest way to turn off time-varying growth/M is by setting: <code>OM@Msd &lt;- OM@Linfsd &lt;- OM@Ksd &lt;- c(0, 0)</code>.</p>
 <p>To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 index but the data won't enter the likelihood. See section on likelihood weights.</p>
-    <h2 class="hasAnchor" id="vignette"><a class="anchor" href="#vignette"></a>Vignette</h2>
+    <h2 class="hasAnchor" id="articles"><a class="anchor" href="#articles"></a>Articles</h2>
 
     
 
-<p>Three vignettes are available for the RCM:</p>
+<p>Three articles are available for the RCM:</p>
 <ul>
-<li><p><a href='../doc/RCM.html'>General overview of approach</a></p></li>
-<li><p><a href='../doc/RCM_eq.html'>Mathematical description</a></p></li>
-<li><p><a href='../doc/RCM_sel.html'>Setup of selectivity settings</a> (useful for more data-rich cases)</p></li>
+<li><p><a href='https://openmse.com/tutorial-rcm/'>General overview of approach</a></p></li>
+<li><p><a href='https://openmse.com/tutorial-rcm-eq/'>Mathematical description</a></p></li>
+<li><p><a href='https://openmse.com/tutorial-rcm-select/'>Setup of selectivity settings</a> (useful for more data-rich cases)</p></li>
+<li><p><a href='https://openmse.com/features-assessment-models/5-priors/'>Description of priors</a></p></li>
 </ul>
 
     <h2 class="hasAnchor" id="data"><a class="anchor" href="#data"></a>Data</h2>
@@ -337,15 +325,29 @@ index but the data won't enter the likelihood. See section on likelihood weights
 
 <p>One of indices, age compositions, or length compositions should be provided in addition to the historical catch or effort. Not all arguments
 are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).</p>
-<p>The <code>data</code> variable can be a named list that includes:</p>
+<p>The <code>data</code> variable can be an object of class <a href='RCMdata-class.html'>RCMdata</a>. See help file for description of inputs.</p>
+<p>Alternatively, the <code>data</code> input can be a Data S4 object which will retrieve data from the following slots:</p>
+<ul>
+<li><p>Data@Cat - catch series (single fleet with the Data S4 object)</p></li>
+<li><p>Data@Effort - effort series</p></li>
+<li><p>Data@CAA - fishery age composition</p></li>
+<li><p>Data@CAL, Data@CAL_mids - fishery length composition and corresponding length bins</p></li>
+<li><p>Data@Ind, Data@SpInd, Data@VInd, Data@AddInd - indices of abundance</p></li>
+<li><p>Data@CV_Ind, Data@CV_SpInd, Data@CV_VInd, Data@CV_AddInd - annual coefficients of variation for the corresponding indices of abundance. CVs will be converted to lognormal standard deviations.</p></li>
+<li><p>Data@ML - fishery mean lengths</p></li>
+<li><p>Data@AddIndV, Data@AddIndType, Data@AddIunits - Additional information for indices in Data@AddInd: selectivity and units (i.e., biomass or abundance).</p></li>
+</ul>
+
+<p>There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., <code>RCM(OM, Data, C_eq = C_eq, ...)</code>.</p>
+<p>Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:</p>
 <ul>
 <li><p>Chist - A vector of historical catch, should be of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.
 Ideally, the first year of the catch series represents unfished conditions (see also <code>C_eq</code>).</p></li>
 <li><p>C_sd - A vector or matrix of standard deviations (lognormal distribution) for the catches in <code>Chist</code>.
 If not provided, the default is 0.01. Only used if <code>condition = "catch"</code>.</p></li>
 <li><p>Ehist - A vector of historical effort, should be of length OM@nyears (see also <code>E_eq</code>).</p></li>
-<li><p>Index - A vector of values of an index (of length OM@nyears). If there are multiple surveys: a matrix of historical indices of abundances, with rows
-indexing years and columns indexing surveys. Age-specific indices should be numbers-specific while all others are weight-based.</p></li>
+<li><p>Index - A vector of values of an index (of length OM@nyears). If there are multiple indices: a matrix of historical indices of abundances, with rows
+indexing years and columns indexing the index.</p></li>
 <li><p>I_sd - A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in <code>Index</code>.
 If not provided, this function will use values from <code>OM@Iobs</code>.</p></li>
 <li><p>I_type - Obsolete as of version 2.0. See <code>s_selectivity</code> argument.</p></li>
@@ -371,23 +373,9 @@ Zero (default) implies unfished conditions in year one. Otherwise, this is used 
 <li><p>I_units - Optional, an integer vector to indicate whether indices are biomass based (1) or abundance-based (0). By default, all are biomass-based.</p></li>
 <li><p>age_error - Optional, a square matrix of maxage + 1 rows and columns to specify ageing error. The aa-th column assigns a proportion of the true age in the
 a-th row to observed age. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).</p></li>
-<li><p>sel_block - Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function to a fleet for certain years.
-See the <a href='../doc/RCM_sel.html'>selectivity</a> vignette for more details.</p></li>
+<li><p>sel_block - Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function to a fleet for certain years.</p></li>
 </ul>
 
-<p>Alternatively, the <code>data</code> input can be a Data S4 object which will retrieve data from the following slots:</p>
-<ul>
-<li><p>Data@Cat - catch series (single fleet with the Data S4 object)</p></li>
-<li><p>Data@Effort - effort series</p></li>
-<li><p>Data@CAA - fishery age composition</p></li>
-<li><p>Data@CAL, Data@CAL_mids - fishery length composition and corresponding length bins</p></li>
-<li><p>Data@Ind, Data@SpInd, Data@VInd, Data@AddInd - indices of abundance</p></li>
-<li><p>Data@CV_Ind, Data@CV_SpInd, Data@CV_VInd, Data@CV_AddInd - annual coefficients of variation for the corresponding indices of abundance. CVs will be converted to lognormal standard deviations.</p></li>
-<li><p>Data@ML - fishery mean lengths</p></li>
-<li><p>Data@AddIndV, Data@AddIndType, Data@AddIunits - Additional information for indices in Data@AddInd: selectivity and units (i.e., biomass or abundance).</p></li>
-</ul>
-
-<p>There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed in the function call, i.e., <code>RCM(OM, Data, C_eq = C_eq, ...)</code>.</p>
     <h2 class="hasAnchor" id="additional-arguments"><a class="anchor" href="#additional-arguments"></a>Additional arguments</h2>
 
     
@@ -396,17 +384,19 @@ See the <a href='../doc/RCM_sel.html'>selectivity</a> vignette for more details.
 <ul>
 <li><p>vul_par: A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
 to LFS (length of full selectivity), L5 (length of 5 percent selectivity), and Vmaxlen (selectivity at length Linf). By default,
-the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage rows where
-the row specifies the selectivity at age. See the <a href='../doc/RCM_sel.html'>selectivity</a> vignette for more information.</p></li>
-<li><p>s_vul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. These values are only
-used if <code>s_selectivity = "est"</code> for the corresponding fleet. Otherwise, placeholders should be used to complete the matrix.</p></li>
+the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage+1 rows where
+the row specifies the selectivity at age. See Articles section.</p></li>
+<li><p>ivul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. Values in the column are ignored
+if <code>s_selectivity</code> is mapped to a fishing fleet (add NA placeholders in that case). 
+If any <code>s_selectivity = "free"</code>, then this matrix needs to be of maxage+1 rows where
+the row specifies the selectivity at age.</p></li>
 <li><p>log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.</p></li>
 <li><p>log_early_rec_dev: A numeric vector of length OM@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.</p></li>
 <li><p>map_vul_par: An integer matrix of the same dimension as vul_par. This is the 'map' argument for vul_par in TMB, see <a href='https://rdrr.io/pkg/TMB/man/MakeADFun.html'>MakeADFun</a>, which indicates whether selectivity parameters are fixed
 or estimated. If an entry is <code>NA</code>, the corresponding parameter is fixed in the model to the starting
 value. Otherwise, an integer for each independent parameter. By default, selectivity is fixed if there are no age or length composition for that fleet
 or survey, otherwise estimated. Unused cells in the vul_par matrix should be given NA in the map matrix.</p></li>
-<li><p>map_s_vul_par: The map argument for the survey selectivity parameters (same dimension as s_vul_par). Placeholder parameters should have a map value of NA.</p></li>
+<li><p>map_ivul_par: The map argument for the survey selectivity parameters (same dimension as ivul_par). Placeholder parameters should have a map value of NA.</p></li>
 <li><p>map_log_early_rec_dev: A vector of length OM@maxage that indexes which recruitment deviates for the cohorts in the first year of the model are fixed (using NA) or estimated (a separate integer).
 By default, no deviates are estimated (all are NA).</p></li>
 <li><p>map_log_rec_dev: A vector of length OM@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
@@ -423,13 +413,12 @@ a single model fit. By default FALSE. This feature requires identical biological
 
 <p><code>LWT</code> is an optional named list containing the likelihood weights (values &gt;= 0) with the possible options:</p><ul>
 <li><p>Chist, CAA, CAL, MS, C_eq: A vector of length nfleet for each.</p></li>
-<li><p>Index, s_CAA, s_CAL: A vector of length nsurvey for each.</p></li>
+<li><p>Index, IAA, IAL: A vector of length nsurvey for each.</p></li>
 </ul>
 
 <p>By default, all likelihood weights are equal to one if not specified by the user.</p>
-<p>Weighting for CAA and CAL can also be adjusted by changing the multinomial sample size. For <code>CAA</code>, <code>CAL</code>, <code>s_CAA</code>, and <code>s_CAL</code>, the arrays should be set up so that
-the annual number of observations will be equal to the presumed multinomial sample size. Argument <code>ESS</code> provides a shortcut
-to cap the multinomial sample size for age and length comps.</p>
+<p>Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
+<a href='RCMdata-class.html'>RCMdata</a> object.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><a href='plot.RCModel.html'>plot.RCModel</a> <a href='RCModel-class.html'>RCModel</a></p></div>

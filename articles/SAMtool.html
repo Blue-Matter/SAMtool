@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>1. User guide to SAMtool and model-based MPs • SAMtool</title>
+<title>Introduction to SAMtool and model-based MPs • SAMtool</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="1. User guide to SAMtool and model-based MPs">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to SAMtool and model-based MPs">
 <meta property="og:description" content="SAMtool">
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -55,36 +55,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/Delay_difference.html">1a. Delay-difference and delay-differential models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM.html">2. Description of the RCM (Rapid Conditioning Model) for conditioning MSEtool operating models</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_eq.html">2a. Mathematical description of the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/RCM_sel.html">2b. Configuring selectivity for the RCM</a>
-    </li>
-    <li>
-      <a href="../articles/SCA.html">1b. Statistical catch-at-age (SCA) model</a>
-    </li>
-    <li>
-      <a href="../articles/Surplus_production.html">1c. Surplus production model</a>
-    </li>
-    <li>
-      <a href="../articles/VPA.html">1d. Virtual population analysis (VPA)</a>
-    </li>
-  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -110,11 +80,11 @@
       </header><script src="SAMtool_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>1. User guide to SAMtool and model-based MPs</h1>
+      <h1 data-toc-skip>Introduction to SAMtool and model-based MPs</h1>
             <h3 class="subtitle">Development, testing, and implementation of model-based management procedures</h3>
-                        <h4 class="author">Quang Huynh (&lt;<a href="mailto:quang@bluematterscience.com" class="email">quang@bluematterscience.com</a>), Tom Carruthers (<a href="mailto:tom@bluematterscience.com" class="email">tom@bluematterscience.com</a>&gt;), Adrian Hordyk (<a href="mailto:adrian@bluematterscience.com" class="email">adrian@bluematterscience.com</a>)</h4>
+                        <h4 class="author">Quang Huynh (<a href="mailto:quang@bluematterscience.com" class="email">quang@bluematterscience.com</a>), Tom Carruthers (<a href="mailto:tom@bluematterscience.com" class="email">tom@bluematterscience.com</a>), Adrian Hordyk (<a href="mailto:adrian@bluematterscience.com" class="email">adrian@bluematterscience.com</a>)</h4>
             
-            <h4 class="date">2021-05-20</h4>
+            <h4 class="date">2021-06-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Blue-Matter/SAMtool/blob/master/vignettes/SAMtool.Rmd"><code>vignettes/SAMtool.Rmd</code></a></small>
       <div class="hidden name"><code>SAMtool.Rmd</code></div>
@@ -154,7 +124,7 @@ pre { /* Code block */
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
-<p>SAMtool is an extension of the MSEtool package for implementing closed-loop simulation testing of management procedures (MP), a process used in management strategy evaluation (MSE). The components of the operating model (OM) for conducting MSEs for data-rich stocks is wholly contained within MSEtool, but SAMtool provides the tools for implementing additional features to facilitate model-based MPs. Whereas DLMtool is primarily designed for testing data-limited MPs, SAMtool provides an object-oriented framework for building out data-rich MPs, which typically combine an assessment model with a harvest control rule (HCR) to provide a catch recommendation. MPs created by SAMtool are designed to be used with the operating model of MSEtool through the <code>runMSE</code> function.</p>
+<p>As part of openMSE, SAMtool implements closed-loop simulation testing of management procedures (MP), a process used in management strategy evaluation (MSE). The components of the operating model (OM) for conducting MSEs for data-rich stocks is wholly contained within MSEtool, but SAMtool provides the tools for implementing additional features to facilitate model-based MPs. Whereas DLMtool is primarily designed for testing data-limited MPs, SAMtool provides an object-oriented framework for building out data-rich MPs, which typically combine an assessment model with a harvest control rule (HCR) to provide a catch recommendation. MPs created by SAMtool are designed to be used with the operating model of MSEtool through the <code>runMSE</code> function.</p>
 <p>The overall structure of a closed-loop simulation for a MSE in MSEtool can be described through the classes deployed in the package. An operating model (class <strong>OM</strong> object) parameterizes the stock (biology), fleet, observation, and implementation dynamics of the MSE. To begin the MSE, the <strong>OM</strong> object generates the data to be used for a management procedure and stores them in an object of class <strong>Data</strong>. A function of class <strong>MP</strong> uses the <strong>Data</strong> object and returns an object of class <strong>Rec</strong> containing the management recommendations, e.g., some combination of spatial closures and size, effort and catch limits. Candidate MPs should not see the operating model and interacts solely with data simulated in the <strong>Data</strong> object. From the management recommendations, the <strong>OM</strong> object is updated and the process is successively repeated as the operating model projects forward in time. The output from the closed-loop simulation is returned in an object of class <strong>MSE</strong>, from which summary statistics can be calculated.</p>
 <p><img src="fig_assess/MSEtool_design.png" width="400"></p>
 <p><em>Figure 1: Design of MSEtool package for management strategy evaluations</em></p>
@@ -165,12 +135,13 @@ pre { /* Code block */
 <p>Additionally, <strong>Assess</strong> functions can be used in an assessment-only context (external to closed-loop simulation). Output of an <strong>Assess</strong> function can be used to provide standardized stock assessment reporting and diagnostics, such as Kobe plots, likelihood profiles for parameter estimates, and retrospective analyses of time series estimates of biomass, fishing mortality, recruitment, etc.</p>
 <p><img src="fig_assess/SAMtool_design.png" width="690"></p>
 <p><em>Figure 2: Design of SAMtool package for building management procedures from assessment models and harvest control rules for closed-loop simulation with the MSEtool package. Assess and HCR functions and the Assessment object are unique to SAMtool, but work within the framework of MSEtool. Separate functions are also available for standardized reporting of output from assessment models in a stock assessment setting.</em></p>
-<div id="additional-features" class="section level3">
-<h3 class="hasAnchor">
-<a href="#additional-features" class="anchor"></a>Additional features</h3>
-<p>SAMtool provides a conditioning model (RCM, for Rapid Conditioning Model) for generating operating models fitted to data. For more information, see the <a href="RCM.html">RCM vignette</a>.</p>
-<p>To support multiple-area operating models, the <code>simmov</code> function estimates the movement matrix based on the prescribed number of areas, biomass distribution among areas in unfished conditions, and the probability of staying in each area in the next time step.</p>
 </div>
+<div id="additional-features" class="section level2">
+<h2 class="hasAnchor">
+<a href="#additional-features" class="anchor"></a>Additional features</h2>
+<p>SAMtool provides a conditioning model (RCM, for Rapid Conditioning Model) for generating operating models fitted to data.</p>
+<p>Articles with the description of the <a href="https://openmse.com/features-assessment-models/">assessment models</a> and the <a href="https://openmse.com/tutorial-rcm/">RCM</a> are available on the <a href="https://openmse.com/">openMSE</a> website.</p>
+<p>To support multiple-area operating models, the <code>simmov</code> function estimates the movement matrix based on the prescribed number of areas, biomass distribution among areas in unfished conditions, and the probability of staying in each area in the next time step.</p>
 </div>
 </div>
 <div id="assessment-models" class="section level1">
@@ -185,7 +156,7 @@ pre { /* Code block */
 <li>
 <code>SP</code> (Surplus Production model and its state-space counterpart, <code>SP_SS</code>)</li>
 <li>
-<code>SCA</code> (Statistical Catch at age model and variants <code>SCA2</code> and <code>SCA_Pope</code>)</li>
+<code>SCA</code> (Statistical Catch at age model and variants for time varying M: <code>SCA_RWM</code> and <code>SCA_DDM</code>)</li>
 <li>
 <code>SSS</code> (Simple Stock Synthesis implementation with fixed terminal depleton assumption)</li>
 <li>
@@ -238,7 +209,7 @@ pre { /* Code block */
 #&gt; SSB/SSB[MSY]            0.092
 #&gt; Spawning depletion      0.119
 #&gt; Recruitment             0.051
-#&gt; Vulnerable biomass      0.071</code></pre>
+#&gt; Vulnerable biomass     -0.465</code></pre>
 <p><img src="fig_assess/retrospective.png" width="600"></p>
 <p><em>Figure 3: Retrospective trends in the SCA assessment fit and table of associated Mohn’s rho above.</em></p>
 <p><img src="fig_assess/profile.png" width="600"></p>
@@ -307,7 +278,7 @@ pre { /* Code block */
 <h1 class="hasAnchor">
 <a href="#acknowledgements" class="anchor"></a>Acknowledgements</h1>
 <p>SAMtool development is funded by the Canadian Department of Fisheries and Oceans and benefits from ongoing collaborations with the Natural Resources Defense Council and number of Canadian government scientists including Robyn Forrest, Sean Anderson and Daniel Duplisea.</p>
-<p>Development of the features in the <a href="https://github.com/Blue-Matter/SAMtool/">SAMtool</a> originated at the University of British Columbia in collaboration with the Natural Resources Defense Council. Further development has been funded by the Gordon and Betty Moore Foundation, the Packard Foundation, U.S. National Oceanic and Atmospheric Administration, Fisheries and Oceans Canada, the Walton Foundation, Resources Legacy Fund, the Natural Resources Defense Council, the United Nations Food and Agricultural Organization and the California Department of Fish and Wildlife.</p>
+<p>Development of the features in the <a href="https://github.com/Blue-Matter/SAMtool/">SAMtool</a> package originated at the University of British Columbia in collaboration with the Natural Resources Defense Council. Further development has been funded by the Gordon and Betty Moore Foundation, the Packard Foundation, U.S. National Oceanic and Atmospheric Administration, Fisheries and Oceans Canada, the Walton Foundation, Resources Legacy Fund, the Natural Resources Defense Council, the United Nations Food and Agricultural Organization and the California Department of Fish and Wildlife.</p>
 </div>
   </div>
 
