@@ -8,7 +8,7 @@
 \usage{
 \S4method{plot}{RCModel,missing}(
   x,
-  compare = TRUE,
+  compare = FALSE,
   filename = "RCM",
   dir = tempdir(),
   sims = 1:x@OM@nsim,

@@ -99,7 +99,7 @@ RCModel <- setClass("RCModel", slots = c(OM = "ANY", SSB = "matrix", NAA = "arra
 #' @seealso \linkS4class{RCModel} \link{RCM}
 #' @exportMethod plot
 setMethod("plot", signature(x = "RCModel", y = "missing"),
-          function(x, compare = TRUE, filename = "RCM", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL,
+          function(x, compare = FALSE, filename = "RCM", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL,
                    f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
                    open_file = TRUE, quiet = TRUE, render_args, ...) {
 
