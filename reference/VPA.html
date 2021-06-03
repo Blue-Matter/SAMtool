@@ -272,8 +272,7 @@ hasn't converged. The optimization continues from the parameters from the previo
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>An object of class <a href='Assessment-class.html'>Assessment</a>. The F vector is the apical fishing mortality experienced by any
-age class in a given year. The U vector is the ratio of catch (weight) and vulnerable biomass, which may be a better
-description of fishing pressure (and UMSY = MSY/VBMSY).</p>
+age class in a given year.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The VPA is initialized by estimating the terminal F-at-age. Parameter <code>Fterm</code> is the apical terminal F if
@@ -299,6 +298,9 @@ quantities are also calculated, which may be used in harvest control rules.</p>
 
     <p>Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.</p>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='va'>out</span> <span class='op'>&lt;-</span> <span class='fu'>VPA</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>2</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, vulnerability <span class='op'>=</span> <span class='st'>"dome"</span><span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
