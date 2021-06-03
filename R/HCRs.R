@@ -223,7 +223,7 @@ class(HCR60_20) <- "HCR"
 #' @rdname HCR_ramp
 #' @export
 HCR80_40MSY <- function(Assessment, reps = 1, Ftarget_type = "FMSY", SPR_targ = 0.4, ...) {
-  HCR_ramp(Assessment, reps, OCP_type = "SSB_SSBMSY", LOCP = 0.4, TOCP = 0.8, 
+  HCR_ramp(Assessment, reps, OCP_type = "SSB_SSBMSY", LOCP = 0.5, TOCP = 0.5, 
            Ftarget_type = Ftarget_type, relF_min = 0, relF_max = 1, SPR_targ = SPR_targ, ...)
 }
 class(HCR80_40MSY) <- "HCR"
@@ -260,6 +260,50 @@ HCR_MSY <- function(Assessment, reps = 1, MSY_frac = 1, ...) {
            relF_min = MSY_frac, relF_max = MSY_frac)
 }
 class(HCR_MSY) <- "HCR"
+
+#' Fixed escapement harvest control rule
+#'
+#' A simple control rule that allows fishing when the operational control point (OCP) is above some threshold.
+#' By default, this function sets the TAC at F = 100\% FMSY when spawning depletion > 0.1.
+#'
+#' @param Assessment An object of class \linkS4class{Assessment} with estimates of
+#' FMSY or UMSY and vulnerable biomass in terminal year.
+#' @param reps The number of stochastic samples of the TAC recommendation.
+#' @param OCP_type The type of operational control points (OCPs) for the harvest control rule used to determine 
+#' whether there is fishing. By default, use (\code{"SSB_SSB0"} for spawning depletion. Other biomass OCPs include \code{"SSB_SSBMSY"} for spawning biomass relative to MSY and
+#' \code{"SSB_dSSB0"}, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
+#' For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR\% (see \code{SPR_OCP} argument) can be used.
+#' @param OCP_threshold The value of the OCP above which fishing can occur.
+#' @param Ftarget_type The type of F used for the target fishing mortality rate.
+#' @param relF_max The relative value of Ftarget if \code{OCP > OCP_treshold}.
+#' @param ... Miscellaneous arguments.
+#' @return An object of class \linkS4class{Rec} with the TAC recommendation.
+#' @author Q. Huynh
+#' @references
+#' Deroba, J.J. and Bence, J.R. 2008. A review of harvest policies: Understanding relative
+#' performance of control rules. Fisheries Research 94:210-223.
+#' @seealso \link{make_MP} \link{HCR_ramp}
+#' @examples
+#' # create an MP to run in closed-loop MSE (fishes at FMSY when B/B0 > 0.2)
+#' SP_escapement <- make_MP(SP, HCR_escapement)
+#'
+#' # The MP which fishes at 75% of FMSY
+#' SP_escapement75 <- make_MP(SP, HCR_escapement, relF_max = 0.75)
+#' 
+#' # The MP which fishes at FMSY when BMSY > 0.5
+#' SP_BMSY_escapement <- make_MP(SP, HCR_escapement, OCP_type = "SSB_SSBMSY", OCP_threshold = 0.5, relF_max = 1)
+#'
+#' \donttest{
+#' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SP_escapement", "SP_BMSY_escapement"))
+#' }
+#' @export
+HCR_escapement <- function(Assessment, reps = 1, OCP_type = "SSB_SSB0", OCP_threshold = 0.2, 
+                           Ftarget_type = "FMSY", 
+                           relF_max = 1, ...) {
+  HCR_ramp(Assessment, reps, OCP_type = OCP_type, LOCP = OCP_threshold, TOCP = OCP_threshold, 
+           Ftarget_type = Ftarget_type, relF_min = 0, relF_max = relF_max, ...)
+}
+class(HCR_escapement) <- "HCR"
 
 #' Generic linear harvest control rule based on biomass
 #'

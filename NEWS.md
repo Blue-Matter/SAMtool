@@ -9,6 +9,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Dynamic SSB0 is calculated for assessment models. 
 - Priors on M, steepness, R0, and index q can be created SCA, DD, and cDD assessment models.
 - Additional OCP types in `HCR_ramp` to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).
+- Added a shortcut function for a fixed escapement harvest control rule (`HCR_escapement`).
 
 ## SAMtool 1.1.2
 - Minor fix to vignette to fix MSEtool reverse dependency issue.
