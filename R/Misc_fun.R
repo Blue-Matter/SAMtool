@@ -11,8 +11,10 @@ arrows <- function(...) suppressWarnings(graphics::arrows(...))
 #' 
 #' @return Displays a browser webpage of URL links to package vignettes.
 #' @export
-userguide <- function() browseVignettes("SAMtool")
-
+userguide <- function() {
+  .Deprecated("openMSE::userguide", package = "openMSE")
+  browseVignettes("SAMtool")
+}
 
 squeeze <- function(x) (1 - .Machine$double.eps) * (x - 0.5) + 0.5
 iVB <- function(t0, K, Linf, L) max(1, ((-log(1 - L/Linf))/K + t0))  # Inverse Von-B

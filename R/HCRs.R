@@ -291,7 +291,8 @@ class(HCR_MSY) <- "HCR"
 #' SP_escapement75 <- make_MP(SP, HCR_escapement, relF_max = 0.75)
 #' 
 #' # The MP which fishes at FMSY when BMSY > 0.5
-#' SP_BMSY_escapement <- make_MP(SP, HCR_escapement, OCP_type = "SSB_SSBMSY", OCP_threshold = 0.5, relF_max = 1)
+#' SP_BMSY_escapement <- make_MP(SP, HCR_escapement, OCP_type = "SSB_SSBMSY", 
+#'                               OCP_threshold = 0.5, relF_max = 1)
 #'
 #' \donttest{
 #' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SP_escapement", "SP_BMSY_escapement"))

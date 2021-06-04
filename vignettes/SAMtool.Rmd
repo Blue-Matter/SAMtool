@@ -9,7 +9,7 @@ output:
     toc: true
     number_sections: true 
 vignette: >
-  %\VignetteIndexEntry{1. User guide to SAMtool and model-based MPs}
+  %\VignetteIndexEntry{Introduction to SAMtool and model-based MPs}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

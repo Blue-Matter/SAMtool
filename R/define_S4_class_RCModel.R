@@ -466,7 +466,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
 #' @rdname plot.RCModel
 #' @export
-compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tempdir(), Year = NULL,
+compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = tempdir(), Year = NULL,
                         f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
                         open_file = TRUE, quiet = TRUE, render_args) {
 
@@ -506,7 +506,7 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   report_list <- lapply(dots, function(xx) if(length(xx@mean_fit) > 0) return(xx@mean_fit$report) else stop("Error in RCM objects."))
 
   nsim <- length(report_list)
-  data <- dots[[1]]@data
+  RCMdata <- dots[[1]]@data
 
   max_age <- dots[[1]]@OM@maxage
   age <- 0:max_age
@@ -514,9 +514,9 @@ compare_RCM <- function(..., compare = TRUE, filename = "compare_RCM", dir = tem
   if(is.null(Year)) Year <- (dots[[1]]@OM@CurrentYr - nyears + 1):dots[[1]]@OM@CurrentYr
   Yearplusone <- c(Year, max(Year) + 1)
 
-  nfleet <- vapply(dots, function(xx) xx@RCMdata@Misc$nfleet, numeric(1)) %>% unique()
-  nsurvey <- vapply(dots, function(xx) xx@RCMdata@Misc$nsurvey, numeric(1)) %>% unique()
-  length_bin <- dots[[1]]@RCMdata@length_bin
+  nfleet <- vapply(dots, function(xx) xx@data@Misc$nfleet, numeric(1)) %>% unique()
+  nsurvey <- vapply(dots, function(xx) xx@data@Misc$nsurvey, numeric(1)) %>% unique()
+  length_bin <- RCMdata@length_bin
 
   if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
   if(is.null(s_name)) s_name <- paste("Index", 1:nsurvey)

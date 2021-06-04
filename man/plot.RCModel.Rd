@@ -27,7 +27,7 @@
 
 compare_RCM(
   ...,
-  compare = TRUE,
+  compare = FALSE,
   filename = "compare_RCM",
   dir = tempdir(),
   Year = NULL,
