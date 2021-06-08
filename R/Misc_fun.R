@@ -114,6 +114,7 @@ check_det <- function(h, abs_val = 0.1, is_null = TRUE) {
   !is.na(det_h) && det_h < abs_val
 }
 
+#' @importFrom corpcor pseudoinverse
 get_sdreport <- function(obj, getReportCovariance = FALSE) {
   par.fixed <- obj$env$last.par.best
   if(is.null(obj$env$random)) {
@@ -134,12 +135,12 @@ get_sdreport <- function(obj, getReportCovariance = FALSE) {
     res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
   }
   
-  if(requireNamespace("numDeriv", quietly = TRUE) && !res$pdHess && check_det(h)) {
+  if(check_det(h) && !res$pdHess && requireNamespace("numDeriv", quietly = TRUE)) {
     h <- numDeriv::jacobian(obj$gr, par.fixed)
     res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
   }
   
-  if(res$pdHess && all(is.na(res$cov.fixed))) {
+  if(all(is.na(res$cov.fixed)) && res$pdHess) {
     if(!is.character(try(chol(h), silent = TRUE))) res$cov.fixed <- chol2inv(chol(h))
   }
 

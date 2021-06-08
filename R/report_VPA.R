@@ -39,27 +39,26 @@ rmd_VPA <- function(Assessment, ...) {
   ss <- rmd_summary("Virtual Population Analysis (VPA)")
 
   # Life History
-  age <- Assessment@info$ages
-  LH_section <- c(rmd_LAA(age, Assessment@info$LH$LAA, header = "## Life History\n"), rmd_WAA(age, Assessment@info$LH$WAA),
-                  rmd_LW(Assessment@info$LH$LAA, Assessment@info$LH$WAA),
-                  rmd_mat(age, Assessment@info$LH$mat, fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."))
+  LH_section <- c(rmd_LAA("info$ages", header = "## Life History\n"), rmd_WAA("info$ages"), rmd_LW(),
+                  rmd_mat("info$ages", "info$LH$mat", 
+                          fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."))
 
   # Data section
   data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"), 
                     rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)),
-                    rmd_data_age_comps("bubble", ages = vector2char(age)),
-                    rmd_data_age_comps("annual", ages = vector2char(age), annual_yscale = "\"raw\"", annual_ylab = "\"Catch-at-age\""))
+                    rmd_data_age_comps("bubble", ages = "info$ages"),
+                    rmd_data_age_comps("annual", ages = "info$ages", annual_yscale = "\"raw\"", annual_ylab = "\"Catch-at-age\""))
 
   # Assessment
   #### Pars and Fit
   assess_fit <- c("## Assessment {.tabset}\n### Estimates and Model Fit\n",
-                  rmd_sel(age, Assessment@Selectivity[nrow(Assessment@Selectivity), ], fig.cap = "Estimated selectivity at age."),
+                  rmd_sel("info$ages", fig.cap = "Estimated terminal-year selectivity at age."),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
-                  rmd_fit_age_comps("annual", ages = vector2char(age), match = TRUE))
+                  rmd_fit_age_comps("annual", ages = "info$ages", match = TRUE))
 
   #### Time Series
   ts_output <- c(rmd_F(header = "### Time Series Output\n", fig.cap = "apical fishing mortality"), rmd_F_FMSY(),
-                 rmd_sel_annual(age), rmd_sel_persp(age),
+                 rmd_sel_annual("info$ages"), rmd_sel_persp("info$ages"),
                  #rmd_U(fig.cap = "harvest rate (ratio of catch and vulnerable biomass)"),
                  #rmd_U_UMSY(fig.cap = "U/UMSY, where UMSY = MSY/VBMSY"),
                  rmd_SSB(), rmd_SSB_SSBMSY(), rmd_SSB_SSB0(),
@@ -69,21 +68,17 @@ rmd_VPA <- function(Assessment, ...) {
                  rmd_C_mean_age(ages = "info$ages"))
 
   # Productivity
-  Arec <- Assessment@TMB_report$Arec
-  Brec <- Assessment@TMB_report$Brec
-  SSB <- Assessment@SSB[1:(length(Assessment@SSB)-min(age))]
-  SR <- Assessment@info$SR
-  if(SR == "BH") expectedR <- Arec * SSB / (1 + Brec * SSB) else {
-    expectedR <- Arec * SSB * exp(-Brec * SSB)
-  }
-  first_recruit_year <- min(age) + 1
-  last_recruit_year <- length(Assessment@SSB)
-  ind_recruit <- first_recruit_year:last_recruit_year
-  rec_dev <- Assessment@R[ind_recruit]
-  
-  productivity <- c(rmd_SR(SSB, expectedR, rec_dev, ylab = paste0("Recruitment (age ", min(age), ")"),
-                           header = "### Productivity\n\n\n", conv_check = TRUE),
-                    rmd_SR(SSB, expectedR, rec_dev, ylab = paste0("Recruitment (age ", min(age), ")"),
+  SR_calc <- c("SSB_SR <- SSB[1:(length(SSB) - min(info$ages))]",
+               "if(info$SR == \"BH\") {",
+               "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
+               "} else {",
+               "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
+               "}",
+               "Rest <- R[(min(info$ages)+1):length(SSB)]")
+  productivity <- c(rmd_SR(ylab = paste0("Recruitment (age ", min(Assessment@info$ages), ")"),
+                           header = "### Productivity\n\n\n", conv_check = TRUE,
+                           SR_calc = SR_calc),
+                    rmd_SR(ylab = paste0("Recruitment (age ", min(Assessment@info$ages), ")"),
                            fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE, conv_check = TRUE),
                     rmd_yield_F("VPA"), rmd_yield_depletion("VPA"), rmd_sp(depletion = FALSE), rmd_YPR(), rmd_SPR())
 
@@ -147,7 +142,7 @@ retrospective_VPA <- function(Assessment, nyr) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 
-    if(!is.character(opt2) && !is.character(SD)) {
+    if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best) %>% VPA_posthoc(info)
 
       #Z_mat <- t(report$F) + info$data$M

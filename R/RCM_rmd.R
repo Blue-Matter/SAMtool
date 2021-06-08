@@ -13,7 +13,7 @@ rmd_matplot <- function(x, y, col, xlab, ylab, legend.lab, type = "l", lty = 1, 
            paste0("matplot(xx, yy, type = \"", type, "\", lty = ", lty, ", col = ", col,
                   ", ylim = c(0, 1.1 * max(yy, na.rm = TRUE)), xlab = \"", xlab, "\", ylab = \"", ylab, "\")"),
            "abline(h = 0, col = \"grey\")",
-           paste0("if(ncol(xx) > 1) legend(\"topleft\", ", legend.lab, ", text.col = ", col, ")"),
+           paste0("if(ncol(yy) > 1) legend(\"topleft\", ", legend.lab, ", text.col = ", col, ")"),
            " ```\n")
   if(!is.null(header)) ans <- c(header, ans)
   return(ans)
@@ -369,11 +369,11 @@ rmd_log_rec_dev <- function() {
 rmd_RCM_SR <- function() {
   c("```{r, fig.cap = \"Stock-recruit relationship and estimated recruitment.\"}",
     "if(OM@SRrel == 1) {",
-    "  expectedR <- report$Arec * report$E[1:nyears] / (1 + report$Brec * report$E[1:nyears])",
+    "  expectedR <- report$Arec * report$E / (1 + report$Brec * report$E)",
     "} else {",
-    "  expectedR <- report$Arec * report$E[1:nyears] * exp(-report$Brec * report$E[1:nyears])",
+    "  expectedR <- report$Arec * report$E * exp(-report$Brec * report$E)",
     "}",
-    "plot_SR(report$E[1:nyears], expectedR, report$R0, report$E0_SR, report$R[2:(nyears+1)])",
+    "plot_SR(report$E, expectedR, report$R0, report$E0_SR, report$R)",
     "```\n")
 }
 

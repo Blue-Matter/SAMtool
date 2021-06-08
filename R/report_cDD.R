@@ -58,13 +58,11 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
   } else ss <- rmd_summary("Continuous Delay-Differential")
 
   # Life History
-  age <- 1:Assessment@info$LH$maxage
-  k <- Assessment@info$data$k
-  mat <- ifelse(age < k, 0, 1)
-  LH_section <- c(rmd_LAA(age, Assessment@info$LH$LAA, header = "## Life History\n"), rmd_WAA(age, Assessment@info$LH$WAA),
-                  rmd_LW(Assessment@info$LH$LAA, Assessment@info$LH$WAA),
-                  rmd_mat(age, mat, fig.cap = "Assumed knife-edge maturity at age corresponding to length of 50% maturity."))
-
+  LH_section <- c(rmd_LAA(age = "1:info$LH$maxage", header = "## Life History\n"), 
+                  rmd_WAA(age = "1:info$LH$maxage"), rmd_LW(),
+                  rmd_mat(age = "1:info$LH$maxage", mat = "ifelse(1:info$LH$maxage < info$data$k, 0, 1)", 
+                          fig.cap = "Assumed knife-edge maturity at age corresponding to length of 50% maturity."))
+  
   # Data section
   data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"),
                     rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)))
@@ -72,7 +70,8 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
   # Assessment
   #### Pars and Fit
   assess_fit <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h(), rmd_M_prior(),
-                  rmd_sel(age, mat, fig.cap = "Knife-edge selectivity set to the age corresponding to the length of 50% maturity."),
+                  rmd_sel(age = "1:info$LH$maxage", sel = "ifelse(1:info$LH$maxage < info$data$k, 0, 1)", 
+                          fig.cap = "Knife-edge selectivity set to the age corresponding to the length of 50% maturity."),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)), rmd_assess_fit("Catch", "catch", match = TRUE))
 
   if(state_space) {
@@ -89,21 +88,15 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
                  rmd_N())
 
   #### Productivity
-  ny <- Assessment@info$data$ny
-  SSB <- Assessment@SSB[1:ny]
-  Arec <- Assessment@TMB_report$Arec
-  Brec <- Assessment@TMB_report$Brec
-  if(Assessment@info$data$SR_type == "BH") expectedR <- Arec * SSB / (1 + Brec * SSB) else {
-    expectedR <- Arec * SSB * exp(-Brec * SSB)
-  }
-
-  first_recruit_year <- k + 1
-  last_recruit_year <- length(Assessment@info$Year) + k
-  ind_recruit <- first_recruit_year:last_recruit_year
-  rec_dev <- Assessment@R[ind_recruit]
-
-  productivity <- c(rmd_SR(SSB, expectedR, rec_dev, header = "### Productivity\n\n\n"),
-                    rmd_SR(SSB, expectedR, rec_dev, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
+  SR_calc <- c("SSB_SR <- SSB[1:info$data$ny]",
+               "if(info$data$SR_type == \"BH\") {",
+               "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
+               "} else {",
+               "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
+               "}",
+               "Rest <- R[1:info$data$ny + info$data$k]")
+  productivity <- c(rmd_SR(header = "### Productivity\n\n\n", SR_calc = SR_calc),
+                    rmd_SR(fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
                     rmd_yield_F("cDD"), rmd_yield_depletion("cDD"), rmd_sp(), rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
@@ -238,7 +231,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 
-    if(!is.character(opt2) && !is.character(SD)) {
+    if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
       ref_pt <- ref_pt_cDD(info$data, report$Arec, report$Brec)
       report <- c(report, ref_pt)

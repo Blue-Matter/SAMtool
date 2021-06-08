@@ -295,7 +295,7 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
   Yearplusone <- c(Year, max(Year) + 1)
 
   Assessment <- new("Assessment", Model = "VPA",
-                    Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
+                    Name = Data@Name, conv = SD$pdHess,
                     FMort = structure(report$F, names = Year),
                     B = structure(report$B, names = Yearplusone), SSB = structure(report$E, names = Yearplusone),
                     VB = structure(report$VB, names = Yearplusone),

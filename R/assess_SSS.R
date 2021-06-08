@@ -171,7 +171,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
   
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
   Assessment <- new("Assessment", Model = "SSS", 
-                    Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
+                    Name = Data@Name, conv = SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
                     SSB0 = report$E0, VB0 = report$VB0,
                     B = structure(report$B, names = Yearplusone),

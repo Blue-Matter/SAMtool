@@ -9,12 +9,9 @@ rmd_SSS <- function(Assessment, ...) {
   ss <- rmd_summary("Simple Stock Synthesis (SSS)")
 
   # Life History
-  age <- 0:(Assessment@info$data$n_age - 1)
-  LH_section <- c(rmd_LAA(age, Assessment@info$LH$LAA, header = "## Life History\n"), rmd_WAA(age, Assessment@info$LH$WAA),
-                  rmd_LW(Assessment@info$LH$LAA, Assessment@info$LH$WAA),
-                  rmd_mat(age, Assessment@info$data$mat,
-                          fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."),
-                  rmd_sel(age, Assessment@Selectivity[nrow(Assessment@Selectivity), ], fig.cap = "Selectivity at age."))
+  LH_section <- c(rmd_LAA(header = "## Life History\n"), rmd_WAA(), rmd_LW(),
+                  rmd_mat(fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."),
+                  rmd_sel(fig.cap = "Selectivity at age."))
 
   # Data section
   data_section <- rmd_data_timeseries("Catch", header = "## Data\n")
@@ -31,11 +28,10 @@ rmd_SSS <- function(Assessment, ...) {
                  rmd_N(), rmd_N_at_age())
 
   # Productivity
-  SSB <- Assessment@SSB
-  expectedR <- estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
-
-  productivity <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
-                    rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
+  SR_calc <- c("SSB_SR <- SSB",
+               "Rest <- R_SR <- R[as.numeric(names(R)) >= info$Year[1]]")
+  productivity <- c(rmd_SR(header = "### Productivity\n\n\n", SR_calc = SR_calc),
+                    rmd_SR(fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
                     rmd_yield_U("SCA_Pope"), rmd_yield_depletion("SCA_Pope"), rmd_sp(), rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
