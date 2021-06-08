@@ -502,7 +502,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     if(dim(RCMdata@IAA)[3] != RCMdata@Misc$nsurvey) {
       stop("Number of CAA slices (", dim(RCMdata@IAA)[3], ") does not equal nsurvey (", RCMdata@Misc$nsurvey, "). NAs are acceptable.", call. = FALSE)
     }
-    message("Index age comps (IAL) processed, assuming ages 0 - ", OM@maxage, " in array.")
+    message("Index age comps (IAA) processed, assuming ages 0 - ", OM@maxage, " in array.")
     
     if(!length(RCMdata@IAA_ESS)) {
       RCMdata@IAA_ESS <- apply(RCMdata@IAA, c(1, 3), sum, na.rm = TRUE)
