@@ -492,9 +492,9 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       message("Number of IAA columns (", dim(RCMdata@IAA)[2], ") does not equal OM@maxage + 1 (", OM@maxage + 1, ").")
       message("Assuming no observations for ages greater than 0 - ", dim(RCMdata@IAA)[2] - 1, " and filling with zeros.")
       add_ages <- OM@maxage + 1 - dim(RCMdata@IAA)[2]
-      CAA_new <- array(0, c(RCMdata@Misc$nyears, OM@maxage, RCMdata@Misc$nsurvey))
-      CAA_new[, 1:dim(RCMdata@IAA)[2], ] <- RCMdata@IAA
-      RCMdata@IAA <- CAA_new
+      IAA_new <- array(0, c(RCMdata@Misc$nyears, OM@maxage, RCMdata@Misc$nsurvey))
+      IAA_new[, 1:dim(RCMdata@IAA)[2], ] <- RCMdata@IAA
+      RCMdata@IAA <- IAA_new
     }
     if(dim(RCMdata@IAA)[2] > OM@maxage + 1) {
       stop("Error in age dimension of IAA.", call. = FALSE)
@@ -516,7 +516,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     } else stop("IAA_ESS is neither a vector nor a matrix.", call. = FALSE)
   } else {
     RCMdata@IAA <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, ncol(RCMdata@Index)))
-    RCMdata@IAA_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nsurvey)
+    RCMdata@IAA_ESS <- array(0, dim(RCMdata@Index))
   }
 
   # Process survey length comps
@@ -549,7 +549,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     
   } else {
     RCMdata@IAL <- array(0, c(RCMdata@Misc$nyears, length(RCMdata@length_bin), ncol(RCMdata@Index)))
-    RCMdata@IAL_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nsurvey)
+    RCMdata@IAL_ESS <- array(0, dim(RCMdata@Index))
   }
 
   # Absolute survey
