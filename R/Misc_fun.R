@@ -96,7 +96,8 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
   if(any(c("U_equilibrium", "F_equilibrium") %in% names(obj$par))) {
     low[match(c("U_equilibrium", "F_equilibrium"), names(obj$par))] <- 0
   }
-  opt <- try(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low)), silent = TRUE)
+  opt <- tryCatch(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low)),
+                  error = function(e) as.character(e))
   SD <- get_sdreport(obj)
 
   if(!SD$pdHess && restart > 0) {
