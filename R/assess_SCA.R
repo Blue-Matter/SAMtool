@@ -525,7 +525,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
   Assessment <- new("Assessment", Model = "SCA", 
-                    Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
+                    Name = Data@Name, conv = SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
                     SSB0 = report$E0, VB0 = report$VB0,
                     B = structure(report$B, names = Yearplusone),
@@ -559,25 +559,16 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }
   
   if(Assessment@conv) {
-    if(integrate) {
-      SE_Early <- ifelse(est_early_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_early_rec_dev"]), NA)
-      SE_Main <- ifelse(est_rec_dev, sqrt(SD$diag.cov.random[names(SD$par.random) == "log_rec_dev"]), NA)
-    } else {
-      SE_Early <- ifelse(est_early_rec_dev, sqrt(diag(SD$cov.fixed)[names(SD$par.fixed) == "log_early_rec_dev"]), NA)
-      SE_Main <- ifelse(est_rec_dev, sqrt(diag(SD$cov.fixed)[names(SD$par.fixed) == "log_rec_dev"]), NA)
-    }
-    
-    SE_Dev <- structure(c(rev(SE_Early), SE_Main), names = YearDev)
-    
-    first_non_zero <- which(!is.na(SE_Dev))[1]
-    if(!is.na(first_non_zero) && first_non_zero > 1) {
-      Dev <- Dev[-c(1:(first_non_zero - 1))]
-      SE_Dev <- SE_Dev[-c(1:(first_non_zero - 1))]
+    SE_Early <- as.list(SD, "Std. Error")$log_early_rec_dev %>% rev()
+    SE_Main <- as.list(SD, "Std. Error")$log_rec_dev
+    SE_Dev <- structure(c(SE_Early, SE_Main), names = YearDev)
+    if(any(is.na(SE_Dev))) {
+      Dev <- Dev[seq(which(!is.na(SE_Dev))[1], length(YearDev))]
+      SE_Dev <- SE_Dev[seq(which(!is.na(SE_Dev))[1], length(YearDev))]
       SE_Dev[is.na(SE_Dev)] <- 0
     }
     
     ref_pt <- lapply(seq_len(ifelse(tv_M == "walk", n_y, 1)), ref_pt_SCA, obj = obj, report = report)
-    
     if(catch_eq == "Baranov") {
       report$FMSY <- vapply(ref_pt, getElement, numeric(1), "FMSY")
     } else {
@@ -630,7 +621,6 @@ ref_pt_SCA <- function(y = 1, obj, report) {
     Brec <- SR_par$Brec
     SR <- "BH"
   } else {
-    
     SR_par <- NULL
     SR <- obj$env$data$SR_type
     Arec <- report$Arec

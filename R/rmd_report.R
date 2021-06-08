@@ -47,12 +47,7 @@ rmd_summary <- function(modname) {
 
 
 ### Life history
-vector2char <- function(x) paste0("c(", paste0(x, collapse = ", "), ")")
-
 rmd_at_age <- function(age, y_var, fig.cap, label, header = NULL) {
-  age <- vector2char(age)
-  y_var <- vector2char(y_var)
-
   ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
            paste0("plot_generic_at_age(", age, ", ", y_var, ", label = \"", label, "\")"),
            " ```\n")
@@ -60,26 +55,24 @@ rmd_at_age <- function(age, y_var, fig.cap, label, header = NULL) {
   return(ans)
 }
 
-rmd_LAA <- function(age, LAA, header = NULL) {
+rmd_LAA <- function(age = "1:info$data$n_age - 1", LAA = "info$LH$LAA", header = NULL) {
   rmd_at_age(age, LAA, fig.cap = "Mean length-at-age from Data object.", label = "Mean Length-at-age", header = header)
 }
 
-rmd_WAA <- function(age, WAA, header = NULL) {
+rmd_WAA <- function(age = "1:info$data$n_age - 1", WAA = "info$LH$WAA", header = NULL) {
   rmd_at_age(age, WAA, fig.cap = "Mean weight-at-age from Data object.", label = "Mean Weight-at-age", header = header)
 }
 
-rmd_LW <- function(LAA, WAA) {
-  LAA_char <- paste0("c(", paste0(LAA, collapse = ", "), ")")
-  WAA_char <- paste0("c(", paste0(WAA, collapse = ", "), ")")
-
-  return(c("```{r, fig.cap=\"Length-weight relationship.\"}",
-           paste0("plot(", LAA_char, ", ", WAA_char, ", typ = \"o\", xlab = \"Length\", ylab = \"Weight\")"),
-           "abline(h = 0, col = \"grey\")",
-           "```\n"))
+rmd_LW <- function(LAA = "info$LH$LAA", WAA = "info$LH$WAA") {
+  c("```{r, fig.cap=\"Length-weight relationship.\"}",
+    paste0("plot(", LAA, ", ", WAA, ", typ = \"o\", xlab = \"Length\", ylab = \"Weight\")"),
+    "abline(h = 0, col = \"grey\")",
+    "```\n")
 }
 
-rmd_mat <- function(age, mat, fig.cap) rmd_at_age(age, mat, fig.cap, "Maturity")
-
+rmd_mat <- function(age = "1:info$data$n_age - 1", mat = "info$data$mat", fig.cap) {
+  rmd_at_age(age, mat, fig.cap, "Maturity")
+}
 
 
 
@@ -102,7 +95,7 @@ rmd_data_timeseries <- function(type, header = NULL, is_matrix = FALSE, nsets = 
 }
 
 
-rmd_data_age_comps <- function(type = c("bubble", "annual"), ages = "0:(info$data$n_age-1)", annual_yscale = "\"proportions\"",
+rmd_data_age_comps <- function(type = c("bubble", "annual"), ages = "1:info$data$n_age - 1", annual_yscale = "\"proportions\"",
                                annual_ylab = "\"Frequency\"")  {
   type <- match.arg(type)
   if(type == "bubble") {
@@ -257,24 +250,21 @@ rmd_B_B0_terminal <- function() {
 }
 
 
-rmd_sel <- function(age, sel, fig.cap) {
-  age <- vector2char(age)
-  sel <- vector2char(sel)
+rmd_sel <- function(age = "1:info$data$n_age - 1", sel = "Selectivity[nrow(Selectivity), ]", fig.cap) {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     paste0("plot_ogive(", age, ", ", sel, ")"),
     "```\n")
 }
 
-rmd_sel_persp <- function(age, sel = "Selectivity", fig.cap = "Perspective plot of selectivity.") {
-  age <- vector2char(age)
+rmd_sel_persp <- function(age = "1:info$data$n_age - 1", sel = "Selectivity", 
+                          fig.cap = "Perspective plot of selectivity.") {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     paste0("persp(info$Year, ", age, ", ", sel, ", expand = 0.35, ticktype = \"detailed\", phi = 25,"),
     paste0("      theta = 45, xlab = \"Year\", ylab = \"Age\", zlab = \"Selectivity\")"),
     "```\n")
 }
 
-rmd_sel_annual <- function(age, sel = "Selectivity", fig.cap = "Annual selectivity.") {
-  age <- vector2char(age)
+rmd_sel_annual <- function(age = "1:info$data$n_age - 1", sel = "Selectivity", fig.cap = "Annual selectivity.") {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     paste0("plot_composition(info$Year, Selectivity, plot_type = \"annual\", ages = ", age, ", annual_yscale = \"raw\", annual_ylab = \"Selectivity\")"),
     "```\n")
@@ -348,7 +338,7 @@ rmd_assess_timeseries <- function(par, fig.cap, label, header = NULL, conv_check
 rmd_residual <- function(par, se = "NULL", fig.cap, label, conv_check = FALSE, blue = FALSE) {
   if(conv_check) conv <- "if(conv) " else conv <- ""
   if(blue) {
-    blue_arg <- ", res_ind_blue = as.numeric(names(Dev)) < info$Year[1]"
+    blue_arg <- paste0(", res_ind_blue = as.numeric(names(", par,")) < info$Year[1]")
     fig.cap <- paste(fig.cap, "Deviations prior to the first year of the model are in blue.")
   } else {
     blue_arg <- ""
@@ -403,7 +393,7 @@ rmd_U_UMSY <- function(conv_check = TRUE, fig.cap = "U/UMSY") {
   rmd_assess_timeseries("U_UMSY", fig.cap, "expression(U/U[MSY])", conv_check = conv_check, one_line = TRUE)
 }
 
-rmd_SSB <- function() rmd_assess_timeseries("SSB", "spawning biomass", "\"Spawning biomass\"")
+rmd_SSB <- function(var = "SSB") rmd_assess_timeseries(var, "spawning biomass", "\"Spawning biomass\"")
 
 rmd_dynamic_SSB0 <- function(var = "dynamic_SSB0") rmd_assess_timeseries(var, "dynamic SSB0", "expression(\"Dynamic\"~SSB[0])")
 
@@ -411,8 +401,8 @@ rmd_SSB_SSBMSY <- function(conv_check = TRUE) {
   rmd_assess_timeseries("SSB_SSBMSY", "SSB/SSBMSY", "expression(SSB/SSB[MSY])", conv_check = conv_check, one_line = TRUE)
 }
 
-rmd_SSB_SSB0 <- function(conv_check = TRUE) {
-  rmd_assess_timeseries("SSB_SSB0", "spawning depletion", "expression(SSB/SSB[0])", conv_check = conv_check)
+rmd_SSB_SSB0 <- function(conv_check = TRUE, var = "SSB_SSB0") {
+  rmd_assess_timeseries(var, "spawning depletion", "expression(SSB/SSB[0])", conv_check = conv_check)
 }
 
 rmd_B <- function() rmd_assess_timeseries("B", "biomass", "\"Biomass\"")
@@ -425,9 +415,9 @@ rmd_B_B0 <- function(conv_check = TRUE) {
   rmd_assess_timeseries("B_B0", "depletion", "expression(B/B[0])", conv_check = conv_check)
 }
 
-rmd_R <- function() rmd_assess_timeseries("R", "recruitment", "\"Recruitment (R)\"")
+rmd_R <- function(var = "R") rmd_assess_timeseries(var, "recruitment", "\"Recruitment (R)\"")
 
-rmd_N <- function() rmd_assess_timeseries("N", "abundance", "\"Abundance (N)\"")
+rmd_N <- function(var = "N") rmd_assess_timeseries(var, "abundance", "\"Abundance (N)\"")
 
 rmd_N_at_age <- function(ages = "0:(info$data$n_age-1)") {
   rmd_bubble("c(info$Year, max(info$Year)+1)", "N_at_age", ages = ages, fig.cap = "Abundance-at-age bubble plot.")
@@ -453,17 +443,16 @@ rmd_Kobe <- function(Bvar = "B_BMSY", Fvar = "F_FMSY", xlab = "expression(B/B[MS
 
 
 #### Productivity
-rmd_SR <- function(Bvec, expectedR, Rpoints, fig.cap = "Stock-recruit relationship.", trajectory = FALSE, ylab = "Recruitment",
-                   conv_check = FALSE, unfished = TRUE, header = NULL) {
-  Bvec <- vector2char(Bvec)
-  expectedR <- vector2char(expectedR)
-  Rpoints <- vector2char(Rpoints)
-  
+rmd_SR <- function(fig.cap = "Stock-recruit relationship.", trajectory = FALSE, ylab = "Recruitment",
+                   conv_check = FALSE, unfished = TRUE, header = NULL, SR_calc = "") {
   if(unfished) refpt <- "R0 = R0, S0 = SSB0, " else refpt <- ""
-  if(conv_check) conv <- "if(conv) " else conv <- ""
+  if(conv_check) conv <- "if(conv) {" else conv <- ""
   ans <- c(paste0("```{r fig.cap=\"", fig.cap, "\"}"),
-           paste0(conv, "plot_SR(", Bvec, ", ", expectedR, ", rec_dev = ", Rpoints, ","),
+           conv,
+           SR_calc,
+           "plot_SR(SSB_SR, R_SR, rec_dev = Rest,",
            paste0(refpt, "ylab = \"", ylab, "\", trajectory = ", as.character(trajectory), ")"),
+           ifelse(conv_check, "}", ""),
            "```\n")
   if(!is.null(header)) ans <- c(header, ans)
   return(ans)

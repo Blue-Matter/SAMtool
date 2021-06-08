@@ -66,11 +66,9 @@ rmd_SCA <- function(Assessment, ...) {
   ss <- rmd_summary("Statistical Catch-at-Age (SCA)")
 
   # Life History
-  age <- 0:(Assessment@info$data$n_age - 1)
-  LH_section <- c(rmd_LAA(age, Assessment@info$LH$LAA, header = "## Life History\n"), rmd_WAA(age, Assessment@info$LH$WAA),
-                  rmd_LW(Assessment@info$LH$LAA, Assessment@info$LH$WAA),
-                  rmd_mat(age, Assessment@info$data$mat,
-                          fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."))
+  LH_section <- c(rmd_LAA(header = "## Life History\n"), rmd_WAA(), rmd_LW(),
+                  rmd_mat(fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."))
+  
   # Data section
   data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"), 
                     rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)),
@@ -85,7 +83,7 @@ rmd_SCA <- function(Assessment, ...) {
   }
 
   assess_fit <- c(lead_par, rmd_M_prior(), rmd_M_rw(),
-                  rmd_sel(age, Assessment@Selectivity[nrow(Assessment@Selectivity), ], fig.cap = "Estimated selectivity at age."),
+                  rmd_sel(fig.cap = "Estimated selectivity at age."),
                   rmd_assess_fit("Catch", "catch"), rmd_assess_resid("Catch"), rmd_assess_qq("Catch", "catch"),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
                   rmd_fit_age_comps("bubble"), rmd_fit_age_comps("annual"),
@@ -113,18 +111,15 @@ rmd_SCA <- function(Assessment, ...) {
 
   # Productivity
   if(Assessment@obj$env$data$SR_type != "none") {
-    Arec <- Assessment@TMB_report$Arec
-    Brec <- Assessment@TMB_report$Brec
-    SSB <- Assessment@SSB
-    if(Assessment@info$data$SR_type == "BH") {
-      expectedR <- Arec * SSB / (1 + Brec * SSB)
-    } else {
-      expectedR <- Arec * SSB * exp(-Brec * SSB)
-    }
-    estR <- Assessment@R[as.numeric(names(Assessment@R)) >= Assessment@info$Year[1]]
-    
-    SR_header <- c(rmd_SR(SSB, expectedR, estR, header = "### Productivity\n\n\n"),
-                   rmd_SR(SSB, expectedR, estR, fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE))
+    SR_calc <- c("SSB_SR <- SSB",
+                 "if(info$data$SR_type == \"BH\") {",
+                 "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
+                 "} else {",
+                 "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
+                 "}",
+                 "Rest <- R[as.numeric(names(R)) >= info$Year[1]]")
+    SR_header <- c(rmd_SR(header = "### Productivity\n\n\n", SR_calc = SR_calc),
+                   rmd_SR(fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE))
     if(Assessment@obj$env$data$catch_eq == "Baranov") {
       yield_curve <- c(rmd_yield_F("SCA"), rmd_yield_depletion("SCA"))
     } else {
@@ -265,7 +260,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
     opt2 <- mod[[1]]
     SD <- mod[[2]]
     
-    if(!is.character(opt2) && !is.character(SD)) {
+    if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
       
       if(info$data$SR_type != "none") {

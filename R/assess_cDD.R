@@ -255,8 +255,9 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   
   report$dynamic_SSB0 <- cDD_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
     structure(names = Yearplusone)
+  
   Assessment <- new("Assessment", Model = ifelse(state_space, "cDD_SS", "cDD"),
-                    Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
+                    Name = Data@Name, conv = SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
                     SSB0 = report$B0, VB0 = report$B0, h = report$h,
                     FMort = structure(report$F, names = Year),
@@ -295,12 +296,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
     Assessment@TMB_report <- report
 
     if(state_space) {
-      if(integrate) {
-        SE_Dev <- sqrt(SD$diag.cov.random)
-      } else {
-        SE_Dev <- sqrt(diag(SD$cov.fixed)[names(SD$par.fixed) == "log_rec_dev"])
-      }
-      Assessment@SE_Dev <- structure(SE_Dev, names = YearDev)
+      Assessment@SE_Dev <- structure(as.list(SD, "Std. Error")$log_rec_dev, names = YearDev)
     }
     
     catch_eq <- function(Ftarget) {

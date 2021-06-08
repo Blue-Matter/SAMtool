@@ -145,7 +145,6 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
             ####### Assign variables
             OM <- MSEtool::SubCpars(x@OM, sims)
-            mean_fit <- x@mean_fit
             report_list <- x@Misc[sims]
 
             nsim <- OM@nsim
@@ -193,9 +192,6 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                         "```\n")
 
             ####### Updated historical OM parameters
-            #Year_matrix <- matrix(Year, ncol = nsim, nrow = nyears)
-            #Yearplusone_matrix <- matrix(Yearplusone, ncol = nsim, nrow = nyears+1)
-
             OM_update <- c("# Summary {.tabset}\n",
                            "## Updated historical OM parameters\n", rmd_RCM_R0(),
                            rmd_RCM_D(), rmd_RCM_Perr(), rmd_RCM_Find(), rmd_RCM_sel())
@@ -213,23 +209,20 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             ####### Fit to mean inputs from operating model
             # Generate summary table (parameter estimates)
 
-            if(length(x@mean_fit) > 0) {
-              SD <- x@mean_fit$SD
+            if(length(x@mean_fit)) {
               report <- x@mean_fit$report
-              data_mean_fit <- x@mean_fit$obj$env$data
-              length_bin <- data_mean_fit$length_bin
-
               conv <- report$conv
+              data_mean_fit <- x@mean_fit$obj$env$data
+              SD <- x@mean_fit$SD
 
-              SD2 <- sdreport_int(SD) %>% signif(4) %>% format() %>% as.data.frame()
               if(render_args$output_format == "html_document") {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
                            "### RCM Estimates\n",
-                           "`r SD2`\n\n")
+                           "`r sdreport_int(SD) %>% signif(4) %>% format() %>% as.data.frame()`\n\n")
               } else {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
                            "### RCM Estimates\n",
-                           "`r SD2 %>% knitr::kable(format = \"markdown\")`\n\n")
+                           "`r sdreport_int(SD) %>% signif(4) %>% format() %>% as.data.frame() %>% knitr::kable(format = \"markdown\")`\n\n")
               }
 
               # Life History section
@@ -237,23 +230,23 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 n_unique <- apply(x, 2, function(y) length(unique(y)))
                 any(n_unique > 1)
               }
-              LAA <- rmd_at_age(age, data_mean_fit$len_age[nyears, ], header = "### Life History\n", fig.cap = "Length-at-age in last historical year.",
+              LAA <- rmd_at_age(age = "age", "data_mean_fit$len_age[nyears, ]", header = "### Life History\n", fig.cap = "Length-at-age in last historical year.",
                                 label = "Mean Length-at-age")
               if(LH_varies_fn(data_mean_fit$len_age)) {
                 LAA_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$len_age[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Length-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual length-at-age.")
               } else LAA_persp <- NULL
 
-              mat <- rmd_mat(age, data_mean_fit$mat[nyears, ], fig.cap = "Maturity-at-age in last historical year.")
+              mat <- rmd_mat(age = "age", "data_mean_fit$mat[nyears, ]", fig.cap = "Maturity-at-age in last historical year.")
               if(LH_varies_fn(data_mean_fit$mat)) {
                 mat_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$mat[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Maturity-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual maturity-at-age.")
               } else mat_persp <- NULL
 
               if(data_mean_fit$use_prior[3]) {
-                NatM <- rmd_at_age(age, rep(report$Mest, length(age)), fig.cap = "Natural mortality (time constant).", label = "Natural mortality")
+                NatM <- rmd_at_age(age = "age", "rep(report$Mest, length(age))", fig.cap = "Natural mortality (time constant).", label = "Natural mortality")
               } else {
-                NatM <- rmd_at_age(age, data_mean_fit$M[nyears, ], fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
+                NatM <- rmd_at_age(age = "age", "data_mean_fit$M[nyears, ]", fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
               }
               if(!data_mean_fit$use_prior[3] && LH_varies_fn(data_mean_fit$M)) {
                 NatM_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$M[1:nyears, ]", xlab = "Year", ylab = "Age",
@@ -295,7 +288,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               }
 
               if(any(RCMdata@Chist > 0, na.rm = TRUE)) {
-                C_matplot <- rmd_matplot(x = "matrix(Year, nyears, nfleet)", y = "RCMdata@Chist", col = "rich.colors(nfleet)",
+                C_matplot <- rmd_matplot(x = "Year", y = "RCMdata@Chist", col = "rich.colors(nfleet)",
                                          xlab = "Year", ylab = "Catch", legend.lab = "f_name",
                                          fig.cap = "Catch time series.", header = "### Data and Fit {.tabset}\n#### Catch \n")
 
@@ -311,7 +304,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 } else {
                   E_header <- "#### Effort \n"
                 }
-                E_matplot <- rmd_matplot(x = "matrix(Year, nyears, nfleet)", y = "data_mean_fit$E_hist", col = "rich.colors(nfleet)",
+                E_matplot <- rmd_matplot(x = "Year", y = "data_mean_fit$E_hist", col = "rich.colors(nfleet)",
                                          xlab = "Year", ylab = "Effort", legend.lab = "f_name", fig.cap = "Effort time series.", header = E_header)
               } else E_matplot <- NULL
 
@@ -358,49 +351,40 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               data_section <- c(C_matplot, C_plots, E_matplot, I_plots, CAA_plots, CAL_plots, MS_plots, IAA_plots, IAL_plots)
 
               # Model output
-              sel_matplot <- rmd_matplot(x = "matrix(age, max_age + 1, nfleet)", y = "matrix(report$vul[nyears, , ], max_age + 1, nfleet)", col = "rich.colors(nfleet)",
+              sel_matplot <- rmd_matplot(x = "age", y = "matrix(report$vul[nyears, , ], max_age + 1, nfleet)", col = "rich.colors(nfleet)",
                                          xlab = "Age", ylab = "Selectivity", legend.lab = "f_name",
                                          fig.cap = "Terminal year selectivity by fleet.", header = "### Output \n")
 
-              F_matplot <- rmd_matplot(x = "matrix(Year, nyears, nfleet)", y = "report$F", col = "rich.colors(nfleet)",
+              F_matplot <- rmd_matplot(x = "Year", y = "report$F", col = "rich.colors(nfleet)",
                                        xlab = "Year", ylab = "Fishing Mortality (F)", legend.lab = "f_name",
                                        fig.cap = "Time series of fishing mortality by fleet.")
 
-              SSB <- structure(report$E, names = c(Year, max(Year) + 1))
-              dynamic_SSB0 <- structure(report$dynamic_SSB0, names = names(SSB))
-              SSB0 <- structure(report$E0, names = Year)
-              if(length(unique(SSB0)) > 1) {
-                SSB_plot <- rmd_assess_timeseries("SSB0", "unfished spawning depletion (growth and/or M are time-varying)",
-                                                  "expression(SSB[0])")
-              } else SSB_plot <- NULL
+              if(length(unique(report$E0)) > 1) {
+                SSB0_plot <- rmd_assess_timeseries("structure(report$E0, names = Year)", "unfished spawning depletion (growth and/or M are time-varying)",
+                                                   "expression(SSB[0])")
+              } else SSB0_plot <- NULL
 
-              SSB_SSB0 <- structure(report$E/report$E0_SR, names = c(Year, max(Year) + 1))
+              N_bubble <- rmd_bubble("Yearplusone", "report$N", ages = "age", fig.cap = "Predicted abundance-at-age.")
+              CAA_bubble <- rmd_bubble("Year", "apply(report$CAApred, 1:2, sum)", ages = "age",
+                                       fig.cap = "Predicted catch-at-age (summed over all fleets).", 
+                                       bubble_adj = as.character(bubble_adj))
 
-              R <- structure(report$R, names = c(Year, max(Year) + 1))
-              N_at_age <- report$N
-              N <- structure(rowSums(N_at_age), names = c(Year, max(Year) + 1))
-
-              log_rec_dev <- structure(report$log_rec_dev, names = Year)
-              log_rec_dev_SE <- summary(SD)[, 2]
-              log_rec_dev_SE <- log_rec_dev_SE[names(log_rec_dev_SE) == "log_rec_dev"]
-              log_rec_dev_SE <- ifelse(data_mean_fit$est_rec_dev, log_rec_dev_SE, 0)
-
-              N_bubble <- rmd_bubble("c(Year, max(Year)+1)", "N_at_age", fig.cap = "Predicted abundance-at-age.")
-
-              CAA_all <- apply(report$CAApred, c(1, 2), sum)
-              CAA_bubble <- rmd_bubble("Year", "CAA_all", fig.cap = "Predicted catch-at-age (summed over all fleets).", bubble_adj = as.character(bubble_adj))
-
-              CAL_all <- apply(report$CALpred, c(1, 2), sum)
-              if(sum(CAL_all, na.rm = TRUE) > 0) {
-                CAL_bubble <- rmd_bubble("Year", "CAL_all", CAL_bins = "data_mean_fit$length_bin",
+              if(sum(report$CALpred, na.rm = TRUE) > 0) {
+                CAL_bubble <- rmd_bubble("Year", "apply(report$CALpred, 1:2, sum)", CAL_bins = "RCMdata@length_bin",
                                          fig.cap = "Predicted catch-at-length (summed over all fleets).", bubble_adj = as.character(bubble_adj))
-              } else CAL_bubble <- ""
+              } else CAL_bubble <- NULL
 
-              ts_output <- c(sel_matplot, F_matplot, rmd_SSB(), SSB_plot, rmd_SSB_SSB0(FALSE), rmd_dynamic_SSB0(), rmd_R(), rmd_RCM_SR(),
-                             rmd_residual("log_rec_dev", fig.cap = "Time series of recruitment deviations.", label = "log-Recruitment deviations"),
-                             rmd_residual("log_rec_dev", "log_rec_dev_SE", fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
+              ts_output <- c(sel_matplot, F_matplot, rmd_SSB("structure(report$E, names = Yearplusone)"), 
+                             SSB0_plot, rmd_SSB_SSB0(FALSE, "structure(report$E/report$E0_SR, names = Yearplusone)"), 
+                             rmd_dynamic_SSB0("structure(report$dynamic_SSB0, names = Yearplusone)"), 
+                             rmd_R("structure(report$R, names = Yearplusone)"), rmd_RCM_SR(),
+                             rmd_residual("structure(report$log_rec_dev, names = Year)", fig.cap = "Time series of recruitment deviations.", label = "log-Recruitment deviations"),
+                             rmd_residual("structure(report$log_rec_dev, names = Year)", 
+                                          "ifelse(data_mean_fit$est_rec_dev, as.list(SD, \"Std. Error\")$log_rec_dev, 0)", 
+                                          fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
                                           label = "log-Recruitment deviations", conv_check = TRUE),
-                             rmd_N(), N_bubble, CAA_bubble, CAL_bubble)
+                             rmd_N("structure(rowSums(report$N), names = Yearplusone)"), 
+                             N_bubble, CAA_bubble, CAL_bubble)
 
               nll <- RCM_get_likelihoods(report, RCMdata@Misc$LWT, f_name, s_name)
               
@@ -430,15 +414,19 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               } else ret <- NULL
 
               mean_fit_rmd <- c(sumry, LH_section, data_section, ts_output, nll_table, corr_matrix, like_gradients, ret)
-            } else mean_fit_rmd <- c("## Fit to mean parameters of OM {.tabset}\n",
-                                     "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")
+            } else {
+              mean_fit_rmd <- c("## Fit to mean parameters of OM {.tabset}\n",
+                                "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")
+            }
 
             if(compare) {
               message("Getting Hist object from runMSE...")
               Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = OM@nsim >= 48 & snowfall::sfIsRunning())
               compare_rmd <- rmd_RCM_Hist_compare()
-            } else compare_rmd <- c("## Updated OM\n",
-                                    "Re-run `plot()` function with argument `compare = TRUE`.\n\n")
+            } else {
+              compare_rmd <- c("## Updated OM\n",
+                               "Re-run `plot()` function with argument `compare = TRUE`.\n\n")
+            }
 
             rmd <- c(header, OM_update, all_sims_output, mean_fit_rmd, compare_rmd, rmd_footer())
             if(is.list(rmd)) rmd <- do.call(c, rmd)

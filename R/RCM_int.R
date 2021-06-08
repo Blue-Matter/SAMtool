@@ -844,7 +844,7 @@ RCM_retro <- function(x, nyr = 5) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
     
-    if(!is.character(opt2) && !is.character(SD)) {
+    if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2, dynamic_SSB0 = FALSE)
       
       FMort <- rbind(report$F, matrix(NA, i + 1, ncol(report$F)))
@@ -877,55 +877,53 @@ RCM_retro <- function(x, nyr = 5) {
 
 
 RCM_retro_subset <- function(yr, data, params, map) {
-  ##### Data object
   data_out <- structure(data, check.passed = NULL)
+  params_out <- lapply(params, function(x) if(!is.null(attr(x, "map"))) attr(x, "shape") else x)
   
-  mat <- c("C_hist", "E_hist", "I_hist", "sigma_I", "sigma_C", "CAA_n", "CAL_n", "IAA_n", "IAL_n", "msize")
-  if(!is.null(map$log_M)) mat <- c(mat, "M_data")
-  mat_ind <- match(mat, names(data_out))
-  data_out[mat_ind] <- lapply(data_out[mat_ind], function(x) x[1:yr, , drop = FALSE])
-  
-  mat2 <- c("len_age", "wt", "mat", "sel_block")
-  mat_ind2 <- match(mat2, names(data_out))
-  data_out[mat_ind2] <- lapply(data_out[mat_ind2], function(x) x[1:(yr+1), , drop = FALSE])
-  
-  # Update nsel_block, n_y
-  data_out$nsel_block <- data_out$sel_block %>% as.vector() %>% unique() %>% length()
-  data_out$n_y <- yr
-  
-  # Array 1:yr first index
-  arr <- c("CAA_hist", "CAL_hist", "IAA_hist", "IAL_hist")
-  arr_ind <- match(arr, names(data_out))
-  data_out[arr_ind] <- lapply(data_out[arr_ind], function(x) x[1:yr, , , drop = FALSE])
-  
-  # Vector 1:yr
-  data_out$est_rec_dev <- data_out$est_rec_dev[1:yr]
-  
-  ##### Parameters
-  params_out <- structure(params, check.passed = NULL)
-  for(i in 1:length(params)) {
-    if(!is.null(attr(params[[i]], "map"))) params_out[[i]] <- attr(params[[i]], "shape")
-  }
-  
-  # Update rec devs
-  params_out$log_rec_dev <- params_out$log_rec_dev[1:yr]
-  if(!is.null(map$log_rec_dev)) map$log_rec_dev <- map$log_rec_dev[1:yr] %>% factor()
-  
-  # Update F
-  if(data_out$condition == "catch") {
-    params_out$log_F_dev <- params_out$log_F_dev[1:yr, , drop = FALSE]
+  if(yr < data$n_y) {
+    ##### Data object
+    mat <- c("C_hist", "E_hist", "I_hist", "sigma_I", "sigma_C", "CAA_n", "CAL_n", "IAA_n", "IAL_n", "msize")
+    if(!is.null(map$log_M)) mat <- c(mat, "M_data")
+    mat_ind <- match(mat, names(data_out))
+    data_out[mat_ind] <- lapply(data_out[mat_ind], function(x) x[1:yr, , drop = FALSE])
     
-    if(any(data_out$yind_F + 1 > yr)) {
-      data_out$yind_F <- as.integer(0.5 * yr)
-      params_out$log_F_dev[data_out$yind_F + 1, ] <- params$log_F_dev[data$yind_F + 1, ]
+    mat2 <- c("len_age", "wt", "mat", "sel_block")
+    mat_ind2 <- match(mat2, names(data_out))
+    data_out[mat_ind2] <- lapply(data_out[mat_ind2], function(x) x[1:(yr+1), , drop = FALSE])
+    
+    # Update nsel_block, n_y
+    data_out$nsel_block <- data_out$sel_block %>% as.vector() %>% unique() %>% length()
+    data_out$n_y <- yr
+    
+    # Array 1:yr first index
+    arr <- c("CAA_hist", "CAL_hist", "IAA_hist", "IAL_hist")
+    arr_ind <- match(arr, names(data_out))
+    data_out[arr_ind] <- lapply(data_out[arr_ind], function(x) x[1:yr, , , drop = FALSE])
+    
+    # Vector 1:yr
+    data_out$est_rec_dev <- data_out$est_rec_dev[1:yr]
+    
+    ##### Parameters
+    # Update rec devs
+    params_out$log_rec_dev <- params_out$log_rec_dev[1:yr]
+    if(!is.null(map$log_rec_dev)) map$log_rec_dev <- map$log_rec_dev[1:yr] %>% factor()
+    
+    # Update F
+    if(data_out$condition == "catch") {
+      params_out$log_F_dev <- params_out$log_F_dev[1:yr, , drop = FALSE]
+      
+      if(any(data_out$yind_F + 1 > yr)) {
+        data_out$yind_F <- as.integer(0.5 * yr)
+        params_out$log_F_dev[data_out$yind_F + 1, ] <- params$log_F_dev[data$yind_F + 1, ]
+      }
     }
-  }
-  
-  ## Update nsel block if needed
-  if(data$nsel_block > data_out$nsel_block) {
-    sel_block_ind <- data_out$sel_block %>% as.vector() %>% unique()
-    params_out$vul_par <- params_out$vul_par[, sel_block_ind, drop = FALSE]
-    if(!is.null(map$vul_par)) map$vul_par <- map$vul_par[, sel_block_ind, drop = FALSE] %>% factor()
+    
+    ## Update nsel block if needed
+    if(data$nsel_block > data_out$nsel_block) {
+      sel_block_ind <- data_out$sel_block %>% as.vector() %>% unique()
+      params_out$vul_par <- params_out$vul_par[, sel_block_ind, drop = FALSE]
+      if(!is.null(map$vul_par)) map$vul_par <- map$vul_par[, sel_block_ind, drop = FALSE] %>% factor()
+    }
   }
   
   return(list(data = data_out, params = params_out, map = map))

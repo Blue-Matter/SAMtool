@@ -293,7 +293,8 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   
   report$dynamic_SSB0 <- SP_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
     structure(names = Yearplusone)
-  Assessment <- new("Assessment", Model = ifelse(state_space, "SP_SS", "SP"), Name = Data@Name, conv = !is.character(SD) && SD$pdHess,
+  Assessment <- new("Assessment", Model = ifelse(state_space, "SP_SS", "SP"), 
+                    Name = Data@Name, conv = SD$pdHess,
                     FMSY = report$FMSY, MSY = report$MSY, BMSY = report$BMSY, VBMSY = report$BMSY,
                     B0 = report$K, VB0 = report$K, FMort = structure(report$F, names = Year),
                     F_FMSY = structure(report$F/report$FMSY, names = Year),
@@ -325,12 +326,8 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
 
   if(Assessment@conv) {
     if(state_space) {
-      if(integrate) {
-        SE_Dev <- ifelse(est_B_dev, sqrt(SD$diag.cov.random), 0)
-      } else {
-        SE_Dev <- ifelse(est_B_dev, sqrt(diag(SD$cov.fixed)[names(SD$par.fixed) =="log_B_dev"]), 0)
-      }
-      Assessment@SE_Dev <- structure(SE_Dev, names = Year)
+      SE_Dev <- as.list(SD, "Std. Error")$log_B_dev
+      Assessment@SE_Dev <- structure(ifelse(is.na(SE_Dev), 0, SE_Dev), names = Year)
     }
     Assessment@SE_FMSY <- SD$sd[names(SD$value) == "FMSY"]
     Assessment@SE_MSY <- SD$sd[names(SD$value) == "MSY"]

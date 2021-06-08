@@ -184,7 +184,7 @@ retrospective_SP <- function(Assessment, nyr, state_space = FALSE) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 
-    if(!is.character(opt2) && !is.character(SD)) {
+    if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
 
       FMort <- c(report$F, rep(NA, 1 + i))
