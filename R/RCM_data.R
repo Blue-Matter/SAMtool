@@ -113,17 +113,6 @@ pull_Index <- function(Data, maxage) {
 }
 
 
-RCM_tiny_comp <- function(x) {
-  all_zero <- all(is.na(x)) | sum(x, na.rm = TRUE) == 0
-  if(!all_zero) {
-    x_out <- x/sum(x, na.rm = TRUE)
-    ind <- is.na(x) | x == 0
-    if(any(ind)) x_out[ind] <- 1e-8
-  } else {
-    x_out <- x
-  }
-  return(x_out)
-}
 
 int_s_sel <- function(s_selectivity, nfleet = 1) {
   s_sel <- suppressWarnings(as.numeric(s_selectivity)) # Numbers match fleets, otherwise see next lines

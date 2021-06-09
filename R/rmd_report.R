@@ -55,8 +55,26 @@ rmd_at_age <- function(age, y_var, fig.cap, label, header = NULL) {
   return(ans)
 }
 
-rmd_LAA <- function(age = "1:info$data$n_age - 1", LAA = "info$LH$LAA", header = NULL) {
-  rmd_at_age(age, LAA, fig.cap = "Mean length-at-age from Data object.", label = "Mean Length-at-age", header = header)
+rmd_LAA <- function(age = "1:info$data$n_age - 1", LAA = "info$LH$LAA", header = NULL, SD_LAA = "") {
+  fig.cap <- "Mean length-at-age from Data object."
+  if(nchar(SD_LAA)) {
+    fig.cap <- paste(fig.cap, "Dotted lines indicate 95% intervals for variability in length-at-age.")
+    SD_LAA_calc <- c(paste("SD_low <-", LAA, "- 1.96 *", SD_LAA),
+                     paste("SD_high <- ", LAA, "+ 1.96 *", SD_LAA),
+                     "ymax <- 1.1 * max(SD_high)")
+    SD_LAA_plot <- paste0("lines(", age, ", SD_low, lty = 3); lines(", age, ", SD_high, lty = 3)")
+  } else {
+    SD_LAA_calc <- paste0("ymax <- 1.1 * max(", LAA, ")")
+    SD_LAA_plot <- ""
+  }
+  
+  ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
+           SD_LAA_calc,
+           paste0("plot_generic_at_age(", age, ", ", LAA, ", label = \"Length-at-age\", ymax = 1.1 * ymax)"),
+           SD_LAA_plot,
+           " ```\n")
+  if(!is.null(header)) ans <- c(header, ans)
+  return(ans)
 }
 
 rmd_WAA <- function(age = "1:info$data$n_age - 1", WAA = "info$LH$WAA", header = NULL) {
@@ -108,6 +126,25 @@ rmd_data_age_comps <- function(type = c("bubble", "annual"), ages = "1:info$data
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     "ind_valid <- rowSums(Obs_C_at_age, na.rm = TRUE) > 0",
     paste0("plot_composition(info$Year[ind_valid], Obs_C_at_age[ind_valid, ], ages = ", ages, ", plot_type = ", arg, ","),
+    paste0("                 annual_yscale = ", annual_yscale, ", annual_ylab = ", annual_ylab, ")"),
+    "```\n")
+}
+
+rmd_data_length_comps <- function(type = c("bubble", "annual"), 
+                                  CAL_bins = "info$LH$CAL_mids", annual_yscale = "\"proportions\"",
+                                  annual_ylab = "\"Frequency\"")  {
+  type <- match.arg(type)
+  if(type == "bubble") {
+    arg <- "\"bubble_data\""
+    fig.cap = "Length composition bubble plot."
+  } else {
+    arg <- "\"annual\""
+    fig.cap <- "Annual length compositions."
+  }
+  c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
+    "ind_valid <- obj$env$data$CAL_n > 0",
+    "CALobs <- obj$env$data$CAL_hist * obj$env$data$CAL_n", 
+    paste0("plot_composition(info$Year[ind_valid], CALobs[ind_valid, ], N = obj$env$data$CAL_n, CAL_bins = ", CAL_bins, ", plot_type = ", arg, ","),
     paste0("                 annual_yscale = ", annual_yscale, ", annual_ylab = ", annual_ylab, ")"),
     "```\n")
 }
@@ -370,6 +407,23 @@ rmd_fit_age_comps <- function(type = c("bubble", "annual"), ages = "0:(info$data
     "```\n")
 }
 
+rmd_fit_length_comps <- function(type = c("bubble", "annual"), CAL_bins = "info$LH$CAL_mids")  {
+  type <- match.arg(type)
+  if(type == "bubble") {
+    arg <- paste("\"bubble_residuals\", bubble_adj = 20, CAL_bins =", CAL_bins)
+    fig.cap = "Pearson residual bubble plot of length compositions (grey bubbles are negative, white are positive)."
+  } else {
+    arg <- paste("\"annual\", CAL_bins =", CAL_bins)
+    fig.cap <- "Annual observed (black) and predicted (red) length compositions."
+  }
+  c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
+    "ind_valid <- obj$env$data$CAL_n > 0",
+    "CALobs <- obj$env$data$CAL_hist * obj$env$data$CAL_n", 
+    "plot_composition(info$Year[ind_valid], CALobs[ind_valid, ], TMB_report$CALpred[ind_valid, ], N = obj$env$data$CAL_n, ",
+    paste0("                 plot_type = ", arg, ")"),
+    "```\n")
+}
+
 rmd_bubble <- function(year, par, CAL_bins = "NULL", ages = "NULL", fig.cap, bubble_adj = "5") {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     paste0("plot_composition(", year, ", ", par, ", CAL_bins = ", CAL_bins, ", ages = ", ages, ", plot_type = \"bubble_data\", bubble_adj = ", bubble_adj, ")"),
@@ -430,6 +484,17 @@ rmd_C_at_age <- function(ages = "0:(info$data$n_age-1)") {
 rmd_C_mean_age <- function(ages = "0:(info$data$n_age-1)") {
   c("```{r, fig.cap=\"Observed (black) and predicted (red) mean age of the composition data.\"}",
     paste0("plot_composition(info$Year, Obs_C_at_age, C_at_age, ages = ", ages, ", plot_type = \"mean\")"),
+    "```\n")
+}
+
+rmd_C_at_length <- function() {
+  rmd_bubble("info$Year", "TMB_report$CALpred", CAL_bins = "info$LH$CAL_mids", fig.cap = "Predicted catch-at-length bubble plot.")
+}
+
+rmd_C_mean_length <- function() {
+  c("```{r, fig.cap=\"Observed (black) and predicted (red) mean length of the composition data.\"}",
+    "plot_composition(info$Year, obj$env$data$CAL_hist * obj$env$data$CAL_n, TMB_report$CALpred,",
+    "                 CAL_bins = info$LH$CAL_mids, plot_type = \"mean\")",
     "```\n")
 }
 

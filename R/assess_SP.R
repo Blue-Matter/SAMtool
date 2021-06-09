@@ -205,8 +205,8 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
 
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
-  I_hist <- do.call(cbind, lapply(Ind, getElement, "I_hist"))
-  I_sd <- do.call(cbind, lapply(Ind, getElement, "I_sd"))
+  I_hist <- vapply(Ind, getElement, numeric(ny), "I_hist")
+  I_sd <- vapply(Ind, getElement, numeric(ny), "I_sd")
   if(is.null(I_hist)) stop("No indices found.")
   nsurvey <- ncol(I_hist)
 

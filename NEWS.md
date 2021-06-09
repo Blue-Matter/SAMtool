@@ -4,12 +4,16 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - A new S4 object, `RCMdata`, used to send data to the RCM model, i.e., `RCM(OM, RCMdata)`. Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms 'survey' and 'index' to focus on 'index' as much as possible when maintaining backwards compatibility. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.
 - Create a profiling function for `RCM` models. Steepness, R0, and final depletion can be profiled.
 - Fix plotting bug in `compare_RCM`.
+- Priors for index q in `RCM` is now lognormal instead of normal.
+- Priors on M, steepness, R0, and index q (lognormal, see RCM) can be created SCA, DD, and cDD assessment models.
+- Likelihood weights to SCA assessments can now be provided for `Catch`, `CAA`, and `CAL` in addition to `Index` in a named list `LWT`.
+Backwards compatibility remains to provide `LWT` as a vector for indices weights only. 
 - A new SCA assessment model that incorporates density-dependent natural mortality (`SCA_DDM`) is added.
-- Priors for index q in `RCM` is now lognormal instead of normal. They have also been added to assessment models.
-- Dynamic SSB0 is calculated for assessment models. 
-- Priors on M, steepness, R0, and index q can be created SCA, DD, and cDD assessment models.
+- A new SCA assessment model fits to length composition (`SCA_CAL`) is added.
+- Dynamic SSB0 is calculated for all assessment models. 
 - Additional OCP types in `HCR_ramp` to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).
 - Added a shortcut function for a fixed escapement harvest control rule (`HCR_escapement`).
+- A multitude of changes to clean up internal code.
 
 ## SAMtool 1.1.2
 - Minor fix to vignette to fix MSEtool reverse dependency issue.

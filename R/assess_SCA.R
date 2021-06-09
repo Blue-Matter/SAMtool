@@ -36,16 +36,12 @@
 #' @param fix_F_equilibrium Logical, whether the equilibrium fishing mortality prior to the first year of the model
 #' is estimated. If \code{TRUE}, \code{F_equilibrium} is fixed to value provided in \code{start} (if provided),
 #' otherwise, equal to zero (assumes unfished conditions).
-#' @param fix_U_equilibrium Logical, same as `fix_F_equilibrium` for `SCA_Pope`.
 #' @param fix_omega Logical, whether the standard deviation of the catch is fixed. If \code{TRUE},
 #' omega is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Cat}.
 #' @param fix_tau Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
 #' tau is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@sigmaR}.
-#' @param LWT A vector of likelihood weights for each survey.
-#' @param common_dev Typically, a numeric for the number of most recent years in which a common recruitment deviation will
-#' be estimated (in \code{SCA2}, uninformative years will have a recruitment closer to the mean, which can be very misleading,
-#' especially near the end of the time series). By default, \code{"comp50"} uses the number of ages (smaller than the mode)
-#' for which the catch-at-age matrix has less than half the abundance than that at the mode.
+#' @param LWT A named list (Index, CAA, Catch) of likelihood weights for the data components. For the index, a vector of length survey. For
+#' CAL and Catch, a single value.
 #' @param early_dev Numeric or character string describing the years for which recruitment deviations are estimated in \code{SCA}. By default,
 #' equal to \code{"comp_onegen"}, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
 #' With \code{"comp"}, rec devs are estimated starting in the first year with CAA. With \code{"all"}, rec devs start at the beginning of the model.
@@ -135,6 +131,9 @@
 #' @examples
 #' res <- SCA(Data = MSEtool::SimulatedData)
 #' res2 <- SCA2(Data = MSEtool::SimulatedData)
+#' 
+#' # Downweight the index
+#' res3 <- SCA(Data = MSEtool::SimulatedData, LWT = list(Index = 0.1, CAA = 1))
 #'
 #' compare_models(res, res2)
 #' @section Required Data:
@@ -156,12 +155,14 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                 CAA_dist = c("multinomial", "lognormal"),
                 CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
                 start = NULL, prior = list(), fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
-                LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
+                LWT = list(), early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
-  out <- SCA_(x, Data, AddInd, SR, vulnerability, catch_eq, CAA_dist, CAA_multiplier, rescale, max_age,
-              start, prior, fix_h, fix_F_equilibrium, fix_omega, fix_tau, 
+  out <- SCA_(x = x, Data = Data, AddInd = AddInd, SR = SR, vulnerability = vulnerability, catch_eq = catch_eq, comp = "age",
+              comp_dist = CAA_dist, comp_multiplier = CAA_multiplier, 
+              rescale = rescale, max_age = max_age, start = start, prior = prior, fix_h = fix_h, 
+              fix_F_equilibrium = fix_F_equilibrium, fix_omega = fix_omega, fix_tau = fix_tau, 
               LWT = LWT, early_dev = early_dev, late_dev = late_dev, integrate = integrate,
               silent = silent, opt_hess = opt_hess, n_restart = n_restart, control = control, 
               inner.control = inner.control, ...)
@@ -170,15 +171,20 @@ SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
 class(SCA) <- "Assess"
 
 #' @rdname SCA
+#' @param common_dev Typically, a numeric for the number of most recent years in which a common recruitment deviation will
+#' be estimated (in \code{SCA2}, uninformative years will have a recruitment closer to the mean, which can be very misleading,
+#' especially near the end of the time series). By default, \code{"comp50"} uses the number of ages (smaller than the mode)
+#' for which the catch-at-age matrix has less than half the abundance than that at the mode.
 #' @export
 SCA2 <- function(x = 1, Data, AddInd = "B", vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
                  CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, prior = list(),
-                 fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE, LWT = NULL,
+                 fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE, LWT = list(),
                  common_dev = "comp50", integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                  control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
-  out <- SCA_(x, Data, AddInd, SR = "none", vulnerability, catch_eq = "Baranov", CAA_dist, CAA_multiplier, rescale, max_age,
-              start, prior, fix_h, fix_F_equilibrium, fix_omega, fix_tau,
+  out <- SCA_(x = x, Data = Data, AddInd = AddInd, SR = "none", vulnerability = vulnerability, catch_eq = "Baranov", comp = "age",
+              comp_dist = CAA_dist, comp_multiplier = CAA_multiplier, rescale = rescale, max_age = max_age,
+              start = start, prior = prior, fix_h = fix_h, fix_F_equilibrium = fix_F_equilibrium, fix_omega = fix_omega, fix_tau = fix_tau,
               LWT = LWT, early_dev = "all", late_dev = common_dev, integrate = integrate,
               silent = silent, opt_hess = opt_hess, n_restart = n_restart, control = control, 
               inner.control = inner.control, ...)
@@ -188,16 +194,18 @@ class(SCA2) <- "Assess"
 
 
 #' @rdname SCA
+#' @param fix_U_equilibrium Logical, same as `fix_F_equilibrium` for `SCA_Pope`.
 #' @export
 SCA_Pope <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), vulnerability = c("logistic", "dome"), CAA_dist = c("multinomial", "lognormal"),
                      CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge, start = NULL, prior = list(),
-                     fix_h = TRUE, fix_U_equilibrium = TRUE, fix_tau = TRUE, LWT = NULL,
+                     fix_h = TRUE, fix_U_equilibrium = TRUE, fix_tau = TRUE, LWT = list(),
                      early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                      silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                      control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
-  out <- SCA_(x, Data, AddInd, SR, vulnerability, catch_eq = "Pope", CAA_dist, CAA_multiplier, rescale, max_age,
-              start, prior, fix_h, fix_F_equilibrium = fix_U_equilibrium, fix_omega = TRUE, fix_tau, 
+  out <- SCA_(x = x, Data = Data, AddInd = AddInd, SR = SR, vulnerability = vulnerability, catch_eq = "Pope", comp = "age",
+              comp_dist = CAA_dist, comp_multiplier = CAA_multiplier, rescale = rescale, max_age = max_age,
+              start = start, prior = prior, fix_h = fix_h, fix_F_equilibrium = fix_U_equilibrium, fix_omega = TRUE, fix_tau, 
               LWT = LWT, early_dev = early_dev, late_dev = late_dev, integrate = integrate,
               silent = silent, opt_hess = opt_hess, n_restart = n_restart, control = control, 
               inner.control = inner.control, ...)
@@ -208,11 +216,11 @@ class(SCA_Pope) <- "Assess"
 
 #' @useDynLib SAMtool
 SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
-                 vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
-                 CAA_dist = c("multinomial", "lognormal"), CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
+                 vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"), comp = c("age", "length"),
+                 comp_dist = c("multinomial", "lognormal"), comp_multiplier = c(50, 50), rescale = "mean1", max_age = Data@MaxAge,
                  start = NULL, prior = list(), fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
                  tv_M = c("none", "walk", "DD"), M_bounds = NULL, refyear = 1,
-                 LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
+                 LWT = list(), early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", integrate = FALSE,
                  silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                  control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
@@ -225,7 +233,9 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   n_age <- max_age + 1
   vulnerability <- match.arg(vulnerability)
   catch_eq <- match.arg(catch_eq)
-  CAA_dist <- match.arg(CAA_dist)
+  comp <- match.arg(comp, several.ok = TRUE)
+  comp_dist <- match.arg(comp_dist)
+  if(length(comp_multiplier) == 1) comp_multiplier <- rep(comp_multiplier, 2)
   SR <- match.arg(SR)  
   tv_M <- match.arg(tv_M)
   
@@ -242,15 +252,6 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   C_hist <- Data@Cat[x, yind]
   if(any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
   
-  Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
-  CAA_hist <- Data@CAA[x, yind, 1:n_age]
-  if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
-  
-  CAA_n_nominal <- rowSums(CAA_hist)
-  if(CAA_multiplier <= 1) {
-    CAA_n_rescale <- CAA_multiplier * CAA_n_nominal
-  } else CAA_n_rescale <- pmin(CAA_multiplier, CAA_n_nominal)
-  
   n_y <- length(C_hist)
   M <- rep(Data@Mort[x], n_age)
   a <- Data@wla[x]
@@ -259,47 +260,95 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   K <- Data@vbK[x]
   t0 <- Data@vbt0[x]
   La <- Linf * (1 - exp(-K * (c(0:max_age) - t0)))
+  SD_La <- La * Data@LenCV[x]
   Wa <- a * La ^ b
   A50 <- min(0.5 * max_age, iVB(t0, K, Linf, Data@L50[x]))
   A95 <- max(A50+0.5, iVB(t0, K, Linf, Data@L95[x]))
   mat_age <- c(0, 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50)))) # Age-0 is immature
   mat_age <- mat_age/max(mat_age)
-  LH <- list(LAA = La, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
+  
+  if(any(comp == "age")) {
+    Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
+    CAA_hist <- Data@CAA[x, yind, 1:n_age]
+    if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
+  } else {
+    CAA_hist <- matrix(0, n_y, n_age)
+  }
+  CAA_n_nominal <- rowSums(CAA_hist, na.rm = TRUE)
+  if(comp_multiplier[1] <= 1) {
+    CAA_n_rescale <- comp_multiplier[1] * CAA_n_nominal
+  } else {
+    CAA_n_rescale <- pmin(CAA_n_nominal, comp_multiplier[1])
+  }
+  
+  if(any(comp == "length")) {
+    CAL_hist <- Data@CAL[x, yind, ]
+    CAL_sum <- colSums(CAL_hist, na.rm = TRUE) # Remove length bins with zeros for all years
+    CAL_cdf <- cumsum(CAL_sum)
+    CAL_ind <- which(CAL_sum > 0)[1]:which.max(CAL_cdf)[1]
+    CAL_hist <- CAL_hist[, CAL_ind]
+    
+    CAL_mids <- Data@CAL_mids[CAL_ind]
+    CAL_bins <- Data@CAL_bins[CAL_ind]
+    PLA <- generate_PLA(La, SD_La, CAL_bins, CAL_mids)
+  } else {
+    CAL_hist <- matrix(0, n_y, 1)
+    PLA <- matrix(1, n_age, 1)
+    CAL_bins <- CAL_mids <- 1
+  }
+  CAL_n_nominal <- rowSums(CAL_hist, na.rm = TRUE)
+  if(comp_multiplier[2] <= 1) {
+    CAL_n_rescale <- comp_multiplier[2] * CAL_n_nominal
+  } else {
+    CAL_n_rescale <- pmin(CAL_n_nominal, comp_multiplier[2])
+  }
   
   if(early_dev == "all") {
     est_early_rec_dev <- rep(1, n_age - 1)
     est_rec_dev <- rep(1, n_y)
   } else if(early_dev == "comp") {
     est_early_rec_dev <- rep(0, n_age-1)
-    ind1 <- which(!is.na(CAA_n_nominal))[1]
-    est_rec_dev <- ifelse(1:n_y < ind1, 0, 1)
+    if(any(comp == "age")) {
+      est_rec_dev <- ifelse(1:n_y < which(CAA_n_nominal > 0)[1], 0, 1)
+    } else {
+      est_rec_dev <- ifelse(1:n_y < which(CAL_n_nominal > 0)[1], 0, 1)
+    }
   } else if(early_dev == "comp_onegen") {
-    ind1 <- which(!is.na(CAA_n_nominal))[1] - n_age
-    if(ind1 < 0) {
-      early_start <- n_age + ind1
-      est_early_rec_dev <- rev(ifelse(c(1:(n_age-1)) < early_start, 0, 1))
+    if(any(comp == "age")) {
+      istart <- which(CAA_n_nominal > 0)[1] - n_age
+    } else {
+      istart <- which(CAL_n_nominal > 0)[1] - n_age
+    }
+    if(istart < 0) {
+      early_start <- n_age + istart
+      est_early_rec_dev <- ifelse(2:n_age < early_start, 0, 1) %>% rev()
       est_rec_dev <- rep(1, n_y)
     } else {
       est_early_rec_dev <- rep(0, n_age - 1)
-      est_rec_dev <- ifelse(1:n_y < ind1, 0, 1)
+      est_rec_dev <- ifelse(1:n_y < istart, 0, 1)
     }
   } else if(is.numeric(early_dev)) {
     if(early_dev > 1) {
       est_early_rec_dev <- rep(0, n_age-1)
-      est_rec_dev <- ifelse(1:n_y >= early_dev, 1, 0)
+      est_rec_dev <- ifelse(1:n_y < early_dev, 0, 11)
     } else {
-      ind1 <- early_dev - 1
-      est_early_rec_dev <- c(rep(1, ind1), rep(NA, n_age-ind1-1))
+      istart <- early_dev - 1
+      est_early_rec_dev <- rep(c(1, 0), c(istart, n_age - istart - 1))
       est_rec_dev <- rep(1, n_y)
     }
   }
   if(tv_M == "DD") est_early_rec_dev <- rep(0, n_age-1) # Temporary for now
   
   if(is.character(late_dev) && late_dev == "comp50") {
-    CAA_all <- colSums(CAA_hist, na.rm = TRUE)/max(colSums(CAA_hist, na.rm = TRUE))
-    CAA_mode <- which.max(CAA_all)[1]
-    comp50_ind <- which(CAA_all[1:CAA_mode] <= 0.5)
+    if(any(comp == "age")) {
+      comp_ldev <- colSums(CAA_hist, na.rm = TRUE)/max(colSums(CAA_hist, na.rm = TRUE))
+    } else {
+      comp_ldev <- colSums(CAL_hist, na.rm = TRUE)/max(colSums(CAL_hist, na.rm = TRUE))
+    }
+    comp_mode <- which.max(comp_ldev)[1]
+    comp50_ind <- which(comp_ldev[1:comp_mode] <= 0.5)
     comp50_ind <- comp50_ind[length(comp50_ind)]
+    if(all(comp != "age")) comp50_ind <- ceiling(LinInterp(La, 0:n_age, Data@CAL_mids[comp50_ind]))
     late_dev <- ifelse(is.na(comp50_ind), 0, comp50_ind)
   }
   if(is.numeric(late_dev) && late_dev > 0) {
@@ -311,9 +360,9 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
   
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
-  I_hist <- do.call(cbind, lapply(Ind, getElement, "I_hist"))
-  I_sd <- do.call(cbind, lapply(Ind, getElement, "I_sd")) %>% pmax(0.05)
-  I_units <- do.call(c, lapply(Ind, getElement, "I_units"))
+  I_hist <- vapply(Ind, getElement, numeric(n_y), "I_hist")
+  I_sd <- vapply(Ind, getElement, numeric(n_y), "I_sd") %>% pmax(0.05)
+  I_units <- vapply(Ind, getElement, numeric(1), "I_units")
   I_vul <- vapply(AddInd, function(xx) {
     if(xx == "B") {
       return(rep(1, n_age))
@@ -326,8 +375,17 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     }
   }, numeric(n_age))
   nsurvey <- ncol(I_hist)
-  if(is.null(LWT)) LWT <- rep(1, nsurvey)
-  if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  
+  if(!is.list(LWT)) {
+    if(!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+    LWT <- list(Index = LWT)
+    LWT$CAA <- LWT$CAL <- LWT$Catch <- 1
+  } else {
+    if(is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
+    if(is.null(LWT$CAA)) LWT$CAA <- 1
+    if(is.null(LWT$CAL)) LWT$CAL <- 1
+    if(is.null(LWT$Catch)) LWT$Catch <- 1 
+  }
   
   # Generate priors
   prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
@@ -342,14 +400,15 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }
   
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, I_hist = I_hist,
-               I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
-               CAA_hist = t(apply(CAA_hist, 1, function(x) x/sum(x))),
-               CAA_n = CAA_n_rescale, n_y = n_y, n_age = n_age,
-               weight = Wa, mat = mat_age, vul_type = vulnerability,
-               SR_type = SR, CAA_dist = CAA_dist, catch_eq = catch_eq,
+               I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, 
+               CAA_hist = apply(CAA_hist, 1, tiny_comp) %>% t(), CAA_n = CAA_n_rescale, 
+               CAL_hist = apply(CAL_hist, 1, tiny_comp) %>% t(), CAL_n = CAL_n_rescale,
+               LWT = c(LWT$Index, LWT$CAA, LWT$CAL, LWT$Catch),
+               n_y = n_y, n_age = n_age, n_bin = ncol(PLA), 
+               weight = Wa, PLA = PLA, mat = mat_age, vul_type = vulnerability,
+               SR_type = SR, comp_dist = comp_dist, catch_eq = catch_eq,
                est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y),
                tv_M = tv_M, M_bounds = M_bounds, use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
-  data$CAA_hist[data$CAA_hist < 1e-8] <- 1e-8
   
   # Starting values
   params <- list()
@@ -421,14 +480,22 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   if(is.null(params$logit_M_walk)) params$logit_M_walk <- rep(0, n_y)
   if(is.null(params$F_equilibrium)) params$F_equilibrium <- 0
   if(is.null(params$vul_par)) {
-    CAA_mode <- which.max(colSums(CAA_hist, na.rm = TRUE))
-    if((is.na(Data@LFC[x]) && is.na(Data@LFS[x])) || (Data@LFC[x] > Linf) || (Data@LFS[x] > Linf)) {
-      if(vulnerability == "logistic") params$vul_par <- c(logit(CAA_mode/max_age/0.75), log(1))
+    if(any(comp == "age")) {
+      comp_ldev <- colSums(CAA_hist, na.rm = TRUE)/max(colSums(CAA_hist, na.rm = TRUE))
+    } else {
+      comp_ldev <- colSums(CAL_hist, na.rm = TRUE)/max(colSums(CAL_hist, na.rm = TRUE))
+    }
+    comp_mode <- which.max(comp_ldev)[1]
+    
+    if(is.na(Data@LFC[x]) && is.na(Data@LFS[x]) || Data@LFC[x] > Linf || Data@LFS[x] > Linf) {
+      
+      if(all(comp != "length")) comp_mode <- ceiling(LinInterp(La, 0:n_age, Data@CAL_mids[comp_mode]))
+      if(vulnerability == "logistic") params$vul_par <- c(logit(comp_mode/max_age/0.75), log(1))
       if(vulnerability == "dome") {
-        params$vul_par <- c(logit(CAA_mode/max_age/0.75), log(1), logit(1/(max_age - CAA_mode)), logit(0.5))
+        params$vul_par <- c(logit(comp_mode/max_age/0.75), log(1), logit(1/(max_age - comp_mode)), logit(0.5))
       }
     } else {
-      A5 <- min(iVB(t0, K, Linf, Data@LFC[x]), CAA_mode-1)
+      A5 <- min(iVB(t0, K, Linf, Data@LFC[x]), comp_mode - 1)
       Afull <- min(iVB(t0, K, Linf, Data@LFS[x]), 0.5 * max_age)
       A5 <- min(A5, Afull - 0.5)
       A50_vul <- mean(c(A5, Afull))
@@ -459,6 +526,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
   
+  LH <- list(LAA = La, SD_LAA = SD_La, CAL_mids = CAL_mids, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control,
                inner.control = inner.control)
   
@@ -537,8 +605,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                     R = structure(R, names = YearR),
                     N = structure(rowSums(report$N), names = Yearplusone),
                     N_at_age = report$N,
-                    Selectivity = matrix(report$vul, nrow = length(Year),
-                                         ncol = n_age, byrow = TRUE),
+                    Selectivity = matrix(report$vul, nrow = length(Year), ncol = n_age, byrow = TRUE),
                     Obs_Catch = structure(C_hist, names = Year),
                     Obs_Index = structure(I_hist, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
                     Obs_C_at_age = CAA_hist,
@@ -547,10 +614,13 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                     C_at_age = report$CAApred,
                     Dev = Dev, Dev_type = "log-Recruitment deviations",
                     NLL = structure(c(nll_report, report$nll_comp, report$prior, report$penalty),
-                                    names = c("Total", paste0("Index_", 1:nsurvey), "CAA", "Catch", "Dev", "M_dev", "Prior", "Penalty")),
+                                    names = c("Total", paste0("Index_", 1:nsurvey), "CAA", "CAL", "Catch", "Dev", "M_dev", "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
   if(tv_M != "walk") Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "M_dev"]
+  if(all(comp != "age")) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "CAA"]
+  if(all(comp != "length")) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "CAL"]
+  if(catch_eq == "Pope") Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "Catch"]
   if(SR != "none") Assessment@h <- report$h
   if(catch_eq == "Baranov") {
     Assessment@FMort <- structure(report$F, names = Year)
@@ -802,4 +872,19 @@ get_SR <- function(pars, E, R, EPR0, opt = TRUE, figure = FALSE, type = c("BH", 
     return(list(Rpred = Rpred, R0 = R0, h = h, E0 = E0, sigmaR = sigmaR, Arec = Arec, Brec = Brec))
   }
 }
+
+generate_PLA <- function(LAA, SD_LAA, len_bins, len_mids) {
+  n_age <- length(LAA)
+  n_bin <- length(len_mids)
+  
+  PLA <- matrix(0, n_age, n_bin)
+  PLA[, n_bin] <- 1 - pnorm(len_bins[n_bin], LAA, SD_LAA)
+  PLA[, 1] <- pnorm(len_bins[2], LAA, SD_LAA)
+  PLA[, 3:n_bin - 1] <- vapply(1:n_age, function(x) {
+    pnorm(len_bins[3:n_bin], LAA[x], SD_LAA[x]) - pnorm(len_bins[3:n_bin - 1], LAA[x], SD_LAA[x])
+  }, numeric(n_bin - 2)) %>% t()
+  return(PLA)
+}
+
+
 

@@ -396,11 +396,11 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   nsurvey <- ncol(RCMdata@Index)
   
   # Convert to proportions?
-  RCMdata@CAA <- apply(RCMdata@CAA, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
-  RCMdata@CAL <- apply(RCMdata@CAL, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
+  RCMdata@CAA <- apply(RCMdata@CAA, c(1, 3), tiny_comp) %>% aperm(c(2, 1, 3))
+  RCMdata@CAL <- apply(RCMdata@CAL, c(1, 3), tiny_comp) %>% aperm(c(2, 1, 3))
   
-  RCMdata@IAA <- apply(RCMdata@IAA, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
-  RCMdata@IAL <- apply(RCMdata@IAL, c(1, 3), RCM_tiny_comp) %>% aperm(c(2, 1, 3))
+  RCMdata@IAA <- apply(RCMdata@IAA, c(1, 3), tiny_comp) %>% aperm(c(2, 1, 3))
+  RCMdata@IAL <- apply(RCMdata@IAL, c(1, 3), tiny_comp) %>% aperm(c(2, 1, 3))
   
   #Backwards compatibility
   if(!is.null(dots$ESS) && length(dots$ESS) == 2) {

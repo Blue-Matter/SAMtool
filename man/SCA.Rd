@@ -23,7 +23,7 @@ SCA(
   fix_F_equilibrium = TRUE,
   fix_omega = TRUE,
   fix_tau = TRUE,
-  LWT = NULL,
+  LWT = list(),
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
   integrate = FALSE,
@@ -50,7 +50,7 @@ SCA2(
   fix_F_equilibrium = TRUE,
   fix_omega = TRUE,
   fix_tau = TRUE,
-  LWT = NULL,
+  LWT = list(),
   common_dev = "comp50",
   integrate = FALSE,
   silent = TRUE,
@@ -76,7 +76,7 @@ SCA_Pope(
   fix_h = TRUE,
   fix_U_equilibrium = TRUE,
   fix_tau = TRUE,
-  LWT = NULL,
+  LWT = list(),
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
   integrate = FALSE,
@@ -135,7 +135,8 @@ omega is fixed to value provided in \code{start} (if provided), otherwise, value
 \item{fix_tau}{Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
 tau is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@sigmaR}.}
 
-\item{LWT}{A vector of likelihood weights for each survey.}
+\item{LWT}{A named list (Index, CAA, Catch) of likelihood weights for the data components. For the index, a vector of length survey. For
+CAL and Catch, a single value.}
 
 \item{early_dev}{Numeric or character string describing the years for which recruitment deviations are estimated in \code{SCA}. By default,
 equal to \code{"comp_onegen"}, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
@@ -261,6 +262,9 @@ for example, when vulnerability >> 0.5 for the youngest age class.
 \examples{
 res <- SCA(Data = MSEtool::SimulatedData)
 res2 <- SCA2(Data = MSEtool::SimulatedData)
+
+# Downweight the index
+res3 <- SCA(Data = MSEtool::SimulatedData, LWT = list(Index = 0.1, CAA = 1))
 
 compare_models(res, res2)
 }

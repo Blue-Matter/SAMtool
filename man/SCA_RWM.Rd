@@ -21,7 +21,7 @@ SCA_RWM(
   fix_F_equilibrium = TRUE,
   fix_omega = TRUE,
   fix_tau = TRUE,
-  LWT = NULL,
+  LWT = list(),
   early_dev = c("comp_onegen", "comp", "all"),
   late_dev = "comp50",
   refyear = expression(length(Data@Year)),
@@ -82,7 +82,8 @@ omega is fixed to value provided in \code{start} (if provided), otherwise, value
 \item{fix_tau}{Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
 tau is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@sigmaR}.}
 
-\item{LWT}{A vector of likelihood weights for each survey.}
+\item{LWT}{A named list (Index, CAA, Catch) of likelihood weights for the data components. For the index, a vector of length survey. For
+CAL and Catch, a single value.}
 
 \item{early_dev}{Numeric or character string describing the years for which recruitment deviations are estimated in \code{SCA}. By default,
 equal to \code{"comp_onegen"}, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
@@ -144,7 +145,6 @@ By default, 150\% Data@OM$R0[x] is used as the start value in closed-loop simula
 \item \code{vul_par} Vulnerability parameters, see next paragraph.
 \item \code{F} A vector of length nyears for year-specific fishing mortality.
 \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-\item \code{U_equilibrium} Same as F_equilibrium when \code{catch_eq = "Pope"}. By default, 0.
 \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, Data@CV_Cat[x].
 \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].
 \item \code{tau_M} The fixed SD of the random walk in M. By default, 0.05. 
@@ -165,7 +165,7 @@ compare_models(res, res2, res3)
 }
 }
 \seealso{
-\link{SCA}
+\link{SCA} \link{SCA_DDM}
 }
 \author{
 Q. Huynh

@@ -49,6 +49,18 @@ logit2 <- function(v, ymin = 0, ymax = 1, y0 = 0.5, scale = 1) {
   return(qlogis(p, location, scale))
 }
 
+tiny_comp <- function(x) {
+  all_zero <- all(is.na(x)) | sum(x, na.rm = TRUE) == 0
+  if(!all_zero) {
+    x_out <- x/sum(x, na.rm = TRUE)
+    ind <- is.na(x) | x == 0
+    if(any(ind)) x_out[ind] <- 1e-8
+  } else {
+    x_out <- x
+  }
+  return(x_out)
+}
+
 get_F01 <- function(FM, YPR) {
   if(is.null(FM) && is.null(YPR)) stop("F01 can not be used.")
   stopifnot(length(FM) == length(YPR))

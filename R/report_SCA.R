@@ -29,19 +29,20 @@ summary_SCA <- function(Assessment) {
   if(conv && SR != "none") {
     Value <- c(VB0, SSB0, MSY, ifelse(catch_eq == "Pope", UMSY, FMSY), VBMSY, SSBMSY, SSBMSY/SSB0)
   } else {
-    Value <- rep(NA, 7)
+    Value <- rep(NA_real_, 7)
   }
   Description <- c("Unfished vulnerable biomass",
                    "Unfished spawning stock biomass (SSB)", "Maximum sustainable yield (MSY)", 
                    ifelse(catch_eq == "Pope", "Exploitation rate at MSY", "Fishing mortality at MSY"),
                    "Vulnerable biomass at MSY", "SSB at MSY", "Spawning depletion at MSY")
-  derived <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
-  rownames(derived) <- c("VB0", "SSB0", "MSY", ifelse(catch_eq == "Pope", "UMSY", "FMSY"), "VBMSY", "SSBMSY", "SSBMSY/SSB0")
-
+  rownam <- c("VB0", "SSB0", "MSY", ifelse(catch_eq == "Pope", "UMSY", "FMSY"), "VBMSY", "SSBMSY", "SSBMSY/SSB0")
   if(conv && SR != "none" && "transformed_h" %in% names(obj$env$map)) {
-    derived <- rbind(derived, c(h, "Stock-recruit steepness"))
-    rownames(derived)[8] <- "h"
+    Description <- c(Description, "Stock-recruit steepness")
+    Value <- c(Value, h)
+    rownam <- c(rownam, "h")
   }
+  derived <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
+  rownames(derived) <- rownam
 
   model_estimates <- sdreport_int(SD)
   if(!is.character(model_estimates)) {
@@ -64,15 +65,30 @@ summary_SCA <- function(Assessment) {
 
 rmd_SCA <- function(Assessment, ...) {
   ss <- rmd_summary("Statistical Catch-at-Age (SCA)")
+  
+  age_comps <- any(Assessment@obj$env$data$CAA_n > 0)
+  length_comps <- any(Assessment@obj$env$data$CAL_n > 0)
 
   # Life History
-  LH_section <- c(rmd_LAA(header = "## Life History\n"), rmd_WAA(), rmd_LW(),
+  LH_section <- c(rmd_LAA(header = "## Life History\n", SD_LAA = ifelse(length_comps, "info$LH$SD_LAA", "")), 
+                  rmd_WAA(), rmd_LW(),
                   rmd_mat(fig.cap = "Maturity at age. Length-based maturity parameters were converted to the corresponding ages."))
   
   # Data section
+  if(age_comps) {
+    data_age_comps <- c(rmd_data_age_comps("bubble"), rmd_data_age_comps("annual"))
+  } else {
+    data_age_comps <- ""
+  }
+  if(length_comps) {
+    data_length_comps <- c(rmd_data_length_comps("bubble"), rmd_data_length_comps("annual"))
+  } else {
+    data_length_comps <- ""
+  }
+  
   data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"), 
                     rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)),
-                    rmd_data_age_comps("bubble"), rmd_data_age_comps("annual"))
+                    data_age_comps, data_length_comps)
 
   # Assessment
   #### Pars and Fit
@@ -81,12 +97,22 @@ rmd_SCA <- function(Assessment, ...) {
   } else {
     lead_par <- c(rmd_R0(header = "## Assessment {.tabset}\n### Estimates and Model Fit\n"), rmd_h())
   }
+  if(age_comps) {
+    fit_age_comps <- c(rmd_fit_age_comps("bubble"), rmd_fit_age_comps("annual"))
+  } else {
+    fit_age_comps <- ""
+  }
+  if(length_comps) {
+    fit_length_comps <- c(rmd_fit_length_comps("bubble"), rmd_fit_length_comps("annual"))
+  } else {
+    fit_length_comps <- ""
+  }
 
   assess_fit <- c(lead_par, rmd_M_prior(), rmd_M_rw(),
                   rmd_sel(fig.cap = "Estimated selectivity at age."),
                   rmd_assess_fit("Catch", "catch"), rmd_assess_resid("Catch"), rmd_assess_qq("Catch", "catch"),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
-                  rmd_fit_age_comps("bubble"), rmd_fit_age_comps("annual"),
+                  fit_age_comps, fit_length_comps,
                   rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type,
                                blue = any(as.numeric(names(Assessment@Dev)) < Assessment@info$Year[1])),
                   rmd_residual("Dev", "SE_Dev", fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
@@ -101,13 +127,25 @@ rmd_SCA <- function(Assessment, ...) {
     F_output <- rmd_U(header = "### Time Series Output\n")
     if(Assessment@obj$env$data$SR_type != "none") F_output <- c(F_output, rmd_U_UMSY())
   }
+  
+  if(age_comps) {
+    C_age <- c(rmd_C_at_age(), rmd_C_mean_age())
+  } else {
+    C_age <- ""
+  }
+  if(length_comps) {
+    C_length <- c(rmd_C_at_length(), rmd_C_mean_length())
+  } else {
+    C_length <- ""
+  }
+  
   ts_output <- c(F_output, rmd_M_rw(), rmd_M_DD(), rmd_SSB(),
                  rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"), 
                  ifelse(Assessment@obj$env$data$SR_type != "none", rmd_SSB_SSBMSY(), ""),
                  rmd_SSB_SSB0(), 
                  ifelse(Assessment@obj$env$data$SR_type != "none", 
                         rmd_Kobe("SSB_SSBMSY", xlab = "expression(SSB/SSB[MSY])"), ""), 
-                 rmd_R(), rmd_N(), rmd_N_at_age(), rmd_C_at_age(), rmd_C_mean_age())
+                 rmd_R(), rmd_N(), rmd_N_at_age(), C_age, C_length)
 
   # Productivity
   if(Assessment@obj$env$data$SR_type != "none") {
@@ -236,6 +274,10 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
     
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
     info$data$CAA_n <- info$data$CAA_n[1:n_y_ret]
+    
+    info$data$CAL_hist <- info$data$CAL_hist[1:n_y_ret, ]
+    info$data$CAL_n <- info$data$CAL_n[1:n_y_ret]
+    
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]
     
     info$params$log_rec_dev <- rep(0, n_y_ret)

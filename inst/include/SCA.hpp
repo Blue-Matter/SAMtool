@@ -12,22 +12,31 @@ Type SCA(objective_function<Type> *obj) {
 
   DATA_VECTOR(C_hist);    // Total catch
   DATA_SCALAR(rescale);   // Scalar for R0
+  
   DATA_MATRIX(I_hist);    // Index
   DATA_MATRIX(I_sd);
   DATA_IVECTOR(I_units);
   DATA_MATRIX(I_vul);
   DATA_IVECTOR(abs_I);
   DATA_INTEGER(nsurvey);
-  DATA_VECTOR(LWT);
+  
   DATA_MATRIX(CAA_hist);  // Catch-at-age proportions
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
+  DATA_MATRIX(CAL_hist);  // Catch-at-length proportions
+  DATA_VECTOR(CAL_n);     // Annual samples in CAL
+  
+  DATA_VECTOR(LWT);       // Vector of likelihood weights length nsurvey + 3 (nsurvey indices, then CAA, CAL, catch)
+  
   DATA_INTEGER(n_y);      // Number of years in model
   DATA_INTEGER(n_age);    // Maximum age (plus-group)
+  DATA_INTEGER(n_bin);    // Number of length bins
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
+  DATA_MATRIX(PLA);       // Probability matrix of length-at-age
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
+  
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
   DATA_STRING(SR_type);   // String indicating whether Beverton-Holt ("BH"), or Ricker stock-recruit ("Ricker"), or none ("meanR") is used
-  DATA_STRING(CAA_dist);  // String indicating whether CAA is multinomial or lognormal
+  DATA_STRING(comp_dist); // String indicating whether CAA and CAL likelihoods use multinomial or lognormal distributions
   DATA_STRING(catch_eq);  // String whether to use "Baranov" or "Pope"'s approximation for the catch equation
   DATA_IVECTOR(est_early_rec_dev);
   DATA_IVECTOR(est_rec_dev); // Indicator of whether rec_dev is estimated in model or fixed at zero
@@ -105,8 +114,9 @@ Type SCA(objective_function<Type> *obj) {
 
   ////// During time series year = 1, 2, ..., n_y
   matrix<Type> N(n_y+1, n_age);   // Numbers at year and age
-  matrix<Type> CAApred(n_y, n_age);   // Catch (in numbers) at year and age at the mid-point of the season
-  vector<Type> CN(n_y);             // Catch in numbers
+  matrix<Type> CAApred(n_y, n_age);   // Catch (in numbers) at year and age
+  matrix<Type> CALpred(n_y, n_bin);   // Catch at year and length
+  vector<Type> CN(n_y);               // Catch in numbers
   vector<Type> Cpred(n_y);
   vector<Type> F(n_y);
   vector<Type> U(n_y);
@@ -122,6 +132,7 @@ Type SCA(objective_function<Type> *obj) {
   //vector<Type> EPR_unfished(n_y+1);
 
   N.setZero();
+  CALpred.setZero();
   CN.setZero();
   Cpred.setZero();
   VB.setZero();
@@ -173,8 +184,6 @@ Type SCA(objective_function<Type> *obj) {
     M.row(0).fill(M0);
     logit_M(0) = logit2(M(0,0), M_bounds(0), M_bounds(1), M(0,0));
   }
-  //NPR_unfished(0) = calc_NPR(Type(0), vul, M, n_age, 0);
-  //EPR_unfished(0) = sum_EPR(NPR_unfished(0), weight, mat);
   
   for(int a=0;a<n_age;a++) {
     if(catch_eq == "Baranov") {
@@ -224,6 +233,7 @@ Type SCA(objective_function<Type> *obj) {
           N(y+1,a) += N(y,a) * exp(-M(y,a)) * (1 - vul(a) * U(y));
         }
       }
+      if(CAL_n.sum() > 0) for(int len=0;len<n_bin;len++) CALpred(y,len) += CAApred(y,a) * PLA(a,len);
       CN(y) += CAApred(y,a);
       Cpred(y) += CAApred(y,a) * weight(a);
       E(y+1) += N(y+1,a) * weight(a) * mat(a);
@@ -266,10 +276,12 @@ Type SCA(objective_function<Type> *obj) {
   // Calculate nuisance parameters and likelihood
   // Ipred updated in calc_q function
   vector<Type> q(nsurvey);
-  array<Type> IAA(n_y,n_age,nsurvey);
-  matrix<Type> IN(n_y,nsurvey);
-  matrix<Type> Itot(n_y,nsurvey);
-  matrix<Type> Ipred(n_y,nsurvey);
+  array<Type> IAA(n_y, n_age, nsurvey);
+  //array<Type> IAL(n_y, n_bin, nsurvey);
+  matrix<Type> IN(n_y, nsurvey);
+  matrix<Type> Itot(n_y, nsurvey);
+  matrix<Type> Ipred(n_y, nsurvey);
+  //IAL.setZero();
   IN.setZero();
   Itot.setZero();
   for(int sur=0;sur<nsurvey;sur++) {
@@ -282,13 +294,14 @@ Type SCA(objective_function<Type> *obj) {
         }
         IN(y,sur) += IAA(y,a,sur);
         if(I_units(sur)) Itot(y,sur) += IAA(y,a,sur) * weight(a); // Biomass vulnerable to survey
+        //if(CAL_n.sum() > 0) for(int len=0;len<n_bin;len++) IAL(y,len,sur) += IAA(y,a,sur) * PLA(a,len);
       }
     }
     if(!I_units(sur)) Itot.col(sur) = IN.col(sur); // Abundance vulnerable to survey
     q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
   }
 
-  vector<Type> nll_comp(nsurvey+4);
+  vector<Type> nll_comp(nsurvey+5);
   nll_comp.setZero();
   for(int y=0;y<n_y;y++) {
     for(int sur=0;sur<nsurvey;sur++) {
@@ -297,25 +310,37 @@ Type SCA(objective_function<Type> *obj) {
       }
     }
     if(C_hist(y) > 0) {
-      if(!R_IsNA(asDouble(CAA_n(y)))) {
+      if(CAA_n(y) > 0) {
         vector<Type> loglike_CAAobs(n_age);
         vector<Type> loglike_CAApred(n_age);
         loglike_CAApred = CAApred.row(y)/CN(y);
         loglike_CAAobs = CAA_hist.row(y);
-        if(CAA_dist == "multinomial") {
+        if(comp_dist == "multinomial") {
           loglike_CAAobs *= CAA_n(y);
-          nll_comp(nsurvey) -= dmultinom_(loglike_CAAobs, loglike_CAApred, true);
+          nll_comp(nsurvey) -= LWT(nsurvey) * dmultinom_(loglike_CAAobs, loglike_CAApred, true);
         } else {
-          nll_comp(nsurvey) -= dlnorm_comp(loglike_CAAobs, loglike_CAApred);
+          nll_comp(nsurvey) -= LWT(nsurvey) * dlnorm_comp(loglike_CAAobs, loglike_CAApred);
         }
       }
-      if(catch_eq == "Baranov") nll_comp(nsurvey+1) -= dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
+      if(CAL_n(y) > 0) {
+        vector<Type> loglike_CALobs(n_bin);
+        vector<Type> loglike_CALpred(n_bin);
+        loglike_CALpred = CALpred.row(y)/CN(y);
+        loglike_CALobs = CAL_hist.row(y);
+        if(comp_dist == "multinomial") {
+          loglike_CALobs *= CAL_n(y);
+          nll_comp(nsurvey+1) -= LWT(nsurvey+1) * dmultinom_(loglike_CALobs, loglike_CALpred, true);
+        } else {
+          nll_comp(nsurvey+1) -= LWT(nsurvey+1) * dlnorm_comp(loglike_CALobs, loglike_CALpred);
+        }
+      }
+      if(catch_eq == "Baranov") nll_comp(nsurvey+2) -= LWT(nsurvey+2) * dnorm(log(C_hist(y)), log(Cpred(y)), omega, true);
     }
-    if(est_rec_dev(y)) nll_comp(nsurvey+2) -= dnorm(log_rec_dev(y), Type(0), tau, true);
-    if(tv_M == "walk") nll_comp(nsurvey+3) -= dnorm(logit_M_walk(y), Type(0), tau_M, true);
+    if(est_rec_dev(y)) nll_comp(nsurvey+3) -= dnorm(log_rec_dev(y), Type(0), tau, true);
+    if(tv_M == "walk") nll_comp(nsurvey+4) -= dnorm(logit_M_walk(y), Type(0), tau_M, true);
   }
   for(int a=0;a<n_age-1;a++) {
-    if(est_early_rec_dev(a)) nll_comp(nsurvey+2) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
+    if(est_early_rec_dev(a)) nll_comp(nsurvey+3) -= dnorm(log_early_rec_dev(a), Type(0), tau, true);
   }
   
   // Add priors
@@ -373,6 +398,7 @@ Type SCA(objective_function<Type> *obj) {
   REPORT(CN);
   REPORT(Cpred);
   REPORT(CAApred);
+  if(CAL_n.sum() > 0) REPORT(CALpred);
   REPORT(Ipred);
   REPORT(R);
   REPORT(R_early);

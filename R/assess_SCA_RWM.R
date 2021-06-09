@@ -4,63 +4,10 @@
 #' \code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age). 
 #' Set the variance (\code{start$tau_M}) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
 #' 
-#' @param x A position in the Data object (by default, equal to one for assessments).
-#' @param Data An object of class Data
-#' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
-#' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
-#' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd. Vulnerability to the survey is fixed in the model.
-#' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt, \code{"Ricker"}, or \code{"none"} for constant mean recruitment).
-#' @param vulnerability Whether estimated vulnerability is \code{"logistic"} or \code{"dome"} (double-normal).
-#' See details for parameterization.
-#' @param catch_eq Whether to use the Baranov equation or Pope's approximation to calculate the predicted catch at age in the model.
-#' @param CAA_dist Whether a multinomial or lognormal distribution is used for likelihood of the catch-at-age matrix. See details.
-#' @param CAA_multiplier Numeric for data weighting of catch-at-age matrix if \code{CAA_hist = "multinomial"}. Otherwise ignored. See details.
-#' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
-#' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
-#' Output is re-converted back to original units.
-#' @param max_age Integer, the maximum age (plus-group) in the model.
-#' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
-#' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
-#' lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
-#' For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors
-#' For all others, provide a length-2 vector for the mean and SD.
-#' See vignette for full description.
-#' @param fix_h Logical, whether to fix steepness to value in \code{Data@@steep} in the model for \code{SCA}. This only affects
-#' calculation of reference points for \code{SCA2}.
-#' @param fix_F_equilibrium Logical, whether the equilibrium fishing mortality prior to the first year of the model
-#' is estimated. If \code{TRUE}, \code{F_equilibrium} is fixed to value provided in \code{start} (if provided),
-#' otherwise, equal to zero (assumes unfished conditions).
-#' @param fix_omega Logical, whether the standard deviation of the catch is fixed. If \code{TRUE},
-#' omega is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Cat}.
-#' @param fix_tau Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
-#' tau is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@sigmaR}.
-#' @param LWT A vector of likelihood weights for each survey.
-#' @param early_dev Numeric or character string describing the years for which recruitment deviations are estimated in \code{SCA}. By default,
-#' equal to \code{"comp_onegen"}, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
-#' With \code{"comp"}, rec devs are estimated starting in the first year with CAA. With \code{"all"}, rec devs start at the beginning of the model.
-#' If numeric, the number of years after the first year of the model for which to start estimating rec devs. Use negative numbers for years prior to the first year.
-#' @param late_dev Typically, a numeric for the number of most recent years in which recruitment deviations will
-#' not be estimated in \code{SCA} (recruitment in these years will be based on the mean predicted by stock-recruit relationship).
-#' By default, \code{"comp50"} uses the number of ages (smaller than the mode)
-#' for which the catch-at-age matrix has less than half the abundance than that at the mode.
+#' @inheritParams SCA 
 #' @param refyear An expression for the year for which M is used to report MSY reference points. By default, terminal year.
 #' @param M_bounds A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
 #' (\code{start$M}). The default min and max are 75\% and 125\%, respectively.
-#' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
-#' of the recruitment deviations (thus, treating it as a random effects/state-space variable).
-#' Otherwise, recruitment deviations are penalized parameters.
-#' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
-#' will print trace information during optimization. Used for diagnostics for model convergence.
-#' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
-#' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
-#' in convergence rate). Ignored if \code{integrate = TRUE}.
-#' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
-#' hasn't converged. The optimization continues from the parameters from the previous (re)start.
-#' @param control A named list of arguments for optimization to be passed to
-#' \code{\link[stats]{nlminb}}.
-#' @param inner.control A named list of arguments for optimization of the random effects, which
-#' is passed on to \code{\link[TMB]{newton}}.
-#' @param ... Other arguments to be passed.
 #' @details
 #' The model estimates year-specific M (constant with age) as a random walk in logit space, bounded by
 #' a proportion of \code{start$M} (specified in \code{M_bounds}).
@@ -77,7 +24,6 @@
 #' \item \code{vul_par} Vulnerability parameters, see next paragraph.
 #' \item \code{F} A vector of length nyears for year-specific fishing mortality.
 #' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-#' \item \code{U_equilibrium} Same as F_equilibrium when \code{catch_eq = "Pope"}. By default, 0.
 #' \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, Data@@CV_Cat[x].
 #' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@@sigmaR[x].
 #' \item \code{tau_M} The fixed SD of the random walk in M. By default, 0.05. 
@@ -98,20 +44,21 @@
 #' }
 #' @author Q. Huynh
 #' @return An object of class \linkS4class{Assessment}.
-#' @seealso \link{SCA}
+#' @seealso \link{SCA} \link{SCA_DDM}
 #' @export
 SCA_RWM <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
                     vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
                     CAA_dist = c("multinomial", "lognormal"),
                     CAA_multiplier = 50, rescale = "mean1", max_age = Data@MaxAge,
                     start = NULL, prior = list(), fix_h = TRUE, fix_F_equilibrium = TRUE, fix_omega = TRUE, fix_tau = TRUE,
-                    LWT = NULL, early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", 
+                    LWT = list(), early_dev = c("comp_onegen", "comp", "all"), late_dev = "comp50", 
                     refyear = expression(length(Data@Year)), M_bounds = NULL,
                     integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                     control = list(iter.max = 2e5, eval.max = 4e5), inner.control = list(), ...) {
   
-  out <- SCA_(x, Data, AddInd, SR, vulnerability, catch_eq, CAA_dist, CAA_multiplier, rescale, max_age,
-              start, prior, fix_h, fix_F_equilibrium, fix_omega, fix_tau, 
+  out <- SCA_(x = x, Data = Data, AddInd = AddInd, SR = SR, vulnerability = vulnerability, catch_eq = catch_eq, comp = "age",
+              comp_dist = CAA_dist, comp_multiplier = CAA_multiplier, rescale = rescale, max_age = max_age,
+              start = start, prior = prior, fix_h = fix_h, fix_F_equilibrium = fix_F_equilibrium, fix_omega = fix_omega, fix_tau = fix_tau, 
               tv_M = "walk", M_bounds = M_bounds, refyear = refyear,
               LWT = LWT, early_dev = early_dev, late_dev = late_dev, integrate = integrate,
               silent = silent, opt_hess = opt_hess, n_restart = n_restart,
