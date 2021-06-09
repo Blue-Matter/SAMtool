@@ -294,7 +294,14 @@ Assess_I_hist <- function(xx, Data, x, yind) {
   }
 
   if(exists("I_hist", inherits = FALSE)) {
-    I_hist[I_hist <= 0] <- NA
+    I_hist[!is.na(I_hist) & I_hist <= 0] <- NA_real_
+    if(all(is.na(I_sd)) || all(!I_sd, na.rm = TRUE)) {
+      if(!is.null(Data@Obs$Isd[x])) {
+        I_sd <- rep(Data@Obs$Isd[x], length(yind))
+      } else {
+        I_sd <- rep(0.2, length(yind))
+      }
+    }
   } else {
     I_hist <- I_sd <- I_units <- NULL
   }

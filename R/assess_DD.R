@@ -16,6 +16,8 @@
 #' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
 #' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
+#' @param MW Logical, whether to fit to mean weight. In closed-loop simulation, mean weight will be grabbed from \code{Data@@Misc[[x]]$MW},
+#' otherwise calculated from \code{Data@@CAL}.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
 #' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
 #' lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
@@ -32,7 +34,8 @@
 #' @param dep The initial depletion in the first year of the model. A tight prior is placed on the model objective function
 #' to estimate the equilibrium exploitation rate that corresponds to the initial depletion. Due to this tight prior, this F
 #' should not be considered to be an independent model parameter.
-#' @param LWT A vector of likelihood weights for each survey.
+#' @param LWT A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
+#' for \code{LWT$MW} a numeric.
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
 #' of the recruitment deviations (thus, treating it as a random effects/state-space variable).
 #' Otherwise, recruitment deviations are penalized parameters.
@@ -64,6 +67,7 @@
 #' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@@sigmaR[x].
 #' \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@@CV_Ind[x]. Not
 #' used if multiple indices are used.
+#' \item \code{sigma_W} Lognormal SD of the mean weight (observation error). By default, 0.1.
 #' }
 #' 
 #' Multiple indices are supported in the model. Data@@Ind, Data@@VInd, and Data@@SpInd are all assumed to be biomass-based.
@@ -108,12 +112,12 @@
 #' }
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @export
-DD_TMB <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
-                   start = NULL, prior = list(), fix_h = TRUE, dep = 1, LWT = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+DD_TMB <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", MW = FALSE,
+                   start = NULL, prior = list(), fix_h = TRUE, dep = 1, LWT = list(), silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                    control = list(iter.max = 5e3, eval.max = 1e4), ...) {
   condition <- match.arg(condition)
-  DD_(x = x, Data = Data, state_space = FALSE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, start = start,
-      prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = FALSE,
+  DD_(x = x, Data = Data, state_space = FALSE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, 
+      MW = MW, start = start, prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = FALSE,
       fix_tau = TRUE, integrate = FALSE, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = list(), ...)
 }
@@ -122,21 +126,21 @@ class(DD_TMB) <- "Assess"
 
 #' @rdname DD_TMB
 #' @export
-DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1",
-                  start = NULL, prior = list(), fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = NULL,
+DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", MW = FALSE,
+                  start = NULL, prior = list(), fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = list(),
                   integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                   control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   condition <- match.arg(condition)
-  DD_(x = x, Data = Data, state_space = TRUE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, start = start,
-      prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = fix_sd,
+  DD_(x = x, Data = Data, state_space = TRUE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, 
+      MW = MW, start = start, prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = fix_sd,
       fix_tau = fix_tau, integrate = integrate, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = inner.control, ...)
 }
 class(DD_SS) <- "Assess"
 
 #' @useDynLib SAMtool
-DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", start = NULL,
-                prior = list(), fix_h = TRUE, fix_sd = TRUE, fix_tau = TRUE, dep = 1, LWT = NULL,
+DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), 
+                rescale = "mean1", MW = FALSE, start = NULL, prior = list(), fix_h = TRUE, fix_sd = TRUE, fix_tau = TRUE, dep = 1, LWT = list(),
                 integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
@@ -159,17 +163,18 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   }
   Year <- Data@Year[yind]
   C_hist <- Data@Cat[x, yind]
-
+  
+  ny <- length(C_hist)
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
-  I_hist <- do.call(cbind, lapply(Ind, getElement, "I_hist"))
-  I_sd <- do.call(cbind, lapply(Ind, getElement, "I_sd"))
-  I_units <- do.call(c, lapply(Ind, getElement, "I_units"))
+  I_hist <- vapply(Ind, getElement, numeric(ny), "I_hist")
+  I_sd <- vapply(Ind, getElement, numeric(ny), "I_sd")
+  I_units <- vapply(Ind, getElement, numeric(1), "I_units")
 
   if(is.null(I_hist)) stop("No indices found.", call. = FALSE)
   nsurvey <- ncol(I_hist)
 
   if(condition == "effort") {
-    if(nsurvey > 1) stop("Only one index time series can be used when conditioning on effort.", call. = FALSE)
+    if(nsurvey > 1) message("Only one index time series can be used when conditioning on effort.", call. = FALSE)
     E_hist <- C_hist/I_hist[, 1]
     if(any(is.na(E_hist))) stop("Missing values in catch and index in Data object.")
     E_rescale <- 1/mean(E_hist)
@@ -178,10 +183,22 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     E_hist <- rep(1, length(yind))
   }
   
+  if(MW) {
+    if(!is.null(Data@Misc[[x]]$MW)) {
+      MW_hist <- Data@Misc[[x]]$MW
+    } else {
+      MW_hist <- apply(Data@CAL[x, , ], 1, function(xx) {
+        weighted.mean(Data@wla[x]*Data@CAL_mids^Data@wlb[x], xx, na.rm = TRUE)
+      })
+    }
+    MW_hist[MW_hist <= 0] <- NA_real_
+  } else {
+    MW_hist <- rep(NA_real_, ny)
+  }
+  
   # Generate priors
   prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
 
-  ny <- length(C_hist)
   if(!is.null(start$k)) {
     k <- start$k
   } else {
@@ -203,14 +220,20 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
 
   if(rescale == "mean1") rescale <- 1/mean(C_hist)
   if(dep <= 0 || dep > 1) stop("Initial depletion (dep) must be between > 0 and <= 1.")
-  if(is.null(LWT)) LWT <- rep(1, nsurvey)
-  if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  if(!is.list(LWT)) {
+    if(!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+    LWT <- list(Index = LWT)
+    LWT$MW <- 1
+  } else {
+    if(is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
+    if(is.null(LWT$MW)) LWT$MW <- 1 
+  }
 
-  fix_sigma <- condition == "effort" | nsurvey > 1 | fix_sd
-  fix_omega <- condition == "catch" | fix_sd
+  fix_sigma <- condition == "effort" || nsurvey > 1 || MW || fix_sd
+  fix_omega <- condition == "catch" || MW || fix_sd
   data <- list(model = "DD", Alpha = Alpha, Rho = Rho, ny = ny, k = k,
                wk = wk, C_hist = C_hist, dep = dep, rescale = rescale, I_hist = I_hist, I_units = I_units, I_sd = I_sd,
-               E_hist = E_hist, SR_type = SR, condition = condition, I_lambda = LWT,
+               E_hist = E_hist, MW_hist = MW_hist, SR_type = SR, condition = condition, LWT = c(LWT$Index, LWT$MW),
                nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), state_space = as.integer(state_space),
                use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k)
@@ -230,7 +253,8 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     if(!is.null(start$q_effort) && is.numeric(start$q_effort)) params$log_q_effort <- log(start$q_effort[1])
     if(!is.null(start$U_equilibrium) && is.numeric(start$U_equilibrium)) params$U_equilibrium <- start$U_equililbrium
     if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega[1])
-    if(!is.null(start$sigma) && is.numeric(start$sigma)) params$log_sigma <- log(start$sigma[1])
+    if(!is.null(start[["sigma"]]) && is.numeric(start[["sigma"]])) params$log_sigma <- log(start[["sigma"]])
+    if(!is.null(start[["sigma_W"]]) && is.numeric(start[["sigma_W"]])) params$log_sigma_W <- log(start[["sigma_W"]])
     if(!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau[1])
   }
   if(is.null(params$R0x)) {
@@ -251,7 +275,8 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   if(is.null(params$log_omega)) {
     params$log_omega <- max(0.05, sdconv(1, Data@CV_Cat[x]), na.rm = TRUE) %>% log()
   }
-  if(is.null(params$log_sigma)) params$log_sigma <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE) %>% log()
+  if(is.null(params[["log_sigma"]])) params$log_sigma <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE) %>% log()
+  if(is.null(params[["log_sigma_W"]])) params$log_sigma_W <- log(0.1)
   if(is.null(params$log_tau)) {
     params$log_tau <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x]) %>% log()
   }
@@ -268,6 +293,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   if(dep == 1) map$U_equilibrium <- factor(NA)
   if(fix_omega) map$log_omega <- factor(NA)
   if(fix_sigma) map$log_sigma <- factor(NA)
+  map$log_sigma_W <- factor(NA)
   if(fix_tau) map$log_tau <- factor(NA)
   if(!state_space) map$log_rec_dev <- factor(rep(NA, ny - k))
 
@@ -311,9 +337,10 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
                     Catch = structure(report$Cpred, names = Year),
                     Index = structure(report$Ipred, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
                     NLL = structure(c(nll_report, report$nll_comp, report$prior, report$penalty),
-                                    names = c("Total", NLL_name, "Dev", "Prior", "Penalty")),
+                                    names = c("Total", NLL_name, "MW", "Dev", "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
+  if(!MW) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "MW"]
 
   if(state_space) {
     YearDev <- seq(Year[1] + k, max(Year))

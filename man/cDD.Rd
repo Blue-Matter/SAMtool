@@ -11,11 +11,12 @@ cDD(
   AddInd = "B",
   SR = c("BH", "Ricker"),
   rescale = "mean1",
+  MW = FALSE,
   start = NULL,
   prior = list(),
   fix_h = TRUE,
   dep = 1,
-  LWT = NULL,
+  LWT = list(),
   n_itF = 5L,
   silent = TRUE,
   opt_hess = FALSE,
@@ -30,13 +31,14 @@ cDD_SS(
   AddInd = "B",
   SR = c("BH", "Ricker"),
   rescale = "mean1",
+  MW = FALSE,
   start = NULL,
   prior = list(),
   fix_h = TRUE,
   fix_sigma = FALSE,
   fix_tau = TRUE,
   dep = 1,
-  LWT = NULL,
+  LWT = list(),
   n_itF = 5L,
   integrate = FALSE,
   silent = TRUE,
@@ -63,6 +65,9 @@ Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd.}
 can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
 Output is re-converted back to original units.}
 
+\item{MW}{Logical, whether to fit to mean weight. In closed-loop simulation, mean weight will be grabbed from \code{Data@Misc[[x]]$MW},
+otherwise calculated from \code{Data@CAL}.}
+
 \item{start}{Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.}
 
 \item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
@@ -76,7 +81,8 @@ See vignette for full description.}
 to estimate the equilibrium fishing mortality corresponding to the initial depletion. Due to this tight prior, this F
 should not be considered to be an independent model parameter.}
 
-\item{LWT}{A vector of likelihood weights for each survey.}
+\item{LWT}{A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
+for \code{LWT$MW} a numeric.}
 
 \item{n_itF}{Integer, the number of iterations to solve F conditional on the observed catch.}
 
@@ -127,6 +133,7 @@ For \code{start} (optional), a named list of starting values of estimates can be
 \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@sigmaR[x].
 \item \code{sigma} Lognormal SD of the index (observation error). By default, Data@CV_Ind[x]. Not
 used if multiple indices are used.
+\item \code{sigma_W} Lognormal SD of the mean weight (observation error). By default, 0.1.
 }
 
 Multiple indices are supported in the model. Data@Ind, Data@VInd, and Data@SpInd are all assumed to be biomass-based.

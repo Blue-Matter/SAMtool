@@ -20,9 +20,10 @@ Type DD(objective_function<Type> *obj) {
   DATA_IVECTOR(I_units);
   DATA_MATRIX(I_sd);
   DATA_VECTOR(E_hist);
+  DATA_VECTOR(MW_hist);
   DATA_STRING(SR_type);
   DATA_STRING(condition);
-  DATA_VECTOR(I_lambda);
+  DATA_VECTOR(LWT);
   DATA_INTEGER(nsurvey);
   DATA_INTEGER(fix_sigma);
   DATA_INTEGER(state_space);
@@ -36,6 +37,7 @@ Type DD(objective_function<Type> *obj) {
   PARAMETER(U_equilibrium);
   PARAMETER(log_omega);
   PARAMETER(log_sigma);
+  PARAMETER(log_sigma_W);
   PARAMETER(log_tau);
   PARAMETER_VECTOR(log_rec_dev);
 
@@ -49,6 +51,7 @@ Type DD(objective_function<Type> *obj) {
   Type q_effort = exp(log_q_effort);
   Type omega = exp(log_omega);
   Type sigma = exp(log_sigma);
+  Type sigma_W = exp(log_sigma_W);
   Type tau = exp(log_tau);
 
   //--DECLARING DERIVED VALUES
@@ -83,7 +86,8 @@ Type DD(objective_function<Type> *obj) {
   vector<Type> Surv(ny);
   vector<Type> Cpred(ny);
   matrix<Type> Ipred(ny,nsurvey);
-  vector<Type> Sp(ny);
+  vector<Type> MWpred(ny);
+  //vector<Type> Sp(ny);
   vector<Type> U(ny);
 
   //--INITIALIZE
@@ -116,7 +120,8 @@ Type DD(objective_function<Type> *obj) {
     }
     Surv(tt) = S0 * (1 - U(tt));
     Cpred(tt) = U(tt) * B(tt);
-    Sp(tt) = B(tt) - Cpred(tt);
+    MWpred(tt) = B(tt)/N(tt);
+    //Sp(tt) = B(tt) - Cpred(tt);
 
     if(SR_type == "BH") {
       R(tt+k) = BH_SR(B(tt), h, R0, B0);
@@ -138,7 +143,7 @@ Type DD(objective_function<Type> *obj) {
   vector<Type> q(nsurvey);
   if(condition == "catch") q = calc_q(I_hist, B, N, Ipred, nsurvey, I_units, ny);
 
-  vector<Type> nll_comp(nsurvey + 1);
+  vector<Type> nll_comp(nsurvey + 2);
   nll_comp.setZero();
 
   for(int tt=0; tt<ny; tt++){
@@ -147,7 +152,7 @@ Type DD(objective_function<Type> *obj) {
     } else {
       for(int sur=0;sur<nsurvey;sur++) {
         for(int tt=0;tt<ny;tt++) {
-          if(I_lambda(sur) > 0 && !R_IsNA(asDouble(I_hist(tt,sur)))) {
+          if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(tt,sur)))) {
             if(fix_sigma) {
               nll_comp(sur) -= dnorm_(log(I_hist(tt,sur)), log(Ipred(tt,sur)), I_sd(tt,sur), true);
             } else {
@@ -155,10 +160,13 @@ Type DD(objective_function<Type> *obj) {
             }
           }
         }
-        nll_comp(sur) *= I_lambda(sur);
+        nll_comp(sur) *= LWT(sur);
       }
     }
-    if(state_space && tt + k < ny) nll_comp(nsurvey) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
+    if(LWT(nsurvey) > 0 && !R_IsNA(asDouble(MW_hist(tt)))) {
+      nll_comp(nsurvey) -= LWT(nsurvey) * dnorm(log(MW_hist(tt)), log(MWpred(tt)), sigma_W, true);
+    }
+    if(state_space && tt + k < ny) nll_comp(nsurvey+1) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
   }
 
   //Summing individual nll and penalties
@@ -174,6 +182,10 @@ Type DD(objective_function<Type> *obj) {
   if(CppAD::Variable(log_omega)) ADREPORT(omega);
   if(CppAD::Variable(log_sigma)) ADREPORT(sigma);
   if(CppAD::Variable(log_tau)) ADREPORT(tau);
+  if(MW_hist.sum() > 0) {
+    ADREPORT(sigma_W);
+    REPORT(sigma_W);
+  }
   if(condition == "effort") REPORT(omega);
   if(!fix_sigma) REPORT(sigma);
   if(state_space) REPORT(tau);
@@ -190,6 +202,7 @@ Type DD(objective_function<Type> *obj) {
   if(condition == "effort") REPORT(q_effort);
   REPORT(B);
   REPORT(N);
+  REPORT(MWpred);
   REPORT(R);
   REPORT(log_rec_dev);
   REPORT(Rec_dev);

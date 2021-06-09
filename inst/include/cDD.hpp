@@ -20,9 +20,10 @@ Type cDD(objective_function<Type> *obj) {
   DATA_MATRIX(I_hist);
   DATA_IVECTOR(I_units);
   DATA_MATRIX(I_sd);
+  DATA_VECTOR(MW_hist);
   DATA_STRING(SR_type);
   DATA_INTEGER(nitF);
-  DATA_VECTOR(I_lambda);
+  DATA_VECTOR(LWT);
   DATA_INTEGER(nsurvey);
   DATA_INTEGER(fix_sigma);
   DATA_INTEGER(state_space);
@@ -34,6 +35,7 @@ Type cDD(objective_function<Type> *obj) {
   PARAMETER(log_M);
   PARAMETER(F_equilibrium);
   PARAMETER(log_sigma);
+  PARAMETER(log_sigma_W);
   PARAMETER(log_tau);
   PARAMETER_VECTOR(log_rec_dev);
 
@@ -45,6 +47,7 @@ Type cDD(objective_function<Type> *obj) {
   Type R0 = exp(R0x)/rescale;
   Type M = exp(log_M);
   Type sigma = exp(log_sigma);
+  Type sigma_W = exp(log_sigma_W);
   Type tau = exp(log_tau);
   int SR_type2 = SR_type == "BH";
 
@@ -78,6 +81,7 @@ Type cDD(objective_function<Type> *obj) {
   vector<Type> Z(ny);
   vector<Type> Cpred(ny);
   matrix<Type> Ipred(ny,nsurvey);
+  vector<Type> MWpred(ny);
 
   vector<Type> BPRinf(ny);
   vector<Type> Rec_dev(ny-k);
@@ -94,7 +98,7 @@ Type cDD(objective_function<Type> *obj) {
 
   Type Ceqpred = F_equilibrium * B(0);
 
-  Type penalty = 0; // Pentalty to likelihood for high F > max_F
+  Type penalty = 0; // Penalty to likelihood for high F > max_F
   Type prior = -dnorm_(log(B(0)/B0), log(dep), Type(0.01), true); // Penalty for initial depletion to get corresponding F
 
   for(int tt=0; tt<ny; tt++) {
@@ -102,6 +106,7 @@ Type cDD(objective_function<Type> *obj) {
     F(tt) = cDD_F(F_start, C_hist(tt), M, Winf, Kappa, wk, N, B, Cpred, BPRinf, Binf, R, Ninf,
       CppAD::Integer(CppAD::CondExpLe(C_hist(tt), Type(1e-8), Type(1), Type(nitF))), tt);
     Z(tt) = F(tt) + M;
+    MWpred(tt) = B(tt)/N(tt);
 
     N(tt+1) = Ninf(tt) + (N(tt) - Ninf(tt)) * exp(-Z(tt));
     B(tt+1) = Binf(tt);
@@ -124,12 +129,12 @@ Type cDD(objective_function<Type> *obj) {
 
   // Objective function
   //creates storage for jnll and sets value to 0
-  vector<Type> nll_comp(nsurvey+1);
+  vector<Type> nll_comp(nsurvey+2);
   nll_comp.setZero();
 
   for(int sur=0;sur<nsurvey;sur++) {
     for(int tt=0;tt<ny;tt++) {
-      if(I_lambda(sur) > 0 && !R_IsNA(asDouble(I_hist(tt,sur)))) {
+      if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(tt,sur)))) {
         if(fix_sigma) {
           nll_comp(sur) -= dnorm_(log(I_hist(tt,sur)), log(Ipred(tt,sur)), I_sd(tt,sur), true);
         } else {
@@ -137,10 +142,17 @@ Type cDD(objective_function<Type> *obj) {
         }
       }
     }
-    nll_comp(sur) *= I_lambda(sur);
+    nll_comp(sur) *= LWT(sur);
   }
+  
+  for(int tt=0;tt<ny;tt++) {
+    if(LWT(nsurvey) > 0 && !R_IsNA(asDouble(MW_hist(tt)))) {
+      nll_comp(nsurvey) -= dnorm(log(MW_hist(tt)), log(MWpred(tt)), sigma_W, true);
+    }
+  }
+  nll_comp(nsurvey) *= LWT(nsurvey);
   if(state_space) {
-    for(int tt=0;tt<log_rec_dev.size();tt++) nll_comp(nsurvey) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
+    for(int tt=0;tt<log_rec_dev.size();tt++) nll_comp(nsurvey+1) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
   }
 
   //Summing individual jnll and penalties
@@ -154,6 +166,10 @@ Type cDD(objective_function<Type> *obj) {
   ADREPORT(q);
   if(CppAD::Variable(log_sigma)) ADREPORT(sigma);
   if(CppAD::Variable(log_tau)) ADREPORT(tau);
+  if(MW_hist.sum() > 0) {
+    ADREPORT(sigma_W);
+    REPORT(sigma_W);
+  }
   if(!fix_sigma) REPORT(sigma);
   if(state_space) REPORT(tau);
   REPORT(nll);
@@ -164,6 +180,7 @@ Type cDD(objective_function<Type> *obj) {
   REPORT(Cpred);
   REPORT(Ceqpred);
   REPORT(Ipred);
+  REPORT(MWpred);
   REPORT(q);
   REPORT(B);
   REPORT(N);

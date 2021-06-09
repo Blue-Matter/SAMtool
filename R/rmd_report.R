@@ -112,6 +112,13 @@ rmd_data_timeseries <- function(type, header = NULL, is_matrix = FALSE, nsets = 
   return(ans)
 }
 
+rmd_data_MW <- function(header = NULL) {
+  ans <- c("```{r, fig.cap=\"Mean weight time series.\"}",
+           "plot_timeseries(info$Year, info$data$MW_hist, label = \"Mean weight\")",
+           "```\n")
+  if(!is.null(header)) ans <- c(header, ans)
+  return(ans)
+}
 
 rmd_data_age_comps <- function(type = c("bubble", "annual"), ages = "1:info$data$n_age - 1", annual_yscale = "\"proportions\"",
                                annual_ylab = "\"Frequency\"")  {
@@ -356,6 +363,19 @@ rmd_assess_fit_series <- function(par = "Index", fig.cap = "index", label = par,
 
 }
 
+rmd_assess_fit_MW <- function() {
+  c("```{r, fig.cap=\"Observed (black) and predicted (red) mean weight.\"}",
+    "plot_timeseries(info$Year, info$data$MW_hist, TMB_report$MWpred, label = \"Mean weight\")",
+    "```\n",
+    "```{r, fig.cap=\"Mean weight residuals in log-space.\"}",
+    "plot_residuals(info$Year, log(info$data$MW_hist/TMB_report$MWpred),",
+    "               label = \"Mean weight log-residuals\")",
+    "```\n",
+    "```{r, fig.cap=\"QQ-plot of log-residuals of mean weight\"}",
+    "qqnorm(log(info$data$MW_hist/TMB_report$MWpred), main = \"\")",
+    "qqline(log(info$data$MW_hist/TMB_report$MWpred))",
+    "```\n")
+}
 
 rmd_assess_timeseries <- function(par, fig.cap, label, header = NULL, conv_check = FALSE, one_line = FALSE) {
   if(conv_check) {

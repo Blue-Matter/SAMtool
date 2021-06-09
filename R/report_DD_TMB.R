@@ -33,6 +33,11 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
     Description <- c(Description, "Natural mortality")
     rownam <- c(rownam, "M")
   }
+  if(any(info$data$MW_hist > 0, na.rm = TRUE) && "log_sigma_W" %in% names(obj$env$map)) {
+    Value <- c(Value, TMB_report$sigma_W)
+    Description <- c(Description, "Mean weight SD")
+    rownam <- c(rownam, "sigma_W")
+  }
   input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
   rownames(input_parameters) <- rownam
 
@@ -71,8 +76,14 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
                           fig.cap = "Assumed knife-edge maturity at age corresponding to length of 50% maturity."))
 
   # Data section
+  if(any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
+    data_MW <- rmd_data_MW()
+  } else {
+    data_MW <- ""
+  }
   data_section <- c(rmd_data_timeseries("Catch", header = "## Data\n"),
-                    rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)))
+                    rmd_data_timeseries("Index", is_matrix = is.matrix(Assessment@Obs_Index), nsets = ncol(Assessment@Obs_Index)),
+                    data_MW)
 
   # Assessment
   #### Pars and Fit
@@ -85,7 +96,12 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
   } else {
     assess_data <- rmd_assess_fit_series(nsets = ncol(Assessment@Index))
   }
-  assess_fit <- c(assess_all, assess_data)
+  if(any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
+    fit_MW <- rmd_assess_fit_MW()
+  } else {
+    fit_MW <- ""
+  }
+  assess_fit <- c(assess_all, assess_data, fit_MW)
 
   if(state_space) {
     assess_fit2 <- c(rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type),
@@ -197,6 +213,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
     info$data$E_hist <- info$data$E_hist[1:ny_ret]
     info$data$I_hist <- info$data$I_hist[1:ny_ret, , drop = FALSE]
     info$data$I_sd <- info$data$I_sd[1:ny_ret, , drop = FALSE]
+    info$data$MW_hist <- info$data$MW_hist[1:ny_ret]
 
     if(state_space) info$params$log_rec_dev <- rep(0, ny_ret - k)
 
