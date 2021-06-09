@@ -47,7 +47,7 @@ make_OM <- function(x, Hist) {
   Fleet@Spat_targ <- c(1, 1)
   Fleet@MPA <- FALSE
   
-  OM <- new("OM", Stock = Stock, Fleet = Fleet, Obs = MSEtool::Generic_Obs, Imp = MSEtool::Perfect_Imp)
+  OM <- new("OM", Stock = Stock, Fleet = Fleet, Obs = MSEtool::Precise_Unbiased, Imp = MSEtool::Perfect_Imp)
   OM@nsim <- 2
   OM@proyears <- 5
   OM@interval <- 2
@@ -61,92 +61,123 @@ lapply2_fn <- function(x, i = 1, data_master, Hist) {
   OM <- make_OM(x, Hist)
   RCMdata <- new("RCMdata")
   
-  args <- list()
-  
-  if(data_master$cond[i] == "catch") { # Condition on catch
-    args$condition <- "catch2"
+  if(data_master$cond[i] == "catch2") { # Condition on catch
+    condition <- "catch2"
     RCMdata@Chist <- Hist@Data@Cat[x, ]
+    OM@R0 <- 2 * OM@R0
   } else {
-    if(data_master$Catch_with_effort[i]) { # Conditioned on effort, but may include some catches
+    condition <- "effort"
+    RCMdata@Ehist <- Hist@Data@Cat[x, ]/Hist@Data@Ind[x, ] #Hist@TSdata$Find[x, ]
+    if(data_master$cond[i] == "effort_with_catch") { # Conditioned on effort, but may include some catches
       RCMdata@Chist <- Hist@Data@Cat[x, ]
       #RCMdata@Chist[1:40, ] <- NA
     }
-    args$condition <- "effort"
-    RCMdata@Ehist <- Hist@TSdata$Find[x, ]
   }
   
   if(data_master$Index[i]) { # Only recent ten years index
     RCMdata@Index <- Hist@Data@Ind[1, ]
     #RCMdata@Index[c(1:20)] <- NA
     RCMdata@I_sd <- rep(Hist@SampPars$Obs$Isd[x], length(RCMdata@Index))
-    args$s_selectivity <- "B"
   }
   
-  if(data_master$ML[i]) { # Only recent mean length
+  if(data_master$size[i] == "ML") { # Only recent mean length
     RCMdata@MS <- Hist@Data@ML[x, ]
     #args$data$MS[c(1:40)] <- NA
     RCMdata@MS_type <- "length"
-  } else if(data_master$MW[i]) {
-    WAL <- Hist@Data@wla[x] * Hist@Data@CAL_mids^Hist@Data@wlb[x]
-    
-    MW <- colSums(t(Hist@Data@CAL[x, , ]) * WAL) / rowSums(Hist@Data@CAL[x, , ])
-    RCMdata@MS <- MW
+  } else if(data_master$size[i] == "MW") {
+    RCMdata@MS <- apply(Hist@Data@CAL[x, , ], 1, function(xx) {
+      weighted.mean(x = Hist@Data@wla[x] * Hist@Data@CAL_mids ^ Hist@Data@wlb[x], w = xx, na.rm = TRUE)
+    })
+    #args$data$MS[c(1:40)] <- NA
     RCMdata@MS_type <- "weight"
-  } else if(data_master$CAA[i]) {
+  } else if(data_master$size[i] == "CAA") {
     RCMdata@CAA <- Hist@Data@CAA[x, , ]
+    RCMdata@CAA_ESS <- rep(Hist@Data@Obs$CAA_ESS[x], length(Hist@Data@Year)) %>% pmin(50)
     #args$data$CAA[1:35, ] <- NA
-  } else if(data_master$CAL[i]) {
+  } else if(data_master$size[i] == "CAL") {
     RCMdata@CAL <- Hist@Data@CAL[x, , ]
     #args$data$CAL[1:35, ] <- NA
     RCMdata@length_bin <- Hist@Data@CAL_mids
+    RCMdata@CAL_ESS <- rep(Hist@Data@Obs$CAL_ESS[x], length(Hist@Data@Year)) %>% pmin(50)
   }
-  args$mean_fit <- TRUE
   
-  args$OM <- OM
-  args$data <- RCMdata
-  args$selectivity <- ifelse(mean(Hist@SampPars$Fleet$Vmaxlen_y[x, ]) < 1, "dome", "logistic")
+  selectivity <- ifelse(mean(Hist@SampPars$Fleet$Vmaxlen_y[x, ]) < 1, 0, -1)
+  s_selectivity <- -4
   
-  SRA <- do.call(RCM, args)
+  do_check <- check_RCMdata(RCMdata, OM, condition)
   
-  return(c(R0 = SRA@mean_fit$report$R0, dep = SRA@OM@cpars$D %>% mean()))
+  out <- SAMtool:::RCM_est(x = 1, RCMdata = do_check$RCMdata, selectivity = selectivity,
+                           s_selectivity = s_selectivity, LWT = SAMtool:::make_LWT(list(), 1, 1),
+                           comp_like = "multinomial", prior = SAMtool:::make_prior(list(), 1), 
+                           StockPars = do_check$StockPars, FleetPars = do_check$FleetPars,
+                           ObsPars = do_check$ObsPars)
+  return(c(R0 = out$report$R0, dep = out$report$E[length(out$report$E)-1]/out$report$E0_SR, conv = as.numeric(out$SD$pdHess)))
 }
 
 lapply_fn <- function(x, data_master, Hist) {
-  rr <- try(lapply(1:nrow(data_master), function(xx) lapply2_fn(x = x, i = xx, data_master = data_master, Hist = Hist)),
+  rr <- try(sapply(1:nrow(data_master), function(xx) lapply2_fn(x = x, i = xx, data_master = data_master, Hist = Hist)),
             silent = TRUE)
   return(rr)
 }
 
 
-
-
-
 # Run simulation
-OM <- testOM
+OM <- testOM %>% Replace(from = Precise_Unbiased)
+OM@Prob_staying <- OM@Frac_area_1 <- OM@Size_area_1 <- rep(0.5, 2)
+
 OM@nsim <- 100
 Hist <- runMSE(OM, Hist = TRUE)
 
-bool <- c(TRUE, FALSE)
-
 #### Function to run RCM in parallel (with list)
-data_master <- expand.grid(cond = c("catch2", "effort"), Catch_with_effort = bool,
-                           Index = bool, ML = bool, MW = bool, CAL = bool, CAA = bool)
-data_master$MW[data_master$ML] <- FALSE
-data_master$CAA[data_master$ML | data_master$MW] <- data_master$CAL[data_master$ML | data_master$MW] <- FALSE
+data_master <- expand.grid(cond = c("catch2", "effort", "effort_with_catch"),
+                           Index = c(TRUE, FALSE), size = c("ML", "CAA", "CAL", "MW", "none")) %>%
+  dplyr::filter(!(!Index & size == "none"))
 
-#data_master <- data_master[1:3, ]
-
-setup(8)
+setup(12)
 sfExportAll()
 sfLibrary(dplyr)
 
 #### Run RCM
 res <- sfClusterApplyLB(1:OM@nsim, lapply_fn, data_master = data_master, Hist = Hist)
-#res <- lapply(1:2, lapply_fn, data_master = data_master, Hist = Hist)
+sfStop()
+#res <- suppressMessages(lapply(1, lapply_fn, data_master = data_master, Hist = Hist))
+saveRDS(res, file = "tests/sim_RCM.rds")
 
-saveRDS(res, file = "sim_RCM.rds")
+res <- readRDS("tests/sim_RCM.rds")
+#
 
-#res <- lapply(5, lapply_fn, data_master = data_master, Hist = Hist, OM = OM)
+out <- lapply(1:nrow(data_master), function(x) {
+  res_x <- simplify2array(res)[, x, ]
+  conv <- res_x[3, ] == 1
+  
+  R0 <- Hist@SampPars$Stock$R0[conv]
+  D <- Hist@SampPars$Stock$D[conv]
+  
+  dev_R0 <- res_x[1, conv]/Hist@SampPars$Stock$R0[conv] - 1
+  dev_D <- res_x[2, conv]/Hist@SampPars$Stock$D[conv] - 1
+  
+  bias_R0 <- mean(dev_R0)
+  bias_D <- mean(dev_D)
+  
+  rmse_R0 <- sqrt(mean(dev_R0^2))
+  rmse_D <- sqrt(mean(dev_D^2))
+  
+  data.frame(Value = c(bias_R0, bias_D, rmse_R0, rmse_D),
+             Var = c("R0", "D", "R0", "D"),
+             Type = c("bias", "bias", "rmse", "rmse"),
+             combo = x, 
+             no_catch = ifelse(rmse_R0 <= 1e-8, TRUE, FALSE))
+}) %>% bind_rows()
+
+out %>% #dplyr::filter(abs(Value) <= 1e5)
+  ggplot(aes(combo, Value, shape = no_catch)) + geom_point() + 
+  facet_grid(Type ~ Var, scales = "free_y") + theme_bw() +
+  scale_shape_manual(values = c('TRUE' = 4, 'FALSE' = 16)) +
+  coord_cartesian(ylim = c(-2, 2))
+#
+
+
+
 #
 ## Test MW
 #res <- lapply_fn(9, data_master = data_master, Hist = Hist, OM = OM)

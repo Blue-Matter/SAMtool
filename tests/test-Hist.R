@@ -1,39 +1,69 @@
 
 
 # Test that default configurations are very, very robust when running Assessments.
-library(testthat)
 library(SAMtool)
-library(DLMextra)
+OM <- testOM
+OM@nsim <- 48
+Hist <- runMSE(OM, Hist = TRUE)
 
-OMs <- avail("OM")
+assess <- avail("Assess")
 
-# Make hist objects once
-#setup(12)
-#sfLibrary(DLMextra)
-#Hist <- sfClusterApplyLB(OMs, function(x) runMSE(get(x), Hist = TRUE))
-#sfStop()
-#Data_from_Hist <- lapply(Hist, getElement, "Data")
-#save(Data_from_Hist, file = "tests_results/Data_from_Hist.RData")
+MSEtool::setup(10)
+sfExportAll()
 
-# Run test
-context("Run Assess models from Hist object")
-
-load("tests_results/Data_from_Hist.RData")
-
-# Other OMs need to be evaluated separately
-for(i in 1:length(Data_from_Hist)) {
-
-  #test_that(OMs[i], {
-    message(paste("OM:", OMs[i], "\n"))
-
-    Data <- Data_from_Hist[[i]]
-
-    # Main call: change desired Assess model as necessary here.
-    res <- prelim_AM(Data, SCA, 12)
-
-  #})
-
+# Generic run all assessments in default
+message("Default assessment settings")
+for(i in 1:length(assess)) {
+  message(assess[i])
+  run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data)
+  conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+  message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
 }
 
-sfStop()
+# Run with depletion
+message("\n\nAssessment dep 0.5")
+do_dep <- sapply(assess, function(x) any(grepl("dep", names(formals(x)))))
+for(i in 1:length(assess)) {
+  if(do_dep[i]) {
+    message(assess[i])
+    run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data, dep = 0.5, start = list(dep = 0.5))
+    conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+    message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
+  }
+}
+
+# Run with Ricker
+message("\n\nDo Ricker")
+do_Ricker <- sapply(assess, function(x) any(grepl("SR", names(formals(x)))))
+for(i in 1:length(assess)) {
+  if(do_Ricker[i]) {
+    message(assess[i])
+    run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data, SR = "Ricker")
+    conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+    message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
+  }
+}
+
+# Shortened Index
+message("\n\nShorten index")
+Hist@Data@Ind[, 1:30] <- NA
+for(i in 1:length(assess)) {
+  message(assess[i])
+  run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data)
+  conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+  message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
+}
+
+# Zero catch scenario
+
+# SCA data weights
+
+#  fix/est pars
+
+# retro
+
+# projections
+
+# profile
+
 

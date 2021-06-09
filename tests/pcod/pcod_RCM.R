@@ -134,14 +134,50 @@ out <- RCM(OM, RCM_data,
            map_log_early_rec_dev = rep(1, OM@maxage), # Estimate R-init
            prior = prior)
 
+#### LRP
 matplot(1956:2021, t(out@SSB/sapply(out@Misc, function(x) x$E[1956:2021 == 2000])), typ = 'l', col = 1, lty = 1,
-        xlab = "Year", ylab = "SSB/LRP", ylim = c(0, 7))
+        xlab = "Year", ylab = expression(SSB/LRP), ylim = c(0, 7))
 abline(h = 1, lty = 3)
 abline(h = 0, col = "grey")
+
+#### USR
+matplot(1956:2021, t(out@SSB/sapply(out@Misc, function(x) mean(x$E[1956:2021 %in% 1956:2004]))), 
+        typ = 'l', col = 1, lty = 1,
+        xlab = "Year", ylab = expression(SSB/USR), ylim = c(0, 2.5))
+abline(h = 1, lty = 3)
+abline(h = 0, col = "grey")
+
+#### SSB
 matplot(1956:2021, t(out@SSB)/1e3, typ = 'l', col = 1, lty = 1,
         xlab = "Year", ylab = "SSB (mt)", ylim = c(0, 1e2))
 abline(h = 0, col = "grey")
-LPR_ind <- 1956:2021 == 2020
+
+#### F
+matplot(1956:2020, t(out@OM@cpars$Find), typ = 'l', col = 1, lty = 1,
+        xlab = "Year", ylab = "Fishing mortality",  ylim = c(0, 0.5))
+abline(h = 0, col = "grey")
+
+
+
+
+# Alternative OM with age-3 maturity and selectivity instead.
+out_age3 <- local({
+  pcod$OM@cpars$Mat_age[, 2, ] <- 0
+  mat_ogive_age3 <- pcod$OM@cpars$Mat_age[1, , 1]
+  RCM(OM = pcod$OM, data = pcod$data, 
+      condition = "catch", mean_fit = TRUE,
+      selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
+      vul_par = matrix(mat_ogive_age3, length(mat_ogive_age3), 1),
+      map_vul_par = matrix(NA, length(mat_ogive_age3), 1),
+      map_log_early_rec_dev = rep(1, pcod$OM@maxage),
+      prior = pcod$prior)
+})
+
+compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 maturity")),
+            s_name = colnames(pcod$data@Index))
+
+
+
 
 saveRDS(out, file = "tests/pcod/pcod-RCM2.rds")
 

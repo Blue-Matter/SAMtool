@@ -300,7 +300,7 @@ compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 ma
 } 
 }
 \seealso{
-\link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM}
+\link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod}
 }
 \author{
 Q. Huynh
