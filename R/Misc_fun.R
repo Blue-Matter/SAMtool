@@ -120,7 +120,7 @@ get_sdreport <- function(obj, getReportCovariance = FALSE) {
   par.fixed <- obj$env$last.par.best
   if(is.null(obj$env$random)) {
     h <- obj$he(par.fixed)
-    if(any(is.na(h)) || det(h) <= 0) {
+    if(any(is.na(h)) || any(is.infinite(h)) || det(h) <= 0) {
       h <- NULL
     } else {
       res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
