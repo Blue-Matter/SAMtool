@@ -83,7 +83,7 @@ Type DD(objective_function<Type> *obj) {
   vector<Type> B(ny_p);
   vector<Type> N(ny_p);
   vector<Type> R(ny_k);
-  vector<Type> Rec_dev(ny - k);
+  vector<Type> Rec_dev(ny);
 
   vector<Type> Surv(ny);
   vector<Type> Cpred(ny);
@@ -107,6 +107,10 @@ Type DD(objective_function<Type> *obj) {
   B(0) = Req * SprEq;
   N(0) = Req/(1 - Seq);
   for(int tt=0;tt<k;tt++) R(tt) = Req;
+  if(state_space) {
+    Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
+    R(0) *= Rec_dev(0);
+  }
   
   Type Ceqpred = F_equilibrium * B(0) * (1 - Seq)/(F_equilibrium + M);
 
@@ -123,16 +127,15 @@ Type DD(objective_function<Type> *obj) {
     Surv(tt) = S0 * exp(-F(tt));
     Cpred(tt) = F(tt) * B(tt) * (1 - Surv(tt))/(F(tt) + M);
     MWpred(tt) = B(tt)/N(tt);
-    //Sp(tt) = B(tt) - Cpred(tt);
 
     if(SR_type == "BH") {
       R(tt+k) = BH_SR(B(tt), h, R0, B0);
     } else {
       R(tt+k) = Ricker_SR(B(tt), h, R0, B0);
     }
-    if(state_space && tt + k < ny) {
-      Rec_dev(tt) = exp(log_rec_dev(tt) - 0.5 * tau * tau);
-      R(tt + k) *= Rec_dev(tt);
+    if(state_space && tt<ny-1) {
+      Rec_dev(tt+1) = exp(log_rec_dev(tt+1) - 0.5 * tau * tau);
+      R(tt+1) *= Rec_dev(tt+1);
     }
 
     B(tt+1) = Surv(tt) * (Alpha * N(tt) + Rho * B(tt)) + wk * R(tt+1);
@@ -140,8 +143,6 @@ Type DD(objective_function<Type> *obj) {
   }
 
   //--ARGUMENTS FOR NLL
-  // Objective function
-  //creates storage for nll and sets value to 0
   vector<Type> q(nsurvey);
   if(condition == "catch") q = calc_q(I_hist, B, N, Ipred, nsurvey, I_units, ny);
 
@@ -168,7 +169,7 @@ Type DD(objective_function<Type> *obj) {
     if(LWT(nsurvey) > 0 && !R_IsNA(asDouble(MW_hist(tt)))) {
       nll_comp(nsurvey) -= LWT(nsurvey) * dnorm(log(MW_hist(tt)), log(MWpred(tt)), sigma_W, true);
     }
-    if(state_space && tt + k < ny) nll_comp(nsurvey+1) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
+    if(state_space) nll_comp(nsurvey+1) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
   }
 
   //Summing individual nll and penalties

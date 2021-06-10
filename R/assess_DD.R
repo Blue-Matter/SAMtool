@@ -281,7 +281,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   if(is.null(params$log_tau)) {
     params$log_tau <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x]) %>% log()
   }
-  params$log_rec_dev = rep(0, ny - k)
+  params$log_rec_dev = rep(0, ny)
 
   info <- list(Year = Year, data = data, params = params, I_hist = I_hist, LH = LH,
                rescale = rescale, control = control, inner.control = inner.control)
@@ -296,7 +296,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   if(fix_sigma) map$log_sigma <- factor(NA)
   map$log_sigma_W <- factor(NA)
   if(fix_tau) map$log_tau <- factor(NA)
-  if(!state_space) map$log_rec_dev <- factor(rep(NA, ny - k))
+  if(!state_space) map$log_rec_dev <- factor(rep(NA, ny))
 
   random <- NULL
   if(integrate) random <- "log_rec_dev"
@@ -344,8 +344,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   if(!MW) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "MW"]
 
   if(state_space) {
-    YearDev <- seq(Year[1] + k, max(Year))
-    Assessment@Dev <- structure(report$log_rec_dev, names = YearDev)
+    Assessment@Dev <- structure(report$log_rec_dev, names = Year)
     Assessment@Dev_type <- "log-Recruitment deviations"
   }
 
@@ -361,7 +360,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     Assessment@TMB_report <- report
 
     if(state_space) {
-      Assessment@SE_Dev <- structure(as.list(SD, "Std. Error")$log_rec_dev, names = YearDev)
+      Assessment@SE_Dev <- structure(as.list(SD, "Std. Error")$log_rec_dev, names = Year)
     }
     
     catch_eq <- function(Ftarget) {

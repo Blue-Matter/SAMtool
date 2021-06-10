@@ -197,7 +197,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
   Year <- c(Year, moreRecruitYears)
 
   # Array dimension: Retroyr, Year, ts
-  # ts includes: U, U/UMSY, B, B/BMSY, B/B0, R, VB
+  # ts includes: F, F/FMSY, B, B/BMSY, B/B0, R, VB
   retro_ts <- array(NA, dim = c(nyr+1, ny+k, 7))
   TS_var <- c("F", "F_FMSY", "B", "B_BMSY", "B_B0", "R", "VB")
   dimnames(retro_ts) <- list(Peel = 0:nyr, Year = Year, Var = TS_var)
@@ -215,7 +215,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
     info$data$I_sd <- info$data$I_sd[1:ny_ret, , drop = FALSE]
     info$data$MW_hist <- info$data$MW_hist[1:ny_ret]
 
-    if(state_space) info$params$log_rec_dev <- rep(0, ny_ret - k)
+    if(state_space) info$params$log_rec_dev <- rep(0, ny_ret)
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, random = obj$env$random, map = obj$env$map,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)

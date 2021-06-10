@@ -90,7 +90,7 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
   } else {
     fit_MW <- ""
   }
-  assess_fit <- c(assess_all, fit_MW)
+  assess_fit <- c(assess_fit, fit_MW)
   
   if(state_space) {
     assess_fit2 <- c(rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type),
@@ -242,7 +242,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
     info$data$I_sd <- info$data$I_sd[1:ny_ret, , drop = FALSE]
     info$data$MW_hist <- info$data$MW_hist[1:ny_ret]
 
-    if(state_space) info$params$log_rec_dev <- rep(0, ny_ret - k)
+    if(state_space) info$params$log_rec_dev <- rep(0, ny_ret)
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)

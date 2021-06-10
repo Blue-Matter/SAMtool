@@ -84,7 +84,7 @@ Type cDD(objective_function<Type> *obj) {
   vector<Type> MWpred(ny);
 
   vector<Type> BPRinf(ny);
-  vector<Type> Rec_dev(ny-k);
+  vector<Type> Rec_dev(ny);
   vector<Type> Binf(ny);
   vector<Type> Ninf(ny);
 
@@ -95,7 +95,11 @@ Type cDD(objective_function<Type> *obj) {
   B(0) = Req * BPReq;
   N(0) = Req/(F_equilibrium + M);
   for(int tt=0;tt<k;tt++) R(tt) = Req;
-
+  if(state_space) {
+    Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
+    R(0) *= Rec_dev(0);
+  }
+  
   Type Ceqpred = F_equilibrium * B(0);
 
   Type penalty = 0; // Penalty to likelihood for high F > max_F
@@ -118,9 +122,9 @@ Type cDD(objective_function<Type> *obj) {
     } else {
       R(tt+k) = Ricker_SR(B(tt), h, R0, B0);
     }
-    if(state_space && tt+k<ny) {
-      Rec_dev(tt) = exp(log_rec_dev(tt) - 0.5 * tau * tau);
-      R(tt+k) *= Rec_dev(tt);
+    if(state_space && tt<ny-1) {
+      Rec_dev(tt+1) = exp(log_rec_dev(tt+1) - 0.5 * tau * tau);
+      R(tt+1) *= Rec_dev(tt+1);
     }
   }
 
@@ -152,7 +156,7 @@ Type cDD(objective_function<Type> *obj) {
   }
   nll_comp(nsurvey) *= LWT(nsurvey);
   if(state_space) {
-    for(int tt=0;tt<log_rec_dev.size();tt++) nll_comp(nsurvey+1) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
+    for(int tt=0;tt<ny;tt++) nll_comp(nsurvey+1) -= dnorm(log_rec_dev(tt), Type(0), tau, true);
   }
 
   //Summing individual jnll and penalties

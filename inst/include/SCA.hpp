@@ -99,18 +99,20 @@ Type SCA(objective_function<Type> *obj) {
   Type E0 = R0 * EPR0;
   Type VB0 = R0 * sum_VBPR(NPR0, weight, vul);
   
-  Type CR, Brec;
+  Type CR, Arec, Brec;
   if(SR_type == "BH") {
     CR = 4 * h;
     CR /= 1-h;
     Brec = 5*h - 1;
     Brec /= (1-h);
-  } else {
+    Arec = CR/EPR0;
+    Brec /= E0;
+  } else if(SR_type == "Ricker") {
     CR = pow(5*h, 1.25);
     Brec = 1.25 * log(5*h);
+    Arec = CR/EPR0;
+    Brec /= E0;
   }
-  Type Arec = CR/EPR0;
-  Brec /= E0;
 
   ////// During time series year = 1, 2, ..., n_y
   matrix<Type> N(n_y+1, n_age);   // Numbers at year and age
