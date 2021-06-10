@@ -128,8 +128,6 @@ Type SCA(objective_function<Type> *obj) {
   
   matrix<Type> M(n_y+1,n_age);
   vector<Type> logit_M(n_y+1);
-  //vector< vector<Type>> NPR_unfished(n_y+1);
-  //vector<Type> EPR_unfished(n_y+1);
 
   N.setZero();
   CALpred.setZero();
@@ -198,8 +196,6 @@ Type SCA(objective_function<Type> *obj) {
   for(int y=0;y<n_y;y++) {
     // Calculate this year's F
     if(catch_eq == "Baranov") {
-      for(int a=0;a<n_age;a++) VB(y) += N(y,a) * weight(a) * vul(a);
-      
       if(y != yindF) {
         Type Ftmp = F(yindF) * exp(log_F_dev(y));
         F(y) = CppAD::CondExpLt(3 - Ftmp, Type(0), 3 - posfun(3 - Ftmp, Type(0), penalty), Ftmp);
@@ -260,8 +256,6 @@ Type SCA(objective_function<Type> *obj) {
       logit_M(y+1) = logit_M(y) + logit_M_walk(y);
       M.row(y+1).fill(invlogit2(logit_M(y+1), M_bounds(0), M_bounds(1), M(0,0)));
     }
-    //NPR_unfished(y+1) = calc_NPR(Type(0), vul, M, n_age, y+1);
-    //EPR_unfished(y+1) = sum_EPR(NPR_unfished(y+1), weight, mat);
     
     // Calculate next year's VB
     for(int a=0;a<n_age;a++) {

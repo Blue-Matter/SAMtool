@@ -14,54 +14,23 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-<style type="text/css">
-
-body{ /* Normal  */
-   font-size: 12px;
-}
-td {  /* Table  */
-   font-size: 8px;
-}
-h1 { /* Header 1 */
- font-size: 18px;
- color: DarkBlue;
-}
-h2 { /* Header 2 */
- font-size: 15px;
- color: DarkBlue;
-}
-h3 { /* Header 3 */
- font-size: 14px;
- color: DarkBlue;
-}
-code.r{ /* Code block */
-  font-size: 10px;
-}
-pre { /* Code block */
-  font-size: 10px
-}
-</style>
-
 
 ```{r, echo = FALSE, include = FALSE}
 library(SAMtool)
 ```
 
 ```{r set options, echo = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-knitr::opts_chunk$set(dpi=85)
-options(width = 650)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.align = "center")
+#knitr::opts_chunk$set(dpi=85)
+#options(width = 650)
 ```
-
-<br>
-
 
 # Introduction 
 As part of openMSE, SAMtool implements closed-loop simulation testing of management procedures (MP), a process used in management strategy evaluation (MSE). The components of the operating model (OM) for conducting MSEs for data-rich stocks is wholly contained within MSEtool, but SAMtool provides the tools for implementing additional features to facilitate model-based MPs. Whereas DLMtool is primarily designed for testing data-limited MPs, SAMtool provides an object-oriented framework for building out data-rich MPs, which typically combine an assessment model with a harvest control rule (HCR) to provide a catch recommendation. MPs created by SAMtool are designed to be used with the operating model of MSEtool through the `runMSE` function. 
 
 The overall structure of a closed-loop simulation for a MSE in MSEtool can be described through the classes deployed in the package. An operating model (class __OM__ object) parameterizes the stock (biology), fleet, observation, and implementation dynamics of the MSE. To begin the MSE, the __OM__ object generates the data to be used for a management procedure and stores them in an object of class __Data__. A function of class __MP__ uses the __Data__ object and returns an object of class __Rec__ containing the management recommendations, e.g., some combination of spatial closures and size, effort and catch limits. Candidate MPs should not see the operating model and interacts solely with data simulated in the __Data__ object. From the management recommendations, the __OM__ object is updated and the process is successively repeated as the operating model projects forward in time. The output from the closed-loop simulation is returned in an object of class __MSE__, from which summary statistics can be calculated.
 
-<img src="fig_assess/MSEtool_design.png" width=400>
+<img src="fig_assess/MSEtool_design.Png" width=400>
 
 _Figure 1: Design of MSEtool package for management strategy evaluations_
 
@@ -129,7 +98,7 @@ Two diagnostic functions are available: `retrospective` for retrospective analys
 
 ```{r, eval = FALSE}
 retrospective(SCA_assessment, nyr = 5) # Retrospective analysis going back 5 years from current year
-profile(DD_result, R0 = seq(0.75, 1.25, 0.025), h = seq(0.95, 1, 2.5e-3)) # Joint profile over grid of R0 and steepness
+profile(SCA_result, R0 = seq(0.75, 1.25, 0.025), h = seq(0.95, 1, 2.5e-3)) # Joint profile over grid of R0 and steepness
 ```
 
 ```{r, echo = FALSE}

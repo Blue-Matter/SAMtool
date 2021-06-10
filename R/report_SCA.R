@@ -275,7 +275,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
     info$data$CAA_n <- info$data$CAA_n[1:n_y_ret]
     
-    info$data$CAL_hist <- info$data$CAL_hist[1:n_y_ret, ]
+    info$data$CAL_hist <- info$data$CAL_hist[1:n_y_ret, , drop = FALSE]
     info$data$CAL_n <- info$data$CAL_n[1:n_y_ret]
     
     info$data$est_rec_dev <- info$data$est_rec_dev[1:n_y_ret]

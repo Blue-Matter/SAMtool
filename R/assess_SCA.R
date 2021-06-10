@@ -409,6 +409,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                SR_type = SR, comp_dist = comp_dist, catch_eq = catch_eq,
                est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y),
                tv_M = tv_M, M_bounds = M_bounds, use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
+  if(data$n_bin == 1) data$CAL_hist <- t(data$CAL_hist)
   
   # Starting values
   params <- list()
