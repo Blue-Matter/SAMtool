@@ -237,6 +237,7 @@ Type Ricker_SR(Type SSB, Type h, Type R0, Type SSB0) {
 }
 
 #include "ns/ns_cDD.hpp"
+#include "ns/ns_DD.hpp"
 #include "ns/ns_SCA.hpp"
 #include "ns/ns_VPA.hpp"
 #include "ns/ns_RCM.hpp"
@@ -249,7 +250,7 @@ Type Ricker_SR(Type SSB, Type h, Type R0, Type SSB0) {
 // We iteratively solve for x where x_next = x_previous - g(x)/g'(x)
 template<class Type>
 vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matrix<Type> wt, matrix<Type> VB_out, array<Type> vul,
-                          Type max_F, int y, int max_age, int nfleet, int nit_F, Type &penalty) {
+                      Type max_F, int y, int max_age, int nfleet, int nit_F, Type &penalty) {
 
   vector<Type> F_out(nfleet);
   vector<Type> x_loop(nfleet);
@@ -304,6 +305,7 @@ vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matri
   }
   return F_out;
 }
+
 
 
 #include "cDD.hpp"

@@ -7,6 +7,7 @@
 
 template<class Type>
 Type DD(objective_function<Type> *obj) {
+  using namespace ns_DD;
 
   DATA_SCALAR(Alpha);
   DATA_SCALAR(Rho);
@@ -26,6 +27,7 @@ Type DD(objective_function<Type> *obj) {
   DATA_VECTOR(LWT);
   DATA_INTEGER(nsurvey);
   DATA_INTEGER(fix_sigma);
+  DATA_INTEGER(nit_F);
   DATA_INTEGER(state_space);
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see make_prior fn)
@@ -34,7 +36,7 @@ Type DD(objective_function<Type> *obj) {
   PARAMETER(transformed_h);
   PARAMETER(log_M);
   PARAMETER(log_q_effort);
-  PARAMETER(U_equilibrium);
+  PARAMETER(F_equilibrium);
   PARAMETER(log_omega);
   PARAMETER(log_sigma);
   PARAMETER(log_sigma_W);
@@ -88,10 +90,11 @@ Type DD(objective_function<Type> *obj) {
   matrix<Type> Ipred(ny,nsurvey);
   vector<Type> MWpred(ny);
   //vector<Type> Sp(ny);
-  vector<Type> U(ny);
+  vector<Type> F(ny);
 
   //--INITIALIZE
-  Type Seq = S0 * (1 - U_equilibrium);
+  Type Z_equilibrium = F_equilibrium + M;
+  Type Seq = S0 * exp(-F_equilibrium);
   Type SprEq = (Seq * Alpha/(1 - Seq) + wk)/(1 - Rho * Seq);
   Type Req;
   if(SR_type == "BH") {
@@ -104,22 +107,21 @@ Type DD(objective_function<Type> *obj) {
   B(0) = Req * SprEq;
   N(0) = Req/(1 - Seq);
   for(int tt=0;tt<k;tt++) R(tt) = Req;
+  
+  Type Ceqpred = F_equilibrium * B(0) * (1 - Seq)/(F_equilibrium + M);
 
-  Type Ceqpred = B(0) * U_equilibrium;
-
-  Type penalty = 0; // Penalty to likelihood for high U > 0.95
+  Type penalty = 0; // Penalty to likelihood for high F > 3
   Type prior = -dnorm_(log(B(0)/B0), log(dep), Type(0.01), true); // Penalty for initial depletion to get the corresponding U_equilibrium
 
   for(int tt=0; tt<ny; tt++){
     if(condition == "catch") {
-      U(tt) = CppAD::CondExpLt(1 - C_hist(tt)/B(tt), Type(0.025),
-        1 - posfun(1 - C_hist(tt)/B(tt), Type(0.025), penalty), C_hist(tt)/B(tt));
+      F(tt) = Newton_F(C_hist, M, B, Type(3), tt, nit_F, penalty);
     } else {
-      U(tt) = CppAD::CondExpLt(exp(-q_effort * E_hist(tt)), Type(0.025),
-        1 - posfun(exp(-q_effort * E_hist(tt)), Type(0.025), penalty), 1 - exp(-q_effort * E_hist(tt)));
+      Type tmp = Type(3) - q_effort * E_hist(tt);
+      F(tt) = CppAD::CondExpGt(tmp, Type(0), Type(3) - posfun(tmp, Type(0), penalty), q_effort * E_hist(tt));
     }
-    Surv(tt) = S0 * (1 - U(tt));
-    Cpred(tt) = U(tt) * B(tt);
+    Surv(tt) = S0 * exp(-F(tt));
+    Cpred(tt) = F(tt) * B(tt) * (1 - Surv(tt))/(F(tt) + M);
     MWpred(tt) = B(tt)/N(tt);
     //Sp(tt) = B(tt) - Cpred(tt);
 
@@ -206,7 +208,7 @@ Type DD(objective_function<Type> *obj) {
   REPORT(R);
   REPORT(log_rec_dev);
   REPORT(Rec_dev);
-  REPORT(U);
+  REPORT(F);
   REPORT(M);
   REPORT(h);
   REPORT(R0);

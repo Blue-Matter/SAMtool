@@ -2,10 +2,10 @@
 summary_DD_TMB <- function(Assessment, state_space = FALSE) {
   assign_Assessment_slots()
 
-  if(conv) current_status <- c(U_UMSY[length(U_UMSY)], B_BMSY[length(B_BMSY)], B_B0[length(B_B0)])
+  if(conv) current_status <- c(F_FMSY[length(F_FMSY)], B_BMSY[length(B_BMSY)], B_B0[length(B_B0)])
   else current_status <- c(NA, NA, B_B0[length(B_B0)])
   current_status <- data.frame(Value = current_status)
-  rownames(current_status) <- c("U/UMSY", "B/BMSY", "B/B0")
+  rownames(current_status) <- c("F/FMSY", "B/BMSY", "B/B0")
 
   Value <- c(unlist(info$data[c(2,3,5,6)]))
   Description <- c("alpha = Winf * (1-rho)",
@@ -41,13 +41,13 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
   input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
   rownames(input_parameters) <- rownam
 
-  if(conv) derived <- c(B0, N0, MSY, UMSY, BMSY, BMSY/B0)
+  if(conv) derived <- c(B0, N0, MSY, FMSY, BMSY, BMSY/B0)
   else derived <- rep(NA, 6)
   derived <- data.frame(Value = derived,
                         Description = c("Unfished biomass", "Unfished abundance", "Maximum sustainable yield (MSY)",
-                                        "Exploitation rate at MSY", "Biomass at MSY", "Depletion at MSY"),
+                                        "Fishing mortality at MSY", "Biomass at MSY", "Depletion at MSY"),
                         stringsAsFactors = FALSE)
-  rownames(derived) <- c("B0", "N0", "MSY", "UMSY", "BMSY", "BMSY/B0")
+  rownames(derived) <- c("B0", "N0", "MSY", "FMSY", "BMSY", "BMSY/B0")
 
   model_estimates <- sdreport_int(SD)
   if(!is.character(model_estimates)) {
@@ -94,7 +94,8 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
   if(Assessment@obj$env$data$condition == "effort") {
     assess_data <- c(rmd_assess_fit("Catch", "catch"), rmd_assess_resid("Catch"), rmd_assess_qq("Catch", "catch"))
   } else {
-    assess_data <- rmd_assess_fit_series(nsets = ncol(Assessment@Index))
+    assess_data <- c(rmd_assess_fit("Catch", "catch", match = TRUE), 
+                     rmd_assess_fit_series(nsets = ncol(Assessment@Index)))
   }
   if(any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
     fit_MW <- rmd_assess_fit_MW()
@@ -111,10 +112,9 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
   }
 
   #### Time Series
-  ts_output <- c(rmd_U(header = "### Time Series Output\n"), rmd_U_UMSY(), rmd_SSB(), rmd_SSB_SSBMSY(),
+  ts_output <- c(rmd_F(header = "### Time Series Output\n"), rmd_F_FMSY(), rmd_SSB(), rmd_SSB_SSBMSY(),
                  rmd_SSB_SSB0(), rmd_dynamic_SSB0("TMB_report$dynamic_SSB0"),
-                 rmd_Kobe("SSB_SSBMSY", "U_UMSY", xlab = "expression(SSB/SSB[MSY])", ylab = "expression(U/U[MSY])"),
-                 rmd_R(), rmd_N())
+                 rmd_Kobe(), rmd_R(), rmd_N())
 
   #### Productivity
   SR_calc <- c("SSB_SR <- SSB[1:info$data$ny]",
@@ -126,7 +126,7 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
                "Rest <- R[1:info$data$ny + info$data$k]")
   productivity <- c(rmd_SR(header = "### Productivity\n\n\n", SR_calc = SR_calc),
                     rmd_SR(fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),
-                    rmd_yield_U("DD"), rmd_yield_depletion("DD"), rmd_sp(), rmd_SPR(), rmd_YPR())
+                    rmd_yield_F("DD"), rmd_yield_depletion("DD"), rmd_sp(), rmd_SPR(), rmd_YPR())
 
   return(c(ss, LH_section, data_section, assess_fit, ts_output, productivity))
 
@@ -199,7 +199,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
   # Array dimension: Retroyr, Year, ts
   # ts includes: U, U/UMSY, B, B/BMSY, B/B0, R, VB
   retro_ts <- array(NA, dim = c(nyr+1, ny+k, 7))
-  TS_var <- c("U", "U_UMSY", "B", "B_BMSY", "B_B0", "R", "VB")
+  TS_var <- c("F", "F_FMSY", "B", "B_BMSY", "B_B0", "R", "VB")
   dimnames(retro_ts) <- list(Peel = 0:nyr, Year = Year, Var = TS_var)
 
   retro_est <- array(NA, dim = c(nyr+1, length(SD$par.fixed[names(SD$par.fixed) != "log_rec_dev"]), 2))
@@ -225,18 +225,18 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
 
     if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
-      ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec)
+      ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec, report$M)
       report <- c(report, ref_pt)
 
-      U <- c(report$U, rep(NA, k + i))
-      U_UMSY <- U/report$UMSY
+      FF <- c(report$F, rep(NA, k + i))
+      F_FMSY <- FF/report$FMSY
       B <- c(report$B, rep(NA, k - 1 + i))
       B_BMSY <- B/report$BMSY
       B_B0 <- B/B0
       R <- c(report$R, rep(NA, i))
       VB <- B
 
-      retro_ts[i+1, , ] <<- cbind(U, U_UMSY, B, B_BMSY, B_B0, R, VB)
+      retro_ts[i+1, , ] <<- cbind(FF, F_FMSY, B, B_BMSY, B_B0, R, VB)
 
       sumry <- summary(SD, "fixed")
       sumry <- sumry[rownames(sumry) != "log_rec_dev", drop = FALSE]
@@ -252,7 +252,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
 
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
-  attr(retro, "TS_lab") <- c("Exploitation rate", expression(U/U[MSY]), "Biomass", expression(B/B[MSY]), expression(B/B[0]),
+  attr(retro, "TS_lab") <- c("Fishing mortality", expression(F/F[MSY]), "Biomass", expression(B/B[MSY]), expression(B/B[0]),
                              "Recruitment", "Vulnerable biomass")
 
   return(retro)
@@ -269,11 +269,12 @@ profile_likelihood_DD_SS <- profile_likelihood_DD_TMB
 retrospective_DD_SS <- function(Assessment, nyr) retrospective_DD_TMB(Assessment, nyr, TRUE)
 
 
-plot_yield_DD <- function(data, report, umsy, msy, xaxis = c("U", "Biomass", "Depletion")) {
+plot_yield_DD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "Depletion")) {
   xaxis <- match.arg(xaxis)
-  u.vector <- seq(0, 0.99, 0.01)
+  F.vector <- seq(0, 2.5 * fmsy, length.out = 1e2)
   
-  yield <- lapply(u.vector, yield_fn_DD, M = report$M, Alpha = data$Alpha, 
+  yield <- lapply(F.vector, 
+                  yield_fn_DD, M = report$M, Alpha = data$Alpha, 
                   Rho = data$Rho, wk = data$wk, SR = data$SR_type,
                   Arec = report$Arec, Brec = report$Brec, opt = FALSE)
   
@@ -282,11 +283,11 @@ plot_yield_DD <- function(data, report, umsy, msy, xaxis = c("U", "Biomass", "De
   R <- vapply(yield, getElement, numeric(1), "R")
   ind <- R >= 0
 
-  if(xaxis == "U") {
-    plot(u.vector[ind], Yield[ind], typ = 'l', xlab = "Exploitation rate (U)",
+  if(xaxis == "F") {
+    plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing mortality",
          ylab = "Equilibrium yield")
-    segments(x0 = umsy, y0 = 0, y1 = msy, lty = 2)
-    segments(x0 = 0, y0 = msy, x1 = umsy, lty = 2)
+    segments(x0 = fmsy, y0 = 0, y1 = msy, lty = 2)
+    segments(x0 = 0, y0 = msy, x1 = fmsy, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
@@ -305,7 +306,7 @@ plot_yield_DD <- function(data, report, umsy, msy, xaxis = c("U", "Biomass", "De
     segments(x0 = 0, y0 = msy, x1 = report$BMSY/report$B0, lty = 2)
     abline(h = 0, col = 'grey')
   }
-  invisible(data.frame(U = u.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/report$B0))
+  invisible(data.frame(F = F.vector[ind], Yield = Yield[ind], B = Biomass[ind], B_B0 = Biomass[ind]/report$B0))
 }
 
 

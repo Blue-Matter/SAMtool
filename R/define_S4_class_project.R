@@ -326,14 +326,14 @@ projection_SCA_internal <- function(FMort, Catch, constrain, TMB_report, TMB_dat
   return(list(Cpred = Cpred * Cobs_err, CAApred = CAApred, Ipred = Ipred, B = B, VB = VB, E = E, N = N, Fout = Fout))
 }
 
-Baranov <- function(sel, apicalF, M, N) {
+Baranov <- function(sel = 1, apicalF, M, N) {
   FF <- sel * apicalF
   Z <- FF + M
   CAA <- FF / Z * (1 - exp(-Z)) * N
   return(CAA)
 }
 
-SCA_catch_solver <- function(FM, N, weight, vul, M, TAC = NULL) {
+SCA_catch_solver <- function(FM, N, weight = 1, vul = 1, M, TAC = NULL) {
   CAA <- Baranov(vul, FM, M, N)
   Cw <- sum(CAA * weight)
   if(!is.null(TAC)) {
@@ -501,7 +501,7 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
     Cobs_err <- exp(matrix(rnorm(p_years * p_sim, 0, omega), p_sim, p_years))
   }
   
-  B <- N <- R <- Cpred <- matrix(NA, p_sim, p_years)
+  B <- N <- R <- Cpred <- matrix(NA_real_, p_sim, p_years)
   Ipred <- array(NA_real_, c(p_sim, p_years, nsurvey))
   B[, 1] <- TMB_report$B[length(TMB_report$B)]
   N[, 1] <- TMB_report$N[length(TMB_report$N)]
@@ -509,10 +509,10 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
     p_log_rec_dev[, 1:TMB_data$k]
 
   if(constrain == "F") {
-    Fout <- U <- matrix(pmin(Ftarget, 1 - exp(-max_F)), p_sim, p_years, byrow = TRUE)
-    surv <- (1 - U) * exp(-TMB_report$M)
+    Fout <- matrix(pmin(Ftarget, max_F), p_sim, p_years, byrow = TRUE)
+    surv <- exp(-TMB_report$M - Fout)
   } else {
-    Fout <- U <- surv <- matrix(NA, p_sim, p_years)
+    Fout <- surv <- matrix(NA_real_, p_sim, p_years)
   }
 
   for(y in 1:p_years + 1) {
@@ -521,10 +521,12 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
         p_log_rec_dev[, y+TMB_data$k-1]
     }
     if(constrain == "Catch") {
-      Fout[,y-1] <- U[, y-1] <- ifelse(Catch[y-1]/B[, y-1] < 1 - exp(-max_F), Catch[y-1]/B[, y-1], 1 - exp(-max_F))
-      surv[, y-1] <- (1 - U[, y-1]) * exp(-TMB_report$M)
+      Fout[,y-1] <- vapply(1:p_sim, function(i) {
+        optimize(SCA_catch_solver, c(1e-8, max_F), N = B[i, y-1], M = TMB_report$M, TAC = Catch[y-1])$minimum
+      }, numeric(1))
+      surv[, y-1] <- exp(-TMB_report$M - Fout[,y-1])
     }
-    Cpred[, y-1] <- U[, y-1] * B[, y-1]
+    Cpred[, y-1] <- vapply(1:p_sim, function(i) Baranov(apicalF = Fout[i, y-1], M = TMB_report$M, N = B[i, y-1]), numeric(1))
     if(Assessment@obj$env$data$condition == "catch") {
       Ipred[, y-1, ] <- outer(B[, y-1], TMB_report$q) * Iobs_err[, y-1, ]
     } 
@@ -534,7 +536,7 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
     }
   }
   if(Assessment@obj$env$data$condition == "effort") {
-    Eff <- -log(1 - U)/TMB_report$q/Assessment@info$E_rescale
+    Eff <- Fout/TMB_report$q/Assessment@info$E_rescale
     Ipred <- Cpred/Eff * Iobs_err
   }
 

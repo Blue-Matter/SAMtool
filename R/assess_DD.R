@@ -36,6 +36,7 @@
 #' should not be considered to be an independent model parameter.
 #' @param LWT A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
 #' for \code{LWT$MW} a numeric.
+#' @param n_itF Integer, the number of iterations to solve F within an annual time step when conditioning on catch.
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
 #' of the recruitment deviations (thus, treating it as a random effects/state-space variable).
 #' Otherwise, recruitment deviations are penalized parameters.
@@ -62,7 +63,7 @@
 #' \item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
-#' \item \code{U_equilibrium} Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.
+#' \item \code{F_equilibrium} Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.
 #' \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@@CV_Cat[x].
 #' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@@sigmaR[x].
 #' \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@@CV_Ind[x]. Not
@@ -113,12 +114,12 @@
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @export
 DD_TMB <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", MW = FALSE,
-                   start = NULL, prior = list(), fix_h = TRUE, dep = 1, LWT = list(), silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                   start = NULL, prior = list(), fix_h = TRUE, dep = 1, LWT = list(), nit_F = 3L, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                    control = list(iter.max = 5e3, eval.max = 1e4), ...) {
   condition <- match.arg(condition)
   DD_(x = x, Data = Data, state_space = FALSE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, 
       MW = MW, start = start, prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = FALSE,
-      fix_tau = TRUE, integrate = FALSE, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
+      fix_tau = TRUE, nit_F = nit_F, integrate = FALSE, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = list(), ...)
 }
 class(DD_TMB) <- "Assess"
@@ -128,12 +129,12 @@ class(DD_TMB) <- "Assess"
 #' @export
 DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", MW = FALSE,
                   start = NULL, prior = list(), fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = list(),
-                  integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                  nit_F = 3L, integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                   control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   condition <- match.arg(condition)
   DD_(x = x, Data = Data, state_space = TRUE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, 
       MW = MW, start = start, prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = fix_sd,
-      fix_tau = fix_tau, integrate = integrate, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
+      fix_tau = fix_tau, nit_F = nit_F, integrate = integrate, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = inner.control, ...)
 }
 class(DD_SS) <- "Assess"
@@ -141,7 +142,7 @@ class(DD_SS) <- "Assess"
 #' @useDynLib SAMtool
 DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), 
                 rescale = "mean1", MW = FALSE, start = NULL, prior = list(), fix_h = TRUE, fix_sd = TRUE, fix_tau = TRUE, dep = 1, LWT = list(),
-                integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                nit_F = 3L, integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
   dots <- list(...)
@@ -234,7 +235,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   data <- list(model = "DD", Alpha = Alpha, Rho = Rho, ny = ny, k = k,
                wk = wk, C_hist = C_hist, dep = dep, rescale = rescale, I_hist = I_hist, I_units = I_units, I_sd = I_sd,
                E_hist = E_hist, MW_hist = MW_hist, SR_type = SR, condition = condition, LWT = c(LWT$Index, LWT$MW),
-               nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), state_space = as.integer(state_space),
+               nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), nit_F = nit_F, state_space = as.integer(state_space),
                use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k)
 
@@ -251,7 +252,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     }
     if(!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M[1])
     if(!is.null(start$q_effort) && is.numeric(start$q_effort)) params$log_q_effort <- log(start$q_effort[1])
-    if(!is.null(start$U_equilibrium) && is.numeric(start$U_equilibrium)) params$U_equilibrium <- start$U_equililbrium
+    if(!is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) params$F_equilibrium <- start$F_equilibrium
     if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega[1])
     if(!is.null(start[["sigma"]]) && is.numeric(start[["sigma"]])) params$log_sigma <- log(start[["sigma"]])
     if(!is.null(start[["sigma_W"]]) && is.numeric(start[["sigma_W"]])) params$log_sigma_W <- log(start[["sigma_W"]])
@@ -271,7 +272,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   }
   if(is.null(params$log_M)) params$log_M <- log(M)
   if(is.null(params$log_q_effort)) params$log_q_effort <- log(1)
-  if(is.null(params$U_equilibrium)) params$U_equilibrium <- ifelse(dep < 1, 0.1, 0)
+  if(is.null(params$F_equilibrium)) params$F_equilibrium <- ifelse(dep < 1, 0.1, 0)
   if(is.null(params$log_omega)) {
     params$log_omega <- max(0.05, sdconv(1, Data@CV_Cat[x]), na.rm = TRUE) %>% log()
   }
@@ -290,7 +291,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   if(condition == "catch") map$log_q_effort <- factor(NA)
   if(fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
   if(!prior$use_prior[3]) map$log_M <- factor(NA)
-  if(dep == 1) map$U_equilibrium <- factor(NA)
+  if(dep == 1) map$F_equilibrium <- factor(NA)
   if(fix_omega) map$log_omega <- factor(NA)
   if(fix_sigma) map$log_sigma <- factor(NA)
   map$log_sigma_W <- factor(NA)
@@ -299,7 +300,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
 
   random <- NULL
   if(integrate) random <- "log_rec_dev"
-
+  
   obj <- MakeADFun(data = info$data, parameters = info$params, random = random,
                    map = map, hessian = TRUE, DLL = "SAMtool", inner.control = inner.control, silent = silent)
 
@@ -323,7 +324,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
                     Name = Data@Name, conv = SD$pdHess,
                     B0 = report$B0, R0 = report$R0, N0 = report$N0,
                     SSB0 = report$B0, VB0 = report$B0, h = report$h,
-                    U = structure(report$U, names = Year),
+                    FMort = structure(report$F, names = Year),
                     B = structure(report$B, names = Yearplusone),
                     B_B0 = structure(report$B/report$B0, names = Yearplusone),
                     SSB = structure(report$B, names = Yearplusone),
@@ -352,10 +353,10 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec, report$M)
     report <- c(report, ref_pt[1:3])
 
-    Assessment@UMSY <- report$UMSY
+    Assessment@FMSY <- report$FMSY
     Assessment@MSY <- report$MSY
     Assessment@BMSY <- Assessment@SSBMSY <- Assessment@VBMSY <- report$BMSY
-    Assessment@U_UMSY <- structure(report$U/report$UMSY, names = Year)
+    Assessment@F_FMSY <- structure(report$F/report$FMSY, names = Year)
     Assessment@B_BMSY <- Assessment@SSB_SSBMSY <- Assessment@VB_VBMSY <- structure(report$B/report$BMSY, names = Yearplusone)
     Assessment@TMB_report <- report
 
@@ -374,37 +375,40 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
 
 
 ref_pt_DD <- function(TMB_data, Arec, Brec, M) {
-  opt2 <- optimize(yield_fn_DD, interval = c(0, 1), M = M, Alpha = TMB_data$Alpha,
+  opt2 <- optimize(yield_fn_DD, interval = c(1e-4, 3), M = M, Alpha = TMB_data$Alpha,
                    Rho = TMB_data$Rho, wk = TMB_data$wk, SR = TMB_data$SR_type, Arec = Arec, Brec = Brec)
-  UMSY <- opt2$minimum
+  opt3 <- yield_fn_DD(opt2$minimum, M = M, Alpha = TMB_data$Alpha, opt = FALSE,
+                      Rho = TMB_data$Rho, wk = TMB_data$wk, SR = TMB_data$SR_type, Arec = Arec, Brec = Brec)
+  FMSY <- opt2$minimum
   MSY <- -1 * opt2$objective
-  BMSY <- MSY/UMSY
+  BMSY <- opt3["B"]
   
-  U_PR <- seq(0, 0.99, 0.01)
-  yield <- lapply(U_PR, yield_fn_DD, M = M, Alpha = TMB_data$Alpha,
+  F_PR <- seq(0, 2.5 * FMSY, length.out = 100)
+  yield <- lapply(F_PR, 
+                  yield_fn_DD, M = M, Alpha = TMB_data$Alpha,
                   Rho = TMB_data$Rho, wk = TMB_data$wk, SR = TMB_data$SR_type, 
                   Arec = Arec, Brec = Brec, opt = FALSE)
   SPR <- vapply(yield, getElement, numeric(1), "SPR")
   YPR <- vapply(yield, getElement, numeric(1), "YPR")
   
-  return(list(UMSY = UMSY, MSY = MSY, BMSY = BMSY, 
-              per_recruit = data.frame(U = U_PR, SPR = SPR/SPR[1], YPR = YPR)))
+  return(list(FMSY = FMSY, MSY = MSY, BMSY = BMSY, 
+              per_recruit = data.frame(FM = F_PR, SPR = SPR/SPR[1], YPR = YPR)))
 }
 
-yield_fn_DD <- function(x, M, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, logit_trans = FALSE) {
-  if(logit_trans) {
-    U <- ilogit(x)
+yield_fn_DD <- function(x, M, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, log_trans = FALSE) {
+  if(log_trans) {
+    FF <- exp(x)
   } else {
-    U <- x
+    FF <- x
   }
   S0 <- exp(-M)
-  SS <- S0 * (1 - U)
+  SS <- S0 * exp(-FF)
   Spr <- (SS * Alpha/(1 - SS) + wk)/(1 - Rho * SS)
   if(SR == "BH") Req <- (Arec * Spr - 1)/(Brec * Spr)
   if(SR == "Ricker") Req <- log(Arec * Spr)/(Brec * Spr)
   Beq <- Spr * Req
-  Ypr <- U * Spr
-  Yield <- U * Beq
+  Ypr <- FF * Spr * (1 - SS) / (FF + M)
+  Yield <- Ypr * Req
   if(opt) {
     return(-1 * Yield)
   } else {
@@ -420,7 +424,7 @@ DD_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   } else if(dots$data$condition == "effort") {
     par[names(par) == "log_q_effort"] <- -1e8
   }
-  par[names(par) == "U_equilibrium"] <- 0
+  par[names(par) == "F_equilibrium"] <- 0
   
   obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
                     random = obj$env$random, DLL = "SAMtool", silent = TRUE)

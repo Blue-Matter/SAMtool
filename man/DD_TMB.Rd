@@ -18,6 +18,7 @@ DD_TMB(
   fix_h = TRUE,
   dep = 1,
   LWT = list(),
+  nit_F = 3L,
   silent = TRUE,
   opt_hess = FALSE,
   n_restart = ifelse(opt_hess, 0, 1),
@@ -40,6 +41,7 @@ DD_SS(
   fix_tau = TRUE,
   dep = 1,
   LWT = list(),
+  nit_F = 3L,
   integrate = FALSE,
   silent = TRUE,
   opt_hess = FALSE,
@@ -116,6 +118,8 @@ Otherwise, recruitment deviations are penalized parameters.}
 
 \item{inner.control}{A named list of arguments for optimization of the random effects, which
 is passed on to \code{\link[TMB]{newton}} via \code{\link[TMB]{MakeADFun}}.}
+
+\item{n_itF}{Integer, the number of iterations to solve F within an annual time step when conditioning on catch.}
 }
 \value{
 An object of \code{\linkS4class{Assessment}} containing objects and output from TMB.
@@ -136,7 +140,7 @@ For \code{start} (optional), a named list of starting values of estimates can be
 \item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
 \item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
-\item \code{U_equilibrium} Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.
+\item \code{F_equilibrium} Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.
 \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@CV_Cat[x].
 \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@sigmaR[x].
 \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@CV_Ind[x]. Not
