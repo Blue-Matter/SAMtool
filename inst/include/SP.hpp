@@ -21,7 +21,7 @@ Type SP(objective_function<Type> *obj) {
   DATA_IVECTOR(est_B_dev);
   DATA_INTEGER(nstep);
   DATA_SCALAR(dt);
-  DATA_INTEGER(nitF);
+  DATA_INTEGER(n_itF);
   DATA_VECTOR(r_prior);
   //DATA_VECTOR_INDICATOR(keep, I_hist);
 
@@ -66,9 +66,9 @@ Type SP(objective_function<Type> *obj) {
   for(int y=0;y<ny;y++) {
     if(est_B_dev(y)) B(y) *= exp(log_B_dev(y) - 0.5 * tau * tau);
     if(C_hist(y) > 1e-8) {
-      F(y) = SP_F(C_hist(y)/(C_hist(y) + B(y)), C_hist(y), MSY, K, n, n_term, dt, nstep, nitF, Cpred, B, y, penalty);
+      F(y) = SP_F(C_hist(y)/(C_hist(y) + B(y)), C_hist(y), MSY, K, n, n_term, dt, nstep, n_itF, Cpred, B, y, penalty);
     } else {
-      F(y) = SP_F(C_hist(y)/(C_hist(y) + B(y)), C_hist(y), MSY, K, n, n_term, dt, 1, nitF, Cpred, B, y, penalty);
+      F(y) = SP_F(C_hist(y)/(C_hist(y) + B(y)), C_hist(y), MSY, K, n, n_term, dt, 1, n_itF, Cpred, B, y, penalty);
     }
     SP(y) = B(y+1) - B(y) + Cpred(y);
   }

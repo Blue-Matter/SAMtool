@@ -478,7 +478,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
     E_eq <- rep(0, nfleet)
   }
   
-  if(is.null(dots$nit_F)) nit_F <- 3L else nit_F <- dots$nit_F
+  if(is.null(dots$n_itF)) n_itF <- 3L else n_itF <- dots$n_itF
   if(is.null(dots$plusgroup)) plusgroup <- 1L else plusgroup <- as.integer(dots$plusgroup)
   age_only_model <- StockPars$Len_age[x, , 1:(nyears+1)] %>% apply(2, function(xx) length(xx) == n_age & max(xx) == n_age) %>% all()
   TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, 
@@ -502,7 +502,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
                    age_error = RCMdata@age_error,
                    SR_type = SR_type, LWT_fleet = LWT_fleet, LWT_index = LWT_index, comp_like = comp_like,
                    max_F = max_F, rescale = rescale, ageM = min(nyears, ceiling(StockPars$ageM[x, 1])),
-                   yind_F = as.integer(rep(0.5 * nyears, nfleet)), nit_F = nit_F, plusgroup = plusgroup,
+                   yind_F = as.integer(rep(0.5 * nyears, nfleet)), n_itF = n_itF, plusgroup = plusgroup,
                    use_prior = prior$use_prior, prior_dist = prior$pr_matrix, nll_gr = 0L)
   
   if(SR_type == "BH") {

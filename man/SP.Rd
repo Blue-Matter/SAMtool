@@ -168,6 +168,12 @@ and a symmetric production function (n = 2).
 
 Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.
 }
+\section{Online Documentation}{
+
+Model description and equations are available on the openMSE 
+\href{https://openmse.com/features-assessment-models/3-sp/}{website}.
+}
+
 \section{Required Data}{
 
 \itemize{

@@ -155,6 +155,12 @@ See \link{SCA} for all other information about the structure and setup of the mo
 The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are 
 calculated and reported in TMB_report of the \linkS4class{Assessment} object.
 }
+\section{Online Documentation}{
+
+Model description and equations are available on the openMSE 
+\href{https://openmse.com/features-assessment-models/2-sca/}{website}.
+}
+
 \examples{
 res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
 res2 <- SCA(Data = MSEtool::SimulatedData)

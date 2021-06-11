@@ -199,10 +199,11 @@ if(getRversion() >= "2.15.1") {
 #' @slot Ehist A vector of historical effort, should be of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns. 
 #' See also \code{E_eq}).
 #' @slot CAA Fishery age composition matrix with nyears rows and OM@@maxage+1 columns. If multiple fleets: an array with dimension: nyears, OM@@maxage, and nfleets.
+#' Raw numbers will be converted to annual proportions (see CAA_ESS for sample sizes).
 #' @slot CAA_ESS Annual sample size (for the multinomial distribution) of the fishery age comps. 
 #' A vector of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns.
 #' @slot CAL Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets: an array with dimension: nyears,
-#' length bins (see \code{length_bin}), and nfleets. 
+#' length bins (see \code{length_bin}), and nfleets. Raw numbers will be converted to annual proportions (see CAL_ESS for sample sizes).
 #' @slot CAL_ESS Annual sample size (for the multinomial distribution) of the fishery length comps. 
 #' A vector of length OM@@nyears. If there are multiple fleets: a matrix of OM@@nyears rows and nfleet columns.
 #' @slot length_bin - A vector for the midpoints of the length bins for \code{CAL} and \code{IAL}. All bin widths should be equal in size.
@@ -216,9 +217,11 @@ if(getRversion() >= "2.15.1") {
 #' @slot I_sd A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
 #' If not provided, this function will use values from \code{OM@@Iobs}.
 #' @slot IAA Index age composition data, an array of dimension nyears, maxage+1, nsurvey.
+#' Raw numbers will be converted to annual proportions (see IAA_ESS for sample sizes).
 #' @slot IAA_ESS Annual sample size (for the multinomial distribution) of the index age comps. 
 #' A vector of length OM@@nyears. If there are multiple indices: a matrix of OM@@nyears rows and nsurvey columns.
-#' @slot IAL Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.
+#' @slot IAL Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.#' 
+#' Raw numbers will be converted to annual proportions (see IAL_ESS for sample sizes).
 #' @slot IAL_ESS Annual sample size (for the multinomial distribution) of the index length comps. 
 #' A vector of length OM@@nyears. If there are multiple indices: a matrix of OM@@nyears rows and nsurvey columns.
 #' @slot C_eq A numeric vector of length nfleet for the equilibrium catch for each fleet in \code{Chist} prior to the first year of the operating model.

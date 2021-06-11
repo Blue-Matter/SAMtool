@@ -120,6 +120,12 @@ is passed on to \code{\link[TMB]{newton}}.}
 \description{
 A single-fleet assessment that fits to catch, indices of abundance, and fishery length compositions. See \link{SCA} for all details.
 }
+\section{Online Documentation}{
+
+Model description and equations are available on the openMSE 
+\href{https://openmse.com/features-assessment-models/2-sca/}{website}.
+}
+
 \author{
 Q. Huynh
 }

@@ -27,7 +27,7 @@ Type DD(objective_function<Type> *obj) {
   DATA_VECTOR(LWT);
   DATA_INTEGER(nsurvey);
   DATA_INTEGER(fix_sigma);
-  DATA_INTEGER(nit_F);
+  DATA_INTEGER(n_itF);
   DATA_INTEGER(state_space);
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see make_prior fn)
@@ -115,11 +115,14 @@ Type DD(objective_function<Type> *obj) {
   Type Ceqpred = F_equilibrium * B(0) * (1 - Seq)/(F_equilibrium + M);
 
   Type penalty = 0; // Penalty to likelihood for high F > 3
-  Type prior = -dnorm_(log(B(0)/B0), log(dep), Type(0.01), true); // Penalty for initial depletion to get the corresponding U_equilibrium
-
+  Type prior = 0;
+  if(dep > 0) { // Penalty for initial depletion to get corresponding F
+    prior = -dnorm_(log(B(0)/B0), log(dep), Type(0.01), true);
+  }
+  
   for(int tt=0; tt<ny; tt++){
     if(condition == "catch") {
-      F(tt) = Newton_F(C_hist, M, B, Type(3), tt, nit_F, penalty);
+      F(tt) = Newton_F(C_hist, M, B, Type(3), tt, n_itF, penalty);
     } else {
       Type tmp = Type(3) - q_effort * E_hist(tt);
       F(tt) = CppAD::CondExpGt(tmp, Type(0), Type(3) - posfun(tmp, Type(0), penalty), q_effort * E_hist(tt));

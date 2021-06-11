@@ -1,5 +1,5 @@
 
-#' SCA model with density-dependent M
+#' SCA models with time-varying natural mortality
 #' 
 #' A modification of \code{SCA} that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).
 #' Set the bounds of M in the \code{M_bounds} argument, a length-2 vector where the first entry is M0, the M as B/B0 >= 1,
@@ -15,6 +15,9 @@
 #' Forrest, R.E., Holt, K.R., and Kronlund, A.R. 2018. Performance of alternative harvest control rules for two Pacific groundfish
 #' stocks with uncertain natural mortality: Bias, robustness and trade-offs. Fisheries Research 2016: 259-286.
 #'
+#' @section Online Documentation:
+#' Model description and equations are available on the openMSE 
+#' \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
 #' @examples
 #' res <- SCA_DDM(Data = MSEtool::SimulatedData)
 #' 

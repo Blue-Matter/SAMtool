@@ -2,7 +2,7 @@
 % Please edit documentation in R/assess_SCA_DDM.R
 \name{SCA_DDM}
 \alias{SCA_DDM}
-\title{SCA model with density-dependent M}
+\title{SCA models with time-varying natural mortality}
 \usage{
 SCA_DDM(
   x = 1,
@@ -131,6 +131,12 @@ or M0 can be less than M1 (depensatory).
 \details{
 See \link{SCA} for more information on all arguments.
 }
+\section{Online Documentation}{
+
+Model description and equations are available on the openMSE 
+\href{https://openmse.com/features-assessment-models/2-sca/}{website}.
+}
+
 \examples{
 res <- SCA_DDM(Data = MSEtool::SimulatedData)
 

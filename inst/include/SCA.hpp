@@ -203,8 +203,6 @@ Type SCA(objective_function<Type> *obj) {
         F(y) = CppAD::CondExpLt(3 - Ftmp, Type(0), 3 - posfun(3 - Ftmp, Type(0), penalty), Ftmp);
       }
     } else {
-      for(int a=0;a<n_age;a++) VB(y) += N(y,a) * weight(a) * vul(a) * exp(-0.5 * M(y,a));
-      
       Type Utmp = C_hist(y)/VB(y);
       U(y) = CppAD::CondExpLt(1 - Utmp, Type(0.025), 1 - posfun(1 - Utmp, Type(0.025), penalty), Utmp);
     }

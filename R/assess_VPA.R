@@ -36,7 +36,7 @@
 #' \item \code{R} A length two for the quantile used to calculate recruitment in the year following the terminal year and the number of years
 #' from which that quantile is used, i.e., \code{c(0.5, 5)} is the default that calculates median recruitment from the most recent 5 years of the model.
 #' }
-#' @param nitF The number of iterations for solving F in the model (via Newton's method).
+#' @param n_itF The number of iterations for solving F in the model (via Newton's method).
 #' @param min_age An integer to specify the smallest age class in the VPA. By default, the youngest age with non-zero CAA in the terminal year is used.
 #' @param max_age An integer to specify the oldest age class in the VPA. By default, the oldest age with non-zero CAA for all years is used.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
@@ -72,6 +72,10 @@
 #' MSY and depletion reference points are calculated by fitting the stock recruit relationship to the recruitment and SSB estimates. Per-recruit
 #' quantities are also calculated, which may be used in harvest control rules.
 #' 
+#' @section Online Documentation:
+#' Model description and equations are available on the openMSE 
+#' \href{https://openmse.com/features-assessment-models/4-vpa/}{website}.
+#' 
 #' @return An object of class \linkS4class{Assessment}. The F vector is the apical fishing mortality experienced by any
 #' age class in a given year. 
 #' @examples
@@ -80,12 +84,13 @@
 #' Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.
 #' @export
 VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricker"), vulnerability = c("logistic", "dome", "free"),
-                start = list(), fix_h = TRUE, fix_Fratio = TRUE, fix_Fterm = FALSE, LWT = NULL, shrinkage = list(), nitF = 5L,
+                start = list(), fix_h = TRUE, fix_Fratio = TRUE, fix_Fterm = FALSE, LWT = NULL, shrinkage = list(), n_itF = 5L,
                 min_age = "auto", max_age = "auto", refpt = list(),
                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), ...) {
   dependencies <- "Data@Cat, Data@CAA, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
   dots <- list(...)
+  if(!is.null(dots$nitF)) n_itF <- dots$nitF
   start <- lapply(start, eval, envir = environment())
   
   vulnerability <- match.arg(vulnerability)
@@ -207,7 +212,7 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
                abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
                CAA_hist = CAA_hist2, n_y = length(Year), n_age = length(ages),
                M = update_age_schedule(M, ages), weight = LH$WAA, 
-               vul_type_term = vulnerability, nitF = as.integer(nitF),
+               vul_type_term = vulnerability, n_itF = as.integer(n_itF),
                n_vulpen = shrinkage$vul[1], vulpen = shrinkage$vul[2], 
                n_Rpen = shrinkage$R[1], Rpen = shrinkage$R[2])
 

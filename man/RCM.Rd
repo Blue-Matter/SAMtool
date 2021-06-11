@@ -146,9 +146,9 @@ The easiest way to turn off time-varying growth/M is by setting: \code{OM@Msd <-
 To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 index but the data won't enter the likelihood. See section on likelihood weights.
 }
-\section{Articles}{
+\section{Online Documentation}{
 
-Three articles are available for the RCM:
+Several articles are available for the RCM:
 
 \itemize{
 \item \href{https://openmse.com/tutorial-rcm/}{General overview of approach}

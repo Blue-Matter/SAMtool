@@ -20,13 +20,14 @@ If not provided, the default is 0.01. Not used if \code{RCM(condition = "catch2"
 \item{\code{Ehist}}{A vector of historical effort, should be of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns. 
 See also \code{E_eq}).}
 
-\item{\code{CAA}}{Fishery age composition matrix with nyears rows and OM@maxage+1 columns. If multiple fleets: an array with dimension: nyears, OM@maxage, and nfleets.}
+\item{\code{CAA}}{Fishery age composition matrix with nyears rows and OM@maxage+1 columns. If multiple fleets: an array with dimension: nyears, OM@maxage, and nfleets.
+Raw numbers will be converted to annual proportions (see CAA_ESS for sample sizes).}
 
 \item{\code{CAA_ESS}}{Annual sample size (for the multinomial distribution) of the fishery age comps. 
 A vector of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.}
 
 \item{\code{CAL}}{Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets: an array with dimension: nyears,
-length bins (see \code{length_bin}), and nfleets.}
+length bins (see \code{length_bin}), and nfleets. Raw numbers will be converted to annual proportions (see CAL_ESS for sample sizes).}
 
 \item{\code{CAL_ESS}}{Annual sample size (for the multinomial distribution) of the fishery length comps. 
 A vector of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.}
@@ -47,12 +48,14 @@ indexing years and columns indexing surveys.}
 \item{\code{I_sd}}{A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
 If not provided, this function will use values from \code{OM@Iobs}.}
 
-\item{\code{IAA}}{Index age composition data, an array of dimension nyears, maxage+1, nsurvey.}
+\item{\code{IAA}}{Index age composition data, an array of dimension nyears, maxage+1, nsurvey.
+Raw numbers will be converted to annual proportions (see IAA_ESS for sample sizes).}
 
 \item{\code{IAA_ESS}}{Annual sample size (for the multinomial distribution) of the index age comps. 
 A vector of length OM@nyears. If there are multiple indices: a matrix of OM@nyears rows and nsurvey columns.}
 
-\item{\code{IAL}}{Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.}
+\item{\code{IAL}}{Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.#' 
+Raw numbers will be converted to annual proportions (see IAL_ESS for sample sizes).}
 
 \item{\code{IAL_ESS}}{Annual sample size (for the multinomial distribution) of the index length comps. 
 A vector of length OM@nyears. If there are multiple indices: a matrix of OM@nyears rows and nsurvey columns.}

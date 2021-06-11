@@ -118,6 +118,11 @@
 #' }
 #' Vague priors of \code{vul_par[2] ~ N(0, sd = 3)} and \code{vul_par[3] ~ N(0, 3)} are used to aid convergence,
 #' for example, when vulnerability >> 0.5 for the youngest age class.
+#' 
+#' @section Online Documentation:
+#' Model description and equations are available on the openMSE 
+#' \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
+#' 
 #' @references
 #' Cadigan, N.G. 2016. A state-space stock assessment model for northern cod, including under-reported catches and
 #' variable natural mortality rates. Canadian Journal of Fisheries and Aquatic Science 72:296-308.

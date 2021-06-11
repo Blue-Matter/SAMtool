@@ -61,8 +61,8 @@
 #' \code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
 #' from the OM.
 #'
-#' @section Articles:
-#' Three articles are available for the RCM:
+#' @section Online Documentation:
+#' Several articles are available for the RCM:
 #'
 #' \itemize{
 #' \item \href{https://openmse.com/tutorial-rcm/}{General overview of approach}

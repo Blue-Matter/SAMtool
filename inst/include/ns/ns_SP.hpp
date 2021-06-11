@@ -3,13 +3,13 @@ namespace ns_SP {
 
 // Sub-annual time steps for SP and iteratively find the F that predicts the observed catch
 template<class Type>
-Type SP_F(Type U_start, Type C_hist, Type MSY, Type K, Type n, Type nterm, Type dt, int nstep, int nitF,
+Type SP_F(Type U_start, Type C_hist, Type MSY, Type K, Type n, Type nterm, Type dt, int nstep, int n_itF,
           vector<Type> &Cpred, vector<Type> &B, int y, Type &penalty) {
   Type F;
   Type F_out;
   if(nstep > 1) {
     F = -log(1 - U_start);
-    for(int i=0;i<nitF;i++) {
+    for(int i=0;i<n_itF;i++) {
       Type Catch = 0;
       Type B_next = B(y);
 

@@ -22,7 +22,7 @@ Type cDD(objective_function<Type> *obj) {
   DATA_MATRIX(I_sd);
   DATA_VECTOR(MW_hist);
   DATA_STRING(SR_type);
-  DATA_INTEGER(nitF);
+  DATA_INTEGER(n_itF);
   DATA_VECTOR(LWT);
   DATA_INTEGER(nsurvey);
   DATA_INTEGER(fix_sigma);
@@ -103,12 +103,15 @@ Type cDD(objective_function<Type> *obj) {
   Type Ceqpred = F_equilibrium * B(0);
 
   Type penalty = 0; // Penalty to likelihood for high F > max_F
-  Type prior = -dnorm_(log(B(0)/B0), log(dep), Type(0.01), true); // Penalty for initial depletion to get corresponding F
-
+  Type prior = 0;
+  if(dep > 0) { // Penalty for initial depletion to get corresponding F
+    prior = -dnorm_(log(B(0)/B0), log(dep), Type(0.01), true);
+  }
+  
   for(int tt=0; tt<ny; tt++) {
     Type F_start = CppAD::CondExpLe(C_hist(tt), Type(1e-8), Type(0), -log(1 - C_hist(tt)/B(tt)));
     F(tt) = cDD_F(F_start, C_hist(tt), M, Winf, Kappa, wk, N, B, Cpred, BPRinf, Binf, R, Ninf,
-      CppAD::Integer(CppAD::CondExpLe(C_hist(tt), Type(1e-8), Type(1), Type(nitF))), tt);
+      CppAD::Integer(CppAD::CondExpLe(C_hist(tt), Type(1e-8), Type(1), Type(n_itF))), tt);
     Z(tt) = F(tt) + M;
     MWpred(tt) = B(tt)/N(tt);
 

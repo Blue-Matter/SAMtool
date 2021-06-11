@@ -18,7 +18,7 @@ DD_TMB(
   fix_h = TRUE,
   dep = 1,
   LWT = list(),
-  nit_F = 3L,
+  n_itF = 3L,
   silent = TRUE,
   opt_hess = FALSE,
   n_restart = ifelse(opt_hess, 0, 1),
@@ -41,7 +41,7 @@ DD_SS(
   fix_tau = TRUE,
   dep = 1,
   LWT = list(),
-  nit_F = 3L,
+  n_itF = 3L,
   integrate = FALSE,
   silent = TRUE,
   opt_hess = FALSE,
@@ -84,11 +84,13 @@ See vignette for full description.}
 Automatically false if a prior is used.}
 
 \item{dep}{The initial depletion in the first year of the model. A tight prior is placed on the model objective function
-to estimate the equilibrium exploitation rate that corresponds to the initial depletion. Due to this tight prior, this F
-should not be considered to be an independent model parameter.}
+to estimate the equilibrium fishing mortality rate that corresponds to the initial depletion. Due to this tight prior, this F
+should not be considered to be an independent model parameter. Set to zero to eliminate this prior.}
 
 \item{LWT}{A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
 for \code{LWT$MW} a numeric.}
+
+\item{n_itF}{Integer, the number of iterations to solve F within an annual time step when conditioning on catch.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.}
@@ -118,8 +120,6 @@ Otherwise, recruitment deviations are penalized parameters.}
 
 \item{inner.control}{A named list of arguments for optimization of the random effects, which
 is passed on to \code{\link[TMB]{newton}} via \code{\link[TMB]{MakeADFun}}.}
-
-\item{n_itF}{Integer, the number of iterations to solve F within an annual time step when conditioning on catch.}
 }
 \value{
 An object of \code{\linkS4class{Assessment}} containing objects and output from TMB.
@@ -140,7 +140,7 @@ For \code{start} (optional), a named list of starting values of estimates can be
 \item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
 \item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
-\item \code{F_equilibrium} Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.
+\item \code{F_equilibrium} Equilibrium fishing mortality rate leading into first year of the model (to determine initial depletion). By default, 0.
 \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@CV_Cat[x].
 \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@sigmaR[x].
 \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@CV_Ind[x]. Not
@@ -157,6 +157,12 @@ proportionality between the abundance index and real abundance.
 Unsurprisingly the extent to which these assumptions are
 violated tends to be the biggest driver of performance for this method.
 }
+\section{Online Documentation}{
+
+Model description and equations are available on the openMSE 
+\href{https://openmse.com/features-assessment-models/1-dd/}{website}.
+}
+
 \section{Required Data}{
 
 \itemize{

@@ -29,7 +29,7 @@
 #' tau is fixed to value provided in \code{start} (if provided), otherwise, equal to 1.
 #' @param dep The initial depletion in the first year of the model. A tight prior is placed on the model objective function
 #' to estimate the equilibrium fishing mortality corresponding to the initial depletion. Due to this tight prior, this F
-#' should not be considered to be an independent model parameter.
+#' should not be considered to be an independent model parameter. Set to zero to eliminate this prior.
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
 #' of the recruitment deviations (thus, treating it as a state-space variable). Otherwise, recruitment deviations are penalized parameters.
 #' @param LWT A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
@@ -64,6 +64,10 @@
 #' 
 #' Multiple indices are supported in the model. Data@@Ind, Data@@VInd, and Data@@SpInd are all assumed to be biomass-based.
 #' For Data@@AddInd, Data@@I_units are used to identify a biomass vs. abundance-based index.
+#'
+#' @section Online Documentation:
+#' Model description and equations are available on the openMSE 
+#' \href{https://openmse.com/features-assessment-models/1-dd/}{website}.
 #' 
 #' @author Q. Huynh
 #' @references
@@ -194,7 +198,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
 
   data <- list(model = "cDD", Winf = Winf, Kappa = Kappa, ny = ny, k = k, wk = wk, C_hist = C_hist, dep = dep,
                rescale = rescale, I_hist = I_hist, I_units = I_units, I_sd = I_sd, MW_hist = MW_hist,
-               SR_type = SR, nitF = n_itF, LWT = c(LWT$Index, LWT$MW), nsurvey = nsurvey,
+               SR_type = SR, n_itF = n_itF, LWT = c(LWT$Index, LWT$MW), nsurvey = nsurvey,
                fix_sigma = as.integer(fix_sigma), state_space = as.integer(state_space),
                use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k, fit_mod = fit_mod)

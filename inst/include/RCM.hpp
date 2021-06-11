@@ -72,7 +72,7 @@ Type RCM(objective_function<Type> *obj) {
   DATA_INTEGER(ageM);     // Age of maturity used for averaging E0 and EPR0
 
   DATA_IVECTOR(yind_F);   // When condition = "catch", the year in F's are estimated and all other F parameters are deviations from this F
-  DATA_INTEGER(nit_F);    // When condition = "catch2", the number of iterations for Newton-Raphson method to solve for F
+  DATA_INTEGER(n_itF);    // When condition = "catch2", the number of iterations for Newton-Raphson method to solve for F
   DATA_INTEGER(plusgroup) // Boolean, whether the maximum age in the plusgroup is modeled.
   
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
@@ -260,7 +260,7 @@ Type RCM(objective_function<Type> *obj) {
         }
       }
     } else if(condition == "catch2") {
-      F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, nit_F, penalty);
+      F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
     } else {
       for(int ff=0;ff<nfleet;ff++) {
         Type tmp = max_F - q_effort(ff) * E_hist(y,ff);

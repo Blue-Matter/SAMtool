@@ -250,7 +250,7 @@ Type Ricker_SR(Type SSB, Type h, Type R0, Type SSB0) {
 // We iteratively solve for x where x_next = x_previous - g(x)/g'(x)
 template<class Type>
 vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matrix<Type> wt, matrix<Type> VB_out, array<Type> vul,
-                      Type max_F, int y, int max_age, int nfleet, int nit_F, Type &penalty) {
+                      Type max_F, int y, int max_age, int nfleet, int n_itF, Type &penalty) {
 
   vector<Type> F_out(nfleet);
   vector<Type> x_loop(nfleet);
@@ -260,7 +260,7 @@ vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matri
     x_loop(ff) = log(F_start);
   }
 
-  for(int i=0;i<nit_F;i++) { // Loop for Newton-Raphson
+  for(int i=0;i<n_itF;i++) { // Loop for Newton-Raphson
     vector<Type> Z = M.row(y);
     matrix<Type> VB(max_age, nfleet);
     vector<Type> Cpred(nfleet);
@@ -280,7 +280,7 @@ vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matri
       for(int a=0;a<max_age;a++) Cpred(ff) += VB(a,ff) * F_loop(ff) * (1 - exp(-Z(a)))/Z(a);
     }
 
-    if(i<nit_F-1) {
+    if(i<n_itF-1) {
       vector<Type> Newton_fn = Cpred - C_hist_y;
       vector<Type> Newton_gr(nfleet);
       Newton_gr.setZero();

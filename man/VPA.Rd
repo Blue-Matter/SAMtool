@@ -17,7 +17,7 @@ VPA(
   fix_Fterm = FALSE,
   LWT = NULL,
   shrinkage = list(),
-  nitF = 5L,
+  n_itF = 5L,
   min_age = "auto",
   max_age = "auto",
   refpt = list(),
@@ -66,7 +66,7 @@ The default
 is the number of years in which recruitment will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
 }}
 
-\item{nitF}{The number of iterations for solving F in the model (via Newton's method).}
+\item{n_itF}{The number of iterations for solving F in the model (via Newton's method).}
 
 \item{min_age}{An integer to specify the smallest age class in the VPA. By default, the youngest age with non-zero CAA in the terminal year is used.}
 
@@ -126,6 +126,12 @@ by the Fratio.
 MSY and depletion reference points are calculated by fitting the stock recruit relationship to the recruitment and SSB estimates. Per-recruit
 quantities are also calculated, which may be used in harvest control rules.
 }
+\section{Online Documentation}{
+
+Model description and equations are available on the openMSE 
+\href{https://openmse.com/features-assessment-models/4-vpa/}{website}.
+}
+
 \examples{
 out <- VPA(x = 2, Data = MSEtool::SimulatedData, vulnerability = "dome")
 }

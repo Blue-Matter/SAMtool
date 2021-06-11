@@ -23,7 +23,7 @@ Type VPA(objective_function<Type> *obj) {
   DATA_VECTOR(M);              // Natural mortality at age
   DATA_VECTOR(weight);         // Weight-at-age at the beginning of the year
   DATA_STRING(vul_type_term);  // Vulnerability function
-  DATA_INTEGER(nitF);          // The maximum number of iterations to solve for F
+  DATA_INTEGER(n_itF);          // The maximum number of iterations to solve for F
   DATA_INTEGER(n_vulpen);
   DATA_SCALAR(vulpen);      //
   DATA_INTEGER(n_Rpen);
@@ -34,6 +34,7 @@ Type VPA(objective_function<Type> *obj) {
   PARAMETER_VECTOR(vul_par);
 
   matrix<Type> F_at_age(n_y,n_age);
+  matrix<Type> Z_at_age(n_y,n_age);
   vector<Type> F(n_y);
   matrix<Type> N(n_y,n_age);
   matrix<Type> vul(n_y,n_age);
@@ -44,6 +45,7 @@ Type VPA(objective_function<Type> *obj) {
   VB.setZero();
   B.setZero();
   F_at_age.setZero();
+  Z_at_age.setZero();
   N.setZero();
 
   Type penalty = 0.;
@@ -67,29 +69,37 @@ Type VPA(objective_function<Type> *obj) {
   // Terminal Year
   for(int a=0;a<n_age;a++) {
     F_at_age(n_y-1,a) = vul_term(a) * Fterm;
-    N(n_y-1,a) = (F_at_age(n_y-1,a) + M(a)) * CAA_hist(n_y-1,a);
-    N(n_y-1,a) /= (1 - exp(-F_at_age(n_y-1,a) - M(a))) * F_at_age(n_y-1,a);
+    Z_at_age(n_y-1,a) = F_at_age(n_y-1,a) + M(a);
+    N(n_y-1,a) = Z_at_age(n_y-1,a) * CAA_hist(n_y-1,a);
+    N(n_y-1,a) /= 1 - exp(-Z_at_age(n_y-1,a));
+    N(n_y-1,a) /= F_at_age(n_y-1,a);
   }
   
   // Backwards recursion of N
   for(int y=n_y-1;y>0;y--) {
     for(int a=1;a<n_age;a++) {
       if(a==n_age-1) {
-        F_at_age(y-1,a-1) = Newton_VPA_F_plus(F_at_age(y,a), Fratio, M(a-1), M(a), CAA_hist(y-1,a-1), CAA_hist(y-1,a), N(y,a), nitF);
+        F_at_age(y-1,a-1) = Newton_VPA_F_plus(F_at_age(y,a), Fratio, M(a-1), M(a), CAA_hist(y-1,a-1), CAA_hist(y-1,a), N(y,a), n_itF);
       } else {
-        F_at_age(y-1,a-1) = CppAD::CondExpGt(CAA_hist(y-1,a-1), Type(1e-4), Newton_VPA_F(F_at_age(y,a), M(a-1), CAA_hist(y-1,a-1), N(y,a), nitF), Type(1e-4));
+        F_at_age(y-1,a-1) = CppAD::CondExpGt(CAA_hist(y-1,a-1), Type(1e-4), 
+                 Newton_VPA_F(F_at_age(y,a), M(a-1), CAA_hist(y-1,a-1), N(y,a), n_itF), 
+                 Type(1e-4));
       }
+      Z_at_age(y-1,a-1) = F_at_age(y-1,a-1) + M(a-1);
 
-      N(y-1,a-1) = CppAD::CondExpGt(CAA_hist(y-1,a-1), Type(1e-4), (F_at_age(y-1,a-1) + M(a-1)) * CAA_hist(y-1,a-1)/(1 - exp(-F_at_age(y-1,a-1) - M(a-1)))/F_at_age(y-1,a-1), 
-                                    N(y,a) * exp(F_at_age(y-1,a-1) + M(a)));
+      N(y-1,a-1) = CppAD::CondExpGt(CAA_hist(y-1,a-1), Type(1e-4), 
+        Z_at_age(y-1,a-1) * CAA_hist(y-1,a-1)/(1 - exp(-Z_at_age(y-1,a-1)))/F_at_age(y-1,a-1), 
+        N(y,a) * exp(Z_at_age(y-1,a-1)));
 
       if(a==n_age-1) {
         F_at_age(y-1,a) = Fratio * F_at_age(y-1,a-1);
-        N(y-1,a) = (F_at_age(y-1,a) + M(a)) * CAA_hist(y-1,a);
-        N(y-1,a) /= (1 - exp(-F_at_age(y-1,a) - M(a))) * F_at_age(y-1,a);
+        Z_at_age(y-1,a) = F_at_age(y-1,a) + M(a);
+        
+        N(y-1,a) = Z_at_age(y-1,a) * CAA_hist(y-1,a);
+        N(y-1,a) /= 1 - exp(-Z_at_age(y-1,a));
+        N(y-1,a) /= F_at_age(y-1,a);
       }
     }
-    
   }
   
   for(int y=0;y<n_y;y++) {
@@ -97,7 +107,7 @@ Type VPA(objective_function<Type> *obj) {
     F(y) = max(Fvec);
     for(int a=0;a<n_age;a++) {
       vul(y,a) = F_at_age(y,a)/F(y);
-      CAApred(y,a) = N(y,a) * F_at_age(y,a) * (1 - exp(-F_at_age(y,a) - M(a)))/(F_at_age(y,a) + M(a));
+      CAApred(y,a) = N(y,a) * F_at_age(y,a) * (1 - exp(-Z_at_age(y,a)))/Z_at_age(y,a);
       B(y) += N(y,a) * weight(a);
       VB(y) += N(y,a) * weight(a) * vul(y,a);
     }

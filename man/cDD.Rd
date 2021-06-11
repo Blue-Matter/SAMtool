@@ -79,7 +79,7 @@ See vignette for full description.}
 
 \item{dep}{The initial depletion in the first year of the model. A tight prior is placed on the model objective function
 to estimate the equilibrium fishing mortality corresponding to the initial depletion. Due to this tight prior, this F
-should not be considered to be an independent model parameter.}
+should not be considered to be an independent model parameter. Set to zero to eliminate this prior.}
 
 \item{LWT}{A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
 for \code{LWT$MW} a numeric.}
@@ -139,6 +139,12 @@ used if multiple indices are used.
 Multiple indices are supported in the model. Data@Ind, Data@VInd, and Data@SpInd are all assumed to be biomass-based.
 For Data@AddInd, Data@I_units are used to identify a biomass vs. abundance-based index.
 }
+\section{Online Documentation}{
+
+Model description and equations are available on the openMSE 
+\href{https://openmse.com/features-assessment-models/1-dd/}{website}.
+}
+
 \section{Required Data}{
 
 \itemize{

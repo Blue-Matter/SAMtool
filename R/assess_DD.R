@@ -32,8 +32,8 @@
 #' @param fix_tau Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
 #' tau is fixed to value provided in \code{start} (if provided), otherwise, equal to 1.
 #' @param dep The initial depletion in the first year of the model. A tight prior is placed on the model objective function
-#' to estimate the equilibrium exploitation rate that corresponds to the initial depletion. Due to this tight prior, this F
-#' should not be considered to be an independent model parameter.
+#' to estimate the equilibrium fishing mortality rate that corresponds to the initial depletion. Due to this tight prior, this F
+#' should not be considered to be an independent model parameter. Set to zero to eliminate this prior.
 #' @param LWT A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
 #' for \code{LWT$MW} a numeric.
 #' @param n_itF Integer, the number of iterations to solve F within an annual time step when conditioning on catch.
@@ -63,7 +63,7 @@
 #' \item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
-#' \item \code{F_equilibrium} Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.
+#' \item \code{F_equilibrium} Equilibrium fishing mortality rate leading into first year of the model (to determine initial depletion). By default, 0.
 #' \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@@CV_Cat[x].
 #' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@@sigmaR[x].
 #' \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@@CV_Ind[x]. Not
@@ -79,6 +79,11 @@
 #' proportionality between the abundance index and real abundance.
 #' Unsurprisingly the extent to which these assumptions are
 #' violated tends to be the biggest driver of performance for this method.
+#' 
+#' @section Online Documentation:
+#' Model description and equations are available on the openMSE 
+#' \href{https://openmse.com/features-assessment-models/1-dd/}{website}.
+#' 
 #' @author T. Carruthers & Z. Siders. Zach Siders coded the TMB function.
 #' @references
 #' Carruthers, T, Walters, C.J,, and McAllister, M.K. 2012. Evaluating methods that classify
@@ -114,12 +119,12 @@
 #' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @export
 DD_TMB <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", MW = FALSE,
-                   start = NULL, prior = list(), fix_h = TRUE, dep = 1, LWT = list(), nit_F = 3L, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                   start = NULL, prior = list(), fix_h = TRUE, dep = 1, LWT = list(), n_itF = 3L, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                    control = list(iter.max = 5e3, eval.max = 1e4), ...) {
   condition <- match.arg(condition)
   DD_(x = x, Data = Data, state_space = FALSE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, 
       MW = MW, start = start, prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = FALSE,
-      fix_tau = TRUE, nit_F = nit_F, integrate = FALSE, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
+      fix_tau = TRUE, n_itF = n_itF, integrate = FALSE, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = list(), ...)
 }
 class(DD_TMB) <- "Assess"
@@ -129,12 +134,12 @@ class(DD_TMB) <- "Assess"
 #' @export
 DD_SS <- function(x = 1, Data, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", MW = FALSE,
                   start = NULL, prior = list(), fix_h = TRUE, fix_sd = FALSE, fix_tau = TRUE, dep = 1, LWT = list(),
-                  nit_F = 3L, integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                  n_itF = 3L, integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                   control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   condition <- match.arg(condition)
   DD_(x = x, Data = Data, state_space = TRUE, condition = condition, AddInd = AddInd, SR = SR, rescale = rescale, 
       MW = MW, start = start, prior = prior, fix_h = fix_h, dep = dep, LWT = LWT, fix_sd = fix_sd,
-      fix_tau = fix_tau, nit_F = nit_F, integrate = integrate, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
+      fix_tau = fix_tau, n_itF = n_itF, integrate = integrate, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = inner.control, ...)
 }
 class(DD_SS) <- "Assess"
@@ -142,7 +147,7 @@ class(DD_SS) <- "Assess"
 #' @useDynLib SAMtool
 DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort"), AddInd = "B", SR = c("BH", "Ricker"), 
                 rescale = "mean1", MW = FALSE, start = NULL, prior = list(), fix_h = TRUE, fix_sd = TRUE, fix_tau = TRUE, dep = 1, LWT = list(),
-                nit_F = 3L, integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                n_itF = 3L, integrate = FALSE, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
   dependencies <- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge"
   dots <- list(...)
@@ -235,7 +240,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   data <- list(model = "DD", Alpha = Alpha, Rho = Rho, ny = ny, k = k,
                wk = wk, C_hist = C_hist, dep = dep, rescale = rescale, I_hist = I_hist, I_units = I_units, I_sd = I_sd,
                E_hist = E_hist, MW_hist = MW_hist, SR_type = SR, condition = condition, LWT = c(LWT$Index, LWT$MW),
-               nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), nit_F = nit_F, state_space = as.integer(state_space),
+               nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), n_itF = n_itF, state_space = as.integer(state_space),
                use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k)
 

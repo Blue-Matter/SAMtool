@@ -9,6 +9,9 @@
 #' rescales annual sample sizes to this fraction of the original sample size. Values greater than one generates a cap of the annual sample
 #' size to this value.
 #' 
+#' @section Online Documentation:
+#' Model description and equations are available on the openMSE 
+#' \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
 #' @author Q. Huynh
 #' @export
 SCA_CAL <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 

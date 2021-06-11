@@ -83,6 +83,11 @@
 #' and a symmetric production function (n = 2).
 #'
 #' Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.
+#' 
+#' @section Online Documentation:
+#' Model description and equations are available on the openMSE 
+#' \href{https://openmse.com/features-assessment-models/3-sp/}{website}.
+#' 
 #' @author Q. Huynh
 #' @references
 #' Fletcher, R. I. 1978. On the restructuring of the Pella-Tomlinson system. Fishery Bulletin 76:515:521.
@@ -227,7 +232,7 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
   data <- list(model = "SP", C_hist = C_hist, rescale = rescale, I_hist = I_hist, I_sd = I_sd, I_lambda = LWT,
                fix_sigma = as.integer(fix_sigma), nsurvey = nsurvey, ny = ny,
-               est_B_dev = est_B_dev, nstep = n_seas, dt = 1/n_seas, nitF = n_itF)
+               est_B_dev = est_B_dev, nstep = n_seas, dt = 1/n_seas, n_itF = n_itF)
 
   if(use_r_prior) {
     if(!is.null(start$r_prior) && length(start$r_prior) == 2) {
