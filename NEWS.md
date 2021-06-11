@@ -6,6 +6,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Create a profiling function for `RCM` models. Steepness, R0, and final depletion can be profiled.
 - Fix plotting bug in `compare_RCM`.
 - Priors for index q in `RCM` is now lognormal instead of normal.
+- Uneven length bin widths now supported.
 
 ### Assessment models
 - Priors on M, steepness, R0, and index q (lognormal, see RCM) can be created SCA, DD, and cDD assessment models.
@@ -20,7 +21,6 @@ Backwards compatibility remains to provide `LWT` as a vector for indices weights
 ### Harvest control rules
 - Additional OCP types in `HCR_ramp` to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).
 - Added a shortcut function for a fixed escapement harvest control rule (`HCR_escapement`).
-- A multitude of changes to clean up internal code.
 
 ## SAMtool 1.1.2
 - Minor fix to vignette to fix MSEtool reverse dependency issue.

@@ -161,7 +161,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             nfleet <- RCMdata@Misc$nfleet
             nsel_block <- RCMdata@Misc$nsel_block
             nsurvey <- RCMdata@Misc$nsurvey
-            length_bin <- RCMdata@length_bin
+            length_bin <- RCMdata@Misc$lbinmid
 
             if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
             if(is.null(s_name)) {
@@ -230,8 +230,13 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 n_unique <- apply(x, 2, function(y) length(unique(y)))
                 any(n_unique > 1)
               }
-              LAA <- rmd_at_age(age = "age", "data_mean_fit$len_age[nyears, ]", header = "### Life History\n", fig.cap = "Length-at-age in last historical year.",
-                                label = "Mean Length-at-age")
+              if(any(data_mean_fit$MLpred > 0) && any(data_mean_fit$CALpred > 0)) {
+                SD_LAA <- "data_mean_fit$SD_LAA[nyears, ]"
+              } else {
+                SD_LAA <- ""
+              }
+              LAA <- rmd_LAA(age = "age", LAA = "data_mean_fit$len_age[nyears, ]", header = "### Life History\n", 
+                             SD_LAA = SD_LAA, fig.cap = "Length-at-age in last historical year.")
               if(LH_varies_fn(data_mean_fit$len_age)) {
                 LAA_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$len_age[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Length-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual length-at-age.")
@@ -280,9 +285,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                   rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", ages = "age", fig.cap = fig.cap2)
                   rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", ages = "age", fig.cap = fig.cap3)
                 } else {
-                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", CAL_bins = "RCMdata@length_bin", fig.cap = fig.cap)
-                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", CAL_bins = "RCMdata@length_bin", fig.cap = fig.cap2)
-                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", CAL_bins = "RCMdata@length_bin", fig.cap = fig.cap3)
+                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", CAL_bins = "RCMdata@Misc$lbinmid", fig.cap = fig.cap)
+                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", CAL_bins = "RCMdata@Misc$lbinmid", fig.cap = fig.cap2)
+                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", CAL_bins = "RCMdata@Misc$lbinmid", fig.cap = fig.cap3)
                 }
                 c(rr, rr2, rr3)
               }
@@ -370,7 +375,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                        bubble_adj = as.character(bubble_adj))
 
               if(sum(report$CALpred, na.rm = TRUE) > 0) {
-                CAL_bubble <- rmd_bubble("Year", "apply(report$CALpred, 1:2, sum)", CAL_bins = "RCMdata@length_bin",
+                CAL_bubble <- rmd_bubble("Year", "apply(report$CALpred, 1:2, sum)", CAL_bins = "RCMdata@Misc$lbinmid",
                                          fig.cap = "Predicted catch-at-length (summed over all fleets).", bubble_adj = as.character(bubble_adj))
               } else CAL_bubble <- NULL
 
@@ -504,7 +509,7 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
 
   nfleet <- vapply(dots, function(xx) xx@data@Misc$nfleet, numeric(1)) %>% unique()
   nsurvey <- vapply(dots, function(xx) xx@data@Misc$nsurvey, numeric(1)) %>% unique()
-  length_bin <- RCMdata@length_bin
+  length_bin <- RCMdata@Misc$lbinmid
 
   if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
   if(is.null(s_name)) s_name <- paste("Index", 1:nsurvey)

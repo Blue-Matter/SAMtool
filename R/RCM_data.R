@@ -207,6 +207,8 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
   return(LWT)
 }
 
+
+
 #' @rdname RCM
 #' @param RCMdata An \linkS4class{RCMdata} object.
 #' @export
@@ -386,20 +388,14 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   # Process length comps
   if(length(RCMdata@CAL)) {
     if(is.matrix(RCMdata@CAL)) RCMdata@CAL <- array(RCMdata@CAL, c(dim(RCMdata@CAL), 1))
-
-    if(!length(RCMdata@length_bin)) {
-      stop("You must specify length_bin, which is the mean length of each length bin (columns) of the CAL data.", call. = FALSE)
-    }
+    
     if(dim(RCMdata@CAL)[1] != RCMdata@Misc$nyears) {
       stop("Number of CAL rows (", dim(RCMdata@CAL)[1], ") does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
     }
-    if(dim(RCMdata@CAL)[2] != length(RCMdata@length_bin)) {
-      stop("Number of CAL columns (", dim(RCMdata@CAL)[2], ") does not equal length(length_bin) (", length(RCMdata@length_bin), ").", call. = FALSE)
-    }
+    message(dim(RCMdata@CAL)[2], " length bins detected in CAL.")
     if(dim(RCMdata@CAL)[3] != RCMdata@Misc$nfleet) {
       stop("Number of CAL slices (", dim(RCMdata@CAA)[3], ") does not equal nfleet (", RCMdata@Misc$nfleet, "). NAs are acceptable.", call. = FALSE)
     }
-    
     if(!length(RCMdata@CAL_ESS)) {
       RCMdata@CAL_ESS <- apply(RCMdata@CAL, c(1, 3), sum, na.rm = TRUE)
     }
@@ -411,9 +407,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       if(ncol(RCMdata@CAL_ESS) != RCMdata@Misc$nfleet) stop("Number of columns of CAL_ESS matrix does not equal nfleet (", RCMdata@Misc$nfleet, "). NAs are acceptable.", call. = FALSE)
     } else stop("CAL_ESS is neither a vector nor a matrix.", call. = FALSE)
   } else {
-    RCMdata@CAL <- array(0, c(RCMdata@Misc$nyears, length(StockPars$CAL_binsmid), RCMdata@Misc$nfleet))
     RCMdata@CAL_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)
-    RCMdata@length_bin <- StockPars$CAL_binsmid
   }
 
   # Process mean size
@@ -511,20 +505,13 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   # Process survey length comps
   if(length(RCMdata@IAL)) {
     if(is.matrix(RCMdata@IAL)) RCMdata@IAL <- array(RCMdata@IAL, c(dim(RCMdata@IAL), 1))
-
-    if(!length(RCMdata@length_bin)) {
-      stop("You must specify length_bin, which is the mean length of each length bin (columns) of the IAL data.", call. = FALSE)
-    }
     if(dim(RCMdata@IAL)[1] != RCMdata@Misc$nyears) {
       stop("Number of IAL rows (", dim(RCMdata@IAL)[1], ") does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
     }
-    if(dim(RCMdata@IAL)[2] != length(RCMdata@length_bin)) {
-      stop("Number of IAL columns (", dim(RCMdata@IAL)[2], ") does not equal length(length_bin) (", length(RCMdata@length_bin), ").", call. = FALSE)
-    }
+    message(dim(RCMdata@IAL)[2], " length bins detected in CAL.")
     if(dim(RCMdata@IAL)[3] != RCMdata@Misc$nsurvey) {
       stop("Number of IAL slices (", dim(RCMdata@IAL)[3], ") does not equal nsurvey (", RCMdata@Misc$nsurvey, "). NAs are acceptable.", call. = FALSE)
     }
-    
     if(!length(RCMdata@IAL_ESS)) {
       RCMdata@IAL_ESS <- apply(RCMdata@IAL, c(1, 3), sum, na.rm = TRUE)
     }
@@ -537,8 +524,48 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     } else stop("IAL_ESS is neither a vector nor a matrix.", call. = FALSE)
     
   } else {
-    RCMdata@IAL <- array(0, c(RCMdata@Misc$nyears, length(RCMdata@length_bin), ncol(RCMdata@Index)))
     RCMdata@IAL_ESS <- array(0, dim(RCMdata@Index))
+  }
+  
+  # Length bin
+  if(!sum(RCMdata@CAL_ESS) && !sum(RCMdata@IAL_ESS)) { # No length/index data
+    RCMdata@Misc$lbin <- StockPars$CAL_bins
+    RCMdata@Misc$lbinmid <- StockPars$CAL_binsmid
+    RCMdata@Misc$nlbin <- length(RCMdata@Misc$lbinmid)
+    RCMdata@CAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, RCMdata@Misc$nfleet))
+    RCMdata@IAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, ncol(RCMdata@Index)))
+  } else {
+    if(sum(RCMdata@CAL_ESS) && !sum(RCMdata@IAL_ESS)) { # CAL only
+      RCMdata@Misc$nlbin <- dim(RCMdata@CAL)[2]
+      RCMdata@IAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, ncol(RCMdata@Index)))
+    } else if(!sum(RCMdata@CAL_ESS) && sum(RCMdata@IAL_ESS)) { # IAL only
+      RCMdata@Misc$nlbin <- dim(RCMdata@IAL)[2]
+      RCMdata@CAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, RCMdata@Misc$nfleet))
+    } else if(dim(RCMdata@CAL)[2] == dim(RCMdata@IAL)[2]) { # Both CAL/IAL. Check nlbin for both
+      RCMdata@Misc$nlbin <- dim(RCMdata@CAL)[2]
+    } else {
+      stop("Number of length bins in CAL is not equal to those in IAL.", call. = FALSE)
+    }
+    
+    if(!length(RCMdata@length_bin)) { # No length bins
+      stop("You must specify length_bin for your length composition.", call. = FALSE)
+      
+    } else if(length(RCMdata@length_bin) == RCMdata@Misc$nlbin) { # Even length bins
+      binWidth <- unique(diff(RCMdata@length_bin))
+      if(length(binWidth) == 1) {
+        RCMdata@Misc$lbinmid <- RCMdata@length_bin
+        RCMdata@Misc$lbin <- c(RCMdata@Misc$lbinmid - 0.5 * binWidth, max(RCMdata@Misc$lbinmid) + 0.5 * binWidth)
+      } else {
+        stop("Uneven length bins detected. Provide a vector of length n_bin + 1 of the boundaries of all length bins", call. = FALSE)
+      }
+      
+    } else if(length(RCMdata@length_bin) == RCMdata@Misc$nlbin + 1)  { # Uneven length bins
+      RCMdata@Misc$lbin <- RCMdata@length_bin 
+      RCMdata@Misc$lbinmid <- 0.5 * (RCMdata@Misc$lbin[1:RCMdata@Misc$nlbin + 1] - RCMdata@Misc$lbin[1:RCMdata@Misc$nlbin])
+    } else {
+      stop("Check vector of length_bin vs. the dimensions of the length compositions.", call. = FALSE)
+    }
+    
   }
 
   # Absolute survey

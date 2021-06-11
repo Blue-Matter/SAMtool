@@ -55,8 +55,8 @@ rmd_at_age <- function(age, y_var, fig.cap, label, header = NULL) {
   return(ans)
 }
 
-rmd_LAA <- function(age = "1:info$data$n_age - 1", LAA = "info$LH$LAA", header = NULL, SD_LAA = "") {
-  fig.cap <- "Mean length-at-age from Data object."
+rmd_LAA <- function(age = "1:info$data$n_age - 1", LAA = "info$LH$LAA", header = NULL, SD_LAA = "",
+                    fig.cap = "Mean length-at-age from Data object.") {
   if(nchar(SD_LAA)) {
     fig.cap <- paste(fig.cap, "Dotted lines indicate 95% intervals for variability in length-at-age.")
     SD_LAA_calc <- c(paste("SD_low <-", LAA, "- 1.96 *", SD_LAA),

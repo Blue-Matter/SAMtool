@@ -36,7 +36,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_ARRAY(IAL_hist);   // Index-at-length proportions by year, length_bin, survey
   DATA_MATRIX(IAL_n);     // Annual samples in IAL by year and survey
 
-  DATA_VECTOR(length_bin); // Vector of length bins
+  DATA_VECTOR(lbin);      // Vector of length bin boundaries
+  DATA_VECTOR(lbinmid);   // Vector of length bin midpoints
   DATA_MATRIX(msize);      // Vector of annual mean size by year and fleet
   DATA_STRING(msize_type); // Whether the mean size is length or weight
 
@@ -96,8 +97,7 @@ Type RCM(objective_function<Type> *obj) {
   PARAMETER_VECTOR(log_early_rec_dev);  // Rec devs for first year abundance
   PARAMETER_VECTOR(log_rec_dev);        // Rec devs for all other years in the model
 
-  int nlbin = length_bin.size();
-  Type bin_width = length_bin(1) - length_bin(0);
+  int nlbin = lbinmid.size();
 
   Type R0 = exp(R0x)/rescale;
   Type h;
@@ -251,7 +251,7 @@ Type RCM(objective_function<Type> *obj) {
   // Loop over all other years
   for(int y=0;y<n_y;y++) {
     // Calculate this year's age-length key (ALK) and F
-    if(Type(n_age) != Linf) ALK(y) = generate_ALK(length_bin, len_age, SD_LAA, n_age, nlbin, bin_width, y);
+    if(Type(n_age) != Linf) ALK(y) = generate_ALK(lbin, len_age, SD_LAA, n_age, nlbin, y);
     if(condition == "catch") {
       for(int ff=0;ff<nfleet;ff++) {
         if(y != yind_F(ff)) {
@@ -282,7 +282,7 @@ Type RCM(objective_function<Type> *obj) {
         if(Type(n_age) != Linf) {
           for(int len=0;len<nlbin;len++) {
             CALpred(y,len,ff) += CAAtrue(y,a,ff) * ALK(y)(a,len);
-            MLpred(y,ff) += CAAtrue(y,a,ff) * ALK(y)(a,len) * length_bin(len);
+            MLpred(y,ff) += CAAtrue(y,a,ff) * ALK(y)(a,len) * lbinmid(len);
           }
         }
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
@@ -384,8 +384,8 @@ Type RCM(objective_function<Type> *obj) {
     }
     
     for(int y=0;y<n_y;y++) {
-      int check1 = (condition != "effort") & (C_hist(y,ff) > 0);
-      int check2 = (condition == "effort") & (E_hist(y,ff) > 0);
+      int check1 = (condition != "effort") && (C_hist(y,ff) > 0);
+      int check2 = (condition == "effort") && (E_hist(y,ff) > 0);
       if(check1 || check2) {
         
         if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {

@@ -156,7 +156,9 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
     if(!is.null(Data@Misc[[x]]$MW)) {
       MW_hist <- Data@Misc[[x]]$MW
     } else {
-      MW_hist <- apply(Data@CAL[x, , ], 1, function(xx) weighted.mean(x = Data@wla[x]*Data@CAL_mids^Data@wlb[x], w = xx))
+      MW_hist <- apply(Data@CAL[x, , ], 1, function(xx) {
+        weighted.mean(x = Data@wla[x]*Data@CAL_mids^Data@wlb[x], w = xx, na.rm = TRUE)
+      })
     }
     MW_hist[MW_hist <= 0] <- NA_real_
   } else {

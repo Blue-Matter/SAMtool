@@ -27,12 +27,13 @@ Raw numbers will be converted to annual proportions (see CAA_ESS for sample size
 A vector of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.}
 
 \item{\code{CAL}}{Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets: an array with dimension: nyears,
-length bins (see \code{length_bin}), and nfleets. Raw numbers will be converted to annual proportions (see CAL_ESS for sample sizes).}
+n_bins, and nfleets. Raw numbers will be converted to annual proportions (see CAL_ESS for sample sizes).}
 
 \item{\code{CAL_ESS}}{Annual sample size (for the multinomial distribution) of the fishery length comps. 
 A vector of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.}
 
-\item{\code{length_bin}}{- A vector for the midpoints of the length bins for \code{CAL} and \code{IAL}. All bin widths should be equal in size.}
+\item{\code{length_bin}}{- A vector (length n_bin) for the midpoints of the length bins for \code{CAL} and \code{IAL}, as well as the population model, if all bin widths are equal in size. 
+If length bins are unequal in bin width, then provide a vector of the boundaries of the length bins (vector of length n_bin + 1).}
 
 \item{\code{MS}}{A vector of fishery mean size (MS, either mean length or mean weight) observations (length OM@nyears), or if multiple fleets: matrix of dimension: nyears and nfleets.
 Generally, mean lengths should not be used if \code{CAL} is also provided, unless mean length and length comps are independently sampled.}
@@ -54,7 +55,7 @@ Raw numbers will be converted to annual proportions (see IAA_ESS for sample size
 \item{\code{IAA_ESS}}{Annual sample size (for the multinomial distribution) of the index age comps. 
 A vector of length OM@nyears. If there are multiple indices: a matrix of OM@nyears rows and nsurvey columns.}
 
-\item{\code{IAL}}{Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.#' 
+\item{\code{IAL}}{Index length composition data, an array of dimension nyears, n_bin, nsurvey. 
 Raw numbers will be converted to annual proportions (see IAL_ESS for sample sizes).}
 
 \item{\code{IAL_ESS}}{Annual sample size (for the multinomial distribution) of the index length comps. 
