@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SCA models with time-varying natural mortality — SCA_DDM • SAMtool</title>
+<title>Age-structured model using fishery length composition — SCA_CAL • SAMtool</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,11 +46,8 @@
 
 
 
-<meta property="og:title" content="SCA models with time-varying natural mortality — SCA_DDM" />
-<meta property="og:description" content="A modification of SCA that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).
-Set the bounds of M in the M_bounds argument, a length-2 vector where the first entry is M0, the M as B/B0 &amp;gt;= 1,
-and the second entry is M1, the M as B/B0 approaches zero. Note that M0 can be greater than M1 (compensatory) 
-or M0 can be less than M1 (depensatory)." />
+<meta property="og:title" content="Age-structured model using fishery length composition — SCA_CAL" />
+<meta property="og:description" content="A single-fleet assessment that fits to catch, indices of abundance, and fishery length compositions. See SCA for all details." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -125,27 +122,24 @@ or M0 can be less than M1 (depensatory)." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>SCA models with time-varying natural mortality</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA_DDM.R'><code>R/assess_SCA_DDM.R</code></a></small>
-    <div class="hidden name"><code>SCA_DDM.Rd</code></div>
+    <h1>Age-structured model using fishery length composition</h1>
+    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/assess_SCA_CAL.R'><code>R/assess_SCA_CAL.R</code></a></small>
+    <div class="hidden name"><code>SCA_CAL.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>A modification of <code>SCA</code> that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).
-Set the bounds of M in the <code>M_bounds</code> argument, a length-2 vector where the first entry is M0, the M as B/B0 &gt;= 1,
-and the second entry is M1, the M as B/B0 approaches zero. Note that M0 can be greater than M1 (compensatory) 
-or M0 can be less than M1 (depensatory).</p>
+    <p>A single-fleet assessment that fits to catch, indices of abundance, and fishery length compositions. See <a href='SCA.html'>SCA</a> for all details.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>SCA_DDM</span><span class='op'>(</span>
+    <pre class="usage"><span class='fu'>SCA_CAL</span><span class='op'>(</span>
   x <span class='op'>=</span> <span class='fl'>1</span>,
   <span class='va'>Data</span>,
   AddInd <span class='op'>=</span> <span class='st'>"B"</span>,
   SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
   vulnerability <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"logistic"</span>, <span class='st'>"dome"</span><span class='op'>)</span>,
   catch_eq <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Baranov"</span>, <span class='st'>"Pope"</span><span class='op'>)</span>,
-  CAA_dist <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
-  CAA_multiplier <span class='op'>=</span> <span class='fl'>50</span>,
+  CAL_dist <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"multinomial"</span>, <span class='st'>"lognormal"</span><span class='op'>)</span>,
+  CAL_multiplier <span class='op'>=</span> <span class='fl'>50</span>,
   rescale <span class='op'>=</span> <span class='st'>"mean1"</span>,
   max_age <span class='op'>=</span> <span class='va'>Data</span><span class='op'>@</span><span class='va'>MaxAge</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -157,7 +151,6 @@ or M0 can be less than M1 (depensatory).</p>
   LWT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   early_dev <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"comp_onegen"</span>, <span class='st'>"comp"</span>, <span class='st'>"all"</span><span class='op'>)</span>,
   late_dev <span class='op'>=</span> <span class='st'>"comp50"</span>,
-  M_bounds <span class='op'>=</span> <span class='cn'>NULL</span>,
   integrate <span class='op'>=</span> <span class='cn'>FALSE</span>,
   silent <span class='op'>=</span> <span class='cn'>TRUE</span>,
   opt_hess <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -198,12 +191,14 @@ See details for parameterization.</p></td>
       <td><p>Whether to use the Baranov equation or Pope's approximation to calculate the predicted catch at age in the model.</p></td>
     </tr>
     <tr>
-      <th>CAA_dist</th>
-      <td><p>Whether a multinomial or lognormal distribution is used for likelihood of the catch-at-age matrix. See details.</p></td>
+      <th>CAL_dist</th>
+      <td><p>Character, the statistical distribution for the likelihood of the catch-at-length.</p></td>
     </tr>
     <tr>
-      <th>CAA_multiplier</th>
-      <td><p>Numeric for data weighting of catch-at-age matrix if <code>CAA_hist = "multinomial"</code>. Otherwise ignored. See details.</p></td>
+      <th>CAL_multiplier</th>
+      <td><p>Numeric for data weighting of catch-at-length matrix if <code>CAL_hist = "multinomial"</code>. A value smaller than one
+rescales annual sample sizes to this fraction of the original sample size. Values greater than one generates a cap of the annual sample
+size to this value.</p></td>
     </tr>
     <tr>
       <th>rescale</th>
@@ -268,11 +263,6 @@ By default, <code>"comp50"</code> uses the number of ages (smaller than the mode
 for which the catch-at-age matrix has less than half the abundance than that at the mode.</p></td>
     </tr>
     <tr>
-      <th>M_bounds</th>
-      <td><p>A numeric vector of length 2 to indicate the M as B/B0 approaches zero and one, respectively.
-By default, set to 75% and 125%, respectively, of Data@Mort[x].</p></td>
-    </tr>
-    <tr>
       <th>integrate</th>
       <td><p>Logical, whether the likelihood of the model integrates over the likelihood
 of the recruitment deviations (thus, treating it as a random effects/state-space variable).
@@ -310,33 +300,16 @@ is passed on to <code><a href='https://rdrr.io/pkg/TMB/man/newton.html'>newton</
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>An object of class <a href='Assessment-class.html'>Assessment</a>.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>See <a href='SCA.html'>SCA</a> for more information on all arguments.</p>
     <h2 class="hasAnchor" id="online-documentation"><a class="anchor" href="#online-documentation"></a>Online Documentation</h2>
 
     
 
 <p>Model description and equations are available on the openMSE 
 <a href='https://openmse.com/features-assessment-models/2-sca/'>website</a>.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
-
-    <p>Forrest, R.E., Holt, K.R., and Kronlund, A.R. 2018. Performance of alternative harvest control rules for two Pacific groundfish
-stocks with uncertain natural mortality: Bias, robustness and trade-offs. Fisheries Research 2016: 259-286.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p><a href='SCA.html'>SCA</a> <a href='SCA_RWM.html'>SCA_RWM</a> <a href='plot.Assessment.html'>plot.Assessment</a> <a href='summary.Assessment.html'>summary.Assessment</a> <a href='retrospective.html'>retrospective</a> <a href='profile.html'>profile</a> <a href='make_MP.html'>make_MP</a></p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Q. Huynh</p>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>SCA_DDM</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span><span class='op'>)</span>
-
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

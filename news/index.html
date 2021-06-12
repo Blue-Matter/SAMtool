@@ -128,17 +128,38 @@
     <div id="samtool-120" class="section level2">
 <h2 class="hasAnchor">
 <a href="#samtool-120" class="anchor"></a>SAMtool 1.2.0</h2>
+<div id="rcm" class="section level3">
+<h3 class="hasAnchor">
+<a href="#rcm" class="anchor"></a>RCM</h3>
 <ul>
 <li>A new S4 object, <code>RCMdata</code>, used to send data to the RCM model, i.e., <code><a href="../reference/check_RCMdata.html">RCM(OM, RCMdata)</a></code>. Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms ‘survey’ and ‘index’ to focus on ‘index’ as much as possible when maintaining backwards compatibility. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.</li>
 <li>Create a profiling function for <code>RCM</code> models. Steepness, R0, and final depletion can be profiled.</li>
 <li>Fix plotting bug in <code>compare_RCM</code>.</li>
+<li>Priors for index q in <code>RCM</code> is now lognormal instead of normal.</li>
+<li>Uneven length bin widths now supported.</li>
+</ul>
+</div>
+<div id="assessment-models" class="section level3">
+<h3 class="hasAnchor">
+<a href="#assessment-models" class="anchor"></a>Assessment models</h3>
+<ul>
+<li>Priors on M, steepness, R0, and index q (lognormal, see RCM) can be created SCA, DD, and cDD assessment models.</li>
+<li>Likelihood weights to SCA assessments can now be provided for <code>Catch</code>, <code>CAA</code>, and <code>CAL</code> in addition to <code>Index</code> in a named list <code>LWT</code>. Backwards compatibility remains to provide <code>LWT</code> as a vector for indices weights only.</li>
 <li>A new SCA assessment model that incorporates density-dependent natural mortality (<code>SCA_DDM</code>) is added.</li>
-<li>Priors for index q in <code>RCM</code> is now lognormal instead of normal. They have also been added to assessment models.</li>
-<li>Dynamic SSB0 is calculated for assessment models.</li>
-<li>Priors on M, steepness, R0, and index q can be created SCA, DD, and cDD assessment models.</li>
+<li>A new SCA assessment model that fits to length composition (<code>SCA_CAL</code>) is added.</li>
+<li>Delay-difference assessments (DD_TMB, DD_SS, cDD, cDD_SS) can now fit to mean weight with argument <code>MW = TRUE</code>. The functions will look for mean weight data series in <code>Data@Misc[[x]]$MW</code>, otherwise will convert length composition <code>Data@CAL</code> to weights and calculate annual means.</li>
+<li>Delay-difference assessments (DD_TMB and DD_SS) use an instantaneous F formulation for the catch equation instead of Pope’s approximation. The models should now be more robust for high F situations.</li>
+<li>Dynamic SSB0 is calculated for all assessment models.</li>
+</ul>
+</div>
+<div id="harvest-control-rules" class="section level3">
+<h3 class="hasAnchor">
+<a href="#harvest-control-rules" class="anchor"></a>Harvest control rules</h3>
+<ul>
 <li>Additional OCP types in <code>HCR_ramp</code> to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).</li>
 <li>Added a shortcut function for a fixed escapement harvest control rule (<code>HCR_escapement</code>).</li>
 </ul>
+</div>
 </div>
     <div id="samtool-112" class="section level2">
 <h2 class="hasAnchor">
@@ -176,9 +197,9 @@
 <li>A <code>Shortcut</code> assess function samples the OM with error and autocorrelation for HCRs as an emulator of a stock assessment in closed-loop simulation. The <code>Perfect</code> function samples the OM without error.</li>
 <li>All assessment models now accommodate multiple indices in model fitting, specify in the <code>AddInd</code> argument of functions which index slots in the Data object will be used among <a href="mailto:Data@Ind" class="email">Data@Ind</a>, <a href="mailto:Data@SpInd" class="email">Data@SpInd</a>, <a href="mailto:Data@VInd" class="email">Data@VInd</a>, and <a href="mailto:Data@AddInd" class="email">Data@AddInd</a>. Within series weighting is applied by using the corresponding CV slot, i.e., <a href="mailto:Data@CV_Ind" class="email">Data@CV_Ind</a> for <a href="mailto:Data@Ind" class="email">Data@Ind</a>, etc. Among series weighting can also be tuned using likelihood weights with <code>LWT</code> argument. For SCA and VPA models, the selectivity is fixed in the model using <a href="mailto:Data@AddIndV" class="email">Data@AddIndV</a> for indices in <a href="mailto:Data@AddInd" class="email">Data@AddInd</a>.</li>
 </ul>
-<div id="rcm" class="section level3">
+<div id="rcm-1" class="section level3">
 <h3 class="hasAnchor">
-<a href="#rcm" class="anchor"></a>RCM</h3>
+<a href="#rcm-1" class="anchor"></a>RCM</h3>
 <ul>
 <li>The function for the OM conditioning model is now re-named to <code>RCM</code> (Rapid Conditioning Model).</li>
 <li>The age structure of the model now starts at age 0, following the change in the MSEtool OM. The dimension associated with age in matrices and arrays need to be of length <code>maxage + 1</code> which corresponds to ages 0 to maxage.</li>

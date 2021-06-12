@@ -84,7 +84,7 @@
             <h3 class="subtitle">Development, testing, and implementation of model-based management procedures</h3>
                         <h4 class="author">Quang Huynh (<a href="mailto:quang@bluematterscience.com" class="email">quang@bluematterscience.com</a>), Tom Carruthers (<a href="mailto:tom@bluematterscience.com" class="email">tom@bluematterscience.com</a>), Adrian Hordyk (<a href="mailto:adrian@bluematterscience.com" class="email">adrian@bluematterscience.com</a>)</h4>
             
-            <h4 class="date">2021-06-09</h4>
+            <h4 class="date">2021-06-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Blue-Matter/SAMtool/blob/master/vignettes/SAMtool.Rmd"><code>vignettes/SAMtool.Rmd</code></a></small>
       <div class="hidden name"><code>SAMtool.Rmd</code></div>
@@ -93,34 +93,6 @@
 
     
     
-<style type="text/css">
-
-body{ /* Normal  */
-   font-size: 12px;
-}
-td {  /* Table  */
-   font-size: 8px;
-}
-h1 { /* Header 1 */
- font-size: 18px;
- color: DarkBlue;
-}
-h2 { /* Header 2 */
- font-size: 15px;
- color: DarkBlue;
-}
-h3 { /* Header 3 */
- font-size: 14px;
- color: DarkBlue;
-}
-code.r{ /* Code block */
-  font-size: 10px;
-}
-pre { /* Code block */
-  font-size: 10px
-}
-</style>
-<p><br></p>
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
@@ -201,7 +173,7 @@ pre { /* Code block */
 <p>Two diagnostic functions are available: <code>retrospective</code> for retrospective analyses (re-running the model by sequentially removing terminal years of data) and <code>profile</code> for profiling the likelihood function over a grid of parameters.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">SCA_assessment</span>, nyr <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co"># Retrospective analysis going back 5 years from current year</span>
-<span class="fu"><a href="../reference/profile.html">profile</a></span><span class="op">(</span><span class="va">DD_result</span>, R0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">1.25</span>, <span class="fl">0.025</span><span class="op">)</span>, h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="fl">1</span>, <span class="fl">2.5e-3</span><span class="op">)</span><span class="op">)</span> <span class="co"># Joint profile over grid of R0 and steepness</span></code></pre></div>
+<span class="fu"><a href="../reference/profile.html">profile</a></span><span class="op">(</span><span class="va">SCA_result</span>, R0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">1.25</span>, <span class="fl">0.025</span><span class="op">)</span>, h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="fl">1</span>, <span class="fl">2.5e-3</span><span class="op">)</span><span class="op">)</span> <span class="co"># Joint profile over grid of R0 and steepness</span></code></pre></div>
 <pre><code>#&gt;                    Mohn's rho
 #&gt; Fishing mortality      -0.089
 #&gt; F/F[MSY]               -0.058
@@ -209,7 +181,7 @@ pre { /* Code block */
 #&gt; SSB/SSB[MSY]            0.092
 #&gt; Spawning depletion      0.119
 #&gt; Recruitment             0.051
-#&gt; Vulnerable biomass     -0.465</code></pre>
+#&gt; Vulnerable biomass      0.071</code></pre>
 <p><img src="fig_assess/retrospective.png" width="600"></p>
 <p><em>Figure 3: Retrospective trends in the SCA assessment fit and table of associated Mohn’s rho above.</em></p>
 <p><img src="fig_assess/profile.png" width="600"></p>
@@ -220,7 +192,7 @@ pre { /* Code block */
 <h1 class="hasAnchor">
 <a href="#harvest-control-rules-hcrs" class="anchor"></a>Harvest control rules (HCRs)</h1>
 <p>Harvest control rules in SAMtool are functions of class <strong>HCR</strong>, and are designed to provide different for a given assessment model. <strong>HCR</strong> functions take an object of class <strong>Assessment</strong> and return an object of class <strong>Rec</strong>. Currently, three <strong>HCR</strong> functions are available as output controls (catch limits): HCR_MSY, HCR40_10, and HCR60_20. HCR_MSY prescribes the TAC to be the catch predicted with fishing at the estimated <span class="math inline">\(F_{MSY}\)</span>, i.e., the product of <span class="math inline">\(F_{MSY}\)</span> and estimated vulnerable biomass, while HCR40_10 and HCR60_20 are ramped control rules which reduce the <span class="math inline">\(F_{MSY}\)</span> catch limit based on spawning depletion <span class="math inline">\(SSB/SSB_0\)</span>.</p>
-<p><img src="SAMtool_files/figure-html/unnamed-chunk-9-1.png" width="425"></p>
+<p><img src="SAMtool_files/figure-html/unnamed-chunk-9-1.png" width="480" style="display: block; margin: auto;"></p>
 <p><em>Figure 5: The 40-10 harvest control rule prescribes an additional reduction in the TAC based on estimated spawning depletion.</em></p>
 </div>
 <div id="model-based-mps-in-closed-loop-simulation" class="section level1">
@@ -233,7 +205,9 @@ pre { /* Code block */
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">avail</span><span class="op">(</span><span class="st">"MP"</span>, package <span class="op">=</span> <span class="st">"SAMtool"</span><span class="op">)</span>
 <span class="co">#&gt; Searching for objects of class MP in package: SAMtool</span>
-<span class="co">#&gt;  [1] "DDSS_4010"  "DDSS_75MSY" "DDSS_MSY"   "SCA_4010"   "SCA_75MSY"  "SCA_MSY"    "SP_4010"    "SP_75MSY"   "SP_MSY"     "SSS_4010"   "SSS_75MSY"  "SSS_MSY"</span></code></pre></div>
+<span class="co">#&gt;  [1] "DDSS_4010"  "DDSS_75MSY" "DDSS_MSY"   "SCA_4010"   "SCA_75MSY" </span>
+<span class="co">#&gt;  [6] "SCA_MSY"    "SP_4010"    "SP_75MSY"   "SP_MSY"     "SSS_4010"  </span>
+<span class="co">#&gt; [11] "SSS_75MSY"  "SSS_MSY"</span></code></pre></div>
 <p>These MPs use an assessment model and a harvest control rule to come up with a management recommendation (TAC).</p>
 <p>The <code>make_MP</code> function is a convenient way to stitch together additional MPs from an assessment model and HCR. This is handy if an assessment model with a different configuration than the default is needed (for example, specify dome vulnerability instead of logistic vulnerability in <code>SCA</code>) or a different harvest control rule is desired. The resulting function can then be passed to <code><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html">MSEtool::runMSE()</a></code> as a management procedure.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">

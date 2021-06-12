@@ -150,7 +150,7 @@ Set the variance (<code>start$tau_M</code>) to a small value (0.001) in order to
   fix_F_equilibrium <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_omega <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_tau <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  LWT <span class='op'>=</span> <span class='cn'>NULL</span>,
+  LWT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   early_dev <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"comp_onegen"</span>, <span class='st'>"comp"</span>, <span class='st'>"all"</span><span class='op'>)</span>,
   late_dev <span class='op'>=</span> <span class='st'>"comp50"</span>,
   refyear <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/expression.html'>expression</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>Data</span><span class='op'>@</span><span class='va'>Year</span><span class='op'>)</span><span class='op'>)</span>,
@@ -247,7 +247,8 @@ tau is fixed to value provided in <code>start</code> (if provided), otherwise, v
     </tr>
     <tr>
       <th>LWT</th>
-      <td><p>A vector of likelihood weights for each survey.</p></td>
+      <td><p>A named list (Index, CAA, Catch) of likelihood weights for the data components. For the index, a vector of length survey. For
+CAL and Catch, a single value.</p></td>
     </tr>
     <tr>
       <th>early_dev</th>
@@ -327,7 +328,6 @@ By default, 150% Data@OM$R0[x] is used as the start value in closed-loop simulat
 <li><p><code>vul_par</code> Vulnerability parameters, see next paragraph.</p></li>
 <li><p><code>F</code> A vector of length nyears for year-specific fishing mortality.</p></li>
 <li><p><code>F_equilibrium</code> Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.</p></li>
-<li><p><code>U_equilibrium</code> Same as F_equilibrium when <code>catch_eq = "Pope"</code>. By default, 0.</p></li>
 <li><p><code>omega</code> Lognormal SD of the catch (observation error) when <code>catch_eq = "Baranov"</code>. By default, Data@CV_Cat[x].</p></li>
 <li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].</p></li>
 <li><p><code>tau_M</code> The fixed SD of the random walk in M. By default, 0.05.</p></li>
@@ -336,9 +336,15 @@ By default, 150% Data@OM$R0[x] is used as the start value in closed-loop simulat
 <p>See <a href='SCA.html'>SCA</a> for all other information about the structure and setup of the model.</p>
 <p>The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are 
 calculated and reported in TMB_report of the <a href='Assessment-class.html'>Assessment</a> object.</p>
+    <h2 class="hasAnchor" id="online-documentation"><a class="anchor" href="#online-documentation"></a>Online Documentation</h2>
+
+    
+
+<p>Model description and equations are available on the openMSE 
+<a href='https://openmse.com/features-assessment-models/2-sca/'>website</a>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><a href='SCA.html'>SCA</a></p></div>
+    <div class='dont-index'><p><a href='SCA.html'>SCA</a> <a href='SCA_DDM.html'>SCA_DDM</a></p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Q. Huynh</p>

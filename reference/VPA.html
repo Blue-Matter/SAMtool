@@ -148,7 +148,7 @@ are then calculated from the VPA output.</p>
   fix_Fterm <span class='op'>=</span> <span class='cn'>FALSE</span>,
   LWT <span class='op'>=</span> <span class='cn'>NULL</span>,
   shrinkage <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
-  nitF <span class='op'>=</span> <span class='fl'>5L</span>,
+  n_itF <span class='op'>=</span> <span class='fl'>5L</span>,
   min_age <span class='op'>=</span> <span class='st'>"auto"</span>,
   max_age <span class='op'>=</span> <span class='st'>"auto"</span>,
   refpt <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
@@ -223,7 +223,7 @@ is the number of years in which recruitment will be constrained (as a random wal
 </ul></td>
     </tr>
     <tr>
-      <th>nitF</th>
+      <th>n_itF</th>
       <td><p>The number of iterations for solving F in the model (via Newton's method).</p></td>
     </tr>
     <tr>
@@ -294,6 +294,12 @@ by the Fratio.</p></li>
 
 <p>MSY and depletion reference points are calculated by fitting the stock recruit relationship to the recruitment and SSB estimates. Per-recruit
 quantities are also calculated, which may be used in harvest control rules.</p>
+    <h2 class="hasAnchor" id="online-documentation"><a class="anchor" href="#online-documentation"></a>Online Documentation</h2>
+
+    
+
+<p>Model description and equations are available on the openMSE 
+<a href='https://openmse.com/features-assessment-models/4-vpa/'>website</a>.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.</p>

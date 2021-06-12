@@ -342,6 +342,12 @@ a prior distribution for r. See <code>vignette("Surplus_production")</code> for 
 leading parameters. The default conditions assume unfished conditions in the first year of the time series
 and a symmetric production function (n = 2).</p>
 <p>Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.</p>
+    <h2 class="hasAnchor" id="online-documentation"><a class="anchor" href="#online-documentation"></a>Online Documentation</h2>
+
+    
+
+<p>Model description and equations are available on the openMSE 
+<a href='https://openmse.com/features-assessment-models/3-sp/'>website</a>.</p>
     <h2 class="hasAnchor" id="required-data"><a class="anchor" href="#required-data"></a>Required Data</h2>
 
     
@@ -388,7 +394,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 
 <span class='co'># \donttest{</span>
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpkObpy8/report_SP.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkObpy8/report_SP.html</span></div><div class='input'><span class='fu'><a href='profile.html'>profile</a></span><span class='op'>(</span><span class='va'>res</span>, FMSY <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpgbfTY4/report_SP.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpgbfTY4/report_SP.html</span></div><div class='input'><span class='fu'><a href='profile.html'>profile</a></span><span class='op'>(</span><span class='va'>res</span>, FMSY <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='img'><img src='SP-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; An object of class "prof"
 #&gt; Slot "Model":
 #&gt; [1] "SP"
@@ -431,7 +437,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 #&gt; 25 0.34 14279.16 0.2891333485
 #&gt; 26 0.35 14279.16 0.3822012176
 #&gt; 27 0.36 14279.16 0.4857799664
-#&gt; 28 0.37 14279.16 0.5990390917
+#&gt; 28 0.37 14279.16 0.5990390918
 #&gt; 29 0.38 14279.16 0.7211749445
 #&gt; 30 0.39 14279.16 0.8514134997
 #&gt; 31 0.40 14279.16 0.9890125181
@@ -448,7 +454,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 
 <span class='co'># \donttest{</span>
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res_SS</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpkObpy8/report_SP_SS.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkObpy8/report_SP_SS.html</span></div><div class='img'><img src='SP-6.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># }</span>
+</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpgbfTY4/report_SP_SS.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpgbfTY4/report_SP_SS.html</span></div><div class='img'><img src='SP-6.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># }</span>
 
 <span class='co'>#### Fox model</span>
 <span class='va'>res_Fox</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, fix_n <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>

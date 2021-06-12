@@ -147,18 +147,20 @@ If not provided, the default is 0.01. Not used if <code><a href='check_RCMdata.h
 <dt><code>Ehist</code></dt><dd><p>A vector of historical effort, should be of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns. 
 See also <code>E_eq</code>).</p></dd>
 
-<dt><code>CAA</code></dt><dd><p>Fishery age composition matrix with nyears rows and OM@maxage+1 columns. If multiple fleets: an array with dimension: nyears, OM@maxage, and nfleets.</p></dd>
+<dt><code>CAA</code></dt><dd><p>Fishery age composition matrix with nyears rows and OM@maxage+1 columns. If multiple fleets: an array with dimension: nyears, OM@maxage, and nfleets.
+Raw numbers will be converted to annual proportions (see CAA_ESS for sample sizes).</p></dd>
 
 <dt><code>CAA_ESS</code></dt><dd><p>Annual sample size (for the multinomial distribution) of the fishery age comps. 
 A vector of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.</p></dd>
 
 <dt><code>CAL</code></dt><dd><p>Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets: an array with dimension: nyears,
-length bins (see <code>length_bin</code>), and nfleets.</p></dd>
+n_bins, and nfleets. Raw numbers will be converted to annual proportions (see CAL_ESS for sample sizes).</p></dd>
 
 <dt><code>CAL_ESS</code></dt><dd><p>Annual sample size (for the multinomial distribution) of the fishery length comps. 
 A vector of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.</p></dd>
 
-<dt><code>length_bin</code></dt><dd><p>- A vector for the midpoints of the length bins for <code>CAL</code> and <code>IAL</code>. All bin widths should be equal in size.</p></dd>
+<dt><code>length_bin</code></dt><dd><p>- A vector (length n_bin) for the midpoints of the length bins for <code>CAL</code> and <code>IAL</code>, as well as the population model, if all bin widths are equal in size. 
+If length bins are unequal in bin width, then provide a vector of the boundaries of the length bins (vector of length n_bin + 1).</p></dd>
 
 <dt><code>MS</code></dt><dd><p>A vector of fishery mean size (MS, either mean length or mean weight) observations (length OM@nyears), or if multiple fleets: matrix of dimension: nyears and nfleets.
 Generally, mean lengths should not be used if <code>CAL</code> is also provided, unless mean length and length comps are independently sampled.</p></dd>
@@ -174,12 +176,14 @@ indexing years and columns indexing surveys.</p></dd>
 <dt><code>I_sd</code></dt><dd><p>A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in <code>Index</code>.
 If not provided, this function will use values from <code>OM@Iobs</code>.</p></dd>
 
-<dt><code>IAA</code></dt><dd><p>Index age composition data, an array of dimension nyears, maxage+1, nsurvey.</p></dd>
+<dt><code>IAA</code></dt><dd><p>Index age composition data, an array of dimension nyears, maxage+1, nsurvey.
+Raw numbers will be converted to annual proportions (see IAA_ESS for sample sizes).</p></dd>
 
 <dt><code>IAA_ESS</code></dt><dd><p>Annual sample size (for the multinomial distribution) of the index age comps. 
 A vector of length OM@nyears. If there are multiple indices: a matrix of OM@nyears rows and nsurvey columns.</p></dd>
 
-<dt><code>IAL</code></dt><dd><p>Index length composition data, an array of dimension nyears, length(length_bin), nsurvey.</p></dd>
+<dt><code>IAL</code></dt><dd><p>Index length composition data, an array of dimension nyears, n_bin, nsurvey. 
+Raw numbers will be converted to annual proportions (see IAL_ESS for sample sizes).</p></dd>
 
 <dt><code>IAL_ESS</code></dt><dd><p>Annual sample size (for the multinomial distribution) of the index length comps. 
 A vector of length OM@nyears. If there are multiple indices: a matrix of OM@nyears rows and nsurvey columns.</p></dd>

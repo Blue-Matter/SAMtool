@@ -144,11 +144,13 @@ In the state-space version <code>DD_SS</code>, recruitment deviations from the s
   AddInd <span class='op'>=</span> <span class='st'>"B"</span>,
   SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span><span class='op'>)</span>,
   rescale <span class='op'>=</span> <span class='st'>"mean1"</span>,
+  MW <span class='op'>=</span> <span class='cn'>FALSE</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
   prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   fix_h <span class='op'>=</span> <span class='cn'>TRUE</span>,
   dep <span class='op'>=</span> <span class='fl'>1</span>,
-  LWT <span class='op'>=</span> <span class='cn'>NULL</span>,
+  LWT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  n_itF <span class='op'>=</span> <span class='fl'>3L</span>,
   silent <span class='op'>=</span> <span class='cn'>TRUE</span>,
   opt_hess <span class='op'>=</span> <span class='cn'>FALSE</span>,
   n_restart <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>opt_hess</span>, <span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>,
@@ -163,13 +165,15 @@ In the state-space version <code>DD_SS</code>, recruitment deviations from the s
   AddInd <span class='op'>=</span> <span class='st'>"B"</span>,
   SR <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BH"</span>, <span class='st'>"Ricker"</span><span class='op'>)</span>,
   rescale <span class='op'>=</span> <span class='st'>"mean1"</span>,
+  MW <span class='op'>=</span> <span class='cn'>FALSE</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
   prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
   fix_h <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fix_sd <span class='op'>=</span> <span class='cn'>FALSE</span>,
   fix_tau <span class='op'>=</span> <span class='cn'>TRUE</span>,
   dep <span class='op'>=</span> <span class='fl'>1</span>,
-  LWT <span class='op'>=</span> <span class='cn'>NULL</span>,
+  LWT <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  n_itF <span class='op'>=</span> <span class='fl'>3L</span>,
   integrate <span class='op'>=</span> <span class='cn'>FALSE</span>,
   silent <span class='op'>=</span> <span class='cn'>TRUE</span>,
   opt_hess <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -212,6 +216,11 @@ can improve convergence. By default, <code>"mean1"</code> scales the catch so th
 Output is re-converted back to original units.</p></td>
     </tr>
     <tr>
+      <th>MW</th>
+      <td><p>Logical, whether to fit to mean weight. In closed-loop simulation, mean weight will be grabbed from <code>Data@Misc[[x]]$MW</code>,
+otherwise calculated from <code>Data@CAL</code>.</p></td>
+    </tr>
+    <tr>
       <th>start</th>
       <td><p>Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.</p></td>
     </tr>
@@ -231,12 +240,17 @@ Automatically false if a prior is used.</p></td>
     <tr>
       <th>dep</th>
       <td><p>The initial depletion in the first year of the model. A tight prior is placed on the model objective function
-to estimate the equilibrium exploitation rate that corresponds to the initial depletion. Due to this tight prior, this F
-should not be considered to be an independent model parameter.</p></td>
+to estimate the equilibrium fishing mortality rate that corresponds to the initial depletion. Due to this tight prior, this F
+should not be considered to be an independent model parameter. Set to zero to eliminate this prior.</p></td>
     </tr>
     <tr>
       <th>LWT</th>
-      <td><p>A vector of likelihood weights for each survey.</p></td>
+      <td><p>A named list of likelihood weights. For <code>LWT$Index</code>, a vector of likelihood weights for each survey, while
+for <code>LWT$MW</code> a numeric.</p></td>
+    </tr>
+    <tr>
+      <th>n_itF</th>
+      <td><p>Integer, the number of iterations to solve F within an annual time step when conditioning on catch.</p></td>
     </tr>
     <tr>
       <th>silent</th>
@@ -300,11 +314,12 @@ is passed on to <code><a href='https://rdrr.io/pkg/TMB/man/newton.html'>newton</
 <li><p><code>Rho</code> Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.</p></li>
 <li><p><code>Alpha</code> Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.</p></li>
 <li><p><code>q_effort</code> Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.</p></li>
-<li><p><code>U_equilibrium</code> Equilibrium exploitation rate leading into first year of the model (to determine initial depletion). By default, 0.</p></li>
+<li><p><code>F_equilibrium</code> Equilibrium fishing mortality rate leading into first year of the model (to determine initial depletion). By default, 0.</p></li>
 <li><p><code>omega</code> Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@CV_Cat[x].</p></li>
 <li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error) for <code>DD_SS</code>. By default, Data@sigmaR[x].</p></li>
 <li><p><code>sigma</code> Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@CV_Ind[x]. Not
 used if multiple indices are used.</p></li>
+<li><p><code>sigma_W</code> Lognormal SD of the mean weight (observation error). By default, 0.1.</p></li>
 </ul>
 
 <p>Multiple indices are supported in the model. Data@Ind, Data@VInd, and Data@SpInd are all assumed to be biomass-based.
@@ -314,6 +329,12 @@ models, the model depends on assumptions such as stationary productivity and
 proportionality between the abundance index and real abundance.
 Unsurprisingly the extent to which these assumptions are
 violated tends to be the biggest driver of performance for this method.</p>
+    <h2 class="hasAnchor" id="online-documentation"><a class="anchor" href="#online-documentation"></a>Online Documentation</h2>
+
+    
+
+<p>Model description and equations are available on the openMSE 
+<a href='https://openmse.com/features-assessment-models/1-dd/'>website</a>.</p>
     <h2 class="hasAnchor" id="required-data"><a class="anchor" href="#required-data"></a>Required Data</h2>
 
     
@@ -356,12 +377,12 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>@</span><span class='va'>SD</span><span class='op'>)</span> <span class='co'># Parameter estimates</span>
 </div><div class='output co'>#&gt;                Estimate   Std. Error
-#&gt; R0x       -2.3581906052 1.931030e-02
-#&gt; log_sigma -1.3236951283 1.414214e-02
-#&gt; R0        63.7126295106 1.230310e+00
+#&gt; R0x       -2.1763015902 2.011308e-02
+#&gt; log_sigma -1.3239595749 1.414214e-02
+#&gt; R0        76.4220925130 1.537084e+00
 #&gt; h          0.9500000000 0.000000e+00
-#&gt; q          0.0003005088 9.347119e-06
-#&gt; sigma      0.2661500242 3.763930e-03</div><div class='input'>
+#&gt; q          0.0002515442 8.108952e-06
+#&gt; sigma      0.2660796511 3.762934e-03</div><div class='input'>
 <span class='co'>### State-space version</span>
 <span class='co'>### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)</span>
 <span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_SS</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>tau <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span><span class='op'>)</span>
