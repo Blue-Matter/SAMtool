@@ -7,6 +7,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Fix plotting bug in `compare_RCM`.
 - Priors for index q in `RCM` is now lognormal instead of normal.
 - Uneven length bin widths now supported.
+- An example is now added to the help documentation and online article, using Pacific cod (courtesy of R. Forrest).
 
 ### Assessment models
 - Priors on M, steepness, R0, and index q (lognormal, see RCM) can be created SCA, DD, and cDD assessment models.

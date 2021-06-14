@@ -367,7 +367,7 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
     report$vul_len <- matrix(NA_real_, nlbin, data$nsel_block)
     report$ivul_len <- matrix(NA_real_, nlbin, dim(report$ivul)[3])
     
-    report$MLpred <- matrix(NA_real_, nrow(report$F), ncol(report$F))
+    report$MLpred <- array(NA_real_, dim(report$F))
     report$CALpred <- array(NA_real_, dim(report$CALpred))
     report$IALpred <- array(NA_real_, dim(report$IALpred))
   } else {

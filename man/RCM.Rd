@@ -264,8 +264,43 @@ Annual multinomial sample sizes for the age and length comps can now be provided
 \linkS4class{RCMdata} object.
 }
 
+\examples{
+\donttest{ 
+# An example that conditions a Pacific cod operating model. There are 48 simulations, 
+# where values of natural mortality and steepness are sampled from distributions. 
+# The model is fitted with priors on the index catchability. Maturity and selectivity 
+# are knife-edge at the age of 2 years. See online tutorial for more information.
+
+data(pcod) 
+mat_ogive <- pcod$OM@cpars$Mat_age[1, , 1]
+out <- RCM(OM = pcod$OM, data = pcod$data, 
+           condition = "catch", mean_fit = TRUE,
+           selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
+           vul_par = matrix(mat_ogive, length(mat_ogive), 1),
+           map_vul_par = matrix(NA, length(mat_ogive), 1),
+           map_log_early_rec_dev = rep(1, pcod$OM@maxage),
+           prior = pcod$prior)
+plot(out, s_name = colnames(pcod$data@Index))
+
+# Alternative OM with age-3 maturity and selectivity instead.
+out_age3 <- local({
+  pcod$OM@cpars$Mat_age[, 2, ] <- 0
+  mat_ogive_age3 <- pcod$OM@cpars$Mat_age[1, , 1]
+  RCM(OM = pcod$OM, data = pcod$data, 
+      condition = "catch", mean_fit = TRUE,
+      selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
+      vul_par = matrix(mat_ogive_age3, length(mat_ogive_age3), 1),
+      map_vul_par = matrix(NA, length(mat_ogive_age3), 1),
+      map_log_early_rec_dev = rep(1, pcod$OM@maxage),
+      prior = pcod$prior)
+})
+  
+compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 maturity")),
+            s_name = colnames(pcod$data@Index))
+} 
+}
 \seealso{
-\link{plot.RCModel} \linkS4class{RCModel}
+\link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM}
 }
 \author{
 Q. Huynh
