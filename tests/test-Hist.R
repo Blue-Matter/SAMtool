@@ -16,7 +16,7 @@ message("Default assessment settings")
 for(i in 1:length(assess)) {
   message(assess[i])
   run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data)
-  conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+  conv <- sapply(run_mod, getElement, 'conv')
   message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
 }
 
@@ -27,7 +27,7 @@ for(i in 1:length(assess)) {
   if(do_dep[i]) {
     message(assess[i])
     run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data, dep = 0.5, start = list(dep = 0.5))
-    conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+    conv <- sapply(run_mod, getElement, 'conv')
     message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
   }
 }
@@ -39,7 +39,7 @@ for(i in 1:length(assess)) {
   if(do_Ricker[i]) {
     message(assess[i])
     run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data, SR = "Ricker")
-    conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+    conv <- sapply(run_mod, getElement, 'conv')
     message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
   }
 }
@@ -50,7 +50,7 @@ Hist@Data@Ind[, 1:30] <- NA
 for(i in 1:length(assess)) {
   message(assess[i])
   run_mod <- sfClusterApplyLB(1:OM@nsim, assess[i], Data = Hist@Data)
-  conv <- sapply(run_mod, getElement, 'conv')/length(run_mod)
+  conv <- sapply(run_mod, getElement, 'conv')
   message("Percent converged... ", 100 * sum(conv)/length(run_mod), "\n")
 }
 
@@ -65,5 +65,5 @@ for(i in 1:length(assess)) {
 # projections
 
 # profile
-
+sfStop()
 
