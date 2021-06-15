@@ -180,13 +180,13 @@ a figure of the likelihood surface.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
-<span class='va'>output</span> <span class='op'>&lt;-</span> <span class='fu'><a href='DD_TMB.html'>DD_TMB</a></span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span><span class='op'>)</span>
+<span class='va'>output</span> <span class='op'>&lt;-</span> <span class='fu'><a href='DD_TMB.html'>DD_TMB</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span><span class='op'>)</span>
 
 <span class='co'># Profile R0 only</span>
-<span class='va'>pro</span> <span class='op'>&lt;-</span> <span class='fu'>profile</span><span class='op'>(</span><span class='va'>output</span>, R0 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>100</span>, <span class='fl'>300</span>, <span class='fl'>10</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>pro</span> <span class='op'>&lt;-</span> <span class='fu'>profile</span><span class='op'>(</span><span class='va'>output</span>, R0 <span class='op'>=</span> <span class='fl'>60</span><span class='op'>:</span><span class='fl'>100</span><span class='op'>)</span>
 </div><div class='img'><img src='profile-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Profile both R0 and steepness</span>
-<span class='va'>pro</span> <span class='op'>&lt;-</span> <span class='fu'>profile</span><span class='op'>(</span><span class='va'>output</span>, R0 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>100</span>, <span class='fl'>300</span>, <span class='fl'>10</span><span class='op'>)</span>, h <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.7</span>, <span class='fl'>0.9</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>pro</span> <span class='op'>&lt;-</span> <span class='fu'>profile</span><span class='op'>(</span><span class='va'>output</span>, R0 <span class='op'>=</span> <span class='fl'>65</span><span class='op'>:</span><span class='fl'>85</span>, h <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.65</span>, <span class='fl'>0.85</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='img'><img src='profile-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Ensure your grid is of proper resolution. A grid that is too coarse</span>
 <span class='co'># will likely distort the shape of the likelihood surface.</span>

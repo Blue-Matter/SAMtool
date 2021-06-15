@@ -3,7 +3,7 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   SAMtool: SAMtool.html
-last_built: 2021-06-15T00:47Z
+last_built: 2021-06-15T16:17Z
 urls:
   reference: https://SAMtool.openMSE.com/reference
   article: https://SAMtool.openMSE.com/articles
