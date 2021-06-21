@@ -6,6 +6,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Create a profiling function for `RCM` models. Steepness, R0, and final depletion can be profiled.
 - Fix plotting bug in `compare_RCM`.
 - Priors for index q in `RCM` is now lognormal instead of normal.
+- Annual equilibrium and transitional SPR are now calculated and reported.
 - Uneven length bin widths now supported.
 - An example is now added to the help documentation and online article, using Pacific cod (courtesy of R. Forrest).
 

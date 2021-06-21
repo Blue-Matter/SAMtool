@@ -356,6 +356,11 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
   }
   report$F_at_age <- report$Z - M
   report$NPR_unfished <- do.call(rbind, report$NPR_unfished)
+  report$SPR_eq <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt)
+  report$SPR_dyn <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt, 
+                            N_at_age = report$N, R = report$R, R_early = report$R_early,
+                            equilibrium = FALSE)
+
   lmid <- obj$env$data$lbinmid
   nlbin <- length(lmid)
   
@@ -411,4 +416,31 @@ get_ivul_len <- function(report, s_selectivity, lmid, Linf) {
     }
   }
   return(ivul_len)
+}
+
+RCM_SPR <- function(F_at_age, M, mat, wt, N_at_age, R, R_early, equilibrium = TRUE) {
+  n_y <- nrow(F_at_age)
+  SSPR_0 <- vapply(1:n_y, function(y) {
+    yield_fn_SCA_int(0, M = M[y, ], mat = mat[y, ], weight = wt[y, ], vul = F_at_age[y, ]/max(F_at_age[y, ]), 
+                             Arec = 1, Brec = 1, opt = FALSE)["SPR"]
+  }, numeric(1))
+  
+  if(equilibrium) {
+    SSPR_F <- vapply(1:n_y, function(y) {
+      yield_fn_SCA_int(max(F_at_age[y, ]), M = M[y, ], mat = mat[y, ], weight = wt[y, ], 
+                       vul = F_at_age[y, ]/max(F_at_age[y, ]), Arec = 1, Brec = 1, opt = FALSE)["SPR"]
+    }, numeric(1))
+  } else {
+    n_age <- ncol(F_at_age)
+    SSPR_F <- vapply(1:n_y, function(y) {
+      if(y < n_age) {
+        RR <- R_early[1:(n_age-y)] %>% rev() %>% c(R[1:y])
+      } else {
+        RR <- R[(y - n_age + 1):y]
+      }
+      sum(N_at_age[y, ] * wt[y, ] * mat[y, ]/ rev(RR))
+    }, numeric(1))
+  }
+  SPR <- SSPR_F/SSPR_0
+  return(SPR)
 }

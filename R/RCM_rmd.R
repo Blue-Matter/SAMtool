@@ -366,6 +366,34 @@ rmd_log_rec_dev <- function() {
     "```\n")
 }
 
+rmd_RCM_SPR <- function() {
+  c("```{r, fig.cap = \"Equilibrium spawning potential ratio (SPR) calculated from the biological parameters and F-at-age in the corresponding year for all simulations.\"}",
+    "SPR_eq <- do.call(cbind, lapply(report_list, getElement, \"SPR_eq\"))",
+    "matplot(Year, SPR_eq, type = \"n\", ylim = c(0, 1), xlab = \"Year\", ylab = \"Equilibrium SPR\")",
+    "abline(h = 0, col = \"grey\")",
+    "matlines(Year, SPR_eq, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
+    "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
+    "```\n",
+    "",
+    "```{r, fig.cap = \"Transitional spawning potential ratio (SPR) calculated from the biological parameters and relative survival of the cohorts in the corresponding year for all simulations.\"}",
+    "SPR_dyn <- do.call(cbind, lapply(report_list, getElement, \"SPR_dyn\"))",
+    "matplot(Year, SPR_dyn, type = \"n\", ylim = c(0, 1), xlab = \"Year\", ylab = \"Transitional SPR\")",
+    "abline(h = 0, col = \"grey\")",
+    "matlines(Year, SPR_dyn, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
+    "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
+    "```\n")
+}
+
+rmd_RCM_SPR2 <- function() {
+  c("```{r, fig.cap = \"Annual spawning potential ratio (SPR). Equilibrium SPR is calculated from the F-at-age in the corresponding year, while transitional SPR is calculated from the relative survival of cohorts.\"}",
+    "plot(Year, report$SPR_eq, typ = \"o\", lty = 3, ylim = c(0, 1), xlab = \"Year\", ylab = \"Spawning potential ratio\")",
+    "lines(Year, report$SPR_dyn, typ = \"o\", pch = 16)",
+    "legend(\"bottomleft\", c(\"Equilibrium SPR\", \"Transitional SPR\"), lty = c(3, 1), pch = c(1, 16))",
+    "abline(h = 0, col = \"grey\")",
+    "```\n")
+}
+
+
 rmd_RCM_SR <- function() {
   c("```{r, fig.cap = \"Stock-recruit relationship and estimated recruitment.\"}",
     "if(OM@SRrel == 1) {",

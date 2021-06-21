@@ -204,7 +204,8 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             } else index_output <- NULL
 
             all_sims_output <- c(fleet_output, index_output, "### Model predictions\n",
-                                 rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), rmd_log_rec_dev())
+                                 rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), rmd_log_rec_dev(), 
+                                 rmd_RCM_SPR())
 
             ####### Fit to mean inputs from operating model
             # Generate summary table (parameter estimates)
@@ -382,7 +383,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               ts_output <- c(sel_matplot, F_matplot, rmd_SSB("structure(report$E, names = Yearplusone)"), 
                              SSB0_plot, rmd_SSB_SSB0(FALSE, "structure(report$E/report$E0_SR, names = Yearplusone)"), 
                              rmd_dynamic_SSB0("structure(report$dynamic_SSB0, names = Yearplusone)"), 
-                             rmd_R("structure(report$R, names = Yearplusone)"), rmd_RCM_SR(),
+                             rmd_R("structure(report$R, names = Yearplusone)"), rmd_RCM_SR(), rmd_RCM_SPR2(),
                              rmd_residual("structure(report$log_rec_dev, names = Year)", fig.cap = "Time series of recruitment deviations.", label = "log-Recruitment deviations"),
                              rmd_residual("structure(report$log_rec_dev, names = Year)", 
                                           "ifelse(data_mean_fit$est_rec_dev, as.list(SD, \"Std. Error\")$log_rec_dev, 0)", 

@@ -115,7 +115,7 @@ out <- RCM(OM, RCM_data,
            map_log_early_rec_dev = rep(1, OM@maxage), # Estimate R-init
            prior = prior)
 
-saveRDS(out, file = "tests/pcod/pcod-RCM2.rds")
+saveRDS(out, file = "tests/pcod/pcod-RCM.rds")
 
 out <- readRDS("tests/pcod/pcod-RCM2.rds")
 summary(out@mean_fit$SD) # Parameter estimates
