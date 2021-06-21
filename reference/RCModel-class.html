@@ -150,37 +150,46 @@
 
 <dt><code>conv</code></dt><dd><p>A logical vector of length <code>OM@nsim</code> indicating convergence of the RCM in the i-th simulation.</p></dd>
 
-<dt><code>Misc</code></dt><dd><p>A list of length <code>OM@nsim</code> with more output from the fitted RCM. Within each simulation, items of interest include:<ul>
+<dt><code>Misc</code></dt><dd><p>A list of length <code>OM@nsim</code> with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:<ul>
 <li><p>B - total biomass - vector of length nyears+1</p></li>
 <li><p>E0 - annual unfished spawning biomass - vector of length nyears</p></li>
 <li><p>E0_SR - unfished spawning biomass for the stock-recruit relationship - numeric</p></li>
+<li><p>CR_SR - compensation ratio correpsponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric</p></li>
 <li><p>CR - annual compensation ratio - vector of length nyears</p></li>
 <li><p>Arec - alpha parameter of the stock-recruit relationship - numeric</p></li>
 <li><p>Brec - beta parameter of the stock-recruit relationship - numeric</p></li>
 <li><p>R - recruitment - vector of length nyears+1</p></li>
-<li><p>R_early - recruitment for the cohorts in first year of the model - vector maxage-1</p></li>
+<li><p>R_early - recruitment for the cohorts in first year of the model - vector n_age-1 (where n_age = maxage + 1)</p></li>
 <li><p>VB - vulnerable biomass - matrix of nyears x nfleet</p></li>
-<li><p>N - abundance at age - matrix of nyears+1 x maxage</p></li>
+<li><p>N - abundance at age - matrix of nyears+1 x n_age</p></li>
 <li><p>F - apical fishing mortality - matrix of nyears x nfleet</p></li>
-<li><p>F_at_age - fishing mortality at age - array of nyears x maxage x nfleet</p></li>
+<li><p>F_at_age - fishing mortality at age - matrix of nyears x n_age</p></li>
 <li><p>F_equilibrium - equilibrium fishing mortality prior to first year - vector of length nfleet</p></li>
-<li><p>M - natural mortality - matrix of nyears x maxage</p></li>
-<li><p>Z - total mortality - matrix of nyears x maxage</p></li>
+<li><p>M - natural mortality - matrix of nyears x n_age</p></li>
+<li><p>Z - total mortality - matrix of nyears x n_age</p></li>
 <li><p>q - index catchability - vector of length nsurvey</p></li>
-<li><p>ivul - index selectivity at age - array of dim nyears+1, maxage, nsurvey</p></li>
+<li><p>ivul - index selectivity at age - array of dim nyears+1, n_age, nsurvey</p></li>
 <li><p>ivul_len - corresponding index selectivity at length - matrix of nbins x nsurvey</p></li>
 <li><p>Ipred - predicted index values - matrix of nyears x nsurvey</p></li>
-<li><p>IAApred - predicted index catch at age - array of dim nyears, maxage, nsurvey</p></li>
-<li><p>vul - fleet selectivity at age - array of dim nyears+1, maxage, nfleet (or nsel_block)</p></li>
+<li><p>IAApred - predicted index catch at age - array of dim nyears, n_age, nsurvey</p></li>
+<li><p>vul - fleet selectivity at age - array of dim nyears+1, n_age, nfleet (or nsel_block)</p></li>
 <li><p>vul_len - corresponding fleet selectivity at length - matrix of nbins x nfleet (or nsel_block)</p></li>
 <li><p>IALpred - predicted index catch at length - array of dim nyears, nbins, nsurvey</p></li>
 <li><p>MLpred - predicted mean length - matrix of nyears x nfleet</p></li>
 <li><p>MWpred - predicted mean weight - matrix of nyears x nfleet</p></li>
-<li><p>CAApred - predicted catch at age - array of nyears, maxage, nfleet</p></li>
+<li><p>CAApred - predicted catch at age - array of nyears, n_age, nfleet</p></li>
 <li><p>CALpred - predicted catch at length - array of nyears, nbins, nfleet</p></li>
 <li><p>Cpred - predicted catch in weight - matrix of nyears x nfleet</p></li>
 <li><p>CN - predicted catch in numbers - matrix of nyears x nfleet</p></li>
-<li><p>nll - Total objective function of the model - numeric</p></li>
+<li><p>dynamic_SSB0 - the dynamic unfished spawning biomass calcaluated by projecting the historical model with zero catches - vector of length nyears+1</p></li>
+<li><p>SPR_eq - equilibrium spawning potential ratio calculated from annual F-at-age - vector of length nyears</p></li>
+<li><p>SPR_dyn - dynamic (transitional) spawning potential ratio calculated from relative survival of cohorts - vector of length nyears</p></li>
+<li><p>nll - total objective function of the model - numeric</p></li>
+<li><p>nll_fleet - objective function values for each annual data point(s) from fleets - array of nyears x nfleet x 5 (for Catch, equilibrium catch, CAA, CAL, and mean size)</p></li>
+<li><p>nll_index - objective function values for each annual data point(s) in the index - array of nyears x nsurvey x 3 (for Index, IAA, and IAL)</p></li>
+<li><p>prior - penalty value added to the objective function from priors - numeric</p></li>
+<li><p>penalty - additional penalty values added to the objective function due to high F - numeric</p></li>
+<li><p>conv - whether the model converged (whether a positive-definite Hessian was obtained) - logical</p></li>
 </ul></p></dd>
 
 <dt><code>mean_fit</code></dt><dd><p>A list of output from fit to mean values of life history parameters in the operating model. The named list consists of:<ul>
@@ -191,7 +200,7 @@
 <li><p>report - a list of model output reported from the TMB executable, i.e. <code>obj$report()</code>. See Misc.</p></li>
 </ul></p></dd>
 
-<dt><code>data</code></dt><dd><p>A list of the data inputs for the RCM.</p></dd>
+<dt><code>data</code></dt><dd><p>A <a href='RCMdata-class.html'>RCMdata</a> object containing data inputs for the RCM.</p></dd>
 
 <dt><code>config</code></dt><dd><p>A data frame describing configuration of the RCM (not currently used).</p></dd>
 
