@@ -23,39 +23,48 @@ An S4 class for the output from \link{RCM}.
 
 \item{\code{conv}}{A logical vector of length \code{OM@nsim} indicating convergence of the RCM in the i-th simulation.}
 
-\item{\code{Misc}}{A list of length \code{OM@nsim} with more output from the fitted RCM. Within each simulation, items of interest include:
+\item{\code{Misc}}{A list of length \code{OM@nsim} with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:
 
 \itemize{
 \item B - total biomass - vector of length nyears+1
 \item E0 - annual unfished spawning biomass - vector of length nyears
 \item E0_SR - unfished spawning biomass for the stock-recruit relationship - numeric
+\item CR_SR - compensation ratio correpsponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric
 \item CR - annual compensation ratio - vector of length nyears
 \item Arec - alpha parameter of the stock-recruit relationship - numeric
 \item Brec - beta parameter of the stock-recruit relationship - numeric
 \item R - recruitment - vector of length nyears+1
-\item R_early - recruitment for the cohorts in first year of the model - vector maxage-1
+\item R_early - recruitment for the cohorts in first year of the model - vector n_age-1 (where n_age = maxage + 1)
 \item VB - vulnerable biomass - matrix of nyears x nfleet
-\item N - abundance at age - matrix of nyears+1 x maxage
+\item N - abundance at age - matrix of nyears+1 x n_age
 \item F - apical fishing mortality - matrix of nyears x nfleet
-\item F_at_age - fishing mortality at age - array of nyears x maxage x nfleet
+\item F_at_age - fishing mortality at age - matrix of nyears x n_age
 \item F_equilibrium - equilibrium fishing mortality prior to first year - vector of length nfleet
-\item M - natural mortality - matrix of nyears x maxage
-\item Z - total mortality - matrix of nyears x maxage
+\item M - natural mortality - matrix of nyears x n_age
+\item Z - total mortality - matrix of nyears x n_age
 \item q - index catchability - vector of length nsurvey
-\item ivul - index selectivity at age - array of dim nyears+1, maxage, nsurvey
+\item ivul - index selectivity at age - array of dim nyears+1, n_age, nsurvey
 \item ivul_len - corresponding index selectivity at length - matrix of nbins x nsurvey
 \item Ipred - predicted index values - matrix of nyears x nsurvey
-\item IAApred - predicted index catch at age - array of dim nyears, maxage, nsurvey
-\item vul - fleet selectivity at age - array of dim nyears+1, maxage, nfleet (or nsel_block)
+\item IAApred - predicted index catch at age - array of dim nyears, n_age, nsurvey
+\item vul - fleet selectivity at age - array of dim nyears+1, n_age, nfleet (or nsel_block)
 \item vul_len - corresponding fleet selectivity at length - matrix of nbins x nfleet (or nsel_block)
 \item IALpred - predicted index catch at length - array of dim nyears, nbins, nsurvey
 \item MLpred - predicted mean length - matrix of nyears x nfleet
 \item MWpred - predicted mean weight - matrix of nyears x nfleet
-\item CAApred - predicted catch at age - array of nyears, maxage, nfleet
+\item CAApred - predicted catch at age - array of nyears, n_age, nfleet
 \item CALpred - predicted catch at length - array of nyears, nbins, nfleet
 \item Cpred - predicted catch in weight - matrix of nyears x nfleet
 \item CN - predicted catch in numbers - matrix of nyears x nfleet
-\item nll - Total objective function of the model - numeric
+\item dynamic_SSB0 - the dynamic unfished spawning biomass calcaluated by projecting the historical model with zero catches - vector of length nyears+1
+\item SPR_eq - equilibrium spawning potential ratio calculated from annual F-at-age - vector of length nyears
+\item SPR_dyn - dynamic (transitional) spawning potential ratio calculated from relative survival of cohorts - vector of length nyears
+\item nll - total objective function of the model - numeric
+\item nll_fleet - objective function values for each annual data point(s) from fleets - array of nyears x nfleet x 5 (for Catch, equilibrium catch, CAA, CAL, and mean size)
+\item nll_index - objective function values for each annual data point(s) in the index - array of nyears x nsurvey x 3 (for Index, IAA, and IAL)
+\item prior - penalty value added to the objective function from priors - numeric
+\item penalty - additional penalty values added to the objective function due to high F - numeric
+\item conv - whether the model converged (whether a positive-definite Hessian was obtained) - logical
 }}
 
 \item{\code{mean_fit}}{A list of output from fit to mean values of life history parameters in the operating model. The named list consists of:
@@ -68,7 +77,7 @@ An S4 class for the output from \link{RCM}.
 \item report - a list of model output reported from the TMB executable, i.e. \code{obj$report()}. See Misc.
 }}
 
-\item{\code{data}}{A list of the data inputs for the RCM.}
+\item{\code{data}}{A \linkS4class{RCMdata} object containing data inputs for the RCM.}
 
 \item{\code{config}}{A data frame describing configuration of the RCM (not currently used).}
 }}
