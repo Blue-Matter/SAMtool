@@ -47,7 +47,7 @@
 #' \item CN - predicted catch in numbers - matrix of nyears x nfleet
 #' \item dynamic_SSB0 - the dynamic unfished spawning biomass calcaluated by projecting the historical model with zero catches - vector of length nyears+1
 #' \item SPR_eq - equilibrium spawning potential ratio calculated from annual F-at-age - vector of length nyears
-#' \item SPR_dyn - dynamic (transitional) spawning potential ratio calculated from relative survival of cohorts - vector of length nyears
+#' \item SPR_dyn - dynamic (transitional) spawning potential ratio calculated from cumulative survival of cohorts - vector of length nyears
 #' \item nll - total objective function of the model - numeric
 #' \item nll_fleet - objective function values for each annual data point(s) from fleets - array of nyears x nfleet x 5 (for Catch, equilibrium catch, CAA, CAL, and mean size)
 #' \item nll_index - objective function values for each annual data point(s) in the index - array of nyears x nsurvey x 3 (for Index, IAA, and IAL)

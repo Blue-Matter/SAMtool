@@ -425,21 +425,24 @@ RCM_SPR <- function(F_at_age, M, mat, wt, N_at_age, R, R_early, equilibrium = TR
                              Arec = 1, Brec = 1, opt = FALSE)["SPR"]
   }, numeric(1))
   
-  if(equilibrium) {
+  if(equilibrium) { # Plusgroup always on
     SSPR_F <- vapply(1:n_y, function(y) {
       yield_fn_SCA_int(max(F_at_age[y, ]), M = M[y, ], mat = mat[y, ], weight = wt[y, ], 
                        vul = F_at_age[y, ]/max(F_at_age[y, ]), Arec = 1, Brec = 1, opt = FALSE)["SPR"]
     }, numeric(1))
   } else {
     n_age <- ncol(F_at_age)
-    SSPR_F <- vapply(1:n_y, function(y) {
-      if(y < n_age) {
-        RR <- R_early[1:(n_age-y)] %>% rev() %>% c(R[1:y])
-      } else {
-        RR <- R[(y - n_age + 1):y]
+    NPR <- matrix(1, n_y, n_age)
+    
+    RR <- R_early %>% rev() %>% c(R[1])
+    NPR[1, ] <- N_at_age[1, ]/rev(RR)
+    for(y in 2:n_y) {
+      for(a in 2:n_age) {
+        NPR[y, a] <- NPR[y-1, a-1] * exp(-F_at_age[y-1, a-1] - M[y-1, a-1])
       }
-      sum(N_at_age[y, ] * wt[y, ] * mat[y, ]/ rev(RR))
-    }, numeric(1))
+      NPR[y, n_age] <- NPR[y, n_age] + NPR[y-1, n_age] * exp(-F_at_age[y-1, n_age] - M[y-1, n_age])
+    }
+    SSPR_F <- rowSums(NPR * wt[1:n_y, ] * mat[1:n_y, ])
   }
   SPR <- SSPR_F/SSPR_0
   return(SPR)

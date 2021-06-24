@@ -375,9 +375,9 @@ rmd_RCM_SPR <- function() {
     "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
     "```\n",
     "",
-    "```{r, fig.cap = \"Transitional spawning potential ratio (SPR) calculated from the biological parameters and relative survival of the cohorts in the corresponding year for all simulations.\"}",
+    "```{r, fig.cap = \"Dynamic spawning potential ratio (SPR) calculated from the biological parameters and cumulative survival of the cohorts in the corresponding year for all simulations.\"}",
     "SPR_dyn <- do.call(cbind, lapply(report_list, getElement, \"SPR_dyn\"))",
-    "matplot(Year, SPR_dyn, type = \"n\", ylim = c(0, 1), xlab = \"Year\", ylab = \"Transitional SPR\")",
+    "matplot(Year, SPR_dyn, type = \"n\", ylim = c(0, 1), xlab = \"Year\", ylab = \"Dynamic SPR\")",
     "abline(h = 0, col = \"grey\")",
     "matlines(Year, SPR_dyn, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
     "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
@@ -385,10 +385,10 @@ rmd_RCM_SPR <- function() {
 }
 
 rmd_RCM_SPR2 <- function() {
-  c("```{r, fig.cap = \"Annual spawning potential ratio (SPR). Equilibrium SPR is calculated from the F-at-age in the corresponding year, while transitional SPR is calculated from the relative survival of cohorts.\"}",
+  c("```{r, fig.cap = \"Annual spawning potential ratio (SPR). Equilibrium SPR is calculated from the F-at-age in the corresponding year, while dynamic SPR is calculated from the cumulative survival of cohorts.\"}",
     "plot(Year, report$SPR_eq, typ = \"o\", lty = 3, ylim = c(0, 1), xlab = \"Year\", ylab = \"Spawning potential ratio\")",
     "lines(Year, report$SPR_dyn, typ = \"o\", pch = 16)",
-    "legend(\"bottomleft\", c(\"Equilibrium SPR\", \"Transitional SPR\"), lty = c(3, 1), pch = c(1, 16))",
+    "legend(\"bottomleft\", c(\"Equilibrium SPR\", \"Dynamic SPR\"), lty = c(3, 1), pch = c(1, 16))",
     "abline(h = 0, col = \"grey\")",
     "```\n")
 }
