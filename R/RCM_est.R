@@ -420,29 +420,36 @@ get_ivul_len <- function(report, s_selectivity, lmid, Linf) {
 
 RCM_SPR <- function(F_at_age, M, mat, wt, N_at_age, R, R_early, equilibrium = TRUE) {
   n_y <- nrow(F_at_age)
-  SSPR_0 <- vapply(1:n_y, function(y) {
-    yield_fn_SCA_int(0, M = M[y, ], mat = mat[y, ], weight = wt[y, ], vul = F_at_age[y, ]/max(F_at_age[y, ]), 
-                             Arec = 1, Brec = 1, opt = FALSE)["SPR"]
-  }, numeric(1))
   
   if(equilibrium) { # Plusgroup always on
     SSPR_F <- vapply(1:n_y, function(y) {
       yield_fn_SCA_int(max(F_at_age[y, ]), M = M[y, ], mat = mat[y, ], weight = wt[y, ], 
                        vul = F_at_age[y, ]/max(F_at_age[y, ]), Arec = 1, Brec = 1, opt = FALSE)["SPR"]
     }, numeric(1))
+    
+    SSPR_0 <- vapply(1:n_y, function(y) {
+      yield_fn_SCA_int(0, M = M[y, ], mat = mat[y, ], weight = wt[y, ], vul = F_at_age[y, ]/max(F_at_age[y, ]), 
+                       Arec = 1, Brec = 1, opt = FALSE)["SPR"]
+    }, numeric(1))
   } else {
     n_age <- ncol(F_at_age)
-    NPR <- matrix(1, n_y, n_age)
+    NPR_M <- NPR_F <- matrix(1, n_y, n_age)
     
     RR <- R_early %>% rev() %>% c(R[1])
-    NPR[1, ] <- N_at_age[1, ]/rev(RR)
+    NPR_F[1, ] <- N_at_age[1, ]/rev(RR)
+    
+    NPR_M[1, -1] <- exp(-cumsum(M[1, -n_age]))
+    NPR_M[1, n_age] <- NPR_M[1, n_age]/(1 - exp(-M[1, n_age]))
     for(y in 2:n_y) {
       for(a in 2:n_age) {
-        NPR[y, a] <- NPR[y-1, a-1] * exp(-F_at_age[y-1, a-1] - M[y-1, a-1])
+        NPR_M[y, a] <- NPR_M[y-1, a-1] * exp(-M[y-1, a-1])
+        NPR_F[y, a] <- NPR_F[y-1, a-1] * exp(-F_at_age[y-1, a-1] - M[y-1, a-1])
       }
-      NPR[y, n_age] <- NPR[y, n_age] + NPR[y-1, n_age] * exp(-F_at_age[y-1, n_age] - M[y-1, n_age])
+      NPR_M[y, n_age] <- NPR_M[y, n_age] + NPR_M[y-1, n_age] * exp(-M[y-1, n_age])
+      NPR_F[y, n_age] <- NPR_F[y, n_age] + NPR_F[y-1, n_age] * exp(-F_at_age[y-1, n_age] - M[y-1, n_age])
     }
-    SSPR_F <- rowSums(NPR * wt[1:n_y, ] * mat[1:n_y, ])
+    SSPR_F <- rowSums(NPR_F * wt[1:n_y, ] * mat[1:n_y, ])
+    SSPR_0 <- rowSums(NPR_M * wt[1:n_y, ] * mat[1:n_y, ])
   }
   SPR <- SSPR_F/SSPR_0
   return(SPR)
