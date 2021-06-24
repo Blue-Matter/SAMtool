@@ -2,7 +2,7 @@
 
 vec_slot_fn <- function(x, Data, err = FALSE) {
   res <- slot(Data, x)
-  if(!all(is.na(res))) {
+  if(length(res) && !all(is.na(res))) {
     return(res[1, ])
   } else {
     if(err) stop(paste0("Nothing found in Data@", x), call. = FALSE)
@@ -12,7 +12,7 @@ vec_slot_fn <- function(x, Data, err = FALSE) {
 
 matrix_slot_fn <- function(x, Data) {
   res <- slot(Data, x)
-  if(!all(is.na(res))) return(res[1, , ]) else return(NULL)
+  if(length(res) && !all(is.na(res))) return(res[1, , ]) else return(NULL)
 }
 
 pull_Ind <- function(Data, maxage) {
@@ -412,7 +412,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
 
   # Process mean size
   if(length(RCMdata@MS)) {
-    if(!nchar(RCMdata@MS_type)) {
+    if(!length(RCMdata@MS_type) || !nchar(RCMdata@MS_type)) {
       message("Mean size (RCMdata@MS) found, but not type (RCMdata@MS_type). Assuming it's mean length.")
       RCMdata@MS_type <- "length"
     } else {

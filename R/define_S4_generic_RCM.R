@@ -278,11 +278,11 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             condition <- match.arg(condition)
             extra_args <- list(...)
 
-            ####### Harvest catch and ML from Data object
+            ####### Catch and ML from Data object
             vec_slot <- c("Cat", "ML", "CV_Cat")
             data_vec <- lapply(vec_slot, vec_slot_fn, Data = data) %>% structure(names = vec_slot)
 
-            ####### Harvest age/length comps from Data object
+            ####### Age/length comps from Data object
             matrix_slot <- c("CAA", "CAL")
             data_matrix <- lapply(matrix_slot, matrix_slot_fn, Data = data) %>% structure(names = matrix_slot)
 
@@ -303,7 +303,7 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             } else if(is.null(data_vec$Cat)) {
               stop("Conditioning on catch but no catch data found", call. = FALSE)
             }
-            dataS4@Chist <- data_vec$Cat
+            if(!is.null(data_vec$Cat)) dataS4@Chist <- data_vec$Cat
             if(!is.null(data_vec$CV_Cat)) dataS4@C_sd <- sdconv(1, data_vec$CV_Cat) 
 
             # Index
@@ -320,8 +320,8 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             }
 
             # Length/age comps
-            dataS4@CAA <- data_matrix$CAA
-            dataS4@CAL <- data_matrix$CAL
+            if(!is.null(data_matrix$CAA)) dataS4@CAA <- data_matrix$CAA
+            if(!is.null(data_matrix$CAL)) dataS4@CAL <- data_matrix$CAL
             if(!is.null(dataS4@CAL)) {
               if(all(is.na(data@CAL_mids))) {
                 stop("No length bins found in Data@CAL_mids.", call. = FALSE)
@@ -329,11 +329,11 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             }
 
             # Mean length
-            dataS4@MS <- data_vec$ML # By default, MS_type = "length" and CV = 0.2
+            if(!is.null(data_vec$ML)) dataS4@MS <- data_vec$ML # By default, MS_type = "length" and CV = 0.2
 
             # Equilibrium catches and/or effort - nothing happens if NULL
-            dataS4@C_eq <- extra_args$C_eq
-            dataS4@E_eq <- extra_args$E_eq
+            if(!is.null(extra_args$C_eq)) dataS4@C_eq <- extra_args$C_eq
+            if(!is.null(extra_args$E_eq)) dataS4@E_eq <- extra_args$E_eq
 
             ####### Run RCM
             output <- RCM_int(OM = OM, RCMdata = dataS4, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
