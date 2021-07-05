@@ -63,6 +63,7 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
       dependencies <- .(get_dependencies(Assess_char, dots))
       do_Assessment <- .(Assess_call)
       Rec <- .(HCR_call)
+      if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- do_Assessment@info$Misc
       return(Rec)
     })
 
@@ -73,6 +74,7 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
       do_Assessment <- .(Assess_call)
       Rec <- .(HCR_call)
       Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
+      if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
       return(Rec)
     })
 

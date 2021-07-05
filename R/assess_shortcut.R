@@ -2,11 +2,14 @@
 
 #' Assessment emulator as a shortcut to model fitting in closed-loop simulation
 #' 
-#' Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass and abundance
-#' (with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
-#' be passed onto a harvest control rule (HCR function). To utilize the shortcut method in closed-loop simulation,
-#' use \link{make_MP} with \code{Shortcut} as the Assessment function. \code{Perfect} assumes no error in the 
-#' assessment model and is useful for comparing the behavior of different harvest control rules.
+#' Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass, abundance, and 
+#' fishing mortality (with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
+#' be passed onto a harvest control rule (HCR function). \code{Shortcut} is the base function that samples the OM with an error 
+#' distribution. \code{Shortcut2}, the more prefereable option, fits \link{SCA} in the last historical year of the operating 
+#' model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
+#' using \link[vars]{predict.varest}. \code{Perfect} assumes no error in the assessment model and is useful for comparing the behavior of 
+#' different harvest control rules. To utilize the shortcut method in closed-loop simulation, use \link{make_MP} with these functions as 
+#' the Assessment model. N.B. the functions do not work with \code{runMSE(parallel = TRUE)}.
 #' 
 #' @aliases Perfect
 #' @param x An index for the objects in \code{Data} when running in \link[MSEtool]{runMSE}.
@@ -14,12 +17,14 @@
 #' @param Data An object of class Data.
 #' @param method Indicates where the error in the OM is located. For "B", OM biomass is directly sampled with error.
 #' For "N", OM abundance-at-age is sampled and biomass subsequently calculated. For "RF", recruitment and F are
-#' sampled to calculate abundance and biomass. There is no error in biological parameters for "N" and "RF".
-#' @param B_err If method = "B", a vector of length three that specifies the standard deviation (in logspace),
+#' sampled to calculate abundance and biomass. There is no error in biological parameters for "N" and "RF". By default,
+#' "B" is used for \code{Shortcut} and "N" for \code{Shortcut2}.
+#' @param B_err If \code{method = "B"}, a vector of length three that specifies the standard deviation (in logspace),
 #' autocorrelation, and bias (1 = unbiased) for biomass.
-#' @param N_err Same as B_err, but for abundance when method = "N".
-#' @param R_err Same as B_err, but for recruitment when method = "RF".
-#' @param F_err Same as B_err, but for fishing mortality when method = "RF".
+#' @param N_err Same as B_err, but for abundance when \code{method = "N"}.
+#' @param R_err Same as B_err, but for recruitment when \code{method = "RF"}.
+#' @param F_err Same as B_err. Always used regardless of \code{method} to report F and selectivity for HCR.
+#' @param VAR_model An object returned by \link[vars]{VAR} to generate emulated assessment error. Used by \code{Shortcut2}. 
 #' @param ... Other arguments (not currently used).
 #' @author Q. Huynh
 #' @details Currently there is no error in FMSY (the target F in the HCR in SAMtool).
@@ -28,6 +33,9 @@
 #' @examples 
 #' Shortcut_4010 <- make_MP(Shortcut, HCR40_10) 
 #' Shortcut_Nerr <- make_MP(Shortcut, HCR40_10, method = "N", N_err = c(0.1, 0.1, 1)) # Highly precise!
+#' 
+#' # Fits SCA first and then emulate it in the projection period 
+#' Shortcut2_4010 <- make_MP(Shortcut2, HCR40_10) 
 #' 
 #' \donttest{
 #' # Compare the shortcut method vs. fitting an SCA model with a 40-10 control rule
@@ -48,11 +56,12 @@
 #' estimates: Implications for management strategy evaluation. Fisheries Research 172: 325-334.
 #' @export
 Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7, 1), N_err = c(0.3, 0.7, 1), 
-                     R_err = c(0.3, 0.7, 1), F_err = c(0.3, 0.7, 1), ...) {
+                     R_err = c(0.3, 0.7, 1), F_err = c(0.3, 0.7, 1), VAR_model, ...) {
   OM_ind <- lapply(1:length(sys.calls()), function(xx) try(get("N_P", envir = sys.frames()[[xx]], inherits = FALSE), silent = TRUE)) %>%
     vapply(function(xx) !is.character(xx), logical(1)) %>% which()
-  if(length(OM_ind) == 0) {
-    return(new("Assessment", opt = "", SD = "", conv = FALSE))
+  if(!length(OM_ind)) {
+    stop("No operating model was found.")
+    #return(new("Assessment", opt = "", SD = "", conv = FALSE))
   }
   
   method <- match.arg(method)
@@ -91,39 +100,54 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   }
   R <- N[1, ]
   
+  if(!missing(VAR_model) && year_p > 0) {
+    VAR_proj <- predict(VAR_model, n.ahead = year_p + 1)
+    F_dev <- exp(c(VAR_proj$endog[, "FM"], VAR_proj$fcst$FM[1:year_p, "fcst"]))
+  } else {
+    stopifnot(length(F_err) >= 3)
+    F_dev <- exp(dev_AC(n_y, mu = F_err[3], stdev = F_err[1], AC = F_err[2], seed = x * n_y - 5000))
+  }
+  F_out <- Fapical * F_dev
+  
   if(method == "B") {
-    stopifnot(length(B_err) >= 3)
-    
-    B_dev <- exp(dev_AC(n_y+1, mu = B_err[3], stdev = B_err[1], AC = B_err[2], seed = x * n_y))
-    
+    if(!missing(VAR_model) && year_p > 0) {
+      B_dev <- exp(c(VAR_proj$endog[, "B"], VAR_proj$fcst$B[, "fcst"]))
+    } else {
+      stopifnot(length(B_err) >= 3)
+      B_dev <- exp(dev_AC(n_y+1, mu = B_err[3], stdev = B_err[1], AC = B_err[2], seed = x * n_y))
+    }
     SSB_out <- SSB * B_dev
     VB_out <- VB * B_dev
     B_out <- B * B_dev
   } else if(method == "N") {
-    stopifnot(length(N_err) >= 3)
-    
-    N_dev_y <- dev_AC(n_y+1, mu = N_err[3], stdev = N_err[1], AC = N_err[2], seed = x * n_y)
-    N_dev_age <- dev_AC(n_age, mu = 1, stdev = N_err[1], AC = 0, seed = x * n_y - 5000)
-    N_dev <- exp(outer(N_dev_age, N_dev_y))
-    
+    if(!missing(VAR_model) && year_p > 0) {
+      N_dev_proj <- vapply(paste0("N.", 1:n_age), function(xx) getElement(VAR_proj$fcst, xx)[, "fcst"], numeric(year_p+1))
+      N_dev <- exp(rbind(VAR_proj$endog[, 1:n_age], N_dev_proj)) %>% t()
+    } else {
+      stopifnot(length(N_err) >= 3)
+      
+      N_dev_y <- dev_AC(n_y+1, mu = N_err[3], stdev = N_err[1], AC = N_err[2], seed = x * n_y)
+      N_dev_age <- dev_AC(n_age, mu = 1, stdev = N_err[1], AC = 0, seed = x * n_y - 5000)
+      N_dev <- exp(outer(N_dev_age, N_dev_y))
+    }
     N_out <- N * N_dev
     
-    Wt_age <- Hist$StockPars$Wt_age[x, , 0 + 1:n_y]
-    Mat_age <- Hist$StockPars$Mat_age[x, , 0 + 1:n_y]
-    V_age <- Hist$FleetPars$V[x, , 0 + 1:n_y]
+    Wt_age <- Hist$StockPars$Wt_age[x, , 0:n_y + 1]
+    Mat_age <- Hist$StockPars$Mat_age[x, , 0:n_y + 1]
+    V_age <- Hist$FleetPars$V[x, , 0:n_y + 1]
     
     SSB_out <- colSums(N_out * Mat_age * Wt_age)
     VB_out <- colSums(N_out * V_age * Wt_age)
     B_out <- colSums(N_out * Wt_age)
     
   } else if(method == "RF") {
-    stopifnot(length(R_err) >= 3, length(F_err) >= 3)
-    
-    R_dev <- exp(dev_AC(n_y+1, mu = R_err[3], stdev = R_err[1], AC = R_err[2], seed = x * n_y))
-    F_dev <- exp(dev_AC(n_y, mu = F_err[3], stdev = F_err[1], AC = F_err[2], seed = x * n_y - 5000))
-    
+    if(!missing(VAR_model) && year_p > 0) {
+      R_dev <- exp(c(VAR_proj$endog[, "R"], VAR_proj$fcst$R[, "fcst"]))
+    } else {
+      stopifnot(length(R_err) >= 3)
+      R_dev <- exp(dev_AC(n_y+1, mu = R_err[3], stdev = R_err[1], AC = R_err[2], seed = x * n_y))
+    }
     R_out <- R * R_dev
-    F_out <- Fapical * F_dev
     ASM_out <- project_ASM(x, R_out, F_out, Hist, Data)
     
     N_out <- ASM_out$N
@@ -137,12 +161,15 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   Year <- Data@Year
   Year_plusone <- c(Year, max(Year) + 1)
   opt <- SD <- "No assessment."
-  Assessment <- new("Assessment", Model = paste("Shortcut", method), conv = TRUE,
+  Assessment <- new("Assessment", 
+                    Model = paste(ifelse(missing(VAR_model), "Shortcut", "Shortcut2"), method), 
+                    conv = TRUE,
+                    FMort = structure(F_out, names = Year),
                     FMSY = Hist$ReferencePoints$ReferencePoints$FMSY[x],
                     SSB = structure(SSB_out, names = Year_plusone),
                     VB = structure(VB_out, names = Year_plusone),
                     B = structure(B_out, names = Year_plusone),
-                    Selectivity = Hist$FleetPars$V[x, , ] %>% t(),
+                    Selectivity = Hist$FleetPars$V[x, , 1:n_y] %>% t(),
                     Obs_Catch = Data@Cat[x, ],
                     Obs_Index = Data@Ind[x, ],
                     Obs_C_at_age = Data@CAA[x, , ],
@@ -150,14 +177,17 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
                     SD = "No assessment.")
   if(exists("N_out", inherits = FALSE)) Assessment@N_at_age <- t(N_out)
   if(exists("R_out", inherits = FALSE)) Assessment@R <- structure(R_out, names = Year_plusone)
-  if(exists("F_out", inherits = FALSE)) Assessment@FMort <- structure(F_out, names = Year)
   
-  if(method == "B") {
-    mag_bias <- B_err[3]
-  } else if(method == "N") {
-    mag_bias <- N_err[3]
+  if(missing(VAR_model)) {
+    if(method == "B") {
+      mag_bias <- B_err[3]
+    } else if(method == "N") {
+      mag_bias <- N_err[3]
+    } else {
+      mag_bias <- R_err[3]
+    }
   } else {
-    mag_bias <- R_err[3]
+    mag_bias <- 1
   }
   
   ref_pt <- c("N0", "B0", "SSB0", "VB0", "MSY", "SSBMSY", "BMSY", "VBMSY")
@@ -202,9 +232,70 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
 class(Shortcut) <- "Assess"
 
 #' @rdname Shortcut
+#' @param SCA_args Additional arguments to pass to \link{SCA}. Currently, arguments \code{SR} and \code{vulnerability}
+#' are obtained from the operating model.
+#' @param VAR_args Additional arguments to pass to \link[vars]{VAR}. By default, argument \code{type = "none"} 
+#' (stationary time series with mean zero is assumed).
+#' @importFrom vars VAR
+#' @export
+Shortcut2 <- function(x, Data, method = "N", SCA_args = list(), VAR_args = list(type = "none"), ...) {
+  method <- match.arg(method, choices = c("N", "B", "RF"))
+  
+  if(!is.null(Data@Misc[[x]]$VAR_model)) {
+    run_Shortcut <- Shortcut(x = x, Data = Data, method = method, VAR_model = Data@Misc[[x]]$VAR_model)
+    
+    run_Shortcut@info$Misc$VAR_model <- Data@Misc[[x]]$VAR_model
+    return(run_Shortcut)
+  } else if(max(Data@Year) == Data@LHYear) {
+    SCA_args$x <- x
+    SCA_args$Data <- Data
+    if(is.null(SCA_args$SR) && !is.null(Data@Misc$StockPars$SRrel)) {
+      SCA_args$SR <- ifelse(Data@Misc$StockPars$SRrel[x] == 1, "BH", "Ricker")
+    }
+    if(is.null(SCA_args$vulnerability) && !is.null(Data@OM$Vmaxlen)) {
+      SCA_args$vulnerability <- ifelse(Data@OM$Vmaxlen[x] != 1, "dome", "logistic")
+    }
+    
+    run_SCA <- do.call("SCA", SCA_args)
+    
+    F_est <- run_SCA@FMort
+    F_OM <- Data@Misc$FleetPars$Find[x, ] * Data@Misc$FleetPars$qs[x]
+    
+    if(method == "B") {
+      SSB_est <- run_SCA@SSB[-length(run_SCA@SSB)]
+      SSB_OM <- apply(Data@Misc$StockPars$SSB[x, , , ], 2, sum)
+      
+      var_resid <- data.frame(B = log(SSB_est/SSB_OM), FM = log(F_est/F_OM))
+      
+    } else if(method == "N") {
+      N_est <- run_SCA@N_at_age[-length(run_SCA@SSB), ]
+      N_OM <- apply(Data@Misc$StockPars$N[x, , , ], 1:2, sum) %>% t()
+      
+      var_resid <- data.frame(N = log(N_est/N_OM), FM = log(F_est/F_OM))
+      
+    } else {
+      R_est <- run_SCA@N_at_age[-length(run_SCA@SSB), 1]
+      R_OM <- rowSums(Data@Misc$StockPars$N[x, 1, , ])
+      
+      var_resid <- data.frame(R = log(R_est/R_OM), FM = log(F_est/F_OM))
+    }
+    VAR_args$y <- as.matrix(var_resid)
+    VAR_model <- do.call(vars::VAR, VAR_args)
+    
+    run_SCA@info$Misc$VAR_model <- VAR_model
+    return(run_SCA)
+    
+  } else {
+    stop("No assessment or shortcut method was run.")
+  }
+}
+class(Shortcut2) <- "Assess"
+
+
+#' @rdname Shortcut
 #' @export
 Perfect <- function(x, Data, ...) {
-  out <- Shortcut(x, Data, method = "RF", R_err = c(0, 0, 1), F_err = c(0, 0, 1))
+  out <- Shortcut(x, Data, method = "N", N_err = c(0, 0, 1))
   out@Model <- "Perfect"
   return(out)
 }
@@ -233,3 +324,27 @@ project_ASM <- function(x, R_out, F_out, Hist, Data) {
   
   return(list(N = N, SSB = SSB, VB = VB, B = B))
 }
+
+
+#calc_err <- function(x_est, x_OM, AC_method) {
+#  if(AC_method == "mle") {
+#    opt <- nlminb(c(log(0.1), 0), err_likelihood, x_est = x_est, x_OM = x_OM, n = length(x_est))
+#    c(exp(opt$par[1]), ilogit2(opt$par[2], -1, 1, 0), 1)
+#  } else {
+#    SD <- sd(log(x_est/x_OM))
+#    AC <- acf(log(x_est/x_OM), lag.max = 1, plot = FALSE)$acf[2]
+#    Bias <- mean(x_est/x_OM)
+#    c(SD, AC, Bias)
+#  }
+#}
+#
+## Equation 2 of Wiedenmann et al. 2015 but drop constant terms
+#err_likelihood <- function(x, x_est, x_OM, n) {
+#  SD <- exp(x[1])
+#  AC <- ilogit2(x[2], -1, 1, 0)
+#  
+#  v1 <- log(x_OM[2:n]) - AC * log(x_OM[2:n - 1]) - log(x_est[2:n]) + AC * log(x_est[2:n-1]) 
+#  v2 <- log(x_OM[1]/x_est[1])
+#  obj <- -n * log(SD) + 0.5 * log(1 - AC^2) - 0.5 * sum(v1^2)/SD/SD - 0.5 * (1 - AC^2) * v2^2 /SD/SD
+#  return(-obj)
+#}

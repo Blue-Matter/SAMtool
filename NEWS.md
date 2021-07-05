@@ -19,6 +19,7 @@ Backwards compatibility remains to provide `LWT` as a vector for indices weights
 - Delay-difference assessments (DD_TMB, DD_SS, cDD, cDD_SS) can now fit to mean weight with argument `MW = TRUE`. The functions will look for mean weight data series in `Data@Misc[[x]]$MW`, otherwise will convert length composition `Data@CAL` to weights and calculate annual means.
 - Delay-difference assessments (DD_TMB and DD_SS) use an instantaneous F formulation for the catch equation instead of Pope's approximation. The models should now be more robust for high F situations.
 - Dynamic SSB0 is calculated for all assessment models. 
+- A variant of the shortcut assessment emulator for closed-loop simulation is available (`Shortcut2`). This function fits an SCA assessment and then characterizes the assessment error relative to the operating model using a vector autoregressive (VAR) model. The functions samples the operating model using the VAR for the projection period. This is a useful function to guide the level of error in the shortcut method.
 
 ### Harvest control rules
 - Additional OCP types in `HCR_ramp` to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).

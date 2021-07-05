@@ -3,6 +3,7 @@
 \name{Shortcut}
 \alias{Shortcut}
 \alias{Perfect}
+\alias{Shortcut2}
 \title{Assessment emulator as a shortcut to model fitting in closed-loop simulation}
 \usage{
 Shortcut(
@@ -13,6 +14,16 @@ Shortcut(
   N_err = c(0.3, 0.7, 1),
   R_err = c(0.3, 0.7, 1),
   F_err = c(0.3, 0.7, 1),
+  VAR_model,
+  ...
+)
+
+Shortcut2(
+  x,
+  Data,
+  method = "N",
+  SCA_args = list(),
+  VAR_args = list(type = "none"),
   ...
 )
 
@@ -26,28 +37,40 @@ Otherwise, equals to 1 When running an assessment interactively.}
 
 \item{method}{Indicates where the error in the OM is located. For "B", OM biomass is directly sampled with error.
 For "N", OM abundance-at-age is sampled and biomass subsequently calculated. For "RF", recruitment and F are
-sampled to calculate abundance and biomass. There is no error in biological parameters for "N" and "RF".}
+sampled to calculate abundance and biomass. There is no error in biological parameters for "N" and "RF". By default,
+"B" is used for \code{Shortcut} and "N" for \code{Shortcut2}.}
 
-\item{B_err}{If method = "B", a vector of length three that specifies the standard deviation (in logspace),
+\item{B_err}{If \code{method = "B"}, a vector of length three that specifies the standard deviation (in logspace),
 autocorrelation, and bias (1 = unbiased) for biomass.}
 
-\item{N_err}{Same as B_err, but for abundance when method = "N".}
+\item{N_err}{Same as B_err, but for abundance when \code{method = "N"}.}
 
-\item{R_err}{Same as B_err, but for recruitment when method = "RF".}
+\item{R_err}{Same as B_err, but for recruitment when \code{method = "RF"}.}
 
-\item{F_err}{Same as B_err, but for fishing mortality when method = "RF".}
+\item{F_err}{Same as B_err. Always used regardless of \code{method} to report F and selectivity for HCR.}
+
+\item{VAR_model}{An object returned by \link[vars]{VAR} to generate emulated assessment error. Used by \code{Shortcut2}.}
 
 \item{...}{Other arguments (not currently used).}
+
+\item{SCA_args}{Additional arguments to pass to \link{SCA}. Currently, arguments \code{SR} and \code{vulnerability}
+are obtained from the operating model.}
+
+\item{VAR_args}{Additional arguments to pass to \link[vars]{VAR}. By default, argument \code{type = "none"} 
+(stationary time series with mean zero is assumed).}
 }
 \value{
 An object of class \linkS4class{Assessment}.
 }
 \description{
-Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass and abundance
-(with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
-be passed onto a harvest control rule (HCR function). To utilize the shortcut method in closed-loop simulation,
-use \link{make_MP} with \code{Shortcut} as the Assessment function. \code{Perfect} assumes no error in the 
-assessment model and is useful for comparing the behavior of different harvest control rules.
+Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass, abundance, and 
+fishing mortality (with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
+be passed onto a harvest control rule (HCR function). \code{Shortcut} is the base function that samples the OM with an error 
+distribution. \code{Shortcut2}, the more prefereable option, fits \link{SCA} in the last historical year of the operating 
+model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
+using \link[vars]{predict.varest}. \code{Perfect} assumes no error in the assessment model and is useful for comparing the behavior of 
+different harvest control rules. To utilize the shortcut method in closed-loop simulation, use \link{make_MP} with these functions as 
+the Assessment model. N.B. the functions do not work with \code{runMSE(parallel = TRUE)}.
 }
 \details{
 Currently there is no error in FMSY (the target F in the HCR in SAMtool).
@@ -57,6 +80,9 @@ See Wiedenmann et al. (2015) for guidance on the magnitude of error for the shor
 \examples{
 Shortcut_4010 <- make_MP(Shortcut, HCR40_10) 
 Shortcut_Nerr <- make_MP(Shortcut, HCR40_10, method = "N", N_err = c(0.1, 0.1, 1)) # Highly precise!
+
+# Fits SCA first and then emulate it in the projection period 
+Shortcut2_4010 <- make_MP(Shortcut2, HCR40_10) 
 
 \donttest{
 # Compare the shortcut method vs. fitting an SCA model with a 40-10 control rule
