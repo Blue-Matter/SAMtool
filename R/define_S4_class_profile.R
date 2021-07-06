@@ -112,13 +112,13 @@ setGeneric("profile", function(fitted, ...) standardGeneric("profile"))
 #' a figure of the likelihood surface.
 #' @examples
 #' \donttest{
-#' output <- DD_TMB(x = 3, Data = MSEtool::SimulatedData)
+#' output <- SCA(Data = MSEtool::SimulatedData)
 #' 
 #' # Profile R0 only
-#' pro <- profile(output, R0 = 60:100)
+#' pro <- profile(output, R0 = seq(1000, 2000, 50))
 #' 
 #' # Profile both R0 and steepness
-#' pro <- profile(output, R0 = 65:85, h = seq(0.65, 0.85, 0.01))
+#' pro <- profile(output, R0 = seq(1000, 2000, 100), h = seq(0.8, 0.95, 0.025))
 #'
 #' # Ensure your grid is of proper resolution. A grid that is too coarse
 #' # will likely distort the shape of the likelihood surface.
