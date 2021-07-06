@@ -84,7 +84,7 @@
             <h3 class="subtitle">Development, testing, and implementation of model-based management procedures</h3>
                         <h4 class="author">Quang Huynh (<a href="mailto:quang@bluematterscience.com" class="email">quang@bluematterscience.com</a>), Tom Carruthers (<a href="mailto:tom@bluematterscience.com" class="email">tom@bluematterscience.com</a>), Adrian Hordyk (<a href="mailto:adrian@bluematterscience.com" class="email">adrian@bluematterscience.com</a>)</h4>
             
-            <h4 class="date">2021-06-24</h4>
+            <h4 class="date">2021-07-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Blue-Matter/SAMtool/blob/master/vignettes/SAMtool.Rmd"><code>vignettes/SAMtool.Rmd</code></a></small>
       <div class="hidden name"><code>SAMtool.Rmd</code></div>
@@ -156,32 +156,32 @@
 #&gt; 
 #&gt; $current_status
 #&gt;                Value
-#&gt; F/FMSY     0.5068157
-#&gt; SSB/SSBMSY 1.1821362
-#&gt; SSB/SSB0   0.2576407
+#&gt; F/FMSY     0.5115929
+#&gt; SSB/SSBMSY 1.2148562
+#&gt; SSB/SSB0   0.3027897
 #&gt; 
 #&gt; $input_parameters
 #&gt;              Value              Description
 #&gt; M        0.4147479        Natural mortality
 #&gt; maxage  15.0000000 Maximum age (plus-group)
-#&gt; Linf   133.8074396        Asymptotic length
-#&gt; K        0.1506118       Growth coefficient
-#&gt; t0      -1.6651417       Age at length-zero
-#&gt; Winf    54.1038756        Asymptotic weight
-#&gt; A50      6.2170134      Age of 50% maturity
-#&gt; A95      8.6722429      Age of 95% maturity</code></pre>
+#&gt; Linf   138.5112774        Asymptotic length
+#&gt; K        0.1616530       Growth coefficient
+#&gt; t0      -1.4063466       Age at length-zero
+#&gt; Winf    60.2341128        Asymptotic weight
+#&gt; A50      5.4765479      Age of 50% maturity
+#&gt; A95      7.4845256      Age of 95% maturity</code></pre>
 <p>Two diagnostic functions are available: <code>retrospective</code> for retrospective analyses (re-running the model by sequentially removing terminal years of data) and <code>profile</code> for profiling the likelihood function over a grid of parameters.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">SCA_assessment</span>, nyr <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co"># Retrospective analysis going back 5 years from current year</span>
 <span class="fu"><a href="../reference/profile.html">profile</a></span><span class="op">(</span><span class="va">SCA_result</span>, R0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">1.25</span>, <span class="fl">0.025</span><span class="op">)</span>, h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="fl">1</span>, <span class="fl">2.5e-3</span><span class="op">)</span><span class="op">)</span> <span class="co"># Joint profile over grid of R0 and steepness</span></code></pre></div>
 <pre><code>#&gt;                    Mohn's rho
-#&gt; Fishing mortality      -0.089
-#&gt; F/F[MSY]               -0.058
-#&gt; Spawning biomass        0.153
-#&gt; SSB/SSB[MSY]            0.092
-#&gt; Spawning depletion      0.119
-#&gt; Recruitment             0.051
-#&gt; Vulnerable biomass      0.071</code></pre>
+#&gt; Fishing mortality      -0.095
+#&gt; F/F[MSY]               -0.085
+#&gt; Spawning biomass        0.116
+#&gt; SSB/SSB[MSY]            0.088
+#&gt; Spawning depletion      0.096
+#&gt; Recruitment             0.096
+#&gt; Vulnerable biomass      0.082</code></pre>
 <p><img src="fig_assess/retrospective.png" width="600"></p>
 <p><em>Figure 3: Retrospective trends in the SCA assessment fit and table of associated Mohn’s rho above.</em></p>
 <p><img src="fig_assess/profile.png" width="600"></p>
