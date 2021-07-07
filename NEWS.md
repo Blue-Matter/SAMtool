@@ -1,28 +1,31 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.2.1
+- `HCR_segment` allows for creating control rules with any number of linear segments.
+
 ## SAMtool 1.2.0
 ### RCM
-- A new S4 object, `RCMdata`, used to send data to the RCM model, i.e., `RCM(OM, RCMdata)`. Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms 'survey' and 'index' to focus on 'index' as much as possible when maintaining backwards compatibility. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.
-- Create a profiling function for `RCM` models. Steepness, R0, and final depletion can be profiled.
-- Fix plotting bug in `compare_RCM`.
-- Priors for index q in `RCM` is now lognormal instead of normal.
+- A new S4 object, `RCMdata`, is used to send data to the RCM model, i.e., `RCM(OM, RCMdata)`. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.
+- Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms 'survey' and 'index' to focus on 'index' as much as possible when maintaining backwards compatibility. 
+- The `profile` generic is now available for `RCM` models. Steepness, R0, and final depletion can be profiled.
+- Fixed plotting bug in `compare_RCM`.
+- Priors for index q in `RCM` are now lognormal instead of normal.
 - Annual equilibrium and transitional SPR are now calculated and reported.
-- Uneven length bin widths now supported.
-- An example is now added to the help documentation and online article, using Pacific cod (courtesy of R. Forrest).
+- Uneven length bin widths are now supported.
+- An example is added to the help documentation and online article, using Pacific cod (courtesy of R. Forrest).
 
 ### Assessment models
 - Priors on M, steepness, R0, and index q (lognormal, see RCM) can be created SCA, DD, and cDD assessment models.
-- Likelihood weights to SCA assessments can now be provided for `Catch`, `CAA`, and `CAL` in addition to `Index` in a named list `LWT`.
-Backwards compatibility remains to provide `LWT` as a vector for indices weights only. 
+- Likelihood weights to SCA assessments can now be provided for `Catch`, `CAA`, and `CAL` in addition to `Index` in a named list `LWT`. Backwards compatibility remains to provide `LWT` as a vector for indices weights only. 
 - A new SCA assessment model that incorporates density-dependent natural mortality (`SCA_DDM`) is added.
 - A new SCA assessment model that fits to length composition (`SCA_CAL`) is added.
 - Delay-difference assessments (DD_TMB, DD_SS, cDD, cDD_SS) can now fit to mean weight with argument `MW = TRUE`. The functions will look for mean weight data series in `Data@Misc[[x]]$MW`, otherwise will convert length composition `Data@CAL` to weights and calculate annual means.
-- Delay-difference assessments (DD_TMB and DD_SS) use an instantaneous F formulation for the catch equation instead of Pope's approximation. The models should now be more robust for high F situations.
+- Delay-difference assessments (DD_TMB and DD_SS) now use an instantaneous F formulation for the catch equation instead of Pope's approximation. The models should now be more robust for high F situations.
 - Dynamic SSB0 is calculated for all assessment models. 
-- A variant of the shortcut assessment emulator for closed-loop simulation is available (`Shortcut2`). This function fits an SCA assessment and then characterizes the assessment error relative to the operating model using a vector autoregressive (VAR) model. The functions samples the operating model using the VAR for the projection period. This is a useful function to guide the level of error in the shortcut method.
+- A variant of the shortcut assessment emulator for closed-loop simulation is available (`Shortcut2`). This function fits an SCA assessment and then characterizes the assessment error relative to the operating model using a vector autoregressive (VAR) model. The functions samples the operating model with error predicted from the VAR model for the projection period. This is a useful function to guide the level of error in the shortcut method.
 
 ### Harvest control rules
-- Additional OCP types in `HCR_ramp` to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).
+- Additional OCP types in `HCR_ramp` are available to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).
 - Added a shortcut function for a fixed escapement harvest control rule (`HCR_escapement`).
 
 ## SAMtool 1.1.2

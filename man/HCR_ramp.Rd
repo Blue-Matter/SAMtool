@@ -16,8 +16,8 @@ HCR_ramp(
   TOCP = 0.4,
   relF_min = 0,
   relF_max = 1,
-  SPR_OCP,
-  SPR_targ,
+  SPR_OCP = 0.4,
+  SPR_targ = 0.4,
   ...
 )
 
@@ -62,7 +62,7 @@ An output control rule with a ramp that reduces the target F (used for the TAC r
 as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
 is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
 the target F is minimized. For example, the TOCP and LOCP for 40\% and 10\% spawning depletion, respectively, in the 40-10 control rule.
-Ftarget is FMSY above the TOCP and zero below the LOCP.
+Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rule can generalized with more control points (>2) in \link{HCR_segment}.
 Class HCR objects are typically used with function \link{make_MP}.
 }
 \details{
@@ -121,7 +121,7 @@ Restrepo, V.R. and Power, J.E. 1999. Precautionary control rules in US fisheries
 management: specification and performance. ICES Journal of Marine Science 56:846-852.
 }
 \seealso{
-\link{HCR_MSY} \link{HCRlin} \link{make_MP}
+\link{HCR_segment} \link{HCR_MSY} \link{HCRlin} \link{make_MP}
 }
 \author{
 Q. Huynh & T. Carruthers
