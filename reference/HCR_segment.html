@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot Assessment object — plot.Assessment • SAMtool</title>
+<title>Segmented harvest control rules — HCR_segment • SAMtool</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,8 +46,11 @@
 
 
 
-<meta property="og:title" content="Plot Assessment object — plot.Assessment" />
-<meta property="og:description" content="Produces HTML file (via markdown) figures of parameter estimates and output from an Assessment object." />
+<meta property="og:title" content="Segmented harvest control rules — HCR_segment" />
+<meta property="og:description" content="A linear segmented output control rule where the target F (used for the TAC recommendation) 
+is a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. 
+The joints of the HCR are specified by arguments OCP and relF. Beyond the range of OCP, the response will be flat.
+HCR_ramp uses HCR_segment with two control points." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -122,36 +125,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot Assessment object</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/define_S4_class_assess_RCMdata.R'><code>R/define_S4_class_assess_RCMdata.R</code></a>, <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/define_S4_class_retro.R'><code>R/define_S4_class_retro.R</code></a></small>
-    <div class="hidden name"><code>plot.Assessment.Rd</code></div>
+    <h1>Segmented harvest control rules</h1>
+    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/HCRs.R'><code>R/HCRs.R</code></a></small>
+    <div class="hidden name"><code>HCR_segment.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Produces HTML file (via markdown) figures of parameter estimates and output from an <a href='Assessment-class.html'>Assessment</a> object.</p>
+    <p>A linear segmented output control rule where the target F (used for the TAC recommendation) 
+is a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. 
+The joints of the HCR are specified by arguments <code>OCP</code> and <code>relF</code>. Beyond the range of <code>OCP</code>, the response will be flat.
+<a href='HCR_ramp.html'>HCR_ramp</a> uses <code>HCR_segment</code> with two control points.</p>
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for Assessment,missing</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span>
-  <span class='va'>x</span>,
-  filename <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='st'>"report_"</span>, <span class='va'>x</span><span class='op'>@</span><span class='va'>Model</span><span class='op'>)</span>,
-  dir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
-  ret_yr <span class='op'>=</span> <span class='fl'>0L</span>,
-  open_file <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  render_args <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
-  <span class='va'>...</span>
-<span class='op'>)</span>
-
-<span class='co'># S4 method for Assessment,retro</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span>
-  <span class='va'>x</span>,
-  <span class='va'>y</span>,
-  filename <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='st'>"report_"</span>, <span class='va'>x</span><span class='op'>@</span><span class='va'>Model</span><span class='op'>)</span>,
-  dir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
-  open_file <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  render_args <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+    <pre class="usage"><span class='fu'>HCR_segment</span><span class='op'>(</span>
+  <span class='va'>Assessment</span>,
+  reps <span class='op'>=</span> <span class='fl'>1</span>,
+  OCP_type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"SSB_SSB0"</span>, <span class='st'>"SSB_SSBMSY"</span>, <span class='st'>"SSB_dSSB0"</span>, <span class='st'>"F_FMSY"</span>, <span class='st'>"F_F01"</span>, <span class='st'>"F_FSPR"</span><span class='op'>)</span>,
+  Ftarget_type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FMSY"</span>, <span class='st'>"F01"</span>, <span class='st'>"Fmax"</span>, <span class='st'>"FSPR"</span><span class='op'>)</span>,
+  OCP <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span><span class='op'>)</span>,
+  relF <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span>,
+  <span class='va'>SPR_OCP</span>,
+  <span class='va'>SPR_targ</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
@@ -159,58 +153,58 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>An object of class <a href='Assessment-class.html'>Assessment</a>.</p></td>
+      <th>Assessment</th>
+      <td><p>An object of class <a href='Assessment-class.html'>Assessment</a> with estimates of
+FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal year.</p></td>
     </tr>
     <tr>
-      <th>filename</th>
-      <td><p>Character string for the name of the markdown and HTML files.</p></td>
+      <th>reps</th>
+      <td><p>The number of stochastic samples of the TAC recommendation.</p></td>
     </tr>
     <tr>
-      <th>dir</th>
-      <td><p>The directory in which the markdown and HTML files will be saved.</p></td>
+      <th>OCP_type</th>
+      <td><p>The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
+By default, use (<code>"SSB_SSB0"</code> for spawning depletion. Other biomass OCPs include <code>"SSB_SSBMSY"</code> for spawning biomass relative to MSY and
+<code>"SSB_dSSB0"</code>, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
+For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR% (see <code>SPR_OCP</code> argument) can be used.</p></td>
     </tr>
     <tr>
-      <th>ret_yr</th>
-      <td><p>If greater than zero, then a retrospective analysis will be performed and results will be reported. The integer here corresponds
-to the number of peels (the maximum number of terminal years for which the data are removed).</p></td>
+      <th>Ftarget_type</th>
+      <td><p>The type of F used for the target fishing mortality rate.</p></td>
     </tr>
     <tr>
-      <th>open_file</th>
-      <td><p>Logical, whether the HTML document is opened after it is rendered.</p></td>
+      <th>OCP</th>
+      <td><p>Numeric vector of operational control points for the HCR (in increasing order).</p></td>
     </tr>
     <tr>
-      <th>quiet</th>
-      <td><p>Logical, whether to silence the markdown rendering function.</p></td>
+      <th>relF</th>
+      <td><p>Numeric vector of Ftarget corresponding to the values in <code>OCP</code>.</p></td>
     </tr>
     <tr>
-      <th>render_args</th>
-      <td><p>Arguments to pass to <a href='https://pkgs.rstudio.com/rmarkdown/reference/render.html'>render</a>.</p></td>
+      <th>SPR_OCP</th>
+      <td><p>The value of spawning potential ratio for the OCP if <code>OCP_type = "F_FSPR"</code>. By default, 0.4 (F40%).</p></td>
+    </tr>
+    <tr>
+      <th>SPR_targ</th>
+      <td><p>The target value of spawning potential ratio if <code>Ftarget_type = "FSPR"</code>. By default, 0.4 (F40%).</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Other arguments.</p></td>
-    </tr>
-    <tr>
-      <th>y</th>
-      <td><p>An object of class <a href='retro-class.html'>retro</a>.</p></td>
+      <td><p>Miscellaneous arguments.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Returns invisibly the output from <a href='https://pkgs.rstudio.com/rmarkdown/reference/render.html'>render</a>.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <p>An object of class Rec with the TAC recommendation.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
-    <div class='dont-index'><p><a href='retrospective.html'>retrospective</a></p></div>
+    <p>Q. Huynh</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>output</span> <span class='op'>&lt;-</span> <span class='fu'><a href='DD_TMB.html'>DD_TMB</a></span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>Simulation_1</span><span class='op'>)</span>
-
-<span class='co'># \donttest{</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>output</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpXmMyaA/report_DD_TMB.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpXmMyaA/report_DD_TMB.html</span></div><div class='input'><span class='co'># }</span>
-</div></pre>
+    <pre class="examples"><div class='input'><span class='co'># This is an MP with a 40-10 harvest control rule</span>
+<span class='va'>DD_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>DD_TMB</span>, <span class='va'>HCR_segment</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSB0"</span>, OCP <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span><span class='op'>)</span>, relF <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", OCP = c(0.1,     0.4), relF = c(0, 1)): HCR_segment does not belong to class 'HCR.' Use: avail('HCR') to find eligible objects.</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -125,6 +125,14 @@
       <small>Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="samtool-121" class="section level2">
+<h2 class="hasAnchor">
+<a href="#samtool-121" class="anchor"></a>SAMtool 1.2.1</h2>
+<ul>
+<li>
+<code>HCR_segment</code> allows for creating control rules with any number of linear segments.</li>
+</ul>
+</div>
     <div id="samtool-120" class="section level2">
 <h2 class="hasAnchor">
 <a href="#samtool-120" class="anchor"></a>SAMtool 1.2.0</h2>
@@ -132,13 +140,14 @@
 <h3 class="hasAnchor">
 <a href="#rcm" class="anchor"></a>RCM</h3>
 <ul>
-<li>A new S4 object, <code>RCMdata</code>, used to send data to the RCM model, i.e., <code><a href="../reference/check_RCMdata.html">RCM(OM, RCMdata)</a></code>. Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms ‘survey’ and ‘index’ to focus on ‘index’ as much as possible when maintaining backwards compatibility. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.</li>
-<li>Create a profiling function for <code>RCM</code> models. Steepness, R0, and final depletion can be profiled.</li>
-<li>Fix plotting bug in <code>compare_RCM</code>.</li>
-<li>Priors for index q in <code>RCM</code> is now lognormal instead of normal.</li>
+<li>A new S4 object, <code>RCMdata</code>, is used to send data to the RCM model, i.e., <code><a href="../reference/check_RCMdata.html">RCM(OM, RCMdata)</a></code>. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.</li>
+<li>Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms ‘survey’ and ‘index’ to focus on ‘index’ as much as possible when maintaining backwards compatibility.</li>
+<li>The <code>profile</code> generic is now available for <code>RCM</code> models. Steepness, R0, and final depletion can be profiled.</li>
+<li>Fixed plotting bug in <code>compare_RCM</code>.</li>
+<li>Priors for index q in <code>RCM</code> are now lognormal instead of normal.</li>
 <li>Annual equilibrium and transitional SPR are now calculated and reported.</li>
-<li>Uneven length bin widths now supported.</li>
-<li>An example is now added to the help documentation and online article, using Pacific cod (courtesy of R. Forrest).</li>
+<li>Uneven length bin widths are now supported.</li>
+<li>An example is added to the help documentation and online article, using Pacific cod (courtesy of R. Forrest).</li>
 </ul>
 </div>
 <div id="assessment-models" class="section level3">
@@ -150,16 +159,16 @@
 <li>A new SCA assessment model that incorporates density-dependent natural mortality (<code>SCA_DDM</code>) is added.</li>
 <li>A new SCA assessment model that fits to length composition (<code>SCA_CAL</code>) is added.</li>
 <li>Delay-difference assessments (DD_TMB, DD_SS, cDD, cDD_SS) can now fit to mean weight with argument <code>MW = TRUE</code>. The functions will look for mean weight data series in <code>Data@Misc[[x]]$MW</code>, otherwise will convert length composition <code>Data@CAL</code> to weights and calculate annual means.</li>
-<li>Delay-difference assessments (DD_TMB and DD_SS) use an instantaneous F formulation for the catch equation instead of Pope’s approximation. The models should now be more robust for high F situations.</li>
+<li>Delay-difference assessments (DD_TMB and DD_SS) now use an instantaneous F formulation for the catch equation instead of Pope’s approximation. The models should now be more robust for high F situations.</li>
 <li>Dynamic SSB0 is calculated for all assessment models.</li>
-<li>A variant of the shortcut assessment emulator for closed-loop simulation is available (<code>Shortcut2</code>). This function fits an SCA assessment and then characterizes the assessment error relative to the operating model using a vector autoregressive (VAR) model. The functions samples the operating model using the VAR for the projection period. This is a useful function to guide the level of error in the shortcut method.</li>
+<li>A variant of the shortcut assessment emulator for closed-loop simulation is available (<code>Shortcut2</code>). This function fits an SCA assessment and then characterizes the assessment error relative to the operating model using a vector autoregressive (VAR) model. The functions samples the operating model with error predicted from the VAR model for the projection period. This is a useful function to guide the level of error in the shortcut method.</li>
 </ul>
 </div>
 <div id="harvest-control-rules" class="section level3">
 <h3 class="hasAnchor">
 <a href="#harvest-control-rules" class="anchor"></a>Harvest control rules</h3>
 <ul>
-<li>Additional OCP types in <code>HCR_ramp</code> to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).</li>
+<li>Additional OCP types in <code>HCR_ramp</code> are available to create harvest control rules based on dynamic B0, and F-based rules (F/FMSY, F/F01, F/F-SPR).</li>
 <li>Added a shortcut function for a fixed escapement harvest control rule (<code>HCR_escapement</code>).</li>
 </ul>
 </div>

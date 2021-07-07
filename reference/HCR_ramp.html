@@ -51,7 +51,7 @@
 as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
 is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
 the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
-Ftarget is FMSY above the TOCP and zero below the LOCP.
+Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rule can generalized with more control points (&amp;gt;2) in HCR_segment.
 Class HCR objects are typically used with function make_MP." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
@@ -137,7 +137,7 @@ Class HCR objects are typically used with function make_MP." />
 as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
 is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
 the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
-Ftarget is FMSY above the TOCP and zero below the LOCP.
+Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rule can generalized with more control points (&gt;2) in <a href='HCR_segment.html'>HCR_segment</a>.
 Class HCR objects are typically used with function <a href='make_MP.html'>make_MP</a>.</p>
     </div>
 
@@ -150,8 +150,8 @@ Class HCR objects are typically used with function <a href='make_MP.html'>make_M
   TOCP <span class='op'>=</span> <span class='fl'>0.4</span>,
   relF_min <span class='op'>=</span> <span class='fl'>0</span>,
   relF_max <span class='op'>=</span> <span class='fl'>1</span>,
-  <span class='va'>SPR_OCP</span>,
-  <span class='va'>SPR_targ</span>,
+  SPR_OCP <span class='op'>=</span> <span class='fl'>0.4</span>,
+  SPR_targ <span class='op'>=</span> <span class='fl'>0.4</span>,
   <span class='va'>...</span>
 <span class='op'>)</span>
 
@@ -237,7 +237,7 @@ for groundfish off the U.S. West Coast. Fisheries Research 94:251-266.</p>
 management: specification and performance. ICES Journal of Marine Science 56:846-852.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><a href='HCR_MSY.html'>HCR_MSY</a> <a href='HCRlin.html'>HCRlin</a> <a href='make_MP.html'>make_MP</a></p></div>
+    <div class='dont-index'><p><a href='HCR_segment.html'>HCR_segment</a> <a href='HCR_MSY.html'>HCR_MSY</a> <a href='HCRlin.html'>HCRlin</a> <a href='make_MP.html'>make_MP</a></p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Q. Huynh &amp; T. Carruthers</p>
