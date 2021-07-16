@@ -97,26 +97,24 @@
 #' Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter
 #' vector \code{vul_par} is of length 2:
 #' \itemize{
-#' \item \code{vul_par[1]}: \code{a_95}, the age of 95\% vulnerability, via logit transformation to constrain \code{a_95} to less than 75\%
-#' of the maximum age: \code{a_95 = 0.75 * max_age * plogis(vul_par[1])}.
-#' \item \code{vul_par[2]}: \code{a_50}, the age of 50\% vulnerability as an offset, i.e., \code{a_50 = a_95 - exp(vul_par[2])}.
+#' \item \code{vul_par[1]} corresponds to \code{a_95}, the age of 95\% vulnerability. \code{a_95} is a transformed parameter via logit transformation to constrain \code{a_95} to less than 75\%
+#' of the maximum age: \code{a_95 = 0.75 * max_age * plogis(x[1])}, where \code{x} is the estimated vector.
+#' \item \code{vul_par[2]} corresponds to \code{a_50}, the age of 50\% vulnerability. Estimated as an offset, i.e., \code{a_50 = a_95 - exp(x[2])}.
 #' }
-#' A vague prior for \code{vul_par[2] ~ N(0, sd = 3)} is used to aid convergence, for example, when vulnerability >> 0.5 for the youngest age class.
-#'
+#' 
 #' With dome vulnerability, a double Gaussian parameterization is used, where \code{vul_par}
 #' is an estimated vector of length 4:
 #' \itemize{
-#' \item \code{vul_par[1]}: \code{a_asc}, the first age of full vulnerability for the ascending limb, via logit transformation
-#' to constrain \code{a_95} to less than 75\% of the maximum age: \code{a_asc = 0.75 * maxage * plogis(vul_par[1])}.
-#' \item \code{vul_par[2]}: \code{a_50}, the age of 50\% vulnerability for the ascending limb as an offset, i.e.,
-#' \code{a_50 = a_asc - exp(vul_par[2])}.
-#' \item \code{vul_par[3]}: \code{a_des}, the last age of full vulnerability (where the descending limb starts) via logit transformation
-#' to constrain between \code{a_asc} and \code{max_age},
-#' i.e., \code{a_des = (max_age - a_asc) * plogis(vul_par[3]) + a_asc}. By default, fixed to a small value so that the dome is effectively
+#' \item \code{vul_par[1]} corresponds to  \code{a_asc}, the first age of full vulnerability for the ascending limb. In the model, \code{a_asc} is estimated via logit transformation
+#' to constrain \code{a_95} to less than 75\% of the maximum age: \code{a_asc = 0.75 * maxage * plogis(x[1])}, where \code{x} is the estimated vector.
+#' \item \code{vul_par[2]} corresponds to \code{a_50}, the age of 50\% vulnerability for the ascending limb. Estimated as an offset, i.e.,
+#' \code{a_50 = a_asc - exp(x[2])}.
+#' \item \code{vul_par[3]} corresponds to \code{a_des}, the last age of full vulnerability (where the descending limb starts). Generated via logit transformation
+#' to constrain between \code{a_asc} and \code{max_age}, i.e., \code{a_des = (max_age - a_asc) * plogis(x[3]) + a_asc}. By default, fixed to a small value so that the dome is effectively
 #' a three-parameter function.
-#' \item \code{vul_par[4]}: \code{vul_max}, the vulnerability (in logit space) at the maximum age.
+#' \item \code{vul_par[4]} corresponds to \code{vul_max}, the vulnerability at the maximum age. Estimated in logit space: \code{vul_max = plogis(x[4])}.
 #' }
-#' Vague priors of \code{vul_par[2] ~ N(0, sd = 3)} and \code{vul_par[3] ~ N(0, 3)} are used to aid convergence,
+#' Vague priors of \code{vul_par[1] ~ N(0, sd = 3)}, \code{vul_par[2] ~ N(0, 3)}, \code{vul_par[3] ~ Beta(1.01, 1.01)} are used to aid convergence when parameters may not be well estimated,
 #' for example, when vulnerability >> 0.5 for the youngest age class.
 #' 
 #' @section Online Documentation:
