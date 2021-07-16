@@ -495,7 +495,10 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     
     if(is.na(Data@LFC[x]) && is.na(Data@LFS[x]) || Data@LFC[x] > Linf || Data@LFS[x] > Linf) {
       
-      if(all(comp != "length")) comp_mode <- ceiling(LinInterp(La, 0:n_age, Data@CAL_mids[comp_mode]))
+      if(all(comp == "length")) {
+        comp_mode <- ceiling(LinInterp(La, 0:max_age, Data@CAL_mids[comp_mode]))
+        if(!length(comp_mode)) comp_mode <- 1
+      }
       if(vulnerability == "logistic") params$vul_par <- c(logit(comp_mode/max_age/0.75), log(1))
       if(vulnerability == "dome") {
         params$vul_par <- c(logit(comp_mode/max_age/0.75), log(1), logit(1/(max_age - comp_mode)), logit(0.5))
@@ -560,6 +563,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   
   random <- NULL
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev", "logit_M_walk")
+  
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                    map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
   
