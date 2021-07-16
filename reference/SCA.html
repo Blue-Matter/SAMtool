@@ -404,22 +404,22 @@ By default, 150% Data@OM$R0[x] is used as the start value in closed-loop simulat
 
 <p>Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter
 vector <code>vul_par</code> is of length 2:</p><ul>
-<li><p><code>vul_par[1]</code>: <code>a_95</code>, the age of 95% vulnerability, via logit transformation to constrain <code>a_95</code> to less than 75%
-of the maximum age: <code>a_95 = 0.75 * max_age * plogis(vul_par[1])</code>.</p></li>
-<li><p><code>vul_par[2]</code>: <code>a_50</code>, the age of 50% vulnerability as an offset, i.e., <code>a_50 = a_95 - exp(vul_par[2])</code>.</p></li>
-</ul><p>A vague prior for <code>vul_par[2] ~ N(0, sd = 3)</code> is used to aid convergence, for example, when vulnerability &gt;&gt; 0.5 for the youngest age class.</p>
+<li><p><code>vul_par[1]</code> corresponds to <code>a_95</code>, the age of 95% vulnerability. <code>a_95</code> is a transformed parameter via logit transformation to constrain <code>a_95</code> to less than 75%
+of the maximum age: <code>a_95 = 0.75 * max_age * plogis(x[1])</code>, where <code>x</code> is the estimated vector.</p></li>
+<li><p><code>vul_par[2]</code> corresponds to <code>a_50</code>, the age of 50% vulnerability. Estimated as an offset, i.e., <code>a_50 = a_95 - exp(x[2])</code>.</p></li>
+</ul>
+
 <p>With dome vulnerability, a double Gaussian parameterization is used, where <code>vul_par</code>
 is an estimated vector of length 4:</p><ul>
-<li><p><code>vul_par[1]</code>: <code>a_asc</code>, the first age of full vulnerability for the ascending limb, via logit transformation
-to constrain <code>a_95</code> to less than 75% of the maximum age: <code>a_asc = 0.75 * maxage * plogis(vul_par[1])</code>.</p></li>
-<li><p><code>vul_par[2]</code>: <code>a_50</code>, the age of 50% vulnerability for the ascending limb as an offset, i.e.,
-<code>a_50 = a_asc - exp(vul_par[2])</code>.</p></li>
-<li><p><code>vul_par[3]</code>: <code>a_des</code>, the last age of full vulnerability (where the descending limb starts) via logit transformation
-to constrain between <code>a_asc</code> and <code>max_age</code>,
-i.e., <code>a_des = (max_age - a_asc) * plogis(vul_par[3]) + a_asc</code>. By default, fixed to a small value so that the dome is effectively
+<li><p><code>vul_par[1]</code> corresponds to  <code>a_asc</code>, the first age of full vulnerability for the ascending limb. In the model, <code>a_asc</code> is estimated via logit transformation
+to constrain <code>a_95</code> to less than 75% of the maximum age: <code>a_asc = 0.75 * maxage * plogis(x[1])</code>, where <code>x</code> is the estimated vector.</p></li>
+<li><p><code>vul_par[2]</code> corresponds to <code>a_50</code>, the age of 50% vulnerability for the ascending limb. Estimated as an offset, i.e.,
+<code>a_50 = a_asc - exp(x[2])</code>.</p></li>
+<li><p><code>vul_par[3]</code> corresponds to <code>a_des</code>, the last age of full vulnerability (where the descending limb starts). Generated via logit transformation
+to constrain between <code>a_asc</code> and <code>max_age</code>, i.e., <code>a_des = (max_age - a_asc) * plogis(x[3]) + a_asc</code>. By default, fixed to a small value so that the dome is effectively
 a three-parameter function.</p></li>
-<li><p><code>vul_par[4]</code>: <code>vul_max</code>, the vulnerability (in logit space) at the maximum age.</p></li>
-</ul><p>Vague priors of <code>vul_par[2] ~ N(0, sd = 3)</code> and <code>vul_par[3] ~ N(0, 3)</code> are used to aid convergence,
+<li><p><code>vul_par[4]</code> corresponds to <code>vul_max</code>, the vulnerability at the maximum age. Estimated in logit space: <code>vul_max = plogis(x[4])</code>.</p></li>
+</ul><p>Vague priors of <code>vul_par[1] ~ N(0, sd = 3)</code>, <code>vul_par[2] ~ N(0, 3)</code>, <code>vul_par[3] ~ Beta(1.01, 1.01)</code> are used to aid convergence when parameters may not be well estimated,
 for example, when vulnerability &gt;&gt; 0.5 for the youngest age class.</p>
     <h2 class="hasAnchor" id="online-documentation"><a class="anchor" href="#online-documentation"></a>Online Documentation</h2>
 
