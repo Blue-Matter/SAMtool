@@ -350,6 +350,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                                   n_age = maxage + 1, nfleet = nfleet, nyears = nyears) %>%
         simplify2array() %>% aperm(c(1, 3, 2))
       real_Data@AddIunits <- RCMdata@I_units
+      
+      output@OM@cpars$AddIbeta <- matrix(1, output@OM@nsim, nsurvey)
       message("Historical indices added to OM@cpars$Data@AddInd.")
     }
     output@OM@cpars$Data <- real_Data

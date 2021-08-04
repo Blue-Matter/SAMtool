@@ -348,6 +348,10 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
                 if(Ind$slotname[i] != "AddInd") {
                   slot(Data_out, Ind$slotname[i]) <- Data_out@AddInd[, i, ]
                   slot(Data_out, paste0("CV_", Ind$slotname[i])) <- Data_out@CV_AddInd[, i, ]
+                  
+                  if(Ind$slotname[i] == "Ind") output@OM@cpars$I_beta <- rep(1, output@OM@nsim)
+                  if(Ind$slotname[i] == "VInd") output@OM@cpars$VI_beta <- rep(1, output@OM@nsim)
+                  if(Ind$slotname[i] == "SpInd") output@OM@cpars$SpI_beta <- rep(1, output@OM@nsim)
                 }
               }
 
@@ -355,11 +359,15 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
               if(all(!ind)) {
                 Data_out@AddInd <- Data_out@CV_AddInd <- Data_out@AddIndV <- array(NA, c(1, 1, 1))
                 Data_out@AddIndType <- NA
+                
+                output@OM@cpars$AddIbeta <- NULL
               } else {
                 Data_out@AddInd <- Data_out@AddInd[, ind, , drop = FALSE]
                 Data_out@CV_AddInd <- Data_out@CV_AddInd[, ind, , drop = FALSE]
                 Data_out@AddIndV <- Data_out@AddIndV[, ind, , drop = FALSE]
                 Data_out@AddIndType <- Data_out@AddIndType[ind]
+                
+                output@OM@cpars$AddIbeta <- output@OM@cpars$AddIbeta[, ind, drop = FALSE]
               }
               output@OM@cpars$Data <- Data_out
             }
