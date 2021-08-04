@@ -2,6 +2,8 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.2.1
 - `HCR_segment` allows for creating control rules with any number of linear segments.
+- Assign index beta = 1 for OMs conditioned by RCM.
+- The ESS argument is re-instated for RCM to maintain backwards compatibility.
 
 ## SAMtool 1.2.0
 ### RCM

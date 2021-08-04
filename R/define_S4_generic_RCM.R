@@ -27,6 +27,8 @@
 #' see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.
 #' @param LWT A named list of likelihood weights for the RCM. See below.
 #' @param comp_like A string indicating either \code{"multinomial"} (default) or \code{"lognormal"} distributions for the composition data.
+#' @param ESS A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
+#' Not used when data are provided in a \linkS4class{RCMdata} object.
 #' @param prior A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
 #' lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
 #' For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors. For all others, provide a length-2 vector for the mean and SD.
@@ -169,7 +171,7 @@
 #' By default, all likelihood weights are equal to one if not specified by the user.
 #'
 #' Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
-#' \linkS4class{RCMdata} object.
+#' \linkS4class{RCMdata} object. For a list or \linkS4class{Data} object, use the \code{ESS} argument.
 #' @author Q. Huynh
 #' @examples 
 #' \donttest{ 
@@ -226,19 +228,36 @@ setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
 #' @export
 setMethod("RCM", signature(OM = "OM", data = "list"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                   comp_like = c("multinomial", "lognormal"), prior = list(),
+                   comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
             
             .Deprecated(msg = "Using a list of input data to RCM is now deprecated. Use an RCMdata object, i.e., new(\"RCMdata\")")
             
             dataS4 <- new("RCMdata")
+            if(length(ESS) == 1) ESS <- rep(ESS, 2)
             
             if(!is.null(data$Chist)) dataS4@Chist <- data$Chist 
             if(!is.null(data$C_sd)) dataS4@C_sd <- data$C_sd 
             if(!is.null(data$Ehist)) dataS4@Ehist <- data$Ehist
-            if(!is.null(data$CAA)) dataS4@CAA <- data$CAA 
-            if(!is.null(data$CAL)) dataS4@CAL <- data$CAL 
+            
+            if(!is.null(data$CAA)) {
+              dataS4@CAA <- data$CAA
+              if(is.matrix(dataS4@CAA)) {
+                dataS4@CAA_ESS <- apply(dataS4@CAA, 1, sum, na.rm = TRUE) %>% pmin(ESS[1])
+              } else {
+                dataS4@CAA_ESS <- apply(dataS4@CAA, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[1])
+              }
+            }
+            if(!is.null(data$CAL)) {
+              dataS4@CAL <- data$CAL 
+              if(is.matrix(dataS4@CAL)) {
+                dataS4@CAL_ESS <- apply(dataS4@CAL, 1, sum, na.rm = TRUE) %>% pmin(ESS[2])
+              } else {
+                dataS4@CAL_ESS <- apply(dataS4@CAL, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[2])
+              }
+            }
+            
             if(!is.null(data$length_bin)) dataS4@length_bin <- data$length_bin 
             if(!is.null(data$MS)) dataS4@MS <- data$MS
             if(!is.null(data$MS_type)) dataS4@MS_type <- data$MS_type
@@ -246,10 +265,26 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
             
             if(!is.null(data$Index)) dataS4@Index <- data$Index
             if(!is.null(data$I_sd)) dataS4@I_sd <- data$I_sd
+            
             if(!is.null(data$s_CAA)) dataS4@IAA <- data$s_CAA
             if(!is.null(data$IAA)) dataS4@IAA <- data$IAA
+            if(length(dataS4@IAA)) {
+              if(is.matrix(dataS4@IAA)) {
+                dataS4@IAA_ESS <- apply(dataS4@IAA, 1, sum, na.rm = TRUE) %>% pmin(ESS[1])
+              } else {
+                dataS4@IAA_ESS <- apply(dataS4@IAA, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[1])
+              }
+            }
+            
             if(!is.null(data$s_CAL)) dataS4@IAL <- data$s_CAL
             if(!is.null(data$IAL)) dataS4@IAL <- data$IAL
+            if(length(dataS4@IAL)) {
+              if(is.matrix(dataS4@IAL)) {
+                dataS4@IAL_ESS <- apply(dataS4@IAL, 1, sum, na.rm = TRUE) %>% pmin(ESS[2])
+              } else {
+                dataS4@IAL_ESS <- apply(dataS4@IAL, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[2])
+              }
+            }
             
             if(!is.null(data$C_eq)) dataS4@C_eq <- data$C_eq
             if(!is.null(data$C_eq_sd)) dataS4@C_eq_sd <- data$C_eq_sd
@@ -271,12 +306,13 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
 #' @export
 setMethod("RCM", signature(OM = "OM", data = "Data"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                   comp_like = c("multinomial", "lognormal"), prior = list(),
+                   comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
 
             condition <- match.arg(condition)
             extra_args <- list(...)
+            if(length(ESS) == 1) ESS <- rep(ESS, 2)
 
             ####### Catch and ML from Data object
             vec_slot <- c("Cat", "ML", "CV_Cat")
@@ -320,8 +356,14 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             }
 
             # Length/age comps
-            if(!is.null(data_matrix$CAA)) dataS4@CAA <- data_matrix$CAA
-            if(!is.null(data_matrix$CAL)) dataS4@CAL <- data_matrix$CAL
+            if(!is.null(data_matrix$CAA)) {
+              dataS4@CAA <- data_matrix$CAA
+              dataS4@CAA_ESS <- apply(dataS4@CAA, 1, sum, na.rm = TRUE) %>% pmin(ESS[1])
+            }
+            if(!is.null(data_matrix$CAL)) {
+              dataS4@CAL <- data_matrix$CAL
+              dataS4@CAL_ESS <- apply(dataS4@CAL, 1, sum, na.rm = TRUE) %>% pmin(ESS[2])
+            }
             if(!is.null(dataS4@CAL)) {
               if(all(is.na(data@CAL_mids))) {
                 stop("No length bins found in Data@CAL_mids.", call. = FALSE)

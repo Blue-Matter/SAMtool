@@ -39,6 +39,7 @@ RCM(OM, data, ...)
   s_selectivity = NULL,
   LWT = list(),
   comp_like = c("multinomial", "lognormal"),
+  ESS = c(30, 30),
   prior = list(),
   max_F = 3,
   cores = 1L,
@@ -58,6 +59,7 @@ RCM(OM, data, ...)
   s_selectivity = NULL,
   LWT = list(),
   comp_like = c("multinomial", "lognormal"),
+  ESS = c(30, 30),
   prior = list(),
   max_F = 3,
   cores = 1L,
@@ -114,6 +116,9 @@ See Articles section for full description.}
 \item{drop_highF}{Logical, whether to drop fits of the RCM where F = \code{max_F}.}
 
 \item{control}{A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.}
+
+\item{ESS}{A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
+Not used when data are provided in a \linkS4class{RCMdata} object.}
 }
 \value{
 An object of class \linkS4class{RCModel} (see link for description of output).
@@ -261,7 +266,7 @@ a single model fit. By default FALSE. This feature requires identical biological
 By default, all likelihood weights are equal to one if not specified by the user.
 
 Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
-\linkS4class{RCMdata} object.
+\linkS4class{RCMdata} object. For a list or \linkS4class{Data} object, use the \code{ESS} argument.
 }
 
 \examples{

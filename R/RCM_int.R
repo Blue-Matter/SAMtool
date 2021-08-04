@@ -1,13 +1,12 @@
 
 RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = "B", LWT = list(),
-                    comp_like = c("multinomial", "lognormal"), ESS = c(30, 30), prior = list(),
+                    comp_like = c("multinomial", "lognormal"), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                     drop_highF = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
   
   dots <- list(...) # can be vul_par, ivul_par, log_rec_dev, log_early_rec_dev, map_vul_par, map_ivul_par, map_log_rec_dev, map_log_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
   if(!is.null(dots$maxF)) max_F <- dots$maxF
-  if(length(ESS) == 1) ESS <- rep(ESS, 2)
   
   comp_like <- match.arg(comp_like)
   condition <- match.arg(condition)
@@ -148,13 +147,16 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     conv <- conv & !highF
   }
   if(drop_nonconv) {
-    NaF <- vapply(res, function(x) getElement(x, "F") %>% is.na() %>% any(), logical(1))
+    NaF <- vapply(res, function(x) any(is.na(x$F) | is.infinite(x$F)), logical(1))
     if(sum(NaF)) message(sum(NaF), " out of ", nsim , " iterations had F with NA's")
     
     conv <- conv & !NaF
   }
   if(sum(conv) < nsim) message("Non-converged iteration(s): ", paste(which(!conv), collapse = " "), "\n")
-  if(sum(conv) < nsim && (drop_nonconv | drop_highF)) {
+  if(!sum(conv)) {
+    message("Non-converged for all iterations. Returning all for evaluation.")
+    keep <- !logical(OM@nsim)
+  } else if(sum(conv) < nsim && (drop_nonconv | drop_highF)) {
     message("Non-converged and/or highF iterations will be removed.\n")
     keep <- conv
   } else {
@@ -307,11 +309,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                 CAL = lapply(res[keep], getElement, "CALpred") %>% simplify2array() %>% aperm(c(4, 1:3)),
                 mean_fit = mean_fit_output, conv = conv[keep], data = RCMdata, Misc = res[keep])
   
-  #if(any(!keep)) {
-  #  output@data$drop_sim <- which(!keep)
-  #} else {
-  #  output@data$drop_sim <- numeric(0)
-  #}
+  output@config <- list(drop_sim = which(!keep))
+  
   
   # Data in cpars
   if(sum(RCMdata@Chist > 0, na.rm = TRUE) || nsurvey > 0) {

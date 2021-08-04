@@ -66,7 +66,10 @@
 #' \item report - a list of model output reported from the TMB executable, i.e. \code{obj$report()}. See Misc.
 #' }
 #' @slot data A \linkS4class{RCMdata} object containing data inputs for the RCM.
-#' @slot config A data frame describing configuration of the RCM (not currently used).
+#' @slot config A list describing configuration of the RCM:
+#' \itemize{
+#' \item drop_sim - a vector of simulations that were dropped for the output
+#' }
 #'
 #' @seealso \link{plot.RCModel} \link{RCM}
 #' @author Q. Huynh
@@ -74,7 +77,7 @@
 #' @exportClass RCModel
 RCModel <- setClass("RCModel", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
                                          CAA = "array", CAL = "array", conv = "logical", Misc = "list", mean_fit = "list",
-                                         data = "ANY", config = "data.frame"))
+                                         data = "ANY", config = "ANY"))
 
 
 #' @name plot.RCModel

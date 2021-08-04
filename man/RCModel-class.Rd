@@ -79,7 +79,10 @@ An S4 class for the output from \link{RCM}.
 
 \item{\code{data}}{A \linkS4class{RCMdata} object containing data inputs for the RCM.}
 
-\item{\code{config}}{A data frame describing configuration of the RCM (not currently used).}
+\item{\code{config}}{A list describing configuration of the RCM:
+\itemize{
+\item drop_sim - a vector of simulations that were dropped for the output
+}}
 }}
 
 \seealso{
