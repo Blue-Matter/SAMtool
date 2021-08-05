@@ -291,8 +291,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   
   if(any(RCMdata@CAL > 0, na.rm = TRUE) || (any(RCMdata@MS > 0, na.rm = TRUE) & RCMdata@MS_type == "length") ||
      any(RCMdata@IAL > 0, na.rm = TRUE)) {
-    OM@cpars$CAL_bins <- RCMdata@Misc$lbinmid
-    OM@cpars$CAL_binsmid <- RCMdata@Misc$lbin
+    OM@cpars$CAL_bins <- RCMdata@Misc$lbin
+    OM@cpars$CAL_binsmid <- RCMdata@Misc$lbinmid
     message("RCM length bins will be added to OM.")
   }
   
