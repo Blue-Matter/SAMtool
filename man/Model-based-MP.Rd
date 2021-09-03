@@ -18,29 +18,29 @@
 \alias{SSS_4010}
 \title{Model-based management procedures}
 \usage{
-SCA_MSY(x, Data, reps = 1)
+SCA_MSY(x, Data, reps = 1, diagnostic = "min")
 
-SCA_75MSY(x, Data, reps = 1)
+SCA_75MSY(x, Data, reps = 1, diagnostic = "min")
 
-SCA_4010(x, Data, reps = 1)
+SCA_4010(x, Data, reps = 1, diagnostic = "min")
 
-DDSS_MSY(x, Data, reps = 1)
+DDSS_MSY(x, Data, reps = 1, diagnostic = "min")
 
-DDSS_75MSY(x, Data, reps = 1)
+DDSS_75MSY(x, Data, reps = 1, diagnostic = "min")
 
-DDSS_4010(x, Data, reps = 1)
+DDSS_4010(x, Data, reps = 1, diagnostic = "min")
 
-SP_MSY(x, Data, reps = 1)
+SP_MSY(x, Data, reps = 1, diagnostic = "min")
 
-SP_75MSY(x, Data, reps = 1)
+SP_75MSY(x, Data, reps = 1, diagnostic = "min")
 
-SP_4010(x, Data, reps = 1)
+SP_4010(x, Data, reps = 1, diagnostic = "min")
 
-SSS_MSY(x, Data, reps = 1)
+SSS_MSY(x, Data, reps = 1, diagnostic = "min")
 
-SSS_75MSY(x, Data, reps = 1)
+SSS_75MSY(x, Data, reps = 1, diagnostic = "min")
 
-SSS_4010(x, Data, reps = 1)
+SSS_4010(x, Data, reps = 1, diagnostic = "min")
 }
 \arguments{
 \item{x}{A position in the Data object.}
@@ -48,6 +48,8 @@ SSS_4010(x, Data, reps = 1)
 \item{Data}{An object of class Data}
 
 \item{reps}{Numeric, the number of stochastic replicates for the management advice.}
+
+\item{diagnostic}{Character string describing the assessment diagnostic to save, see \link{make_MP}.}
 }
 \value{
 An object of class \linkS4class{Rec} which contains the management recommendation.
@@ -55,7 +57,8 @@ An object of class \linkS4class{Rec} which contains the management recommendatio
 \description{
 A suite of model-based management procedures (MPs) included in the package. Additional MPs,
 with specific model configurations (e.g., stock-recruit function or fixing certain parameters) or alternative
-ramped harvest control rules can be created with \link{make_MP} and the available Assess and HCR objects.
+ramped harvest control rules can be created with \link{make_MP} and the available Assess and HCR objects with constant
+TAC between assessment years.
 }
 \section{Functions}{
 \itemize{

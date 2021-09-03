@@ -100,10 +100,7 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
 
   if(figure) {
     old_par <- par(no.readonly = TRUE)
-    on.exit(layout(matrix(1)))
     on.exit(par(old_par), add = TRUE)
-
-    par(mar = c(5, 4, 1, 1), oma = c(0, 0, 8, 0))
   }
 
   MPs <- MSE@MPs
@@ -141,6 +138,7 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
 
       if(figure) {
         layout(matrix(c(1, 2, 3, 4, 4, 5), ncol = 3, byrow = TRUE))
+        par(mar = c(5, 4, 1, 1), oma = c(0, 0, 8, 0))
 
         plot_hessian_convergence(hessian_code, Year)
         plot_msg(msg, Year)

@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.2.2
+- The `make_interim_MP` function is added to generate MPs that adjust the TAC between periodic assessments using the index.
+
 ## SAMtool 1.2.1
 - `HCR_segment` allows for creating control rules with any number of linear segments.
 - Assign index beta = 1 for OMs conditioned by RCM.
