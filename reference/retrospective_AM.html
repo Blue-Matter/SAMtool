@@ -144,7 +144,7 @@ are plotted over the course of the MSE are plotted against the operating model (
     </tr>
     <tr>
       <th>MP</th>
-      <td><p>Character. The name of the management procedure created by <code><a href='make_MP.html'>make_MP</a></code> containing the assessment model.</p></td>
+      <td><p>Character. The name of the management procedure created by <code><a href='make_interim_MP.html'>make_MP</a></code> containing the assessment model.</p></td>
     </tr>
     <tr>
       <th>sim</th>
@@ -178,7 +178,7 @@ may not be indicative of general assessment behavior and performance overall.</p
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
-<span class='va'>SCA_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SP</span>, <span class='va'>HCR_MSY</span>, diagnostic <span class='op'>=</span> <span class='st'>"full"</span><span class='op'>)</span>
+<span class='va'>SCA_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_interim_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SP</span>, <span class='va'>HCR_MSY</span>, diagnostic <span class='op'>=</span> <span class='st'>"full"</span><span class='op'>)</span>
 <span class='va'>OM</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html'>testOM</a></span>; <span class='va'>OM</span><span class='op'>@</span><span class='va'>proyears</span> <span class='op'>&lt;-</span> <span class='fl'>20</span>
 <span class='va'>myMSE</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></span><span class='op'>(</span>OM <span class='op'>=</span> <span class='va'>OM</span>, MPs <span class='op'>=</span> <span class='st'>"SCA_40_10"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'><span style='color: #0000BB;'>Checking MPs </span>

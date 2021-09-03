@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Make a custom management procedure (MP) — make_MP • SAMtool</title>
+<title>Make a custom management procedure (MP) — make_interim_MP • SAMtool</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,9 +46,10 @@
 
 
 
-<meta property="og:title" content="Make a custom management procedure (MP) — make_MP" />
+<meta property="og:title" content="Make a custom management procedure (MP) — make_interim_MP" />
 <meta property="og:description" content="Function operator that combines a function of class Assess and a function of
-class HCR to create a management procedure (MP). The resulting function
+class HCR to create a management procedure (MP) with constant TAC between assessments. 
+Use make_interim_MP to use an interim procedure to adjust the TAC between assessments using an index. The resulting function
 can then be tested in closed-loop simulation via runMSE." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
@@ -125,17 +126,29 @@ can then be tested in closed-loop simulation via runMSE." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Make a custom management procedure (MP)</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/z_MPs.R'><code>R/z_MPs.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/interim_MP.R'><code>R/interim_MP.R</code></a>, <a href='https://github.com/Blue-Matter/SAMtool/blob/master/R/z_MPs.R'><code>R/z_MPs.R</code></a></small>
     <div class="hidden name"><code>make_MP.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>Function operator that combines a function of class <code>Assess</code> and a function of
-class <code>HCR</code> to create a management procedure (MP). The resulting function
+class <code>HCR</code> to create a management procedure (MP) with constant TAC between assessments. 
+Use make_interim_MP to use an interim procedure to adjust the TAC between assessments using an index. The resulting function
 can then be tested in closed-loop simulation via <code><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>.Assess</span>, <span class='va'>.HCR</span>, diagnostic <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"min"</span>, <span class='st'>"full"</span>, <span class='st'>"none"</span><span class='op'>)</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>make_interim_MP</span><span class='op'>(</span>
+  .Assess <span class='op'>=</span> <span class='st'>"SCA"</span>,
+  .HCR <span class='op'>=</span> <span class='st'>"HCR_MSY"</span>,
+  AddInd <span class='op'>=</span> <span class='st'>"VB"</span>,
+  assessment_interval <span class='op'>=</span> <span class='fl'>5</span>,
+  type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"buffer"</span>, <span class='st'>"mean"</span>, <span class='st'>"loess"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
+  type_par <span class='op'>=</span> <span class='cn'>NULL</span>,
+  diagnostic <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"min"</span>, <span class='st'>"full"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
+
+<span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>.Assess</span>, <span class='va'>.HCR</span>, diagnostic <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"min"</span>, <span class='st'>"full"</span>, <span class='st'>"none"</span><span class='op'>)</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -149,11 +162,31 @@ can then be tested in closed-loop simulation via <code><a href='https://rdrr.io/
       <td><p>Harvest control rule, a function of class <code>HCR</code>.</p></td>
     </tr>
     <tr>
+      <th>AddInd</th>
+      <td><p>A vector of integers or character strings indicating the indices to be used in the assessment model. 
+Integers assign the index to the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, 
+"VB" represents vulnerable biomass in Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd. For the interim
+procedure, the function will use the first index in <code>AddInd</code>.</p></td>
+    </tr>
+    <tr>
+      <th>assessment_interval</th>
+      <td><p>The time interval for when the assesment model is applied (number of years). In all other years, the 
+interim procedure is applied.</p></td>
+    </tr>
+    <tr>
+      <th>type</th>
+      <td><p>How the index is used to calculate the TAC in the interim procedure. See details.</p></td>
+    </tr>
+    <tr>
+      <th>type_par</th>
+      <td><p>A control parameter for the interim procedure. See details.</p></td>
+    </tr>
+    <tr>
       <th>diagnostic</th>
       <td><p>A character string describing if any additional diagnostic information from the
-assessment models will be collected during the closed-loop simulation (<code>"none"</code> is the
-default). <code>"min"</code> (minimal) will collect information on convergence and <code>"full"</code> will also collect the
-model estimates of biomass and F generated by <code>.Assess</code>.</p></td>
+assessment models will be collected during the closed-loop simulation. <code>"min"</code> (minimal) will collect information 
+on convergence (default) and <code>"full"</code> will also collect the model estimates of biomass and F generated by <code>.Assess</code>.
+<code>"none"</code> skips this step.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -164,12 +197,48 @@ model estimates of biomass and F generated by <code>.Assess</code>.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A function of class <code>MP</code>.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p><code>make_interim_MP</code> creates an MP that runs the interim procedure (updating the TAC according to index observations in between periodic 
+assessment intervals. <strong>Always ensure to set:</strong> <code>OM@interval &lt;- 1</code>. The assessment frequency is specified in argument 
+<code>assessment_interval</code>.</p>
+<p>In the year when the assessment is applied, the TAC is set by fitting the model and then running the harvest control rule. Between assessments,
+the TAC is updated as
+$$
+TAC_{y+1} = Cref (I_y + b \times s)/(Iref + b \times s)
+$$
+where <code>Cref</code> is the TAC calculated from the most recent assessment, <code>Iref</code> is the value of the index when <code>Cref</code> was calculated
+(see Equations 6 and 7 of Huynh et al. 2020). The value of <code>I_y</code> depends on <code>type</code>, with <code>b</code> and <code>s</code> equal zero unless
+<code>type = "buffer"</code>:</p>
+<ul>
+<li><p><code>"buffer"</code> - <code>I_y</code> is the most recent index with <code>b</code> is specifed by <code>type_par</code> (default = 1), and <code>s</code> is 
+the standard deviation of index residuals from the most recent assessment.</p></li>
+<li><p><code>"mean"</code> - <code>I_y</code> is the mean value of the index over the most recent <code>type_par</code> years (default = 3).</p></li>
+<li><p><code>"loess"</code> - <code>I_y</code> is the most recent index predicted by a <a href='https://rdrr.io/r/stats/loess.html'>loess</a> smoother applied over the entire time series of the index.
+Use <code>type_par</code> to adjust the <code>span</code> parameter (default = 0.75).</p></li>
+<li><p><code>"none"</code> - <code>I_y</code> is the most recent index. Index values are not adjusted in the interim procedure.</p></li>
+</ul>
+
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p>Huynh et al. 2020. The interim management procedure approach for assessed stocks: Responsive management advice and lower assessment
+frequency. Fish Fish. 21:663–679. <a href='https://doi.org/10.1111/faf.12453'>https://doi.org/10.1111/faf.12453</a></p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><a href='HCR_ramp.html'>HCR_ramp</a> <a href='HCR_MSY.html'>HCR_MSY</a> <a href='diagnostic.html'>diagnostic</a> <a href='retrospective_AM.html'>retrospective_AM</a></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># A statistical catch-at-age model with a 40-10 control rule</span>
+    <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
+<span class='co'># Interim MPs</span>
+<span class='va'>MP_buffer_5</span> <span class='op'>&lt;-</span> <span class='fu'>make_interim_MP</span><span class='op'>(</span>assessment_interval <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+<span class='va'>MP_buffer_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_interim_MP</span><span class='op'>(</span>assessment_interval <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>OM</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html'>testOM</a></span>
+<span class='va'>OM</span><span class='op'>@</span><span class='va'>interval</span> <span class='op'>&lt;-</span> <span class='fl'>1</span>
+
+<span class='va'>MSE</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></span><span class='op'>(</span><span class='va'>OM</span>, MPs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"MP_buffer_5"</span>, <span class='st'>"MP_buffer_10"</span><span class='op'>)</span><span class='op'>)</span> 
+</div><div class='output co'>#&gt; <span class='message'><span style='color: #0000BB;'>Checking MPs </span>
+#&gt; <span class='message'></span></span></div><div class='output co'>#&gt; <span class='error'>Error: Some MPs are not a functions of class `MP`: MP_buffer_5, MP_buffer_10</span></div><div class='input'><span class='co'># }</span>
+<span class='co'># A statistical catch-at-age model with a 40-10 control rule</span>
 <span class='va'>SCA_40_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR40_10</span><span class='op'>)</span>
 
 <span class='co'># An SCA that will produce convergence diagnostics</span>
@@ -178,17 +247,19 @@ model estimates of biomass and F generated by <code>.Assess</code>.</p></td>
 <span class='co'># MP with an SCA that uses a Ricker stock-recruit function.</span>
 <span class='va'>SCA_Ricker</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_MSY</span>, SR <span class='op'>=</span> <span class='st'>"Ricker"</span><span class='op'>)</span>
 <span class='fu'>show</span><span class='op'>(</span><span class='va'>SCA_Ricker</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; function (x, Data, reps = 1) 
+</div><div class='output co'>#&gt; function (x, Data, reps = 1, diagnostic = "min") 
 #&gt; {
 #&gt;     dependencies &lt;- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge, Data@steep, Data@CV_Ind, Data@sigmaR, Data@CV_Cat, Data@Mort, Data@CV_Mort, Data@steep, Data@CV_steep, Data@vbLinf, Data@vbK, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge, Data@L50, Data@L95"
 #&gt;     do_Assessment &lt;- SCA(x = x, Data = Data, SR = "Ricker")
 #&gt;     Rec &lt;- HCR_MSY(Assessment = do_Assessment, reps = reps)
-#&gt;     Rec@Misc &lt;- Assess_diagnostic(x, Data, do_Assessment, include_assessment = FALSE)
+#&gt;     if (diagnostic != "none") 
+#&gt;         Rec@Misc &lt;- Assess_diagnostic(x, Data, do_Assessment, 
+#&gt;             include_assessment = FALSE)
 #&gt;     if (!is.null(do_Assessment@info$Misc)) 
 #&gt;         Rec@Misc &lt;- c(Rec@Misc, do_Assessment@info$Misc)
 #&gt;     return(Rec)
 #&gt; }
-#&gt; &lt;environment: 0x7f992947ba48&gt;
+#&gt; &lt;environment: 0x7fe468c07048&gt;
 #&gt; attr(,"class")
 #&gt; [1] "MP"</div><div class='input'>
 </div></pre>

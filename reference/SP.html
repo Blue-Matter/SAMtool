@@ -376,7 +376,7 @@ Aquat. Sci. 58: 1871-1890.</p>
 paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 2009/055. xiv + 200 p.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><a href='SP_production.html'>SP_production</a> <a href='plot.Assessment.html'>plot.Assessment</a> <a href='summary.Assessment.html'>summary.Assessment</a> <a href='retrospective.html'>retrospective</a> <a href='profile.html'>profile</a> <a href='make_MP.html'>make_MP</a></p></div>
+    <div class='dont-index'><p><a href='SP_production.html'>SP_production</a> <a href='plot.Assessment.html'>plot.Assessment</a> <a href='summary.Assessment.html'>summary.Assessment</a> <a href='retrospective.html'>retrospective</a> <a href='profile.html'>profile</a> <a href='make_interim_MP.html'>make_MP</a></p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Q. Huynh</p>
@@ -394,7 +394,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 
 <span class='co'># \donttest{</span>
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpyZitIl/report_SP.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpyZitIl/report_SP.html</span></div><div class='input'><span class='fu'><a href='profile.html'>profile</a></span><span class='op'>(</span><span class='va'>res</span>, FMSY <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp9Q4VbL/report_SP.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp9Q4VbL/report_SP.html</span></div><div class='input'><span class='fu'><a href='profile.html'>profile</a></span><span class='op'>(</span><span class='va'>res</span>, FMSY <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='img'><img src='SP-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; An object of class "prof"
 #&gt; Slot "Model":
 #&gt; [1] "SP"
@@ -454,7 +454,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 
 <span class='co'># \donttest{</span>
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res_SS</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpyZitIl/report_SP_SS.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpyZitIl/report_SP_SS.html</span></div><div class='img'><img src='SP-6.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># }</span>
+</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp9Q4VbL/report_SP_SS.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp9Q4VbL/report_SP_SS.html</span></div><div class='img'><img src='SP-6.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># }</span>
 
 <span class='co'>#### Fox model</span>
 <span class='va'>res_Fox</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, fix_n <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>

@@ -138,7 +138,7 @@ as a function of an operational control point (OCP) such as spawning depletion o
 is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
 the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
 Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rule can generalized with more control points (&gt;2) in <a href='HCR_segment.html'>HCR_segment</a>.
-Class HCR objects are typically used with function <a href='make_MP.html'>make_MP</a>.</p>
+Class HCR objects are typically used with function <a href='make_interim_MP.html'>make_MP</a>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>HCR_ramp</span><span class='op'>(</span>
@@ -237,7 +237,7 @@ for groundfish off the U.S. West Coast. Fisheries Research 94:251-266.</p>
 management: specification and performance. ICES Journal of Marine Science 56:846-852.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><a href='HCR_segment.html'>HCR_segment</a> <a href='HCR_MSY.html'>HCR_MSY</a> <a href='HCRlin.html'>HCRlin</a> <a href='make_MP.html'>make_MP</a></p></div>
+    <div class='dont-index'><p><a href='HCR_segment.html'>HCR_segment</a> <a href='HCR_MSY.html'>HCR_MSY</a> <a href='HCRlin.html'>HCRlin</a> <a href='make_interim_MP.html'>make_MP</a></p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Q. Huynh &amp; T. Carruthers</p>
@@ -252,17 +252,17 @@ management: specification and performance. ICES Journal of Marine Science 56:846
 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='st'>"red"</span>, lty <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 </div><div class='img'><img src='HCR_ramp-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># create a 40-10 MP to run in closed-loop MSE</span>
-<span class='va'>DD_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>DD_TMB</span>, <span class='va'>HCR40_10</span><span class='op'>)</span>
+<span class='va'>DD_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_interim_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>DD_TMB</span>, <span class='va'>HCR40_10</span><span class='op'>)</span>
 
 <span class='co'># Alternatively,</span>
-<span class='va'>DD_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>DD_TMB</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSB0"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.1</span>, TOCP <span class='op'>=</span> <span class='fl'>0.4</span><span class='op'>)</span>
+<span class='va'>DD_40_10</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_interim_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>DD_TMB</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSB0"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.1</span>, TOCP <span class='op'>=</span> <span class='fl'>0.4</span><span class='op'>)</span>
 
 <span class='co'># An SCA with LOCP and TOCP at 0.4 and 0.8, respectively, of SSB/SSBMSY</span>
-<span class='va'>SCA_80_40</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSBMSY"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.4</span>, TOCP <span class='op'>=</span> <span class='fl'>0.8</span><span class='op'>)</span>
+<span class='va'>SCA_80_40</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_interim_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSBMSY"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.4</span>, TOCP <span class='op'>=</span> <span class='fl'>0.8</span><span class='op'>)</span>
 
 <span class='co'># A conservative HCR that fishes at 75% of FMSY at B &gt; 80% BMSY but only reduces F</span>
 <span class='co'># to 10% of FMSY if B &lt; 40% BMSY.</span>
-<span class='va'>SCA_conservative</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSBMSY"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.4</span>, TOCP <span class='op'>=</span> <span class='fl'>0.8</span>, 
+<span class='va'>SCA_conservative</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_interim_MP.html'>make_MP</a></span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_ramp</span>, OCP_type <span class='op'>=</span> <span class='st'>"SSB_SSBMSY"</span>, LOCP <span class='op'>=</span> <span class='fl'>0.4</span>, TOCP <span class='op'>=</span> <span class='fl'>0.8</span>, 
 relF_min <span class='op'>=</span> <span class='fl'>0.1</span>, relF_max <span class='op'>=</span> <span class='fl'>0.75</span><span class='op'>)</span>
 
 <span class='co'># Figure of this conservative HCR</span>
