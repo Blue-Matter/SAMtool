@@ -88,7 +88,7 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
       OCP_val <- NA_real_
     }
     
-    if(!is.na(OCP_val)) {
+    if(!is.na(OCP_val) && OCP_val > 0) {
       alpha <- HCRlinesegment(OCP_val, OCP, relF)
       
       if(Ftarget_type == "FMSY") {
@@ -132,7 +132,7 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
         }
       }
       
-      if(exists("Fout", inherits = FALSE)) {
+      if(exists("Fout", inherits = FALSE) && !is.na(F_out)) {
         if(Fout > 0) {
           if(!exists("SE", inherits = FALSE) || !length(SE)) SE <- 0
           FM <- trlnorm(reps, Fout, SE/Fout)
@@ -440,9 +440,13 @@ TAC_MSY <- function(Assessment, reps, MSY_frac = 1) {
     Fout <- SE <- numeric(0)
   }
   
-  if(length(Fout) && length(SE)) {
-    FM <- trlnorm(reps, Fout, SE/Fout)
-    TAC <- calculate_TAC(Assessment, Ftarget = FM)
+  if(length(Fout) && !is.na(Fout) && Fout > 0) {
+    if(length(SE)) {
+      FM <- trlnorm(reps, Fout, SE/Fout)
+      TAC <- calculate_TAC(Assessment, Ftarget = FM)
+    } else {
+      TAC <- rep(NA_real_, reps)
+    }
   } else {
     TAC <- rep(NA_real_, reps)
   }
