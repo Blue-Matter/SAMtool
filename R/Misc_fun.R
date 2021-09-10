@@ -320,7 +320,7 @@ Assess_I_hist <- function(xx, Data, x, yind) {
 dev_AC <- function(n, mu = 1, stdev, AC, seed, chain_start) {
   if(!missing(seed)) set.seed(seed)
   
-  log_mean <- log(mu) - 0.5 * stdev^2 * (1 - AC/sqrt(1 - AC^2)) #http://dx.doi.org/10.1139/cjfas-2016-0167
+  log_mean <- log(mu) - 0.5 * stdev^2 * (1 - AC)/sqrt(1 - AC^2) #http://dx.doi.org/10.1139/cjfas-2016-0167
   samp <- rnorm(n, log_mean, stdev)
   out <- numeric(n)
   if(missing(chain_start)) {
