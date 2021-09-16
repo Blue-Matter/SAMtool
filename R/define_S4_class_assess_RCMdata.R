@@ -120,6 +120,20 @@ Assessment <- setClass("Assessment",
                                  obj = "list", opt = "optAssess", SD = "sdreportAssess",
                                  TMB_report = "list", dependencies = "character"))
 
+
+setMethod("initialize", "Assessment", function(.Object, ...) {
+  dots <- list(...)
+  if(length(dots)) {
+    for(i in names(dots)) slot(.Object, i) <- dots[[i]]
+  }
+  attr(.Object, "version") <- paste("SAMtool", packageVersion("SAMtool"), "with MSEtool", packageVersion("MSEtool"))
+  attr(.Object, "date") <- date()
+  attr(.Object, "R.version") <- getRversion()
+  
+  return(.Object)
+})
+
+
 #' @name summary.Assessment
 #' @title Summary of Assessment object
 #' @aliases summary,Assessment-method

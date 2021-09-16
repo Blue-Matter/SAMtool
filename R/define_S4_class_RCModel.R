@@ -80,6 +80,18 @@ RCModel <- setClass("RCModel", slots = c(OM = "ANY", SSB = "matrix", NAA = "arra
                                          data = "ANY", config = "ANY"))
 
 
+setMethod("initialize", "RCModel", function(.Object, ...) {
+  dots <- list(...)
+  if(length(dots)) {
+    for(i in names(dots)) slot(.Object, i) <- dots[[i]]
+  }
+  attr(.Object, "version") <- paste("SAMtool", packageVersion("SAMtool"), "with MSEtool", packageVersion("MSEtool"))
+  attr(.Object, "date") <- date()
+  attr(.Object, "R.version") <- getRversion()
+  
+  return(.Object)
+})
+
 #' @name plot.RCModel
 #' @aliases plot,RCModel,missing-method
 #' @title Plot RCM scope output
