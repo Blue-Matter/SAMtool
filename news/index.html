@@ -130,6 +130,11 @@
 <a href="#samtool-122" class="anchor"></a>SAMtool 1.2.2</h2>
 <ul>
 <li>The <code>make_interim_MP</code> function is added to generate MPs that adjust the TAC between periodic assessments using the index.</li>
+<li>An additional posfun to <code>SP</code> is added to avoid negative biomass situations.</li>
+<li>Fix sampling of recruitment deviations for projections in <code>RCM</code> so that the mean is one in normal space. This error was apparent when autocorrelation was very large.</li>
+<li>Assessment and RCModel objects now save the package version as attributes.</li>
+<li>Shortcut function now reports year-specific reference points for the harvest control rule.</li>
+<li>HCR returns TAC = NA when a control point or target point is negative.</li>
 </ul>
 </div>
     <div id="samtool-121" class="section level2">

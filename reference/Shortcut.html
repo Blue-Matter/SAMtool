@@ -142,7 +142,7 @@ distribution. <code>Shortcut2</code>, the more prefereable option, fits <a href=
 model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
 using <a href='https://rdrr.io/pkg/vars/man/predict.html'>predict.varest</a>. <code>Perfect</code> assumes no error in the assessment model and is useful for comparing the behavior of 
 different harvest control rules. To utilize the shortcut method in closed-loop simulation, use <a href='make_interim_MP.html'>make_MP</a> with these functions as 
-the Assessment model. N.B. the functions do not work with <code>runMSE(parallel = TRUE)</code>.</p>
+the Assessment model. <strong>N.B. the functions do not work with</strong> <code>runMSE(parallel = TRUE)</code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>Shortcut</span><span class='op'>(</span>
@@ -229,7 +229,7 @@ are obtained from the operating model.</p></td>
     <p>An object of class <a href='Assessment-class.html'>Assessment</a>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Currently there is no error in FMSY (the target F in the HCR in SAMtool).</p>
+    <p>Currently there is no error in FMSY (frequently the target F in the HCR).</p>
 <p>See Wiedenmann et al. (2015) for guidance on the magnitude of error for the shortcut emulator.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 

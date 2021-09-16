@@ -47,10 +47,12 @@
 
 
 <meta property="og:title" content="Make a custom management procedure (MP) — make_interim_MP" />
-<meta property="og:description" content="Function operator that combines a function of class Assess and a function of
-class HCR to create a management procedure (MP) with constant TAC between assessments. 
-Use make_interim_MP to use an interim procedure to adjust the TAC between assessments using an index. The resulting function
-can then be tested in closed-loop simulation via runMSE." />
+<meta property="og:description" content="Function operator that creates a management procedure (MP) by combining an assessment model (function of class Assess) with
+a harvest control rule (function of class HCR). The resulting function can then be tested in closed-loop simulation via 
+runMSE. Use make_MP to specify constant TAC between assessments; the frequency of
+assessments is specified in OM@interval. Use make_interim_MP to use an interim procedure to adjust the TAC between 
+assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument assessment_interval when 
+making the MP; ensure that OM@interval &amp;lt;- 1." />
 <meta property="og:image" content="https://SAMtool.openMSE.com/logo.png" />
 
 
@@ -131,10 +133,12 @@ can then be tested in closed-loop simulation via runMSE." />
     </div>
 
     <div class="ref-description">
-    <p>Function operator that combines a function of class <code>Assess</code> and a function of
-class <code>HCR</code> to create a management procedure (MP) with constant TAC between assessments. 
-Use make_interim_MP to use an interim procedure to adjust the TAC between assessments using an index. The resulting function
-can then be tested in closed-loop simulation via <code><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></code>.</p>
+    <p>Function operator that creates a management procedure (MP) by combining an assessment model (function of class <code>Assess</code>) with
+a harvest control rule (function of class <code>HCR</code>). The resulting function can then be tested in closed-loop simulation via 
+<code><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></code>. Use <code>make_MP</code> to specify constant TAC between assessments; the frequency of
+assessments is specified in <code>OM@interval</code>. Use <code>make_interim_MP</code> to use an interim procedure to adjust the TAC between 
+assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument <code>assessment_interval</code> when 
+making the MP; ensure that <code>OM@interval &lt;- 1</code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>make_interim_MP</span><span class='op'>(</span>
@@ -259,7 +263,7 @@ frequency. Fish Fish. 21:663–679. <a href='https://doi.org/10.1111/faf.12453'>
 #&gt;         Rec@Misc &lt;- c(Rec@Misc, do_Assessment@info$Misc)
 #&gt;     return(Rec)
 #&gt; }
-#&gt; &lt;environment: 0x7f8a34fe4e48&gt;
+#&gt; &lt;environment: 0x7f983437d2d8&gt;
 #&gt; attr(,"class")
 #&gt; [1] "MP"</div><div class='input'>
 </div></pre>
