@@ -1,10 +1,12 @@
 
 #' Make a custom management procedure (MP)
 #'
-#' Function operator that combines a function of class \code{Assess} and a function of
-#' class \code{HCR} to create a management procedure (MP) with constant TAC between assessments. 
-#' Use \link{make_interim_MP} to use an interim procedure to adjust the TAC between assessments using an index. The resulting function
-#' can then be tested in closed-loop simulation via \code{\link[MSEtool]{runMSE}}.
+#' Function operator that creates a management procedure (MP) by combining an assessment model (function of class \code{Assess}) with
+#' a harvest control rule (function of class \code{HCR}). The resulting function can then be tested in closed-loop simulation via 
+#' \code{\link[MSEtool]{runMSE}}. Use \code{make_MP} to specify constant TAC between assessments; the frequency of
+#' assessments is specified in \code{OM@@interval}. Use \code{make_interim_MP} to use an interim procedure to adjust the TAC between 
+#' assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument \code{assessment_interval} when 
+#' making the MP; ensure that \code{OM@@interval <- 1}.
 #'
 #' @param .Assess Assessment model, a function of class \code{Assess}.
 #' @param .HCR Harvest control rule, a function of class \code{HCR}.

@@ -132,7 +132,7 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
         }
       }
       
-      if(exists("Fout", inherits = FALSE) && !is.na(F_out)) {
+      if(exists("Fout", inherits = FALSE) && !is.na(Fout)) {
         if(Fout > 0) {
           if(!exists("SE", inherits = FALSE) || !length(SE)) SE <- 0
           FM <- trlnorm(reps, Fout, SE/Fout)

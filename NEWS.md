@@ -2,6 +2,11 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.2.2
 - The `make_interim_MP` function is added to generate MPs that adjust the TAC between periodic assessments using the index.
+- An additional posfun to `SP` is added to avoid negative biomass situations.
+- Fix sampling of recruitment deviations for projections in `RCM` so that the mean is one in normal space. This error was apparent when autocorrelation was very large.
+- Assessment and RCModel objects now save the package version as attributes.
+- Shortcut function now reports year-specific reference points for the harvest control rule.
+- HCR returns TAC = NA when a control point or target point is negative.
 
 ## SAMtool 1.2.1
 - `HCR_segment` allows for creating control rules with any number of linear segments.
