@@ -35,7 +35,7 @@
 #' 
 #' @references 
 #' Huynh et al. 2020. The interim management procedure approach for assessed stocks: Responsive management advice and lower assessment
-#' frequency. Fish Fish. 21:663–679. \url{https://doi.org/10.1111/faf.12453}
+#' frequency. Fish Fish. 21:663–679. \doi{10.1111/faf.12453}
 #' @examples 
 #' \donttest{
 #' # Interim MPs

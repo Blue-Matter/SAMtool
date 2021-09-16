@@ -66,7 +66,7 @@ An object of class \linkS4class{Assessment}.
 Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass, abundance, and 
 fishing mortality (with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
 be passed onto a harvest control rule (HCR function). \code{Shortcut} is the base function that samples the OM with an error 
-distribution. \code{Shortcut2}, the more prefereable option, fits \link{SCA} in the last historical year of the operating 
+distribution. \code{Shortcut2}, the more preferable option, fits \link{SCA} in the last historical year of the operating 
 model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
 using \link[vars]{predict.varest}. \code{Perfect} assumes no error in the assessment model and is useful for comparing the behavior of 
 different harvest control rules. To utilize the shortcut method in closed-loop simulation, use \link{make_MP} with these functions as 
