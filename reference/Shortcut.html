@@ -50,7 +50,7 @@
 <meta property="og:description" content="Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass, abundance, and 
 fishing mortality (with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
 be passed onto a harvest control rule (HCR function). Shortcut is the base function that samples the OM with an error 
-distribution. Shortcut2, the more prefereable option, fits SCA in the last historical year of the operating 
+distribution. Shortcut2, the more preferable option, fits SCA in the last historical year of the operating 
 model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model &quot;estimates&quot;
 using predict.varest. Perfect assumes no error in the assessment model and is useful for comparing the behavior of 
 different harvest control rules. To utilize the shortcut method in closed-loop simulation, use make_MP with these functions as 
@@ -138,7 +138,7 @@ the Assessment model. N.B. the functions do not work with runMSE(parallel = TRUE
     <p>Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass, abundance, and 
 fishing mortality (with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
 be passed onto a harvest control rule (HCR function). <code>Shortcut</code> is the base function that samples the OM with an error 
-distribution. <code>Shortcut2</code>, the more prefereable option, fits <a href='SCA.html'>SCA</a> in the last historical year of the operating 
+distribution. <code>Shortcut2</code>, the more preferable option, fits <a href='SCA.html'>SCA</a> in the last historical year of the operating 
 model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
 using <a href='https://rdrr.io/pkg/vars/man/predict.html'>predict.varest</a>. <code>Perfect</code> assumes no error in the assessment model and is useful for comparing the behavior of 
 different harvest control rules. To utilize the shortcut method in closed-loop simulation, use <a href='make_interim_MP.html'>make_MP</a> with these functions as 
