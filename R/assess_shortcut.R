@@ -9,7 +9,7 @@
 #' model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
 #' using \link[vars]{predict.varest}. \code{Perfect} assumes no error in the assessment model and is useful for comparing the behavior of 
 #' different harvest control rules. To utilize the shortcut method in closed-loop simulation, use \link{make_MP} with these functions as 
-#' the Assessment model. N.B. the functions do not work with \code{runMSE(parallel = TRUE)}.
+#' the Assessment model. \strong{N.B. the functions do not work with} \code{runMSE(parallel = TRUE)}.
 #' 
 #' @aliases Perfect
 #' @param x An index for the objects in \code{Data} when running in \link[MSEtool]{runMSE}.
@@ -27,7 +27,7 @@
 #' @param VAR_model An object returned by \link[vars]{VAR} to generate emulated assessment error. Used by \code{Shortcut2}. 
 #' @param ... Other arguments (not currently used).
 #' @author Q. Huynh
-#' @details Currently there is no error in FMSY (the target F in the HCR in SAMtool).
+#' @details Currently there is no error in FMSY (frequently the target F in the HCR).
 #' 
 #' See Wiedenmann et al. (2015) for guidance on the magnitude of error for the shortcut emulator.
 #' @examples 
@@ -165,7 +165,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
                     Model = paste(ifelse(missing(VAR_model), "Shortcut", "Shortcut2"), method), 
                     conv = TRUE,
                     FMort = structure(F_out, names = Year),
-                    FMSY = Hist$ReferencePoints$ReferencePoints$FMSY[x],
+                    FMSY = Hist$ReferencePoints$ByYear[["FMSY"]][x, n_y],
                     SSB = structure(SSB_out, names = Year_plusone),
                     VB = structure(VB_out, names = Year_plusone),
                     B = structure(B_out, names = Year_plusone),
@@ -191,7 +191,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   }
   
   ref_pt <- c("N0", "B0", "SSB0", "VB0", "MSY", "SSBMSY", "BMSY", "VBMSY")
-  lapply(ref_pt, function(xx) slot(Assessment, xx) <<- mag_bias * getElement(Hist$ReferencePoints$ReferencePoints, xx)[x])
+  lapply(ref_pt, function(xx) slot(Assessment, xx) <<- mag_bias * Hist$ReferencePoints$ByYear[[xx]][x, n_y])
   Assessment@TMB_report$dynamic_SSB0 <- Hist$ReferencePoints$Dynamic_Unfished$SSB0[x, 1 + 0:n_y] %>% structure(names = Year_plusone)
   
   Assessment@R0 <- mag_bias * Hist$StockPars$R0[x]

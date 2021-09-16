@@ -70,10 +70,10 @@ distribution. \code{Shortcut2}, the more prefereable option, fits \link{SCA} in 
 model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
 using \link[vars]{predict.varest}. \code{Perfect} assumes no error in the assessment model and is useful for comparing the behavior of 
 different harvest control rules. To utilize the shortcut method in closed-loop simulation, use \link{make_MP} with these functions as 
-the Assessment model. N.B. the functions do not work with \code{runMSE(parallel = TRUE)}.
+the Assessment model. \strong{N.B. the functions do not work with} \code{runMSE(parallel = TRUE)}.
 }
 \details{
-Currently there is no error in FMSY (the target F in the HCR in SAMtool).
+Currently there is no error in FMSY (frequently the target F in the HCR).
 
 See Wiedenmann et al. (2015) for guidance on the magnitude of error for the shortcut emulator.
 }
