@@ -18,13 +18,18 @@
 #' }
 #' @export
 prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
-
+  
+  if(is.numeric(ncpus) && !snowfall::sfIsRunning()) {
+    MSEtool::setup(cpus = ncpus)
+    on.exit(snowfall::sfStop())
+  }
+  
   # is Hist?
   if(inherits(x, "Hist")) {
     Data <- x@Data
   } else if(inherits(x, "OM")) {
     message("Generating Hist object from OM via runMSE...")
-    runHist <- runMSE(x, Hist = TRUE, silent = TRUE)
+    runHist <- runMSE(x, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
     Data <- runHist@Data
   } else if(inherits(x, "Data")) {
     Data <- x
@@ -34,10 +39,6 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
   
   Assess_char <- as.character(substitute(Assess))
   
-  if(is.numeric(ncpus) && !snowfall::sfIsRunning()) {
-    MSEtool::setup(cpus = ncpus)
-    on.exit(snowfall::sfStop())
-  }
   nsim <- nrow(Data@Cat)
   dots <- list(...)
   if(length(dots) > 0) message("\nAdditional arguments to be provided to ", deparse(substitute(Assess)), ":\n", paste(names(dots), collapse = "\n"))
@@ -46,11 +47,10 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 
   if(snowfall::sfIsRunning()) snowfall::sfExport(list = c("Assess", "Data"))
   timing <- proc.time()
+  message(paste0("Running ", Assess_char, " with ", nsim, " simulations for ", deparse(substitute(x)), "."))
   if(snowfall::sfIsRunning()) {
-    message("Running ", Assess_char, " with ", nsim, " simulations for ", deparse(substitute(x)), " on ", snowfall::sfCpus(), " CPUs.")
     res <- snowfall::sfClusterApplyLB(1:nsim, Assess, Data = Data, ...)
   } else {
-    message(paste0("Running ", Assess_char, " with ", nsim, " simulations for ", deparse(substitute(x)), "."))
     res <- lapply(1:nsim, Assess, Data = Data, ...)
   }
   timing2 <- (proc.time() - timing)[3]

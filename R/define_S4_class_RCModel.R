@@ -451,7 +451,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
             if(compare) {
               message("Getting Hist object from runMSE...")
-              Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = OM@nsim >= 48 & snowfall::sfIsRunning())
+              Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
               compare_rmd <- rmd_RCM_Hist_compare()
             } else {
               compare_rmd <- c("## Updated OM\n",
