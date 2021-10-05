@@ -16,10 +16,10 @@
 #'
 #' \itemize{
 #' \item B - total biomass - vector of length nyears+1
-#' \item E0 - annual unfished spawning biomass - vector of length nyears
+#' \item E0 - annual unfished spawning biomass (intersection of stock-recruit relationship and unfished spawners per recruit) - vector of length nyears
 #' \item E0_SR - unfished spawning biomass for the stock-recruit relationship - numeric
-#' \item CR_SR - compensation ratio correpsponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric
-#' \item CR - annual compensation ratio - vector of length nyears
+#' \item CR_SR - compensation ratio corresponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric
+#' \item CR - annual compensation ratio, the product of alpha and annual unfished spawners per recruit - vector of length nyears
 #' \item Arec - alpha parameter of the stock-recruit relationship - numeric
 #' \item Brec - beta parameter of the stock-recruit relationship - numeric
 #' \item R - recruitment - vector of length nyears+1

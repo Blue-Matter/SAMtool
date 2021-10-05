@@ -351,6 +351,14 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
   report$SPR_dyn <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt, 
                             N_at_age = report$N, R = report$R, R_early = report$R_early,
                             equilibrium = FALSE)
+  
+  if(data$SR_type == "BH") {
+    report$E0 <- pmax((report$Arec * report$EPR0 - 1)/report$Brec, 0)
+  } else {
+    report$E0 <- pmax(log(report$Arec * report$EPR0)/report$Brec, 0)
+  }
+  report$N0 <- apply(report$NPR_unfished * report$E0/report$EPR0, 1, sum)
+  report$B0 <- apply(report$NPR_unfished * report$E0/report$EPR0 * data$wt[1:data$n_y, ], 1, sum)
 
   lmid <- obj$env$data$lbinmid
   nlbin <- length(lmid)

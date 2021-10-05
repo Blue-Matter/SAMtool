@@ -147,23 +147,14 @@ Type RCM(objective_function<Type> *obj) {
   ////// Equilibrium reference points and per-recruit quantities - calculate annually
   vector<vector<Type> > NPR_unfished(n_y);
   vector<Type> EPR0(n_y);
-  vector<Type> E0(n_y);
-  vector<Type> B0(n_y);
-  vector<Type> N0(n_y);
-
-  Type E0_SR = 0;
+  Type EPR0_SR = 0;
   for(int y=0;y<n_y;y++) {
     NPR_unfished(y) = calc_NPR0(M, n_age, y, plusgroup);
-
     EPR0(y) = sum_EPR(NPR_unfished(y), wt, mat, n_age, y);
-    E0(y) = R0 * EPR0(y);
-    B0(y) = R0 * sum_BPR(NPR_unfished(y), wt, n_age, y);
-    N0(y) = R0 * NPR_unfished(y).sum();
-
-    if(y <= ageM) E0_SR += E0(y);
+    if(y <= ageM) EPR0_SR += EPR0(y);
   }
-  E0_SR /= Type(ageM + 1);
-  Type EPR0_SR = E0_SR/R0;
+  EPR0_SR /= Type(ageM + 1);
+  Type E0_SR = R0 * EPR0_SR;
 
   Type CR_SR, Brec;
   if(SR_type == "BH") {
@@ -463,9 +454,6 @@ Type RCM(objective_function<Type> *obj) {
 
   REPORT(NPR_unfished);
   REPORT(EPR0);
-  REPORT(B0);
-  REPORT(E0);
-  REPORT(N0);
 
   REPORT(Arec);
   REPORT(Brec);
