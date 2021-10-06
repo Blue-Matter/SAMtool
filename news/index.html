@@ -125,6 +125,17 @@
       <small>Source: <a href='https://github.com/Blue-Matter/SAMtool/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="samtool-123" class="section level2">
+<h2 class="hasAnchor">
+<a href="#samtool-123" class="anchor"></a>SAMtool 1.2.3</h2>
+<ul>
+<li>
+<code>RCM</code> will check age and length comp data for NA’s and replaces with zero</li>
+<li>
+<code>RCM</code> reports annual equilibrium unfished reference points using constant stock recruit alpha and beta</li>
+<li>Unlink TMB executable when unloading package</li>
+</ul>
+</div>
     <div id="samtool-122" class="section level2">
 <h2 class="hasAnchor">
 <a href="#samtool-122" class="anchor"></a>SAMtool 1.2.2</h2>
@@ -170,7 +181,7 @@
 <a href="#assessment-models" class="anchor"></a>Assessment models</h3>
 <ul>
 <li>Priors on M, steepness, R0, and index q (lognormal, see RCM) can be created SCA, DD, and cDD assessment models.</li>
-<li>Likelihood weights to SCA assessments can now be provided for <code>Catch</code>, <code>CAA</code>, and <code>CAL</code> in addition to <code>Index</code> in a named list <code>LWT</code>. Backwards compatibility remains to provide <code>LWT</code> as a vector for indices weights only.</li>
+<li>Likelihood weights to SCA assessments can now be provided for <code>Catch</code>, <code>CAA</code>, and <code>CAL</code> in addition to <code>Index</code> in a named list <code>LWT</code>. Backwards compatibility remains to provide <code>LWT</code> as a vector for index likelihood weights only.</li>
 <li>A new SCA assessment model that incorporates density-dependent natural mortality (<code>SCA_DDM</code>) is added.</li>
 <li>A new SCA assessment model that fits to length composition (<code>SCA_CAL</code>) is added.</li>
 <li>Delay-difference assessments (DD_TMB, DD_SS, cDD, cDD_SS) can now fit to mean weight with argument <code>MW = TRUE</code>. The functions will look for mean weight data series in <code>Data@Misc[[x]]$MW</code>, otherwise will convert length composition <code>Data@CAL</code> to weights and calculate annual means.</li>

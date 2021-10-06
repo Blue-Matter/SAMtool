@@ -152,12 +152,19 @@
 
 <dt><code>Misc</code></dt><dd><p>A list of length <code>OM@nsim</code> with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:<ul>
 <li><p>B - total biomass - vector of length nyears+1</p></li>
+<li><p>EPR0 - annual unfished spawners per recruit - vector of length nyears</p></li>
+<li><p>ageM - age of 50% maturity - integer</p></li>
+<li><p>EPR0_SR - unfished spawners per recruit for the stock-recruit relationship (mean EPR0 over the first <code>ageM</code> years) - numeric</p></li>
+<li><p>R0 - unfished recruitment for the stock-recruit relationship - numeric</p></li>
+<li><p>h - steepness for the stock-recruit relationship - numeric</p></li>
+<li><p>Arec - stock-recruit alpha parameter - numeric</p></li>
+<li><p>Brec - stock-recruit beta parameter - numeric</p></li>
+<li><p>E0_SR - unfished spawning biomass for the stock-recruit relationship (product of EPR0_SR and R0) - numeric</p></li>
+<li><p>CR_SR - compensation ratio, the product of Arec and EPR0_SR - numeric</p></li>
 <li><p>E0 - annual unfished spawning biomass (intersection of stock-recruit relationship and unfished spawners per recruit) - vector of length nyears</p></li>
-<li><p>E0_SR - unfished spawning biomass for the stock-recruit relationship - numeric</p></li>
-<li><p>CR_SR - compensation ratio corresponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric</p></li>
-<li><p>CR - annual compensation ratio, the product of alpha and annual unfished spawners per recruit - vector of length nyears</p></li>
-<li><p>Arec - alpha parameter of the stock-recruit relationship - numeric</p></li>
-<li><p>Brec - beta parameter of the stock-recruit relationship - numeric</p></li>
+<li><p>R0_annual - annual unfished recruitment (annual ratio of E0 and EPR0) - vector of length nyears</p></li>
+<li><p>h_annual - annual steepness (calculated from EPR0 and Arec) - vector of length nyears</p></li>
+<li><p>CR - annual compensation ratio, the product of alpha and annual unfished spawners per recruit (EPR0) - vector of length nyears</p></li>
 <li><p>R - recruitment - vector of length nyears+1</p></li>
 <li><p>R_early - recruitment for the cohorts in first year of the model - vector n_age-1 (where n_age = maxage + 1)</p></li>
 <li><p>VB - vulnerable biomass - matrix of nyears x nfleet</p></li>
