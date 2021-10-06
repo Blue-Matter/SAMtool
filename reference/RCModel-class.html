@@ -152,10 +152,10 @@
 
 <dt><code>Misc</code></dt><dd><p>A list of length <code>OM@nsim</code> with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:<ul>
 <li><p>B - total biomass - vector of length nyears+1</p></li>
-<li><p>E0 - annual unfished spawning biomass - vector of length nyears</p></li>
+<li><p>E0 - annual unfished spawning biomass (intersection of stock-recruit relationship and unfished spawners per recruit) - vector of length nyears</p></li>
 <li><p>E0_SR - unfished spawning biomass for the stock-recruit relationship - numeric</p></li>
-<li><p>CR_SR - compensation ratio correpsponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric</p></li>
-<li><p>CR - annual compensation ratio - vector of length nyears</p></li>
+<li><p>CR_SR - compensation ratio corresponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric</p></li>
+<li><p>CR - annual compensation ratio, the product of alpha and annual unfished spawners per recruit - vector of length nyears</p></li>
 <li><p>Arec - alpha parameter of the stock-recruit relationship - numeric</p></li>
 <li><p>Brec - beta parameter of the stock-recruit relationship - numeric</p></li>
 <li><p>R - recruitment - vector of length nyears+1</p></li>
