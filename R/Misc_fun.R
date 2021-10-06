@@ -69,6 +69,18 @@ tiny_comp <- function(x) {
   return(x_out)
 }
 
+find_na <- function(x, na = 0) {
+  all_na <- all(is.na(x))
+  if(!all_na) {
+    x_out <- x
+    ind <- is.na(x)
+    if(any(ind)) x_out[ind] <- na
+  } else {
+    x_out <- x
+  }
+  return(x_out)
+}
+
 get_F01 <- function(FM, YPR) {
   if(is.null(FM) && is.null(YPR)) stop("F01 can not be used.")
   stopifnot(length(FM) == length(YPR))

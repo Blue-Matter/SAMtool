@@ -27,12 +27,19 @@ An S4 class for the output from \link{RCM}.
 
 \itemize{
 \item B - total biomass - vector of length nyears+1
+\item EPR0 - annual unfished spawners per recruit - vector of length nyears
+\item ageM - age of 50\% maturity - integer
+\item EPR0_SR - unfished spawners per recruit for the stock-recruit relationship (mean EPR0 over the first \code{ageM} years) - numeric
+\item R0 - unfished recruitment for the stock-recruit relationship - numeric
+\item h - steepness for the stock-recruit relationship - numeric
+\item Arec - stock-recruit alpha parameter - numeric
+\item Brec - stock-recruit beta parameter - numeric
+\item E0_SR - unfished spawning biomass for the stock-recruit relationship (product of EPR0_SR and R0) - numeric
+\item CR_SR - compensation ratio, the product of Arec and EPR0_SR - numeric
 \item E0 - annual unfished spawning biomass (intersection of stock-recruit relationship and unfished spawners per recruit) - vector of length nyears
-\item E0_SR - unfished spawning biomass for the stock-recruit relationship - numeric
-\item CR_SR - compensation ratio corresponding to Arec and unfished spawning biomass for the stock-recruit relationship - numeric
-\item CR - annual compensation ratio, the product of alpha and annual unfished spawners per recruit - vector of length nyears
-\item Arec - alpha parameter of the stock-recruit relationship - numeric
-\item Brec - beta parameter of the stock-recruit relationship - numeric
+\item R0_annual - annual unfished recruitment (annual ratio of E0 and EPR0) - vector of length nyears
+\item h_annual - annual steepness (calculated from EPR0 and Arec) - vector of length nyears
+\item CR - annual compensation ratio, the product of alpha and annual unfished spawners per recruit (EPR0) - vector of length nyears
 \item R - recruitment - vector of length nyears+1
 \item R_early - recruitment for the cohorts in first year of the model - vector n_age-1 (where n_age = maxage + 1)
 \item VB - vulnerable biomass - matrix of nyears x nfleet

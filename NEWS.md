@@ -1,5 +1,10 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.2.3
+- `RCM` will check age and length comp data for NA's and replaces with zero
+- `RCM` reports annual equilibrium unfished reference points using constant stock recruit alpha and beta 
+- Unlink TMB executable when unloading package
+
 ## SAMtool 1.2.2
 - The `make_interim_MP` function is added to generate MPs that adjust the TAC between periodic assessments using the index.
 - An additional posfun to `SP` is added to avoid negative biomass situations.
@@ -27,7 +32,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ### Assessment models
 - Priors on M, steepness, R0, and index q (lognormal, see RCM) can be created SCA, DD, and cDD assessment models.
-- Likelihood weights to SCA assessments can now be provided for `Catch`, `CAA`, and `CAL` in addition to `Index` in a named list `LWT`. Backwards compatibility remains to provide `LWT` as a vector for indices weights only. 
+- Likelihood weights to SCA assessments can now be provided for `Catch`, `CAA`, and `CAL` in addition to `Index` in a named list `LWT`. Backwards compatibility remains to provide `LWT` as a vector for index likelihood weights only. 
 - A new SCA assessment model that incorporates density-dependent natural mortality (`SCA_DDM`) is added.
 - A new SCA assessment model that fits to length composition (`SCA_CAL`) is added.
 - Delay-difference assessments (DD_TMB, DD_SS, cDD, cDD_SS) can now fit to mean weight with argument `MW = TRUE`. The functions will look for mean weight data series in `Data@Misc[[x]]$MW`, otherwise will convert length composition `Data@CAL` to weights and calculate annual means.

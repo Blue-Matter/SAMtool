@@ -374,6 +374,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     RCMdata@CAA <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, RCMdata@Misc$nfleet))
     RCMdata@CAA_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)
   }
+  RCMdata@CAA <- apply(RCMdata@CAA, c(1, 3), find_na) %>% aperm(c(2, 1, 3))
 
   OM_samp <- check_OM_for_sampling(OM, RCMdata) # Sample life history, selectivity, and obs parameters
 
@@ -501,6 +502,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     RCMdata@IAA <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, ncol(RCMdata@Index)))
     RCMdata@IAA_ESS <- array(0, dim(RCMdata@Index))
   }
+  RCMdata@IAA <- apply(RCMdata@IAA, c(1, 3), find_na) %>% aperm(c(2, 1, 3))
 
   # Process survey length comps
   if(length(RCMdata@IAL)) {
@@ -565,7 +567,8 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     } else {
       stop("Check vector of length_bin vs. the dimensions of the length compositions.", call. = FALSE)
     }
-    
+    RCMdata@CAL <- apply(RCMdata@CAL, c(1, 3), find_na) %>% aperm(c(2, 1, 3))
+    RCMdata@IAL <- apply(RCMdata@IAL, c(1, 3), find_na) %>% aperm(c(2, 1, 3))
   }
 
   # Absolute survey
