@@ -229,9 +229,13 @@ plot_msg <- function(convergence_code, Year) {
 plot_iter <- function(x, Year, plot_type = c('line', 'hist'), lab = c("Optimization iterations", "Function evaluations")) {
   plot_type <- match.arg(plot_type)
   lab <- match.arg(lab)
-
+  x_plot <- do.call(c, x)
   if(plot_type == "hist") {
-    hist(do.call(c, x), main = "", xlab = lab)
+    if(all(is.na(x_plot))) { # For Perfect()
+      hist(0, ylim = c(0, 1), main = "", xlab = lab)
+    } else {
+      hist(x_plot[!is.na(x_plot)], main = "", xlab = lab)
+    }
     mtext(paste("Median:", round(median(do.call(c, x), na.rm = TRUE), 2)))
   }
 
@@ -240,9 +244,12 @@ plot_iter <- function(x, Year, plot_type = c('line', 'hist'), lab = c("Optimizat
     yr_range <- range(do.call(c, Year))
 
     color.vec <- rich.colors(nsim)
-    plot(x = NULL, y = NULL, xlim = yr_range,
-         ylim = c(0.9, 1.1) * range(do.call(c, x), na.rm = TRUE),
-         xlab = "MSE Year", ylab = lab)
+    if(all(is.na(x_plot))) {
+      ylim <- c(0, 1)
+    } else {
+      ylim <- c(0.9, 1.1) * range(x_plot, na.rm = TRUE)
+    }
+    plot(x = NULL, y = NULL, xlim = yr_range, ylim = ylim, xlab = "MSE Year", ylab = lab)
     mtext(lab)
     
     lapply(1:nsim, function(i) {
