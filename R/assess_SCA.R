@@ -796,8 +796,7 @@ yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Are
     surv <- exp(-M) * (1 - vul * U)
   }
   n_age <- length(M)
-  NPR <- c(1, cumprod(surv[1:(n_age-1)]))
-  NPR[n_age] <- NPR[n_age]/(1 - surv[n_age])
+  NPR <- calc_NPR(surv, n_age)
   EPR <- sum(NPR * mat * weight)
   if(SR == "BH") {
     Req <- (Arec * EPR - 1)/(Brec * EPR)
