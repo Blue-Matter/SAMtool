@@ -122,7 +122,11 @@ Type DD(objective_function<Type> *obj) {
   
   for(int tt=0; tt<ny; tt++){
     if(condition == "catch") {
-      F(tt) = Newton_F(C_hist, M, B, Type(3), tt, n_itF, penalty);
+      if(C_hist(tt) > 1e-8) {
+        F(tt) = Newton_F(C_hist, M, B, Type(3), tt, n_itF, penalty);
+      } else {
+        F(tt) = 1e-8;
+      }
     } else {
       Type tmp = Type(3) - q_effort * E_hist(tt);
       F(tt) = CppAD::CondExpGt(tmp, Type(0), Type(3) - posfun(tmp, Type(0), penalty), q_effort * E_hist(tt));
