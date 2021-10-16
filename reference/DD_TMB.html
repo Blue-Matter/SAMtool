@@ -376,13 +376,13 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
 <span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_TMB</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='va'>start</span><span class='op'>)</span>
 
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>@</span><span class='va'>SD</span><span class='op'>)</span> <span class='co'># Parameter estimates</span>
-</div><div class='output co'>#&gt;               Estimate Std. Error
-#&gt; R0x          0.7997888        NaN
-#&gt; log_sigma   -1.6192751        NaN
-#&gt; R0        1500.0000000        NaN
-#&gt; h            0.9500000        NaN
-#&gt; q                  NaN        NaN
-#&gt; sigma        0.1980422        NaN</div><div class='input'>
+</div><div class='output co'>#&gt;                Estimate   Std. Error
+#&gt; R0x       -2.1637663571 1.924283e-02
+#&gt; log_sigma -1.3283639101 1.414214e-02
+#&gt; R0        77.4525279757 1.490406e+00
+#&gt; h          0.9500000000 0.000000e+00
+#&gt; q          0.0002416937 7.543866e-06
+#&gt; sigma      0.2649103240 3.746398e-03</div><div class='input'>
 <span class='co'>### State-space version</span>
 <span class='co'>### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)</span>
 <span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_SS</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>tau <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span><span class='op'>)</span>
