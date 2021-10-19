@@ -678,7 +678,8 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     Assessment@TMB_report <- report
     
     catch_eq_fn <- function(Ftarget) {
-      projection_SCA(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, obs_error = list(matrix(1, 1, 1), matrix(1, 1, 1)),
+      projection_SCA(Assessment, Ftarget = Ftarget, p_years = 1, p_sim = 1, 
+                     obs_error = list(array(1, c(1, 1, nsurvey)), matrix(1, 1, 1)),
                      process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
     }
     Assessment@forecast <- list(per_recruit = ref_pt[[refyear]][[7]], catch_eq = catch_eq_fn)
@@ -742,15 +743,15 @@ ref_pt_SCA <- function(y = 1, obj, report) {
   yield <- lapply(Fvec,
                   yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
                   Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
-  SPR <- vapply(yield, getElement, numeric(1), "SPR")
+  EPR <- vapply(yield, getElement, numeric(1), "EPR")
   YPR <- vapply(yield, getElement, numeric(1), "YPR")
   
   if(catch_eq == "Baranov") {
     return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                per_recruit = data.frame(FM = Fvec, SPR = SPR/SPR[1], YPR = YPR), SR_par = SR_par))
+                per_recruit = data.frame(FM = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR_par))
   } else {
     return(list(UMSY = UMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                per_recruit = data.frame(U = Fvec, SPR = SPR/SPR[1], YPR = YPR), SR_par = SR_par))
+                per_recruit = data.frame(U = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR_par))
   }
   
 }
@@ -819,7 +820,7 @@ yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Are
     E <- Req * EPR
     VB <- Req * sum(NPR * vul * weight)
     
-    return(c(SPR = EPR, Yield = Yield, YPR = YPR, B = B, E = E, VB = VB, R = Req))
+    return(c(EPR = EPR, Yield = Yield, YPR = YPR, B = B, E = E, VB = VB, R = Req))
   }
 }
 
