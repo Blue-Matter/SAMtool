@@ -367,27 +367,28 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
     <p>T. Carruthers &amp; Z. Siders. Zach Siders coded the TMB function.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
-<span class='co'>#### Observation-error delay difference model</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_TMB</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span><span class='op'>)</span>
-
-<span class='co'># Provide starting values</span>
-<span class='va'>start</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>h <span class='op'>=</span> <span class='fl'>0.95</span><span class='op'>)</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_TMB</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='va'>start</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>@</span><span class='va'>SD</span><span class='op'>)</span> <span class='co'># Parameter estimates</span>
-</div><div class='output co'>#&gt;                Estimate   Std. Error
-#&gt; R0x       -2.1637663571 1.924283e-02
-#&gt; log_sigma -1.3283639101 1.414214e-02
-#&gt; R0        77.4525279757 1.490406e+00
-#&gt; h          0.9500000000 0.000000e+00
-#&gt; q          0.0002416937 7.543866e-06
-#&gt; sigma      0.2649103240 3.746398e-03</div><div class='input'>
-<span class='co'>### State-space version</span>
-<span class='co'>### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_SS</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>tau <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span><span class='op'>)</span>
-<span class='co'># }</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'># \donttest{</span></span>
+<span class='r-in'><span class='co'>#### Observation-error delay difference model</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_TMB</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Provide starting values</span></span>
+<span class='r-in'><span class='va'>start</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>h <span class='op'>=</span> <span class='fl'>0.95</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_TMB</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='va'>start</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>@</span><span class='va'>SD</span><span class='op'>)</span> <span class='co'># Parameter estimates</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate   Std. Error</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R0x       -2.1637663571 1.924283e-02</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_sigma -1.3283639101 1.414214e-02</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R0        77.4525279757 1.490406e+00</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> h          0.9500000000 0.000000e+00</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> q          0.0002416937 7.543866e-06</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> sigma      0.2649103240 3.746398e-03</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>### State-space version</span></span>
+<span class='r-in'><span class='co'>### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>DD_SS</span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>3</span>, Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/SimulatedData.html'>SimulatedData</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>tau <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># }</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

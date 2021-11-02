@@ -168,12 +168,13 @@ the value of the OCP relative to target and limit values.</p>
     <p>T. Carruthers</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#40-10 linear ramp</span>
-<span class='va'>Brel</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, length.out <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>Brel</span>, <span class='fu'>HCRlin</span><span class='op'>(</span><span class='va'>Brel</span>, <span class='fl'>0.1</span>, <span class='fl'>0.4</span><span class='op'>)</span>, xlab <span class='op'>=</span> <span class='st'>"Estimated B/B0"</span>, ylab <span class='op'>=</span> <span class='st'>"Relative change in F"</span>,
-     main <span class='op'>=</span> <span class='st'>"A 40-10 harvest control rule"</span>, type <span class='op'>=</span> <span class='st'>'l'</span>, col <span class='op'>=</span> <span class='st'>'blue'</span><span class='op'>)</span>
-</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>,<span class='fl'>0.4</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='st'>'red'</span>, lty <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-</div><div class='img'><img src='HCRlin-1.png' alt='' width='700' height='433' /></div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'>#40-10 linear ramp</span></span>
+<span class='r-in'><span class='va'>Brel</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, length.out <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>Brel</span>, <span class='fu'>HCRlin</span><span class='op'>(</span><span class='va'>Brel</span>, <span class='fl'>0.1</span>, <span class='fl'>0.4</span><span class='op'>)</span>, xlab <span class='op'>=</span> <span class='st'>"Estimated B/B0"</span>, ylab <span class='op'>=</span> <span class='st'>"Relative change in F"</span>,</span>
+<span class='r-in'>     main <span class='op'>=</span> <span class='st'>"A 40-10 harvest control rule"</span>, type <span class='op'>=</span> <span class='st'>'l'</span>, col <span class='op'>=</span> <span class='st'>'blue'</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span><span class='op'>(</span>v <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.1</span>,<span class='fl'>0.4</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='st'>'red'</span>, lty <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='HCRlin-1.png' alt='' width='700' height='433' /></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

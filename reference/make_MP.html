@@ -232,41 +232,44 @@ frequency. Fish Fish. 21:663–679. doi: <a href='https://doi.org/10.1111/faf.12
     <div class='dont-index'><p><a href='HCR_ramp.html'>HCR_ramp</a> <a href='HCR_MSY.html'>HCR_MSY</a> <a href='diagnostic.html'>diagnostic</a> <a href='retrospective_AM.html'>retrospective_AM</a></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
-<span class='co'># Interim MPs</span>
-<span class='va'>MP_buffer_5</span> <span class='op'>&lt;-</span> <span class='fu'>make_interim_MP</span><span class='op'>(</span>assessment_interval <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
-<span class='va'>MP_buffer_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_interim_MP</span><span class='op'>(</span>assessment_interval <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-<span class='va'>OM</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html'>testOM</a></span>
-<span class='va'>OM</span><span class='op'>@</span><span class='va'>interval</span> <span class='op'>&lt;-</span> <span class='fl'>1</span>
-
-<span class='va'>MSE</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></span><span class='op'>(</span><span class='va'>OM</span>, MPs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"MP_buffer_5"</span>, <span class='st'>"MP_buffer_10"</span><span class='op'>)</span><span class='op'>)</span> 
-</div><div class='output co'>#&gt; <span class='message'><span style='color: #0000BB;'>Checking MPs </span>
-#&gt; <span class='message'></span></span></div><div class='output co'>#&gt; <span class='error'>Error: Some MPs are not a functions of class `MP`: MP_buffer_5, MP_buffer_10</span></div><div class='input'><span class='co'># }</span>
-<span class='co'># A statistical catch-at-age model with a 40-10 control rule</span>
-<span class='va'>SCA_40_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR40_10</span><span class='op'>)</span>
-
-<span class='co'># An SCA that will produce convergence diagnostics</span>
-<span class='va'>SCA_40_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR40_10</span>, diagnostic <span class='op'>=</span> <span class='st'>"min"</span><span class='op'>)</span>
-
-<span class='co'># MP with an SCA that uses a Ricker stock-recruit function.</span>
-<span class='va'>SCA_Ricker</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_MSY</span>, SR <span class='op'>=</span> <span class='st'>"Ricker"</span><span class='op'>)</span>
-<span class='fu'>show</span><span class='op'>(</span><span class='va'>SCA_Ricker</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; function (x, Data, reps = 1, diagnostic = "min") 
-#&gt; {
-#&gt;     dependencies &lt;- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge, Data@steep, Data@CV_Ind, Data@sigmaR, Data@CV_Cat, Data@Mort, Data@CV_Mort, Data@steep, Data@CV_steep, Data@vbLinf, Data@vbK, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge, Data@L50, Data@L95"
-#&gt;     do_Assessment &lt;- SCA(x = x, Data = Data, SR = "Ricker")
-#&gt;     Rec &lt;- HCR_MSY(Assessment = do_Assessment, reps = reps)
-#&gt;     if (diagnostic != "none") 
-#&gt;         Rec@Misc &lt;- Assess_diagnostic(x, Data, do_Assessment, 
-#&gt;             include_assessment = FALSE)
-#&gt;     if (!is.null(do_Assessment@info$Misc)) 
-#&gt;         Rec@Misc &lt;- c(Rec@Misc, do_Assessment@info$Misc)
-#&gt;     return(Rec)
-#&gt; }
-#&gt; &lt;environment: 0x7faa2506f8b8&gt;
-#&gt; attr(,"class")
-#&gt; [1] "MP"</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'># \donttest{</span></span>
+<span class='r-in'><span class='co'># Interim MPs</span></span>
+<span class='r-in'><span class='va'>MP_buffer_5</span> <span class='op'>&lt;-</span> <span class='fu'>make_interim_MP</span><span class='op'>(</span>assessment_interval <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>MP_buffer_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_interim_MP</span><span class='op'>(</span>assessment_interval <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>OM</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html'>testOM</a></span></span>
+<span class='r-in'><span class='va'>OM</span><span class='op'>@</span><span class='va'>interval</span> <span class='op'>&lt;-</span> <span class='fl'>1</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>MSE</span> <span class='op'>&lt;-</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/MSEtool/man/runMSE.html'>runMSE</a></span><span class='op'>(</span><span class='va'>OM</span>, MPs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"MP_buffer_5"</span>, <span class='st'>"MP_buffer_10"</span><span class='op'>)</span><span class='op'>)</span> </span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> <span style='color: #0000BB;'>Checking MPs </span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> Some MPs are not a functions of class `MP`: MP_buffer_5, MP_buffer_10</span>
+<span class='r-in'><span class='co'># }</span></span>
+<span class='r-in'><span class='co'># A statistical catch-at-age model with a 40-10 control rule</span></span>
+<span class='r-in'><span class='va'>SCA_40_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR40_10</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># An SCA that will produce convergence diagnostics</span></span>
+<span class='r-in'><span class='va'>SCA_40_10</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR40_10</span>, diagnostic <span class='op'>=</span> <span class='st'>"min"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># MP with an SCA that uses a Ricker stock-recruit function.</span></span>
+<span class='r-in'><span class='va'>SCA_Ricker</span> <span class='op'>&lt;-</span> <span class='fu'>make_MP</span><span class='op'>(</span><span class='va'>SCA</span>, <span class='va'>HCR_MSY</span>, SR <span class='op'>=</span> <span class='st'>"Ricker"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>show</span><span class='op'>(</span><span class='va'>SCA_Ricker</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> function (x, Data, reps = 1, diagnostic = "min") </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> {</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     dependencies &lt;- "Data@Cat, Data@Ind, Data@Mort, Data@L50, Data@L95, Data@CAA, Data@vbK, Data@vbLinf, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge, Data@steep, Data@CV_Ind, Data@sigmaR, Data@CV_Cat, Data@Mort, Data@CV_Mort, Data@steep, Data@CV_steep, Data@vbLinf, Data@vbK, Data@vbt0, Data@wla, Data@wlb, Data@MaxAge, Data@L50, Data@L95"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     do_Assessment &lt;- SCA(x = x, Data = Data, SR = "Ricker")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     Rec &lt;- HCR_MSY(Assessment = do_Assessment, reps = reps)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     if (diagnostic != "none") </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         Rec@Misc &lt;- Assess_diagnostic(x, Data, do_Assessment, </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             include_assessment = FALSE)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     if (!is.null(do_Assessment@info$Misc)) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         Rec@Misc &lt;- c(Rec@Misc, do_Assessment@info$Misc)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     return(Rec)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> }</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x7ffd91538b78&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"class")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "MP"</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

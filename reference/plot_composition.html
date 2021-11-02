@@ -173,7 +173,7 @@ bubble plot of the data, and bubble plot of the residuals, and annual means.</p>
     </tr>
     <tr>
       <th>N</th>
-      <td><p>Annual sample sizes. Vector of length <code><a href='https://rdrr.io/r/base/nrow.html'>nrow(obs)</a></code>.</p></td>
+      <td><p>Annual sample sizes. Vector of length <code>nrow(obs)</code>.</p></td>
     </tr>
     <tr>
       <th>CAL_bins</th>
@@ -224,11 +224,13 @@ and <code>fit</code>. Ignored for age data.</p></td>
     <p>Q. Huynh</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>plot_composition</span><span class='op'>(</span>obs <span class='op'>=</span> <span class='va'>SimulatedData</span><span class='op'>@</span><span class='va'>CAA</span><span class='op'>[</span><span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>16</span>, <span class='op'>]</span><span class='op'>)</span>
-</div><div class='img'><img src='plot_composition-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_composition</span><span class='op'>(</span>obs <span class='op'>=</span> <span class='va'>SimulatedData</span><span class='op'>@</span><span class='va'>CAA</span><span class='op'>[</span><span class='fl'>1</span>, , <span class='op'>]</span>, plot_type <span class='op'>=</span> <span class='st'>"bubble_data"</span>, 
-                 ages <span class='op'>=</span> <span class='fl'>0</span><span class='op'>:</span><span class='va'>SimulatedData</span><span class='op'>@</span><span class='va'>MaxAge</span><span class='op'>)</span>
-</div><div class='img'><img src='plot_composition-2.png' alt='' width='700' height='433' /></div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='fu'>plot_composition</span><span class='op'>(</span>obs <span class='op'>=</span> <span class='va'>SimulatedData</span><span class='op'>@</span><span class='va'>CAA</span><span class='op'>[</span><span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>16</span>, <span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='plot_composition-1.png' alt='' width='700' height='433' /></span>
+<span class='r-in'><span class='fu'>plot_composition</span><span class='op'>(</span>obs <span class='op'>=</span> <span class='va'>SimulatedData</span><span class='op'>@</span><span class='va'>CAA</span><span class='op'>[</span><span class='fl'>1</span>, , <span class='op'>]</span>, plot_type <span class='op'>=</span> <span class='st'>"bubble_data"</span>, </span>
+<span class='r-in'>                 ages <span class='op'>=</span> <span class='fl'>0</span><span class='op'>:</span><span class='va'>SimulatedData</span><span class='op'>@</span><span class='va'>MaxAge</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='plot_composition-2.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

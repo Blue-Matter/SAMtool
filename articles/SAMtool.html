@@ -84,7 +84,7 @@
             <h3 class="subtitle">Development, testing, and implementation of model-based management procedures</h3>
                         <h4 class="author">Quang Huynh (<a href="mailto:quang@bluematterscience.com" class="email">quang@bluematterscience.com</a>), Tom Carruthers (<a href="mailto:tom@bluematterscience.com" class="email">tom@bluematterscience.com</a>), Adrian Hordyk (<a href="mailto:adrian@bluematterscience.com" class="email">adrian@bluematterscience.com</a>)</h4>
             
-            <h4 class="date">2021-10-16</h4>
+            <h4 class="date">2021-11-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Blue-Matter/SAMtool/blob/master/vignettes/SAMtool.Rmd"><code>vignettes/SAMtool.Rmd</code></a></small>
       <div class="hidden name"><code>SAMtool.Rmd</code></div>
@@ -220,7 +220,7 @@
 <p>Model configuration arguments can be passed through <code>...</code> in <code>make_MP</code> when the MP is made. For example, the Ricker stock-recruitment relationship can be used in the SCA instead of the default Beverton-Holt relationship and steepness can be fixed instead of estimated by passing argument <code>SR = "Ricker"</code> and <code>fix_h = TRUE</code>, respectively:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">SCA_MSY_Ricker_fixsteep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_interim_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SCA</span>, <span class="va">HCR_MSY</span>, SR <span class="op">=</span> <span class="st">"Ricker"</span>, fix_h <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p>This MP will call <code><a href="../reference/SCA.html">SCA(..., SR = "Ricker", fix_h = TRUE)</a></code> in closed-loop.</p>
+<p>This MP will call <code>SCA(..., SR = "Ricker", fix_h = TRUE)</code> in closed-loop.</p>
 </div>
 <div id="diagnostic-of-assessment-models-in-mse" class="section level2">
 <h2 class="hasAnchor">

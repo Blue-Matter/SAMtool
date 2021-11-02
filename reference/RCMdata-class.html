@@ -142,7 +142,7 @@
 Ideally, the first year of the catch series represents unfished conditions (see also <code>C_eq</code>).</p></dd>
 
 <dt><code>C_sd</code></dt><dd><p>A vector or matrix of lognormal distribution standard deviations (by year and fleet) for the catches in <code>Chist</code>.
-If not provided, the default is 0.01. Not used if <code><a href='check_RCMdata.html'>RCM(condition = "catch2")</a></code>.</p></dd>
+If not provided, the default is 0.01. Not used if <code>RCM(condition = "catch2")</code>.</p></dd>
 
 <dt><code>Ehist</code></dt><dd><p>A vector of historical effort, should be of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns. 
 See also <code>E_eq</code>).</p></dd>
@@ -194,7 +194,7 @@ if one has a full CAA matrix, one could instead estimate "artificial" rec devs t
 in the first year of the model (see additional arguments in <a href='check_RCMdata.html'>RCM</a>).</p></dd>
 
 <dt><code>C_eq_sd</code></dt><dd><p>- A vector of standard deviations (lognormal distribution) for the equilibrium catches in <code>C_eq</code>.
-If not provided, the default is 0.01. Only used if <code><a href='check_RCMdata.html'>RCM(condition = "catch")</a></code>.</p></dd>
+If not provided, the default is 0.01. Only used if <code>RCM(condition = "catch")</code>.</p></dd>
 
 <dt><code>E_eq</code></dt><dd><p>The equilibrium effort for each fleet in <code>Ehist</code> prior to the first year of the operating model.
 Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data.</p></dd>

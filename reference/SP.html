@@ -382,90 +382,104 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
     <p>Q. Huynh</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>swordfish</span><span class='op'>)</span>
-
-<span class='co'>#### Observation-error surplus production model</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span><span class='op'>)</span>
-
-<span class='co'># Provide starting values, assume B/K = 0.875 in first year of model</span>
-<span class='co'># and symmetrical production curve (n = 2)</span>
-<span class='va'>start</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>dep <span class='op'>=</span> <span class='fl'>0.875</span>, n <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='va'>start</span><span class='op'>)</span>
-
-<span class='co'># \donttest{</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmphjNjux/report_SP.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmphjNjux/report_SP.html</span></div><div class='input'><span class='fu'><a href='profile.html'>profile</a></span><span class='op'>(</span><span class='va'>res</span>, FMSY <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='img'><img src='SP-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; An object of class "prof"
-#&gt; Slot "Model":
-#&gt; [1] "SP"
-#&gt; 
-#&gt; Slot "Name":
-#&gt; [1] "North Atlantic Swordfish (Source: ASPIC software)"
-#&gt; 
-#&gt; Slot "Par":
-#&gt; [1] "FMSY"
-#&gt; 
-#&gt; Slot "MLE":
-#&gt; [1] 0.2779916
-#&gt; 
-#&gt; Slot "grid":
-#&gt;    FMSY      MSY          nll
-#&gt; 1  0.10 14279.16 3.2294940699
-#&gt; 2  0.11 14279.16 2.8709621889
-#&gt; 3  0.12 14279.16 2.5306098844
-#&gt; 4  0.13 14279.16 2.2099100337
-#&gt; 5  0.14 14279.16 1.9099783048
-#&gt; 6  0.15 14279.16 1.6316339875
-#&gt; 7  0.16 14279.16 1.3754432106
-#&gt; 8  0.17 14279.16 1.1417518078
-#&gt; 9  0.18 14279.16 0.9307119587
-#&gt; 10 0.19 14279.16 0.7423048923
-#&gt; 11 0.20 14279.16 0.5763609104
-#&gt; 12 0.21 14279.16 0.4325774337
-#&gt; 13 0.22 14279.16 0.3105354898
-#&gt; 14 0.23 14279.16 0.2097149079
-#&gt; 15 0.24 14279.16 0.1295084067
-#&gt; 16 0.25 14279.16 0.0692347101
-#&gt; 17 0.26 14279.16 0.0281507868
-#&gt; 18 0.27 14279.16 0.0054632851
-#&gt; 19 0.28 14279.16 0.0003392047
-#&gt; 20 0.29 14279.16 0.0119158312
-#&gt; 21 0.30 14279.16 0.0393099433
-#&gt; 22 0.31 14279.16 0.0816262912
-#&gt; 23 0.32 14279.16 0.1379653440
-#&gt; 24 0.33 14279.16 0.2074302985
-#&gt; 25 0.34 14279.16 0.2891333485
-#&gt; 26 0.35 14279.16 0.3822012176
-#&gt; 27 0.36 14279.16 0.4857799664
-#&gt; 28 0.37 14279.16 0.5990390917
-#&gt; 29 0.38 14279.16 0.7211749445
-#&gt; 30 0.39 14279.16 0.8514134997
-#&gt; 31 0.40 14279.16 0.9890125181
-#&gt; </div><div class='input'><span class='fu'><a href='retrospective.html'>retrospective</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span>
-</div><div class='img'><img src='SP-2.png' alt='' width='700' height='433' /></div><div class='img'><img src='SP-3.png' alt='' width='700' height='433' /></div><div class='img'><img src='SP-4.png' alt='' width='700' height='433' /></div><div class='img'><img src='SP-5.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt;                   Mohn's rho
-#&gt; Fishing mortality      0.129
-#&gt; F/F[MSY]              -0.145
-#&gt; Biomass               -0.091
-#&gt; B/B[MSY]               0.152
-#&gt; B/B[0]                 0.152</div><div class='input'><span class='co'># }</span>
-
-<span class='co'>#### State-space version</span>
-<span class='va'>res_SS</span> <span class='op'>&lt;-</span> <span class='fu'>SP_SS</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>dep <span class='op'>=</span> <span class='fl'>0.875</span>, sigma <span class='op'>=</span> <span class='fl'>0.1</span>, tau <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># \donttest{</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res_SS</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmphjNjux/report_SP_SS.Rmd</span></div><div class='output co'>#&gt; <span class='message'>Rendering markdown file...</span></div><div class='output co'>#&gt; <span class='message'>Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmphjNjux/report_SP_SS.html</span></div><div class='img'><img src='SP-6.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># }</span>
-
-<span class='co'>#### Fox model</span>
-<span class='va'>res_Fox</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, fix_n <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='va'>res_Fox2</span> <span class='op'>&lt;-</span> <span class='fu'>SP_Fox</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span><span class='op'>)</span>
-
-<span class='co'>#### SP with r_prior</span>
-<span class='va'>res_prior</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>SimulatedData</span>, use_r_prior <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-
-<span class='co'>#### Pass an r_prior to the model with mean = 0.35, sd = 0.10</span>
-<span class='va'>res_prior2</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>SimulatedData</span>, use_r_prior <span class='op'>=</span> <span class='cn'>TRUE</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>r_prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.35</span>, <span class='fl'>0.10</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>swordfish</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#### Observation-error surplus production model</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Provide starting values, assume B/K = 0.875 in first year of model</span></span>
+<span class='r-in'><span class='co'># and symmetrical production curve (n = 2)</span></span>
+<span class='r-in'><span class='va'>start</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>dep <span class='op'>=</span> <span class='fl'>0.875</span>, n <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='va'>start</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># \donttest{</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp4cBKN0/report_SP.Rmd</span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> Rendering markdown file...</span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp4cBKN0/report_SP.html</span>
+<span class='r-in'><span class='fu'><a href='profile.html'>profile</a></span><span class='op'>(</span><span class='va'>res</span>, FMSY <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0.1</span>, <span class='fl'>0.4</span>, <span class='fl'>0.01</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='SP-1.png' alt='' width='700' height='433' /></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> An object of class "prof"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Slot "Model":</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "SP"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Slot "Name":</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "North Atlantic Swordfish (Source: ASPIC software)"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Slot "Par":</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "FMSY"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Slot "MLE":</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 0.2779916</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Slot "grid":</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    FMSY      MSY          nll</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1  0.10 14279.16 3.2294940699</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2  0.11 14279.16 2.8709621889</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3  0.12 14279.16 2.5306098844</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4  0.13 14279.16 2.2099100337</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5  0.14 14279.16 1.9099783048</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6  0.15 14279.16 1.6316339875</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 7  0.16 14279.16 1.3754432106</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 8  0.17 14279.16 1.1417518078</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 9  0.18 14279.16 0.9307119587</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 10 0.19 14279.16 0.7423048923</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 11 0.20 14279.16 0.5763609104</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 12 0.21 14279.16 0.4325774337</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 13 0.22 14279.16 0.3105354898</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 14 0.23 14279.16 0.2097149079</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 15 0.24 14279.16 0.1295084067</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 16 0.25 14279.16 0.0692347101</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 17 0.26 14279.16 0.0281507868</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 18 0.27 14279.16 0.0054632851</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 19 0.28 14279.16 0.0003392047</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 20 0.29 14279.16 0.0119158312</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 21 0.30 14279.16 0.0393099433</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 22 0.31 14279.16 0.0816262912</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 23 0.32 14279.16 0.1379653440</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 24 0.33 14279.16 0.2074302985</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 25 0.34 14279.16 0.2891333485</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 26 0.35 14279.16 0.3822012176</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 27 0.36 14279.16 0.4857799664</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 28 0.37 14279.16 0.5990390917</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 29 0.38 14279.16 0.7211749445</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 30 0.39 14279.16 0.8514134997</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 31 0.40 14279.16 0.9890125181</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-in'><span class='fu'><a href='retrospective.html'>retrospective</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='SP-2.png' alt='' width='700' height='433' /></span>
+<span class='r-plt img'><img src='SP-3.png' alt='' width='700' height='433' /></span>
+<span class='r-plt img'><img src='SP-4.png' alt='' width='700' height='433' /></span>
+<span class='r-plt img'><img src='SP-5.png' alt='' width='700' height='433' /></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                   Mohn's rho</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fishing mortality      0.129</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> F/F[MSY]              -0.145</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Biomass               -0.091</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> B/B[MSY]               0.152</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> B/B[0]                 0.152</span>
+<span class='r-in'><span class='co'># }</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#### State-space version</span></span>
+<span class='r-in'><span class='va'>res_SS</span> <span class='op'>&lt;-</span> <span class='fu'>SP_SS</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>dep <span class='op'>=</span> <span class='fl'>0.875</span>, sigma <span class='op'>=</span> <span class='fl'>0.1</span>, tau <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># \donttest{</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>res_SS</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp4cBKN0/report_SP_SS.Rmd</span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> Rendering markdown file...</span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp4cBKN0/report_SP_SS.html</span>
+<span class='r-plt img'><img src='SP-6.png' alt='' width='700' height='433' /></span>
+<span class='r-in'><span class='co'># }</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#### Fox model</span></span>
+<span class='r-in'><span class='va'>res_Fox</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, fix_n <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res_Fox2</span> <span class='op'>&lt;-</span> <span class='fu'>SP_Fox</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>swordfish</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#### SP with r_prior</span></span>
+<span class='r-in'><span class='va'>res_prior</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>SimulatedData</span>, use_r_prior <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#### Pass an r_prior to the model with mean = 0.35, sd = 0.10</span></span>
+<span class='r-in'><span class='va'>res_prior2</span> <span class='op'>&lt;-</span> <span class='fu'>SP</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='va'>SimulatedData</span>, use_r_prior <span class='op'>=</span> <span class='cn'>TRUE</span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>r_prior <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.35</span>, <span class='fl'>0.10</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

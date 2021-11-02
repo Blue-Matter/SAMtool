@@ -346,161 +346,162 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
     <p>Q. Huynh</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#### Observation-error delay difference model</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>cDD</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/Data-class-objects.html'>Red_snapper</a></span><span class='op'>)</span>
-
-<span class='co'>### State-space version</span>
-<span class='co'>### Also set recruitment variability SD = 0.6 (since fix_tau = TRUE)</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>cDD_SS</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/Data-class-objects.html'>Red_snapper</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>tau <span class='op'>=</span> <span class='fl'>0.6</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>@</span><span class='va'>SD</span><span class='op'>)</span> <span class='co'># Parameter estimates</span>
-</div><div class='output co'>#&gt;                 Estimate   Std. Error
-#&gt; R0x         -0.480921455 0.0547476197
-#&gt; log_sigma   -1.847400042 0.0642471710
-#&gt; log_rec_dev  0.081587219 0.6049894072
-#&gt; log_rec_dev  0.111204054 0.6125899084
-#&gt; log_rec_dev  0.107322308 0.6117275453
-#&gt; log_rec_dev  0.097503317 0.6093864955
-#&gt; log_rec_dev  0.107647465 0.6124728442
-#&gt; log_rec_dev  0.141446939 0.6224339666
-#&gt; log_rec_dev  0.180777991 0.6348165576
-#&gt; log_rec_dev  0.222165851 0.6488319947
-#&gt; log_rec_dev  0.269647741 0.6659351608
-#&gt; log_rec_dev  0.317759201 0.6845925330
-#&gt; log_rec_dev  0.348397602 0.6979832730
-#&gt; log_rec_dev  0.349581550 0.7002855500
-#&gt; log_rec_dev  0.339561583 0.6976667607
-#&gt; log_rec_dev  0.370494271 0.7111734109
-#&gt; log_rec_dev  0.383392138 0.7173261234
-#&gt; log_rec_dev  0.401655660 0.7251979535
-#&gt; log_rec_dev  0.443006137 0.7430123229
-#&gt; log_rec_dev  0.405945004 0.7262746923
-#&gt; log_rec_dev  0.354623846 0.7038032205
-#&gt; log_rec_dev  0.322122772 0.6897517898
-#&gt; log_rec_dev  0.323794867 0.6895276101
-#&gt; log_rec_dev  0.328408423 0.6910275805
-#&gt; log_rec_dev  0.315127343 0.6863526262
-#&gt; log_rec_dev  0.324125255 0.6906325851
-#&gt; log_rec_dev  0.369392591 0.7103030309
-#&gt; log_rec_dev  0.408297484 0.7296375569
-#&gt; log_rec_dev  0.452468887 0.7532735362
-#&gt; log_rec_dev  0.526302090 0.7939118642
-#&gt; log_rec_dev  0.529252204 0.7976604117
-#&gt; log_rec_dev  0.490692480 0.7756016989
-#&gt; log_rec_dev  0.511395980 0.7802731004
-#&gt; log_rec_dev  0.482631571 0.7577363234
-#&gt; log_rec_dev  0.368159321 0.7021732270
-#&gt; log_rec_dev  0.241152720 0.6519067220
-#&gt; log_rec_dev  0.158679381 0.6230152527
-#&gt; log_rec_dev  0.105519680 0.6055344549
-#&gt; log_rec_dev  0.081408980 0.5970019161
-#&gt; log_rec_dev  0.068901077 0.5920825398
-#&gt; log_rec_dev  0.068758365 0.5908982655
-#&gt; log_rec_dev  0.036593700 0.5830367106
-#&gt; log_rec_dev  0.007575195 0.5762369935
-#&gt; log_rec_dev  0.009040124 0.5761802392
-#&gt; log_rec_dev  0.045867494 0.5839586492
-#&gt; log_rec_dev  0.076353141 0.5905744392
-#&gt; log_rec_dev  0.092545589 0.5941710033
-#&gt; log_rec_dev  0.074280617 0.5899738527
-#&gt; log_rec_dev  0.059466472 0.5864711168
-#&gt; log_rec_dev  0.053892245 0.5849228930
-#&gt; log_rec_dev  0.053596864 0.5844512081
-#&gt; log_rec_dev  0.043762183 0.5817642309
-#&gt; log_rec_dev  0.040902993 0.5803827889
-#&gt; log_rec_dev  0.051548347 0.5817812078
-#&gt; log_rec_dev  0.024813238 0.5752244740
-#&gt; log_rec_dev -0.004895483 0.5680683938
-#&gt; log_rec_dev -0.007052469 0.5664624794
-#&gt; log_rec_dev -0.020608349 0.5623777215
-#&gt; log_rec_dev -0.022961957 0.5602817255
-#&gt; log_rec_dev -0.054170870 0.5528287600
-#&gt; log_rec_dev -0.109250959 0.5416013944
-#&gt; log_rec_dev -0.152854059 0.5331731741
-#&gt; log_rec_dev -0.162749695 0.5304019677
-#&gt; log_rec_dev -0.158932104 0.5300187350
-#&gt; log_rec_dev -0.177711307 0.5265857400
-#&gt; log_rec_dev -0.223382424 0.5192153469
-#&gt; log_rec_dev -0.247060068 0.5151229986
-#&gt; log_rec_dev -0.245096006 0.5148710826
-#&gt; log_rec_dev -0.212008011 0.5193099393
-#&gt; log_rec_dev -0.198154382 0.5202926361
-#&gt; log_rec_dev -0.204956939 0.5180344854
-#&gt; log_rec_dev -0.229851806 0.5136491566
-#&gt; log_rec_dev -0.266246465 0.5078634363
-#&gt; log_rec_dev -0.296366985 0.5033009217
-#&gt; log_rec_dev -0.308546390 0.5013969915
-#&gt; log_rec_dev -0.313253299 0.5007385854
-#&gt; log_rec_dev -0.317285593 0.5002774307
-#&gt; log_rec_dev -0.312023245 0.5008781958
-#&gt; log_rec_dev -0.294176812 0.5032972075
-#&gt; log_rec_dev -0.270564738 0.5066421285
-#&gt; log_rec_dev -0.277463391 0.5060395835
-#&gt; log_rec_dev -0.269792298 0.5077518726
-#&gt; log_rec_dev -0.237509424 0.5129091877
-#&gt; log_rec_dev -0.206464938 0.5180295786
-#&gt; log_rec_dev -0.150575917 0.5270700571
-#&gt; log_rec_dev -0.067197023 0.5409461593
-#&gt; log_rec_dev -0.037345260 0.5472529435
-#&gt; log_rec_dev -0.033389386 0.5494843390
-#&gt; log_rec_dev -0.016755164 0.5531133701
-#&gt; log_rec_dev -0.015009131 0.5524478858
-#&gt; log_rec_dev  0.008961951 0.5546364874
-#&gt; log_rec_dev -0.037499332 0.5449332777
-#&gt; log_rec_dev -0.066625227 0.5377666594
-#&gt; log_rec_dev -0.127091247 0.5266060088
-#&gt; log_rec_dev -0.175924264 0.5177299322
-#&gt; log_rec_dev -0.195983618 0.5122340794
-#&gt; log_rec_dev -0.237248084 0.5042982837
-#&gt; log_rec_dev -0.267630154 0.4986282030
-#&gt; log_rec_dev -0.282631802 0.4955933053
-#&gt; log_rec_dev -0.311102517 0.4917555771
-#&gt; log_rec_dev -0.297848438 0.4928703264
-#&gt; log_rec_dev -0.241690588 0.4992099618
-#&gt; log_rec_dev -0.196253920 0.5050128722
-#&gt; log_rec_dev -0.177482641 0.5084187079
-#&gt; log_rec_dev -0.155910710 0.5113651636
-#&gt; log_rec_dev -0.128745159 0.5116720271
-#&gt; log_rec_dev -0.215279661 0.4980689722
-#&gt; log_rec_dev -0.313307306 0.4831124840
-#&gt; log_rec_dev -0.391961805 0.4723610506
-#&gt; log_rec_dev -0.421247706 0.4671835086
-#&gt; log_rec_dev -0.434532545 0.4637536451
-#&gt; log_rec_dev -0.488327616 0.4571295606
-#&gt; log_rec_dev -0.560649561 0.4491333922
-#&gt; log_rec_dev -0.630119659 0.4401942835
-#&gt; log_rec_dev -0.668442621 0.4327567101
-#&gt; log_rec_dev -0.696914695 0.4295885425
-#&gt; log_rec_dev -0.733071443 0.4248176310
-#&gt; log_rec_dev -0.795102762 0.4184384079
-#&gt; log_rec_dev -0.810623588 0.4140989913
-#&gt; log_rec_dev -0.826027785 0.4108981561
-#&gt; log_rec_dev -0.829316197 0.4105702743
-#&gt; log_rec_dev -0.728541821 0.4195898258
-#&gt; log_rec_dev -0.488687343 0.4381550818
-#&gt; log_rec_dev -0.146396756 0.4581390859
-#&gt; log_rec_dev  0.101642377 0.4453071163
-#&gt; log_rec_dev  0.441380554 0.3590746372
-#&gt; log_rec_dev -0.049113699 0.4938512740
-#&gt; log_rec_dev  1.435443072 0.1638096608
-#&gt; log_rec_dev -0.601908017 0.4651803521
-#&gt; log_rec_dev -0.693012692 0.4560706418
-#&gt; log_rec_dev  1.463038645 0.2130131176
-#&gt; log_rec_dev  0.839222876 0.6837709136
-#&gt; log_rec_dev  1.327537303 0.4130762052
-#&gt; log_rec_dev  0.128804587 0.5990360843
-#&gt; log_rec_dev  0.027014546 0.5540022525
-#&gt; log_rec_dev  0.165560756 0.6025115464
-#&gt; log_rec_dev  2.067427834 0.2393321570
-#&gt; log_rec_dev  0.590288513 0.9240650669
-#&gt; log_rec_dev  1.198961722 0.9607683341
-#&gt; log_rec_dev  0.488659366 0.8414113926
-#&gt; log_rec_dev  0.125367274 0.6371169766
-#&gt; log_rec_dev  0.000000000 0.6000000000
-#&gt; R0           0.978611174 0.0535766324
-#&gt; h            0.990000000 0.0000000000
-#&gt; q            0.008233652 0.0005347081
-#&gt; sigma        0.157646508 0.0101283422</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'>#### Observation-error delay difference model</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>cDD</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/Data-class-objects.html'>Red_snapper</a></span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>### State-space version</span></span>
+<span class='r-in'><span class='co'>### Also set recruitment variability SD = 0.6 (since fix_tau = TRUE)</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>cDD_SS</span><span class='op'>(</span>Data <span class='op'>=</span> <span class='fu'>MSEtool</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/MSEtool/man/Data-class-objects.html'>Red_snapper</a></span>, start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>tau <span class='op'>=</span> <span class='fl'>0.6</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>@</span><span class='va'>SD</span><span class='op'>)</span> <span class='co'># Parameter estimates</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate   Std. Error</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R0x         -0.480921455 0.0547476197</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_sigma   -1.847400042 0.0642471710</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.081587219 0.6049894072</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.111204054 0.6125899084</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.107322308 0.6117275453</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.097503317 0.6093864955</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.107647465 0.6124728442</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.141446939 0.6224339666</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.180777991 0.6348165576</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.222165851 0.6488319947</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.269647741 0.6659351608</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.317759201 0.6845925330</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.348397602 0.6979832730</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.349581550 0.7002855500</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.339561583 0.6976667607</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.370494271 0.7111734109</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.383392138 0.7173261234</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.401655660 0.7251979535</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.443006137 0.7430123229</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.405945004 0.7262746923</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.354623846 0.7038032205</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.322122772 0.6897517898</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.323794867 0.6895276101</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.328408423 0.6910275805</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.315127343 0.6863526262</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.324125255 0.6906325851</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.369392591 0.7103030309</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.408297484 0.7296375569</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.452468887 0.7532735362</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.526302090 0.7939118642</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.529252204 0.7976604117</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.490692480 0.7756016989</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.511395980 0.7802731004</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.482631571 0.7577363234</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.368159321 0.7021732270</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.241152720 0.6519067220</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.158679381 0.6230152527</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.105519680 0.6055344549</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.081408980 0.5970019161</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.068901077 0.5920825398</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.068758365 0.5908982655</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.036593700 0.5830367106</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.007575195 0.5762369935</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.009040124 0.5761802392</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.045867494 0.5839586492</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.076353141 0.5905744392</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.092545589 0.5941710033</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.074280617 0.5899738527</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.059466472 0.5864711168</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.053892245 0.5849228930</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.053596864 0.5844512081</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.043762183 0.5817642309</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.040902993 0.5803827889</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.051548347 0.5817812078</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.024813238 0.5752244740</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.004895483 0.5680683938</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.007052469 0.5664624794</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.020608349 0.5623777215</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.022961957 0.5602817255</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.054170870 0.5528287600</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.109250959 0.5416013944</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.152854059 0.5331731741</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.162749695 0.5304019677</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.158932104 0.5300187350</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.177711307 0.5265857400</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.223382424 0.5192153469</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.247060068 0.5151229986</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.245096006 0.5148710826</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.212008011 0.5193099393</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.198154382 0.5202926361</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.204956939 0.5180344854</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.229851806 0.5136491566</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.266246465 0.5078634363</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.296366985 0.5033009217</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.308546390 0.5013969915</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.313253299 0.5007385854</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.317285593 0.5002774307</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.312023245 0.5008781958</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.294176812 0.5032972075</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.270564738 0.5066421285</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.277463391 0.5060395835</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.269792298 0.5077518726</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.237509424 0.5129091877</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.206464938 0.5180295786</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.150575917 0.5270700571</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.067197023 0.5409461593</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.037345260 0.5472529435</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.033389386 0.5494843390</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.016755164 0.5531133701</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.015009131 0.5524478858</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.008961951 0.5546364874</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.037499332 0.5449332777</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.066625227 0.5377666594</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.127091247 0.5266060088</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.175924264 0.5177299322</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.195983618 0.5122340794</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.237248084 0.5042982837</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.267630154 0.4986282030</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.282631802 0.4955933053</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.311102517 0.4917555771</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.297848438 0.4928703264</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.241690588 0.4992099618</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.196253920 0.5050128722</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.177482641 0.5084187079</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.155910710 0.5113651636</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.128745159 0.5116720271</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.215279661 0.4980689722</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.313307306 0.4831124840</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.391961805 0.4723610506</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.421247706 0.4671835086</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.434532545 0.4637536451</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.488327616 0.4571295606</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.560649561 0.4491333922</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.630119659 0.4401942835</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.668442621 0.4327567101</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.696914695 0.4295885425</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.733071443 0.4248176310</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.795102762 0.4184384079</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.810623588 0.4140989913</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.826027785 0.4108981561</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.829316197 0.4105702743</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.728541821 0.4195898258</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.488687343 0.4381550818</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.146396756 0.4581390859</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.101642377 0.4453071163</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.441380554 0.3590746372</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.049113699 0.4938512740</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  1.435443072 0.1638096608</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.601908017 0.4651803521</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev -0.693012692 0.4560706418</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  1.463038645 0.2130131176</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.839222876 0.6837709136</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  1.327537303 0.4130762052</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.128804587 0.5990360843</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.027014546 0.5540022525</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.165560756 0.6025115464</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  2.067427834 0.2393321570</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.590288513 0.9240650669</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  1.198961722 0.9607683341</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.488659366 0.8414113926</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.125367274 0.6371169766</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log_rec_dev  0.000000000 0.6000000000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R0           0.978611174 0.0535766324</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> h            0.990000000 0.0000000000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> q            0.008233652 0.0005347081</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> sigma        0.157646508 0.0101283422</span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

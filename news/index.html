@@ -166,7 +166,7 @@
 <h3 class="hasAnchor">
 <a href="#rcm" class="anchor"></a>RCM</h3>
 <ul>
-<li>A new S4 object, <code>RCMdata</code>, is used to send data to the RCM model, i.e., <code><a href="../reference/check_RCMdata.html">RCM(OM, RCMdata)</a></code>. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.</li>
+<li>A new S4 object, <code>RCMdata</code>, is used to send data to the RCM model, i.e., <code>RCM(OM, RCMdata)</code>. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.</li>
 <li>Internal R and TMB code for RCM has been revised, e.g., reducing interchangeability between the terms ‘survey’ and ‘index’ to focus on ‘index’ as much as possible when maintaining backwards compatibility.</li>
 <li>The <code>profile</code> generic is now available for <code>RCM</code> models. Steepness, R0, and final depletion can be profiled.</li>
 <li>Fixed plotting bug in <code>compare_RCM</code>.</li>
