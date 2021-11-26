@@ -2,19 +2,19 @@ rmd_persp_plot <- function(x, y, z, xlab, ylab, zlab, phi, theta, expand, fig.ca
   ans <- c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
            paste0("persp(x = ", x, ", y = ", y, ", z = ", z, ", theta = ", theta, ", phi = ", phi, ", expand = ", expand, ", xlab = \"", xlab, "\",
                    ylab = \"", ylab, "\", zlab = \"", zlab, "\", ticktype = \"detailed\")"),
-           " ```\n")
+           "```\n")
   if(!is.null(header)) ans <- c(header, ans)
   return(ans)
 }
 
 rmd_matplot <- function(x, y, col, xlab, ylab, legend.lab, type = "l", lty = 1, fig.cap, header = NULL) {
   ans <- c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
-           paste0("xx <- ", x, "; yy <- ", y),
-           paste0("matplot(xx, yy, type = \"", type, "\", lty = ", lty, ", col = ", col,
+           paste0("yy <- ", y),
+           paste0("matplot(", x, ", ", y, ", type = \"", type, "\", lty = ", lty, ", col = ", col,
                   ", ylim = c(0, 1.1 * max(yy, na.rm = TRUE)), xlab = \"", xlab, "\", ylab = \"", ylab, "\")"),
            "abline(h = 0, col = \"grey\")",
            paste0("if(ncol(yy) > 1) legend(\"topleft\", ", legend.lab, ", text.col = ", col, ")"),
-           " ```\n")
+           "```\n")
   if(!is.null(header)) ans <- c(header, ans)
   return(ans)
 }

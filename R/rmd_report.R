@@ -50,7 +50,7 @@ rmd_summary <- function(modname) {
 rmd_at_age <- function(age, y_var, fig.cap, label, header = NULL) {
   ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
            paste0("plot_generic_at_age(", age, ", ", y_var, ", label = \"", label, "\")"),
-           " ```\n")
+           "```\n")
   if(!is.null(header)) ans <- c(header, ans)
   return(ans)
 }
@@ -65,14 +65,14 @@ rmd_LAA <- function(age = "1:info$data$n_age - 1", LAA = "info$LH$LAA", header =
     SD_LAA_plot <- paste0("lines(", age, ", SD_low, lty = 3); lines(", age, ", SD_high, lty = 3)")
   } else {
     SD_LAA_calc <- paste0("ymax <- 1.1 * max(", LAA, ")")
-    SD_LAA_plot <- ""
+    SD_LAA_plot <- NULL
   }
   
-  ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
+  ans <- c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
            SD_LAA_calc,
            paste0("plot_generic_at_age(", age, ", ", LAA, ", label = \"Length-at-age\", ymax = 1.1 * ymax)"),
            SD_LAA_plot,
-           " ```\n")
+           "```\n")
   if(!is.null(header)) ans <- c(header, ans)
   return(ans)
 }

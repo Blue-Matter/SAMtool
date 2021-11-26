@@ -4,6 +4,8 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - `RCM` will check age and length comp data for NA's and replaces with zero
 - `RCM` reports annual equilibrium unfished reference points using constant stock recruit alpha and beta 
 - Unlink TMB executable when unloading package
+- Fix punctuation issue in markdown reports that use knitr v1.36.
+- Other minor fixes
 
 ## SAMtool 1.2.2
 - The `make_interim_MP` function is added to generate MPs that adjust the TAC between periodic assessments using the index.
