@@ -387,9 +387,7 @@ VPA_posthoc <- function(report, info) { # Calculate Terminal year + 1 abundance
 
 ref_pt_VPA <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
   # Per-recruit quantities
-  maxage <- length(M)
-  surv0 <- exp(-M)
-  NPR0 <- calc_NPR(surv, maxage)
+  NPR0 <- calc_NPR(exp(-M), length(M))
   EPR0 <- sum(NPR0 * weight * mat)
   
   # Fit stock-recruit curve

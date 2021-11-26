@@ -380,8 +380,7 @@ r_prior_fn <- function(x = 1, Data, r_reps = 1e2, SR_type = c("BH", "Ricker"), s
 
 Euler_Lotka_fn <- function(log_r, M, h, weight, mat, maxage, SR_type) {
   M <- rep(M, maxage)
-  surv0 <- exp(-M)
-  NPR <- calc_NPR(surv0, maxage)
+  NPR <- calc_NPR(exp(-M), maxage)
 
   SBPR <- sum(NPR * weight * mat)
   CR <- ifelse(SR_type == "BH", 4*h/(1-h), (5*h)^1.25)
