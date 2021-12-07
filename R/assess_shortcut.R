@@ -161,6 +161,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   Year <- Data@Year
   Year_plusone <- c(Year, max(Year) + 1)
   opt <- SD <- "No assessment."
+  
   Assessment <- new("Assessment", 
                     Model = paste(ifelse(missing(VAR_model), "Shortcut", "Shortcut2"), method), 
                     conv = TRUE,
@@ -209,10 +210,12 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
       catch_equation(method = "frac", Utarget = 1 - exp(-Ftarget), B = Assessment@VB[length(Assessment@VB)])
     }
   } else {
+    Assessment@info <- list(data = list(M = Hist$StockPars$M_ageArray[x, , n_y + 1], 
+                                        wt = Hist$StockPars$Wt_age[x, , n_y + 1]))
     catch_eq <- function(Ftarget) {
       catch_equation(method = "Baranov", Ftarget = Ftarget,
                      sel = Assessment@Selectivity[nrow(Assessment@Selectivity), ], 
-                     M = Assessment@info$data$M, wt = Assessment@info$data$weight, N = Assessment@N[nrow(Assessment@N), ])
+                     M = Assessment@info$data$M, wt = Assessment@info$data$weight, N = Assessment@N_at_age[nrow(Assessment@N_at_age), ])
     }
   }
   
