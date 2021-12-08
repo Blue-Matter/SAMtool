@@ -66,9 +66,10 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   
   method <- match.arg(method)
   
-  n_y <- length(Data@Year)
-  year_p <- max(Data@Year) - Data@LHYear
+  n_y <- length(Data@Year) # Should be year_p + n_hist - 1
+  year_p <- max(Data@Year) - Data@LHYear + 1 # You are at the beginning of this year, have the abundance but not the mortality/catches
   Hist <- Data@Misc[-c(1:nrow(Data@Cat))]
+  n_hist <- dim(Hist$StockPars$SSB)[3]
   
   n_age <- Data@MaxAge + 1
   
@@ -80,29 +81,29 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   
   Fapical_hist <- Hist$StockPars$FM[x, , , ] %>% apply(2, max)
   
-  SSB_P <- get("SSB_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1 + 0:year_p, , drop = FALSE] %>% apply(2, sum)
+  SSB_P <- get("SSB_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
   SSB <- c(SSB_hist, SSB_P)
   
-  VB_P <- get("VBiomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1 + 0:year_p, , drop = FALSE] %>% apply(2, sum)
+  VB_P <- get("VBiomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
   VB <- c(VB_hist, VB_P)
   
-  B_P <- get("Biomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1 + 0:year_p, , drop = FALSE] %>% apply(2, sum)
+  B_P <- get("Biomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ] [, 1:year_p, , drop = FALSE] %>% apply(2, sum)
   B <- c(B_hist, B_P)
   
-  N_P <- get("N_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1 + 0:year_p, , drop = FALSE] %>% apply(1:2, sum)
+  N_P <- get("N_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(1:2, sum)
   N <- cbind(N_hist, N_P)
   
-  if(year_p > 0) {
-    Fapical_P <- get("FM_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, max)
+  if(year_p > 1) { # Need OM with equal areas
+    Fapical_P <- get("FM_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 2:year_p - 1, , drop = FALSE] %>% apply(2, max)
     Fapical <- c(Fapical_hist, Fapical_P)
   } else {
     Fapical <- Fapical_hist
   }
   R <- N[1, ]
   
-  if(!missing(VAR_model) && year_p > 0) {
-    VAR_proj <- predict(VAR_model, n.ahead = year_p + 1)
-    F_dev <- exp(c(VAR_proj$endog[, "FM"], VAR_proj$fcst$FM[1:year_p, "fcst"]))
+  if(!missing(VAR_model) && year_p > 1) {
+    VAR_proj <- predict(VAR_model, n.ahead = year_p)
+    F_dev <- exp(c(VAR_proj$endog[, "FM"], VAR_proj$fcst$FM[2:year_p - 1, "fcst"]))
   } else {
     stopifnot(length(F_err) >= 3)
     F_dev <- exp(dev_AC(n_y, mu = F_err[3], stdev = F_err[1], AC = F_err[2], seed = x * n_y - 5000))
@@ -110,7 +111,8 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   F_out <- Fapical * F_dev
   
   if(method == "B") {
-    if(!missing(VAR_model) && year_p > 0) {
+    
+    if(!missing(VAR_model) && year_p > 1) {
       B_dev <- exp(c(VAR_proj$endog[, "B"], VAR_proj$fcst$B[, "fcst"]))
     } else {
       stopifnot(length(B_err) >= 3)
@@ -119,9 +121,11 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     SSB_out <- SSB * B_dev
     VB_out <- VB * B_dev
     B_out <- B * B_dev
+    
   } else if(method == "N") {
-    if(!missing(VAR_model) && year_p > 0) {
-      N_dev_proj <- vapply(paste0("N.", 1:n_age), function(xx) getElement(VAR_proj$fcst, xx)[, "fcst"], numeric(year_p+1))
+    
+    if(!missing(VAR_model) && year_p > 1) {
+      N_dev_proj <- vapply(paste0("N.", 1:n_age), function(xx) getElement(VAR_proj$fcst, xx)[, "fcst"], numeric(year_p))
       N_dev <- exp(rbind(VAR_proj$endog[, 1:n_age], N_dev_proj)) %>% t()
     } else {
       stopifnot(length(N_err) >= 3)
@@ -134,14 +138,15 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     
     Wt_age <- Hist$StockPars$Wt_age[x, , 0:n_y + 1]
     Mat_age <- Hist$StockPars$Mat_age[x, , 0:n_y + 1]
-    V_age <- Hist$FleetPars$V[x, , 0:n_y + 1]
+    V_age <- Hist$FleetPars$V_real[x, , 0:n_y + 1]
+    Fec_age <- Hist$StockPars$Fec_Age[x, , 0:n_y + 1]
     
-    SSB_out <- colSums(N_out * Mat_age * Wt_age)
+    SSB_out <- colSums(N_out * Fec_age)
     VB_out <- colSums(N_out * V_age * Wt_age)
     B_out <- colSums(N_out * Wt_age)
     
   } else if(method == "RF") {
-    if(!missing(VAR_model) && year_p > 0) {
+    if(!missing(VAR_model) && year_p > 1) {
       R_dev <- exp(c(VAR_proj$endog[, "R"], VAR_proj$fcst$R[, "fcst"]))
     } else {
       stopifnot(length(R_err) >= 3)
@@ -166,18 +171,21 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
                     Model = paste(ifelse(missing(VAR_model), "Shortcut", "Shortcut2"), method), 
                     conv = TRUE,
                     FMort = structure(F_out, names = Year),
-                    FMSY = Hist$ReferencePoints$ByYear[["FMSY"]][x, n_y],
                     SSB = structure(SSB_out, names = Year_plusone),
                     VB = structure(VB_out, names = Year_plusone),
                     B = structure(B_out, names = Year_plusone),
-                    Selectivity = Hist$FleetPars$V[x, , 1:n_y] %>% t(),
+                    Selectivity = Hist$FleetPars$V[x, , 0:n_y + 1] %>% t(),
                     Obs_Catch = Data@Cat[x, ],
                     Obs_Index = Data@Ind[x, ],
                     Obs_C_at_age = Data@CAA[x, , ],
                     opt = "No assessment.",
                     SD = "No assessment.")
   if(exists("N_out", inherits = FALSE)) Assessment@N_at_age <- t(N_out)
-  if(exists("R_out", inherits = FALSE)) Assessment@R <- structure(R_out, names = Year_plusone)
+  if(exists("R_out", inherits = FALSE)) {
+    Assessment@R <- structure(R_out, names = Year_plusone)
+  } else {
+    Assessment@R <- structure(Assessment@N_at_age[, 1], names = Year_plusone)
+  }
   
   if(missing(VAR_model)) {
     if(method == "B") {
@@ -191,8 +199,8 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     mag_bias <- 1
   }
   
-  ref_pt <- c("N0", "B0", "SSB0", "VB0", "MSY", "SSBMSY", "BMSY", "VBMSY")
-  lapply(ref_pt, function(xx) slot(Assessment, xx) <<- mag_bias * Hist$ReferencePoints$ByYear[[xx]][x, n_y])
+  ref_pt <- c("N0", "B0", "SSB0", "VB0", "MSY", "SSBMSY", "BMSY", "VBMSY", "FMSY")
+  lapply(ref_pt, function(xx) slot(Assessment, xx) <<- mag_bias * Hist$ReferencePoints$ByYear[[xx]][x, n_y + 1])
   Assessment@TMB_report$dynamic_SSB0 <- Hist$ReferencePoints$Dynamic_Unfished$SSB0[x, 1 + 0:n_y] %>% structure(names = Year_plusone)
   
   Assessment@R0 <- mag_bias * Hist$StockPars$R0[x]
@@ -211,7 +219,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     }
   } else {
     Assessment@info <- list(data = list(M = Hist$StockPars$M_ageArray[x, , n_y + 1], 
-                                        wt = Hist$StockPars$Wt_age[x, , n_y + 1]))
+                                        weight = Hist$FleetPars$Wt_age_C[x, , n_y + 1]))
     catch_eq <- function(Ftarget) {
       catch_equation(method = "Baranov", Ftarget = Ftarget,
                      sel = Assessment@Selectivity[nrow(Assessment@Selectivity), ], 
@@ -219,7 +227,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     }
   }
   
-  F_SPR <- Data@Misc$ReferencePoints$ByYear$F_SPR[x, , n_y] %>% rev()
+  F_SPR <- Data@Misc$ReferencePoints$ByYear$F_SPR[x, , n_y + 1] %>% rev()
   SPR <- F_SPR %>% names() %>% substr(3,4) %>% as.numeric()
   SPR <- rev(SPR/100)
   if(all(F_SPR != 0)) {
@@ -227,8 +235,8 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     SPR <- c(1, SPR)
   }
   Assessment@forecast <- list(per_recruit = data.frame(FM = F_SPR, SPR = SPR, 
-                                                       F01 = Data@Misc$ReferencePoints$ByYear$F01_YPR[x, n_y],
-                                                       Fmax = Data@Misc$ReferencePoints$ByYear$Fmax_YPR[x, n_y]), 
+                                                       F01 = Data@Misc$ReferencePoints$ByYear$F01_YPR[x, n_y + 1],
+                                                       Fmax = Data@Misc$ReferencePoints$ByYear$Fmax_YPR[x, n_y + 1]), 
                               catch_eq = catch_eq)
   return(Assessment)
 }
@@ -298,7 +306,7 @@ class(Shortcut2) <- "Assess"
 #' @rdname Shortcut
 #' @export
 Perfect <- function(x, Data, ...) {
-  out <- Shortcut(x, Data, method = "N", N_err = c(0, 0, 1))
+  out <- Shortcut(x, Data, method = "N", F_err = c(0, 0, 1), N_err = c(0, 0, 1))
   out@Model <- "Perfect"
   return(out)
 }
@@ -318,7 +326,7 @@ project_ASM <- function(x, R_out, F_out, Hist, Data) {
   for(y in 1:n_y) {
     N[1, y+1] <- R_out[y+1]
     for(a in 2:n_age - 1) N[a+1, y+1] <- N[a, y] * exp(-V[a, y] * F_out[y] - M[a, y])
-    N[n_age, y+1] <- N[n_age, y+1] + N[n_age, y] * exp(-V[n_age, y] * F_out[y] - M[n_age, y])
+    if(Hist$StockPars$plusgroup) N[n_age, y+1] <- N[n_age, y+1] + N[n_age, y] * exp(-V[n_age, y] * F_out[y] - M[n_age, y])
   }
   
   SSB <- colSums(N * Wt * Mat)

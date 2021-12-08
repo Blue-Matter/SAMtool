@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.2.4
+- Update `Shortcut` indexing to align year of assessment with projection. An MP using the `Perfect` assessment and `HCR_MSY` annually will produce F = FMSY in the OM.
+
 ## SAMtool 1.2.3
 - `RCM` will check age and length comp data for NA's and replaces with zero
 - `RCM` reports annual equilibrium unfished reference points using constant stock recruit alpha and beta 
