@@ -41,5 +41,5 @@ LazyLoad: yes
 RoxygenNote: 7.1.2
 Encoding: UTF-8
 VignetteBuilder: knitr
-URL: https://github.com/Blue-Matter/SAMtool
+URL: https://openmse.com, https://github.com/Blue-Matter/SAMtool
 BugReports: https://github.com/Blue-Matter/SAMtool/issues
