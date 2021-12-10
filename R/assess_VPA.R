@@ -72,6 +72,17 @@
 #' MSY and depletion reference points are calculated by fitting the stock recruit relationship to the recruitment and SSB estimates. Per-recruit
 #' quantities are also calculated, which may be used in harvest control rules.
 #' 
+#' @section Additional considerations:
+#' The VPA tends to be finicky to implement straight out of the box. For example, zeros in plusgroup age in the catch-at-age
+#' model will crash the model, as well as if the catch-at-age values are close to zero. The model sets F-at-age to 1e-4
+#' if any catch-at-age value < 1e-4.
+#' 
+#' It is recommended to do some preliminary fits with the VPA before running simulations en masse. See example below.
+#' 
+#' Shrinkage, penalty functions that stabilize model estimates of recruitment and selectivity year-over-year near 
+#' the end of the time series, alters the behavior of the model. This is something to tinker with in your initial
+#' model fits, and worth evaluating in closed-loop simulation. 
+#' 
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
 #' \href{https://openmse.com/features-assessment-models/4-vpa/}{website}.
@@ -79,7 +90,22 @@
 #' @return An object of class \linkS4class{Assessment}. The F vector is the apical fishing mortality experienced by any
 #' age class in a given year. 
 #' @examples
-#' out <- VPA(x = 2, Data = MSEtool::SimulatedData, vulnerability = "dome")
+#' \donttest{
+#' OM <- MSEtool::testOM
+#' 
+#' # Simulate logistic normal age comps with CV = 0.1
+#' # (set CAA_ESS < 1, which is interpreted as a CV)
+#' OM@CAA_ESS <- c(0.1, 0.1) 
+#' Hist <- MSEtool::Simulate(OM, silent = TRUE)
+#' 
+#' # VPA max age is 15 (Hist@Data@MaxAge)
+#' m <- VPA(x = 2, Data = Hist@Data, vulnerability = "dome")
+#' 
+#' # Use age-9 as the VPA max age instead
+#' m9 <- VPA(x = 2, Data = Hist@Data, vulnerability = "dome", max_age = 9)
+#' 
+#' compare_models(m, m9)
+#' }
 #' @references
 #' Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.
 #' @export
@@ -131,17 +157,17 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
   }
   
   # Reduce max_age until no zero's are observed
-  CAA_hist2 <- CAA_hist
+  CAA_hist_VPA <- CAA_hist
   if(is.character(max_age) && max_age == "auto") {
     max_age <- n_age - 1
-    while(any(CAA_hist2[, max_age + 1] <= 0)) {
+    while(any(CAA_hist_VPA[, max_age + 1] <= 0)) {
       max_age <- max_age - 1
-      CAA_hist2 <- CAA_hist[, 0:max_age + 1]
-      CAA_hist2[, max_age + 1] <- rowSums(CAA_hist[, (max_age+1):ncol(CAA_hist), drop = FALSE])
+      CAA_hist_VPA <- CAA_hist[, 0:max_age + 1]
+      CAA_hist_VPA[, max_age + 1] <- rowSums(CAA_hist[, (max_age+1):ncol(CAA_hist), drop = FALSE])
     }
   } else if(is.numeric(max_age) && length(max_age) == 1) {
-    CAA_hist2 <- CAA_hist[, 0:max_age + 1]
-    CAA_hist2[, max_age + 1] <- rowSums(CAA_hist[, (max_age+1):ncol(CAA_hist), drop = FALSE])
+    CAA_hist_VPA <- CAA_hist[, 0:max_age + 1]
+    CAA_hist_VPA[, max_age + 1] <- rowSums(CAA_hist[, (max_age+1):ncol(CAA_hist), drop = FALSE])
   } else {
     stop("max_age must be an integer or \"auto\".")
   }
@@ -150,14 +176,14 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
   if(is.character(min_age) && min_age == "auto") {
     min_age <- 0
     while(CAA_hist[nrow(CAA_hist), min_age + 1] <= 0) min_age <- min_age + 1
-    #if(colSums(CAA_hist2)[1] < 0.01 * sum(CAA_hist2)) min_age <- min_age + 1
+    #if(colSums(CAA_hist_VPA)[1] < 0.01 * sum(CAA_hist_VPA)) min_age <- min_age + 1
   } 
   if(is.numeric(min_age) && length(min_age) == 1) {
     if(min_age > 0) {
-      CAA_hist2 <- CAA_hist2[, -c(0:min_age + 1), drop = FALSE]
-      CAA_hist2 <- CAA_hist[, 0:min_age + 1, drop = FALSE] %>% rowSums() %>% cbind(CAA_hist2)
-      if(ncol(CAA_hist2) == 1) stop("Only one age class left after consolidating plus- and minus- groups to remove zeros.")
-    } 
+      CAA_hist_VPA <- CAA_hist_VPA[, -c(0:min_age + 1), drop = FALSE]
+      CAA_hist_VPA <- CAA_hist[, 0:min_age + 1, drop = FALSE] %>% rowSums() %>% cbind(CAA_hist_VPA)
+      if(ncol(CAA_hist_VPA) == 1) stop("Only one age class left after consolidating plus- and minus- groups to remove zeros.")
+    }
   } else {
     stop("min_age must be an integer or \"auto\".")
   }
@@ -165,11 +191,11 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
   ages <- min_age:max_age
   
   # Any missing zeros
-  CAA_hist2[is.na(CAA_hist2) | CAA_hist2 < 1e-8] <- 1e-8
+  CAA_hist_VPA[is.na(CAA_hist_VPA) | CAA_hist_VPA < 1e-8] <- 1e-8
   
   # Avoid numerical instability with maxage and maxage-1
-  maxage_ind <- CAA_hist2[, ncol(CAA_hist2) - 1] == 1e-8 
-  CAA_hist2[maxage_ind, ncol(CAA_hist2) - 1] <- CAA_hist2[maxage_ind, ncol(CAA_hist2)]
+  maxage_ind <- CAA_hist_VPA[, ncol(CAA_hist_VPA) - 1] == 1e-8 
+  CAA_hist_VPA[maxage_ind, ncol(CAA_hist_VPA) - 1] <- CAA_hist_VPA[maxage_ind, ncol(CAA_hist_VPA)]
   
   update_age_schedule <- function(x, ages) {
     xout <- x[ages + 1]
@@ -210,7 +236,7 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
   
   data <- list(model = "VPA", I_hist = I_hist, I_sd = I_sd, I_units = I_units, I_vul = I_vul, 
                abs_I = rep(0, nsurvey), nsurvey = nsurvey, LWT = LWT,
-               CAA_hist = CAA_hist2, n_y = length(Year), n_age = length(ages),
+               CAA_hist = CAA_hist_VPA, n_y = length(Year), n_age = length(ages),
                M = update_age_schedule(M, ages), weight = LH$WAA, 
                vul_type_term = vulnerability, n_itF = as.integer(n_itF),
                n_vulpen = shrinkage$vul[1], vulpen = shrinkage$vul[2], 
@@ -306,9 +332,9 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
                     VB = structure(report$VB, names = Yearplusone),
                     R = structure(report$N[, 1], names = Yearplusone), N = structure(rowSums(report$N), names = Yearplusone),
                     N_at_age = report$N, Selectivity = report$vul, h = NA_real_,
-                    Obs_Catch = structure(if(expanded) colSums(t(CAA_hist2) * data$weight) else C_hist, names = Year),
+                    Obs_Catch = structure(if(expanded) colSums(t(CAA_hist_VPA) * data$weight) else C_hist, names = Year),
                     Obs_Index = structure(I_hist, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
-                    Obs_C_at_age = CAA_hist2,
+                    Obs_C_at_age = CAA_hist_VPA,
                     Catch = structure(colSums(t(report$CAApred) * data$weight), names = Year),
                     Index = structure(report$Ipred, dimnames = list(Year, paste0("Index_", 1:nsurvey))), 
                     C_at_age = report$CAApred,
@@ -448,7 +474,7 @@ ref_pt_VPA <- function(E, R, weight, mat, M, vul, SR, fix_h, h) {
   yield <- lapply(Fvec,
                   yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
                   Arec = Arec, Brec = Brec, opt = FALSE)
-  SPR <- vapply(yield, getElement, numeric(1), "SPR")
+  SPR <- vapply(yield, getElement, numeric(1), "EPR")
   YPR <- vapply(yield, getElement, numeric(1), "YPR")
   
   refpt_unfished <- list(h = h, Arec = Arec, Brec = Brec, E0 = E0, R0 = R0, N0 = N0, VB0 = VB0, B0 = B0, EPR0 = EPR0, NPR0 = NPR0)

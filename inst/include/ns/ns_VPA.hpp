@@ -81,6 +81,7 @@ Type deriv_VPA_F_plus(Type logF, Type phi, Type M1, Type M2, Type C1, Type C2) {
 }
 
 // Newton solver for plus-group F
+// Returns 1e-4 if either CAA1 or CAA2 < 1e-4
 template<class Type>
 Type Newton_VPA_F_plus(Type F_start, Type phi, Type M1, Type M2, Type CAA1, Type CAA2, Type N_next, int nloop) {
   Type logF = log(F_start);
@@ -89,7 +90,9 @@ Type Newton_VPA_F_plus(Type F_start, Type phi, Type M1, Type M2, Type CAA1, Type
     tmp /= deriv_VPA_F_plus(logF, phi, M1, M2, CAA1, CAA2);
     logF -= tmp;
   }
-  return exp(logF);
+  Type Fout = CppAD::CondExpLt(CAA1, Type(1e-4), Type(1e-4),
+                               CppAD::CondExpLt(CAA2, Type(1e-4), Type(1e-4), exp(logF)));
+  return Fout;
 }
 
 }

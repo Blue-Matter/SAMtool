@@ -126,6 +126,19 @@ by the Fratio.
 MSY and depletion reference points are calculated by fitting the stock recruit relationship to the recruitment and SSB estimates. Per-recruit
 quantities are also calculated, which may be used in harvest control rules.
 }
+\section{Additional considerations}{
+
+The VPA tends to be finicky to implement straight out of the box. For example, zeros in plusgroup age in the catch-at-age
+model will crash the model, as well as if the catch-at-age values are close to zero. The model sets F-at-age to 1e-4
+if any catch-at-age value < 1e-4.
+
+It is recommended to do some preliminary fits with the VPA before running simulations en masse. See example below.
+
+Shrinkage, penalty functions that stabilize model estimates of recruitment and selectivity year-over-year near 
+the end of the time series, alters the behavior of the model. This is something to tinker with in your initial
+model fits, and worth evaluating in closed-loop simulation.
+}
+
 \section{Online Documentation}{
 
 Model description and equations are available on the openMSE 
@@ -133,7 +146,22 @@ Model description and equations are available on the openMSE
 }
 
 \examples{
-out <- VPA(x = 2, Data = MSEtool::SimulatedData, vulnerability = "dome")
+\donttest{
+OM <- MSEtool::testOM
+
+# Simulate logistic normal age comps with CV = 0.1
+# (set CAA_ESS < 1, which is interpreted as a CV)
+OM@CAA_ESS <- c(0.1, 0.1) 
+Hist <- MSEtool::Simulate(OM, silent = TRUE)
+
+# VPA max age is 15 (Hist@Data@MaxAge)
+m <- VPA(x = 2, Data = Hist@Data, vulnerability = "dome")
+
+# Use age-9 as the VPA max age instead
+m9 <- VPA(x = 2, Data = Hist@Data, vulnerability = "dome", max_age = 9)
+
+compare_models(m, m9)
+}
 }
 \references{
 Porch, C.E. 2018. VPA-2BOX 4.01 User Guide. NOAA Tech. Memo. NMFS-SEFSC-726. 67 pp.
