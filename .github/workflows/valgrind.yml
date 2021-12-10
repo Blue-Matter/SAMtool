@@ -29,13 +29,17 @@ jobs:
       - name: Save TMB objects
         run: |
           library(SAMtool)
-          assess <- c("DD_TMB", "DD_SS", "SCA", "SCA2", "SCA_Pope", "SCA_RWM", "SP", "SP_SS")
-          assess_sim <- lapply(assess, do.call, args = list(Data = MSEtool::SimulatedData))
+          OM <- testOM
+          OM@CAA_ESS <- c(0.1, 0.1) 
+          Hist <- MSEtool::Simulate(OM, silent = TRUE)
+          
+          assess <- c("DD_TMB", "DD_SS", "SCA", "SCA2", "SCA_Pope", "SCA_RWM", "SP", "SP_SS", "VPA")
+          assess_sim <- lapply(assess, do.call, args = list(Data = Hist@Data))
           names(assess_sim) <- assess
           saveRDS(assess_sim, file = "assess_sim.rds")
           
-          assess_rs <- lapply(assess[!grepl("SCA", assess)], do.call, args = list(Data = MSEtool::Red_snapper))
-          names(assess_rs) <- assess[!grepl("SCA", assess)]
+          assess_rs <- lapply(assess[!grepl("VPA", assess)], do.call, args = list(Data = MSEtool::Red_snapper))
+          names(assess_rs) <- assess[!grepl("VPA", assess)]
           saveRDS(assess_rs, file = "assess_rs.rds")
           
           writeLines(c("library(SAMtool)",
