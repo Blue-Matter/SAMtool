@@ -23,11 +23,9 @@ FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal yea
 \item{reps}{The number of stochastic samples of the TAC recommendation.}
 
 \item{OCP_type}{The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
-By default, use (\code{"SSB_SSB0"} for spawning depletion. Other biomass OCPs include \code{"SSB_SSBMSY"} for spawning biomass relative to MSY and
-\code{"SSB_dSSB0"}, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
-For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR\% (see \code{SPR_OCP} argument) can be used.}
+See below.}
 
-\item{Ftarget_type}{The type of F used for the target fishing mortality rate.}
+\item{Ftarget_type}{The type of F used for the target fishing mortality rate. See below.}
 
 \item{OCP}{Numeric vector of operational control points for the HCR (in increasing order).}
 
@@ -48,9 +46,42 @@ is a function of an operational control point (OCP) such as spawning depletion o
 The joints of the HCR are specified by arguments \code{OCP} and \code{relF}. Beyond the range of \code{OCP}, the response will be flat.
 \link{HCR_ramp} uses \code{HCR_segment} with two control points.
 }
+\details{
+\emph{Operational control points (OCP_type)}
+
+The following are the available options for harvest control rule inputs, and the source of those values
+in the \linkS4class{Assessment} object:
+
+\itemize{
+\item \strong{Default} \code{"SSB_SSB0"}: Spawning depletion. Uses the last value in  \code{Assessment@SSB_SSB0} vector.
+\item \code{"SSB_SSBMSY"}: Spawning biomass relative to MSY. Uses the last value in \code{Assessment@SSB_SSBMSY} vector.
+\item \code{"SSB_dSSB0"}: Dynamic depletion (SSB relative to the historical reconstructed biomass with F = 0). Uses the last value in
+\code{Assessment@SSB/Assessment@TMB_report$dynamic_SSB0}.
+\item \code{"F_FMSY"}: Fishing mortality relative to MSY. Uses the last value in \code{Assessment@F_FMSY}.
+\item \code{"F_F01"}: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
+\code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"F_FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\code{"SPR_OCP"}, calculated from the data frame in \code{Asesssment@forecast[["per_recruit"]]}.
+}
+
+\emph{Fishing mortality target (Ftarget_type)}
+
+The type of F for which the corresponding catch is calculated in the HCR is specified here. The source of those values
+in the \linkS4class{Assessment} object is specified:
+
+\itemize{
+\item \strong{Default} \code{"FMSY"}: Fishing mortality relative to MSY. Uses the value in \code{Assessment@FMSY}.
+\item \code{"F01"}: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
+\code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"Fmax"}: Fishing mortality relative to F_max (maximizing yield per recruit), calculated from the data frame in
+\code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\code{"SPR_targ"}, calculated from data frame in \code{Asesssment@forecast[["per_recruit"]]}.
+}
+}
 \examples{
 # This is an MP with a 40-10 harvest control rule
-DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", OCP = c(0.1, 0.4), relF = c(0, 1))
+DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", OCP = c(0.1, 0.4), relF = c(0, 1)) 
 }
 \author{
 Q. Huynh

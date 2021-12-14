@@ -34,11 +34,9 @@ FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal yea
 \item{reps}{The number of stochastic samples of the TAC recommendation.}
 
 \item{OCP_type}{The type of operational control points (OCPs) for the harvest control rule used to determine the reduction in F.
-By default, use (\code{"SSB_SSB0"} for spawning depletion. Other biomass OCPs include \code{"SSB_SSBMSY"} for spawning biomass relative to MSY and
-\code{"SSB_dSSB0"}, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
-For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR\% (see \code{SPR_OCP} argument) can be used.}
+See below.}
 
-\item{Ftarget_type}{The type of F used for the target fishing mortality rate.}
+\item{Ftarget_type}{The type of F used for the target fishing mortality rate. See below.}
 
 \item{LOCP}{Numeric, the limit value for the OCP in the HCR.}
 
@@ -66,15 +64,52 @@ Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rul
 Class HCR objects are typically used with function \link{make_MP}.
 }
 \details{
-\code{HCR_ramp} is the generic ramped-HCR function where user specifies OCP and corresponding limit and target
+\emph{Operational control points (OCP_type)}
+
+The following are the available options for harvest control rule inputs, and the source of those values
+in the \linkS4class{Assessment} object:
+
+\itemize{
+\item \strong{Default} \code{"SSB_SSB0"}: Spawning depletion. Uses the last value in  \code{Assessment@SSB_SSB0} vector.
+\item \code{"SSB_SSBMSY"}: Spawning biomass relative to MSY. Uses the last value in \code{Assessment@SSB_SSBMSY} vector.
+\item \code{"SSB_dSSB0"}: Dynamic depletion (SSB relative to the historical reconstructed biomass with F = 0). Uses the last value in
+\code{Assessment@SSB/Assessment@TMB_report$dynamic_SSB0}.
+\item \code{"F_FMSY"}: Fishing mortality relative to MSY. Uses the last value in \code{Assessment@F_FMSY}.
+\item \code{"F_F01"}: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
+\code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"F_FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\code{"SPR_OCP"}, calculated from the data frame in \code{Asesssment@forecast[["per_recruit"]]}.
+}
+
+\emph{Fishing mortality target (Ftarget_type)}
+
+The type of F for which the corresponding catch is calculated in the HCR is specified here. The source of those values
+in the \linkS4class{Assessment} object is specified:
+
+\itemize{
+\item \strong{Default} \code{"FMSY"}: Fishing mortality relative to MSY. Uses the value in \code{Assessment@FMSY}.
+\item \code{"F01"}: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
+\code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"Fmax"}: Fishing mortality relative to F_max (maximizing yield per recruit), calculated from the data frame in
+\code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\code{"SPR_targ"}, calculated from data frame in \code{Asesssment@forecast[["per_recruit"]]}.
+}
+}
+\section{Functions}{
+\itemize{
+\item \code{HCR_ramp}: Generic ramped-HCR function where user specifies OCP and corresponding limit and target
 points, as well as minimum and maximum relative F target.
 
-\code{HCR40_10} is a common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
-respectively), while \code{HCR60_20} is more conservative than 40-10, with LOCP and TOCP of 0.2 and 0.6
-spawning depletion, respectively). 
+\item \code{HCR40_10}: Common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
+respectively)
 
-\code{HCR80_40MSY} uses 0.8 and 0.4 SSBMSY as the LOCP and TOCP, respectively.
-}
+\item \code{HCR60_20}: More conservative than \code{HCR40_10}, with LOCP and TOCP of 0.2 and 0.6
+spawning depletion, respectively).
+
+\item \code{HCR80_40MSY}: 0.8 and 0.4 SSBMSY as the LOCP and TOCP, respectively.
+}}
+
 \examples{
 # 40-10 linear ramp
 Brel <- seq(0, 1, length.out = 200)
