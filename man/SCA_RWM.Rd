@@ -95,7 +95,8 @@ not be estimated in \code{SCA} (recruitment in these years will be based on the 
 By default, \code{"comp50"} uses the number of ages (smaller than the mode)
 for which the catch-at-age matrix has less than half the abundance than that at the mode.}
 
-\item{refyear}{An expression for the year for which M is used to report MSY reference points. By default, terminal year.}
+\item{refyear}{An expression for the year for which M is used to report MSY reference points. By default, terminal year. IF multiple
+years are provided, then the mean M over the specified time period is used.}
 
 \item{M_bounds}{A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
 (\code{start$M}). The default min and max are 75\% and 125\%, respectively.}

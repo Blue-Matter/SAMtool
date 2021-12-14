@@ -646,33 +646,35 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       SE_Dev[is.na(SE_Dev)] <- 0
     }
     
-    ref_pt <- lapply(seq_len(ifelse(tv_M == "walk", n_y, 1)), ref_pt_SCA, obj = obj, report = report)
-    if(catch_eq == "Baranov") {
-      report$FMSY <- vapply(ref_pt, getElement, numeric(1), "FMSY")
-    } else {
-      report$UMSY <- vapply(ref_pt, getElement, numeric(1), "UMSY")
-    }
-    report$MSY <- vapply(ref_pt, getElement, numeric(1), "MSY")
-    report$VBMSY <- vapply(ref_pt, getElement, numeric(1), "VBMSY")
-    report$RMSY <- vapply(ref_pt, getElement, numeric(1), "RMSY")
-    report$BMSY <- vapply(ref_pt, getElement, numeric(1), "BMSY")
-    report$EMSY <- vapply(ref_pt, getElement, numeric(1), "EMSY")
-    
     refyear <- eval(refyear)
+    
+    ref_pt <- ref_pt_SCA(y = refyear, obj = obj, report = report)
     if(catch_eq == "Baranov") {
-      Assessment@FMSY <- report$FMSY[refyear]
-      Assessment@F_FMSY <- structure(report$F/report$FMSY[refyear], names = Year)
+      report$FMSY <- ref_pt$FMSY
     } else {
-      Assessment@UMSY <- report$UMSY[refyear]
-      Assessment@U_UMSY <- structure(report$U/report$UMSY[refyear], names = Year)
+      report$UMSY <- ref_pt$UMSY
     }
-    Assessment@MSY <- report$MSY[refyear]
-    Assessment@BMSY <- report$BMSY[refyear]
-    Assessment@SSBMSY <- report$EMSY[refyear]
-    Assessment@VBMSY <- report$VBMSY[refyear]
-    Assessment@B_BMSY <- structure(report$B/report$BMSY[refyear], names = Yearplusone)
-    Assessment@SSB_SSBMSY <- structure(report$E/report$EMSY[refyear], names = Yearplusone)
-    Assessment@VB_VBMSY <- structure(report$VB/report$VBMSY[refyear], names = Yearplusone)
+    report$MSY <- ref_pt$MSY
+    report$VBMSY <- ref_pt$VBMSY
+    report$RMSY <- ref_pt$RMSY
+    report$BMSY <- ref_pt$BMSY
+    report$EMSY <- ref_pt$EMSY
+    report$refyear <- refyear
+    
+    if(catch_eq == "Baranov") {
+      Assessment@FMSY <- report$FMSY
+      Assessment@F_FMSY <- structure(report$F/Assessment@FMSY, names = Year)
+    } else {
+      Assessment@UMSY <- report$UMSY
+      Assessment@U_UMSY <- structure(report$U/Assessment@UMSY, names = Year)
+    }
+    Assessment@MSY <- report$MSY
+    Assessment@BMSY <- report$BMSY
+    Assessment@SSBMSY <- report$EMSY
+    Assessment@VBMSY <- report$VBMSY
+    Assessment@B_BMSY <- structure(report$B/Assessment@BMSY, names = Yearplusone)
+    Assessment@SSB_SSBMSY <- structure(report$E/Assessment@SSBMSY, names = Yearplusone)
+    Assessment@VB_VBMSY <- structure(report$VB/Assessment@VBMSY, names = Yearplusone)
     Assessment@Dev <- Dev
     Assessment@SE_Dev <- SE_Dev
     Assessment@TMB_report <- report
@@ -682,7 +684,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                      obs_error = list(array(1, c(1, 1, nsurvey)), matrix(1, 1, 1)),
                      process_error = matrix(1, 1, 1)) %>% slot("Catch") %>% as.vector()
     }
-    Assessment@forecast <- list(per_recruit = ref_pt[[refyear]][[7]], catch_eq = catch_eq_fn)
+    Assessment@forecast <- list(per_recruit = ref_pt[["per_recruit"]], catch_eq = catch_eq_fn)
   }
   return(Assessment)
 }
@@ -706,7 +708,7 @@ ref_pt_SCA <- function(y = 1, obj, report) {
     Brec <- report$Brec
   }
   
-  M <- report$M[y, ]
+  M <- apply(report$M[y, , drop = FALSE], 2, mean)
   weight <- obj$env$data$weight
   mat <- obj$env$data$mat
   vul <- report$vul
