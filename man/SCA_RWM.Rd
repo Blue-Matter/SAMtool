@@ -95,7 +95,7 @@ not be estimated in \code{SCA} (recruitment in these years will be based on the 
 By default, \code{"comp50"} uses the number of ages (smaller than the mode)
 for which the catch-at-age matrix has less than half the abundance than that at the mode.}
 
-\item{refyear}{An expression for the year for which M is used to report MSY reference points. By default, terminal year. IF multiple
+\item{refyear}{An expression for the year for which M is used to report MSY and unfished reference points. By default, terminal year. If multiple
 years are provided, then the mean M over the specified time period is used.}
 
 \item{M_bounds}{A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
@@ -137,6 +137,9 @@ a proportion of \code{start$M} (specified in \code{M_bounds}).
 The starting value for the first year M (start$M) is \code{Data@Mort[x]} and is fixed, unless a prior is provided (\code{prior$M}). 
 The fixed SD of the random walk (\code{tau_M}) is 0.05, by default. 
 
+Steepness and unfished recruitment in the estimation model, along with unfished reference points, correspond to spawners per recruit using the first year M. 
+With argument \code{refyear}, new unfished reference points and steepness values are calculated. See examples. 
+
 Alternative values can be provided in the start list (see examples):
 \itemize{
 \item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
@@ -166,7 +169,13 @@ Model description and equations are available on the openMSE
 res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
 res2 <- SCA(Data = MSEtool::SimulatedData)
 res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.001))
- 
+
+# Use mean M in most recent 5 years for reporting reference points 
+res_5r <- SCA_RWM(Data = MSEtool::SimulatedData, refyear = expression(seq(length(Data@Year) - 4, length(Data@Year))),
+                  start = list(M_start = 0.4, tau_M = 0.001))
+res_5r@SSB0 # SSB0 reported (see also res_5r@TMB_report$new_E0)
+res_5r@TMB_report$E0 # SSB0 of Year 1 M
+
 \donttest{
 compare_models(res, res2, res3)
 }

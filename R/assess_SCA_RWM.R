@@ -5,7 +5,7 @@
 #' Set the variance (\code{start$tau_M}) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
 #' 
 #' @inheritParams SCA 
-#' @param refyear An expression for the year for which M is used to report MSY reference points. By default, terminal year. IF multiple
+#' @param refyear An expression for the year for which M is used to report MSY and unfished reference points. By default, terminal year. If multiple
 #' years are provided, then the mean M over the specified time period is used.
 #' @param M_bounds A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
 #' (\code{start$M}). The default min and max are 75\% and 125\%, respectively.
@@ -15,6 +15,9 @@
 #' 
 #' The starting value for the first year M (start$M) is \code{Data@@Mort[x]} and is fixed, unless a prior is provided (\code{prior$M}). 
 #' The fixed SD of the random walk (\code{tau_M}) is 0.05, by default. 
+#' 
+#' Steepness and unfished recruitment in the estimation model, along with unfished reference points, correspond to spawners per recruit using the first year M. 
+#' With argument \code{refyear}, new unfished reference points and steepness values are calculated. See examples. 
 #' 
 #' Alternative values can be provided in the start list (see examples):
 #' \itemize{
@@ -42,7 +45,13 @@
 #' res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
 #' res2 <- SCA(Data = MSEtool::SimulatedData)
 #' res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.001))
-#'  
+#' 
+#' # Use mean M in most recent 5 years for reporting reference points 
+#' res_5r <- SCA_RWM(Data = MSEtool::SimulatedData, refyear = expression(seq(length(Data@Year) - 4, length(Data@Year))),
+#'                   start = list(M_start = 0.4, tau_M = 0.001))
+#' res_5r@SSB0 # SSB0 reported (see also res_5r@TMB_report$new_E0)
+#' res_5r@TMB_report$E0 # SSB0 of Year 1 M
+#' 
 #' \donttest{
 #' compare_models(res, res2, res3)
 #' }

@@ -1,7 +1,7 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
 ## SAMtool 1.2.5
-- `SCA_RWM` can accept multiple years to the `refyear` argument, i.e., `expression(1:Data@Year)`. The model will calculate reference points using the mean M during the specified years.
+- `SCA_RWM` can accept multiple years to the `refyear` argument, e.g., `expression(1:Data@Year)`. The model will calculate reference points (MSY, unfished values, and steepness) using the mean M during the specified years.
 
 ## SAMtool 1.2.4
 - Update `Shortcut` indexing to align year of assessment with projection. An MP using the `Perfect` assessment and `HCR_MSY` annually will produce F = FMSY in the OM.

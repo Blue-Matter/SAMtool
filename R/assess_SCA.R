@@ -661,6 +661,18 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     report$EMSY <- ref_pt$EMSY
     report$refyear <- refyear
     
+    if(!all(refyear == 1)) { # New reference points based on change in M
+      report$new_B0 <- Assessment@B0 <- ref_pt$new_B0
+      report$new_E0 <- Assessment@SSB0 <- ref_pt$new_E0
+      report$new_VB0 <- Assessment@VB0 <- ref_pt$new_VB0
+      report$new_R0 <- Assessment@R0 <- ref_pt$new_R0
+      report$new_h <- Assessment@h <- ref_pt$new_h
+      
+      Assessment@B_B0 <- Assessment@B/Assessment@B0
+      Assessment@SSB_SSB0 <- Assessment@SSB/Assessment@SSB0
+      Assessment@VB_VB0 <- Assessment@VB/Assessment@VB0
+    }
+    
     if(catch_eq == "Baranov") {
       Assessment@FMSY <- report$FMSY
       Assessment@F_FMSY <- structure(report$F/Assessment@FMSY, names = Year)
@@ -748,12 +760,24 @@ ref_pt_SCA <- function(y = 1, obj, report) {
   EPR <- vapply(yield, getElement, numeric(1), "EPR")
   YPR <- vapply(yield, getElement, numeric(1), "YPR")
   
+  new_B0 <- yield[[1]]["B"] # New due to change in M
+  new_E0 <- yield[[1]]["E"]
+  new_VB0 <- yield[[1]]["VB"]
+  new_R0 <- yield[[1]]["R"]
+  if(SR == "BH") {
+    new_h <- Arec * EPR[1]/ (4 + Arec * EPR[1])
+  } else {
+    new_h <- 0.2 * (Arec * EPR[1])^0.8
+  }
+  
   if(catch_eq == "Baranov") {
     return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                per_recruit = data.frame(FM = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR_par))
+                per_recruit = data.frame(FM = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR_par,
+                new_B0 = new_B0, new_E0 = new_B0, new_VB0 = new_VB0, new_R0 = new_R0, new_h = new_h))
   } else {
     return(list(UMSY = UMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                per_recruit = data.frame(U = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR_par))
+                per_recruit = data.frame(U = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR_par,
+                new_B0 = new_B0, new_E0 = new_B0, new_VB0 = new_VB0, new_R0 = new_R0, new_h = new_h))
   }
   
 }
