@@ -122,7 +122,7 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
           if(diagnostic != "none") Rec@Misc$diagnostic <- Assess_diag_output$diagnostic
           if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
           
-          Rec@Misc$interim <- list(next_assess_yr = next_assess_yr)
+          Rec@Misc$interim <- list(Cref = NA_real_, Iref = NA_real_, next_assess_yr = next_assess_yr)
           return(Rec)
           
         } else { # There should be a previous assessment to continue the interim procedure for the current year
