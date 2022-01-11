@@ -47,7 +47,8 @@
 #' res3 <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.001))
 #' 
 #' # Use mean M in most recent 5 years for reporting reference points 
-#' res_5r <- SCA_RWM(Data = MSEtool::SimulatedData, refyear = expression(seq(length(Data@Year) - 4, length(Data@Year))),
+#' res_5r <- SCA_RWM(Data = MSEtool::SimulatedData, 
+#'                   refyear = expression(seq(length(Data@Year) - 4, length(Data@Year))),
 #'                   start = list(M_start = 0.4, tau_M = 0.001))
 #' res_5r@SSB0 # SSB0 reported (see also res_5r@TMB_report$new_E0)
 #' res_5r@TMB_report$E0 # SSB0 of Year 1 M
