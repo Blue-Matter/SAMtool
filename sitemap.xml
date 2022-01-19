@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://SAMtool.openMSE.com/404.html</loc>
+  </url>
+  <url>
+    <loc>https://SAMtool.openMSE.com/articles/SAMtool.html</loc>
+  </url>
+  <url>
+    <loc>https://SAMtool.openMSE.com/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>https://SAMtool.openMSE.com/authors.html</loc>
+  </url>
+  <url>
     <loc>https://SAMtool.openMSE.com/index.html</loc>
+  </url>
+  <url>
+    <loc>https://SAMtool.openMSE.com/news/index.html</loc>
   </url>
   <url>
     <loc>https://SAMtool.openMSE.com/reference/Assessment-class.html</loc>
@@ -91,6 +106,9 @@
     <loc>https://SAMtool.openMSE.com/reference/getinds.html</loc>
   </url>
   <url>
+    <loc>https://SAMtool.openMSE.com/reference/index.html</loc>
+  </url>
+  <url>
     <loc>https://SAMtool.openMSE.com/reference/mahplot.html</loc>
   </url>
   <url>
@@ -167,8 +185,5 @@
   </url>
   <url>
     <loc>https://SAMtool.openMSE.com/reference/userguide.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/SAMtool.html</loc>
   </url>
 </urlset>
