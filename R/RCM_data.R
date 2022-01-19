@@ -370,6 +370,10 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       if(nrow(RCMdata@CAA_ESS) != RCMdata@Misc$nyears) stop("Number of rows of CAA_ESS matrix does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
       if(ncol(RCMdata@CAA_ESS) != RCMdata@Misc$nfleet) stop("Number of columns of CAA_ESS matrix does not equal nfleet (", RCMdata@Misc$nfleet, "). NAs are acceptable.", call. = FALSE)
     } else stop("CAA_ESS is neither a vector nor a matrix.", call. = FALSE)
+    
+    # Check if CAA_ESS > 0 if there are no data
+    RCMdata@CAA_ESS[apply(RCMdata@CAA, c(1, 3), sum, na.rm = TRUE) == 0] <- 0
+    
   } else {
     RCMdata@CAA <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, RCMdata@Misc$nfleet))
     RCMdata@CAA_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)
@@ -407,6 +411,9 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       if(nrow(RCMdata@CAL_ESS) != RCMdata@Misc$nyears) stop("Number of rows of CAL_ESS matrix does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
       if(ncol(RCMdata@CAL_ESS) != RCMdata@Misc$nfleet) stop("Number of columns of CAL_ESS matrix does not equal nfleet (", RCMdata@Misc$nfleet, "). NAs are acceptable.", call. = FALSE)
     } else stop("CAL_ESS is neither a vector nor a matrix.", call. = FALSE)
+    
+    # Check if CAL_ESS > 0 if there are no data
+    RCMdata@CAL_ESS[apply(RCMdata@CAL, c(1, 3), sum, na.rm = TRUE) == 0] <- 0
   } else {
     RCMdata@CAL_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)
   }
@@ -498,6 +505,9 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       if(nrow(RCMdata@IAA_ESS) != RCMdata@Misc$nyears) stop("Number of rows of IAA_ESS matrix does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
       if(ncol(RCMdata@IAA_ESS) != RCMdata@Misc$nsurvey) stop("Number of columns of IAA_ESS matrix does not equal nsurvey (", RCMdata@Misc$nsurvey, "). NAs are acceptable.", call. = FALSE)
     } else stop("IAA_ESS is neither a vector nor a matrix.", call. = FALSE)
+    
+    # Check if IAA_ESS > 0 if there are no data
+    RCMdata@IAA_ESS[apply(RCMdata@IAA, c(1, 3), sum, na.rm = TRUE) == 0] <- 0
   } else {
     RCMdata@IAA <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, ncol(RCMdata@Index)))
     RCMdata@IAA_ESS <- array(0, dim(RCMdata@Index))
@@ -525,6 +535,8 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       if(ncol(RCMdata@IAL_ESS) != RCMdata@Misc$nsurvey) stop("Number of columns of IAL_ESS matrix does not equal nfleet (", RCMdata@Misc$nsurvey, "). NAs are acceptable.", call. = FALSE)
     } else stop("IAL_ESS is neither a vector nor a matrix.", call. = FALSE)
     
+    # Check if IAL_ESS > 0 if there are no data
+    RCMdata@IAL_ESS[apply(RCMdata@IAL, c(1, 3), sum, na.rm = TRUE) == 0] <- 0
   } else {
     RCMdata@IAL_ESS <- array(0, dim(RCMdata@Index))
   }
