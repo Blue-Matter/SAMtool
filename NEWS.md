@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.2.6
+- `RCM2MOM` converts the output of `RCM` to a multi-fleet operating model.
+
 ## SAMtool 1.2.5
 - `SCA_RWM` can accept multiple years to the `refyear` argument, e.g., `expression(1:Data@Year)`. The model will calculate reference points (MSY, unfished values, and steepness) using the mean M during the specified years.
 - Fix bug in interim MPs to return `NA` in `Rec@TAC` when multiple assessments do not converge.

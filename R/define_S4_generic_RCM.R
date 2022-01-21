@@ -206,8 +206,11 @@
 #'   
 #' compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 maturity")),
 #'             s_name = colnames(pcod$data@Index))
+#'              
+#' Hist <- runMSE(out@OM, Hist = TRUE)            
 #' } 
-#' @seealso \link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod}
+#' 
+#' @seealso \link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM}
 #' @importFrom dplyr %>%
 #' @export
 setGeneric("RCM", function(OM, data, ...) standardGeneric("RCM"))
