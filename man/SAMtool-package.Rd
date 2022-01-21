@@ -14,7 +14,8 @@ assessments within closed-loop simulation, and helper functions for building mor
 
 The main features of SAMtool are the assessment models and the ability to make model-based management procedures by combining
 assessment models with harvest control rules. Such MPs can be used and tested in management strategy evaluation
-with MSEtool operating models. An overview of these features is available in the \href{../doc/SAMtool.html}{SAMtool vignette}.
+with MSEtool operating models. An overview of these features is available 
+on the \href{https://openmse.com/features-assessment-models/}{openMSE} website.
 
 The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. 
 
