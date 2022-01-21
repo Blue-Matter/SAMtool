@@ -29,9 +29,6 @@ check_RCMdata evaluates whether the inputs in the S4 RCMdata object are correctl
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
-  <a href="../articles/SAMtool.html">Get started</a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li>
@@ -307,7 +304,7 @@ a single model fit. By default FALSE. This feature requires identical biological
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><a href="plot.RCModel.html">plot.RCModel</a> <a href="RCModel-class.html">RCModel</a> <a href="plot.RCModel.html">compare_RCM</a> <a href="pcod.html">pcod</a></p></div>
+    <div class="dont-index"><p><a href="plot.RCModel.html">plot.RCModel</a> <a href="RCModel-class.html">RCModel</a> <a href="plot.RCModel.html">compare_RCM</a> <a href="pcod.html">pcod</a> <a href="RCM2MOM.html">RCM2MOM</a></p></div>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -364,9 +361,9 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Registered S3 method overwritten by 'prodlim':</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   method    from   </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   plot.Hist MSEtool</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpHsn8hu/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpBYOLZa/RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpHsn8hu/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpBYOLZa/RCM.html</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span>
 <span class="r-in"><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span>
@@ -412,10 +409,69 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-in">  </span>
 <span class="r-in"><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span class="r-in">            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpHsn8hu/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpBYOLZa/compare_RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpHsn8hu/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpBYOLZa/compare_RCM.html</span>
+<span class="r-in">             </span>
+<span class="r-in"><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Loading operating model </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Valid custom parameters found: M h V Mat_age R0 D Find qs Perr Perr_y </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">AC Len_age Linf K t0 LenCV LatASD Wt_age M_ageArray AddIbeta Data </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Note: Maximum age (10) is lower than assuming 1% of cohort survives to </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">maximum age (24) </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Optimizing for user-specified movement </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating MSY reference points for each year </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Skipping optimization for depletion - using catchability (q) from </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">OM@cpars. </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating historical stock and fishing dynamics </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating per-recruit reference points </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating B-low reference points </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating reference yield - best fixed F strategy </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Simulating observed data </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Simulated Data with Real Data from `OM@cpars$Data` </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Using `OM@cpars$Data@LenCV` (0.1) </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Simulated Catch from `OM@cpars$Data@Cat` </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Catch bias from `OM@cpars$Data@Cat` </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Catch variability from `OM@cpars$Data@Cat` </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating catch observation error from `OM@cpars$Data@Cat` </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Adding Additional Indices to Simulated Data from `OM@cpars$Data@AddInd` </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">cpars$AddIbeta detected. Not updating beta for additional indices </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating observation variability (AddIerr) for additional indices from </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">real data </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 1 - spawning stock (biomass) </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 2 - spawning stock (biomass) </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 3 - spawning stock (biomass) </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 4 - spawning stock (biomass) </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 5 - spawning stock (biomass) </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Returning historical simulations </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span class="co"># } </span></span>
+<span class="r-in"></span>
 </code></pre></div>
     </div>
   </div>

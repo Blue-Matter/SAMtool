@@ -4,12 +4,6 @@
     <loc>https://SAMtool.openMSE.com/404.html</loc>
   </url>
   <url>
-    <loc>https://SAMtool.openMSE.com/articles/SAMtool.html</loc>
-  </url>
-  <url>
-    <loc>https://SAMtool.openMSE.com/articles/index.html</loc>
-  </url>
-  <url>
     <loc>https://SAMtool.openMSE.com/authors.html</loc>
   </url>
   <url>
@@ -53,6 +47,9 @@
   </url>
   <url>
     <loc>https://SAMtool.openMSE.com/reference/RCM.html</loc>
+  </url>
+  <url>
+    <loc>https://SAMtool.openMSE.com/reference/RCM2MOM.html</loc>
   </url>
   <url>
     <loc>https://SAMtool.openMSE.com/reference/RCMdata-class.html</loc>
