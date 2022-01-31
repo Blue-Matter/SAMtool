@@ -229,7 +229,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   
   F_SPR <- Data@Misc$ReferencePoints$ByYear$F_SPR[x, , n_y + 1] %>% rev()
   SPR <- F_SPR %>% names() %>% substr(3,4) %>% as.numeric()
-  SPR <- rev(SPR/100)
+  SPR <- SPR/100
   if(all(F_SPR != 0)) {
     F_SPR <- c(0, F_SPR) 
     SPR <- c(1, SPR)
