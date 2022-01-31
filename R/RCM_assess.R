@@ -27,9 +27,6 @@ RCM_assess <- function(x = 1, Data,
   RCMdata@Misc$lbinmid <- lbin <- Data@CAL_mids
   RCMdata@Misc$nlbin <- nlbin <- length(lbin)
   
-  scalls <- lapply(sys.calls(), as.character) %>% unlist()
-  inside_MSE <- length(grep("runMSE_int", scalls)) > 0
-  
   RCMdata@Chist <- matrix(Data@Cat[x, ], nyears, nfleet)
   RCMdata@C_sd <- array(0.1, dim(RCMdata@Chist))
   
@@ -39,7 +36,7 @@ RCM_assess <- function(x = 1, Data,
   RCMdata@CAA_ESS <- array(CAA_ESS, dim(RCMdata@CAA)[c(1, 3)])
   
   selectivity <- match.arg(selectivity)
-  sel <- SAMtool:::int_sel(selectivity)
+  sel <- int_sel(selectivity)
   
   # No length comps or mean size
   RCMdata@CAL <- array(0, c(nyears, nlbin, nfleet))
@@ -49,9 +46,9 @@ RCM_assess <- function(x = 1, Data,
   
   # Only one survey for now
   AddInd <- "B"
-  s_sel <- SAMtool:::int_s_sel(AddInd)
+  s_sel <- int_s_sel(AddInd)
   RCMdata@Misc$nsurvey <- nsurvey <- length(s_sel)
-  Index <- SAMtool:::Assess_I_hist(AddInd, Data, x, 1:nyears)
+  Index <- Assess_I_hist(AddInd, Data, x, 1:nyears)
   RCMdata@Index <- matrix(Index$I_hist, nyears, nsurvey)
   RCMdata@I_sd <- matrix(Index$I_sd, nyears, nsurvey)
   RCMdata@I_units <- Index$I_units
@@ -69,13 +66,12 @@ RCM_assess <- function(x = 1, Data,
   RCMdata@abs_I <- rep(0, nsurvey)
   RCMdata@age_error <- diag(n_age)
   
-  LWT <- SAMtool:::make_LWT(list(), nfleet, nsurvey)
-  prior <- SAMtool:::make_prior(list(), nsurvey, msg = FALSE)
+  LWT <- make_LWT(list(), nfleet, nsurvey)
+  prior <- make_prior(list(), nsurvey, msg = FALSE)
   
-  RCM_out <- SAMtool:::RCM_est(x = x, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel, LWT = LWT,
-                               comp_like = "multinomial", prior = prior,
-                               StockPars = Data@Misc$StockPars, ObsPars = list(Isd = SimulatedData@Obs$Isd),
-                               FleetPars = Data@Misc$FleetPars, mean_fit = FALSE)
+  RCM_out <- RCM_est(x = x, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel, LWT = LWT,
+                     comp_like = "multinomial", prior = prior, StockPars = Data@Misc$StockPars, ObsPars = list(Isd = Data@Obs$Isd),
+                     FleetPars = Data@Misc$FleetPars, mean_fit = FALSE)
   obj <- RCM_out$obj
   opt <- RCM_out$opt
   SD <- RCM_out$SD
@@ -111,10 +107,10 @@ RCM_assess <- function(x = 1, Data,
       Brec <- report$Brec
       
       # Optimize for MSY
-      opt2 <- optimize(SAMtool:::yield_fn_SCA, interval = c(1e-4, 4), M = M, mat = mat, weight = weight, vul = vul, 
+      opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 4), M = M, mat = mat, weight = weight, vul = vul, 
                        SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, tv_M = tv_M)
-      opt3 <- SAMtool:::yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                                     Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, tv_M = tv_M)
+      opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+                           Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, tv_M = tv_M)
       FMSY <- opt2$minimum
       MSY <- -1 * opt2$objective
       VBMSY <- opt3["VB"]
@@ -125,7 +121,7 @@ RCM_assess <- function(x = 1, Data,
       Fvec <- seq(0, 2.5 * FMSY, length.out = 100)
       
       # Yield curve
-      yield <- lapply(Fvec, SAMtool:::yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
+      yield <- lapply(Fvec, yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
                       Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, tv_M = tv_M)
       EPR <- vapply(yield, getElement, numeric(1), "EPR")
       YPR <- vapply(yield, getElement, numeric(1), "YPR")
@@ -179,11 +175,11 @@ RCM_assess <- function(x = 1, Data,
     Assessment@TMB_report <- report
     
     catch_eq_fn <- function(Ftarget) {
-      SAMtool:::catch_equation(method = "Baranov", Ftarget = Ftarget, 
-                               M = obj$env$data$M_data[nyears, ],
-                               wt = obj$env$data$wt[nyears, ],
-                               N = report$N[nyears + 1, ],
-                               sel = report$F_at_age[nyears, ]/max(report$F_at_age[nyears, ]))
+      catch_equation(method = "Baranov", Ftarget = Ftarget, 
+                     M = obj$env$data$M_data[nyears, ],
+                     wt = obj$env$data$wt[nyears, ],
+                     N = report$N[nyears + 1, ],
+                     sel = report$F_at_age[nyears, ]/max(report$F_at_age[nyears, ]))
     }
     Assessment@forecast <- list(per_recruit = ref_pt[[refyear]][["per_recruit"]], catch_eq = catch_eq_fn)
   }
