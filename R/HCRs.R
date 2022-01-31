@@ -265,6 +265,7 @@ HCR40_10 <- function(Assessment, reps = 1, Ftarget_type = "FMSY", SPR_targ = 0.4
 class(HCR40_10) <- "HCR"
 
 
+
 #' @describeIn HCR_ramp More conservative than \code{HCR40_10}, with LOCP and TOCP of 0.2 and 0.6
 #' spawning depletion, respectively).
 #' @export
@@ -358,6 +359,36 @@ HCR_escapement <- function(Assessment, reps = 1, OCP_type = "SSB_SSB0", OCP_thre
               Ftarget_type = Ftarget_type, relF = c(0, relF_max), ...)
 }
 class(HCR_escapement) <- "HCR"
+
+#' Simple fixed F harvest control rule
+#'
+#' A simple control rule that explicitly specifies the target apical F independent of any model.
+#'
+#' @param Assessment An object of class \linkS4class{Assessment} with estimates of next year's abundance or biomass.
+#' @param reps The number of replicates of the TAC recommendation (not used).
+#' @param Ftarget The value of F.
+#' @return An object of class \linkS4class{Rec} with the TAC recommendation.
+#' @author Q. Huynh
+#' @seealso \link{make_MP} \link{HCR_ramp}
+#' @examples
+#' # create an MP to run in closed-loop MSE (fishes at F = 0.2)
+#' F0.2 <- make_MP(SP, HCR_fixedF, Ftarget = 0.2)
+#' 
+#' \donttest{
+#' myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "F0.2"))
+#' }
+#' @export
+HCR_fixedF <- function(Assessment, reps = 1, Ftarget = 0.1) {
+  if(Assessment@conv) {
+    TAC <- calculate_TAC(Assessment, Ftarget = Ftarget)
+  } else {
+    TAC <- NA_real_
+  }
+  Rec <- new("Rec")
+  Rec@TAC <- rep(TAC, reps)
+  return(Rec)
+}
+class(HCR_fixedF) <- "HCR"
 
 #' Generic linear harvest control rule based on biomass
 #'
