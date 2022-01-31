@@ -132,7 +132,7 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
         } 
       } else if(Ftarget_type == "F01") {
         if(!is.null(Assessment@forecast$per_recruit$F01)) {
-          Fout <- Assessment@forecast$per_recruit$F01
+          Fout <- alpha * Assessment@forecast$per_recruit$F01[1]
         } else if(!is.null(Assessment@forecast$per_recruit$U)) {
           U01 <- get_F01(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
           Fout <- -log(1 - alpha * U01)
@@ -141,7 +141,7 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
         }
       } else if(Ftarget_type == "Fmax") {
         if(!is.null(Assessment@forecast$per_recruit$Fmax)) {
-          Fout <- Assessment@forecast$per_recruit$Fmax
+          Fout <- alpha * Assessment@forecast$per_recruit$Fmax[1]
         } else if(!is.null(Assessment@forecast$per_recruit$U)) {
           Umax <- get_Fmax(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
           Fout <- -log(1 - alpha * Umax)
