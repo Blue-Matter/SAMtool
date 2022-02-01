@@ -91,13 +91,12 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
     if(run_assessment) {
       do_Assessment <- .(Assess_call)
       
-      if(diagnostic != "none") {
-        Assess_diag_output <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
-      }
-      
       if(do_Assessment@conv) { # Assessment converged. Run the HCR and report parameters for future interim procedure
         Rec <- .(HCR_call)
-        if(diagnostic != "none") Rec@Misc$diagnostic <- Assess_diag_output$diagnostic
+        
+        if(diagnostic != "none") {
+          Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
+        }
         if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
         
         Rec@Misc$interim <- list(Cref = Rec@TAC, # A vector of nsim reps
@@ -119,20 +118,22 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
           Rec <- new("Rec")
           Rec@TAC <- rep(NA_real_, reps)
           
-          if(diagnostic != "none") Rec@Misc$diagnostic <- Assess_diag_output$diagnostic
+          if(diagnostic != "none") {
+            Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
+          }
           if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
           
           Rec@Misc$interim <- list(Cref = NA_real_, Iref = NA_real_, next_assess_yr = next_assess_yr, s = 0)
-          
           return(Rec)
           
         } else { # There should be a previous assessment to continue the interim procedure for the current year
           run_interim <- TRUE
         }
       }
+      
     }
     
-    if(!run_assessment || run_interim) {
+    if(run_interim) {
       Cref <- Data@Misc[[x]]$interim$Cref
       Iref <- Data@Misc[[x]]$interim$Iref
       I_y <- switch(type,
@@ -166,9 +167,12 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
       if(is.null(TAC)) TAC <- NA_real_
       Rec@TAC <- TAC
       
-      Rec@Misc <- Data@Misc[[x]]
       if(exists("next_assess_yr", inherits = FALSE)) Rec@Misc$interim$next_assess_yr <- next_assess_yr
-      if(exists("Assess_diag_output", inherits = FALSE)) Rec@Misc$diagnostic <- Assess_diag_output$diagnostic
+      if(exists("do_Assessment", inherits = FALSE) && diagnostic != "none") { # If we have an assessment
+        Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
+        if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
+      }
+      Rec@Misc <- c(Rec@Misc, Data@Misc[[x]][setdiff(names(Data@Misc[[x]]), names(Rec@Misc))]) # Only add items that are missing from Rec@Misc
     }
     return(Rec)
   })
