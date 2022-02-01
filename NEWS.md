@@ -3,7 +3,10 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 ## SAMtool 1.2.6
 - `RCM2MOM` converts the output of `RCM` to a multi-fleet operating model.
 - Vignette is now hosted [online](https://openmse.com/features-assessment-models/).
-- Add NULL catch for catch advice from `interim_MP`.
+- `interim_MP` updates include adding NULL catch for catch advice and adding missing feature to report assessment output when `diagnostic = 'full'`.
+- Fix FSPR reporting `Shortcut` and `Perfect` assessment functions.
+- Fix F calculation in `HCR_segment` with yield per recruit (F01 and Fmax).
+- Added a beta version of `RCM_assess` for using the RCM model as an assessment in closed-loop projections. More arguments will be added in the future for flexibility with model configuration.
 
 ## SAMtool 1.2.5
 - `SCA_RWM` can accept multiple years to the `refyear` argument, e.g., `expression(1:Data@Year)`. The model will calculate reference points (MSY, unfished values, and steepness) using the mean M during the specified years.
