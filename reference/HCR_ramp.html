@@ -67,7 +67,7 @@ Class HCR objects are typically used with function <a href="make_MP.html">make_M
   <span class="va">Assessment</span>,
   reps <span class="op">=</span> <span class="fl">1</span>,
   OCP_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SSB_SSB0"</span>, <span class="st">"SSB_SSBMSY"</span>, <span class="st">"SSB_dSSB0"</span>, <span class="st">"F_FMSY"</span>, <span class="st">"F_F01"</span>, <span class="st">"F_FSPR"</span><span class="op">)</span>,
-  Ftarget_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FMSY"</span>, <span class="st">"F01"</span>, <span class="st">"Fmax"</span>, <span class="st">"FSPR"</span><span class="op">)</span>,
+  Ftarget_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FMSY"</span>, <span class="st">"F01"</span>, <span class="st">"Fmax"</span>, <span class="st">"FSPR"</span>, <span class="st">"abs"</span><span class="op">)</span>,
   LOCP <span class="op">=</span> <span class="fl">0.1</span>,
   TOCP <span class="op">=</span> <span class="fl">0.4</span>,
   relF_min <span class="op">=</span> <span class="fl">0</span>,
@@ -139,6 +139,7 @@ in the <a href="Assessment-class.html">Assessment</a> object is specified:</p>
 <code>Asesssment@forecast[["per_recruit"]]</code>.</p></li>
 <li><p><code>"FSPR"</code>: Fishing mortality relative to F_SPR<!-- % (the F that produces the spawning potential ratio specified in -->
 <code>"SPR_targ"</code>, calculated from data frame in <code>Asesssment@forecast[["per_recruit"]]</code>.</p></li>
+<li><p><code>"abs"</code>: Fishing mortality is independent of any model output and is explicitly specified in <code>relF</code>.</p></li>
 </ul></div>
     <div id="functions">
     <h2>Functions</h2>
@@ -205,6 +206,12 @@ management: specification and performance. ICES Journal of Marine Science 56:846
 <span class="r-in">    ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.8</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"red"</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span class="r-plt img"><img src="HCR_ramp-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># A harvest control rule as a function of BMSY, with F independent of model output, </span></span>
+<span class="r-in"><span class="co"># i.e., specify F in relF argument (here maximum F of 0.1)</span></span>
+<span class="r-in"><span class="va">SCA_80_40</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SCA</span>, <span class="va">HCR_ramp</span>, OCP_type <span class="op">=</span> <span class="st">"SSB_SSBMSY"</span>, LOCP <span class="op">=</span> <span class="fl">0.4</span>, TOCP <span class="op">=</span> <span class="fl">0.8</span>, </span>
+<span class="r-in">                     relF_min <span class="op">=</span> <span class="fl">0</span>, relF_max <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span class="r-in"></span>
 </code></pre></div>
     </div>
   </div>
