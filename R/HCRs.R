@@ -50,14 +50,18 @@
 #' \code{Asesssment@@forecast[["per_recruit"]]}.
 #' \item \code{"FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
 #' \code{"SPR_targ"}, calculated from data frame in \code{Asesssment@@forecast[["per_recruit"]]}.
+#' \item \code{"abs"}: Fishing mortality is independent of any model output and is explicitly specified in \code{relF}.
 #' }
 #' 
 #' @examples 
-#' # This is an MP with a 40-10 harvest control rule
+#' # This is an MP with a 40-10 harvest control rule (using FMSY)
 #' DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", OCP = c(0.1, 0.4), relF = c(0, 1)) 
+#' #' 
+#' # This is an MP with a 40-10 harvest control rule with a maximum F of 0.1
+#' DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", Ftarget_type = "abs", OCP = c(0.1, 0.4), relF = c(0, 0.1)) 
 #' @export
 HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "SSB_dSSB0", "F_FMSY", "F_F01", "F_FSPR"),
-                        Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"), 
+                        Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR", "abs"), 
                         OCP = c(0.1, 0.4), relF = c(0, 1), SPR_OCP, SPR_targ, ...) {
   dots <- list(...)
   OCP_type <- match.arg(OCP_type)
@@ -161,6 +165,8 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
           Fout <- alpha * get_FSPR(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$SPR,
                                    target = SPR_targ)
         }
+      } else if(Ftarget_type == "abs") {
+        Fout <- alpha
       }
       
       if(exists("Fout", inherits = FALSE) && !is.na(Fout)) {
@@ -245,9 +251,15 @@ class(HCR_segment) <- "HCR"
 #'     ylab = expression(F[target]~":"~~F/F[MSY]), 
 #'     ylim = c(0, 1), type = "l")
 #' abline(v = c(0.4, 0.8), col = "red", lty = 2)
+#' 
+#' # A harvest control rule as a function of BMSY, with F independent of model output, 
+#' # i.e., specify F in relF argument (here maximum F of 0.1)
+#' SCA_80_40 <- make_MP(SCA, HCR_ramp, OCP_type = "SSB_SSBMSY", LOCP = 0.4, TOCP = 0.8, 
+#'                      relF_min = 0, relF_max = 0.1)
+#'
 #' @export
 HCR_ramp <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "SSB_dSSB0", "F_FMSY", "F_F01", "F_FSPR"),
-                     Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"), 
+                     Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR", "abs"), 
                      LOCP = 0.1, TOCP = 0.4, relF_min = 0, relF_max = 1, SPR_OCP = 0.4, SPR_targ = 0.4, ...) {
   HCR_segment(Assessment = Assessment, reps = reps, OCP_type = OCP_type, Ftarget_type = Ftarget_type,
               OCP = c(LOCP, TOCP), relF = c(relF_min, relF_max), SPR_OCP = SPR_OCP, SPR_targ = SPR_targ, ...)

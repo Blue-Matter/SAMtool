@@ -7,6 +7,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Fix FSPR reporting `Shortcut` and `Perfect` assessment functions.
 - Fix F calculation in `HCR_segment` with yield per recruit (F01 and Fmax).
 - Added a beta version of `RCM_assess` for using the RCM model as an assessment in closed-loop projections. More arguments will be added in the future for flexibility with model configuration.
+- Specify output F in terms of absolute magnitude (independent of model output) in `HCR_segment` and `HCR_ramp`.
 
 ## SAMtool 1.2.5
 - `SCA_RWM` can accept multiple years to the `refyear` argument, e.g., `expression(1:Data@Year)`. The model will calculate reference points (MSY, unfished values, and steepness) using the mean M during the specified years.

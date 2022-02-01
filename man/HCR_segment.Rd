@@ -8,7 +8,7 @@ HCR_segment(
   Assessment,
   reps = 1,
   OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "SSB_dSSB0", "F_FMSY", "F_F01", "F_FSPR"),
-  Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"),
+  Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR", "abs"),
   OCP = c(0.1, 0.4),
   relF = c(0, 1),
   SPR_OCP,
@@ -77,11 +77,15 @@ in the \linkS4class{Assessment} object is specified:
 \code{Asesssment@forecast[["per_recruit"]]}.
 \item \code{"FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
 \code{"SPR_targ"}, calculated from data frame in \code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"abs"}: Fishing mortality is independent of any model output and is explicitly specified in \code{relF}.
 }
 }
 \examples{
-# This is an MP with a 40-10 harvest control rule
+# This is an MP with a 40-10 harvest control rule (using FMSY)
 DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", OCP = c(0.1, 0.4), relF = c(0, 1)) 
+#' 
+# This is an MP with a 40-10 harvest control rule with a maximum F of 0.1
+DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", Ftarget_type = "abs", OCP = c(0.1, 0.4), relF = c(0, 0.1)) 
 }
 \author{
 Q. Huynh

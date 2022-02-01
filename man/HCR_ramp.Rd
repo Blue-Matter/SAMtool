@@ -11,7 +11,7 @@ HCR_ramp(
   Assessment,
   reps = 1,
   OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "SSB_dSSB0", "F_FMSY", "F_F01", "F_FSPR"),
-  Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR"),
+  Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR", "abs"),
   LOCP = 0.1,
   TOCP = 0.4,
   relF_min = 0,
@@ -94,6 +94,7 @@ in the \linkS4class{Assessment} object is specified:
 \code{Asesssment@forecast[["per_recruit"]]}.
 \item \code{"FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
 \code{"SPR_targ"}, calculated from data frame in \code{Asesssment@forecast[["per_recruit"]]}.
+\item \code{"abs"}: Fishing mortality is independent of any model output and is explicitly specified in \code{relF}.
 }
 }
 \section{Functions}{
@@ -141,6 +142,12 @@ plot(Brel, Frel,
     ylab = expression(F[target]~":"~~F/F[MSY]), 
     ylim = c(0, 1), type = "l")
 abline(v = c(0.4, 0.8), col = "red", lty = 2)
+
+# A harvest control rule as a function of BMSY, with F independent of model output, 
+# i.e., specify F in relF argument (here maximum F of 0.1)
+SCA_80_40 <- make_MP(SCA, HCR_ramp, OCP_type = "SSB_SSBMSY", LOCP = 0.4, TOCP = 0.8, 
+                     relF_min = 0, relF_max = 0.1)
+
 }
 \references{
 Deroba, J.J. and Bence, J.R. 2008. A review of harvest policies: Understanding relative
