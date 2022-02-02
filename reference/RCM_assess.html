@@ -78,12 +78,10 @@ parameters in <code>Data@Misc$StockPars</code>.</p>
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"> </span>
 <span class="r-in"><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu">RCM_assess</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">SimulatedData</span><span class="op">)</span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Expected scalar. Got length=0</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in MakeADFun(data = TMB_data, parameters = TMB_params, map = map,     random = random, inner.control = inner.control, DLL = "SAMtool",     silent = TRUE):</span> Error when reading the variable: 'R0x'. Please check data and parameters.</span>
 <span class="r-in"><span class="va">myMP</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">RCM_assess</span>, <span class="va">HCR_MSY</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">myMP</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span>, Data <span class="op">=</span> <span class="va">SimulatedData</span><span class="op">)</span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Expected scalar. Got length=0</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in MakeADFun(data = TMB_data, parameters = TMB_params, map = map,     random = random, inner.control = inner.control, DLL = "SAMtool",     silent = TRUE):</span> Error when reading the variable: 'R0x'. Please check data and parameters.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TAC (median) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     270.0785 </span>
 </code></pre></div>
     </div>
   </div>
