@@ -72,44 +72,45 @@ RCM_assess <- function(x = 1, Data,
   
   # Create StockPars from Data
   StockPars <- list()
+  
   Ages <- 0:Data@MaxAge
-  n_age <- length(Ages)
-  nsim <- length(Data@Mort)
-  Len_age <- sapply(1:nsim, function(x) Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x]))))
-  StockPars$Len_age <- array(t(Len_age), dim=c(nsim, n_age, nyears+1))
-  StockPars$LatASD <-  StockPars$Len_age * array(Data@LenCV, dim=dim(StockPars$Len_age))
-  StockPars$Linf <- Data@vbLinf
-  Wt_age <- vapply(1:nsim, function(x) Data@wla[x] * StockPars$Len_age[x,,]^Data@wlb[x],
-               array(0, dim=c(n_age, nyears+1)))
-  StockPars$Wt_age <- aperm(Wt_age, c(3,1,2))
-  StockPars$ageM <- sapply(1:nsim, function(x) min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x])))
-  StockPars$ageM <- matrix(StockPars$ageM, nrow=nsim, ncol=1)
-  Mat_age <- sapply(1:nsim, function(x) {
+  #n_age <- length(Ages)
+  #nsim <- length(Data@Mort)
+  
+  nsim <- 1
+  Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
+  StockPars$Len_age <- array(Len_age, dim = c(nsim, n_age, nyears+1))
+  StockPars$LatASD <-  StockPars$Len_age * Data@LenCV[x]
+  StockPars$Linf <- Data@vbLinf[x]
+  StockPars$Wt_age <-  Data@wla[x] * StockPars$Len_age ^ Data@wlb[x]
+  StockPars$ageM <- min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x])) %>% matrix(1, 1)
+  Mat_age <- local({
     A50 <- min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x]))
     A95 <- max(A50+0.5, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L95[x]))
-    mat_age <- c(0, 1/(1 + exp(-log(19) * (c(1:Data@MaxAge) - A50)/(A95 - A50)))) # Age-0 is immature
-    mat_age
+    c(0, 1/(1 + exp(-log(19) * (c(1:Data@MaxAge) - A50)/(A95 - A50)))) # Age-0 is immature
   })
-  Mat_age <- replicate(nyears+1, Mat_age)
-  StockPars$Mat_age <- aperm(Mat_age, c(2,1,3))
-  StockPars$SRrel <- rep(1, nsim)
-  StockPars$procsd <- Data@sigmaR
-  StockPars$R0 <- Data@Misc$R0
-  StockPars$hs <- Data@steep
+  StockPars$Mat_age <- array(Mat_age, dim = c(nsim, n_age, nyears+1))
+  StockPars$SRrel <- 1L # BH for now
+  StockPars$procsd <- Data@sigmaR[x]
   
-  StockPars$M_ageArray <- array(Data@Mort, dim=dim(StockPars$Mat_age))
+  if(!is.null(Data@Misc$R0)) {
+    StockPars$R0 <- Data@Misc$R0
+  } else {
+    StockPars$R0 <- 2 * mean(Data@Cat[x, ])
+  }
+  StockPars$hs <- Data@steep[x]
+  StockPars$M_ageArray <- array(Data@Mort[x], dim = c(nsim, n_age, nyears+1))
   Data@Misc$StockPars <- StockPars
   
   # Create FleetPars from Data
   FleetPars <- list()
-  FleetPars$LFS_y <- array(Data@LFS, dim=c(nsim, nyears+1))
-  FleetPars$L5_y <- array(Data@LFC, dim=c(nsim, nyears+1))
-  FleetPars$Vmaxlen_y <- array(Data@Vmaxlen, dim=c(nsim, nyears+1))
+  FleetPars$LFS_y <- array(Data@LFS[x], dim=c(1, nyears+1))
+  FleetPars$L5_y <- array(Data@LFC[x], dim=c(1, nyears+1))
+  FleetPars$Vmaxlen_y <- array(Data@Vmaxlen[x], dim=c(1, nyears+1))
   Data@Misc$FleetPars <- FleetPars
   
-  
-  RCM_out <- RCM_est(x = x, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel, LWT = LWT,
-                     comp_like = "multinomial", prior = prior, StockPars = Data@Misc$StockPars, ObsPars = list(Isd = Data@Obs$Isd),
+  RCM_out <- RCM_est(x = 1, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel, LWT = LWT,
+                     comp_like = "multinomial", prior = prior, StockPars = Data@Misc$StockPars, ObsPars = list(Isd = Data@Obs$Isd[x]),
                      FleetPars = Data@Misc$FleetPars, mean_fit = FALSE)
   obj <- RCM_out$obj
   opt <- RCM_out$opt
