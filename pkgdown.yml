@@ -2,7 +2,7 @@ pandoc: 2.7.3
 pkgdown: 2.0.2
 pkgdown_sha: ~
 articles: {}
-last_built: 2022-02-02T01:41Z
+last_built: 2022-02-15T07:25Z
 urls:
   reference: https://SAMtool.openMSE.com/reference
   article: https://SAMtool.openMSE.com/articles
