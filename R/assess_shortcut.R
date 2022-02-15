@@ -57,48 +57,53 @@
 #' @export
 Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7, 1), N_err = c(0.3, 0.7, 1), 
                      R_err = c(0.3, 0.7, 1), F_err = c(0.3, 0.7, 1), VAR_model, ...) {
-  OM_ind <- lapply(1:length(sys.calls()), function(xx) try(get("N_P", envir = sys.frames()[[xx]], inherits = FALSE), silent = TRUE)) %>%
-    vapply(function(xx) !is.character(xx), logical(1)) %>% which()
-  if(!length(OM_ind)) {
-    stop("No operating model was found.")
-    #return(new("Assessment", opt = "", SD = "", conv = FALSE))
-  }
   
   method <- match.arg(method)
+  .P <- Data@Misc$StockPars[c("N_P", "Biomass_P", "VBiomass_P", "SSB_P")]
+  
+  if(is.null(.P) || all(is.na(names(.P)))) {
+    .P <- NULL
+    OM_ind <- lapply(1:length(sys.calls()), function(xx) try(get("N_P", envir = sys.frames()[[xx]], inherits = FALSE), silent = TRUE)) %>%
+      vapply(function(xx) !is.character(xx), logical(1)) %>% which()
+    if(!length(OM_ind)) {
+      stop("No operating model was found.")
+      #return(new("Assessment", opt = "", SD = "", conv = FALSE))
+    }
+  }
   
   n_y <- length(Data@Year) # Should be year_p + n_hist - 1
   year_p <- max(Data@Year) - Data@LHYear + 1 # You are at the beginning of this year, have the abundance but not the mortality/catches
-  Hist <- Data@Misc[-c(1:nrow(Data@Cat))]
-  n_hist <- dim(Hist$StockPars$SSB)[3]
-  
+
   n_age <- Data@MaxAge + 1
+  
+  nsim <- nrow(Data@Cat)
+  Hist <- Data@Misc[-c(1:nsim)]
+  
+  n_hist <- dim(Hist$StockPars$SSB)[3]
   
   SSB_hist <- Hist$StockPars$SSB[x, , , ] %>% apply(2, sum)
   VB_hist <- Hist$StockPars$VBiomass[x, , , ] %>% apply(2, sum)
   B_hist <- Hist$StockPars$Biomass[x, , , ] %>% apply(2, sum)
-  
   N_hist <- Hist$StockPars$N[x, , , ] %>% apply(1:2, sum)
   
-  Fapical_hist <- Hist$StockPars$FM[x, , , ] %>% apply(2, max)
-  
-  SSB_P <- get("SSB_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
+  if(!is.null(.P)) {
+    SSB_P <- .P$SSB_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
+    VB_P <- .P$VBiomass_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
+    B_P <- .P$Biomass_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
+    N_P <- .P$N_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(1:2, sum)
+  } else if(exists("OM_ind", inherits = FALSE)) {
+    SSB_P <- get("SSB_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
+    VB_P <- get("VBiomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
+    B_P <- get("Biomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ] [, 1:year_p, , drop = FALSE] %>% apply(2, sum)
+    N_P <- get("N_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(1:2, sum)
+  }
   SSB <- c(SSB_hist, SSB_P)
-  
-  VB_P <- get("VBiomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
   VB <- c(VB_hist, VB_P)
-  
-  B_P <- get("Biomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ] [, 1:year_p, , drop = FALSE] %>% apply(2, sum)
   B <- c(B_hist, B_P)
-  
-  N_P <- get("N_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(1:2, sum)
   N <- cbind(N_hist, N_P)
   
-  if(year_p > 1) { # Need OM with equal areas
-    Fapical_P <- get("FM_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 2:year_p - 1, , drop = FALSE] %>% apply(2, max)
-    Fapical <- c(Fapical_hist, Fapical_P)
-  } else {
-    Fapical <- Fapical_hist
-  }
+  Fapical <- solve_F(t(N), t(Hist$StockPars$M_ageArray[x, , 1:n_y]), 
+                     plusgroup = unique(Hist$StockPars$plusgroup)) %>% apply(1, max)
   R <- N[1, ]
   
   if(!missing(VAR_model) && year_p > 1) {

@@ -406,3 +406,23 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
   }
   return(list(use_prior = use_prior, pr_matrix = pr_matrix))
 }
+
+
+solve_F <- function(N, M, plusgroup = TRUE) {
+  FM <- array(NA_real_, dim(M))
+  nyears <- nrow(M)
+  n_age <- ncol(M)
+  for(y in 1:nyears) {
+    for(a in 3:n_age - 2) FM[y, a] <- -log(N[y+1,a+1]/N[y,a]/exp(-M[y,a]))
+    if(plusgroup) {
+      FM[y,n_age] <- FM[y,n_age-1] <- -log(N[y+1,n_age]/(N[y,n_age] * exp(-M[y,n_age]) + 
+                                                           N[y,n_age-1] * exp(-M[y,n_age-1])))
+    } else {
+      FM[y,n_age] <- FM[y,n_age-1] <- -log(N[y+1,n_age]/N[y,n_age-1]/exp(-M[y,n_age-1]))
+    }
+  }
+  FM[is.na(FM) | FM < 0] <- 1e-8
+  return(FM)
+}
+
+
