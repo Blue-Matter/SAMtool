@@ -80,8 +80,13 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see RCM_prior fn)
   
   DATA_INTEGER(nll_gr);    // Whether to ADREPORT annual likelihoods
+  
+  DATA_IMATRIX(est_vul);  // Indicates if fishery selectivity parameters are estimated. Then, will add vague priors to aid convergence
+  DATA_IMATRIX(est_ivul); // Same but for index selectivity parameters
+  
   DATA_IVECTOR(est_early_rec_dev); // Indicates years in which log_early_rec_dev are estimated. Then, lognormal bias correction estimates are added..
   DATA_IVECTOR(est_rec_dev); // Indicates years in which log_rec_dev are estimated.
+  
 
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
@@ -123,7 +128,7 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> LFS(nsel_block);
   vector<Type> L5(nsel_block);
   vector<Type> Vmaxlen(nsel_block);
-  array<Type> vul = calc_vul(vul_par, vul_type, len_age, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, prior);
+  array<Type> vul = calc_vul(vul_par, vul_type, len_age, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, prior, est_vul);
 
   vector<Type> q_effort(nfleet);
   vector<Type> CV_msize(nfleet);
@@ -315,7 +320,7 @@ Type RCM(objective_function<Type> *obj) {
   IN.setZero();
   Itot.setZero();
 
-  array<Type> ivul = calc_ivul(ivul_par, ivul_type, len_age, iLFS, iL5, iVmaxlen, Linf, mat, vul, prior);
+  array<Type> ivul = calc_ivul(ivul_par, ivul_type, len_age, iLFS, iL5, iVmaxlen, Linf, mat, vul, prior, est_ivul);
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
