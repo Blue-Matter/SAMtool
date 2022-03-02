@@ -60,7 +60,7 @@ Type SP(objective_function<Type> *obj) {
   Type penalty = 0;
   Type prior = 0;
 
-  if(r_prior(0) > 0) prior -= dnorm_(r, r_prior(0), r_prior(1), true) + log_FMSY; // r prior with log-Jacobian transformation, exact with fixed n
+  if(r_prior(0) > 0) prior -= dnorm_(r, r_prior(0), r_prior(1), true) - log(r); // r prior with log-Jacobian transformation, exact with fixed n
 
   B(0) = dep * K;
   for(int y=0;y<ny;y++) {

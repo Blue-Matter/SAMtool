@@ -85,14 +85,16 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Le
       } else { // Dome
         Vmaxlen(b) = invlogit(vul_par(2,b));
         srs(b) = (Linf - LFS(b))/pow(-log2(Vmaxlen(b)), 0.5);
-
-        if(est_vul(2,b)) prior -= dbeta_(Vmaxlen(b), Type(1.01), Type(1.01), true) - log(Vmaxlen(b) - Vmaxlen(b) * Vmaxlen(b));
+        if(est_vul(2,b)) {
+          Type jac = Vmaxlen(b) - Vmaxlen(b) * Vmaxlen(b);
+          prior -= dbeta_(Vmaxlen(b), Type(1.01), Type(1.01), true) + log(jac);
+        }
       }
     } else if(vul_type(b) == -2) { // Free parameters - adding priors only
       for(int a=0;a<Len_age.cols();a++) {
         if(est_vul(a,b)) {
           Type v = invlogit(vul_par(a,b));
-          prior -= dbeta_(v, Type(1.01), Type(1.01), true) - log(v - v * v);
+          prior -= dbeta_(v, Type(1.01), Type(1.01), true) + log(v - v * v);
         }
       }
     }
@@ -146,7 +148,9 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> L
     } else if(vul_type(ff) == -2) { // free parameters
       for(int a=0;a<Len_age.cols();a++) {
         Type v = invlogit(vul_par(a,ff));
-        if(est_vul(a,ff)) prior -= dbeta_(v, Type(1.01), Type(1.01), true) - log(v - v * v);
+        if(est_vul(a,ff)) {
+          prior -= dbeta_(v, Type(1.01), Type(1.01), true) + log(v - v * v);
+        }
         for(int y=0;y<Len_age.rows();y++) vul(y,a,ff) = v;
       }
     } else if(vul_type(ff) > 0) { // Index mirrored to fleet
@@ -162,7 +166,11 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> L
         Vmaxlen(ff) = 1;
       } else { // Dome
         Vmaxlen(ff) = invlogit(vul_par(2,ff));
-        if(est_vul(2,ff)) prior -= dbeta_(Vmaxlen(ff), Type(1.01), Type(1.01), true) - log(Vmaxlen(ff) - Vmaxlen(ff) * Vmaxlen(ff));
+        
+        if(est_vul(2,ff)) {
+          Type jac = Vmaxlen(ff) - Vmaxlen(ff) * Vmaxlen(ff);
+          prior -= dbeta_(Vmaxlen(ff), Type(1.01), Type(1.01), true) + log(jac);
+        }
       }
 
       for(int y=0;y<Len_age.rows();y++) {
