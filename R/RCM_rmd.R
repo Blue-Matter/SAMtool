@@ -266,7 +266,7 @@ rmd_RCM_index_output <- function(sur, s_name) {
            paste0("  II <- RCMdata@Index[, ", sur, "]"),
            "  ind <- seq(min(which(!is.na(II))), max(which(!is.na(II))), 1)",
            paste0("  err <- exp(log(II) + outer(RCMdata@I_sd[, ", sur, "], c(-1.96, 1.96)))"),
-           paste0("  matplot(Year[ind], Ipred[ind, ], type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, ylim = c(0, 1.1 * max(c(Ipred[ind, ], II[ind], err[ind, ]), na.rm = TRUE)), xlab = \"Year\", ylab = \"", s_name[sur], "\")"),
+           paste0("  matplot(Year[ind], Ipred[ind, , drop = FALSE], type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, ylim = c(0, 1.1 * max(c(Ipred[ind, ], II[ind], err[ind, ]), na.rm = TRUE)), xlab = \"Year\", ylab = \"", s_name[sur], "\")"),
            "  points(Year[ind], II[ind], lwd = 3, pch = 16)",
            "  arrows(Year[ind], y0 = err[ind, 1], y1 = err[ind, 2], length = 0, lwd = 1.5)",
            "  abline(h = 0, col = \"grey\")",
