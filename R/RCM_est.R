@@ -224,8 +224,8 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   map$vul_par <- factor(map_vul_par)
   map$ivul_par <- factor(map_ivul_par)
   
-  TMB_data$est_vul <- ifelse(is.na(map_vul_par), 0, 1)
-  TMB_data$est_ivul <- ifelse(is.na(map_ivul_par), 0, 1)
+  TMB_data$est_vul <- ifelse(is.na(map_vul_par) | duplicated(as.numeric(map_vul_par)), 0, 1)
+  TMB_data$est_ivul <- ifelse(is.na(map_ivul_par) | duplicated(as.numeric(map_ivul_par)), 0, 1)
   
   if(RCMdata@Misc$condition != "effort") {
     map$log_q_effort <- factor(rep(NA, nfleet))
