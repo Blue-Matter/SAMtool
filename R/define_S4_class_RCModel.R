@@ -440,15 +440,16 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               corr_matrix <- c("### Correlation matrix\n",
                                "`r SD$env$corr.fixed %>% structure(dimnames = list(make_unique_names(rownames(.)), make_unique_names(colnames(.)))) %>% as.data.frame()`\n\n")
               
-              if(is.array(report$nll_fleet)) {
+              if(conv && is.array(report$nll_fleet)) {
                 like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_index = any(RCMdata@Index > 0, na.rm = TRUE)))
               } else {
                 like_gradients <- NULL
               }
-
+              
               if(exists("retro", inherits = FALSE)) {
                 ret <- rmd_RCM_retrospective(render_args)
               } else ret <- NULL
+              
 
               mean_fit_rmd <- c(sumry, LH_section, data_section, ts_output, nll_table, corr_matrix, like_gradients, ret)
             } else {
