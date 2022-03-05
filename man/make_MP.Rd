@@ -2,6 +2,7 @@
 % Please edit documentation in R/interim_MP.R, R/z_MPs.R
 \name{make_interim_MP}
 \alias{make_interim_MP}
+\alias{make_projection_MP}
 \alias{make_MP}
 \title{Make a custom management procedure (MP)}
 \usage{
@@ -16,12 +17,22 @@ make_interim_MP(
   ...
 )
 
+make_projection_MP(
+  .Assess = "SCA",
+  .HCR = "HCR_MSY",
+  assessment_interval = 5,
+  Ftarget = expression(Assessment@FMSY),
+  proj_args = list(process_error = 1, p_sim = 1),
+  diagnostic = c("min", "full", "none"),
+  ...
+)
+
 make_MP(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...)
 }
 \arguments{
 \item{.Assess}{Assessment model, a function of class \code{Assess}.}
 
-\item{.HCR}{Harvest control rule, a function of class \code{HCR}.}
+\item{.HCR}{Harvest control rule, a function of class \code{HCR}. Currently not used in projection MPs.}
 
 \item{AddInd}{A vector of integers or character strings indicating the indices to be used in the assessment model. 
 Integers assign the index to the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, 
@@ -41,6 +52,10 @@ on convergence (default) and \code{"full"} will also collect the model estimates
 \code{"none"} skips this step.}
 
 \item{...}{Additional arguments to be passed to \code{.Assess} and \code{.HCR}.}
+
+\item{Ftarget}{An expression that the MP will evaluate to identify the F used in the projection. See \link{projection} and example.}
+
+\item{proj_args}{Additional arguments for \link{projection}.}
 }
 \value{
 A function of class \code{MP}.
@@ -49,7 +64,9 @@ A function of class \code{MP}.
 Function operator that creates a management procedure (MP) by combining an assessment model (function of class \code{Assess}) with
 a harvest control rule (function of class \code{HCR}). The resulting function can then be tested in closed-loop simulation via 
 \code{\link[MSEtool]{runMSE}}. Use \code{make_MP} to specify constant TAC between assessments; the frequency of
-assessments is specified in \code{OM@interval}. Use \code{make_interim_MP} to use an interim procedure to adjust the TAC between 
+assessments is specified in \code{OM@interval}. Use \code{make_projection_MP} to set catches according to a schedule set by projections,
+specify assessment frequency in argument \code{assessment_interval} adn ensure that \code{OM@interval <- 1}. 
+Use \code{make_interim_MP} to use an interim procedure to adjust the TAC between 
 assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument \code{assessment_interval} when 
 making the MP; ensure that \code{OM@interval <- 1}.
 }
@@ -95,6 +112,17 @@ SCA_40_10 <- make_MP(SCA, HCR40_10, diagnostic = "min")
 # MP with an SCA that uses a Ricker stock-recruit function.
 SCA_Ricker <- make_MP(SCA, HCR_MSY, SR = "Ricker")
 show(SCA_Ricker)
+
+\donttest{
+# TAC is calculated annually from triennial assessments with projections between
+# assessments with F = 0.75 FMSY
+# Projections by default assume no process error.
+OM <- MSEtool::testOM
+OM@interval <- 1
+pMP <- make_projection_MP(SCA, assessment_interval = 3, 
+                          Ftarget = expression(0.75 * Assessment@FMSY),
+                          proj_args = list(process_error = 1))
+}
 
 }
 \references{
