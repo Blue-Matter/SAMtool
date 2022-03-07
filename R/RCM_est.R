@@ -433,19 +433,19 @@ get_ivul_len <- function(report, s_selectivity, lmid, Linf) {
 
 RCM_SPR <- function(F_at_age, M, mat, wt, N_at_age, R, R_early, equilibrium = TRUE) {
   n_y <- nrow(F_at_age)
+  n_age <- ncol(F_at_age)
   
   if(equilibrium) { # Plusgroup always on
     SSPR_F <- vapply(1:n_y, function(y) {
       yield_fn_SCA_int(max(F_at_age[y, ]), M = M[y, ], mat = mat[y, ], weight = wt[y, ], 
-                       vul = F_at_age[y, ]/max(F_at_age[y, ]), Arec = 1, Brec = 1, opt = FALSE)["SPR"]
+                       vul = F_at_age[y, ]/max(F_at_age[y, ]), Arec = 1, Brec = 1, opt = FALSE)["EPR"]
     }, numeric(1))
     
     SSPR_0 <- vapply(1:n_y, function(y) {
-      yield_fn_SCA_int(0, M = M[y, ], mat = mat[y, ], weight = wt[y, ], vul = F_at_age[y, ]/max(F_at_age[y, ]), 
-                       Arec = 1, Brec = 1, opt = FALSE)["SPR"]
+      yield_fn_SCA_int(0, M = M[y, ], mat = mat[y, ], weight = wt[y, ], 
+                       vul = rep(1, n_age), Arec = 1, Brec = 1, opt = FALSE)["EPR"]
     }, numeric(1))
   } else {
-    n_age <- ncol(F_at_age)
     NPR_M <- NPR_F <- matrix(1, n_y, n_age)
     
     RR <- R_early %>% rev() %>% c(R[1])
