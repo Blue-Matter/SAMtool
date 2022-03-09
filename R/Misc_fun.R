@@ -133,10 +133,16 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
   restart <- as.integer(restart)
   if(is.null(obj$env$random) && use_hessian) h <- obj$he else h <- NULL
   low <- rep(-Inf, length(obj$par))
+  upr <- rep(Inf, length(obj$par))
+  
   if(any(c("U_equilibrium", "F_equilibrium") %in% names(obj$par))) {
     low[match(c("U_equilibrium", "F_equilibrium"), names(obj$par))] <- 0
   }
-  opt <- tryCatch(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low)),
+  if(!is.null(obj$env$data$use_prior[1]) && obj$env$data$use_prior[1] > 0) { # Uniform priors need bounds
+    low[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
+    upr[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
+  }
+  opt <- tryCatch(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low, upper = upr)),
                   error = function(e) as.character(e))
   SD <- get_sdreport(obj)
 
@@ -360,12 +366,18 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
   if(no_index) nsurvey <- 1 # Use only on next two lines
   use_prior <- rep(0L, nsurvey + 3)
   pr_matrix <- matrix(NA_real_, nsurvey + 3, 2) %>% 
-    structure(dimnames = list(c("log_R0", "h", "log_M", paste0("q_", 1:nsurvey)), c("par1", "par2")))
+    structure(dimnames = list(c("R0", "h", "log_M", paste0("q_", 1:nsurvey)), c("par1", "par2")))
   
   if(!is.null(prior$R0)) {
-    if(msg) message("Prior for log_R0 found.")
-    use_prior[1] <- 1L
-    pr_matrix[1, ] <- c(log(prior$R0[1]), prior$R0[2])
+    if(msg) message("Prior for R0 found.")
+    use_prior[1] <- as.integer(prior$R0[1]) # 1 - lognormal, 2 - uniform on log-R0, 3 - uniform on R0
+    
+    if(use_prior[1] == 1) {
+      pr_matrix[1, ] <- c(log(prior$R0[2]), prior$R0[3])
+    } else {
+      pr_matrix[1, ] <- prior$R0[2:3]
+      if(prior$R0[3] <= prior$R0[2]) stop("The upper bound of the R0 prior is less than the lower bound.")
+    }
   }
   if(!is.null(prior$h)) {
     if(msg) message("Prior for steepness (h) found.")

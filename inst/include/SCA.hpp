@@ -338,7 +338,7 @@ Type SCA(objective_function<Type> *obj) {
   }
   
   // Add priors
-  prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M0, q);
+  prior -= calc_prior(use_prior, prior_dist, R0x, h, SR_type == "BH", log_M0, q, rescale);
   Type nll = nll_comp.sum() + penalty + prior;
 
   ADREPORT(R0);

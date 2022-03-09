@@ -180,7 +180,7 @@ Type DD(objective_function<Type> *obj) {
   }
 
   //Summing individual nll and penalties
-  prior -= calc_prior(use_prior, prior_dist, R0, h, SR_type == "BH", log_M, q);
+  prior -= calc_prior(use_prior, prior_dist, R0x, h, SR_type == "BH", log_M, q, rescale);
   Type nll = nll_comp.sum() + penalty + prior;
 
   //-------REPORTING-------//

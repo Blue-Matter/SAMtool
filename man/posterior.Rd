@@ -14,8 +14,6 @@ posterior(x, ...)
 \S4method{posterior}{RCModel}(
   x,
   priors_only = FALSE,
-  lower = numeric(0),
-  upper = numeric(0),
   laplace = FALSE,
   chains = 2,
   iter = 2000,
@@ -32,15 +30,11 @@ posterior(x, ...)
 RCMstan(RCModel, stanfit, sim, cores = 1)
 }
 \arguments{
-\item{x, RCModel}{An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.}
+\item{x}{An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.}
 
 \item{...}{Additional arguments to pass to \code{rstan::sampling} via \code{tmbstan::tmbstan}.}
 
 \item{priors_only}{Logical, whether to set the likelihood to zero and sample the priors only.}
-
-\item{lower}{A vector of lower bounds for parameters.}
-
-\item{upper}{A vector of upper bounds for parameters.}
 
 \item{laplace}{Logical, whether to do the Laplace approximation for random parameters.}
 
@@ -51,6 +45,8 @@ RCMstan(RCModel, stanfit, sim, cores = 1)
 \item{warmup}{The number of burnin iterations}
 
 \item{thin}{The frequency at which iterations are kept (e.g., \code{5} saves every fifth iteration)}
+
+\item{seed}{Seed for random number generator during the MCMC.}
 
 \item{init}{The initial values of parameters for starting the MCMC chain. See \code{tmbstan::tmbstan}.}
 

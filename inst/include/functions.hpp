@@ -191,10 +191,14 @@ Type calc_q(matrix<Type> I_y, matrix<Type> B_y, int sur, int ff, matrix<Type> &I
 
 // For RCM, DD, cDD
 template<class Type>
-Type calc_prior(matrix<int> use_prior, matrix<Type> prior_dist, Type R0, Type h, int SR_type, Type log_M, vector<Type> q) {
+Type calc_prior(matrix<int> use_prior, matrix<Type> prior_dist, Type R0x, Type h, int SR_type, Type log_M, vector<Type> q, Type rescale) {
   Type prior = 0;
-  if(use_prior(0)) { // Prior for R0 - normal on log_R0, log Jacobian transform = zero
-    prior += dnorm_(log(R0), prior_dist(0,0), prior_dist(0,1), true);
+  if(use_prior(0) == 1) { // Prior for R0 - normal on log_R0, log Jacobian transform = zero
+    prior += dnorm_(R0x - log(rescale), prior_dist(0,0), prior_dist(0,1), true);
+  } else if(use_prior(0) == 2) { // uniform on log-R0, log Jacobian transform = zero
+    prior -= log(log(prior_dist(0,1)) - log(prior_dist(0,0)));
+  } else if(use_prior(0) == 3) { // uniform on R0, log Jacobian transform = log(r) + log(x)
+    prior += -log(prior_dist(0,1) - prior_dist(0,0)) - log(rescale) + log(R0x);
   }
   if(use_prior(1)) { // Prior for h
     if(SR_type) { // Beverton-Holt - beta on y = (h - 0.2)/0.8 with log Jacobian transform of inverse logit fn

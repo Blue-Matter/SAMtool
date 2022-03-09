@@ -7,7 +7,7 @@
 #' and returns a \code{stanfit} object for diagnostics. Use \code{RCMstan} to update the RCM and the enclosed operating model
 #' with MCMC samples..
 #'
-#' @param x,RCModel An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.
+#' @param x An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.
 #' @param ... Additional arguments to pass to \code{rstan::sampling} via \code{tmbstan::tmbstan}.
 #' @details
 #'
@@ -23,19 +23,18 @@ setGeneric("posterior", function(x, ...) standardGeneric("posterior"))
 #' @rdname posterior 
 #' @aliases posterior,RCModel-method posterior.RCModel
 #' @param priors_only Logical, whether to set the likelihood to zero and sample the priors only.
-#' @param lower A vector of lower bounds for parameters. 
-#' @param upper A vector of upper bounds for parameters.
 #' @param laplace Logical, whether to do the Laplace approximation for random parameters.
 #' @param chains The numer of MCMC chains.
 #' @param iter The number of iterations for each chain, including warmup.
 #' @param warmup The number of burnin iterations
 #' @param thin The frequency at which iterations are kept (e.g., \code{5} saves every fifth iteration)
+#' @param seed Seed for random number generator during the MCMC.
 #' @param init The initial values of parameters for starting the MCMC chain. See \code{tmbstan::tmbstan}.
 #' @param cores The number of cores for running in parallel, e.g., one core per MCMC chain. Used in \code{RCMstan}
 #' for reconstructing the population.
 #' @exportMethod posterior
 setMethod("posterior", signature(x = "RCModel"),
-          function(x, priors_only = FALSE, lower = numeric(0), upper = numeric(0),
+          function(x, priors_only = FALSE, 
                    laplace = FALSE, chains = 2, iter = 2000, warmup = floor(iter/2), thin = 5,
                    seed = 34, init = "last.par.best", cores = chains, ...) {
             if(!requireNamespace("tmbstan", quietly = TRUE)) stop("Install tmbstan to use this function.")
@@ -71,8 +70,16 @@ setMethod("posterior", signature(x = "RCModel"),
               obj_new <- obj
             }
             
+            lower <- rep(-Inf, length(obj$par))
+            upper <- rep(Inf, length(obj$par))
+            
+            if(!is.null(obj$env$data$use_prior[1]) && obj$env$data$use_prior[1] > 0) { # Uniform priors need bounds
+              lower[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
+              upper[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
+            }
+            
             tmbstan::tmbstan(obj_new, chains = chains, iter = iter, warmup = warmup, thin = thin,
-                             seed = seed, init = init, cores = cores, ...)
+                             seed = seed, init = init, cores = cores, lower = lower, upper = upper, ...)
           })
 
 
