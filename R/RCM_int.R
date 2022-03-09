@@ -91,7 +91,13 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     }
     
     mod <- list(mean_fit_output)
-    res <- lapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
+    
+    if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
+    if(snowfall::sfIsRunning()) {
+      res <- sfLapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
+    } else {
+      res <- lapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
+    }
     conv <- rep(mean_fit_output$report$conv, nsim)
     
   } else if(all(par_identical_sims)) { # All identical sims detected

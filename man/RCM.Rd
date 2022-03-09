@@ -308,7 +308,7 @@ Hist <- runMSE(out@OM, Hist = TRUE)
 
 }
 \seealso{
-\link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM}
+\link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM} \link{posterior}
 }
 \author{
 Q. Huynh

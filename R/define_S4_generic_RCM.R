@@ -210,7 +210,7 @@
 #' Hist <- runMSE(out@OM, Hist = TRUE)            
 #' } 
 #' 
-#' @seealso \link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM}
+#' @seealso \link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM} \link{posterior}
 #' @importFrom dplyr %>%
 #' @export
 setGeneric("RCM", function(OM, data, ...) standardGeneric("RCM"))

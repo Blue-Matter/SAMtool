@@ -8,6 +8,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Added a beta version of `RCM_assess` for using the RCM model as an assessment in closed-loop projections. More arguments will be added in the future for flexibility with model configuration.
 - `make_project_MP` creates management procedures that update TAC annually from stock assessment projections.
 - Specify output F in terms of absolute magnitude (independent of model output) in `HCR_segment` and `HCR_ramp`.
+- `posterior` wrapper function added to run MCMC of RCM models. `RCMstan` updates OMs with MCMC output.
 
 ### Minor updates
 - Fix FSPR reporting `Shortcut` and `Perfect` assessment functions.
