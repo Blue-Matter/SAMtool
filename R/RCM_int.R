@@ -90,52 +90,51 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       samps <- mvtnorm::rmvnorm(nsim, mean_fit_output$opt$par, mean_fit_output$SD$cov.fixed)
     }
     
-    report_internal_fn <- function(x, samps, obj, conv) {
-      report <- obj$report(samps[x, ]) %>% RCM_posthoc_adjust(obj, par = samps[x, ])
-      report$conv <- conv
-      return(report)
-    }
-    
-    res <- lapply(1:nsim, report_internal_fn, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
-    mod <- lapply(res, function(x) list(obj = mean_fit_output$obj, report = x))
+    mod <- list(mean_fit_output)
+    res <- lapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
     conv <- rep(mean_fit_output$report$conv, nsim)
+    
+  } else if(all(par_identical_sims)) { # All identical sims detected
+      
+    message("\nAll ", nsim, " replicates are identical. Fitting once and replicating single fit...")
+    
+    mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
+                               LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
+                               max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                               FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
+    
+    mod <- list(mean_fit_output)
+    res <- lapply(1:nsim, function(x) mean_fit_output$report)
+    conv <- rep(mean_fit_output$report$conv, nsim)
+    
   } else {
     
-    if(all(par_identical_sims)) { # All identical sims detected
-      message("\nAll ", nsim, " replicates are identical. Fitting once and replicating single fit...")
-      
+    message("\nFitting model (", nsim, " simulations) ...")
+    if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
+    if(snowfall::sfIsRunning()) {
+      mod <- snowfall::sfClusterApplyLB(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
+                                        LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
+                                        max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                                        FleetPars = FleetPars, control = control, dots = dots)
+    } else {
+      mod <- lapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
+                    LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
+                    max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
+                    FleetPars = FleetPars, control = control, dots = dots)
+    }
+    
+    if(mean_fit) { ### Fit to life history means if mean_fit = TRUE
+      message("Generating additional model fit from mean values of parameters in the operating model...\n")
       mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                  LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                                  max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                  FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
       
-      mod <- lapply(1:nsim, function(x) return(mean_fit_output))
+      if(!mean_fit_output$report$conv) warning("Mean fit model did not appear to converge.")
     } else {
-      
-      message("\nFitting model (", nsim, " simulations) ...")
-      if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-      if(snowfall::sfIsRunning()) {
-        mod <- snowfall::sfClusterApplyLB(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                                          LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
-                                          max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                                          FleetPars = FleetPars, control = control, dots = dots)
-      } else {
-        mod <- lapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                      LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
-                      max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                      FleetPars = FleetPars, control = control, dots = dots)
-      }
-      
-      if(mean_fit) { ### Fit to life history means if mean_fit = TRUE
-        message("Generating additional model fit from mean values of parameters in the operating model...\n")
-        mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                                   LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
-                                   max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                                   FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
-        
-        if(!mean_fit_output$report$conv) warning("Mean fit model did not appear to converge.")
-      } else mean_fit_output <- list()
+      mean_fit_output <- list()
     }
+    
     res <- lapply(mod, getElement, "report")
     conv <- vapply(res, getElement, logical(1), name = "conv")
   }
@@ -163,38 +162,25 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     keep <- !logical(OM@nsim)
   }
   
+  ### Get parameters to update OM
+  obj_data <- mod[[1]]$obj$env$data
+  OM_par <- RCM_update_OM(res, obj_data, maxage, nyears, proyears)
+  
   ### R0
-  OM@cpars$R0 <- vapply(res, getElement, numeric(1), "R0")
+  OM@cpars$R0 <- OM_par$R0
   message("Range of unfished age-0 recruitment (OM@cpars$R0): ", paste(round(range(OM@cpars$R0), 2), collapse = " - "))
   
   ### Depletion and init D - init D is only reported, OM setup for initD by adjusting rec devs
-  initD <- vapply(res, function(x) x$E[1]/x$E0_SR, numeric(1))
-  message("Range of initial spawning depletion: ", paste(round(range(initD), 2), collapse = " - "))
+  message("Range of initial spawning depletion: ", paste(round(range(OM_par$initD), 2), collapse = " - "))
   
-  OM@cpars$D <- vapply(res, function(x) x$E[length(x$E)-1]/x$E0_SR, numeric(1))
+  OM@cpars$D <- OM_par$D
   message("Range of spawning depletion (OM@cpars$D): ", paste(round(range(OM@cpars$D), 2), collapse = " - "), "\n")
   
   ### Selectivity and F
   ### Find
   OM@isRel <- FALSE
-  
-  make_F <- function(x) { # Extra step to avoid apical F = 0
-    apicalF <- x$F
-    apicalF[apicalF < 1e-4] <- 1e-4
-    F_at_age <- lapply(1:ncol(apicalF), function(xx) apicalF[, xx] * x$vul[1:nyears, , xx]) %>% 
-      simplify2array() %>% apply(1:2, sum)
-    return(F_at_age)
-  }
-  F_matrix <- lapply(res, make_F)
-  apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
-  
-  expand_V_matrix <- function(x) {
-    y <- matrix(x[nyears, ], proyears, maxage + 1, byrow = TRUE)
-    rbind(x, y)
-  }
-  V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix)
-  OM@cpars$V <- simplify2array(V) %>% aperm(c(3, 2, 1))
-  OM@cpars$Find <- do.call(rbind, apical_F)
+  OM@cpars$V <- OM_par$V
+  OM@cpars$Find <- OM_par$Find
   message("Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.")
   message("Selectivity during projection period is set to that in most recent historical year.")
   
@@ -207,58 +193,21 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   message("Historical effort trends set in OM@EffLower and OM@EffUpper.\n")
   
   ### Rec devs
-  OM@cpars$Perr <- StockPars$procsd
+  OM@cpars$Perr <- OM_par$procsd
   message("Recruitment standard deviation set in OM@cpars$Perr.")
   
-  make_Perr <- function(x) {
-    bias_corr <- ifelse(x$obj$env$data$est_rec_dev, exp(-0.5 * x$report$tau^2), 1)
-    res <- exp(x$report$log_rec_dev) * bias_corr
-    res[1] <- res[1] * x$report$R_eq/x$report$R0
-    return(res)
-  }
-  Perr <- do.call(rbind, lapply(mod, make_Perr))
-  
-  make_early_Perr <- function(x) {
-    res <- x$report$R_eq * x$report$NPR_equilibrium / x$report$R0 / x$report$NPR_unfished[1, ]
-    bias_corr <- ifelse(x$obj$env$data$est_early_rec_dev, exp(-0.5 * x$report$tau^2), 1)
-    early_dev <- exp(x$report$log_early_rec_dev) * bias_corr
-    out <- res[-1] * early_dev
-    return(rev(out))
-  }
-  early_Perr <- do.call(rbind, lapply(mod, make_early_Perr))
-  
-  OM@cpars$Perr_y <- StockPars$Perr_y
-  OM@cpars$Perr_y[, 1:OM@maxage] <- early_Perr
-  OM@cpars$Perr_y[, (OM@maxage+1):(OM@maxage + nyears)] <- Perr
+  Perr_y <- StockPars$Perr_y
+  Perr_y[, 1:maxage] <- OM_par$early_Perr
+  Perr_y[, maxage + 1:nyears] <- OM_par$Perr
   message("Historical recruitment set in OM@cpars$Perr_y.")
   
-  log_rec_dev <- do.call(rbind, lapply(res, getElement, "log_rec_dev"))
-  
-  if(!all(log_rec_dev == 0)) {
-    OM@cpars$AC <- apply(log_rec_dev, 1, function(x) {
-      out <- acf(x, lag.max = 1, plot = FALSE)$acf[2]
-      ifelse(is.na(out), 0, out)
-    })
-    OM@AC <- range(OM@cpars$AC)
+  if(any(OM_par$AC != 0)) {
+    OM@cpars$AC <- OM_par$AC
+    OM@AC <- range(OM_par$AC)
     message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
     
-    sample_future_dev <- function() {
-      if(!is.null(dots$map_log_rec_dev) && any(is.na(dots$map_log_rec_dev))) { # Sample historical rec devs for OM for most recent years
-        yr_fixed_rec_dev <- which(is.na(dots$map_log_rec_dev))
-        if(any(yr_fixed_rec_dev > max(dots$map_log_rec_dev, na.rm = TRUE))) {
-          yr_hist_sample <- yr_fixed_rec_dev[yr_fixed_rec_dev > max(dots$map_log_rec_dev, na.rm = TRUE)] %>% min()
-          samp_hist <- Map(dev_AC, AC = OM@cpars$AC, stdev = StockPars$procsd, chain_start = log_rec_dev[, yr_hist_sample - 1],
-                           MoreArgs = list(n = length(yr_hist_sample:nyears), mu = 1))
-          log_rec_dev[, yr_hist_sample:nyears] <<- do.call(rbind, samp_hist)
-          OM@cpars$Perr_y[, (OM@maxage + yr_hist_sample):(OM@maxage + nyears)] <<- exp(log_rec_dev[, yr_hist_sample:nyears])
-          message("Historical recruitment deviations sampled with autocorrelation starting in year ", yr_hist_sample, " out of OM@nyears = ", nyears)
-        }
-      }
-      samp_proj <- Map(dev_AC, AC = OM@cpars$AC, stdev = StockPars$procsd, chain_start = log_rec_dev[, nyears],
-                       MoreArgs = list(n = proyears, mu = 1))
-      return(exp(do.call(rbind, samp_proj)))
-    }
-    OM@cpars$Perr_y[, (OM@maxage+nyears+1):ncol(OM@cpars$Perr_y)] <- sample_future_dev()
+    OM@cpars$Perr_y <- RCM_sample_future_dev(obj_data$est_rec_dev, OM_par$procsd, OM_par$AC, 
+                                             OM_par$log_rec_dev, Perr_y, maxage, nyears, proyears)
     message("Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).\n")
   }
   
@@ -277,14 +226,13 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   } else {
     OM@cpars$Mat_age <- StockPars$Mat_age
   }
-  if(prior$use_prior[2]) { # May not be necessary
-    OM@cpars$h <- vapply(res, getElement, numeric(1), "h")
+  if(prior$use_prior[2]) {
+    OM@cpars$hs <- OM_par$h
   } else {
-    OM@cpars$h <- StockPars$hs
+    OM@cpars$hs <- StockPars$hs
   }
   if(prior$use_prior[3]) {
-    OM@cpars$M_ageArray <- vapply(res, getElement, numeric(1), "Mest") %>% 
-      array(c(nsim, maxage+1, nyears + proyears))
+    OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
   } else {
     OM@cpars$M_ageArray <- StockPars$M_ageArray
   }
@@ -303,14 +251,16 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   ### Output S4 object
   RCMdata@Misc$prior <- prior
   output <- new("RCModel", OM = MSEtool::SubCpars(OM, keep), 
-                SSB = do.call(rbind, lapply(res[keep], getElement, "E")), 
-                NAA = lapply(res[keep], getElement, "N") %>% simplify2array() %>% aperm(c(3, 1, 2)), 
-                CAA = lapply(res[keep], getElement, "CAApred") %>% simplify2array() %>% aperm(c(4, 1:3)), 
-                CAL = lapply(res[keep], getElement, "CALpred") %>% simplify2array() %>% aperm(c(4, 1:3)),
-                mean_fit = mean_fit_output, conv = conv[keep], data = RCMdata, Misc = res[keep])
+                SSB = OM_par$SSB[keep, , drop = FALSE], 
+                NAA = OM_par$NAA[keep, , , drop = FALSE], 
+                CAA = OM_par$CAA[keep, , , , drop = FALSE], 
+                CAL = OM_par$CAL[keep, , , , drop = FALSE], 
+                mean_fit = mean_fit_output, 
+                conv = conv[keep], 
+                data = RCMdata, 
+                Misc = res[keep])
   
   output@config <- list(drop_sim = which(!keep))
-  
   
   # Data in cpars
   if(sum(RCMdata@Chist > 0, na.rm = TRUE) || nsurvey > 0) {
@@ -380,6 +330,103 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   return(output)
 }
 
+
+RCM_report_samps <- function(x, samps, obj, conv) {
+  report <- obj$report(samps[x, ]) %>% RCM_posthoc_adjust(obj, par = samps[x, ])
+  report$conv <- conv
+  return(report)
+}
+
+
+RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears) {
+  out <- list()
+  
+  out$R0 <- vapply(res, getElement, numeric(1), "R0")
+  out$initD <- vapply(res, function(x) x$E[1]/x$E0_SR, numeric(1))
+  out$D <- vapply(res, function(x) x$E[length(x$E)-1]/x$E0_SR, numeric(1))
+  
+  make_F <- function(x) { # Extra step to avoid apical F = 0
+    apicalF <- x$F
+    apicalF[apicalF < 1e-4] <- 1e-4
+    F_at_age <- lapply(1:ncol(apicalF), function(xx) apicalF[, xx] * x$vul[1:nyears, , xx]) %>% 
+      simplify2array() %>% apply(1:2, sum)
+    return(F_at_age)
+  }
+  F_matrix <- lapply(res, make_F)
+  apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
+  
+  expand_V_matrix <- function(x) {
+    y <- matrix(x[nyears, ], proyears, maxage + 1, byrow = TRUE)
+    rbind(x, y)
+  }
+  
+  out$V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(3:1)
+  out$Find <- do.call(rbind, apical_F)
+  
+  out$procsd <- vapply(res, getElement, numeric(1), "tau")
+  
+  make_Perr <- function(x, obj_data) {
+    bias_corr <- ifelse(obj_data$est_rec_dev, exp(-0.5 * x$tau^2), 1)
+    res <- exp(x$log_rec_dev) * bias_corr
+    res[1] <- res[1] * x$R_eq/x$R0
+    return(res)
+  }
+  out$Perr <- sapply(res, make_Perr, obj_data = obj_data) %>% t()
+  
+  make_early_Perr <- function(x, obj_data) {
+    res <- x$R_eq * x$NPR_equilibrium / x$R0 / x$NPR_unfished[1, ]
+    bias_corr <- ifelse(obj_data$est_early_rec_dev, exp(-0.5 * x$tau^2), 1)
+    early_dev <- exp(x$log_early_rec_dev) * bias_corr
+    out <- res[-1] * early_dev
+    return(rev(out))
+  }
+  out$early_Perr <- sapply(res, make_early_Perr, obj_data = obj_data) %>% t()
+  
+  out$log_rec_dev <- sapply(res, getElement, "log_rec_dev") %>% t()
+  
+  if(!all(out$log_rec_dev == 0)) {
+    out$AC <- apply(out$log_rec_dev, 1, function(x) {
+      out <- acf(x, lag.max = 1, plot = FALSE)$acf[2]
+      ifelse(is.na(out), 0, out)
+    })
+  } else {
+    out$AC <- rep(0, length(res))
+  }
+  
+  out$h <- vapply(res, getElement, numeric(1), "h")
+  out$Mest <- vapply(res, getElement, numeric(1), "Mest")
+  
+  out$SSB <- sapply(res, getElement, "E") %>% t()
+  out$NAA <- sapply(res, getElement, "N", simplify = "array") %>% aperm(c(3, 1, 2))
+  out$CAA <- sapply(res, getElement, "CAApred", simplify = "array") %>% aperm(c(4, 1:3))
+  out$CAL <- sapply(res, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))
+  
+  return(out)
+}
+
+
+RCM_sample_future_dev <- function(est_rec_dev, procsd, AC, log_rec_dev, Perr_y, maxage, nyears, proyears) {
+  if(any(!est_rec_dev)) { # Sample historical rec devs for OM for most recent years
+    yr_fixed_rec_dev <- which(!est_rec_dev)
+    if(any(yr_fixed_rec_dev > sum(est_rec_dev))) {
+      yr_hist_sample <- yr_fixed_rec_dev[yr_fixed_rec_dev > sum(est_rec_dev)] %>% min()
+      nyears <- length(est_rec_dev)
+      samp_hist <- Map(dev_AC, AC = AC, stdev = procsd, 
+                       chain_start = log_rec_dev[, yr_hist_sample - 1],
+                       MoreArgs = list(n = length(yr_hist_sample:nyears), mu = 1))
+      log_rec_dev[, yr_hist_sample:nyears] <- do.call(rbind, samp_hist)
+      
+      Perr_y[, (maxage + yr_hist_sample):(maxage + nyears)] <- exp(log_rec_dev[, yr_hist_sample:nyears])
+      message("Historical recruitment deviations sampled with autocorrelation starting in year ", yr_hist_sample, " out of OM@nyears = ", nyears)
+    }
+  }
+  samp_proj <- Map(dev_AC, AC = AC, stdev = procsd, 
+                   chain_start = log_rec_dev[, nyears],
+                   MoreArgs = list(n = proyears, mu = 1))
+  
+  Perr_y[, maxage + nyears + 1:proyears] <- exp(do.call(rbind, samp_proj))
+  return(Perr_y)
+}
 
 process_AddIndType <- function(s_sel, nfleet) {
   if(s_sel == -4 || s_sel == -2 || s_sel == -1 || s_sel == 0) { # -4 = B,-2 - 0 = custom sel
