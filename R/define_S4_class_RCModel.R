@@ -176,7 +176,11 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
             ####### Assign variables
             OM <- MSEtool::SubCpars(x@OM, sims)
-            report_list <- x@Misc[sims]
+            if(length(x@Misc) == 1) {
+              report_list <- x@Misc
+            } else {
+              report_list <- x@Misc[sims]
+            }
 
             nsim <- OM@nsim
             RCMdata <- x@data
@@ -440,7 +444,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               corr_matrix <- c("### Correlation matrix\n",
                                "`r SD$env$corr.fixed %>% structure(dimnames = list(make_unique_names(rownames(.)), make_unique_names(colnames(.)))) %>% as.data.frame()`\n\n")
               
-              if(conv && is.array(report$nll_fleet)) {
+              if(!is.null(dots$gradient) && !dots$gradient) {
+                like_gradients <- NULL
+              } else if(conv && is.array(report$nll_fleet)) {
                 like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_index = any(RCMdata@Index > 0, na.rm = TRUE)))
               } else {
                 like_gradients <- NULL

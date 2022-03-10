@@ -73,14 +73,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                                max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                FleetPars = FleetPars, mean_fit = TRUE, dots = dots)
     
-    if(length(mean_fit_output) > 0 && !mean_fit_output$report$conv) {
-      warning("Mean fit model did not appear to converge. Will not be able to sample the covariance matrix.")
-      message("Model did not converge. Returning the mean-fit model for evaluation.")
-      
-      drop_nonconv <- TRUE
-      
-      samps <- mean_fit_output$obj$env$last.par.best %>% matrix(nrow = nsim, ncol = length(mean_fit_output$obj$par), byrow = TRUE)
-    } else {
+    if(mean_fit_output$report$conv) {
       message("Model converged. Sampling covariance matrix for nsim = ", nsim, " replicates...")
       if(!all(par_identical_sims)) {
         message("Note: not all ", nsim, " replicates are identical.")
@@ -88,16 +81,22 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                 which(!par_identical_sims) %>% names() %>% paste0(collapse = " "))
       }
       samps <- mvtnorm::rmvnorm(nsim, mean_fit_output$opt$par, mean_fit_output$SD$cov.fixed)
+      
+      if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
+      if(snowfall::sfIsRunning()) {
+        res <- sfLapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
+      } else {
+        res <- lapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
+      }
+      
+    } else {
+      warning("Mean fit model did not appear to converge. Will not be able to sample the covariance matrix.")
+      message("Model did not converge. Returning the mean-fit model for evaluation.")
+      
+      res <- list(mean_fit_output$report) # Length 1
     }
     
     mod <- list(mean_fit_output)
-    
-    if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-    if(snowfall::sfIsRunning()) {
-      res <- sfLapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
-    } else {
-      res <- lapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
-    }
     conv <- rep(mean_fit_output$report$conv, nsim)
     
   } else if(all(par_identical_sims)) { # All identical sims detected
@@ -109,8 +108,14 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                                max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                                FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
     
-    mod <- list(mean_fit_output)
-    res <- lapply(1:nsim, function(x) mean_fit_output$report)
+    if(mean_fit_output$report$conv) {
+      message("Model converged.")
+    } else {
+      message("Model did not converge. Returning the mean-fit model for evaluation.")
+    }
+
+    mod <- list(mean_fit_output) # Length - 1
+    res <- list(mean_fit_output$report) 
     conv <- rep(mean_fit_output$report$conv, nsim)
     
   } else {
@@ -145,32 +150,37 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     conv <- vapply(res, getElement, logical(1), name = "conv")
   }
   
-  if(drop_highF) {
-    highF <- vapply(res, function(x) max(getElement(x, "F"), na.rm = TRUE) >= max_F, logical(1))
-    if(sum(highF)) message(sum(highF), " out of ", nsim , " model fits had F on the upper boundary (F = ", max_F, "; ", round(100*sum(highF)/nsim, 2), "% of simulations).\n")
-    
-    conv <- conv & !highF
+  highF <- vapply(res, function(x) max(getElement(x, "F"), na.rm = TRUE) >= max_F, logical(1))
+  if(length(res) == 1) {
+    if(highF) message("Single model fit had F on the upper boundary.\n")
+  } else if(sum(highF)) {
+    message(sum(highF), " out of ", nsim , " model fits had F on the upper boundary (F = ", 
+            max_F, "; ", round(100 * sum(highF)/nsim, 2), "% of simulations).\n")
+    if(drop_highF) conv <- conv & !highF
   }
-  if(drop_nonconv) {
-    NaF <- vapply(res, function(x) any(is.na(x$F) | is.infinite(x$F)), logical(1))
-    if(sum(NaF)) message(sum(NaF), " out of ", nsim , " iterations had F with NA's")
-    
-    conv <- conv & !NaF
+  
+  NaF <- vapply(res, function(x) any(is.na(x$F) | is.infinite(x$F)), logical(1))
+  if(length(res) == 1) {
+    if(NaF) message("Single model fit had F with NA's")
+  } else if(sum(NaF)) {
+    message(sum(NaF), " out of ", nsim , " iterations had F with NA's")
+    if(drop_nonconv) conv <- conv & !NaF
   }
-  if(sum(conv) < nsim) message("Non-converged iteration(s): ", paste(which(!conv), collapse = " "), "\n")
-  if(!sum(conv)) {
-    message("Non-converged for all iterations. Returning all for evaluation.")
-    keep <- !logical(OM@nsim)
-  } else if(sum(conv) < nsim && (drop_nonconv | drop_highF)) {
-    message("Non-converged and/or highF iterations will be removed.\n")
-    keep <- conv
-  } else {
-    keep <- !logical(OM@nsim)
+  
+  keep <- !logical(OM@nsim) # Keep all simulations
+  if(length(res) > 1 && sum(conv) < nsim) {
+    message("Non-converged iteration(s): ", paste(which(!conv), collapse = " "), "\n")
+    if(!sum(conv)) {
+      message("Non-converged for all iterations. Returning all for evaluation.")
+    } else if(drop_nonconv || drop_highF) {
+      message("Non-converged and/or highF iterations will be removed.\n")
+      keep <- conv
+    }
   }
   
   ### Get parameters to update OM
   obj_data <- mod[[1]]$obj$env$data
-  OM_par <- RCM_update_OM(res, obj_data, maxage, nyears, proyears)
+  OM_par <- RCM_update_OM(res, obj_data, maxage, nyears, proyears, nsim)
   
   ### R0
   OM@cpars$R0 <- OM_par$R0
@@ -263,10 +273,15 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                 CAL = OM_par$CAL[keep, , , , drop = FALSE], 
                 mean_fit = mean_fit_output, 
                 conv = conv[keep], 
-                data = RCMdata, 
-                Misc = res[keep])
+                data = RCMdata)
   
-  output@config <- list(drop_sim = which(!keep))
+  if(length(res) > 1) {
+    output@Misc <- res[keep]
+    output@config <- list(drop_sim = which(!keep))
+  } else {
+    output@Misc <- res
+    output@config <- list(drop_sim = integer(0))
+  }
   
   # Data in cpars
   if(sum(RCMdata@Chist > 0, na.rm = TRUE) || nsurvey > 0) {
@@ -327,8 +342,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     do_catch_check <- vapply(1:length(res), catch_check_fn, logical(1), report = res, data = data)
     if(any(do_catch_check)) {
       flag_ind <- paste(which(do_catch_check), collapse = " ")
-      message("Note: there is predicted catch that deviates from observed catch by more than 1% in simulations:")
-      message(flag_ind)
+      message("Note: there is predicted catch that deviates from observed catch by more than 1%")
+      if(length(res) > 1) message("Simulations: ", flag_ind)
     }
   }
   message("Complete.")
@@ -344,7 +359,7 @@ RCM_report_samps <- function(x, samps, obj, conv) {
 }
 
 
-RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears) {
+RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length(res)) {
   out <- list()
   
   out$R0 <- vapply(res, getElement, numeric(1), "R0")
@@ -389,7 +404,7 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears) {
   out$early_Perr <- sapply(res, make_early_Perr, obj_data = obj_data) %>% t()
   
   out$log_rec_dev <- sapply(res, getElement, "log_rec_dev") %>% t()
-  
+
   if(!all(out$log_rec_dev == 0)) {
     out$AC <- apply(out$log_rec_dev, 1, function(x) {
       out <- acf(x, lag.max = 1, plot = FALSE)$acf[2]
@@ -407,7 +422,19 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears) {
   out$CAA <- sapply(res, getElement, "CAApred", simplify = "array") %>% aperm(c(4, 1:3))
   out$CAL <- sapply(res, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))
   
-  return(out)
+  if(length(res) == 1) {
+    lapply(out, function(x) {
+      if(is.array(x)) {
+        dx <- dim(x)
+        ldx <- length(dx)
+        array(x, dim = c(dx[-1], nsim)) %>% aperm(c(ldx, 2:ldx - 1))
+      } else {
+        replicate(nsim, x)
+      }
+    })
+  } else {
+    out
+  }
 }
 
 
