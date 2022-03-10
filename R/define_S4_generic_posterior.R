@@ -43,7 +43,7 @@ setMethod("posterior", signature(x = "RCModel"),
             
             obj <- x@mean_fit$obj
             
-            if(!is.null(obj)) {
+            if(is.null(obj)) {
               stop(paste0("No TMB object was found in ", xchar, "@mean_fit$obj. Re-run RCM with mean_fit = TRUE."))
             } else if(obj$env$data$condition != "catch2") { # With condition = "catch", infinitely diffuse prior on log_F_dev
               stop("MCMC currently only supported with condition = \"catch2\".")
