@@ -416,10 +416,10 @@ Type RCM(objective_function<Type> *obj) {
   }
 
   for(int y=0;y<n_y;y++) {
-    if(est_rec_dev(y)) nll_log_rec_dev -= dnorm_(log_rec_dev(y), Type(0), tau, true);
+    if(est_rec_dev(y) == 1) nll_log_rec_dev -= dnorm_(log_rec_dev(y), Type(0), tau, true);
   }
   for(int a=0;a<n_age-1;a++) {
-    if(est_early_rec_dev(a)) nll_log_rec_dev -= dnorm_(log_early_rec_dev(a), Type(0), tau, true);
+    if(est_early_rec_dev(a) == 1) nll_log_rec_dev -= dnorm_(log_early_rec_dev(a), Type(0), tau, true);
   }
 
   Type nll = nll_fleet.sum() + nll_index.sum();

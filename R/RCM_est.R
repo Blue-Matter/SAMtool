@@ -245,14 +245,18 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   } else {
     map$log_early_rec_dev <- factor(dots$map_log_early_rec_dev)
   }
-  TMB_data$est_early_rec_dev <- ifelse(is.na(map$log_early_rec_dev), 0, 1)
+  
+  # 0 = fixed parameter: no bias correction, no contribution to likelihood
+  # 1 = estimated parameter, not previous duplicated: bias correction, contribute to likelihood
+  # 2 = estimated parameter, but duplicated: bias correction, no contribution to likelihood
+  TMB_data$est_early_rec_dev <- ifelse(is.na(map$log_early_rec_dev), 0, ifelse(duplicated(map$log_early_rec_dev), 2, 1))
   
   if(is.null(dots$map_log_rec_dev)) {
     map$log_rec_dev <- factor(1:nyears)
   } else {
     map$log_rec_dev <- factor(dots$map_log_rec_dev)
   }
-  TMB_data$est_rec_dev <- ifelse(is.na(map$log_rec_dev), 0, 1)
+  TMB_data$est_rec_dev <- ifelse(is.na(map$log_rec_dev), 0, ifelse(duplicated(map$log_rec_dev), 2, 1))
   
   if(integrate) random <- c("log_early_rec_dev", "log_rec_dev") else random <- NULL
   
