@@ -62,11 +62,7 @@ Output is re-converted back to original units.}
 
 \item{start}{Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.}
 
-\item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
-lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
-For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors
-For all others, provide a length-2 vector for the mean and SD.
-See vignette for full description.}
+\item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 
 \item{fix_h}{Logical, whether to fix steepness to value in \code{Data@steep} in the model for \code{SCA}. This only affects
 calculation of reference points for \code{SCA2}.}

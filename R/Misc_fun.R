@@ -369,8 +369,19 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
     structure(dimnames = list(c("R0", "h", "log_M", paste0("q_", 1:nsurvey)), c("par1", "par2")))
   
   if(!is.null(prior$R0)) {
-    if(msg) message("Prior for R0 found.")
+    if(length(prior$R0) == 2) prior$R0 <- c(1, prior$R0) # Backwards compatibility
     use_prior[1] <- as.integer(prior$R0[1]) # 1 - lognormal, 2 - uniform on log-R0, 3 - uniform on R0
+    
+    if(msg) {
+      message(
+        switch(
+          use_prior[1],
+          "1" = "Lognormal prior for R0 found",
+          "2" = "Uniform prior for log(R0) found",
+          "3" = "Uniform prior for R0 found"
+        )
+      )
+    }
     
     if(use_prior[1] == 1) {
       pr_matrix[1, ] <- c(log(prior$R0[2]), prior$R0[3])

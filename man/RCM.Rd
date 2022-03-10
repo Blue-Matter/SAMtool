@@ -98,10 +98,7 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 \item{comp_like}{A string indicating either \code{"multinomial"} (default) or \code{"lognormal"} distributions for the composition data.}
 
-\item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
-lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
-For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors. For all others, provide a length-2 vector for the mean and SD.
-See Articles section for full description.}
+\item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 
 \item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also \code{drop_highF}.}
 
@@ -151,6 +148,24 @@ The easiest way to turn off time-varying growth/M is by setting: \code{OM@Msd <-
 To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 index but the data won't enter the likelihood. See section on likelihood weights.
 }
+\section{Priors}{
+
+The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}. 
+For each parameter below, provide a vector of values as described:
+
+\itemize{
+\item \code{R0} - A vector of length 3. The first value indicates the distribution of the prior: \code{1} for lognormal, \code{2} for uniform
+on \code{log(R0)}, \code{3} for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
+Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).
+\item \code{h} - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+while Ricker steepness uses a normal distribution.
+\item \code{M} - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.
+\item \code{q} - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+for the SD (in log space). Use \code{NA} in rows corresponding to indices without priors.
+}
+See online documentation for more details.
+}
+
 \section{Online Documentation}{
 
 Several articles are available for the RCM:

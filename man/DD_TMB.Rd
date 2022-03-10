@@ -74,11 +74,7 @@ otherwise calculated from \code{Data@CAL}.}
 
 \item{start}{Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.}
 
-\item{prior}{A named list (R0, h, M, and q) to provide the mean and standard deviations of prior distributions for those parameters. R0, index q, and M priors are
-lognormal (provide the mean in normal space, SD in lognormal space). Beverton-Holt steepness uses a beta prior, while Ricker steepness uses a normal prior.
-For index q, provide a matrix for nsurvey rows and 2 columns (for mean and SD), with NA in rows corresponding to indices without priors.
-For all others, provide a length-2 vector for the mean and SD.
-See vignette for full description.}
+\item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 
 \item{fix_h}{Logical, whether to fix steepness to value in \code{Data@steep} in the assessment model.
 Automatically false if a prior is used.}
@@ -157,6 +153,24 @@ proportionality between the abundance index and real abundance.
 Unsurprisingly the extent to which these assumptions are
 violated tends to be the biggest driver of performance for this method.
 }
+\section{Priors}{
+
+The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}. 
+For each parameter below, provide a vector of values as described:
+
+\itemize{
+\item \code{R0} - A vector of length 3. The first value indicates the distribution of the prior: \code{1} for lognormal, \code{2} for uniform
+on \code{log(R0)}, \code{3} for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
+Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).
+\item \code{h} - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+while Ricker steepness uses a normal distribution.
+\item \code{M} - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.
+\item \code{q} - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+for the SD (in log space). Use \code{NA} in rows corresponding to indices without priors.
+}
+See online documentation for more details.
+}
+
 \section{Online Documentation}{
 
 Model description and equations are available on the openMSE 
