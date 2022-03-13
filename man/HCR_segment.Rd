@@ -85,7 +85,8 @@ in the \linkS4class{Assessment} object is specified:
 DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", OCP = c(0.1, 0.4), relF = c(0, 1)) 
 #' 
 # This is an MP with a 40-10 harvest control rule with a maximum F of 0.1
-DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", Ftarget_type = "abs", OCP = c(0.1, 0.4), relF = c(0, 0.1)) 
+DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", 
+                    Ftarget_type = "abs", OCP = c(0.1, 0.4), relF = c(0, 0.1)) 
 }
 \author{
 Q. Huynh

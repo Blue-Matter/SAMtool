@@ -326,7 +326,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                      log_early_rec_dev = log_early_rec_dev, log_rec_dev = log_rec_dev)
   
   if(RCMdata@Misc$condition == "catch") {
-    TMB_params$log_F_dev[TMB_data$yind_F + 1, 1:nfleet] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
+    TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, ] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
   }
   
   # Map list (to fix parameters)

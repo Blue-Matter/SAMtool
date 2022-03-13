@@ -70,9 +70,6 @@ A convenient wrapper function (\code{posterior}) to sample the posterior using M
 and returns a \code{stanfit} object for diagnostics. Use \code{RCMstan} to update the RCM and the enclosed operating model
 with MCMC samples..
 }
-\details{
-
-}
 \author{
 Q. Huynh
 }

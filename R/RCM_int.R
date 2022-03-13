@@ -84,7 +84,9 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       
       if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
       if(snowfall::sfIsRunning()) {
-        res <- sfLapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
+        res <- snowfall::sfClusterApplyLB(1:nsim, RCM_report_samps, samps = samps, 
+                                          obj = mean_fit_output$obj, 
+                                          conv = mean_fit_output$report$conv)
       } else {
         res <- lapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
       }

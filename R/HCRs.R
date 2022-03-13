@@ -58,7 +58,8 @@
 #' DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", OCP = c(0.1, 0.4), relF = c(0, 1)) 
 #' #' 
 #' # This is an MP with a 40-10 harvest control rule with a maximum F of 0.1
-#' DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", Ftarget_type = "abs", OCP = c(0.1, 0.4), relF = c(0, 0.1)) 
+#' DD_40_10 <- make_MP(DD_TMB, HCR_segment, OCP_type = "SSB_SSB0", 
+#'                     Ftarget_type = "abs", OCP = c(0.1, 0.4), relF = c(0, 0.1)) 
 #' @export
 HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBMSY", "SSB_dSSB0", "F_FMSY", "F_F01", "F_FSPR"),
                         Ftarget_type = c("FMSY", "F01", "Fmax", "FSPR", "abs"), 

@@ -9,8 +9,6 @@
 #'
 #' @param x An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.
 #' @param ... Additional arguments to pass to \code{rstan::sampling} via \code{tmbstan::tmbstan}.
-#' @details
-#'
 #' @author Q. Huynh
 #' @return \code{posterior} returns an object of class \code{stanfit}. See \code{class?stanfit}.
 #' 
@@ -40,13 +38,10 @@ setMethod("posterior", signature(x = "RCModel"),
             if(!requireNamespace("tmbstan", quietly = TRUE)) stop("Install tmbstan to use this function.")
             
             xchar <- substitute(x) %>% as.character()
-            
             obj <- x@mean_fit$obj
             
             if(is.null(obj)) {
               stop(paste0("No TMB object was found in ", xchar, "@mean_fit$obj. Re-run RCM with mean_fit = TRUE."))
-            } else if(obj$env$data$condition != "catch2") { # With condition = "catch", infinitely diffuse prior on log_F_dev
-              stop("MCMC currently only supported with condition = \"catch2\".")
             }
             
             if(priors_only) {
@@ -92,7 +87,7 @@ setMethod("posterior", signature(x = "Assessment"),
             
             xchar <- substitute(x) %>% as.character()
             f <- get(paste0("posterior_", x@Model))
-            f(x, xchar, chains, iter, warmup, seed)
+            f(x, ...)
           })
 
 
@@ -141,7 +136,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   
   if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
   if(snowfall::sfIsRunning()) {
-    res <- sfLapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE)
+    res <- snowfall::sfLapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE)
   } else {
     res <- lapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE)
   }
