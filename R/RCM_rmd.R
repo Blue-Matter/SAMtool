@@ -302,15 +302,15 @@ rmd_RCM_index_output <- function(sur, s_name) {
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", s_name[sur], ".\"}"),
            paste0("if(length(RCMdata@IAA) && any(RCMdata@IAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
-           paste0("pred_sCAA <- lapply(report_list, function(x) x$IAA[,, ", sur, "]) %>% simplify2array() %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_RCM(Year, pred_sCAA, RCMdata@IAA[, , ", sur, "], ages = age, dat_col = scenario$col)"),
+           paste0("pred_IAA <- sapply(report_list, function(x) x$IAA[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
+           paste0("plot_composition_RCM(Year, pred_IAA, RCMdata@IAA[, , ", sur, "], ages = age, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) length composition from ", s_name[sur], ".\"}"),
            paste0("if(length(RCMdata@IAL) && any(RCMdata@IAL[, , ", sur, "] > 0, na.rm = TRUE)) {"),
-           paste0("pred_sCAL <- lapply(report_list, function(x) x$IAL[,, ", sur, "]) %>% simplify2array() %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_RCM(Year, pred_sCAL, RCMdata@IAL[, , ", sur, "], CAL_bins = RCMdata@Misc$lbinmid, dat_col = scenario$col)"),
+           paste0("pred_IAL <- sapply(report_list, function(x) x$IAL[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
+           paste0("plot_composition_RCM(Year, pred_IAL, RCMdata@IAL[, , ", sur, "], CAL_bins = RCMdata@Misc$lbinmid, dat_col = scenario$col)"),
            "}",
            "```\n"
   )
@@ -551,14 +551,16 @@ plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = 
   }
   
   # Annual comps (fit vs. dat if available)
-  # Dim of
-  fit_plot <- fit
-  dat_plot <- dat
   if(annual_yscale == "proportions") {
-    for(i in 1:length(Year)) {
-      fit_plot[, i, ] <- fit[, i, ]/rowSums(fit[, i, ])
-      if(!is.null(dat)) dat_plot[i, ] <- dat[i, ]/sum(dat[i, ])
+    fit_plot <- apply(fit, 1:2, function(x) x/sum(x)) %>% aperm(c(2, 3, 1))
+    if(!is.null(dat)) {
+      dat_plot <- dat/rowSums(dat)
+    } else {
+      dat_plot <- dat
     }
+  } else {
+    fit_plot <- fit
+    dat_plot <- dat
   }
   ylim <- c(0, 1.1 * max(fit_plot, dat_plot, na.rm = TRUE))
   yaxp <- c(0, max(pretty(ylim, n = 4)), 4)
