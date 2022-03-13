@@ -417,7 +417,7 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length
   }
   
   out$h <- vapply(res, getElement, numeric(1), "h")
-  out$Mest <- vapply(res, getElement, numeric(1), "Mest")
+  out$Mest <- vapply(res, function(x) ifelse(is.null(x$Mest), NA_real_, x$Mest), numeric(1))
   
   out$SSB <- sapply(res, getElement, "E") %>% t()
   out$NAA <- sapply(res, getElement, "N", simplify = "array") %>% aperm(c(3, 1, 2))
