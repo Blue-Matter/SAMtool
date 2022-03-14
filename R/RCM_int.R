@@ -39,22 +39,23 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   # Selectivity
   if(length(selectivity) == 1) selectivity <- rep(selectivity, RCMdata@Misc$nsel_block)
   if(length(selectivity) < RCMdata@Misc$nsel_block) stop("selectivity vector should be of length ", RCMdata@Misc$nsel_block, ").", call. = FALSE)
-  sel <- int_sel(selectivity)
+  sel <- int_sel(selectivity, RCMdata)
   
   # Survey selectivity
   if(nsurvey > 0) {
     if(is.null(s_selectivity)) s_selectivity <- rep("B", nsurvey)
     if(length(s_selectivity) == 1) s_selectivity <- rep(s_selectivity, nsurvey)
-    s_sel <- int_s_sel(s_selectivity, nfleet)
+    s_sel <- int_s_sel(s_selectivity, RCMdata)
   } else {
-    s_sel <- int_s_sel("B")
+    s_sel <- int_s_sel(NULL)
   }
   
   # Likelihood weights
+  message("\n")
   RCMdata@Misc$LWT <- make_LWT(LWT, nfleet, nsurvey)
   
   # SR
-  message(ifelse(OM@SRrel == 1, "Beverton-Holt", "Ricker"), " stock-recruitment relationship used.")
+  message("\n", ifelse(OM@SRrel == 1, "Beverton-Holt", "Ricker"), " stock-recruitment relationship used.")
   
   # Generate priors
   prior <- make_prior(prior, nsurvey, OM@SRrel, dots)
@@ -394,7 +395,7 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length
     res[1] <- res[1] * x$R_eq/x$R0
     return(res)
   }
-  out$Perr <- sapply(res, make_Perr, obj_data = obj_data) %>% t()
+  out$Perr <- vapply(res, make_Perr, numeric(nyears), obj_data = obj_data) %>% t()
   
   make_early_Perr <- function(x, obj_data) {
     res <- x$R_eq * x$NPR_equilibrium / x$R0 / x$NPR_unfished[1, ]
@@ -403,9 +404,9 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length
     out <- res[-1] * early_dev
     return(rev(out))
   }
-  out$early_Perr <- sapply(res, make_early_Perr, obj_data = obj_data) %>% t()
+  out$early_Perr <- vapply(res, make_early_Perr, numeric(maxage), obj_data = obj_data) %>% t()
   
-  out$log_rec_dev <- sapply(res, getElement, "log_rec_dev") %>% t()
+  out$log_rec_dev <- vapply(res, getElement, numeric(nyears), "log_rec_dev") %>% t()
 
   if(!all(out$log_rec_dev == 0)) {
     out$AC <- apply(out$log_rec_dev, 1, function(x) {
@@ -419,7 +420,7 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length
   out$h <- vapply(res, getElement, numeric(1), "h")
   out$Mest <- vapply(res, function(x) ifelse(is.null(x$Mest), NA_real_, x$Mest), numeric(1))
   
-  out$SSB <- sapply(res, getElement, "E") %>% t()
+  out$SSB <- vapply(res, getElement, numeric(nyears + 1), "E") %>% t()
   out$NAA <- sapply(res, getElement, "N", simplify = "array") %>% aperm(c(3, 1, 2))
   out$CAA <- sapply(res, getElement, "CAApred", simplify = "array") %>% aperm(c(4, 1:3))
   out$CAL <- sapply(res, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))

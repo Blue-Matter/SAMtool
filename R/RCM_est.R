@@ -489,8 +489,7 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
     M <- data$M_data
   }
   report$F_at_age <- report$Z - M
-  NPR_unfished <- do.call(rbind, report$NPR_unfished)
-  report$NPR_unfished <- NULL
+  report$NPR_unfished <- do.call(rbind, report$NPR_unfished)
   report$SPR_eq <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt)
   report$SPR_dyn <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt, 
                             N_at_age = report$N, R = report$R, R_early = report$R_early,
@@ -511,8 +510,8 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
     })
   }
   report$R0_annual <- report$E0/report$EPR0
-  report$N0 <- apply(NPR_unfished * report$R0_annual, 1, sum)
-  report$B0 <- apply(NPR_unfished * report$R0_annual * data$wt[1:data$n_y, ], 1, sum)
+  report$N0 <- apply(report$NPR_unfished * report$R0_annual, 1, sum)
+  report$B0 <- apply(report$NPR_unfished * report$R0_annual * data$wt[1:data$n_y, ], 1, sum)
 
   lmid <- obj$env$data$lbinmid
   nlbin <- length(lmid)

@@ -376,9 +376,9 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
       message(
         switch(
           use_prior[1],
-          "1" = "Lognormal prior for R0 found",
-          "2" = "Uniform prior for log(R0) found",
-          "3" = "Uniform prior for R0 found"
+          "1" = "Lognormal prior for R0 found.",
+          "2" = "Uniform prior for log(R0) found.",
+          "3" = "Uniform prior for R0 found."
         )
       )
     }
