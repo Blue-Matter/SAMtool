@@ -171,7 +171,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    nll_gr = 0L)
                    
   TMB_data$est_vul <- ifelse(is.na(map$vul_par) | duplicated(map$vul_par), 0, 1) %>%
-    matrix(length(map$vul_par)/nfleet, nfleet)
+    matrix(length(map$vul_par)/RCMdata@Misc$nsel_block, RCMdata@Misc$nsel_block)
   TMB_data$est_ivul <- ifelse(is.na(map$ivul_par) | duplicated(map$ivul_par), 0, 1) %>%
     matrix(length(map$ivul_par)/nsurvey, nsurvey)
   
@@ -211,6 +211,14 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, RCMdata@Misc$nsel_block)
   } else {
     vul_par <- dots$vul_par
+    
+    if(ncol(vul_par) != RCMdata@Misc$nsel_block) {
+      stop("vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
+    }
+    if(any(selectivity == -2) && nrow(vul_par) != n_age) {
+      stop("vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
+    }
+    
   }
   
   # Check for functional selectivity functions (dome or logistic)
@@ -250,6 +258,13 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     }
   } else {
     map_vul_par <- dots$map_vul_par
+    
+    if(ncol(map_vul_par) != RCMdata@Misc$nsel_block) {
+      stop("map_vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
+    }
+    if(any(selectivity == -2) && nrow(map_vul_par) != n_age) {
+      stop("map_vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
+    }
   }
   
   if(any(selectivity == -2)) {
@@ -266,6 +281,13 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     ivul_par <- matrix(c(LFS, L5, Vmaxlen), 3, nsurvey)
   } else {
     ivul_par <- dots$ivul_par
+    
+    if(ncol(ivul_par) != nsurvey) {
+      stop("ivul_par needs to be a matrix with ", nsurvey, " columns.")
+    }
+    if(any(s_selectivity == -2) && nrow(ivul_par) != n_age) {
+      stop("ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
+    }
   }
   
   # Check for function selectivity (dome/logistic)
@@ -296,6 +318,13 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     }
   } else {
     map_ivul_par <- dots$map_ivul_par
+    
+    if(ncol(map_ivul_par) != nsurvey) {
+      stop("ivul_par needs to be a matrix with ", nsurvey, " columns.")
+    }
+    if(any(s_selectivity == -2) && nrow(map_ivul_par) != n_age) {
+      stop("ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
+    }
   }
   
   if(any(s_selectivity == -2)) {
@@ -342,8 +371,11 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   map$vul_par <- factor(map_vul_par)
   map$ivul_par <- factor(map_ivul_par)
   
-  if(RCMdata@Misc$condition != "effort") {
+  if(RCMdata@Misc$condition == "effort") {
+    map$log_F_equilibrium <- factor(rep(NA, nfleet))
+  } else {
     map$log_q_effort <- factor(rep(NA, nfleet))
+    
     if(any(RCMdata@C_eq == 0)) {
       map$log_F_equilibrium <- local({
         m <- rep(NA, nfleet)
@@ -351,9 +383,8 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
         factor(m)
       })
     }
-  } else {
-    map$log_F_equilibrium <- factor(rep(NA, nfleet))
   }
+  
   if(RCMdata@Misc$condition != "catch") {
     map$log_F_dev <- factor(matrix(NA, nyears, nfleet))
   }
@@ -363,12 +394,18 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     map$log_early_rec_dev <- factor(rep(NA, n_age - 1))
   } else {
     map$log_early_rec_dev <- factor(dots$map_log_early_rec_dev)
+    if(length(map$log_early_rec_dev) != n_age - 1) {
+      stop("map_log_early_rec_dev needs to be a vector of length ", n_age - 1)
+    }
   }
   
   if(is.null(dots$map_log_rec_dev)) {
     map$log_rec_dev <- factor(1:nyears)
   } else {
     map$log_rec_dev <- factor(dots$map_log_rec_dev)
+    if(length(map$log_rec_dev) != n_age - 1) {
+      stop("map_log_rec_dev needs to be a vector of length ", nyears)
+    }
   }
   
   list(params = TMB_params, map = map)
@@ -421,10 +458,12 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
     
   } else if(obj$env$data$condition == "catch2") {
     
-    new_args <- RCM_retro_subset(obj$env$data$n_y, data = obj$env$data, params = obj$env$parameters, map = obj$env$map)
+    new_args <- RCM_retro_subset(obj$env$data$n_y, data = obj$env$data, 
+                                 params = obj$env$parameters, map = obj$env$map)
     new_args$data$C_hist <- matrix(1e-8, new_args$data$n_y, new_args$data$nfleet)
     
-    obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, map = new_args$map, random = obj$env$random,
+    obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, 
+                      map = new_args$map, random = obj$env$random,
                       DLL = "SAMtool", silent = TRUE)
     out <- obj2$report(par)$E
     
@@ -438,6 +477,10 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
   return(out)
 }
 
+# Calculate annual values of:
+# F-at-age, dynamic and static SPR, dynamic SSB0, compensation ratio,
+# steepness, unfished reference points (remove from output unfished numbers per recruit),
+# selectivity at length
 RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic_SSB0 = TRUE) {
   data <- obj$env$data
   if(data$use_prior[3]) {
@@ -446,7 +489,8 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
     M <- data$M_data
   }
   report$F_at_age <- report$Z - M
-  report$NPR_unfished <- do.call(rbind, report$NPR_unfished)
+  NPR_unfished <- do.call(rbind, report$NPR_unfished)
+  report$NPR_unfished <- NULL
   report$SPR_eq <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt)
   report$SPR_dyn <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt, 
                             N_at_age = report$N, R = report$R, R_early = report$R_early,
@@ -466,9 +510,9 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
       ifelse(h < 0.2, NA_real_, h)
     })
   }
-  report$N0 <- apply(report$NPR_unfished * report$E0/report$EPR0, 1, sum)
-  report$B0 <- apply(report$NPR_unfished * report$E0/report$EPR0 * data$wt[1:data$n_y, ], 1, sum)
   report$R0_annual <- report$E0/report$EPR0
+  report$N0 <- apply(NPR_unfished * report$R0_annual, 1, sum)
+  report$B0 <- apply(NPR_unfished * report$R0_annual * data$wt[1:data$n_y, ], 1, sum)
 
   lmid <- obj$env$data$lbinmid
   nlbin <- length(lmid)
@@ -493,7 +537,7 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
 }
 
 get_vul_len <- function(report, selectivity, lmid, Linf) {
-  vul <- matrix(NA, length(lmid), length(selectivity))
+  vul <- matrix(NA_real_, length(lmid), length(selectivity))
   sel_ind  <- selectivity == 0 | selectivity == -1
   LFS <- report$LFS[sel_ind]
   L5 <- report$L5[sel_ind]
@@ -510,7 +554,7 @@ get_vul_len <- function(report, selectivity, lmid, Linf) {
 }
 
 get_ivul_len <- function(report, s_selectivity, lmid, Linf) {
-  ivul_len <- matrix(NA, length(lmid), length(s_selectivity)) # length-based: matrix of dimension nlbin, nsurvey
+  ivul_len <- matrix(NA_real_, length(lmid), length(s_selectivity)) # length-based: matrix of dimension nlbin, nsurvey
   for(i in 1:ncol(ivul_len)) {
     if(s_selectivity[i] == -1 || s_selectivity[i] == 0) {
       sls <- (report$iLFS[i] - report$iL5[i])/sqrt(-log(0.05, 2))

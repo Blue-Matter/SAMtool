@@ -466,7 +466,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(EPR0_SR);
   REPORT(CR_SR);
 
-  if(nll_fleet.col(3).sum() != 0 || nll_index.col(2).sum() != 0 || ((nll_fleet.col(4).sum() != 0) & (msize_type == "length"))) REPORT(ALK);
+  //if(nll_fleet.col(3).sum() != 0 || nll_index.col(2).sum() != 0 || ((nll_fleet.col(4).sum() != 0) & (msize_type == "length"))) REPORT(ALK);
   REPORT(N);
   REPORT(CAApred);
   REPORT(CALpred);
