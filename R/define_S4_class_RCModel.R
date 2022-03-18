@@ -230,6 +230,36 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             OM_update <- c("# Summary {.tabset}\n",
                            "## Updated historical OM parameters\n", rmd_RCM_R0(),
                            rmd_RCM_D(), rmd_RCM_Perr(), rmd_RCM_Find(), rmd_RCM_sel())
+            
+            vary_R0 <- !is.null(OM@cpars$R0) && length(unique(OM@cpars$R0)) > 1 
+            vary_D <- !is.null(OM@cpars$D) && length(unique(OM@cpars$R0)) > 1
+            vary_hs <- !is.null(OM@cpars$hs) && length(unique(OM@cpars$hs)) > 1
+            vary_M <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1 # Only plot there is a prior
+            
+            if(sum(vary_R0, vary_D, vary_hs, vary_M) > 1) {
+              vars <- c("R0", "D", "hs", "M")
+              var_labs <- c(R0 = "expression(R[0])", D = "Depletion", hs = "Steepness", M = "Natural mortality")
+              var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", M = "natural mortality")
+              
+              corr_series <- do.call(rbind, lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])))
+              corr_rmd <- local({
+                if(vary_M) OM@cpars$M <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
+                lapply(1:nrow(corr_series), function(i) {
+                  x <- corr_series$x[i]
+                  y <- corr_series$y[i]
+                  if(eval(as.symbol(paste0("vary_", x))) && eval(as.symbol(paste0("vary_", y)))) { 
+                    rmd_corr(paste0("OM@cpars$", x), paste0("OM@cpars$", y), 
+                             var_labs[x], var_labs[y], 
+                             paste0("Correlation between ", var_names[x], " and ", var_names[y], " in operating model.")
+                             )
+                  } else {
+                    ""
+                  }
+                })
+              })
+              
+              OM_update <- c(OM_update, "## Correlations\n", do.call(c, corr_rmd))
+            }
 
             ####### Output from all simulations {.tabset}
             fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
@@ -444,20 +474,12 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               corr_matrix <- c("### Correlation matrix\n",
                                "`r SD$env$corr.fixed %>% structure(dimnames = list(make_unique_names(rownames(.)), make_unique_names(colnames(.)))) %>% as.data.frame()`\n\n")
               
-              if(!is.null(dots$gradient) && !dots$gradient) {
-                like_gradients <- NULL
-              } else if(conv && is.array(report$nll_fleet)) {
-                like_gradients <- c("### Likelihood gradients {.tabset}\n", rmd_RCM_likelihood_gradients(f_name, s_name, do_index = any(RCMdata@Index > 0, na.rm = TRUE)))
-              } else {
-                like_gradients <- NULL
-              }
-              
               if(exists("retro", inherits = FALSE)) {
                 ret <- rmd_RCM_retrospective(render_args)
               } else ret <- NULL
               
 
-              mean_fit_rmd <- c(sumry, LH_section, data_section, ts_output, nll_table, corr_matrix, like_gradients, ret)
+              mean_fit_rmd <- c(sumry, LH_section, data_section, ts_output, nll_table, corr_matrix, ret)
             } else {
               mean_fit_rmd <- c("## Fit to mean parameters of OM {.tabset}\n",
                                 "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")

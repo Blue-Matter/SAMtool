@@ -4,7 +4,8 @@ max <- function(..., na.rm = TRUE) suppressWarnings(base::max(..., na.rm = na.rm
 arrows <- function(...) suppressWarnings(graphics::arrows(...))
 
 hist.numeric <- function(x, ...) {
-  if(all(!diff(x))) {
+  if(all(!diff(signif(x, 3)))) {
+    x <- signif(x, 3)
     breaks <- c(0.99, 1.01) * x[1]
     xlim <- c(0.8, 1.2) * x[1]
     graphics::hist.default(x, breaks = breaks, xlim = xlim, ...)

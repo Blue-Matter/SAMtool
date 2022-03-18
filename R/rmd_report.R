@@ -112,6 +112,7 @@ rmd_data_timeseries <- function(type, header = NULL, is_matrix = FALSE, nsets = 
   return(ans)
 }
 
+
 rmd_data_MW <- function(header = NULL) {
   ans <- c("```{r, fig.cap=\"Mean weight time series.\"}",
            "plot_timeseries(info$Year, info$data$MW_hist, label = \"Mean weight\")",
@@ -629,6 +630,13 @@ rmd_retrospective <- function() {
     "```{r}",
     "as.data.frame(summary(retro))",
     "plot(retro)",
+    "```\n")
+}
+
+
+rmd_corr <- function(xchar, ychar, xlab, ylab, fig.cap) {
+  c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
+    paste0("plot(", xchar, ", ", ychar, ", xlab = \"", xlab, "\", ylab = \"", ylab, "\", pch = 21, bg = \"grey\")"),
     "```\n")
 }
 

@@ -105,8 +105,8 @@ rmd_RCM_Find <- function(fig.cap = "Apical F from RCM model. These values may be
 
 rmd_RCM_sel <- function(fig.cap = "Operating model selectivity among simulations.") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
-    "if(nsel_block == 1) {",
-    "  vul <- do.call(cbind, lapply(report_list, getElement, \"vul_len\"))",
+    "vul <- sapply(report_list, getElement, \"vul_len\")",
+    "if(nsel_block == 1 && all(!is.na(vul))) {",
     "  matplot(RCMdata@Misc$lbinmid, vul, type = \"l\", col = \"black\",",
     "          xlab = \"Length\", ylab = \"Selectivity (last historical year)\", ylim = c(0, 1.1))",
     "} else {",
@@ -319,7 +319,7 @@ rmd_RCM_index_output <- function(sur, s_name) {
 
 rmd_RCM_initD <- function(fig.cap = "Histogram of initial depletion among all simulations.") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
-    "initD <- vapply(report_list, function(x) x$E[1]/x$E0[1], numeric(1))",
+    "initD <- vapply(report_list, function(x) x$E[1]/x$E0_SR, numeric(1))",
     "hist(initD, main = \"\", xlab = \"Initial depletion\")",
     "```\n")
 }
