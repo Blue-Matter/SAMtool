@@ -32,6 +32,7 @@ Type SCA(objective_function<Type> *obj) {
   DATA_INTEGER(n_bin);    // Number of length bins
   DATA_VECTOR(weight);    // Weight-at-age at the beginning of the year
   DATA_MATRIX(PLA);       // Probability matrix of length-at-age
+  DATA_VECTOR(M_data);    // Fixed M vector to support M at age
   DATA_VECTOR(mat);       // Maturity-at-age at the beginning of the year
   
   DATA_STRING(vul_type);  // String indicating whether logistic or dome vul is used
@@ -86,13 +87,15 @@ Type SCA(objective_function<Type> *obj) {
   }
   
   ////// Equilibrium reference points and per-recruit quantities
-  Type M0_eq;
-  if(tv_M == "DD") {
-    M0_eq = M_bounds(0);
+  vector<Type> NPR0(n_age);
+  if(M_data.size() == n_age) { // Age-dependent M (fixed)
+    NPR0 = calc_NPR(Type(0), vul, M_data, n_age, catch_eq == "Pope");
+  } else if(tv_M == "DD") {    // Density-dependent M
+    NPR0 = calc_NPR(Type(0), vul, M_bounds(0), n_age, catch_eq == "Pope");
   } else {
-    M0_eq = M0;
+    NPR0 = calc_NPR(Type(0), vul, M0, n_age, catch_eq == "Pope");
   }
-  vector<Type> NPR0 = calc_NPR(Type(0), vul, M0_eq, n_age, catch_eq == "Pope");
+  
   Type EPR0 = sum_EPR(NPR0, weight, mat);
   Type B0 = R0 * sum_BPR(NPR0, weight);
   Type N0 = R0 * NPR0.sum();
@@ -140,14 +143,16 @@ Type SCA(objective_function<Type> *obj) {
   E.setZero();
 
   // Equilibrium quantities (leading into first year of model)
-  Type M_equilibrium;
-  if(tv_M == "DD") {
-    M_equilibrium = CppAD::CondExpEq(F_equilibrium, Type(0), M_bounds(0),
-                                     calc_M_eq(F_equilibrium, B0, R0, M_bounds, vul, weight, n_age, catch_eq == "Pope")); 
+  vector<Type> NPR_equilibrium(n_age);
+  if(M_data.size() == n_age) { // Age-dependent M (fixed)
+    NPR_equilibrium = calc_NPR(F_equilibrium, vul, M_data, n_age, catch_eq == "Pope");
+  } else if(tv_M == "DD") {           // Density-dependent M
+    Type M_equilibrium = CppAD::CondExpEq(F_equilibrium, Type(0), M_bounds(0),
+                                          calc_M_eq(F_equilibrium, B0, R0, M_bounds, vul, weight, n_age, catch_eq == "Pope")); 
+    NPR_equilibrium = calc_NPR(F_equilibrium, vul, M_equilibrium, n_age, catch_eq == "Pope");
   } else {
-    M_equilibrium = M0;
+    NPR_equilibrium = calc_NPR(F_equilibrium, vul, M0, n_age, catch_eq == "Pope");
   }
-  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, M_equilibrium, n_age, catch_eq == "Pope");
   Type EPR_eq = sum_EPR(NPR_equilibrium, weight, mat);
   
   Type R_eq;
@@ -176,7 +181,9 @@ Type SCA(objective_function<Type> *obj) {
   }
   
   // Calculate this year's M, then VB
-  if(tv_M == "DD") {
+  if(M_data.size() == n_age) { // Age-dependent M (fixed)
+    M.row(0) = M_data;
+  } else if(tv_M == "DD") {
     Type M_y = CppAD::CondExpLe(B(0)/B0, Type(1), M_bounds(0) + (M_bounds(1) - M_bounds(0)) * (1 - B(0)/B0),
                                 M_bounds(0));
     M.row(0).fill(M_y);
@@ -248,7 +255,9 @@ Type SCA(objective_function<Type> *obj) {
     for(int a=0;a<n_age;a++) B(y+1) += N(y+1,a) * weight(a);
     
     // Calculate next year's M
-    if(tv_M == "DD") {
+    if(M_data.size() == n_age) { // Age-dependent M (fixed)
+      M.row(y+1) = M_data;
+    } else if(tv_M == "DD") {
       Type M_y = CppAD::CondExpLe(B(y+1), B0, M_bounds(0) + (M_bounds(1) - M_bounds(0)) * (1 - B(y+1)/B0),
                                   M_bounds(0));
       M.row(y+1).fill(M_y);
@@ -386,7 +395,7 @@ Type SCA(objective_function<Type> *obj) {
     REPORT(logit_M);
     REPORT(logit_M_walk);
   }
-  if(tv_M == "DD") REPORT(M_equilibrium);
+  //if(tv_M == "DD") REPORT(M_equilibrium);
 
   REPORT(N);
   REPORT(CN);
