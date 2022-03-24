@@ -20,8 +20,12 @@ FMSY or UMSY and vulnerable biomass in terminal year.}
 An object of class \linkS4class{Rec} with the TAC recommendation.
 }
 \description{
-A simple control rule that specifies the total allowable catch (TAC) to be the
-product of current vulnerable biomass and UMSY.
+A simple control rule that specifies the total allowable catch (TAC) as a function of the abundance of the first 
+projection year and some fraction of FMSY/UMSY.
+}
+\details{
+The catch advice is calculated using the catch equation of the corresponding
+assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the catch advice for a specified \code{Ftarget}.
 }
 \examples{
 # create an MP to run in closed-loop MSE (fishes at UMSY)

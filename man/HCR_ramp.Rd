@@ -57,13 +57,16 @@ An object of class \linkS4class{Rec} with the TAC recommendation.
 }
 \description{
 An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
-as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
-is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
+as a function of an operational control point (OCP) such as spawning depletion or spawning biomass. The reduction in F is linear when the OCP
+is between the target OCP (TOCP) and the limit OCP (LOCP). The target F is maximized at or above the TOCP. Below the LOCP,
 the target F is minimized. For example, the TOCP and LOCP for 40\% and 10\% spawning depletion, respectively, in the 40-10 control rule.
 Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rule can generalized with more control points (>2) in \link{HCR_segment}.
 Class HCR objects are typically used with function \link{make_MP}.
 }
 \details{
+The catch advice is calculated using the catch equation of the corresponding
+assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the catch advice for a specified \code{Ftarget}.
+
 \emph{Operational control points (OCP_type)}
 
 The following are the available options for harvest control rule inputs, and the source of those values

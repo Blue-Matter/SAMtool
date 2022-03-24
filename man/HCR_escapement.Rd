@@ -40,6 +40,10 @@ An object of class \linkS4class{Rec} with the TAC recommendation.
 A simple control rule that allows fishing when the operational control point (OCP) is above some threshold.
 By default, this function sets the TAC at F = 100\% FMSY when spawning depletion > 0.1.
 }
+\details{
+The catch advice is calculated using the catch equation of the corresponding
+assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the catch advice for a specified \code{Ftarget}.
+}
 \examples{
 # create an MP to run in closed-loop MSE (fishes at FMSY when B/B0 > 0.2)
 SP_escapement <- make_MP(SP, HCR_escapement)

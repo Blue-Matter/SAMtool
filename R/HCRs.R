@@ -2,8 +2,8 @@
 #' Segmented harvest control rules
 #' 
 #' A linear segmented output control rule where the target F (used for the TAC recommendation) 
-#' is a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. 
-#' The joints of the HCR are specified by arguments \code{OCP} and \code{relF}. Beyond the range of \code{OCP}, the response will be flat.
+#' is a function of an operational control point (OCP) such as spawning depletion or spawning biomass. 
+#' The segments of the HCR are specified by arguments \code{OCP} and \code{relF}. Beyond the range of \code{OCP}, the response will be flat.
 #' \link{HCR_ramp} uses \code{HCR_segment} with two control points.
 #' 
 #' @param Assessment An object of class \linkS4class{Assessment} with estimates of
@@ -20,6 +20,10 @@
 #' @return An object of class \linkS4class{Rec} with the TAC recommendation.
 #' @author Q. Huynh
 #' @details 
+#' 
+#' The catch advice is calculated using the catch equation of the corresponding
+#' assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the catch advice for a specified \code{Ftarget}.
+#' 
 #' \emph{Operational control points (OCP_type)}
 #' 
 #' The following are the available options for harvest control rule inputs, and the source of those values
@@ -192,8 +196,8 @@ class(HCR_segment) <- "HCR"
 #' Linearly ramped harvest control rules
 #'
 #' An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
-#' as a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. The reduction in F is linear when the OCP
-#' is between the target OCP (TOCP) and the limit OCP (LOCP). Above the TOCP, the target F is maximized. Below the LOCP,
+#' as a function of an operational control point (OCP) such as spawning depletion or spawning biomass. The reduction in F is linear when the OCP
+#' is between the target OCP (TOCP) and the limit OCP (LOCP). The target F is maximized at or above the TOCP. Below the LOCP,
 #' the target F is minimized. For example, the TOCP and LOCP for 40\% and 10\% spawning depletion, respectively, in the 40-10 control rule.
 #' Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rule can generalized with more control points (>2) in \link{HCR_segment}.
 #' Class HCR objects are typically used with function \link{make_MP}.
@@ -298,14 +302,17 @@ class(HCR80_40MSY) <- "HCR"
 
 #' Harvest control rule to fish at some fraction of maximum sustainable yield
 #'
-#' A simple control rule that specifies the total allowable catch (TAC) to be the
-#' product of current vulnerable biomass and UMSY.
+#' A simple control rule that specifies the total allowable catch (TAC) as a function of the abundance of the first 
+#' projection year and some fraction of FMSY/UMSY. 
 #'
 #' @param Assessment An object of class \linkS4class{Assessment} with estimates of
 #' FMSY or UMSY and vulnerable biomass in terminal year.
 #' @param reps The number of stochastic samples of the TAC recommendation.
 #' @param MSY_frac The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75\% of FMSY).
 #' @param ... Miscellaneous arguments.
+#' @details 
+#' The catch advice is calculated using the catch equation of the corresponding
+#' assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the catch advice for a specified \code{Ftarget}.
 #' @return An object of class \linkS4class{Rec} with the TAC recommendation.
 #' @author Q. Huynh
 #' @references
@@ -346,6 +353,7 @@ class(HCR_MSY) <- "HCR"
 #' @param ... Miscellaneous arguments.
 #' @return An object of class \linkS4class{Rec} with the TAC recommendation.
 #' @author Q. Huynh
+#' @inherit HCR_MSY details 
 #' @references
 #' Deroba, J.J. and Bence, J.R. 2008. A review of harvest policies: Understanding relative
 #' performance of control rules. Fisheries Research 94:210-223.
@@ -382,7 +390,8 @@ class(HCR_escapement) <- "HCR"
 #' @param Ftarget The value of F.
 #' @return An object of class \linkS4class{Rec} with the TAC recommendation.
 #' @author Q. Huynh
-#' @seealso \link{make_MP} \link{HCR_ramp}
+#' @seealso \link{make_MP} \link{HCR_ramp}#' 
+#' @inherit HCR_MSY details 
 #' @examples
 #' # create an MP to run in closed-loop MSE (fishes at F = 0.2)
 #' F0.2 <- make_MP(SP, HCR_fixedF, Ftarget = 0.2)

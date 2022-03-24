@@ -19,6 +19,10 @@ An object of class \linkS4class{Rec} with the TAC recommendation.
 \description{
 A simple control rule that explicitly specifies the target apical F independent of any model.
 }
+\details{
+The catch advice is calculated using the catch equation of the corresponding
+assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the catch advice for a specified \code{Ftarget}.
+}
 \examples{
 # create an MP to run in closed-loop MSE (fishes at F = 0.2)
 F0.2 <- make_MP(SP, HCR_fixedF, Ftarget = 0.2)
@@ -28,7 +32,7 @@ myOM <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "F0.2"))
 }
 }
 \seealso{
-\link{make_MP} \link{HCR_ramp}
+\link{make_MP} \link{HCR_ramp}#'
 }
 \author{
 Q. Huynh

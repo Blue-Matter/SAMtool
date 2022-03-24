@@ -42,11 +42,14 @@ An object of class \linkS4class{Rec} with the TAC recommendation.
 }
 \description{
 A linear segmented output control rule where the target F (used for the TAC recommendation) 
-is a function of an operational control point (OCP) such as spawning depletion or spawning biomass relative to that at MSY. 
-The joints of the HCR are specified by arguments \code{OCP} and \code{relF}. Beyond the range of \code{OCP}, the response will be flat.
+is a function of an operational control point (OCP) such as spawning depletion or spawning biomass. 
+The segments of the HCR are specified by arguments \code{OCP} and \code{relF}. Beyond the range of \code{OCP}, the response will be flat.
 \link{HCR_ramp} uses \code{HCR_segment} with two control points.
 }
 \details{
+The catch advice is calculated using the catch equation of the corresponding
+assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the catch advice for a specified \code{Ftarget}.
+
 \emph{Operational control points (OCP_type)}
 
 The following are the available options for harvest control rule inputs, and the source of those values
