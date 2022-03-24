@@ -4,15 +4,19 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 ### New features
 - `RCM2MOM` converts the output of `RCM` to a multi-fleet operating model.
 - Vignette is now hosted [online](https://openmse.com/features-assessment-models/).
-- `interim_MP` updates include adding NULL catch for catch advice and adding missing feature to report assessment output when `diagnostic = 'full'`.
 - Added a beta version of `RCM_assess` for using the RCM model as an assessment in closed-loop projections. More arguments will be added in the future for flexibility with model configuration.
 - `make_project_MP` creates management procedures that update TAC annually from stock assessment projections.
-- Specify output F in terms of absolute magnitude (independent of model output) in `HCR_segment` and `HCR_ramp`.
 - `posterior` wrapper function added to run MCMC of RCM models. `RCMstan` updates OMs with MCMC output.
 
 ### Minor updates
 - Fix FSPR reporting `Shortcut` and `Perfect` assessment functions.
 - Fix F calculation in `HCR_segment` with yield per recruit (F01 and Fmax).
+- Updates to `interim_MP` include adding NULL catch for catch advice and adding missing feature to report assessment output when `diagnostic = 'full'`.
+- Create ability to specify output F in absolute magnitude (independent of model output) in `HCR_segment` and `HCR_ramp`.
+- Uniform prior available for `R0` and `log(R0)` for RCM models and assessment models.
+- Shared recruitment deviation parameters in `RCM` only enter the objective function once.
+- New correlation plots of estimated productivity parameters (steepness, M, R0, as well as depletion) in `RCM` reporting.
+- Clean up TMB code to fix clang-14 compiler warnings.
 
 ## SAMtool 1.2.5
 - `SCA_RWM` can accept multiple years to the `refyear` argument, e.g., `expression(1:Data@Year)`. The model will calculate reference points (MSY, unfished values, and steepness) using the mean M during the specified years.

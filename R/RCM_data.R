@@ -114,13 +114,9 @@ pull_Index <- function(Data, maxage) {
 
 
 
-int_s_sel <- function(s_selectivity, RCMdata) {
+int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
   if(is.null(s_selectivity)) return(-4)
-  
-  nfleet <- RCMdata@Misc$nfleet
-  nsurvey <- length(s_selectivity)
-  stopifnot(length(s_selectivity) == RCMdata@Misc$nsurvey)
-  
+
   s_sel <- suppressWarnings(as.numeric(s_selectivity)) # Numbers match fleets, otherwise see next lines
   s_sel[s_selectivity == "B"] <- -4
   s_sel[s_selectivity == "SSB"] <- -3
@@ -137,25 +133,29 @@ int_s_sel <- function(s_selectivity, RCMdata) {
     stop("Character entries for s_selectivity (for indices) must be either: \"B\", \"SSB\", \"logistic\", \"dome\", or \"free\"", call. = FALSE)
   }
   
-  message("\nIndex selectivity setup:")
-  for(sur in 1:nsurvey) {
-    if(s_sel[sur] > 0) {
-      sout <- paste("fishery fleet", s_sel[sur])
-    } else {
-      sout <- switch(s_sel[sur] %>% as.character(),
-                     "-4" = "total biomass",
-                     "-3" = "spawning biomass",
-                     "-2" = "individual parameters at age (free)",
-                     "-1" = "logistic function",
-                     "0" = "dome function")
+  if(!silent) {
+    nsurvey <- length(s_selectivity)
+    message("\nIndex selectivity setup:")
+    for(sur in 1:nsurvey) {
+      if(s_sel[sur] > 0) {
+        sout <- paste("fishery fleet", s_sel[sur])
+      } else {
+        sout <- switch(s_sel[sur] %>% as.character(),
+                       "-4" = "total biomass",
+                       "-3" = "spawning biomass",
+                       "-2" = "individual parameters at age (free)",
+                       "-1" = "logistic function",
+                       "0" = "dome function")
+      }
+      message("Index ", sur, ": ", sout)
     }
-    message("Index ", sur, ": ", sout)
   }
+  
   return(s_sel)
 }
 
 
-int_sel <- function(selectivity, RCMdata) {
+int_sel <- function(selectivity, RCMdata, silent = FALSE) {
   sel <- suppressWarnings(as.numeric(selectivity))
   sel[selectivity == "free"] <- -2
   sel[selectivity == "logistic"] <- -1
@@ -165,30 +165,32 @@ int_sel <- function(selectivity, RCMdata) {
     stop("Character entries for selectivity (for fleets) must be either: \"logistic\", \"dome\", or \"free\"", call. = FALSE)
   }
   
-  message("\nFishery selectivity setup:")
-  Yr <- RCMdata@Misc$CurrentYr - RCMdata@Misc$nyears:1 + 1
-  no_blocks <- apply(RCMdata@sel_block, 2, function(x) length(unique(x)) == 1) %>% all()
-  for(bb in 1:length(sel)) {
-    fout <- switch(sel[bb] %>% as.character(),
-                   "-2" = "individual parameters at age (free)",
-                   "-1" = "logistic function",
-                   "0" = "dome function")
-    if(no_blocks) {
-      message("Fleet ", bb, ": ", fout)
-    } else {
-      fleet <- lapply(1:ncol(RCMdata@sel_block), function(ff) {
-        y <- Yr[RCMdata@sel_block[, ff] == bb]
-        if(length(y)) {
-          if(all(diff(y) == 1)) {
-            paste0(ff, " (", range(y) %>% paste(collapse = "-"), ")")
+  if(!silent && !missing(RCMdata)) {
+    message("\nFishery selectivity setup:")
+    Yr <- RCMdata@Misc$CurrentYr - RCMdata@Misc$nyears:1 + 1
+    no_blocks <- apply(RCMdata@sel_block, 2, function(x) length(unique(x)) == 1) %>% all()
+    for(bb in 1:length(sel)) {
+      fout <- switch(sel[bb] %>% as.character(),
+                     "-2" = "individual parameters at age (free)",
+                     "-1" = "logistic function",
+                     "0" = "dome function")
+      if(no_blocks) {
+        message("Fleet ", bb, ": ", fout)
+      } else {
+        fleet <- lapply(1:ncol(RCMdata@sel_block), function(ff) {
+          y <- Yr[RCMdata@sel_block[, ff] == bb]
+          if(length(y)) {
+            if(all(diff(y) == 1)) {
+              paste0(ff, " (", range(y) %>% paste(collapse = "-"), ")")
+            } else {
+              paste0(ff, " (", range(y) %>% paste(collapse = "-"), ", with gaps)")
+            }
           } else {
-            paste0(ff, " (", range(y) %>% paste(collapse = "-"), ", with gaps)")
+            NULL
           }
-        } else {
-          NULL
-        }
-      })
-      message("Block ", bb, " (", fout, ") assigned to fishery:\n", do.call(c, fleet) %>% paste(collapse = "\n"))
+        })
+        message("Block ", bb, " (", fout, ") assigned to fishery:\n", do.call(c, fleet) %>% paste(collapse = "\n"))
+      }
     }
   }
   

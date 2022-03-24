@@ -269,7 +269,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   if(any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
   
   n_y <- length(C_hist)
-  if(!is.null(dots$M_at_age) && dots$M_at_age) {
+  if(any(names(dots) == "M_at_age") && dots$M_at_age) {
     M <- Data@Misc$StockPars$M_ageArray[x, , n_y] * Data@Obs$Mbias[x]
     prior$M <- NULL
   } else {
@@ -426,7 +426,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                CAL_hist = apply(CAL_hist, 1, tiny_comp) %>% t(), CAL_n = CAL_n_rescale,
                LWT = c(LWT$Index, LWT$CAA, LWT$CAL, LWT$Catch),
                n_y = n_y, n_age = n_age, n_bin = ncol(PLA), 
-               M_data = if(!is.null(dots$M_at_age) && dots$M_at_age) M else numeric(1),
+               M_data = M,
                weight = Wa, PLA = PLA, mat = mat_age, vul_type = vulnerability,
                SR_type = SR, comp_dist = comp_dist, catch_eq = catch_eq,
                est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y),

@@ -4,24 +4,71 @@
 \alias{RCM_assess}
 \title{The rapid conditioning model as an assessment function}
 \usage{
-RCM_assess(x = 1, Data, selectivity = c("logistic", "dome"), CAA_ESS = 50, ...)
+RCM_assess(
+  x = 1,
+  Data,
+  AddInd = "B",
+  SR = c("BH", "Ricker"),
+  selectivity = c("logistic", "dome"),
+  CAA_multiplier = 50,
+  prior = list(),
+  LWT = list(),
+  StockPars = "Data",
+  ...
+)
 }
 \arguments{
 \item{x}{A position in the Data object (by default, equal to one for assessments).}
 
 \item{Data}{An object of class Data}
 
+\item{AddInd}{A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
+the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in
+Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd. Vulnerability to the survey is fixed in the model.}
+
+\item{SR}{Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).}
+
 \item{selectivity}{Whether to model "logistic" or "dome" selectivity for the fishery.}
 
-\item{CAA_ESS}{The annual multinomial sample size for the fishery age composition.}
+\item{CAA_multiplier}{Numeric for data weighting of catch-at-age matrix. If greater than 1, then this is the maximum multinomial sample size
+in any year. If less than one, then the multinomial sample size is this fraction of the sample size.}
+
+\item{prior}{A named list for the parameters of any priors to be added to the model. See documentation in \link{SCA}.}
+
+\item{LWT}{A named list (Index, CAA, Catch) of likelihood weights for the data components. For the index, a vector of length survey. For
+CAL and Catch, a single value.}
+
+\item{StockPars}{Either a string ("Data" or "OM") to indicate whether to grab biological parameters from the Data object,
+or operating model. Alternatively, a named list to provide custom parameters for the assessment.}
 
 \item{...}{Additional arguments (to be added).}
 }
 \description{
-In beta testing. A function that uses RCM as an assessment function for use in MPs. Many more function arguments will be added
-to tinker with model settings and data inputs. Currently uses catch, CAA, and biomass index from Data object, as well as biological
-parameters in \code{Data@Misc$StockPars}.
+In beta testing. A function that uses RCM as an assessment function for use in MPs. More function arguments will be added
+to tinker with model settings and data inputs.
 }
+\section{Data}{
+
+Currently uses catch, CAA, and indices of abundance in the corresponding slots in the Data object.
+}
+
+\section{StockPars}{
+
+Biological parameters can be used from the (1) Data object, (2) operating model, or (3) provided directly in the
+\code{StockPars} argument.
+
+Options 2 and 3 allow for time-varying growth, maturity, and natural mortality. Natural mortality can also be age-varying.
+
+\code{StockPars} can be a named list of parameters used to provide inputs to the assessment model:
+
+\itemize{
+\item \code{Wt_age} - annual weight at age, array [sim, ages, year]
+\item \code{Mat_age} - annual maturity at age, array [sim, ages, year]
+\item \code{hs} - Stock-recruit steepness, vector of length [sim]
+\item \code{M_ageArray} - annual natural mortality, array [sim, ages, year]  
+}
+}
+
 \examples{
  
 r <- RCM_assess(Data = SimulatedData)

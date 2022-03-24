@@ -44,8 +44,12 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   # Survey selectivity
   if(nsurvey > 0) {
     if(is.null(s_selectivity)) s_selectivity <- rep("B", nsurvey)
-    if(length(s_selectivity) == 1) s_selectivity <- rep(s_selectivity, nsurvey)
-    s_sel <- int_s_sel(s_selectivity, RCMdata)
+    if(length(s_selectivity) == 1) {
+      s_selectivity <- rep(s_selectivity, nsurvey)
+    } else {
+      stop("Length of s_selectivity is not equal to ", nsurvey)
+    }
+    s_sel <- int_s_sel(s_selectivity, nfleet)
   } else {
     s_sel <- int_s_sel(NULL)
   }
