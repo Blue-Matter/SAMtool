@@ -238,7 +238,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             
             if(sum(vary_R0, vary_D, vary_hs, vary_M) > 1) {
               vars <- c("R0", "D", "hs", "M")
-              var_labs <- c(R0 = "expression(R[0])", D = "Depletion", hs = "Steepness", M = "Natural mortality")
+              var_labs <- c(R0 = "expression(R[0])", D = "\"Depletion\"", hs = "\"Steepness\"", M = "\"Natural mortality\"")
               var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", M = "natural mortality")
               
               corr_series <- do.call(rbind, lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])))

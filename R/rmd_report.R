@@ -636,7 +636,7 @@ rmd_retrospective <- function() {
 
 rmd_corr <- function(xchar, ychar, xlab, ylab, fig.cap) {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
-    paste0("plot(", xchar, ", ", ychar, ", xlab = \"", xlab, "\", ylab = \"", ylab, "\", pch = 21, bg = \"grey\")"),
+    paste0("plot(", xchar, ", ", ychar, ", xlab = ", xlab, ", ylab = ", ylab, ", pch = 21, bg = \"grey\")"),
     "```\n")
 }
 
