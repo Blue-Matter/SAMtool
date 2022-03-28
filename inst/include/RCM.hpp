@@ -176,7 +176,7 @@ Type RCM(objective_function<Type> *obj) {
   Brec /= E0_SR;
   
   ////// During time series year = 1, 2, ..., n_y
-  vector<matrix<Type> > ALK(n_y);
+  vector<matrix<Type> > PLA(n_y);
   matrix<Type> N(n_y+1, n_age);
 
   vector<Type> C_eq_pred(nfleet);
@@ -246,8 +246,8 @@ Type RCM(objective_function<Type> *obj) {
 
   // Loop over all other years
   for(int y=0;y<n_y;y++) {
-    // Calculate this year's age-length key (ALK) and F
-    if(Type(n_age) != Linf) ALK(y) = generate_ALK(lbin, len_age, SD_LAA, n_age, nlbin, y);
+    // Calculate this year's probability of length-at-age (PLA) and F
+    if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
     if(condition == "catch") {
       for(int ff=0;ff<nfleet;ff++) {
         if(y != yind_F(ff)) {
@@ -277,8 +277,8 @@ Type RCM(objective_function<Type> *obj) {
 
         if(Type(n_age) != Linf) {
           for(int len=0;len<nlbin;len++) {
-            CALpred(y,len,ff) += CAAtrue(y,a,ff) * ALK(y)(a,len);
-            MLpred(y,ff) += CAAtrue(y,a,ff) * ALK(y)(a,len) * lbinmid(len);
+            CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len);
+            MLpred(y,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len) * lbinmid(len);
           }
         }
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
@@ -332,7 +332,7 @@ Type RCM(objective_function<Type> *obj) {
 
         if(I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * wt(y,a); // Biomass vulnerable to survey
         if(Type(n_age) != Linf && IAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
-          for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * ALK(y)(a,len);
+          for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLA(y)(a,len);
         }
       }
     }
@@ -466,7 +466,6 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(EPR0_SR);
   REPORT(CR_SR);
 
-  //if(nll_fleet.col(3).sum() != 0 || nll_index.col(2).sum() != 0 || ((nll_fleet.col(4).sum() != 0) & (msize_type == "length"))) REPORT(ALK);
   REPORT(N);
   REPORT(CAApred);
   REPORT(CALpred);

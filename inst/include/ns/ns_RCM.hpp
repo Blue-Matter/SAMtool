@@ -9,20 +9,20 @@ Type log2(Type x) {
 }
 
 template<class Type>
-matrix<Type> generate_ALK(vector<Type> lbin, matrix<Type> len_age, matrix<Type> SD_LAA, 
+matrix<Type> generate_PLA(vector<Type> lbin, matrix<Type> len_age, matrix<Type> SD_LAA, 
                           int n_age, int nlbin, int y) {
-  matrix<Type> ALK(n_age, nlbin);
+  matrix<Type> PLA(n_age, nlbin);
   for(int a=0;a<n_age;a++) {
     for(int j=0;j<nlbin;j++) {
       if(j==nlbin-1) {
-        ALK(a,j) = 1 - pnorm(lbin(j), len_age(y,a), SD_LAA(y,a));
+        PLA(a,j) = 1 - pnorm(lbin(j), len_age(y,a), SD_LAA(y,a));
       } else {
-        ALK(a,j) = pnorm(lbin(j+1), len_age(y,a), SD_LAA(y,a));
-        if(j>0) ALK(a,j) -= pnorm(lbin(j), len_age(y,a), SD_LAA(y,a));
+        PLA(a,j) = pnorm(lbin(j+1), len_age(y,a), SD_LAA(y,a));
+        if(j>0) PLA(a,j) -= pnorm(lbin(j), len_age(y,a), SD_LAA(y,a));
       }
     }
   }
-  return ALK;
+  return PLA;
 }
 
 template<class Type>
