@@ -93,7 +93,6 @@ Type DD(objective_function<Type> *obj) {
   vector<Type> F(ny);
 
   //--INITIALIZE
-  Type Z_equilibrium = F_equilibrium + M;
   Type Seq = S0 * exp(-F_equilibrium);
   Type SprEq = (Seq * Alpha/(1 - Seq) + wk)/(1 - Rho * Seq);
   Type Req;
