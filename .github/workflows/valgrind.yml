@@ -42,6 +42,17 @@ jobs:
           names(assess_rs) <- assess[!grepl("VPA", assess)]
           saveRDS(assess_rs, file = "assess_rs.rds")
           
+          data(pcod) 
+          mat_ogive <- pcod$OM@cpars$Mat_age[1, , 1]
+          out <- RCM(OM = SubCpars(pcod$OM, 1:2), data = pcod$data, 
+           condition = "catch", mean_fit = TRUE,
+           selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
+           vul_par = matrix(mat_ogive, length(mat_ogive), 1),
+           map_vul_par = matrix(NA, length(mat_ogive), 1),
+           map_log_early_rec_dev = rep(1, pcod$OM@maxage),
+           prior = pcod$prior)
+          saveRDS(out@mean_fit$obj, file = "RCM_obj.rds")
+          
           writeLines(c("library(SAMtool)",
           "assess_sim <- readRDS(\"assess_sim.rds\")",
           "for(i in 1:length(assess_sim)) {",
@@ -52,7 +63,10 @@ jobs:
           "for(i in 1:length(assess_rs)) {",
           "  print(names(assess_rs)[i])",
           "  assess_rs[[i]]@obj$retape()",
-          "}"), con = "val.R")
+          "}",
+          "RCM_obj <- readRDS(\"RCM_obj.rds\")",
+          "RCM_obj$retape()"), 
+                    con = "val.R")
         shell: RDscript {0}
       
       - name: Run valgrind
