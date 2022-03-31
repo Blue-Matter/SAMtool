@@ -68,7 +68,12 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
 
   max_age <- as.integer(-log(0.01)/Data@Mort[x])
   n_age <- max_age + 1
-  M <- rep(Data@Mort[x], n_age)
+  if(any(names(dots) == "M_at_age") && dots$M_at_age) {
+    M <- Data@Misc$StockPars$M_ageArray[x, , n_y] * Data@Obs$Mbias[x]
+    prior$M <- NULL
+  } else {
+    M <- rep(Data@Mort[x], n_age)
+  }
   a <- Data@wla[x]
   b <- Data@wlb[x]
   Linf <- Data@vbLinf[x]
@@ -88,7 +93,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
                abs_I = 0, nsurvey = 1, LWT = 1,
                CAA_hist = matrix(0, n_y, max_age), CAA_n = rep(0, n_y), 
                CAL_hist = matrix(0, n_y, 1), CAL_n = rep(0, n_y),
-               n_y = n_y, n_age = n_age, n_bin = 1L, 
+               n_y = n_y, n_age = n_age, n_bin = 1L, M_data = M,
                weight = Wa, PLA = matrix(1, n_age, 1), mat = mat_age, vul_type = "logistic",
                SR_type = SR, comp_dist = "multinomial", catch_eq = catch_eq,
                est_early_rec_dev = rep(0, n_age - 1), est_rec_dev = rep(0, n_y), yindF = 0,
