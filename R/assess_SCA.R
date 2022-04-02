@@ -426,11 +426,12 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                CAL_hist = apply(CAL_hist, 1, tiny_comp) %>% t(), CAL_n = CAL_n_rescale,
                LWT = c(LWT$Index, LWT$CAA, LWT$CAL, LWT$Catch),
                n_y = n_y, n_age = n_age, n_bin = ncol(PLA), 
-               M_data = M,
+               M_data = 1,
                weight = Wa, PLA = PLA, mat = mat_age, vul_type = vulnerability,
                SR_type = SR, comp_dist = comp_dist, catch_eq = catch_eq,
                est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y),
                tv_M = tv_M, M_bounds = M_bounds, use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
+  if(any(names(dots) == "M_at_age") && dots$M_at_age) data$M_data <- M
   if(data$n_bin == 1) data$CAL_hist <- t(data$CAL_hist)
   
   # Starting values
