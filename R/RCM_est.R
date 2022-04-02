@@ -128,9 +128,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
   if(is.null(dots$n_itF)) n_itF <- 3L else n_itF <- dots$n_itF
   if(is.null(dots$plusgroup)) plusgroup <- 1L else plusgroup <- as.integer(dots$plusgroup)
   age_only_model <- StockPars$Len_age[x, , 1:(nyears+1)] %>%
-    apply(2, function(xx) {
-      length(xx) == n_age & max(xx) == n_age
-    }) %>% 
+    apply(2, function(xx) all(xx == 1:n_age)) %>% 
     all()
   
   TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, 
@@ -223,9 +221,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   
   # Check for functional selectivity functions (dome or logistic)
   age_only_model <- StockPars$Len_age[x, , 1:(nyears+1)] %>%
-    apply(2, function(xx) {
-      length(xx) == n_age & max(xx) == n_age
-    }) %>% 
+    apply(2, function(xx) all(xx == 1:n_age)) %>% 
     all()
   Linf <- ifelse(age_only_model, n_age, StockPars$Linf[x])
   
@@ -519,7 +515,8 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
   report$CR <- report$Arec * report$EPR0 # Annual compensation ratio recalculated from annual EPR0
   
   age_only_model <- data$len_age %>%
-    apply(1, function(x) length(x) == data$n_age && max(x) == data$n_age) %>% all()
+    apply(1, function(x) all(x == 1:data$n_age)) %>% 
+    all()
   if(age_only_model) {
     report$vul_len <- matrix(NA_real_, nlbin, data$nsel_block)
     report$ivul_len <- matrix(NA_real_, nlbin, dim(report$ivul)[3])
