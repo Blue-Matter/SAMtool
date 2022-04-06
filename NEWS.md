@@ -1,6 +1,6 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
-## SAMtool 1.2.6
+## SAMtool 1.3.0
 ### New features
 - `RCM2MOM` converts the output of `RCM` to a multi-fleet operating model.
 - Vignette is now hosted [online](https://openmse.com/features-assessment-models/).
