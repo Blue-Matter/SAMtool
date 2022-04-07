@@ -13,7 +13,7 @@ Description: Simulation tools for closed-loop simulation are provided for the 'M
 License: GPL-3
 Depends: R (>= 3.5.0), MSEtool (>= 3.0.0)
 Imports: 
-    TMB,
+    TMB (>= 1.8.0),
     corpcor,
     dplyr,
     gplots,
