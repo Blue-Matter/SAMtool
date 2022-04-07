@@ -399,7 +399,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     map$log_rec_dev <- factor(1:nyears)
   } else {
     map$log_rec_dev <- factor(dots$map_log_rec_dev)
-    if(length(map$log_rec_dev) != n_age - 1) {
+    if(length(map$log_rec_dev) != nyears) {
       stop("map_log_rec_dev needs to be a vector of length ", nyears)
     }
   }
