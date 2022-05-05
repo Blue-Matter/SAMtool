@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.3.1
+- Patch in RCM markdown report for plotting fishery length composition.
+
 ## SAMtool 1.3.0
 - Require TMB 1.8 (need TMB package consistency between compilation and model fitting)
 

@@ -228,13 +228,13 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) length composition from ", f_name[ff], ".\"}"),
            paste0("if(any(RCMdata@CAL[, , ", ff, "] > 0, na.rm = TRUE)) {"),
            paste0("if(nsim == 1) CAL_plot <- array(x@CAL[, , , ", ff, "], c(1, nyears, RCMdata@Misc$nlbin)) else CAL_plot <- x@CAL[, , , ", ff, "]"),
-           paste0("plot_composition_RCM(Year, CAL_plot, RCMdata@CAL[, , ", ff, "], CAL_bins = RCMdata@Misc$lbin_mid, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, fit = CAL_plot, dat = RCMdata@CAL[, , ", ff, "], CAL_bins = length_bin, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Predicted length composition from ", f_name[ff], ".\"}"),
            paste0("if(any(RCMdata@CAL[, , ", ff, "] > 0, na.rm = TRUE)) {"),
-           paste0("plot_composition_RCM(Year, CAL_plot, CAL_bins = RCMdata@Misc$lbinmid, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, fit = CAL_plot, CAL_bins = RCMdata@Misc$lbinmid, dat_col = scenario$col)"),
            "}",
            "```\n")
   
@@ -310,7 +310,7 @@ rmd_RCM_index_output <- function(sur, s_name) {
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) length composition from ", s_name[sur], ".\"}"),
            paste0("if(length(RCMdata@IAL) && any(RCMdata@IAL[, , ", sur, "] > 0, na.rm = TRUE)) {"),
            paste0("pred_IAL <- sapply(report_list, function(x) x$IAL[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_RCM(Year, pred_IAL, RCMdata@IAL[, , ", sur, "], CAL_bins = RCMdata@Misc$lbinmid, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, pred_IAL, RCMdata@IAL[, , ", sur, "], CAL_bins = length_bin, dat_col = scenario$col)"),
            "}",
            "```\n"
   )
