@@ -36,7 +36,8 @@ Suggests:
     reshape2,
     shiny,
     testthat,
-    tmbstan
+    tmbstan,
+    usethis
 LazyData: yes
 LazyLoad: yes
 RoxygenNote: 7.1.2

@@ -449,4 +449,31 @@ solve_F <- function(N, M, plusgroup = TRUE) {
   return(FM)
 }
 
+message <- function(...) {
+  if(requireNamespace("usethis", quietly = TRUE)) {
+    dots <- list(...)
+    do.call(c, dots) %>% paste0(collapse = "") %>% usethis::ui_done()
+  } else {
+    base::message(...)
+  }
+}
+
+warning <- function(...) {
+  if(requireNamespace("usethis", quietly = TRUE)) {
+    dots <- list(...)
+    do.call(c, dots) %>% paste0(collapse = "") %>% usethis::ui_warn()
+  } else {
+    base::warning(...)
+  }
+}
+
+
+stop <- function(..., call. = TRUE, domain = NULL) {
+  if(requireNamespace("usethis", quietly = TRUE)) {
+    dots <- list(...)
+    do.call(c, dots) %>% paste0(collapse = "") %>% usethis::ui_stop()
+  } else {
+    base::stop(..., call. = call., domain = domain)
+  }
+}
 
