@@ -341,51 +341,46 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-in">           map_vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span class="r-in">           map_log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span>,</span>
 <span class="r-in">           prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Checking OM and data...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> RCM model is conditioned on: catch</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1 fleet(s) detected.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 65 years of data detected.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 5 survey(s) detected.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Getting biological parameters from OM...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Mean weight data found.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> OM@maxF updated to 3.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> No fishery length or age compositions were provided. Selectivity is fixed to values from OM.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fishery selectivity setup:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fleet 1: individual parameters at age (free)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index selectivity setup:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 1: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 2: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 3: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 4: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 5: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Beverton-Holt stock-recruitment relationship used.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Prior for q found.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting model (48 simulations) ...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Generating additional model fit from mean values of parameters in the operating model...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.86</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of initial spawning depletion: 0.44 - 1.45</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Selectivity during projection period is set to that in most recent historical year.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical effort trends set in OM@EffLower and OM@EffUpper.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Recruitment standard deviation set in OM@cpars$Perr.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical recruitment set in OM@cpars$Perr_y.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.31</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Growth, maturity, natural mortality, and steepness values from RCM are set in OM@cpars.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical catch data added to OM@cpars$Data@Cat.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical indices added to OM@cpars$Data@AddInd.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Complete.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and data...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM model is conditioned on: catch</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 65 years of data detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 5 survey(s) detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Getting biological parameters from OM...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Mean weight data found.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> OM@maxF updated to 3.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> No fishery length or age compositions were provided. Selectivity is fixed to values from OM.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fishery selectivity setup:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fleet 1: individual parameters at age (free)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index selectivity setup:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 1: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 2: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 3: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 4: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 5: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Beverton-Holt stock-recruitment relationship used.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Prior for q found.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fitting model (48 simulations) ...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.86</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Selectivity during projection period is set to that in most recent historical year.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical effort trends set in OM@EffLower and OM@EffUpper.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Recruitment standard deviation set in OM@cpars$Perr.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical recruitment set in OM@cpars$Perr_y.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Growth, maturity, natural mortality, and steepness values from RCM are set in OM@cpars.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical catch data added to OM@cpars$Data@Cat.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpUpUumC/RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpUpUumC/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJYIqXX/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJYIqXX/RCM.html</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span>
 <span class="r-in"><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span>
@@ -399,53 +394,48 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-in">      map_log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span>,</span>
 <span class="r-in">      prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span>
 <span class="r-in"><span class="op">}</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Checking OM and data...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> RCM model is conditioned on: catch</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1 fleet(s) detected.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 65 years of data detected.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 5 survey(s) detected.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Getting biological parameters from OM...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Mean weight data found.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> OM@maxF updated to 3.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> No fishery length or age compositions were provided. Selectivity is fixed to values from OM.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fishery selectivity setup:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fleet 1: individual parameters at age (free)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index selectivity setup:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 1: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 2: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 3: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 4: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Index 5: spawning biomass</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Beverton-Holt stock-recruitment relationship used.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Prior for q found.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting model (48 simulations) ...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Generating additional model fit from mean values of parameters in the operating model...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.86</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of initial spawning depletion: 0.44 - 1.45</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Selectivity during projection period is set to that in most recent historical year.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical effort trends set in OM@EffLower and OM@EffUpper.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Recruitment standard deviation set in OM@cpars$Perr.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical recruitment set in OM@cpars$Perr_y.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.31</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Growth, maturity, natural mortality, and steepness values from RCM are set in OM@cpars.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical catch data added to OM@cpars$Data@Cat.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Historical indices added to OM@cpars$Data@AddInd.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Complete.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and data...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM model is conditioned on: catch</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 65 years of data detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 5 survey(s) detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Getting biological parameters from OM...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Mean weight data found.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> OM@maxF updated to 3.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> No fishery length or age compositions were provided. Selectivity is fixed to values from OM.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fishery selectivity setup:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fleet 1: individual parameters at age (free)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index selectivity setup:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 1: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 2: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 3: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 4: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Index 5: spawning biomass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Beverton-Holt stock-recruitment relationship used.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Prior for q found.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fitting model (48 simulations) ...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.86</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Selectivity during projection period is set to that in most recent historical year.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical effort trends set in OM@EffLower and OM@EffUpper.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Recruitment standard deviation set in OM@cpars$Perr.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical recruitment set in OM@cpars$Perr_y.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Growth, maturity, natural mortality, and steepness values from RCM are set in OM@cpars.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical catch data added to OM@cpars$Data@Cat.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in">  </span>
 <span class="r-in"><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span class="r-in">            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpUpUumC/compare_RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpUpUumC/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJYIqXX/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJYIqXX/compare_RCM.html</span>
 <span class="r-in">             </span>
 <span class="r-in"><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Loading operating model </span></span>
