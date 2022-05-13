@@ -359,7 +359,7 @@ Type RCM(objective_function<Type> *obj) {
       if(LWT_index(sur,1) > 0 && !R_IsNA(asDouble(IAA_n(y,sur))) && IAA_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
           nll_index(y,sur,1) -= LWT_index(sur,1) * comp_multinom(IAA_hist, IAApred, IN, IAA_n, y, n_age, sur);
-        } else {
+        } else if(comp_like == "lognormal") {
           nll_index(y,sur,1) -= LWT_index(sur,1) * comp_lognorm(IAA_hist, IAApred, IN, y, n_age, sur);
         }
       }
@@ -367,7 +367,7 @@ Type RCM(objective_function<Type> *obj) {
       if(LWT_index(sur,2) > 0 && !R_IsNA(asDouble(IAL_n(y,sur))) && IAL_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
           nll_index(y,sur,2) -= LWT_index(sur,2) * comp_multinom(IAL_hist, IALpred, IN, IAL_n, y, nlbin, sur);
-        } else {
+        } else if(comp_like == "lognormal") {
           nll_index(y,sur,2) -= LWT_index(sur,2) * comp_lognorm(IAL_hist, IALpred, IN, y, nlbin, sur);
         }
       }
@@ -391,7 +391,7 @@ Type RCM(objective_function<Type> *obj) {
         if(LWT_fleet(ff,2) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
             nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
-          } else {
+          } else if(comp_like == "lognormal") {
             nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_lognorm(CAA_hist, CAApred, CN, y, n_age, ff);
           }
         }
@@ -399,7 +399,7 @@ Type RCM(objective_function<Type> *obj) {
         if(LWT_fleet(ff,3) > 0 && !R_IsNA(asDouble(CAL_n(y,ff))) && CAL_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
             nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
-          } else {
+          } else if(comp_like == "lognormal") {
             nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_lognorm(CAL_hist, CALpred, CN, y, nlbin, ff);
           }
         }
@@ -420,6 +420,26 @@ Type RCM(objective_function<Type> *obj) {
   }
   for(int a=0;a<n_age-1;a++) {
     if(est_early_rec_dev(a) == 1) nll_log_rec_dev -= dnorm_(log_early_rec_dev(a), Type(0), tau, true);
+  }
+  
+  if(comp_like == "mvlogistic") {
+    for(int sur=0;sur<nsurvey;sur++) {
+      if(LWT_index(sur,0) > 0 && IAA_n.col(sur).sum() > 0) {
+        nll_index(0,sur,1) -= LWT_index(sur,1) * comp_mvlogistic(IAA_hist, IAApred, IN, n_y, n_age, sur);
+      } 
+      if(LWT_index(sur,2) > 0 && IAL_n.col(sur).sum() > 0) {
+        nll_index(0,sur,2) -= LWT_index(sur,2) * comp_mvlogistic(IAL_hist, IALpred, IN, n_y, nlbin, sur);
+      }
+    }
+    
+    for(int ff=0;ff<nfleet;ff++) {
+      if(LWT_fleet(ff,2) > 0 && CAA_n.col(ff).sum() > 0) {
+        nll_fleet(0,ff,2) -= LWT_fleet(ff,2) * comp_mvlogistic(CAA_hist, CAApred, CN, n_y, n_age, ff);
+      }
+      if(LWT_fleet(ff,3) > 0 && CAL_n.col(ff).sum() > 0) {
+        nll_fleet(0,ff,3) -= LWT_fleet(ff,3) * comp_mvlogistic(CAL_hist, CALpred, CN, n_y, nlbin, ff);
+      }
+    }
   }
 
   Type nll = nll_fleet.sum() + nll_index.sum();

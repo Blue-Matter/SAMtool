@@ -1,6 +1,6 @@
 
 RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
-                    comp_like = c("multinomial", "lognormal"), prior = list(),
+                    comp_like = c("multinomial", "lognormal", "mvlogistic"), prior = list(),
                     max_F = 3, integrate = FALSE, StockPars, ObsPars, FleetPars, mean_fit = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), dots = list()) {
   
@@ -139,7 +139,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    CAA_hist = RCMdata@CAA, CAA_n = RCMdata@CAA_ESS,
                    CAL_hist = RCMdata@CAL, CAL_n = RCMdata@CAL_ESS,
                    IAA_hist = RCMdata@IAA, IAA_n = RCMdata@IAA_ESS,
-                   IAL_hist = RCMdata@IAL, IAL_n = RCMdata@IAL_ESS, 
+                   IAL_hist = RCMdata@IAL, IAL_n = RCMdata@IAL_ESS,
                    lbin = RCMdata@Misc$lbin, lbinmid = RCMdata@Misc$lbinmid, 
                    msize = RCMdata@MS, msize_type = RCMdata@MS_type,
                    sel_block = rbind(RCMdata@sel_block, RCMdata@sel_block[nyears, ]), 

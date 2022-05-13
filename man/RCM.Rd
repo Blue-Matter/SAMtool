@@ -19,7 +19,7 @@ RCM(OM, data, ...)
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
-  comp_like = c("multinomial", "lognormal"),
+  comp_like = c("multinomial", "lognormal", "mvlogistic"),
   prior = list(),
   max_F = 3,
   cores = 1L,
@@ -38,7 +38,7 @@ RCM(OM, data, ...)
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
-  comp_like = c("multinomial", "lognormal"),
+  comp_like = c("multinomial", "lognormal", "mvlogistic"),
   ESS = c(30, 30),
   prior = list(),
   max_F = 3,
@@ -58,7 +58,7 @@ RCM(OM, data, ...)
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
-  comp_like = c("multinomial", "lognormal"),
+  comp_like = c("multinomial", "lognormal", "mvlogistic"),
   ESS = c(30, 30),
   prior = list(),
   max_F = 3,
@@ -96,7 +96,8 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 \item{LWT}{A named list of likelihood weights for the RCM. See below.}
 
-\item{comp_like}{A string indicating either \code{"multinomial"} (default) or \code{"lognormal"} distributions for the composition data.}
+\item{comp_like}{A string indicating either \code{"multinomial"} (default) or \code{"lognormal"}, or \code{"mvlogistic"} (multinomial logistic) 
+distributions for the composition data.}
 
 \item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 

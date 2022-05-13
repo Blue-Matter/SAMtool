@@ -218,4 +218,56 @@ Type comp_lognorm(array<Type> obs, array<Type> pred, matrix<Type> N, int y, int 
   return log_like;
 }
 
+template<class Type>
+Type comp_mvlogistic(array<Type> obs, array<Type> pred, matrix<Type> N, int n_y, int n_bin, int ff, Type p_min = 1e-8) {
+  
+  matrix<Type> tmp(n_y, n_bin);
+  Type tau2 = 0;
+  Type sum_count = 0; // (A - 1) * T
+  
+  vector<Type> A(n_y); // Number of age classes per year
+  A.setZero();
+  
+  vector<Type> sum_term(n_y); // Annual mean residual deviation: mean(log(o/p))
+  sum_term.setZero();
+  
+  for(int y=0;y<n_y;y++) {
+    
+    Type accum_obs = 0;
+    Type accum_pred = 0;
+    
+    for(int bb=0;bb<n_bin;bb++) {
+      Type p_pred = pred(y,bb,ff)/N(y,ff);
+      tmp(y,bb) = CppAD::CondExpGt(obs(y,bb,ff), p_min, log(obs(y,bb,ff)) - log(p_pred), 0); // Residual
+      
+      accum_obs += CppAD::CondExpLe(obs(y,bb,ff), p_min, obs(y,bb,ff), 0);
+      accum_pred += CppAD::CondExpLe(obs(y,bb,ff), p_min, p_pred, 0);
+      A(y) += CppAD::CondExpGt(obs(y,bb,ff), p_min, 1, 0); // Zero if no data in year y
+      
+      sum_term(y) += tmp(y,bb);
+    }
+    
+    A(y) += CppAD::CondExpGt(accum_obs, Type(0), 1, 0); // One if no data in year y
+    sum_term(y) += CppAD::CondExpGt(accum_obs, Type(0), log(accum_obs) - log(accum_pred), Type(0));
+    sum_term(y) /= A(y);
+    
+    // Calculate eta iff A(y) > 1
+    for(int bb=0;bb<n_bin;bb++) {
+      tau2 += CppAD::CondExpGt(obs(y,bb,ff), p_min, (tmp(y,bb) - sum_term(y)) * (tmp(y,bb) - sum_term(y)), 0);
+    }
+    
+    tau2 += CppAD::CondExpGt(A(y), Type(1), 
+                             (log(accum_obs) - log(accum_pred) - sum_term(y)) * (log(accum_obs) - log(accum_pred) - sum_term(y)), 
+                              0);
+    
+    sum_count += CppAD::CondExpGt(A(y), Type(1), A(y) - 1, 0);
+  }
+  tau2 /= sum_count;
+  
+  Type log_like = -sum_count * log(tau2);
+  
+  return log_like;
+}
+
+
 }
