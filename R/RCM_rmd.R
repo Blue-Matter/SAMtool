@@ -617,7 +617,7 @@ RCM_get_likelihoods <- function(x, LWT, f_name, s_name) {
   nll_index <- cbind(nll_index, rowSums(nll_index))
   nll_index <- rbind(nll_index, colSums(nll_index))
   colnames(nll_index) <- c(s_name, "Sum")
-  rownames(nll_index) <- c("Index", "CAA", "CAL", "Sum")
+  rownames(nll_index) <- c("Index", "IAA", "IAL", "Sum")
   
   wt_index <- rbind(LWT$Index, LWT$IAA, LWT$IAL) %>% structure(dimnames = list(rownames(nll_index)[1:3], s_name))
   

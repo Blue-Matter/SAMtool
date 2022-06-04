@@ -1,5 +1,9 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.3.2
+- RCM can now use multivariate logistic distribution for fitting to age/length comps.
+- Compile with TMBAD library.
+
 ## SAMtool 1.3.1
 - Patch in RCM markdown report for plotting fishery length composition.
 
