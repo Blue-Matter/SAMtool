@@ -23,7 +23,7 @@ check_RCMdata evaluates whether the inputs in the S4 RCMdata object are correctl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.2</span>
       </span>
     </div>
 
@@ -77,7 +77,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
   selectivity <span class="op">=</span> <span class="st">"logistic"</span>,
   s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,
   LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span><span class="op">)</span>,
+  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span><span class="op">)</span>,
   prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   max_F <span class="op">=</span> <span class="fl">3</span>,
   cores <span class="op">=</span> <span class="fl">1L</span>,
@@ -97,7 +97,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
   selectivity <span class="op">=</span> <span class="st">"logistic"</span>,
   s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,
   LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span><span class="op">)</span>,
+  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span><span class="op">)</span>,
   ESS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,
   prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   max_F <span class="op">=</span> <span class="fl">3</span>,
@@ -118,7 +118,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
   selectivity <span class="op">=</span> <span class="st">"logistic"</span>,
   s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,
   LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span><span class="op">)</span>,
+  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span><span class="op">)</span>,
   ESS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,
   prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   max_F <span class="op">=</span> <span class="fl">3</span>,
@@ -159,7 +159,8 @@ see Additional arguments section for setup of survey selectivity parameters and 
 <dt>LWT</dt>
 <dd><p>A named list of likelihood weights for the RCM. See below.</p></dd>
 <dt>comp_like</dt>
-<dd><p>A string indicating either <code>"multinomial"</code> (default) or <code>"lognormal"</code> distributions for the composition data.</p></dd>
+<dd><p>A string indicating either <code>"multinomial"</code> (default) or <code>"lognormal"</code>, or <code>"mvlogistic"</code> (multinomial logistic) 
+distributions for the composition data.</p></dd>
 <dt>prior</dt>
 <dd><p>A named list for the parameters of any priors to be added to the model. See below.</p></dd>
 <dt>max_F</dt>
@@ -363,7 +364,7 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Prior for q found.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fitting model (48 simulations) ...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.86</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.46 - 13782.85</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.</span>
@@ -378,9 +379,9 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJYIqXX/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpSjLW6J/RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJYIqXX/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpSjLW6J/RCM.html</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span>
 <span class="r-in"><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span>
@@ -416,7 +417,7 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Prior for q found.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fitting model (48 simulations) ...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.86</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.46 - 13782.85</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.</span>
@@ -433,9 +434,9 @@ a single model fit. By default FALSE. This feature requires identical biological
 <span class="r-in">  </span>
 <span class="r-in"><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span class="r-in">            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJYIqXX/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpSjLW6J/compare_RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJYIqXX/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpSjLW6J/compare_RCM.html</span>
 <span class="r-in">             </span>
 <span class="r-in"><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Loading operating model </span></span>
