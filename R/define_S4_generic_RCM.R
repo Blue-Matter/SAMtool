@@ -26,8 +26,8 @@
 #' If the survey selectivity is otherwise independent of anything else in the model, use \code{"logistic"}, \code{"dome"}, or \code{"free"} to specify the functional form of selectivity, and
 #' see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.
 #' @param LWT A named list of likelihood weights for the RCM. See below.
-#' @param comp_like A string indicating either \code{"multinomial"} (default) or \code{"lognormal"}, or \code{"mvlogistic"} (multinomial logistic) 
-#' distributions for the composition data.
+#' @param comp_like A string indicating the statistical distribution for the composition data, either \code{"multinomial"} (default), \code{"lognormal"}, \code{"mvlogistic"} (multivariate logistic),
+#' \code{"dirmult1"} (Dirichlet multinomial, linear version), or \code{"dirmult2"} (saturating version; see Thorson et al. 2017).
 #' @param ESS A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
 #' Not used when data are provided in a \linkS4class{RCMdata} object.
 #' @param prior A named list for the parameters of any priors to be added to the model. See below.
@@ -225,6 +225,9 @@
 #' } 
 #' 
 #' @seealso \link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM} \link{posterior}
+#' @references 
+#' Thorson et al. 2017. Model-based estimates of effective sample size in stock assessmentmodels using the Dirichlet-multinomial distribution.
+#' Fish. Res. 192:84-93. \doi{10.1016/j.fishres.2016.06.005}
 #' @importFrom dplyr %>%
 #' @export
 setGeneric("RCM", function(OM, data, ...) standardGeneric("RCM"))
@@ -233,7 +236,7 @@ setGeneric("RCM", function(OM, data, ...) standardGeneric("RCM"))
 #' @export
 setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                   comp_like = c("multinomial", "lognormal", "mvlogistic"), prior = list(),
+                   comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
             RCM_int(OM = OM, RCMdata = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
@@ -245,7 +248,7 @@ setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
 #' @export
 setMethod("RCM", signature(OM = "OM", data = "list"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                   comp_like = c("multinomial", "lognormal", "mvlogistic"), ESS = c(30, 30), prior = list(),
+                   comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), ESS = c(30, 30), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
             
@@ -323,7 +326,7 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
 #' @export
 setMethod("RCM", signature(OM = "OM", data = "Data"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
-                   comp_like = c("multinomial", "lognormal", "mvlogistic"), ESS = c(30, 30), prior = list(),
+                   comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), ESS = c(30, 30), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
 

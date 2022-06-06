@@ -207,6 +207,33 @@ Type comp_multinom(array<Type> obs, array<Type> pred, matrix<Type> N, matrix<Typ
   return log_like;
 }
 
+// Dirichlet multinomial linear version
+template<class Type>
+Type comp_dirmult1(array<Type> obs, array<Type> pred, matrix<Type> N, matrix<Type> N_samp, Type theta, int y, int n_bin, int ff) {
+  vector<Type> alpha(n_bin);
+  vector<Type> N_obs(n_bin);
+  for(int bb=0;bb<n_bin;bb++) {
+    alpha(bb) = theta * N_samp(y,ff) * pred(y,bb,ff)/N(y,ff);
+    N_obs(bb) = obs(y,bb,ff) * N_samp(y,ff);
+  }
+  Type log_like = ddirmnom_(N_obs, alpha, true);
+  return log_like;
+}
+
+
+// Dirichlet multinomial saturating version
+template<class Type>
+Type comp_dirmult2(array<Type> obs, array<Type> pred, matrix<Type> N, matrix<Type> N_samp, Type beta, int y, int n_bin, int ff) {
+  vector<Type> alpha(n_bin);
+  vector<Type> N_obs(n_bin);
+  for(int bb=0;bb<n_bin;bb++) {
+    alpha(bb) = beta * pred(y,bb,ff)/N(y,ff);
+    N_obs(bb) = obs(y,bb,ff) * N_samp(y,ff);
+  }
+  Type log_like = ddirmnom_(N_obs, alpha, true);
+  return log_like;
+}
+
 template<class Type>
 Type comp_lognorm(array<Type> obs, array<Type> pred, matrix<Type> N, int y, int n_bin, int ff) {
   Type log_like = 0;

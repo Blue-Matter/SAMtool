@@ -1,6 +1,6 @@
 
 RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = "B", LWT = list(),
-                    comp_like = c("multinomial", "lognormal", "mvlogistic"), prior = list(),
+                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                     drop_highF = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {

@@ -19,7 +19,7 @@ RCM(OM, data, ...)
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
-  comp_like = c("multinomial", "lognormal", "mvlogistic"),
+  comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"),
   prior = list(),
   max_F = 3,
   cores = 1L,
@@ -38,7 +38,7 @@ RCM(OM, data, ...)
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
-  comp_like = c("multinomial", "lognormal", "mvlogistic"),
+  comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"),
   ESS = c(30, 30),
   prior = list(),
   max_F = 3,
@@ -58,7 +58,7 @@ RCM(OM, data, ...)
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
-  comp_like = c("multinomial", "lognormal", "mvlogistic"),
+  comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"),
   ESS = c(30, 30),
   prior = list(),
   max_F = 3,
@@ -96,8 +96,8 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 \item{LWT}{A named list of likelihood weights for the RCM. See below.}
 
-\item{comp_like}{A string indicating either \code{"multinomial"} (default) or \code{"lognormal"}, or \code{"mvlogistic"} (multinomial logistic) 
-distributions for the composition data.}
+\item{comp_like}{A string indicating the statistical distribution for the composition data, either \code{"multinomial"} (default), \code{"lognormal"}, \code{"mvlogistic"} (multivariate logistic),
+\code{"dirmult1"} (Dirichlet multinomial, linear version), or \code{"dirmult2"} (saturating version; see Thorson et al. 2017).}
 
 \item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 
@@ -322,6 +322,10 @@ compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 ma
 Hist <- runMSE(out@OM, Hist = TRUE)            
 } 
 
+}
+\references{
+Thorson et al. 2017. Model-based estimates of effective sample size in stock assessmentmodels using the Dirichlet-multinomial distribution.
+Fish. Res. 192:84-93. \doi{10.1016/j.fishres.2016.06.005}
 }
 \seealso{
 \link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM} \link{posterior}

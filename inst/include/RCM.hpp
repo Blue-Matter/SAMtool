@@ -101,6 +101,9 @@ Type RCM(objective_function<Type> *obj) {
   PARAMETER(log_tau);                   // Std. dev. of rec devs
   PARAMETER_VECTOR(log_early_rec_dev);  // Rec devs for first year abundance
   PARAMETER_VECTOR(log_rec_dev);        // Rec devs for all other years in the model
+  
+  PARAMETER_MATRIX(log_compf);          // CAA/CAL dispersion parameter
+  PARAMETER_MATRIX(log_compi);          // IAA/IAL dispersion parameter
 
   int nlbin = lbinmid.size();
 
@@ -361,6 +364,10 @@ Type RCM(objective_function<Type> *obj) {
           nll_index(y,sur,1) -= LWT_index(sur,1) * comp_multinom(IAA_hist, IAApred, IN, IAA_n, y, n_age, sur);
         } else if(comp_like == "lognormal") {
           nll_index(y,sur,1) -= LWT_index(sur,1) * comp_lognorm(IAA_hist, IAApred, IN, y, n_age, sur);
+        } else if(comp_like == "dirmult1") {
+          nll_index(y,sur,1) -= LWT_index(sur,1) * comp_dirmult1(IAA_hist, IAApred, IN, IAA_n, exp(log_compi(sur,0)), y, n_age, sur);
+        } else if(comp_like == "dirmult2") {
+          nll_index(y,sur,1) -= LWT_index(sur,1) * comp_dirmult2(IAA_hist, IAApred, IN, IAA_n, exp(log_compi(sur,0)), y, n_age, sur);
         }
       }
       
@@ -369,6 +376,10 @@ Type RCM(objective_function<Type> *obj) {
           nll_index(y,sur,2) -= LWT_index(sur,2) * comp_multinom(IAL_hist, IALpred, IN, IAL_n, y, nlbin, sur);
         } else if(comp_like == "lognormal") {
           nll_index(y,sur,2) -= LWT_index(sur,2) * comp_lognorm(IAL_hist, IALpred, IN, y, nlbin, sur);
+        } else if(comp_like == "dirmult1") {
+          nll_index(y,sur,2) -= LWT_index(sur,2) * comp_dirmult1(IAL_hist, IALpred, IN, IAL_n, exp(log_compi(sur,1)), y, nlbin, sur);
+        } else if(comp_like == "dirmult2") {
+          nll_index(y,sur,2) -= LWT_index(sur,2) * comp_dirmult2(IAL_hist, IALpred, IN, IAL_n, exp(log_compi(sur,1)), y, nlbin, sur);
         }
       }
     }
@@ -393,6 +404,10 @@ Type RCM(objective_function<Type> *obj) {
             nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           } else if(comp_like == "lognormal") {
             nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_lognorm(CAA_hist, CAApred, CN, y, n_age, ff);
+          } else if(comp_like == "dirmult1") {
+            nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_dirmult1(CAA_hist, CAApred, CN, CAA_n, exp(log_compf(ff,0)), y, n_age, ff);
+          } else if(comp_like == "dirmult2") {
+            nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_dirmult2(CAA_hist, CAApred, CN, CAA_n, exp(log_compf(ff,0)), y, n_age, ff);
           }
         }
         
@@ -401,6 +416,10 @@ Type RCM(objective_function<Type> *obj) {
             nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
           } else if(comp_like == "lognormal") {
             nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_lognorm(CAL_hist, CALpred, CN, y, nlbin, ff);
+          } else if(comp_like == "dirmult1") {
+            nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_dirmult1(CAL_hist, CALpred, CN, CAL_n, exp(log_compf(ff,1)), y, nlbin, ff);
+          } else if(comp_like == "dirmult2") {
+            nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_dirmult2(CAL_hist, CALpred, CN, CAL_n, exp(log_compf(ff,1)), y, nlbin, ff);
           }
         }
 

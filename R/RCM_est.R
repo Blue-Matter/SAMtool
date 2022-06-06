@@ -1,6 +1,6 @@
 
 RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
-                    comp_like = c("multinomial", "lognormal", "mvlogistic"), prior = list(),
+                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                     max_F = 3, integrate = FALSE, StockPars, ObsPars, FleetPars, mean_fit = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), dots = list()) {
   
@@ -14,7 +14,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
     }
   }
   
-  TMB_params <- RCM_est_params(x, RCMdata, selectivity, s_selectivity, prior, StockPars, FleetPars, dots)
+  TMB_params <- RCM_est_params(x, RCMdata, selectivity, s_selectivity, prior, LWT, comp_like, StockPars, FleetPars, dots)
   TMB_data <- RCM_est_data(x, RCMdata, selectivity, s_selectivity, LWT, comp_like, prior, max_F, 
                            StockPars, ObsPars, FleetPars, mean_fit, TMB_params$map, dots)
   
@@ -184,7 +184,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
   return(TMB_data)
 }
 
-RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(),
+RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(), LWT = list(), comp_like,
                            StockPars, FleetPars, dots = list()) {
   
   SR_type <- ifelse(StockPars$SRrel[x] == 1, "BH", "Ricker")
@@ -348,7 +348,8 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                      log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
                      log_F_equilibrium = rep(log(0.05), nfleet),
                      log_CV_msize = log(RCMdata@MS_cv), log_tau = log(StockPars$procsd[x]),
-                     log_early_rec_dev = log_early_rec_dev, log_rec_dev = log_rec_dev)
+                     log_early_rec_dev = log_early_rec_dev, log_rec_dev = log_rec_dev,
+                     log_compf = matrix(0, nfleet, 2), log_compi = matrix(0, nsurvey, 2))
   
   if(RCMdata@Misc$condition == "catch") {
     TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, ] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
@@ -403,6 +404,33 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
       stop("map_log_rec_dev needs to be a vector of length ", nyears)
     }
   }
+  
+  map$log_compf <- local({
+    mapf <- matrix(NA, nfleet, 2)
+    
+    if(comp_like %in% c("dirmult1", "dirmult2")) {
+      CAAv <- sapply(1:nfleet, function(ff) LWT$CAA[ff] > 0 && sum(RCMdata@CAA_ESS[, ff]) > 0)
+      CALv <- sapply(1:nfleet, function(ff) LWT$CAL[ff] > 0 && sum(RCMdata@CAL_ESS[, ff]) > 0)
+      
+      est <- cbind(CAAv, CALv)
+      mapf[est] <- 1:sum(est)
+    }
+    
+    factor(mapf)
+  })
+  
+  map$log_compi <- local({
+    mapi <- matrix(NA, nsurvey, 2)
+    
+    if(comp_like %in% c("dirmult1", "dirmult2")) {
+      IAAv <- sapply(1:nsurvey, function(sur) LWT$IAA[sur] > 0 && sum(RCMdata@IAA_ESS[, sur]) > 0)
+      IALv <- sapply(1:nsurvey, function(sur) LWT$IAL[sur] > 0 && sum(RCMdata@IAL_ESS[, sur]) > 0)
+      
+      est <- cbind(IAAv, IALv)
+      mapi[est] <- 1:sum(est)
+    }
+    factor(mapi)
+  })
   
   list(params = TMB_params, map = map)
 }

@@ -57,6 +57,28 @@ Type posfun2(Type x, Type eps, Type &penalty) {
   return ans;
 }
 
+// Dirichlet multinomial density function
+template <class Type>
+Type ddirmnom(vector<Type> x, vector<Type> alpha, int give_log=0) {
+  Type logres = lgamma(alpha.sum()) + lgamma(x.sum()+1) - lgamma(alpha.sum() + x.sum());
+  for(int i=0;i<x.size();i++) {
+    logres += lgamma(x(i)+alpha(i)) - lgamma(alpha(i)) - lgamma(x(i)+1);
+  }
+  if(give_log) return logres;
+  else return exp(logres);
+}
+
+// Shortened Dirichlet multinomial density function
+template <class Type>
+Type ddirmnom_(vector<Type> x, vector<Type> alpha, int give_log=0) {
+  Type logres = lgamma(alpha.sum()) - lgamma(alpha.sum() + x.sum());
+  for(int i=0;i<x.size();i++) {
+    logres += lgamma(x(i)+alpha(i)) - lgamma(alpha(i));
+  }
+  if(give_log) return logres;
+  else return exp(logres);
+}
+
 // Shortened multinomial density function
 template <class Type>
 Type dmultinom_(vector<Type> x, vector<Type> p, int give_log=0) {
