@@ -291,7 +291,7 @@ Type comp_mvlogistic(array<Type> obs, array<Type> pred, matrix<Type> N, int n_y,
   }
   tau2 /= sum_count;
   
-  Type log_like = -sum_count * log(tau2);
+  Type log_like = -0.5 * sum_count * log(tau2);
   
   return log_like;
 }
