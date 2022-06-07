@@ -1,6 +1,6 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
-## SAMtool 1.3.2
+## SAMtool 1.4.0
 - RCM can now use multivariate logistic and Dirichlet multinomial distributions for fitting to age/length comps.
 - Compile with TMBAD library.
 - Import individual functions in NAMESPACE to avoid package conflicts.

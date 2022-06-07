@@ -557,6 +557,33 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
     report$ivul_len <- get_ivul_len(report, data$ivul_type, lmid, data$Linf)
   }
   if(dynamic_SSB0) report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
+  
+  if(data$comp_like == "mvlogistic") {
+    
+    CAAmv <- calc_mvlogistic_loglike(obs = data$CAA_hist, pred = report$CAApred, 
+                                     LWT = data$LWT_fleet[, 3], nllv = report$nll_fleet[1, , 3])
+    CALmv <- calc_mvlogistic_loglike(obs = data$CAL_hist, pred = report$CALpred, 
+                                     LWT = data$LWT_fleet[, 4], nllv = report$nll_fleet[1, , 4])
+    
+    IAAmv <- calc_mvlogistic_loglike(obs = data$IAA_hist, pred = report$IAApred, 
+                                     LWT = data$LWT_index[, 2], nllv = report$nll_index[1, , 2])
+    
+    if(is.null(report$IALpred)) {
+      IALmv <- list(tau = rep(NaN, data$nsurvey), nll = matrix(0, data$n_y, data$nsurvey))
+    } else {
+      IALmv <- calc_mvlogistic_loglike(obs = data$IAL_hist, pred = report$IALpred, 
+                                       LWT = data$LWT_index[, 3], nllv = report$nll_index[1, , 3])
+    }
+    
+    report$nll_fleet[, 1:data$nfleet, 3] <- CAAmv$nll
+    report$nll_fleet[, 1:data$nfleet, 4] <- CALmv$nll
+    
+    report$nll_index[, 1:data$nsurvey, 2] <- IAAmv$nll
+    report$nll_index[, 1:data$nsurvey, 3] <- IALmv$nll
+    
+    report$compf <- cbind(CAAmv$tau, CALmv$tau)
+    report$compi <- cbind(IAAmv$tau, IALmv$tau)
+  }
   return(report)
 }
 
@@ -631,3 +658,60 @@ RCM_SPR <- function(F_at_age, M, mat, wt, N_at_age, R, R_early, equilibrium = TR
   SPR <- SSPR_F/SSPR_0
   return(SPR)
 }
+
+
+dmvlogistic <- function(x, p, sd, xmin = 1e-8, log = FALSE) {
+  resid <- log(x[x > xmin]) - log(p[x > xmin])
+  if(!length(resid)) stop("Density function can not be calculated from x")
+  accum <- log(sum(x[x <= xmin])) - log(sum(p[x <= xmin]))
+  
+  eta <- c(resid, accum) - mean(c(resid, accum))
+  
+  A <- length(eta)
+  
+  # No normalizing constants!
+  log_like <- -(A-1) * log(sd) - 0.5 * sum(eta^2)/sd/sd
+  if(log) {
+    log_like
+  } else {
+    exp(log_like)
+  }
+}
+
+
+calc_mvlogistic_loglike <- function(obs, pred, nllv, LWT, obsmin = 1e-8) {
+  nf <- dim(obs)[3]
+  n_y <- dim(obs)[1]
+  
+  vars <- lapply(1:nf, function(ff) {
+    sum_count <- sapply(1:n_y, function(y) {
+      if(sum(obs[y, , ff]) > 0 && LWT[ff] > 0) {
+        A <- sum(obs[y, , ff] > obsmin)
+        if(any(obs[y, , ff] <= obsmin)) A <- A + 1
+        return(A-1)
+      } else {
+        return(0)
+      }
+    }) %>% sum()
+    
+    #tau2 <- exp((-nllv[ff] + 0.5 * sum_count)/(-0.5 * sum_count))
+    tau2 <- exp(nllv[ff]/(0.5 * sum_count) - 1)
+    tau <- sqrt(tau2)
+    
+    log_like <- sapply(1:n_y, function(y) {
+      if(sum(obs[y, , ff]) > 0 && LWT[ff] > 0) {
+        log_like <- dmvlogistic(x = obs[y, , ff], p = pred[y, , ff]/sum(pred[y, , ff]), 
+                                sd = tau, xmin = obsmin, log = TRUE)
+      } else {
+        log_like <- 0
+      }
+      return(log_like)
+    })
+    
+    list(tau = tau, log_like = log_like)
+  })
+  
+  list(tau = sapply(vars, getElement, "tau"),
+       nll = -1 * sapply(vars, getElement, "log_like"))
+}
+
