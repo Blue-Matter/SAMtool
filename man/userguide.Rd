@@ -7,10 +7,10 @@
 userguide()
 }
 \value{
-Displays a browser webpage to the package vignette.
+Displays a browser webpage to the openMSE website.
 }
 \description{
-A convenient function to open a web browser with the SAMtool package vignettes
+A convenient function to open a web browser with the openMSE documentation vignettes
 }
 \examples{
 userguide()

@@ -87,7 +87,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     if(RCMdata@Misc$condition == "effort") {
       StockPars$R0 <- mean_vector(StockPars$R0)
       if(!is.null(dots$OMeff) && dots$OMeff) {
-        FleetPars$Find <- apply(FleetPars$Find, 2, mean) %>% matrix(length(StockPars$R0), data$nyears, byrow = TRUE)
+        FleetPars$Find <- apply(FleetPars$Find, 2, mean) %>% matrix(length(StockPars$R0), nyears, byrow = TRUE)
       }
     }
     

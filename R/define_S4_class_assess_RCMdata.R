@@ -1,11 +1,13 @@
 
 
 #' @import MSEtool
-#' @import TMB
-#' @import graphics
-#' @import stats
-#' @import utils
 #' @import methods
+#' @importFrom TMB MakeADFun sdreport
+#' @importFrom graphics arrows abline points lines legend text title mtext axTicks axis box contour hist 
+#' layout matlines matplot par polygon segments
+#' @importFrom stats acf coef cov cov2cor dbeta density dlnorm dnorm formula integrate lm median nlminb nls 
+#' optimHess optimize plogis pnorm predict qlogis qnorm quantile rbeta rnorm sd setNames uniroot weighted.mean
+#' @importFrom utils browseURL globalVariables packageVersion
 setOldClass("sdreport")
 setClassUnion("sdreportAssess", members = c("character", "sdreport"))
 setClassUnion("optAssess", members = c("list", "character"))
@@ -121,6 +123,7 @@ Assessment <- setClass("Assessment",
                                  TMB_report = "list", dependencies = "character"))
 
 
+
 setMethod("initialize", "Assessment", function(.Object, ...) {
   dots <- list(...)
   if(length(dots)) {
@@ -188,7 +191,6 @@ setMethod("plot", signature(x = "Assessment", y = "missing"),
             } else ret <- NULL
             report(x, ret, filename = filename, dir = dir, open_file = open_file, quiet = quiet, render_args = render_args, ...)
           })
-
 
 if(getRversion() >= "2.15.1") {
   # Define global variables for Assessment objects

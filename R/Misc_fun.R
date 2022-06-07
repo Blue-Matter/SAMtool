@@ -16,13 +16,14 @@ hist.numeric <- function(x, ...) {
 
 #' Get the SAMtool vignettes
 #'
-#' A convenient function to open a web browser with the SAMtool package vignettes
+#' A convenient function to open a web browser with the openMSE documentation vignettes
 #' @examples
 #' userguide()
 #' 
-#' @return Displays a browser webpage to the package vignette.
+#' @return Displays a browser webpage to the openMSE website.
+#' @importFrom utils browseURL
 #' @export
-userguide <- function() browseVignettes("SAMtool")
+userguide <- function() browseURL("https://openmse.com")
 
 
 squeeze <- function(x) (1 - .Machine$double.eps) * (x - 0.5) + 0.5

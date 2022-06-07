@@ -333,7 +333,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   
   # Check whether observed matches predicted
   if(RCMdata@Misc$condition == "catch2") {
-    catch_check_fn <- function(x, report, data) {
+    catch_check_fn <- function(x, report, RCMdata) {
       if(report[[x]]$conv) {
         catch_diff <- report[[x]]$Cpred/RCMdata@Chist - 1
         flag <- max(abs(catch_diff), na.rm = TRUE) > 0.01 | any(is.na(report[[x]]$Cpred))
@@ -343,7 +343,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       return(flag)
     }
     
-    do_catch_check <- vapply(1:length(res), catch_check_fn, logical(1), report = res, data = data)
+    do_catch_check <- vapply(1:length(res), catch_check_fn, logical(1), report = res, RCMdata = RCMdata)
     if(any(do_catch_check)) {
       flag_ind <- paste(which(do_catch_check), collapse = " ")
       message("Note: there is predicted catch that deviates from observed catch by more than 1%")
@@ -361,7 +361,6 @@ RCM_report_samps <- function(x, samps, obj, conv) {
   report$conv <- conv
   return(report)
 }
-
 
 RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length(res)) {
   out <- list()

@@ -505,7 +505,7 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
 #' data(Red_snapper)
 #' plot_timeseries(Red_snapper@@Year, Red_snapper@@Cat[1, ],
 #' obs_CV = Red_snapper@@CV_Cat, label = "Catch")
-#' @export plot_timeseries
+#' @export
 plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.95,
                             obs_upper = NULL, obs_lower = NULL, obs_ind_blue = NULL, fit_linewidth = 3,
                             fit_color = "red", label = "Observed data") {
@@ -568,7 +568,7 @@ plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.
 #' @author Q. Huynh
 #' @seealso \code{\link{plot_timeseries}}
 #' @return A plot of model residuals by year (optionally, with error bars).
-#' @export plot_residuals
+#' @export 
 plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
                            res_upper = NULL, res_lower = NULL, res_ind_blue = NULL, draw_zero = TRUE,
                            zero_linetype = 2, label = "Residual") {
@@ -640,7 +640,7 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' @param bubble_color Colors for negative and positive residuals, respectively, for bubble plots.
 #' @return Plots depending on \code{plot_type}.
 #' @author Q. Huynh
-#' @export plot_composition
+#' @export
 #' @examples
 #' plot_composition(obs = SimulatedData@@CAA[1, 1:16, ])
 #' plot_composition(obs = SimulatedData@@CAA[1, , ], plot_type = "bubble_data", 
