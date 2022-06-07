@@ -48,7 +48,7 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 #' @return An object of class \linkS4class{project} that contains future predicted values of F, catch, biomass, recruitment, etc.
 #' @examples
 #' \donttest{
-#' myAssess <- SCA(Data = SimulatedData)
+#' myAssess <- SP(Data = swordfish)
 #' do_projection <- projection(myAssess, Ftarget = myAssess@@FMSY)
 #' }
 #' @export

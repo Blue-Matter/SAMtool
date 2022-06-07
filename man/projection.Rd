@@ -51,7 +51,7 @@ This function takes an assessment model and runs a stochastic projection based o
 }
 \examples{
 \donttest{
-myAssess <- SCA(Data = SimulatedData)
+myAssess <- SP(Data = swordfish)
 do_projection <- projection(myAssess, Ftarget = myAssess@FMSY)
 }
 }
