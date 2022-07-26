@@ -384,7 +384,7 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
               dataS4@CAL <- data_matrix$CAL
               dataS4@CAL_ESS <- apply(dataS4@CAL, 1, sum, na.rm = TRUE) %>% pmin(ESS[2])
             }
-            if(!is.null(dataS4@CAL)) {
+            if(!is.null(data_matrix$CAL)) {
               if(all(is.na(data@CAL_mids))) {
                 stop("No length bins found in Data@CAL_mids.", call. = FALSE)
               } else dataS4@length_bin <- data@CAL_mids
