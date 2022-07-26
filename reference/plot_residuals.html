@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,46 +53,67 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_residuals</span><span class="op">(</span>
-  <span class="va">Year</span>,
-  <span class="va">res</span>,
-  res_sd <span class="op">=</span> <span class="cn">NULL</span>,
-  res_sd_CI <span class="op">=</span> <span class="fl">0.95</span>,
-  res_upper <span class="op">=</span> <span class="cn">NULL</span>,
-  res_lower <span class="op">=</span> <span class="cn">NULL</span>,
-  res_ind_blue <span class="op">=</span> <span class="cn">NULL</span>,
-  draw_zero <span class="op">=</span> <span class="cn">TRUE</span>,
-  zero_linetype <span class="op">=</span> <span class="fl">2</span>,
-  label <span class="op">=</span> <span class="st">"Residual"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_residuals</span><span class="op">(</span></span>
+<span>  <span class="va">Year</span>,</span>
+<span>  <span class="va">res</span>,</span>
+<span>  res_sd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  res_sd_CI <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  res_upper <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  res_lower <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  res_ind_blue <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  draw_zero <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  zero_linetype <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  label <span class="op">=</span> <span class="st">"Residual"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>Year</dt>
 <dd><p>A vector of years for the data.</p></dd>
+
+
 <dt>res</dt>
 <dd><p>A vector of residuals.</p></dd>
+
+
 <dt>res_sd</dt>
 <dd><p>A vector of year specific standard deviation for <code>res</code>.</p></dd>
+
+
 <dt>res_sd_CI</dt>
 <dd><p>The confidence interval for the error bars based for <code>res_sd</code>.</p></dd>
+
+
 <dt>res_upper</dt>
 <dd><p>A vector of year-specific upper bounds for the error bars of the residual (in lieu of argument <code>res_CV</code>).</p></dd>
+
+
 <dt>res_lower</dt>
 <dd><p>A vector of year-specific lower bounds for the error bars of the residual (in lieu of argument <code>res_CV</code>).</p></dd>
+
+
 <dt>res_ind_blue</dt>
 <dd><p>Indices of <code>obs</code> for which the plotted residuals and error bars will be blue.</p></dd>
+
+
 <dt>draw_zero</dt>
 <dd><p>Indicates whether a horizontal line should be drawn at zero.</p></dd>
+
+
 <dt>zero_linetype</dt>
 <dd><p>Passes argument <code>lty</code> (e.g. solid line = 1, dotted = 2) to <code>draw_zero</code>.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>Character string that describes the data to label the y-axis.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A plot of model residuals by year (optionally, with error bars).</p>
+    
+
+<p>A plot of model residuals by year (optionally, with error bars).</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -115,7 +136,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

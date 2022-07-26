@@ -19,7 +19,7 @@ with MCMC samples.."><meta property="og:image" content="https://SAMtool.openMSE.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -57,66 +57,97 @@ with MCMC samples..</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">posterior</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S4 method for RCModel</span>
-<span class="fu">posterior</span><span class="op">(</span>
-  <span class="va">x</span>,
-  priors_only <span class="op">=</span> <span class="cn">FALSE</span>,
-  laplace <span class="op">=</span> <span class="cn">FALSE</span>,
-  chains <span class="op">=</span> <span class="fl">2</span>,
-  iter <span class="op">=</span> <span class="fl">2000</span>,
-  warmup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">iter</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,
-  thin <span class="op">=</span> <span class="fl">5</span>,
-  seed <span class="op">=</span> <span class="fl">34</span>,
-  init <span class="op">=</span> <span class="st">"last.par.best"</span>,
-  cores <span class="op">=</span> <span class="va">chains</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S4 method for Assessment</span>
-<span class="fu">posterior</span><span class="op">(</span><span class="va">x</span>, priors_only <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">RCMstan</span><span class="op">(</span><span class="va">RCModel</span>, <span class="va">stanfit</span>, <span class="va">sim</span>, cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">posterior</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for RCModel</span></span>
+<span><span class="fu">posterior</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  priors_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  laplace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  iter <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  warmup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">iter</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  thin <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">34</span>,</span>
+<span>  init <span class="op">=</span> <span class="st">"last.par.best"</span>,</span>
+<span>  cores <span class="op">=</span> <span class="va">chains</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for Assessment</span></span>
+<span><span class="fu">posterior</span><span class="op">(</span><span class="va">x</span>, priors_only <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">RCMstan</span><span class="op">(</span><span class="va">RCModel</span>, <span class="va">stanfit</span>, <span class="va">sim</span>, cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>An object of class <a href="Assessment-class.html">Assessment</a> or <a href="RCModel-class.html">RCModel</a>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Additional arguments to pass to <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling</a></code> via <code><a href="https://rdrr.io/pkg/tmbstan/man/tmbstan.html" class="external-link">tmbstan::tmbstan</a></code>.</p></dd>
+
+
 <dt>priors_only</dt>
 <dd><p>Logical, whether to set the likelihood to zero and sample the priors only.</p></dd>
+
+
 <dt>laplace</dt>
 <dd><p>Logical, whether to do the Laplace approximation for random parameters.</p></dd>
+
+
 <dt>chains</dt>
 <dd><p>The numer of MCMC chains.</p></dd>
+
+
 <dt>iter</dt>
 <dd><p>The number of iterations for each chain, including warmup.</p></dd>
+
+
 <dt>warmup</dt>
 <dd><p>The number of burnin iterations</p></dd>
+
+
 <dt>thin</dt>
 <dd><p>The frequency at which iterations are kept (e.g., <code>5</code> saves every fifth iteration)</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>Seed for random number generator during the MCMC.</p></dd>
+
+
 <dt>init</dt>
 <dd><p>The initial values of parameters for starting the MCMC chain. See <code><a href="https://rdrr.io/pkg/tmbstan/man/tmbstan.html" class="external-link">tmbstan::tmbstan</a></code>.</p></dd>
+
+
 <dt>cores</dt>
 <dd><p>The number of cores for running in parallel, e.g., one core per MCMC chain. Used in <code>RCMstan</code>
 for reconstructing the population.</p></dd>
+
+
 <dt>RCModel</dt>
 <dd><p>An object of class <code>RCModel</code></p></dd>
+
+
 <dt>stanfit</dt>
 <dd><p>An object of class <code>stanfit</code> returned by <code>posterior</code>.</p></dd>
+
+
 <dt>sim</dt>
 <dd><p>A matrix of <code>RCModel@OM@nsim</code> rows and 2 columns that specifies the samples used to update the
 operating model. The first column specifies the chain and the second columns specifies the MCMC iteration.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p><code>posterior</code> returns an object of class <code>stanfit</code>. See <code>class?stanfit</code>.
-<code>RCMstan</code> returns an updated <code>RCModel</code>.</p>
+    
+
+<p><code>posterior</code> returns an object of class <code>stanfit</code>. See <code>class?stanfit</code>.</p>
+
+
+<p><code>RCMstan</code> returns an updated <code>RCModel</code>.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -135,7 +166,7 @@ operating model. The first column specifies the chain and the second columns spe
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

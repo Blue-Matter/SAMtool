@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,44 +53,61 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_SR</span><span class="op">(</span>
-  <span class="va">Spawners</span>,
-  <span class="va">expectedR</span>,
-  R0 <span class="op">=</span> <span class="cn">NULL</span>,
-  S0 <span class="op">=</span> <span class="cn">NULL</span>,
-  rec_dev <span class="op">=</span> <span class="cn">NULL</span>,
-  trajectory <span class="op">=</span> <span class="cn">FALSE</span>,
-  y_zoom <span class="op">=</span> <span class="cn">NULL</span>,
-  ylab <span class="op">=</span> <span class="st">"Recruitment"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_SR</span><span class="op">(</span></span>
+<span>  <span class="va">Spawners</span>,</span>
+<span>  <span class="va">expectedR</span>,</span>
+<span>  R0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  S0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rec_dev <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  trajectory <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  y_zoom <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="st">"Recruitment"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>Spawners</dt>
 <dd><p>A vector of the number of the spawners (x-axis).</p></dd>
+
+
 <dt>expectedR</dt>
 <dd><p>A vector of the expected recruitment (from the
 stock-recruit function) corresponding to values of <code>Spawners</code>.</p></dd>
+
+
 <dt>R0</dt>
 <dd><p>Virgin recruitment.</p></dd>
+
+
 <dt>S0</dt>
 <dd><p>Virgin spawners.</p></dd>
+
+
 <dt>rec_dev</dt>
 <dd><p>If recruitment deviations are estimated, a vector of estimated recruitment
 (in normal space) corresponding to values of <code>Spawners</code>.</p></dd>
+
+
 <dt>trajectory</dt>
 <dd><p>Indicates whether arrows will be drawn showing the trajectory of
 spawners and recruitment deviations over time.</p></dd>
+
+
 <dt>y_zoom</dt>
 <dd><p>If recruitment deviations are plotted, the y-axis limit relative to
 maximum expected recruitment <code>expectedR</code>. If <code>NULL</code>, all recruitment values are plotted.</p></dd>
+
+
 <dt>ylab</dt>
 <dd><p>Character string for label on y-axis.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A stock-recruit plot</p>
+    
+
+<p>A stock-recruit plot</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -109,7 +126,7 @@ maximum expected recruitment <code>expectedR</code>. If <code>NULL</code>, all r
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

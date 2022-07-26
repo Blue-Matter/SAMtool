@@ -23,7 +23,7 @@ check_RCMdata evaluates whether the inputs in the S4 RCMdata object are correctl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -65,126 +65,165 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">check_RCMdata</span><span class="op">(</span><span class="va">RCMdata</span>, <span class="va">OM</span>, condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">RCM</span><span class="op">(</span><span class="va">OM</span>, <span class="va">data</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S4 method for OM,RCMdata</span>
-<span class="fu">RCM</span><span class="op">(</span>
-  <span class="va">OM</span>,
-  <span class="va">data</span>,
-  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,
-  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,
-  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,
-  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span>, <span class="st">"dirmult1"</span>, <span class="st">"dirmult2"</span><span class="op">)</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  max_F <span class="op">=</span> <span class="fl">3</span>,
-  cores <span class="op">=</span> <span class="fl">1L</span>,
-  integrate <span class="op">=</span> <span class="cn">FALSE</span>,
-  mean_fit <span class="op">=</span> <span class="cn">FALSE</span>,
-  drop_nonconv <span class="op">=</span> <span class="cn">FALSE</span>,
-  drop_highF <span class="op">=</span> <span class="cn">FALSE</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S4 method for OM,list</span>
-<span class="fu">RCM</span><span class="op">(</span>
-  <span class="va">OM</span>,
-  <span class="va">data</span>,
-  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,
-  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,
-  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,
-  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span>, <span class="st">"dirmult1"</span>, <span class="st">"dirmult2"</span><span class="op">)</span>,
-  ESS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  max_F <span class="op">=</span> <span class="fl">3</span>,
-  cores <span class="op">=</span> <span class="fl">1L</span>,
-  integrate <span class="op">=</span> <span class="cn">FALSE</span>,
-  mean_fit <span class="op">=</span> <span class="cn">FALSE</span>,
-  drop_nonconv <span class="op">=</span> <span class="cn">FALSE</span>,
-  drop_highF <span class="op">=</span> <span class="cn">FALSE</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S4 method for OM,Data</span>
-<span class="fu">RCM</span><span class="op">(</span>
-  <span class="va">OM</span>,
-  <span class="va">data</span>,
-  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,
-  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,
-  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,
-  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span>, <span class="st">"dirmult1"</span>, <span class="st">"dirmult2"</span><span class="op">)</span>,
-  ESS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  max_F <span class="op">=</span> <span class="fl">3</span>,
-  cores <span class="op">=</span> <span class="fl">1L</span>,
-  integrate <span class="op">=</span> <span class="cn">FALSE</span>,
-  mean_fit <span class="op">=</span> <span class="cn">FALSE</span>,
-  drop_nonconv <span class="op">=</span> <span class="cn">FALSE</span>,
-  drop_highF <span class="op">=</span> <span class="cn">FALSE</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">check_RCMdata</span><span class="op">(</span><span class="va">RCMdata</span>, <span class="va">OM</span>, condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">RCM</span><span class="op">(</span><span class="va">OM</span>, <span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for OM,RCMdata</span></span>
+<span><span class="fu">RCM</span><span class="op">(</span></span>
+<span>  <span class="va">OM</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,</span>
+<span>  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span>, <span class="st">"dirmult1"</span>, <span class="st">"dirmult2"</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  max_F <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mean_fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  drop_nonconv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  drop_highF <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for OM,list</span></span>
+<span><span class="fu">RCM</span><span class="op">(</span></span>
+<span>  <span class="va">OM</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,</span>
+<span>  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span>, <span class="st">"dirmult1"</span>, <span class="st">"dirmult2"</span><span class="op">)</span>,</span>
+<span>  ESS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  max_F <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mean_fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  drop_nonconv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  drop_highF <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for OM,Data</span></span>
+<span><span class="fu">RCM</span><span class="op">(</span></span>
+<span>  <span class="va">OM</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,</span>
+<span>  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span>, <span class="st">"dirmult1"</span>, <span class="st">"dirmult2"</span><span class="op">)</span>,</span>
+<span>  ESS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  max_F <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mean_fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  drop_nonconv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  drop_highF <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>RCMdata</dt>
 <dd><p>An <a href="RCMdata-class.html">RCMdata</a> object.</p></dd>
+
+
 <dt>OM</dt>
 <dd><p>An object of class OM that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).</p></dd>
+
+
 <dt>condition</dt>
 <dd><p>String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 or "effort".</p></dd>
+
+
 <dt>data</dt>
 <dd><p>Data inputs formatted in a <a href="RCMdata-class.html">RCMdata</a> (preferred) or Data object. 
 Use of a list is deprecated. See Data section below.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to pass in for starting values of parameters and fixing parameters. See details.</p></dd>
+
+
 <dt>selectivity</dt>
 <dd><p>A character vector of length nfleet to indicate <code>"logistic"</code>, <code>"dome"</code>, or <code>"free"</code> selectivity for each fleet in <code>Chist</code>.
 If there is time-varying selectivity, this is a character vector of length nsel_block (see Data section below). "free" indicates independent selectivity parameters for each age,
 and additional modifications for fixing selectivity parameters will likely be needed. See Additional arguments section.</p></dd>
+
+
 <dt>s_selectivity</dt>
 <dd><p>A vector of length nsurvey to indicate the selectivity of the corresponding columns in <code>data$Index</code>. Use <code>"B"</code> for
 total biomass, or <code>"SSB"</code> for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
 If the survey selectivity is otherwise independent of anything else in the model, use <code>"logistic"</code>, <code>"dome"</code>, or <code>"free"</code> to specify the functional form of selectivity, and
 see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.</p></dd>
+
+
 <dt>LWT</dt>
 <dd><p>A named list of likelihood weights for the RCM. See below.</p></dd>
+
+
 <dt>comp_like</dt>
 <dd><p>A string indicating the statistical distribution for the composition data, either <code>"multinomial"</code> (default), <code>"lognormal"</code>, <code>"mvlogistic"</code> (multivariate logistic),
 <code>"dirmult1"</code> (Dirichlet multinomial, linear version), or <code>"dirmult2"</code> (saturating version; see Thorson et al. 2017).</p></dd>
+
+
 <dt>prior</dt>
 <dd><p>A named list for the parameters of any priors to be added to the model. See below.</p></dd>
+
+
 <dt>max_F</dt>
 <dd><p>The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also <code>drop_highF</code>.</p></dd>
+
+
 <dt>cores</dt>
 <dd><p>Integer for the number of CPU cores for the stock reduction analysis.</p></dd>
+
+
 <dt>integrate</dt>
 <dd><p>Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).</p></dd>
+
+
 <dt>mean_fit</dt>
 <dd><p>Logical, whether to run an additional with mean values of life history parameters from the OM.</p></dd>
+
+
 <dt>drop_nonconv</dt>
 <dd><p>Logical, whether to drop non-converged fits of the RCM, including fits where F = NA.</p></dd>
+
+
 <dt>drop_highF</dt>
 <dd><p>Logical, whether to drop fits of the RCM where F = <code>max_F</code>.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+
+
 <dt>ESS</dt>
 <dd><p>A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
 Not used when data are provided in a <a href="RCMdata-class.html">RCMdata</a> object.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <a href="RCModel-class.html">RCModel</a> (see link for description of output).
-<code>check_RCMdata</code> returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
+    
+
+<p>An object of class <a href="RCModel-class.html">RCModel</a> (see link for description of output).</p>
+
+
+<p><code>check_RCMdata</code> returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
 from the OM.</p>
     </div>
     <div id="details">
@@ -332,21 +371,21 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{ </span></span>
-<span class="r-in"><span class="co"># An example that conditions a Pacific cod operating model. There are 48 simulations, </span></span>
-<span class="r-in"><span class="co"># where values of natural mortality and steepness are sampled from distributions. </span></span>
-<span class="r-in"><span class="co"># The model is fitted with priors on the index catchability. Maturity and selectivity </span></span>
-<span class="r-in"><span class="co"># are knife-edge at the age of 2 years. See online tutorial for more information.</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">)</span> </span>
-<span class="r-in"><span class="va">mat_ogive</span> <span class="op">&lt;-</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">cpars</span><span class="op">$</span><span class="va">Mat_age</span><span class="op">[</span><span class="fl">1</span>, , <span class="fl">1</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">RCM</span><span class="op">(</span>OM <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span>, data <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">data</span>, </span>
-<span class="r-in">           condition <span class="op">=</span> <span class="st">"catch"</span>, mean_fit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">           selectivity <span class="op">=</span> <span class="st">"free"</span>, s_selectivity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"SSB"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">           vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mat_ogive</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in">           map_vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in">           map_log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span>,</span>
-<span class="r-in">           prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{ </span></span></span>
+<span class="r-in"><span><span class="co"># An example that conditions a Pacific cod operating model. There are 48 simulations, </span></span></span>
+<span class="r-in"><span><span class="co"># where values of natural mortality and steepness are sampled from distributions. </span></span></span>
+<span class="r-in"><span><span class="co"># The model is fitted with priors on the index catchability. Maturity and selectivity </span></span></span>
+<span class="r-in"><span><span class="co"># are knife-edge at the age of 2 years. See online tutorial for more information.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">)</span> </span></span>
+<span class="r-in"><span><span class="va">mat_ogive</span> <span class="op">&lt;-</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">cpars</span><span class="op">$</span><span class="va">Mat_age</span><span class="op">[</span><span class="fl">1</span>, , <span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">RCM</span><span class="op">(</span>OM <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span>, data <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">data</span>, </span></span>
+<span class="r-in"><span>           condition <span class="op">=</span> <span class="st">"catch"</span>, mean_fit <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>           selectivity <span class="op">=</span> <span class="st">"free"</span>, s_selectivity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"SSB"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>           vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mat_ogive</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>           map_vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>           map_log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>           prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and data...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM model is conditioned on: catch</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
@@ -383,23 +422,23 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical catch data added to OM@cpars$Data@Cat.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJvN8fW/RCM.Rmd</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpYvIPcz/RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJvN8fW/RCM.html</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span>
-<span class="r-in"><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">cpars</span><span class="op">$</span><span class="va">Mat_age</span><span class="op">[</span>, <span class="fl">2</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
-<span class="r-in">  <span class="va">mat_ogive_age3</span> <span class="op">&lt;-</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">cpars</span><span class="op">$</span><span class="va">Mat_age</span><span class="op">[</span><span class="fl">1</span>, , <span class="fl">1</span><span class="op">]</span></span>
-<span class="r-in">  <span class="fu">RCM</span><span class="op">(</span>OM <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span>, data <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">data</span>, </span>
-<span class="r-in">      condition <span class="op">=</span> <span class="st">"catch"</span>, mean_fit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">      selectivity <span class="op">=</span> <span class="st">"free"</span>, s_selectivity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"SSB"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">      vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mat_ogive_age3</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive_age3</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in">      map_vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive_age3</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in">      map_log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span>,</span>
-<span class="r-in">      prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpYvIPcz/RCM.html</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span></span>
+<span class="r-in"><span><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">cpars</span><span class="op">$</span><span class="va">Mat_age</span><span class="op">[</span>, <span class="fl">2</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span>  <span class="va">mat_ogive_age3</span> <span class="op">&lt;-</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">cpars</span><span class="op">$</span><span class="va">Mat_age</span><span class="op">[</span><span class="fl">1</span>, , <span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="fu">RCM</span><span class="op">(</span>OM <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span>, data <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">data</span>, </span></span>
+<span class="r-in"><span>      condition <span class="op">=</span> <span class="st">"catch"</span>, mean_fit <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>      selectivity <span class="op">=</span> <span class="st">"free"</span>, s_selectivity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"SSB"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mat_ogive_age3</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive_age3</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      map_vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive_age3</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      map_log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and data...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM model is conditioned on: catch</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
@@ -436,73 +475,65 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical catch data added to OM@cpars$Data@Cat.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
-<span class="r-in">  </span>
-<span class="r-in"><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJvN8fW/compare_RCM.Rmd</span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpYvIPcz/compare_RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJvN8fW/compare_RCM.html</span>
-<span class="r-in">             </span>
-<span class="r-in"><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Loading operating model </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Valid custom parameters found: M h V Mat_age R0 D Find qs Perr AC </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Perr_y Len_age Linf K t0 LenCV LatASD Wt_age hs M_ageArray AddIbeta </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Data </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Note: Maximum age (10) is lower than assuming 1% of cohort survives to </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">maximum age (24) </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Optimizing for user-specified movement </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating MSY reference points for each year </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Skipping optimization for depletion - using catchability (q) from </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">OM@cpars. </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating historical stock and fishing dynamics </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating per-recruit reference points </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating B-low reference points </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Calculating reference yield - best fixed F strategy </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Simulating observed data </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Simulated Data with Real Data from `OM@cpars$Data` </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Using `OM@cpars$Data@LenCV` (0.1) </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Simulated Catch from `OM@cpars$Data@Cat` </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Catch bias from `OM@cpars$Data@Cat` </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating Catch variability from `OM@cpars$Data@Cat` </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating catch observation error from `OM@cpars$Data@Cat` </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Adding Additional Indices to Simulated Data from `OM@cpars$Data@AddInd` </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">cpars$AddIbeta detected. Not updating beta for additional indices </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Updating observation variability (AddIerr) for additional indices from </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">real data </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 1 - spawning stock (biomass) </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 2 - spawning stock (biomass) </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 3 - spawning stock (biomass) </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 4 - spawning stock (biomass) </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Additional index 5 - spawning stock (biomass) </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Returning historical simulations </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="co"># } </span></span>
-<span class="r-in"></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpYvIPcz/compare_RCM.html</span>
+<span class="r-in"><span>             </span></span>
+<span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loading operating model</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Valid custom parameters found: </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>    M </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   h </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   V </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Mat_age </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   R0 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   D </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Find </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   qs </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Perr </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   AC </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Perr_y </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Len_age </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Linf </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   K </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   t0 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   LenCV </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   LatASD </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Wt_age </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   hs </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   M_ageArray </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   AddIbeta </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Data </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Note: Maximum age (10) is lower than assuming 1% of cohort survives to maximum age (24)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Optimizing for user-specified movement</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating MSY reference points for each year</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Skipping optimization for depletion - using catchability (q) from OM@cpars.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating historical stock and fishing dynamics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating per-recruit reference points</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating B-low reference points</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating reference yield - best fixed F strategy</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Simulating observed data</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating Simulated Data with Real Data from `OM@cpars$Data`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Using `OM@cpars$Data@LenCV` (0.1)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating Simulated Catch from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating Catch bias from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating Catch variability from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating catch observation error from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Adding Additional Indices to Simulated Data from `OM@cpars$Data@AddInd`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> cpars$AddIbeta detected. Not updating beta for additional indices</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating observation variability (AddIerr) for additional indices from real data</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index  1  -  spawning  stock  (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index  2  -  spawning  stock  (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index  3  -  spawning  stock  (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index  4  -  spawning  stock  (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index  5  -  spawning  stock  (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Returning historical simulations</span>
+<span class="r-in"><span><span class="co"># } </span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -517,7 +548,7 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

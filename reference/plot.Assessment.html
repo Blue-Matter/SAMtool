@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,56 +53,75 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for Assessment,missing</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"report_"</span>, <span class="va">x</span><span class="op">@</span><span class="va">Model</span><span class="op">)</span>,
-  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,
-  ret_yr <span class="op">=</span> <span class="fl">0L</span>,
-  open_file <span class="op">=</span> <span class="cn">TRUE</span>,
-  quiet <span class="op">=</span> <span class="cn">TRUE</span>,
-  render_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S4 method for Assessment,retro</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">y</span>,
-  filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"report_"</span>, <span class="va">x</span><span class="op">@</span><span class="va">Model</span><span class="op">)</span>,
-  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,
-  open_file <span class="op">=</span> <span class="cn">TRUE</span>,
-  quiet <span class="op">=</span> <span class="cn">TRUE</span>,
-  render_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for Assessment,missing</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"report_"</span>, <span class="va">x</span><span class="op">@</span><span class="va">Model</span><span class="op">)</span>,</span>
+<span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  ret_yr <span class="op">=</span> <span class="fl">0L</span>,</span>
+<span>  open_file <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  render_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for Assessment,retro</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">y</span>,</span>
+<span>  filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"report_"</span>, <span class="va">x</span><span class="op">@</span><span class="va">Model</span><span class="op">)</span>,</span>
+<span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  open_file <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  render_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>An object of class <a href="Assessment-class.html">Assessment</a>.</p></dd>
+
+
 <dt>filename</dt>
 <dd><p>Character string for the name of the markdown and HTML files.</p></dd>
+
+
 <dt>dir</dt>
 <dd><p>The directory in which the markdown and HTML files will be saved.</p></dd>
+
+
 <dt>ret_yr</dt>
 <dd><p>If greater than zero, then a retrospective analysis will be performed and results will be reported. The integer here corresponds
 to the number of peels (the maximum number of terminal years for which the data are removed).</p></dd>
+
+
 <dt>open_file</dt>
 <dd><p>Logical, whether the HTML document is opened after it is rendered.</p></dd>
+
+
 <dt>quiet</dt>
 <dd><p>Logical, whether to silence the markdown rendering function.</p></dd>
+
+
 <dt>render_args</dt>
 <dd><p>Arguments to pass to <a href="https://pkgs.rstudio.com/rmarkdown/reference/render.html" class="external-link">render</a>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments.</p></dd>
+
+
 <dt>y</dt>
 <dd><p>An object of class <a href="retro-class.html">retro</a>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns invisibly the output from <a href="https://pkgs.rstudio.com/rmarkdown/reference/render.html" class="external-link">render</a>.</p>
+    
+
+<p>Returns invisibly the output from <a href="https://pkgs.rstudio.com/rmarkdown/reference/render.html" class="external-link">render</a>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -111,14 +130,14 @@ to the number of peels (the maximum number of terminal years for which the data 
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu"><a href="DD_TMB.html">DD_TMB</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="va">Simulation_1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJvN8fW/report_DD_TMB.Rmd</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu"><a href="DD_TMB.html">DD_TMB</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="va">Simulation_1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpYvIPcz/report_DD_TMB.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJvN8fW/report_DD_TMB.html</span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpYvIPcz/report_DD_TMB.html</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -133,7 +152,7 @@ to the number of peels (the maximum number of terminal years for which the data 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

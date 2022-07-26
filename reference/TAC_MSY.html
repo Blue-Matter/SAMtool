@@ -19,7 +19,7 @@ either UMSY or FMSY and the available biomass, i.e. vulnerable biomass, in termi
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -57,7 +57,7 @@ either UMSY or FMSY and the available biomass, i.e. vulnerable biomass, in termi
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">TAC_MSY</span><span class="op">(</span><span class="va">Assessment</span>, <span class="va">reps</span>, MSY_frac <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">TAC_MSY</span><span class="op">(</span><span class="va">Assessment</span>, <span class="va">reps</span>, MSY_frac <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -65,14 +65,21 @@ either UMSY or FMSY and the available biomass, i.e. vulnerable biomass, in termi
     <dl><dt>Assessment</dt>
 <dd><p>An Assessment object with estimates of UMSY or FMSY and
 terminal year vulnerable biomass.</p></dd>
+
+
 <dt>reps</dt>
 <dd><p>The number of stochastic draws of UMSY or FMSY.</p></dd>
+
+
 <dt>MSY_frac</dt>
 <dd><p>The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75% of FMSY).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A vector of length <code>reps</code> of stochastic samples of TAC recommendation. Returns NA's
+    
+
+<p>A vector of length <code>reps</code> of stochastic samples of TAC recommendation. Returns NA's
 if missing either UMSY/FMSY or vulnerable biomass.</p>
     </div>
     <div id="note">
@@ -97,7 +104,7 @@ the latter has a more informative name.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

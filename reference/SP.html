@@ -23,7 +23,7 @@ The function for the spict model (Pedersen and Berg, 2016) is available in MSEex
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -65,54 +65,54 @@ The function for the <code>spict</code> model (Pedersen and Berg, 2016) is avail
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">SP</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">Data</span>,
-  AddInd <span class="op">=</span> <span class="st">"B"</span>,
-  rescale <span class="op">=</span> <span class="st">"mean1"</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  fix_dep <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_n <span class="op">=</span> <span class="cn">TRUE</span>,
-  LWT <span class="op">=</span> <span class="cn">NULL</span>,
-  n_seas <span class="op">=</span> <span class="fl">4L</span>,
-  n_itF <span class="op">=</span> <span class="fl">3L</span>,
-  use_r_prior <span class="op">=</span> <span class="cn">FALSE</span>,
-  r_reps <span class="op">=</span> <span class="fl">100</span>,
-  SR_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,
-  silent <span class="op">=</span> <span class="cn">TRUE</span>,
-  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,
-  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">SP_SS</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">Data</span>,
-  AddInd <span class="op">=</span> <span class="st">"B"</span>,
-  rescale <span class="op">=</span> <span class="st">"mean1"</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  fix_dep <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_n <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_sigma <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_tau <span class="op">=</span> <span class="cn">TRUE</span>,
-  LWT <span class="op">=</span> <span class="cn">NULL</span>,
-  early_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"index"</span><span class="op">)</span>,
-  n_seas <span class="op">=</span> <span class="fl">4L</span>,
-  n_itF <span class="op">=</span> <span class="fl">3L</span>,
-  use_r_prior <span class="op">=</span> <span class="cn">FALSE</span>,
-  r_reps <span class="op">=</span> <span class="fl">100</span>,
-  SR_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,
-  integrate <span class="op">=</span> <span class="cn">FALSE</span>,
-  silent <span class="op">=</span> <span class="cn">TRUE</span>,
-  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,
-  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,
-  inner.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">SP_Fox</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span>, <span class="va">Data</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SP</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">Data</span>,</span>
+<span>  AddInd <span class="op">=</span> <span class="st">"B"</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="st">"mean1"</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fix_dep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_n <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_seas <span class="op">=</span> <span class="fl">4L</span>,</span>
+<span>  n_itF <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  use_r_prior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  r_reps <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  SR_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">SP_SS</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">Data</span>,</span>
+<span>  AddInd <span class="op">=</span> <span class="st">"B"</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="st">"mean1"</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fix_dep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_n <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_sigma <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_tau <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  early_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"index"</span><span class="op">)</span>,</span>
+<span>  n_seas <span class="op">=</span> <span class="fl">4L</span>,</span>
+<span>  n_itF <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  use_r_prior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  r_reps <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  SR_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,</span>
+<span>  inner.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">SP_Fox</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span>, <span class="va">Data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -120,77 +120,124 @@ The function for the <code>spict</code> model (Pedersen and Berg, 2016) is avail
     <dl><dt>x</dt>
 <dd><p>An index for the objects in <code>Data</code> when running in <a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a>.
 Otherwise, equals to 1 When running an assessment interactively.</p></dd>
+
+
 <dt>Data</dt>
 <dd><p>An object of class Data.</p></dd>
+
+
 <dt>AddInd</dt>
 <dd><p>A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in
 Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd.</p></dd>
+
+
 <dt>rescale</dt>
 <dd><p>A multiplicative factor that rescales the catch in the assessment model, which
 can improve convergence. By default, <code>"mean1"</code> scales the catch so that time series mean is 1, otherwise a numeric.
 Output is re-converted back to original units.</p></dd>
+
+
 <dt>start</dt>
 <dd><p>Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.</p></dd>
+
+
 <dt>fix_dep</dt>
 <dd><p>Logical, whether to fix the initial depletion (ratio of biomass to carrying capacity in the
 first year of the model). If <code>TRUE</code>, uses the value in <code>start</code>, otherwise equal to 1
 (unfished conditions).</p></dd>
+
+
 <dt>fix_n</dt>
 <dd><p>Logical, whether to fix the exponent of the production function. If <code>TRUE</code>,
 uses the value in <code>start</code>, otherwise equal to <code>n = 2</code>, where the biomass at MSY
 is half of carrying capacity.</p></dd>
+
+
 <dt>LWT</dt>
 <dd><p>A vector of likelihood weights for each survey.</p></dd>
+
+
 <dt>n_seas</dt>
 <dd><p>Integer, the number of seasons in the model for calculating continuous surplus production.</p></dd>
+
+
 <dt>n_itF</dt>
 <dd><p>Integer, the number of iterations to solve F conditional on the observed catch given multiple seasons within an annual time step.
 Ignored if <code>n_seas</code> = 1.</p></dd>
+
+
 <dt>use_r_prior</dt>
 <dd><p>Logical, whether a prior for the intrinsic rate of increase will be used in the model. See details.</p></dd>
+
+
 <dt>r_reps</dt>
 <dd><p>If <code>use_r_prior = TRUE</code>, the number of samples of natural mortality and steepness for calculating the
 mean and standard deviation of the r prior. To override and directly provide the r-prior mean and standard deviation, use the start list, e.g.
 <code>start = list(r_prior = c(0.1, 0.05))</code> (mean of 0.1 and s.d. of 0.05).</p></dd>
+
+
 <dt>SR_type</dt>
 <dd><p>If <code>use_r_prior = TRUE</code>, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
 steepness and unfished spawners-per-recruit. Used to develop the r prior.</p></dd>
+
+
 <dt>silent</dt>
 <dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
+
+
 <dt>opt_hess</dt>
 <dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if <code>integrate = TRUE</code>.</p></dd>
+
+
 <dt>n_restart</dt>
 <dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>A named list of parameters regarding optimization to be passed to
 <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>For <code>SP_Fox</code>, additional arguments to pass to <code>SP</code>.</p></dd>
+
+
 <dt>fix_sigma</dt>
 <dd><p>Logical, whether the standard deviation of the index is fixed. If <code>TRUE</code>,
 sigma is fixed to value provided in <code>start</code> (if provided), otherwise, value based on <code>Data@CV_Ind</code>.</p></dd>
+
+
 <dt>fix_tau</dt>
 <dd><p>Logical, the standard deviation of the biomass deviations is fixed. If <code>TRUE</code>,
 tau is fixed to value provided in <code>start</code> (if provided), otherwise, equal to 0.1.</p></dd>
+
+
 <dt>early_dev</dt>
 <dd><p>Character string describing the years for which biomass deviations are estimated in <code>SP_SS</code>.
 By default, deviations are estimated in each year of the model (<code>"all"</code>), while deviations could also be estimated
 once index data are available (<code>"index"</code>).</p></dd>
+
+
 <dt>integrate</dt>
 <dd><p>Logical, whether the likelihood of the model integrates over the likelihood
 of the biomass deviations (thus, treating it as a state-space variable).</p></dd>
+
+
 <dt>inner.control</dt>
 <dd><p>A named list of arguments for optimization of the random effects, which
 is passed on to <a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton</a> via <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of <code><a href="Assessment-class.html">Assessment</a></code> containing objects and output from TMB.</p>
+    
+
+<p>An object of <code><a href="Assessment-class.html">Assessment</a></code> containing objects and output from TMB.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -261,22 +308,22 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">swordfish</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#### Observation-error surplus production model</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Provide starting values, assume B/K = 0.875 in first year of model</span></span>
-<span class="r-in"><span class="co"># and symmetrical production curve (n = 2)</span></span>
-<span class="r-in"><span class="va">start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dep <span class="op">=</span> <span class="fl">0.875</span>, n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span>, start <span class="op">=</span> <span class="va">start</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJvN8fW/report_SP.Rmd</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">swordfish</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#### Observation-error surplus production model</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Provide starting values, assume B/K = 0.875 in first year of model</span></span></span>
+<span class="r-in"><span><span class="co"># and symmetrical production curve (n = 2)</span></span></span>
+<span class="r-in"><span><span class="va">start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dep <span class="op">=</span> <span class="fl">0.875</span>, n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span>, start <span class="op">=</span> <span class="va">start</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpYvIPcz/report_SP.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJvN8fW/report_SP.html</span>
-<span class="r-in"><span class="fu"><a href="profile.html">profile</a></span><span class="op">(</span><span class="va">res</span>, FMSY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.4</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpYvIPcz/report_SP.html</span>
+<span class="r-in"><span><span class="fu"><a href="profile.html">profile</a></span><span class="op">(</span><span class="va">res</span>, FMSY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.4</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="SP-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An object of class "prof"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slot "Model":</span>
@@ -325,7 +372,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-out co"><span class="r-pr">#&gt;</span> 30 0.39 14279.16 0.8514134997</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 31 0.40 14279.16 0.9890125181</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="fu"><a href="retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="SP-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-4.png" alt="" width="700" height="433"></span>
@@ -336,28 +383,28 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-out co"><span class="r-pr">#&gt;</span> Biomass               -0.091</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> B/B[MSY]               0.152</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> B/B[0]                 0.152</span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#### State-space version</span></span>
-<span class="r-in"><span class="va">res_SS</span> <span class="op">&lt;-</span> <span class="fu">SP_SS</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dep <span class="op">=</span> <span class="fl">0.875</span>, sigma <span class="op">=</span> <span class="fl">0.1</span>, tau <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_SS</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJvN8fW/report_SP_SS.Rmd</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#### State-space version</span></span></span>
+<span class="r-in"><span><span class="va">res_SS</span> <span class="op">&lt;-</span> <span class="fu">SP_SS</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dep <span class="op">=</span> <span class="fl">0.875</span>, sigma <span class="op">=</span> <span class="fl">0.1</span>, tau <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_SS</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpYvIPcz/report_SP_SS.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJvN8fW/report_SP_SS.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpYvIPcz/report_SP_SS.html</span>
 <span class="r-plt img"><img src="SP-6.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#### Fox model</span></span>
-<span class="r-in"><span class="va">res_Fox</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, fix_n <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res_Fox2</span> <span class="op">&lt;-</span> <span class="fu">SP_Fox</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#### SP with r_prior</span></span>
-<span class="r-in"><span class="va">res_prior</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">SimulatedData</span>, use_r_prior <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">#### Pass an r_prior to the model with mean = 0.35, sd = 0.10</span></span>
-<span class="r-in"><span class="va">res_prior2</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">SimulatedData</span>, use_r_prior <span class="op">=</span> <span class="cn">TRUE</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>r_prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.35</span>, <span class="fl">0.10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#### Fox model</span></span></span>
+<span class="r-in"><span><span class="va">res_Fox</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, fix_n <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res_Fox2</span> <span class="op">&lt;-</span> <span class="fu">SP_Fox</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#### SP with r_prior</span></span></span>
+<span class="r-in"><span><span class="va">res_prior</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">SimulatedData</span>, use_r_prior <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#### Pass an r_prior to the model with mean = 0.35, sd = 0.10</span></span></span>
+<span class="r-in"><span><span class="va">res_prior2</span> <span class="op">&lt;-</span> <span class="fu">SP</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">SimulatedData</span>, use_r_prior <span class="op">=</span> <span class="cn">TRUE</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>r_prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.35</span>, <span class="fl">0.10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -372,7 +419,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

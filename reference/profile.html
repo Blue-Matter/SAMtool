@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,28 +53,35 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">profile</span><span class="op">(</span><span class="va">fitted</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S4 method for Assessment</span>
-<span class="fu">profile</span><span class="op">(</span><span class="va">fitted</span>, figure <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S4 method for RCModel</span>
-<span class="fu">profile</span><span class="op">(</span><span class="va">fitted</span>, figure <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">profile</span><span class="op">(</span><span class="va">fitted</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for Assessment</span></span>
+<span><span class="fu">profile</span><span class="op">(</span><span class="va">fitted</span>, figure <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for RCModel</span></span>
+<span><span class="fu">profile</span><span class="op">(</span><span class="va">fitted</span>, figure <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>fitted, Assessment</dt>
 <dd><p>An object of class <a href="Assessment-class.html">Assessment</a>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>A sequence of values of the parameter(s) for the profile. See details and example below.
 See details for name of arguments to be passed on.</p></dd>
+
+
 <dt>figure</dt>
 <dd><p>Logical, indicates whether a figure will be plotted.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <a href="prof-class.html">prof</a> that contains a data frame of negative log-likelihood values from the profile and, optionally,
+    
+
+<p>An object of class <a href="prof-class.html">prof</a> that contains a data frame of negative log-likelihood values from the profile and, optionally,
 a figure of the likelihood surface.</p>
     </div>
     <div id="details">
@@ -95,20 +102,20 @@ a figure of the likelihood surface.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu"><a href="SCA.html">SCA</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Profile R0 only</span></span>
-<span class="r-in"><span class="va">pro</span> <span class="op">&lt;-</span> <span class="fu">profile</span><span class="op">(</span><span class="va">output</span>, R0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">2000</span>, <span class="fl">50</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu"><a href="SCA.html">SCA</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Profile R0 only</span></span></span>
+<span class="r-in"><span><span class="va">pro</span> <span class="op">&lt;-</span> <span class="fu">profile</span><span class="op">(</span><span class="va">output</span>, R0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">2000</span>, <span class="fl">50</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="profile-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Profile both R0 and steepness</span></span>
-<span class="r-in"><span class="va">pro</span> <span class="op">&lt;-</span> <span class="fu">profile</span><span class="op">(</span><span class="va">output</span>, R0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">2000</span>, <span class="fl">100</span><span class="op">)</span>, h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.95</span>, <span class="fl">0.025</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Profile both R0 and steepness</span></span></span>
+<span class="r-in"><span><span class="va">pro</span> <span class="op">&lt;-</span> <span class="fu">profile</span><span class="op">(</span><span class="va">output</span>, R0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">2000</span>, <span class="fl">100</span><span class="op">)</span>, h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.95</span>, <span class="fl">0.025</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="profile-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Ensure your grid is of proper resolution. A grid that is too coarse</span></span>
-<span class="r-in"><span class="co"># will likely distort the shape of the likelihood surface.</span></span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Ensure your grid is of proper resolution. A grid that is too coarse</span></span></span>
+<span class="r-in"><span><span class="co"># will likely distort the shape of the likelihood surface.</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -123,7 +130,7 @@ a figure of the likelihood surface.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

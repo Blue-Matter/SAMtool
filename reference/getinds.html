@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,31 +53,42 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getinds</span><span class="op">(</span>
-  <span class="va">PPD</span>,
-  <span class="va">styr</span>,
-  res <span class="op">=</span> <span class="fl">6</span>,
-  tsd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Ind"</span>, <span class="st">"ML"</span><span class="op">)</span>,
-  stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"AAV"</span>, <span class="st">"mu"</span>, <span class="st">"slp"</span>, <span class="st">"slp"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getinds</span><span class="op">(</span></span>
+<span>  <span class="va">PPD</span>,</span>
+<span>  <span class="va">styr</span>,</span>
+<span>  res <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  tsd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Ind"</span>, <span class="st">"ML"</span><span class="op">)</span>,</span>
+<span>  stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"AAV"</span>, <span class="st">"mu"</span>, <span class="st">"slp"</span>, <span class="st">"slp"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>PPD</dt>
 <dd><p>An object of class Data stored in the Misc slot of an MSE object following a call of <code>runMSE(PPD = TRUE)</code>.</p></dd>
+
+
 <dt>styr</dt>
 <dd><p>Positive integer, the starting year for calculation of quantities</p></dd>
+
+
 <dt>res</dt>
 <dd><p>Positive integer, the temporal resolution (chunks - normally years) over which to calculate quantities</p></dd>
+
+
 <dt>tsd</dt>
 <dd><p>Character vector of names of types of data: Cat = catch, Ind = relative abundance index, ML = mean length in catches</p></dd>
+
+
 <dt>stat</dt>
 <dd><p>Character vector of types of quantity to be calculated: slp = slope(log(x)), AAV = average annual variability, mu = mean(log(x))</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A 3D array of results (type of data/stat (e.g. mean catches),time period (chunk), simulation)</p>
+    
+
+<p>A 3D array of results (type of data/stat (e.g. mean catches),time period (chunk), simulation)</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -100,7 +111,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

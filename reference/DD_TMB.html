@@ -20,7 +20,7 @@ In the state-space version DD_SS, recruitment deviations from the stock-recruit 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -59,51 +59,51 @@ In the state-space version <code>DD_SS</code>, recruitment deviations from the s
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">DD_TMB</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">Data</span>,
-  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"effort"</span><span class="op">)</span>,
-  AddInd <span class="op">=</span> <span class="st">"B"</span>,
-  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,
-  rescale <span class="op">=</span> <span class="st">"mean1"</span>,
-  MW <span class="op">=</span> <span class="cn">FALSE</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  fix_h <span class="op">=</span> <span class="cn">TRUE</span>,
-  dep <span class="op">=</span> <span class="fl">1</span>,
-  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  n_itF <span class="op">=</span> <span class="fl">3L</span>,
-  silent <span class="op">=</span> <span class="cn">TRUE</span>,
-  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,
-  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">DD_SS</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">Data</span>,
-  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"effort"</span><span class="op">)</span>,
-  AddInd <span class="op">=</span> <span class="st">"B"</span>,
-  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,
-  rescale <span class="op">=</span> <span class="st">"mean1"</span>,
-  MW <span class="op">=</span> <span class="cn">FALSE</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  fix_h <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_sd <span class="op">=</span> <span class="cn">FALSE</span>,
-  fix_tau <span class="op">=</span> <span class="cn">TRUE</span>,
-  dep <span class="op">=</span> <span class="fl">1</span>,
-  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  n_itF <span class="op">=</span> <span class="fl">3L</span>,
-  integrate <span class="op">=</span> <span class="cn">FALSE</span>,
-  silent <span class="op">=</span> <span class="cn">TRUE</span>,
-  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,
-  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,
-  inner.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">DD_TMB</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">Data</span>,</span>
+<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  AddInd <span class="op">=</span> <span class="st">"B"</span>,</span>
+<span>  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="st">"mean1"</span>,</span>
+<span>  MW <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  fix_h <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  dep <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  n_itF <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">DD_SS</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">Data</span>,</span>
+<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  AddInd <span class="op">=</span> <span class="st">"B"</span>,</span>
+<span>  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="st">"mean1"</span>,</span>
+<span>  MW <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  fix_h <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_sd <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fix_tau <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  dep <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  n_itF <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">5000</span>, eval.max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>,</span>
+<span>  inner.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -111,72 +111,117 @@ In the state-space version <code>DD_SS</code>, recruitment deviations from the s
     <dl><dt>x</dt>
 <dd><p>An index for the objects in <code>Data</code> when running in closed loop simulation.
 Otherwise, equals to 1 when running an assessment.</p></dd>
+
+
 <dt>Data</dt>
 <dd><p>An object of class Data.</p></dd>
+
+
 <dt>condition</dt>
 <dd><p>A string to indicate whether to condition the model on catch or effort (ratio of catch and index).</p></dd>
+
+
 <dt>AddInd</dt>
 <dd><p>A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in
 Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd.</p></dd>
+
+
 <dt>SR</dt>
 <dd><p>Stock-recruit function (either <code>"BH"</code> for Beverton-Holt or <code>"Ricker"</code>).</p></dd>
+
+
 <dt>rescale</dt>
 <dd><p>A multiplicative factor that rescales the catch in the assessment model, which
 can improve convergence. By default, <code>"mean1"</code> scales the catch so that time series mean is 1, otherwise a numeric.
 Output is re-converted back to original units.</p></dd>
+
+
 <dt>MW</dt>
 <dd><p>Logical, whether to fit to mean weight. In closed-loop simulation, mean weight will be grabbed from <code>Data@Misc[[x]]$MW</code>,
 otherwise calculated from <code>Data@CAL</code>.</p></dd>
+
+
 <dt>start</dt>
 <dd><p>Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.</p></dd>
+
+
 <dt>prior</dt>
 <dd><p>A named list for the parameters of any priors to be added to the model. See below.</p></dd>
+
+
 <dt>fix_h</dt>
 <dd><p>Logical, whether to fix steepness to value in <code>Data@steep</code> in the assessment model.
 Automatically false if a prior is used.</p></dd>
+
+
 <dt>dep</dt>
 <dd><p>The initial depletion in the first year of the model. A tight prior is placed on the model objective function
 to estimate the equilibrium fishing mortality rate that corresponds to the initial depletion. Due to this tight prior, this F
 should not be considered to be an independent model parameter. Set to zero to eliminate this prior.</p></dd>
+
+
 <dt>LWT</dt>
 <dd><p>A named list of likelihood weights. For <code>LWT$Index</code>, a vector of likelihood weights for each survey, while
 for <code>LWT$MW</code> a numeric.</p></dd>
+
+
 <dt>n_itF</dt>
 <dd><p>Integer, the number of iterations to solve F within an annual time step when conditioning on catch.</p></dd>
+
+
 <dt>silent</dt>
 <dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
+
+
 <dt>opt_hess</dt>
 <dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if <code>integrate = TRUE</code>.</p></dd>
+
+
 <dt>n_restart</dt>
 <dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>A named list of parameters regarding optimization to be passed to
 <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Additional arguments (not currently used).</p></dd>
+
+
 <dt>fix_sd</dt>
 <dd><p>Logical, whether the standard deviation of the data in the likelihood (index for conditioning on catch or
 catch for conditioning on effort). If <code>TRUE</code>, the SD is fixed to value provided in <code>start</code> (if provided), otherwise,
  value based on either <code>Data@CV_Cat</code> or <code>Data@CV_Ind</code>.</p></dd>
+
+
 <dt>fix_tau</dt>
 <dd><p>Logical, the standard deviation of the recruitment deviations is fixed. If <code>TRUE</code>,
 tau is fixed to value provided in <code>start</code> (if provided), otherwise, equal to 1.</p></dd>
+
+
 <dt>integrate</dt>
 <dd><p>Logical, whether the likelihood of the model integrates over the likelihood
 of the recruitment deviations (thus, treating it as a random effects/state-space variable).
 Otherwise, recruitment deviations are penalized parameters.</p></dd>
+
+
 <dt>inner.control</dt>
 <dd><p>A named list of arguments for optimization of the random effects, which
 is passed on to <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton</a></code> via <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of <code><a href="Assessment-class.html">Assessment</a></code> containing objects and output from TMB.</p>
+    
+
+<p>An object of <code><a href="Assessment-class.html">Assessment</a></code> containing objects and output from TMB.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -256,27 +301,27 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co">#### Observation-error delay difference model</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Provide starting values</span></span>
-<span class="r-in"><span class="va">start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="va">start</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">@</span><span class="va">SD</span><span class="op">)</span> <span class="co"># Parameter estimates</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co">#### Observation-error delay difference model</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Provide starting values</span></span></span>
+<span class="r-in"><span><span class="va">start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="va">start</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">@</span><span class="va">SD</span><span class="op">)</span> <span class="co"># Parameter estimates</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                Estimate   Std. Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> R0x       -2.1637663571 1.924283e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log_sigma -1.3283639101 1.414214e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> R0        77.4525279757 1.490406e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> h          0.9500000000 0.000000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> q          0.0002416937 7.543866e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sigma      0.2649103240 3.746398e-03</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">### State-space version</span></span>
-<span class="r-in"><span class="co">### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_SS</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tau <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R0x       -1.828102e+00 2.164137e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log_sigma -1.071746e+00 1.414214e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R0         1.579920e+02 3.419164e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> h          9.500000e-01 0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> q          1.675884e-04 5.816162e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sigma      3.424100e-01 4.842410e-03</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">### State-space version</span></span></span>
+<span class="r-in"><span><span class="co">### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_SS</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tau <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -291,7 +336,7 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

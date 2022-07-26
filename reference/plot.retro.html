@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,25 +53,32 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for retro,missing</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="co"># S4 method for retro</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for retro,missing</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for retro</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>An object of class <a href="retro-class.html">retro</a>.</p></dd>
+
+
 <dt>color</dt>
 <dd><p>An optional character vector of colors for plotting.</p></dd>
+
+
 <dt>object</dt>
 <dd><p>An object of class <a href="retro-class.html">retro</a>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A series of plots showing retrospective patterns in fishing mortality, spawning biomass, recruitment, etc.</p>
+    
+
+<p>A series of plots showing retrospective patterns in fishing mortality, spawning biomass, recruitment, etc.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -80,24 +87,24 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="SP.html">SP</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">ret</span> <span class="op">&lt;-</span> <span class="fu"><a href="retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">res</span>, figure <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">ret</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="SP.html">SP</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ret</span> <span class="op">&lt;-</span> <span class="fu"><a href="retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">res</span>, figure <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">ret</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   Mohn's rho</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fishing mortality      0.130</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> F/F[MSY]              -0.145</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Biomass               -0.091</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> B/B[MSY]               0.152</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> B/B[0]                 0.152</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ret</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ret</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.retro-1.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot.retro-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot.retro-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot.retro-4.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot.retro-5.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -112,7 +119,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

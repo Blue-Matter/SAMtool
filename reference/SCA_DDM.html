@@ -20,7 +20,7 @@ or M0 can be less than M1 (depensatory)."><meta property="og:image" content="htt
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -59,123 +59,178 @@ or M0 can be less than M1 (depensatory).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">SCA_DDM</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">Data</span>,
-  AddInd <span class="op">=</span> <span class="st">"B"</span>,
-  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span>, <span class="st">"none"</span><span class="op">)</span>,
-  vulnerability <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"dome"</span><span class="op">)</span>,
-  catch_eq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Baranov"</span>, <span class="st">"Pope"</span><span class="op">)</span>,
-  CAA_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span><span class="op">)</span>,
-  CAA_multiplier <span class="op">=</span> <span class="fl">50</span>,
-  rescale <span class="op">=</span> <span class="st">"mean1"</span>,
-  max_age <span class="op">=</span> <span class="va">Data</span><span class="op">@</span><span class="va">MaxAge</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  fix_h <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_F_equilibrium <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_omega <span class="op">=</span> <span class="cn">TRUE</span>,
-  fix_tau <span class="op">=</span> <span class="cn">TRUE</span>,
-  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  early_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"comp_onegen"</span>, <span class="st">"comp"</span>, <span class="st">"all"</span><span class="op">)</span>,
-  late_dev <span class="op">=</span> <span class="st">"comp50"</span>,
-  M_bounds <span class="op">=</span> <span class="cn">NULL</span>,
-  integrate <span class="op">=</span> <span class="cn">FALSE</span>,
-  silent <span class="op">=</span> <span class="cn">TRUE</span>,
-  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,
-  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,
-  inner.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SCA_DDM</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">Data</span>,</span>
+<span>  AddInd <span class="op">=</span> <span class="st">"B"</span>,</span>
+<span>  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  vulnerability <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"dome"</span><span class="op">)</span>,</span>
+<span>  catch_eq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Baranov"</span>, <span class="st">"Pope"</span><span class="op">)</span>,</span>
+<span>  CAA_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span><span class="op">)</span>,</span>
+<span>  CAA_multiplier <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="st">"mean1"</span>,</span>
+<span>  max_age <span class="op">=</span> <span class="va">Data</span><span class="op">@</span><span class="va">MaxAge</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  fix_h <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_F_equilibrium <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_omega <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_tau <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  early_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"comp_onegen"</span>, <span class="st">"comp"</span>, <span class="st">"all"</span><span class="op">)</span>,</span>
+<span>  late_dev <span class="op">=</span> <span class="st">"comp50"</span>,</span>
+<span>  M_bounds <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,</span>
+<span>  inner.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A position in the Data object (by default, equal to one for assessments).</p></dd>
+
+
 <dt>Data</dt>
 <dd><p>An object of class Data</p></dd>
+
+
 <dt>AddInd</dt>
 <dd><p>A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in
 Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd. Vulnerability to the survey is fixed in the model.</p></dd>
+
+
 <dt>SR</dt>
 <dd><p>Stock-recruit function (either <code>"BH"</code> for Beverton-Holt, <code>"Ricker"</code>, or <code>"none"</code> for constant mean recruitment).</p></dd>
+
+
 <dt>vulnerability</dt>
 <dd><p>Whether estimated vulnerability is <code>"logistic"</code> or <code>"dome"</code> (double-normal).
 See details for parameterization.</p></dd>
+
+
 <dt>catch_eq</dt>
 <dd><p>Whether to use the Baranov equation or Pope's approximation to calculate the predicted catch at age in the model.</p></dd>
+
+
 <dt>CAA_dist</dt>
 <dd><p>Whether a multinomial or lognormal distribution is used for likelihood of the catch-at-age matrix. See details.</p></dd>
+
+
 <dt>CAA_multiplier</dt>
 <dd><p>Numeric for data weighting of catch-at-age matrix if <code>CAA_hist = "multinomial"</code>. Otherwise ignored. See details.</p></dd>
+
+
 <dt>rescale</dt>
 <dd><p>A multiplicative factor that rescales the catch in the assessment model, which
 can improve convergence. By default, <code>"mean1"</code> scales the catch so that time series mean is 1, otherwise a numeric.
 Output is re-converted back to original units.</p></dd>
+
+
 <dt>max_age</dt>
 <dd><p>Integer, the maximum age (plus-group) in the model.</p></dd>
+
+
 <dt>start</dt>
 <dd><p>Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.</p></dd>
+
+
 <dt>prior</dt>
 <dd><p>A named list for the parameters of any priors to be added to the model. See below.</p></dd>
+
+
 <dt>fix_h</dt>
 <dd><p>Logical, whether to fix steepness to value in <code>Data@steep</code> in the model for <code>SCA</code>. This only affects
 calculation of reference points for <code>SCA2</code>.</p></dd>
+
+
 <dt>fix_F_equilibrium</dt>
 <dd><p>Logical, whether the equilibrium fishing mortality prior to the first year of the model
 is estimated. If <code>TRUE</code>, <code>F_equilibrium</code> is fixed to value provided in <code>start</code> (if provided),
 otherwise, equal to zero (assumes unfished conditions).</p></dd>
+
+
 <dt>fix_omega</dt>
 <dd><p>Logical, whether the standard deviation of the catch is fixed. If <code>TRUE</code>,
 omega is fixed to value provided in <code>start</code> (if provided), otherwise, value based on <code>Data@CV_Cat</code>.</p></dd>
+
+
 <dt>fix_tau</dt>
 <dd><p>Logical, the standard deviation of the recruitment deviations is fixed. If <code>TRUE</code>,
 tau is fixed to value provided in <code>start</code> (if provided), otherwise, value based on <code>Data@sigmaR</code>.</p></dd>
+
+
 <dt>LWT</dt>
 <dd><p>A named list (Index, CAA, Catch) of likelihood weights for the data components. For the index, a vector of length survey. For
 CAL and Catch, a single value.</p></dd>
+
+
 <dt>early_dev</dt>
 <dd><p>Numeric or character string describing the years for which recruitment deviations are estimated in <code>SCA</code>. By default,
 equal to <code>"comp_onegen"</code>, where rec devs are estimated one full generation prior to the first year when catch-at-age (CAA) data are available.
 With <code>"comp"</code>, rec devs are estimated starting in the first year with CAA. With <code>"all"</code>, rec devs start at the beginning of the model.
 If numeric, the number of years after the first year of the model for which to start estimating rec devs. Use negative numbers for years prior to the first year.</p></dd>
+
+
 <dt>late_dev</dt>
 <dd><p>Typically, a numeric for the number of most recent years in which recruitment deviations will
 not be estimated in <code>SCA</code> (recruitment in these years will be based on the mean predicted by stock-recruit relationship).
 By default, <code>"comp50"</code> uses the number of ages (smaller than the mode)
 for which the catch-at-age matrix has less than half the abundance than that at the mode.</p></dd>
+
+
 <dt>M_bounds</dt>
 <dd><p>A numeric vector of length 2 to indicate the M as B/B0 approaches zero and one, respectively.
 By default, set to 75% and 125%, respectively, of Data@Mort[x].</p></dd>
+
+
 <dt>integrate</dt>
 <dd><p>Logical, whether the likelihood of the model integrates over the likelihood
 of the recruitment deviations (thus, treating it as a random effects/state-space variable).
 Otherwise, recruitment deviations are penalized parameters.</p></dd>
+
+
 <dt>silent</dt>
 <dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
+
+
 <dt>opt_hess</dt>
 <dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if <code>integrate = TRUE</code>.</p></dd>
+
+
 <dt>n_restart</dt>
 <dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>A named list of arguments for optimization to be passed to
 <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+
+
 <dt>inner.control</dt>
 <dd><p>A named list of arguments for optimization of the random effects, which
 is passed on to <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to be passed.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <a href="Assessment-class.html">Assessment</a>.</p>
+    
+
+<p>An object of class <a href="Assessment-class.html">Assessment</a>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -204,8 +259,8 @@ stocks with uncertain natural mortality: Bias, robustness and trade-offs. Fisher
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SCA_DDM</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SCA_DDM</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -220,7 +275,7 @@ stocks with uncertain natural mortality: Bias, robustness and trade-offs. Fisher
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

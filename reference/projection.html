@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,59 +53,80 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">projection</span><span class="op">(</span>
-  <span class="va">Assessment</span>,
-  constrain <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="st">"Catch"</span><span class="op">)</span>,
-  <span class="va">Ftarget</span>,
-  <span class="va">Catch</span>,
-  p_years <span class="op">=</span> <span class="fl">50</span>,
-  p_sim <span class="op">=</span> <span class="fl">200</span>,
-  <span class="va">obs_error</span>,
-  <span class="va">process_error</span>,
-  max_F <span class="op">=</span> <span class="fl">3</span>,
-  seed <span class="op">=</span> <span class="fl">499</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">projection</span><span class="op">(</span></span>
+<span>  <span class="va">Assessment</span>,</span>
+<span>  constrain <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="st">"Catch"</span><span class="op">)</span>,</span>
+<span>  <span class="va">Ftarget</span>,</span>
+<span>  <span class="va">Catch</span>,</span>
+<span>  p_years <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  p_sim <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>  <span class="va">obs_error</span>,</span>
+<span>  <span class="va">process_error</span>,</span>
+<span>  max_F <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">499</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>Assessment</dt>
 <dd><p>An object of class <a href="Assessment-class.html">Assessment</a>.</p></dd>
+
+
 <dt>constrain</dt>
 <dd><p>Whether to project on future F or catch. By default, projects on F.</p></dd>
+
+
 <dt>Ftarget</dt>
 <dd><p>The projection F, either of length 1 for constant F for the entirety of the projection or length p_years.</p></dd>
+
+
 <dt>Catch</dt>
 <dd><p>The projection catch, either of length 1 for constant catch for the entirety of the projection or length p_years.</p></dd>
+
+
 <dt>p_years</dt>
 <dd><p>Integer for the number of projection years.</p></dd>
+
+
 <dt>p_sim</dt>
 <dd><p>Integer for the number of simulations for the projection.</p></dd>
+
+
 <dt>obs_error</dt>
 <dd><p>A list of length two. In the first entry, a vector of length nsurvey giving the standard deviations of each future index, 
 or alternatively an array of dimension p_sim, p_years, and nsurvey giving the deviates. The second entry is
 the standard deviation of the projected catch. Alternatively, a matrix of 
 simulation and year-specific error structure for the catch (p_sim rows and p_year columns; a matrix of ones indicates perfect data).</p></dd>
+
+
 <dt>process_error</dt>
 <dd><p>Numeric, standard deviation for process error (e.g., recruitment or biomass deviates). If <code>NULL</code>,
 uses values from assessment model. Alternatively, a matrix of simulation and year-specific recruitment deviates (p_sim rows and p_year columns,
 a matrix of ones indicates no recruitment deviates).</p></dd>
+
+
 <dt>max_F</dt>
 <dd><p>The maximum allowable F if the projection is constrained on catch.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>An integer to set the seed for the sampling observation and process error deviates.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <a href="project-class.html">project</a> that contains future predicted values of F, catch, biomass, recruitment, etc.</p>
+    
+
+<p>An object of class <a href="project-class.html">project</a> that contains future predicted values of F, catch, biomass, recruitment, etc.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="va">myAssess</span> <span class="op">&lt;-</span> <span class="fu"><a href="SP.html">SP</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">do_projection</span> <span class="op">&lt;-</span> <span class="fu">projection</span><span class="op">(</span><span class="va">myAssess</span>, Ftarget <span class="op">=</span> <span class="va">myAssess</span><span class="op">@</span><span class="va">FMSY</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># }</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">myAssess</span> <span class="op">&lt;-</span> <span class="fu"><a href="SP.html">SP</a></span><span class="op">(</span>Data <span class="op">=</span> <span class="va">swordfish</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">do_projection</span> <span class="op">&lt;-</span> <span class="fu">projection</span><span class="op">(</span><span class="va">myAssess</span>, Ftarget <span class="op">=</span> <span class="va">myAssess</span><span class="op">@</span><span class="va">FMSY</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -120,7 +141,7 @@ a matrix of ones indicates no recruitment deviates).</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

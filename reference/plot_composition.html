@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,65 +53,94 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_composition</span><span class="op">(</span>
-  Year <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span>,
-  <span class="va">obs</span>,
-  fit <span class="op">=</span> <span class="cn">NULL</span>,
-  plot_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"annual"</span>, <span class="st">"bubble_data"</span>, <span class="st">"bubble_residuals"</span>, <span class="st">"mean"</span><span class="op">)</span>,
-  N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span>,
-  CAL_bins <span class="op">=</span> <span class="cn">NULL</span>,
-  ages <span class="op">=</span> <span class="cn">NULL</span>,
-  ind <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span>,
-  annual_ylab <span class="op">=</span> <span class="st">"Frequency"</span>,
-  annual_yscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"proportions"</span>, <span class="st">"raw"</span><span class="op">)</span>,
-  bubble_adj <span class="op">=</span> <span class="fl">5</span>,
-  bubble_color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"white"</span><span class="op">)</span>,
-  fit_linewidth <span class="op">=</span> <span class="fl">3</span>,
-  fit_color <span class="op">=</span> <span class="st">"red"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_composition</span><span class="op">(</span></span>
+<span>  Year <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span>,</span>
+<span>  <span class="va">obs</span>,</span>
+<span>  fit <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plot_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"annual"</span>, <span class="st">"bubble_data"</span>, <span class="st">"bubble_residuals"</span>, <span class="st">"mean"</span><span class="op">)</span>,</span>
+<span>  N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span>,</span>
+<span>  CAL_bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ages <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ind <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span>,</span>
+<span>  annual_ylab <span class="op">=</span> <span class="st">"Frequency"</span>,</span>
+<span>  annual_yscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"proportions"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
+<span>  bubble_adj <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  bubble_color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"white"</span><span class="op">)</span>,</span>
+<span>  fit_linewidth <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  fit_color <span class="op">=</span> <span class="st">"red"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>Year</dt>
 <dd><p>A vector of years.</p></dd>
+
+
 <dt>obs</dt>
 <dd><p>A matrix of either length or age composition data. For lengths, rows and columns
 should index years and length bin, respectively. For ages, rows and columns should index
 years and age, respectively.</p></dd>
+
+
 <dt>fit</dt>
 <dd><p>A matrix of predicted length or age composition from an assessment model.
 Same dimensions as obs.</p></dd>
+
+
 <dt>plot_type</dt>
 <dd><p>Indicates which plots to create. Options include annual distributions,
 bubble plot of the data, and bubble plot of the residuals, and annual means.</p></dd>
+
+
 <dt>N</dt>
 <dd><p>Annual sample sizes. Vector of length <code>nrow(obs)</code>.</p></dd>
+
+
 <dt>CAL_bins</dt>
 <dd><p>A vector of lengths corresponding to the columns in <code>obs</code>.
 and <code>fit</code>. Ignored for age data.</p></dd>
+
+
 <dt>ages</dt>
 <dd><p>An optional vector of ages corresponding to the columns in <code>obs</code>.</p></dd>
+
+
 <dt>ind</dt>
 <dd><p>A numeric vector for plotting a subset of rows (which indexes year) of <code>obs</code> and <code>fit</code>.</p></dd>
+
+
 <dt>annual_ylab</dt>
 <dd><p>Character string for y-axis label when <code>plot_type = "annual"</code>.</p></dd>
+
+
 <dt>annual_yscale</dt>
 <dd><p>For annual composition plots (<code>plot_type = "annual"</code>), whether the raw values
 ("raw") or frequencies ("proportions") are plotted.</p></dd>
+
+
 <dt>bubble_adj</dt>
 <dd><p>Numeric, for adjusting the relative size of bubbles in bubble plots
 (larger number = larger bubbles).</p></dd>
+
+
 <dt>bubble_color</dt>
 <dd><p>Colors for negative and positive residuals, respectively, for bubble plots.</p></dd>
+
+
 <dt>fit_linewidth</dt>
 <dd><p>Argument <code>lwd</code> for fitted line.</p></dd>
+
+
 <dt>fit_color</dt>
 <dd><p>Color of fitted line.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Plots depending on <code>plot_type</code>.</p>
+    
+
+<p>Plots depending on <code>plot_type</code>.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -120,12 +149,12 @@ and <code>fit</code>. Ignored for age data.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">plot_composition</span><span class="op">(</span>obs <span class="op">=</span> <span class="va">SimulatedData</span><span class="op">@</span><span class="va">CAA</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">16</span>, <span class="op">]</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">plot_composition</span><span class="op">(</span>obs <span class="op">=</span> <span class="va">SimulatedData</span><span class="op">@</span><span class="va">CAA</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">16</span>, <span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_composition-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="fu">plot_composition</span><span class="op">(</span>obs <span class="op">=</span> <span class="va">SimulatedData</span><span class="op">@</span><span class="va">CAA</span><span class="op">[</span><span class="fl">1</span>, , <span class="op">]</span>, plot_type <span class="op">=</span> <span class="st">"bubble_data"</span>, </span>
-<span class="r-in">                 ages <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="va">SimulatedData</span><span class="op">@</span><span class="va">MaxAge</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">plot_composition</span><span class="op">(</span>obs <span class="op">=</span> <span class="va">SimulatedData</span><span class="op">@</span><span class="va">CAA</span><span class="op">[</span><span class="fl">1</span>, , <span class="op">]</span>, plot_type <span class="op">=</span> <span class="st">"bubble_data"</span>, </span></span>
+<span class="r-in"><span>                 ages <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="va">SimulatedData</span><span class="op">@</span><span class="va">MaxAge</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_composition-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -140,7 +169,7 @@ and <code>fit</code>. Ignored for age data.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

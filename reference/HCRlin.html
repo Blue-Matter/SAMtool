@@ -18,7 +18,7 @@ the value of the OCP relative to target and limit values."><meta property="og:im
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -55,25 +55,36 @@ the value of the OCP relative to target and limit values.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">HCRlin</span><span class="op">(</span><span class="va">OCP_val</span>, <span class="va">LOCP</span>, <span class="va">TOCP</span>, relF_min <span class="op">=</span> <span class="fl">0</span>, relF_max <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">HCRlin</span><span class="op">(</span><span class="va">OCP_val</span>, <span class="va">LOCP</span>, <span class="va">TOCP</span>, relF_min <span class="op">=</span> <span class="fl">0</span>, relF_max <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>OCP_val</dt>
 <dd><p>The value of the operational control point (OCP).</p></dd>
+
+
 <dt>LOCP</dt>
 <dd><p>Numeric, the limit value for the OCP in the HCR.</p></dd>
+
+
 <dt>TOCP</dt>
 <dd><p>Numeric, the target value for the OCP in the HCR.</p></dd>
+
+
 <dt>relF_min</dt>
 <dd><p>The relative maximum value (e.g. a multiple of FMSY) if <code>OCP &lt; LOCP</code>.</p></dd>
+
+
 <dt>relF_max</dt>
 <dd><p>The relative maximum value (e.g. a multiple of FMSY) if <code>OCP &gt; TOCP</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Numeric adjustment factor.</p>
+    
+
+<p>Numeric adjustment factor.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -82,11 +93,11 @@ the value of the OCP relative to target and limit values.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">#40-10 linear ramp</span></span>
-<span class="r-in"><span class="va">Brel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">Brel</span>, <span class="fu">HCRlin</span><span class="op">(</span><span class="va">Brel</span>, <span class="fl">0.1</span>, <span class="fl">0.4</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Estimated B/B0"</span>, ylab <span class="op">=</span> <span class="st">"Relative change in F"</span>,</span>
-<span class="r-in">     main <span class="op">=</span> <span class="st">"A 40-10 harvest control rule"</span>, type <span class="op">=</span> <span class="st">'l'</span>, col <span class="op">=</span> <span class="st">'blue'</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>,<span class="fl">0.4</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'red'</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#40-10 linear ramp</span></span></span>
+<span class="r-in"><span><span class="va">Brel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">Brel</span>, <span class="fu">HCRlin</span><span class="op">(</span><span class="va">Brel</span>, <span class="fl">0.1</span>, <span class="fl">0.4</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Estimated B/B0"</span>, ylab <span class="op">=</span> <span class="st">"Relative change in F"</span>,</span></span>
+<span class="r-in"><span>     main <span class="op">=</span> <span class="st">"A 40-10 harvest control rule"</span>, type <span class="op">=</span> <span class="st">'l'</span>, col <span class="op">=</span> <span class="st">'blue'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>,<span class="fl">0.4</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'red'</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="HCRlin-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -102,7 +113,7 @@ the value of the OCP relative to target and limit values.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

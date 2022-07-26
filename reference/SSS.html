@@ -20,7 +20,7 @@ R0 (unfished recruitment), with no process error."><meta property="og:image" con
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -59,57 +59,80 @@ R0 (unfished recruitment), with no process error.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">SSS</span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">Data</span>,
-  dep <span class="op">=</span> <span class="fl">0.4</span>,
-  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,
-  rescale <span class="op">=</span> <span class="st">"mean1"</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  silent <span class="op">=</span> <span class="cn">TRUE</span>,
-  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,
-  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
-  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SSS</span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">Data</span>,</span>
+<span>  dep <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  SR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"Ricker"</span><span class="op">)</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="st">"mean1"</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  opt_hess <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">opt_hess</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A position in the Data object (by default, equal to one for assessments).</p></dd>
+
+
 <dt>Data</dt>
 <dd><p>An object of class Data</p></dd>
+
+
 <dt>dep</dt>
 <dd><p>Depletion value to use in the model. Can be an expression that will be evaluated inside the function.</p></dd>
+
+
 <dt>SR</dt>
 <dd><p>Stock-recruit function (either <code>"BH"</code> for Beverton-Holt or <code>"Ricker"</code>).</p></dd>
+
+
 <dt>rescale</dt>
 <dd><p>A multiplicative factor that rescales the catch in the assessment model, which
 can improve convergence. By default, <code>"mean1"</code> scales the catch so that time series mean is 1, otherwise a numeric.
 Output is re-converted back to original units.</p></dd>
+
+
 <dt>start</dt>
 <dd><p>Optional named list of starting values. Entries can be expressions that are evaluated in the function:</p><ul><li><p><code>R0</code> Unfished recruitment</p></li>
 <li><p><code>vul_par</code> A length-two vector for the age of 95% and 50% fleet selectivity. Fixed to maturity otherwise.</p></li>
 </ul></dd>
+
+
 <dt>silent</dt>
 <dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
+
+
 <dt>opt_hess</dt>
 <dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate).</p></dd>
+
+
 <dt>n_restart</dt>
 <dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>A named list of arguments for optimization to be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to be passed (not currently used).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <a href="Assessment-class.html">Assessment</a>.</p>
+    
+
+<p>An object of class <a href="Assessment-class.html">Assessment</a>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -128,9 +151,9 @@ deriving overfishing limits in data-limited situations. Fisheries Research 142:3
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SSS</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">Red_snapper</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">SSS_MP</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SSS</span>, <span class="va">HCR40_10</span>, dep <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="co"># Always assume depletion = 0.3</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SSS</span><span class="op">(</span>Data <span class="op">=</span> <span class="va">Red_snapper</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">SSS_MP</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SSS</span>, <span class="va">HCR40_10</span>, dep <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="co"># Always assume depletion = 0.3</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -145,7 +168,7 @@ deriving overfishing limits in data-limited situations. Fisheries Research 142:3
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

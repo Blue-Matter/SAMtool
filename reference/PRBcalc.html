@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,46 +53,67 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">PRBcalc</span><span class="op">(</span>
-  <span class="va">MSE_null</span>,
-  <span class="va">MSE_alt</span>,
-  tsd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Ind"</span>, <span class="st">"ML"</span><span class="op">)</span>,
-  stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"AAV"</span>, <span class="st">"mu"</span>, <span class="st">"slp"</span>, <span class="st">"slp"</span><span class="op">)</span>,
-  dnam <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C_S"</span>, <span class="st">"C_V"</span>, <span class="st">"C_M"</span>, <span class="st">"I_S"</span>, <span class="st">"ML_S"</span><span class="op">)</span>,
-  res <span class="op">=</span> <span class="fl">6</span>,
-  alpha <span class="op">=</span> <span class="fl">0.05</span>,
-  plotCC <span class="op">=</span> <span class="cn">FALSE</span>,
-  removedat <span class="op">=</span> <span class="cn">FALSE</span>,
-  removethresh <span class="op">=</span> <span class="fl">0.025</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">PRBcalc</span><span class="op">(</span></span>
+<span>  <span class="va">MSE_null</span>,</span>
+<span>  <span class="va">MSE_alt</span>,</span>
+<span>  tsd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Cat"</span>, <span class="st">"Ind"</span>, <span class="st">"ML"</span><span class="op">)</span>,</span>
+<span>  stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"AAV"</span>, <span class="st">"mu"</span>, <span class="st">"slp"</span>, <span class="st">"slp"</span><span class="op">)</span>,</span>
+<span>  dnam <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C_S"</span>, <span class="st">"C_V"</span>, <span class="st">"C_M"</span>, <span class="st">"I_S"</span>, <span class="st">"ML_S"</span><span class="op">)</span>,</span>
+<span>  res <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  plotCC <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  removedat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  removethresh <span class="op">=</span> <span class="fl">0.025</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>MSE_null</dt>
 <dd><p>An object of class MSE representing the null hypothesis</p></dd>
+
+
 <dt>MSE_alt</dt>
 <dd><p>An object of class MSE representing the alternative hypothesis</p></dd>
+
+
 <dt>tsd</dt>
 <dd><p>Character string of data types: Cat = catch, Ind = relative abundance index, ML = mean length in catches</p></dd>
+
+
 <dt>stat</dt>
 <dd><p>Character string defining the quantity to be calculated for each data type, slp = slope(log(x)), AAV = average annual variability, mu = mean(log(x))</p></dd>
+
+
 <dt>dnam</dt>
 <dd><p>Character string of names for the quantities calculated</p></dd>
+
+
 <dt>res</dt>
 <dd><p>Integer, the resolution (time blocking) for the calculation of PPD</p></dd>
+
+
 <dt>alpha</dt>
 <dd><p>Probability of incorrectly rejecting the null operating model when it is valid</p></dd>
+
+
 <dt>plotCC</dt>
 <dd><p>Logical, should the PPD cross correlations be plotted?</p></dd>
+
+
 <dt>removedat</dt>
 <dd><p>Logical, should data not contributing to the mahalanobis distance be removed?</p></dd>
+
+
 <dt>removethresh</dt>
 <dd><p>Positive fraction: the cumulative percentage of removed data (removedat=TRUE) that contribute to the mahalanobis distance</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list object with two hierarchies of indexing, first by MP, second has two positions as described in <a href="Probs.html">Probs</a>: (1) mahalanobis distance, (2) a matrix of type 1 error
+    
+
+<p>A list object with two hierarchies of indexing, first by MP, second has two positions as described in <a href="Probs.html">Probs</a>: (1) mahalanobis distance, (2) a matrix of type 1 error
 (first row) and statistical power (second row), by time block.</p>
     </div>
     <div id="references">
@@ -117,7 +138,7 @@ Canadian Journal of Fisheries and Aquatic Science.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

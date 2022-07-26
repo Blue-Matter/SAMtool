@@ -18,7 +18,7 @@ are plotted over the course of the MSE are plotted against the operating model (
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -55,23 +55,32 @@ are plotted over the course of the MSE are plotted against the operating model (
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">retrospective_AM</span><span class="op">(</span><span class="va">MSE</span>, <span class="va">MP</span>, sim <span class="op">=</span> <span class="fl">1</span>, plot_legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">retrospective_AM</span><span class="op">(</span><span class="va">MSE</span>, <span class="va">MP</span>, sim <span class="op">=</span> <span class="fl">1</span>, plot_legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>MSE</dt>
 <dd><p>An object of class MSE.</p></dd>
+
+
 <dt>MP</dt>
 <dd><p>Character. The name of the management procedure created by <code><a href="make_MP.html">make_MP</a></code> containing the assessment model.</p></dd>
+
+
 <dt>sim</dt>
 <dd><p>Integer between 1 and MSE@nsim. The simulation number for which the retrospectives will be plotted.</p></dd>
+
+
 <dt>plot_legend</dt>
 <dd><p>Logical. Whether to plot legend to reference year of assessment in the MSE.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A series of figures for SSB, depletion, fishing mortality, and vulnerable biomass (VB) estimated in the MP
+    
+
+<p>A series of figures for SSB, depletion, fishing mortality, and vulnerable biomass (VB) estimated in the MP
 over the course of the closed-loop simulation against the values generated in the operating model (both historical
 and projected).</p>
     </div>
@@ -96,16 +105,15 @@ may not be indicative of general assessment behavior and performance overall.</p
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="va">SCA_40_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_MSY</span>, diagnostic <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html" class="external-link">testOM</a></span>; <span class="va">OM</span><span class="op">@</span><span class="va">proyears</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
-<span class="r-in"><span class="va">myMSE</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a></span><span class="op">(</span>OM <span class="op">=</span> <span class="va">OM</span>, MPs <span class="op">=</span> <span class="st">"SCA_40_10"</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Checking MPs </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">SCA_40_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_MSY</span>, diagnostic <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html" class="external-link">testOM</a></span>; <span class="va">OM</span><span class="op">@</span><span class="va">proyears</span> <span class="op">&lt;-</span> <span class="fl">20</span></span></span>
+<span class="r-in"><span><span class="va">myMSE</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a></span><span class="op">(</span>OM <span class="op">=</span> <span class="va">OM</span>, MPs <span class="op">=</span> <span class="st">"SCA_40_10"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking MPs</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Some MPs are not a functions of class `MP`: SCA_40_10</span>
-<span class="r-in"><span class="fu">retrospective_AM</span><span class="op">(</span><span class="va">myMSE</span>, MP <span class="op">=</span> <span class="st">"SCA_40_10"</span>, sim <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">retrospective_AM</span><span class="op">(</span><span class="va">myMSE</span>, MP <span class="op">=</span> <span class="st">"SCA_40_10"</span>, sim <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in retrospective_AM(myMSE, MP = "SCA_40_10", sim = 1):</span> object 'myMSE' not found</span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -120,7 +128,7 @@ may not be indicative of general assessment behavior and performance overall.</p
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

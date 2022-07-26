@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,27 +53,40 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">HCR_FB</span><span class="op">(</span><span class="va">Brel</span>, <span class="va">Frel</span>, Bpow <span class="op">=</span> <span class="fl">2</span>, Bgrad <span class="op">=</span> <span class="fl">1</span>, Fpow <span class="op">=</span> <span class="fl">1</span>, Fgrad <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">HCR_FB</span><span class="op">(</span><span class="va">Brel</span>, <span class="va">Frel</span>, Bpow <span class="op">=</span> <span class="fl">2</span>, Bgrad <span class="op">=</span> <span class="fl">1</span>, Fpow <span class="op">=</span> <span class="fl">1</span>, Fgrad <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>Brel</dt>
 <dd><p>improper fraction: an estimate of Biomass relative to BMSY</p></dd>
+
+
 <dt>Frel</dt>
 <dd><p>improper fraction: an estimate of Fishing mortality rate relative to FMSY</p></dd>
+
+
 <dt>Bpow</dt>
 <dd><p>non-negative real number: controls the shape of the biomass adjustment, when zero there is no adjustment</p></dd>
+
+
 <dt>Bgrad</dt>
 <dd><p>non-negative real number: controls the gradient of the biomass adjustment</p></dd>
+
+
 <dt>Fpow</dt>
 <dd><p>non-negative real number: controls the adjustment speed relative to F/FMSY. When set to 1, next recommendation is FMSY. When less than 1 next recommendation is between current F and FMSY.</p></dd>
+
+
 <dt>Fgrad</dt>
 <dd><p>improper fraction: target Fishing rate relative to FMSY</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a TAC or TAE adjustment factor.</p>
+    
+
+<p>a TAC or TAE adjustment factor.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -86,16 +99,16 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
-<span class="r-in"><span class="va">Frel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">2</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="va">res</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">Brel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">2</span>, length.out<span class="op">=</span><span class="va">res</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fu">HCR_FB</span><span class="op">(</span><span class="va">Brel</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">res</span>, <span class="va">res</span><span class="op">)</span><span class="op">]</span>, <span class="va">Frel</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">res</span>, each <span class="op">=</span> <span class="va">res</span><span class="op">)</span><span class="op">]</span>,</span>
-<span class="r-in">                    Bpow <span class="op">=</span> <span class="fl">2</span>, Bgrad <span class="op">=</span> <span class="fl">1</span>, Fpow <span class="op">=</span> <span class="fl">1</span>, Fgrad <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">res</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/contour.html" class="external-link">contour</a></span><span class="op">(</span><span class="va">Brel</span>, <span class="va">Frel</span>, <span class="va">adj</span>, nlevels <span class="op">=</span> <span class="fl">20</span>, xlab <span class="op">=</span> <span class="st">"B/BMSY"</span>, ylab <span class="op">=</span> <span class="st">"F/FMSY"</span>,</span>
-<span class="r-in">        main <span class="op">=</span> <span class="st">"FBsurface TAC adjustment factor"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">'red'</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">'red'</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">'topright'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bpow = 2"</span>, <span class="st">"Bgrad = 1"</span>, <span class="st">"Fpow = 1"</span>, <span class="st">"Fgrad = 0.75"</span><span class="op">)</span>, text.col <span class="op">=</span> <span class="st">'blue'</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fl">100</span></span></span>
+<span class="r-in"><span><span class="va">Frel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">2</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Brel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">2</span>, length.out<span class="op">=</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fu">HCR_FB</span><span class="op">(</span><span class="va">Brel</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">res</span>, <span class="va">res</span><span class="op">)</span><span class="op">]</span>, <span class="va">Frel</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">res</span>, each <span class="op">=</span> <span class="va">res</span><span class="op">)</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>                    Bpow <span class="op">=</span> <span class="fl">2</span>, Bgrad <span class="op">=</span> <span class="fl">1</span>, Fpow <span class="op">=</span> <span class="fl">1</span>, Fgrad <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">res</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/contour.html" class="external-link">contour</a></span><span class="op">(</span><span class="va">Brel</span>, <span class="va">Frel</span>, <span class="va">adj</span>, nlevels <span class="op">=</span> <span class="fl">20</span>, xlab <span class="op">=</span> <span class="st">"B/BMSY"</span>, ylab <span class="op">=</span> <span class="st">"F/FMSY"</span>,</span></span>
+<span class="r-in"><span>        main <span class="op">=</span> <span class="st">"FBsurface TAC adjustment factor"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">'red'</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">'red'</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">'topright'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bpow = 2"</span>, <span class="st">"Bgrad = 1"</span>, <span class="st">"Fpow = 1"</span>, <span class="st">"Fgrad = 0.75"</span><span class="op">)</span>, text.col <span class="op">=</span> <span class="st">'blue'</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="HCR_FB-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -111,7 +124,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

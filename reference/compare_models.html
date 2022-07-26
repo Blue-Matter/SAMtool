@@ -18,7 +18,7 @@ different assessment models from the same Data object."><meta property="og:image
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -55,21 +55,28 @@ different assessment models from the same Data object.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">compare_models</span><span class="op">(</span><span class="va">...</span>, label <span class="op">=</span> <span class="cn">NULL</span>, color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compare_models</span><span class="op">(</span><span class="va">...</span>, label <span class="op">=</span> <span class="cn">NULL</span>, color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>...</dt>
 <dd><p>Objects of class <a href="Assessment-class.html">Assessment</a>.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>A character vector of the models for the legend.</p></dd>
+
+
 <dt>color</dt>
 <dd><p>A vector of colors for each assessment model.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A set of figures of biomass, recruitment, and fishing mortality estimates among the models.</p>
+    
+
+<p>A set of figures of biomass, recruitment, and fishing mortality estimates among the models.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -78,11 +85,11 @@ different assessment models from the same Data object.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="cDD.html">cDD_SS</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="SCA.html">SCA</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu"><a href="SP.html">SP</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">compare_models</span><span class="op">(</span><span class="va">res</span>, <span class="va">res2</span>, <span class="va">res3</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="cDD.html">cDD_SS</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="SCA.html">SCA</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu"><a href="SP.html">SP</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">compare_models</span><span class="op">(</span><span class="va">res</span>, <span class="va">res2</span>, <span class="va">res3</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="compare_models-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
@@ -98,7 +105,7 @@ different assessment models from the same Data object.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

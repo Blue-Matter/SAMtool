@@ -20,7 +20,7 @@ assuming the same model structure, i.e., identical matrix and array dimensions a
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -59,84 +59,117 @@ assuming the same model structure, i.e., identical matrix and array dimensions a
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for RCModel,missing</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  compare <span class="op">=</span> <span class="cn">FALSE</span>,
-  filename <span class="op">=</span> <span class="st">"RCM"</span>,
-  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,
-  sims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">x</span><span class="op">@</span><span class="va">OM</span><span class="op">@</span><span class="va">nsim</span>,
-  Year <span class="op">=</span> <span class="cn">NULL</span>,
-  f_name <span class="op">=</span> <span class="cn">NULL</span>,
-  s_name <span class="op">=</span> <span class="cn">NULL</span>,
-  MSY_ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,
-  bubble_adj <span class="op">=</span> <span class="fl">10</span>,
-  scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  title <span class="op">=</span> <span class="cn">NULL</span>,
-  open_file <span class="op">=</span> <span class="cn">TRUE</span>,
-  quiet <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">render_args</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">compare_RCM</span><span class="op">(</span>
-  <span class="va">...</span>,
-  compare <span class="op">=</span> <span class="cn">FALSE</span>,
-  filename <span class="op">=</span> <span class="st">"compare_RCM"</span>,
-  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,
-  Year <span class="op">=</span> <span class="cn">NULL</span>,
-  f_name <span class="op">=</span> <span class="cn">NULL</span>,
-  s_name <span class="op">=</span> <span class="cn">NULL</span>,
-  MSY_ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,
-  bubble_adj <span class="op">=</span> <span class="fl">10</span>,
-  scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  title <span class="op">=</span> <span class="cn">NULL</span>,
-  open_file <span class="op">=</span> <span class="cn">TRUE</span>,
-  quiet <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">render_args</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for RCModel,missing</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  compare <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  filename <span class="op">=</span> <span class="st">"RCM"</span>,</span>
+<span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  sims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">x</span><span class="op">@</span><span class="va">OM</span><span class="op">@</span><span class="va">nsim</span>,</span>
+<span>  Year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  f_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  s_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  MSY_ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  bubble_adj <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  open_file <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">render_args</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">compare_RCM</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  compare <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  filename <span class="op">=</span> <span class="st">"compare_RCM"</span>,</span>
+<span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  f_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  s_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  MSY_ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  bubble_adj <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  open_file <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">render_args</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>An object of class <a href="RCModel-class.html">RCModel</a> (output from <a href="RCM.html">RCM</a>).</p></dd>
+
+
 <dt>compare</dt>
 <dd><p>Logical, if TRUE, the function will run <code>runMSE</code> to compare the historical period of the operating model
 and the RCM output.</p></dd>
+
+
 <dt>filename</dt>
 <dd><p>Character string for the name of the markdown and HTML files.</p></dd>
+
+
 <dt>dir</dt>
 <dd><p>The directory in which the markdown and HTML files will be saved.</p></dd>
+
+
 <dt>sims</dt>
 <dd><p>A logical vector of length <code>x@OM@nsim</code> or a numeric vector indicating which simulations to keep.</p></dd>
+
+
 <dt>Year</dt>
 <dd><p>Optional, a vector of years for the historical period for plotting.</p></dd>
+
+
 <dt>f_name</dt>
 <dd><p>Character vector for fleet names.</p></dd>
+
+
 <dt>s_name</dt>
 <dd><p>Character vector for survey names.</p></dd>
+
+
 <dt>MSY_ref</dt>
 <dd><p>A numeric vector for reference horizontal lines for B/BMSY plots.</p></dd>
+
+
 <dt>bubble_adj</dt>
 <dd><p>A number to adjust the size of bubble plots (for residuals of age and length comps).</p></dd>
+
+
 <dt>scenario</dt>
 <dd><p>Optional, a named list to label each simulation in the RCM for plotting, e.g.:
 <code>list(names = c("low M", "high M"), col = c("blue", "red"))</code>.</p></dd>
+
+
 <dt>title</dt>
 <dd><p>Optional character string for an alternative title for the markdown report.</p></dd>
+
+
 <dt>open_file</dt>
 <dd><p>Logical, whether the HTML document is opened after it is rendered.</p></dd>
+
+
 <dt>quiet</dt>
 <dd><p>Logical, whether to silence the markdown rendering function.</p></dd>
+
+
 <dt>render_args</dt>
 <dd><p>A list of other arguments to pass to <a href="https://pkgs.rstudio.com/rmarkdown/reference/render.html" class="external-link">render</a>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>For <code>compare_RCM</code>, multiple RCM objects for comparison.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns invisibly the output from <a href="https://pkgs.rstudio.com/rmarkdown/reference/render.html" class="external-link">render</a>.</p>
+    
+
+<p>Returns invisibly the output from <a href="https://pkgs.rstudio.com/rmarkdown/reference/render.html" class="external-link">render</a>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -155,7 +188,7 @@ and the RCM output.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

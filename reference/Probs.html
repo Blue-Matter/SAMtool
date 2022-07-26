@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -53,25 +53,36 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">Probs</span><span class="op">(</span><span class="va">indPPD</span>, <span class="va">indData</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>, removedat <span class="op">=</span> <span class="cn">FALSE</span>, removethresh <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">Probs</span><span class="op">(</span><span class="va">indPPD</span>, <span class="va">indData</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>, removedat <span class="op">=</span> <span class="cn">FALSE</span>, removethresh <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>indPPD</dt>
 <dd><p>A 3D array of results arising from running getind on an MSE of the Null operating model (type of data/stat (e.g. mean catches),time period (chunk), simulation)</p></dd>
+
+
 <dt>indData</dt>
 <dd><p>A 3D array of results arising from running getind on an MSE of the Alternative operating model (type of data/stat (e.g. mean catches),time period (chunk), simulation)</p></dd>
+
+
 <dt>alpha</dt>
 <dd><p>Positive fraction: rate of type I error, alpha</p></dd>
+
+
 <dt>removedat</dt>
 <dd><p>Logical, should data not contributing to the mahalanobis distance be removed?</p></dd>
+
+
 <dt>removethresh</dt>
 <dd><p>Positive fraction: the cumulative percentage of removed data (removedat=TRUE) that contribute to the mahalanobis distance</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list object.
+    
+
+<p>A list object.
  Position 1 is an array of the mahalanobis distances. Dimension 1 is length 2 for the Null OM (indPPD) and the alternative OM (indData).
  Dimension 2 is the time block (same length as indPPD dim 2). Dimension 3 is the simulation number (same length at indPPD dim 3.),
  Position 2 is a matrix (2 rows, ntimeblock columns) which is (row 1) alpha: the rate of false positives, and row 2 the power (1-beta) the rate of true positives</p>
@@ -97,7 +108,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

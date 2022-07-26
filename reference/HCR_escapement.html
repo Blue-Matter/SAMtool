@@ -18,7 +18,7 @@ By default, this function sets the TAC at F = 100% FMSY when spawning depletion 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.1</span>
       </span>
     </div>
 
@@ -55,15 +55,15 @@ By default, this function sets the TAC at F = 100% FMSY when spawning depletion 
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">HCR_escapement</span><span class="op">(</span>
-  <span class="va">Assessment</span>,
-  reps <span class="op">=</span> <span class="fl">1</span>,
-  OCP_type <span class="op">=</span> <span class="st">"SSB_SSB0"</span>,
-  OCP_threshold <span class="op">=</span> <span class="fl">0.2</span>,
-  Ftarget_type <span class="op">=</span> <span class="st">"FMSY"</span>,
-  relF_max <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">HCR_escapement</span><span class="op">(</span></span>
+<span>  <span class="va">Assessment</span>,</span>
+<span>  reps <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  OCP_type <span class="op">=</span> <span class="st">"SSB_SSB0"</span>,</span>
+<span>  OCP_threshold <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  Ftarget_type <span class="op">=</span> <span class="st">"FMSY"</span>,</span>
+<span>  relF_max <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -71,25 +71,40 @@ By default, this function sets the TAC at F = 100% FMSY when spawning depletion 
     <dl><dt>Assessment</dt>
 <dd><p>An object of class <a href="Assessment-class.html">Assessment</a> with estimates of
 FMSY or UMSY and vulnerable biomass in terminal year.</p></dd>
+
+
 <dt>reps</dt>
 <dd><p>The number of stochastic samples of the TAC recommendation.</p></dd>
+
+
 <dt>OCP_type</dt>
 <dd><p>The type of operational control points (OCPs) for the harvest control rule used to determine 
 whether there is fishing. By default, use (<code>"SSB_SSB0"</code> for spawning depletion. Other biomass OCPs include <code>"SSB_SSBMSY"</code> for spawning biomass relative to MSY and
 <code>"SSB_dSSB0"</code>, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
 For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR% (see <code>SPR_OCP</code> argument) can be used.</p></dd>
+
+
 <dt>OCP_threshold</dt>
 <dd><p>The value of the OCP above which fishing can occur.</p></dd>
+
+
 <dt>Ftarget_type</dt>
 <dd><p>The type of F used for the target fishing mortality rate.</p></dd>
+
+
 <dt>relF_max</dt>
 <dd><p>The relative value of Ftarget if <code>OCP &gt; OCP_treshold</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Miscellaneous arguments.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class Rec with the TAC recommendation.</p>
+    
+
+<p>An object of class Rec with the TAC recommendation.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -112,22 +127,21 @@ performance of control rules. Fisheries Research 94:210-223.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># create an MP to run in closed-loop MSE (fishes at FMSY when B/B0 &gt; 0.2)</span></span>
-<span class="r-in"><span class="va">SP_escapement</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_escapement</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The MP which fishes at 75% of FMSY</span></span>
-<span class="r-in"><span class="va">SP_escapement75</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_escapement</span>, relF_max <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The MP which fishes at FMSY when BMSY &gt; 0.5</span></span>
-<span class="r-in"><span class="va">SP_BMSY_escapement</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_escapement</span>, OCP_type <span class="op">=</span> <span class="st">"SSB_SSBMSY"</span>, </span>
-<span class="r-in">                              OCP_threshold <span class="op">=</span> <span class="fl">0.5</span>, relF_max <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="va">myOM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a></span><span class="op">(</span><span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html" class="external-link">testOM</a></span>, MPs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FMSYref"</span>, <span class="st">"SP_escapement"</span>, <span class="st">"SP_BMSY_escapement"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Checking MPs </span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># create an MP to run in closed-loop MSE (fishes at FMSY when B/B0 &gt; 0.2)</span></span></span>
+<span class="r-in"><span><span class="va">SP_escapement</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_escapement</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The MP which fishes at 75% of FMSY</span></span></span>
+<span class="r-in"><span><span class="va">SP_escapement75</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_escapement</span>, relF_max <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The MP which fishes at FMSY when BMSY &gt; 0.5</span></span></span>
+<span class="r-in"><span><span class="va">SP_BMSY_escapement</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_escapement</span>, OCP_type <span class="op">=</span> <span class="st">"SSB_SSBMSY"</span>, </span></span>
+<span class="r-in"><span>                              OCP_threshold <span class="op">=</span> <span class="fl">0.5</span>, relF_max <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">myOM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a></span><span class="op">(</span><span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html" class="external-link">testOM</a></span>, MPs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FMSYref"</span>, <span class="st">"SP_escapement"</span>, <span class="st">"SP_BMSY_escapement"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking MPs</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Some MPs are not a functions of class `MP`: SP_escapement, SP_BMSY_escapement</span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -142,7 +156,7 @@ performance of control rules. Fisheries Research 94:210-223.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
