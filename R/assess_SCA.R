@@ -292,6 +292,8 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
     CAA_hist <- Data@CAA[x, yind, 1:n_age]
     if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
+    
+    if(all(is.na(CAA_hist))) warning("No age composition found in Data object", call. = FALSE)
   } else {
     CAA_hist <- matrix(0, n_y, n_age)
   }
@@ -308,6 +310,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     CAL_cdf <- cumsum(CAL_sum)
     CAL_ind <- which(CAL_sum > 0)[1]:which.max(CAL_cdf)[1]
     CAL_hist <- CAL_hist[, CAL_ind]
+    if(all(is.na(CAL_hist))) warning("No length composition found in Data object", call. = FALSE)
     
     CAL_mids <- Data@CAL_mids[CAL_ind]
     CAL_bins <- Data@CAL_bins[CAL_ind]
@@ -382,8 +385,11 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- vapply(Ind, getElement, numeric(n_y), "I_hist")
+  if(is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
+  
   I_sd <- vapply(Ind, getElement, numeric(n_y), "I_sd") %>% pmax(0.05)
   I_units <- vapply(Ind, getElement, numeric(1), "I_units")
+  
   I_vul <- vapply(AddInd, function(xx) {
     if(xx == "B") {
       return(rep(1, n_age))

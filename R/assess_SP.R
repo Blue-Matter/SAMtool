@@ -211,8 +211,9 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
 
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- vapply(Ind, getElement, numeric(ny), "I_hist")
+  if(is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
+  
   I_sd <- vapply(Ind, getElement, numeric(ny), "I_sd")
-  if(is.null(I_hist)) stop("No indices found.")
   nsurvey <- ncol(I_hist)
 
   if(state_space) {

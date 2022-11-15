@@ -186,10 +186,11 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   ny <- length(C_hist)
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- vapply(Ind, getElement, numeric(ny), "I_hist")
+  if(is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
+  
   I_sd <- vapply(Ind, getElement, numeric(ny), "I_sd")
   I_units <- vapply(Ind, getElement, numeric(1), "I_units")
 
-  if(is.null(I_hist)) stop("No indices found.", call. = FALSE)
   nsurvey <- ncol(I_hist)
 
   if(condition == "effort") {

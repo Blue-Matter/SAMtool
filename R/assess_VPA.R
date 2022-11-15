@@ -148,6 +148,7 @@ VPA <- function(x = 1, Data, AddInd = "B", expanded = FALSE, SR = c("BH", "Ricke
 
   Year <- Data@Year[yind]
   CAA_hist <- Data@CAA[x, yind, ]
+  if(all(is.na(CAA_hist))) stop("No age composition data found in Data object.", call. = FALSE)
 
   if(!expanded) {
     C_hist <- Data@Cat[x, yind]
