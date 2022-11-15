@@ -1,4 +1,12 @@
 
+do.call2 <- function(..., fast = TRUE) {
+  if(fast && requireNamespace("Gmisc", quietly = TRUE)) {
+    Gmisc::fastDoCall(...)
+  } else {
+    base::do.call(...)
+  }
+}
+
 max <- function(..., na.rm = TRUE) suppressWarnings(base::max(..., na.rm = na.rm))
 
 arrows <- function(...) suppressWarnings(graphics::arrows(...))

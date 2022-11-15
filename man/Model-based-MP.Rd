@@ -62,34 +62,34 @@ TAC between assessment years.
 }
 \section{Functions}{
 \itemize{
-\item \code{SCA_MSY}: A statistical catch-at-age model with a TAC recommendation based on fishing at FMSY,
+\item \code{SCA_MSY()}: A statistical catch-at-age model with a TAC recommendation based on fishing at FMSY,
 and default arguments for configuring \link{SCA}.
 
-\item \code{SCA_75MSY}: An SCA with a TAC recommendation based on fishing at 75\% of FMSY.
+\item \code{SCA_75MSY()}: An SCA with a TAC recommendation based on fishing at 75\% of FMSY.
 
-\item \code{SCA_4010}: An SCA with a 40-10 control rule.
+\item \code{SCA_4010()}: An SCA with a 40-10 control rule.
 
-\item \code{DDSS_MSY}: A state-space delay difference model with a TAC recommendation based on fishing at FMSY,
+\item \code{DDSS_MSY()}: A state-space delay difference model with a TAC recommendation based on fishing at FMSY,
 and default arguments for configuring \link{DD_SS}.
 
-\item \code{DDSS_75MSY}: A state-space delay difference model with a TAC recommendation based on fishing at 75\% of FMSY.
+\item \code{DDSS_75MSY()}: A state-space delay difference model with a TAC recommendation based on fishing at 75\% of FMSY.
 
-\item \code{DDSS_4010}: A state-space delay difference model with a 40-10 control rule.
+\item \code{DDSS_4010()}: A state-space delay difference model with a 40-10 control rule.
 
-\item \code{SP_MSY}: A surplus production model with a TAC recommendation based on fishing at FMSY,
+\item \code{SP_MSY()}: A surplus production model with a TAC recommendation based on fishing at FMSY,
 and default arguments for configuring \link{SP}.
 
-\item \code{SP_75MSY}: A surplus production model with a TAC recommendation based on fishing at 75\% of FMSY.
+\item \code{SP_75MSY()}: A surplus production model with a TAC recommendation based on fishing at 75\% of FMSY.
 
-\item \code{SP_4010}: A surplus production model with a 40-10 control rule.
+\item \code{SP_4010()}: A surplus production model with a 40-10 control rule.
 
-\item \code{SSS_MSY}: Simple stock synthesis (terminal depletion fixed to 0.4 in \link{SSS}) with a TAC recommendation based on fishing at FMSY.
+\item \code{SSS_MSY()}: Simple stock synthesis (terminal depletion fixed to 0.4 in \link{SSS}) with a TAC recommendation based on fishing at FMSY.
 
-\item \code{SSS_75MSY}: Simple stock synthesis (terminal depletion fixed to 0.4) with with a TAC recommendation based on fishing at 75\% FMSY.
+\item \code{SSS_75MSY()}: Simple stock synthesis (terminal depletion fixed to 0.4) with with a TAC recommendation based on fishing at 75\% FMSY.
 
-\item \code{SSS_4010}: Simple stock synthesis (terminal depletion fixed to 0.4) with a 40-10 control rule.
+\item \code{SSS_4010()}: Simple stock synthesis (terminal depletion fixed to 0.4) with a 40-10 control rule.
+
 }}
-
 \examples{
 MSEtool::avail("MP", package = "SAMtool")
 

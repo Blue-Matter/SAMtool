@@ -72,7 +72,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Hist <- MSE@FM_hist[sim, ]/MSE@OM$FMSY[sim]
       Proj <- MSE@F_FMSY[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "F_FMSY")
-      if(length(do.call(c, Assess)) == 0) {
+      if(!length(do.call(c, Assess))) {
         AssessU <- lapply(Assessment_report, slot, "U")
         AssessUMSY <- lapply(Assessment_report, slot, "UMSY")
         Assess <- Map(function(x, y) log(1-x)/log(1-y), x = AssessU, y = AssessUMSY)
@@ -89,7 +89,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Hist <- MSE@FM_hist[sim, ]
       Proj <- MSE@FM[sim, match_ind, ]
       Assess <- lapply(Assessment_report, slot, "FMort")
-      if(length(do.call(c, Assess)) == 0) {
+      if(!length(do.call(c, Assess))) {
         Assess <- lapply(Assessment_report, function(x) -log(1 - slot(x, "U")))
       }
     }

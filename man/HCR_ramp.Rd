@@ -102,18 +102,18 @@ in the \linkS4class{Assessment} object is specified:
 }
 \section{Functions}{
 \itemize{
-\item \code{HCR_ramp}: Generic ramped-HCR function where user specifies OCP and corresponding limit and target
+\item \code{HCR_ramp()}: Generic ramped-HCR function where user specifies OCP and corresponding limit and target
 points, as well as minimum and maximum relative F target.
 
-\item \code{HCR40_10}: Common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
+\item \code{HCR40_10()}: Common U.S. west coast control rule (LOCP and TOCP of 0.1 and 0.4 spawning depletion,
 respectively)
 
-\item \code{HCR60_20}: More conservative than \code{HCR40_10}, with LOCP and TOCP of 0.2 and 0.6
+\item \code{HCR60_20()}: More conservative than \code{HCR40_10}, with LOCP and TOCP of 0.2 and 0.6
 spawning depletion, respectively).
 
-\item \code{HCR80_40MSY}: 0.8 and 0.4 SSBMSY as the LOCP and TOCP, respectively.
-}}
+\item \code{HCR80_40MSY()}: 0.8 and 0.4 SSBMSY as the LOCP and TOCP, respectively.
 
+}}
 \examples{
 # 40-10 linear ramp
 Brel <- seq(0, 1, length.out = 200)

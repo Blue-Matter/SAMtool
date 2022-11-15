@@ -272,7 +272,7 @@ Shortcut2 <- function(x, Data, method = "N", SCA_args = list(), VAR_args = list(
       SCA_args$vulnerability <- ifelse(Data@OM$Vmaxlen[x] != 1, "dome", "logistic")
     }
     
-    run_SCA <- do.call("SCA", SCA_args)
+    run_SCA <- do.call2("SCA", SCA_args)
     
     F_est <- run_SCA@FMort
     F_OM <- Data@Misc$FleetPars$Find[x, ] * Data@Misc$FleetPars$qs[x]
@@ -296,7 +296,7 @@ Shortcut2 <- function(x, Data, method = "N", SCA_args = list(), VAR_args = list(
       var_resid <- data.frame(R = log(R_est/R_OM), FM = log(F_est/F_OM))
     }
     VAR_args$y <- as.matrix(var_resid)
-    VAR_model <- do.call(vars::VAR, VAR_args)
+    VAR_model <- do.call2(vars::VAR, VAR_args)
     
     run_SCA@info$Misc$VAR_model <- VAR_model
     return(run_SCA)

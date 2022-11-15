@@ -208,7 +208,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             }
 
             ####### Document header
-            if(is.null(title)) title <- "Operating model (OM) conditioning report for `r ifelse(nchar(OM@Name) > 0, OM@Name, substitute(OM))`"
+            if(is.null(title)) title <- "Operating model (OM) conditioning report for `r ifelse(nchar(OM@Name) > 0, OM@Name, substitute(x))`"
             header <- c("---",
                         paste0("title: \"", title, "\""),
                         "subtitle: Output from SAMtool Rapid Conditioning Model (RCM)",
