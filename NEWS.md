@@ -1,9 +1,11 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.4.2
+- Add progress bar to `RCM` with `pbapply`.
+
 ## SAMtool 1.4.1
 - Fix `Data@CAL` check when using `RCM`.
 - Use `Gmisc::fastDoCall` when fitting models, e.g., `SP_Fox`. `Gmisc` is a `Suggests` package.
-- Add progress bar to `RCM` with `pbapply`.
 
 ## SAMtool 1.4.0
 - RCM can now use multivariate logistic and Dirichlet multinomial distributions for fitting to age/length comps.

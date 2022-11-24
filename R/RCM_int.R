@@ -132,7 +132,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                     LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                     max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
                     FleetPars = FleetPars, control = control, dots = dots,
-                    cl = if(cores > 1) snowfall::sfGetCluster() else NULL)
+                    cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
     
     if(mean_fit) { ### Fit to life history means if mean_fit = TRUE
       message("Generating additional model fit from mean values of parameters in the operating model...\n")
