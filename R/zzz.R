@@ -4,14 +4,14 @@
   options(
     "pboptions" = list(
       type = if (interactive()) "timer" else "none",
-      char = "-",
+      char = "=",
       txt.width = 50,
       gui.width = 300,
       style = 1,
       initial = 0,
       title = "R progress bar",
       label = "",
-      nout = 40L,
+      nout = 20L,
       min_time = 10
     )
   )

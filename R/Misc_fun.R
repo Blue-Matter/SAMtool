@@ -149,9 +149,16 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
     low[match(c("U_equilibrium", "F_equilibrium"), names(obj$par))] <- 0
   }
   if(!is.null(obj$env$data$use_prior[1]) && obj$env$data$use_prior[1] > 0) { # Uniform priors need bounds
-    low[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
-    upr[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
+    R0x_ind <- names(obj$par) == "R0x"
+    low[R0x_ind] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
+    upr[R0x_ind] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
+    
+    # R0x start value must be in between bounds
+    if(any(obj$par[R0x_ind] <= low[R0x_ind] | obj$par[R0x_ind] >= upr[R0x_ind])) {
+      obj$par[R0x_ind] <- 0.95 * upr[R0x_ind]
+    }
   }
+  
   opt <- tryCatch(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low, upper = upr)),
                   error = function(e) as.character(e))
   SD <- get_sdreport(obj)
