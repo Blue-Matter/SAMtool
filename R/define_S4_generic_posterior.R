@@ -135,11 +135,9 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   message("Re-constructing population model...")
   
   if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-  if(snowfall::sfIsRunning()) {
-    res <- snowfall::sfLapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE)
-  } else {
-    res <- lapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE)
-  }
+  
+  res <- pblapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE, 
+                  cl = if(cores > 1) snowfall::sfGetCluster() else NULL)
   
   OM_par <- RCM_update_OM(res, obj$env$data, maxage, nyears, proyears)
   message("Updating operating model with MCMC samples...\n")

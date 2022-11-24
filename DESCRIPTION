@@ -5,7 +5,7 @@ Version: 1.4.1
 Authors@R: c(person("Quang", "Huynh", email = "quang@bluematterscience.com", role = c("aut", "cre")), 
   person("Tom", "Carruthers", email = "tom@bluematterscience.com", role = "aut"),
   person("Adrian", "Hordyk", email = "adrian@bluematterscience.com", role = "aut"))
-Date: 2022-11-15
+Date: 2022-11-23
 Maintainer: Quang Huynh <quang@bluematterscience.com>
 Description: Simulation tools for closed-loop simulation are provided for the 'MSEtool' operating model to inform data-rich fisheries. 
   'SAMtool' provides a conditioning model, assessment models of varying complexity with standardized reporting, 
@@ -19,6 +19,7 @@ Imports:
     gplots,
     graphics,
     methods,
+    pbapply,
     rmarkdown,
     snowfall,
     stats,

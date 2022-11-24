@@ -1,4 +1,5 @@
 
+#' @importFrom pbapply pblapply
 RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = "B", LWT = list(),
                     comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
@@ -126,17 +127,12 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     
     message("\nFitting model (", nsim, " simulations) ...")
     if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-    if(snowfall::sfIsRunning()) {
-      mod <- snowfall::sfClusterApplyLB(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                                        LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
-                                        max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                                        FleetPars = FleetPars, control = control, dots = dots)
-    } else {
-      mod <- lapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
+    
+    mod <- pblapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                     LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                     max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                    FleetPars = FleetPars, control = control, dots = dots)
-    }
+                    FleetPars = FleetPars, control = control, dots = dots,
+                    cl = if(cores > 1) snowfall::sfGetCluster() else NULL)
     
     if(mean_fit) { ### Fit to life history means if mean_fit = TRUE
       message("Generating additional model fit from mean values of parameters in the operating model...\n")
