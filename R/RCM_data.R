@@ -323,10 +323,13 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       if(!length(RCMdata@Chist)) RCMdata@Chist <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)
     }
   }
-
-  message("RCM model is conditioned on: ", RCMdata@Misc$condition)
-  message(RCMdata@Misc$nfleet, " fleet(s) detected.")
+  
+  RCMdata@Misc$CurrentYr <- OM@CurrentYr
+  message("RCM is conditioned on: ", RCMdata@Misc$condition)
   message(RCMdata@Misc$nyears, " years of data detected.")
+  message("First year in model: ", RCMdata@Misc$CurrentYr - RCMdata@Misc$nyears + 1)
+  message("Last year in model: ", RCMdata@Misc$CurrentYr)
+  message(RCMdata@Misc$nfleet, " fleet(s) detected.")
 
   # Match number of historical years of catch/effort to OM
   if(OM@nyears != RCMdata@Misc$nyears) {
@@ -667,7 +670,6 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     }
   }
   RCMdata@Misc$nsel_block <- as.numeric(RCMdata@sel_block) %>% unique() %>% length()
-  RCMdata@Misc$CurrentYr <- OM@CurrentYr
 
   return(list(RCMdata = RCMdata, OM = OM, StockPars = StockPars, ObsPars = ObsPars, FleetPars = FleetPars))
 }
