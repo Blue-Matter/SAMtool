@@ -324,7 +324,7 @@ Hist <- runMSE(out@OM, Hist = TRUE)
 
 }
 \references{
-Thorson et al. 2017. Model-based estimates of effective sample size in stock assessmentmodels using the Dirichlet-multinomial distribution.
+Thorson et al. 2017. Model-based estimates of effective sample size in stock assessment models using the Dirichlet-multinomial distribution.
 Fish. Res. 192:84-93. \doi{10.1016/j.fishres.2016.06.005}
 }
 \seealso{

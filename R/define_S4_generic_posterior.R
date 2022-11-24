@@ -30,6 +30,10 @@ setGeneric("posterior", function(x, ...) standardGeneric("posterior"))
 #' @param init The initial values of parameters for starting the MCMC chain. See \code{tmbstan::tmbstan}.
 #' @param cores The number of cores for running in parallel, e.g., one core per MCMC chain. Used in \code{RCMstan}
 #' for reconstructing the population.
+#' 
+#' @section Online Documentation:
+#' A vignette on the steps to run the MCMC is available on the openMSE 
+#' \href{https://openmse.com/tutorial-rcm/4-case-study-mcmc/}{website}.
 #' @exportMethod posterior
 setMethod("posterior", signature(x = "RCModel"),
           function(x, priors_only = FALSE, 
@@ -111,6 +115,8 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   } else if(!is.matrix(sim)) {
     sim_stan <- matrix(1, nsim, 2)
     sim_stan[, 2] <- sim
+  } else {
+    sim_stan <- sim
   }
   
   if(any(sim_stan[, 1] > nchains)) stop("There is only ", nchains, " chain(s) in the stan model.")

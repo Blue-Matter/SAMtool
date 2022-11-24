@@ -70,6 +70,12 @@ A convenient wrapper function (\code{posterior}) to sample the posterior using M
 and returns a \code{stanfit} object for diagnostics. Use \code{RCMstan} to update the RCM and the enclosed operating model
 with MCMC samples..
 }
+\section{Online Documentation}{
+
+A vignette on the steps to run the MCMC is available on the openMSE 
+\href{https://openmse.com/tutorial-rcm/4-case-study-mcmc/}{website}.
+}
+
 \author{
 Q. Huynh
 }
