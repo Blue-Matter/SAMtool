@@ -649,7 +649,7 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
   # Index units - biomass/abundance
   if(RCMdata@Misc$nsurvey > 0) {
     if(!length(RCMdata@I_units)) RCMdata@I_units <- rep(1L, RCMdata@Misc$nsurvey)
-    if(length(RCMdata@I_units) < RCMdata@Misc$nsurvey) stop("I_basis should be of length", RCMdata@Misc$nsurvey, call. = FALSE)
+    if(length(RCMdata@I_units) < RCMdata@Misc$nsurvey) stop("I_units should be of length", RCMdata@Misc$nsurvey, call. = FALSE)
   } else {
     RCMdata@I_units <- 1L
   }
