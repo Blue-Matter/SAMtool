@@ -139,7 +139,7 @@ LinInterp <- function(x,y,xlev,ascending=F,zeroint=F){
 }
 
 
-optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 1) {
+optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 1, do_sd = TRUE) {
   restart <- as.integer(restart)
   if(is.null(obj$env$random) && use_hessian) h <- obj$he else h <- NULL
   low <- rep(-Inf, length(obj$par))
@@ -161,13 +161,18 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
   
   opt <- tryCatch(suppressWarnings(nlminb(obj$par, obj$fn, obj$gr, h, control = control, lower = low, upper = upr)),
                   error = function(e) as.character(e))
-  SD <- get_sdreport(obj)
-
-  if(!SD$pdHess && restart > 0) {
-    if(!is.character(opt)) obj$par <- opt$par * exp(rnorm(length(opt$par), 0, 1e-3))
-    Recall(obj, control, use_hessian, restart - 1)
+  
+  if (do_sd) {
+    SD <- get_sdreport(obj)
+    
+    if(!SD$pdHess && restart > 0) {
+      if(!is.character(opt)) obj$par <- opt$par * exp(rnorm(length(opt$par), 0, 1e-3))
+      Recall(obj, control, use_hessian, restart - 1, do_sd)
+    } else {
+      return(list(opt = opt, SD = SD))
+    }
   } else {
-    return(list(opt = opt, SD = SD))
+    return(list(opt = opt, SD = NULL))
   }
 }
 
