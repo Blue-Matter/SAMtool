@@ -508,7 +508,7 @@ RCM_retro <- function(x, nyr = 5) {
         }
       }
     }
-    mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)
+    mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), do_sd = FALSE)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
     
@@ -529,7 +529,8 @@ RCM_retro <- function(x, nyr = 5) {
     return(FALSE)
   }
   
-  conv <- vapply(0:nyr, lapply_fn, logical(1), new_args = new_args, x = x)
+  conv <- pbsapply(0:nyr, lapply_fn, new_args = new_args, x = x, 
+                   cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
   if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
   
   retro <- new("retro", Model = "RCM", Name = x@OM@Name, TS_var = TS_var, TS = retro_ts)
@@ -621,6 +622,7 @@ profile_likelihood_RCM <- function(x, ...) {
     }
     profile_grid <- expand.grid(D = dots$D)
     
+    # Create a dummy index = depletion
     new_args$data$IAA_hist <- abind::abind(new_args$data$IAA_hist, 
                                            array(NA, c(n_y, new_args$data$n_age, 1)), 
                                            along = 3)
@@ -660,13 +662,14 @@ profile_likelihood_RCM <- function(x, ...) {
       
       obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, map = new_args$map,
                         random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
-      mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)
+      mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), do_sd = FALSE)
       report <- obj2$report(obj2$env$last.par.best)
       RCM_get_likelihoods(report, LWT = LWT, f_name = paste0("Fleet_", 1:new_args$data$nfleet),
                           s_name = paste0("Index_", 1:(new_args$data$nsurvey-1)) %>% c("SSB_depletion"))
     }
     
-    do_profile <- lapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x)
+    do_profile <- pblapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x,
+                           cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
     profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
     
     prof <- sapply(do_profile, nll_depletion_profile) %>% t()
@@ -712,27 +715,20 @@ profile_likelihood_RCM <- function(x, ...) {
       obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, map = new_args$map,
                         random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
       
-      mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)
+      mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), do_sd = FALSE)
       report <- obj2$report(obj2$env$last.par.best)
       RCM_get_likelihoods(report, LWT = LWT, f_name = paste0("Fleet_", 1:new_args$data$nfleet),
                           s_name = paste0("Index_", 1:new_args$data$nsurvey))
-      
-      #opt2 <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)[[1]]
-      #
-      #if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
-      #return(nll)
     }
     
-    do_profile <- lapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x)
+    do_profile <- pblapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x,
+                           cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
     profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
     
     prof <- sapply(do_profile, nll_depletion_profile) %>% t()
     prof_out <- apply(prof, 2, sum) %>% as.logical()
     
     profile_grid <- cbind(profile_grid, prof[, prof_out] %>% as.data.frame())
-    
-    #nll <- vapply(1:nrow(profile_grid), profile_fn, numeric(1), new_args = new_args, x = x)
-    #profile_grid$nll <- nll
     
     if(joint_profile) {
       pars <- c("R0", "h")

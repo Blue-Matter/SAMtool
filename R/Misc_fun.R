@@ -139,7 +139,7 @@ LinInterp <- function(x,y,xlev,ascending=F,zeroint=F){
 }
 
 
-optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 1, do_sd = TRUE) {
+optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, restart = 0, do_sd = TRUE) {
   restart <- as.integer(restart)
   if(is.null(obj$env$random) && use_hessian) h <- obj$he else h <- NULL
   low <- rep(-Inf, length(obj$par))

@@ -36,7 +36,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
     }
   }
   
-  mod <- optimize_TMB_model(obj, control, restart = 0)
+  mod <- optimize_TMB_model(obj, control)
   opt <- mod[[1]]
   SD <- mod[[2]]
   report <- obj$report(obj$env$last.par.best) %>% RCM_posthoc_adjust(obj)
@@ -482,12 +482,13 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
     
   } else if(obj$env$data$condition == "catch2") {
     
-    new_args <- RCM_retro_subset(obj$env$data$n_y, data = obj$env$data, 
-                                 params = obj$env$parameters, map = obj$env$map)
-    new_args$data$C_hist <- matrix(1e-8, new_args$data$n_y, new_args$data$nfleet)
+    new_data <- obj$env$data
+    new_data$C_hist[] <- 1e-8
     
-    obj2 <- MakeADFun(data = new_args$data, parameters = new_args$params, 
-                      map = new_args$map, random = obj$env$random,
+    new_params <- lapply(obj$env$parameters, function(x) if(!is.null(attr(x, "map"))) attr(x, "shape") else x)
+    
+    obj2 <- MakeADFun(data = new_data, parameters = new_params, 
+                      map = obj$env$map, random = obj$env$random,
                       DLL = "SAMtool", silent = TRUE)
     out <- obj2$report(par)$E
     

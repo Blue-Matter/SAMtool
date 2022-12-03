@@ -208,7 +208,7 @@ profile_likelihood_SCA <- function(Assessment, ...) {
     }
     obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
                       inner.control = Assessment@info$inner.control, DLL = "SAMtool", silent = TRUE)
-    opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
+    opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
     if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
     return(nll)
   }
@@ -298,7 +298,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
     
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control)
+    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
     
