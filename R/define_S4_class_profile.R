@@ -80,13 +80,10 @@ setMethod("plot", signature(x = "prof", y = "missing"),
             invisible()
           })
 
-#' @rdname profile
-#' @export
-setGeneric("profile", function(fitted, ...) standardGeneric("profile"))
 
-#' @name profile
+#' @rdname profile
 #' @title Profile likelihood of assessment models
-#' @aliases profile,Assessment-method
+#' @aliases profile profile,Assessment-method
 #' @description Profile the likelihood for parameters of assessment models.
 #'
 #' @param fitted,Assessment An object of class \linkS4class{Assessment}.
