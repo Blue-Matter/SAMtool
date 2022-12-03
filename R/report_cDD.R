@@ -137,7 +137,7 @@ profile_likelihood_cDD <- function(Assessment, ...) {
   params <- Assessment@info$params
 
   profile_grid <- expand.grid(R0 = R0, h = h)
-  joint_profile <- !exists("profile_par")
+  joint_profile <- !exists("profile_par", inherits = FALSE)
 
   profile_fn <- function(i, Assessment, params, map) {
     params$R0x <- log(profile_grid[i, 1] * Assessment@obj$env$data$rescale)
@@ -159,7 +159,7 @@ profile_likelihood_cDD <- function(Assessment, ...) {
         if(joint_profile) {
           nll <- obj2$fn(params$R0x)
         } else { # Profile h
-          opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
+          opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
           if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
         }
       }
@@ -172,14 +172,14 @@ profile_likelihood_cDD <- function(Assessment, ...) {
           if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
           obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
                             DLL = "SAMtool", silent = TRUE)
-          opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
+          opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
           if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
         }
       } else { # R0, F
         if(joint_profile || profile_par == "R0") map$R0x <- factor(NA)
         obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
                           DLL = "SAMtool", silent = TRUE)
-        opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
+        opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
         if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
       }
 
@@ -193,14 +193,16 @@ profile_likelihood_cDD <- function(Assessment, ...) {
       }
 
       obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random, DLL = "SAMtool", silent = TRUE)
-      opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
-      if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
+      opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
+      if(!is.character(opt2)) nll <- opt2$objective else nll <- NA_real_
     }
-    if(!exists("nll")) nll <- NA
+    if(!exists("nll", inherits = FALSE)) nll <- NA_real_
     return(nll)
   }
-  nll <- vapply(1:nrow(profile_grid), profile_fn, numeric(1), Assessment = Assessment, params = params, map = map) - Assessment@opt$objective
-  profile_grid$nll <- nll
+  nll <- pblapply(1:nrow(profile_grid), profile_fn, 
+                  Assessment = Assessment, params = params, map = map,
+                  cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+  profile_grid$nll <- do.call(c, nll) - Assessment@opt$objective
 
   if(joint_profile) {
     pars <- c("R0", "h")
@@ -246,7 +248,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control)
+    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 

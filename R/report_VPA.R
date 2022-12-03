@@ -102,7 +102,7 @@ profile_likelihood_VPA <- function(Assessment, ...) {
   profile_fn <- function(i, Assessment, params, map) {
     params$log_Fterm <- log(Fterm[i])
     obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, DLL = "SAMtool", silent = TRUE)
-    opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
+    opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
     if(!is.character(opt2)) nll <- opt2$objective else nll <- NA_real_
     return(nll)
   }
@@ -138,7 +138,7 @@ retrospective_VPA <- function(Assessment, nyr) {
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map, DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control)
+    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 

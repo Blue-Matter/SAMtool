@@ -125,7 +125,7 @@ profile_likelihood_SP <- function(Assessment, ...) {
           if(obj2$report(c(obj2$par, obj2$env$last.par[obj2$env$random]))$penalty > 0) break
         }
       }
-      opt2 <- optimize_TMB_model(obj2, Assessment@info$control)[[1]]
+      opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
       if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
     }
     return(nll)
@@ -180,7 +180,7 @@ retrospective_SP <- function(Assessment, nyr, state_space = FALSE) {
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control)
+    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 
