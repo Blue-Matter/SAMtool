@@ -97,7 +97,12 @@ Type cDD(objective_function<Type> *obj) {
   for(int tt=0;tt<k;tt++) R(tt) = Req;
   if(state_space) {
     Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
+    SIMULATE { 
+      Rec_dev(0) = exp(rnorm(log_rec_dev(0) - 0.5 * tau * tau, tau));
+    }
     R(0) *= Rec_dev(0);
+  } else {
+    Rec_dev.fill(1);
   }
   
   Type Ceqpred = F_equilibrium * B(0);
@@ -127,8 +132,16 @@ Type cDD(objective_function<Type> *obj) {
     }
     if(state_space && tt<ny-1) {
       Rec_dev(tt+1) = exp(log_rec_dev(tt+1) - 0.5 * tau * tau);
+      SIMULATE {
+        Rec_dev(tt+1) = exp(rnorm(log_rec_dev(tt+1) - 0.5 * tau * tau, tau));
+      }
       R(tt+1) *= Rec_dev(tt+1);
     }
+    
+    SIMULATE {
+      C_hist(tt) = Cpred(tt);
+    }
+    
   }
 
   //--ARGUMENTS FOR NLL
@@ -144,8 +157,17 @@ Type cDD(objective_function<Type> *obj) {
       if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(tt,sur)))) {
         if(fix_sigma) {
           nll_comp(sur) -= dnorm_(log(I_hist(tt,sur)), log(Ipred(tt,sur)), I_sd(tt,sur), true);
+          
+          SIMULATE {
+            I_hist(tt,sur) = exp(rnorm(log(Ipred(tt,sur)), I_sd(tt,sur)));
+          }
+          
         } else {
           nll_comp(sur) -= dnorm(log(I_hist(tt,sur)), log(Ipred(tt,sur)), sigma, true);
+          
+          SIMULATE {
+            I_hist(tt,sur) = exp(rnorm(log(Ipred(tt,sur)), sigma));
+          }
         }
       }
     }
@@ -155,6 +177,10 @@ Type cDD(objective_function<Type> *obj) {
   for(int tt=0;tt<ny;tt++) {
     if(LWT(nsurvey) > 0 && !R_IsNA(asDouble(MW_hist(tt)))) {
       nll_comp(nsurvey) -= dnorm(log(MW_hist(tt)), log(MWpred(tt)), sigma_W, true);
+      
+      SIMULATE {
+        MW_hist(tt) = exp(rnorm(log(MWpred(tt)), sigma_W));
+      }
     }
   }
   nll_comp(nsurvey) *= LWT(nsurvey);
@@ -207,6 +233,12 @@ Type cDD(objective_function<Type> *obj) {
   REPORT(nll_comp);
   REPORT(penalty);
   REPORT(prior);
+  
+  SIMULATE {
+    REPORT(C_hist);
+    REPORT(I_hist);
+    REPORT(MW_hist);
+  }
 
   return nll;
 }

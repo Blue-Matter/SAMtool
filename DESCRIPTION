@@ -30,6 +30,7 @@ Suggests:
     abind,
     caret,
     covr,
+    extraDistr,
     ggplot2,
     Gmisc,
     knitr,

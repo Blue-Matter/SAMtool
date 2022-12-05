@@ -64,9 +64,9 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(age_error); // Ageing error matrix
 
   DATA_STRING(SR_type);   // String indicating whether Beverton-Holt or Ricker stock-recruit is used
-  DATA_MATRIX(LWT_fleet); // LIkelihood weights for catch, C_eq, CAA, CAL, MS
+  DATA_MATRIX(LWT_fleet); // Likelihood weights for catch, C_eq, CAA, CAL, MS
   DATA_MATRIX(LWT_index); // Likelihood weights for the indices data
-  DATA_STRING(comp_like); // Whether to use "multinomial" or "lognormal" distribution for age/lengthc comps
+  DATA_STRING(comp_like); // Distribution for age/length comps (multinomial, lognormal, mvlogistic, dirmult1, dirmult2)
 
   DATA_SCALAR(max_F);     // Maximum F in the model
   DATA_SCALAR(rescale);   // R0 rescaler
@@ -194,10 +194,15 @@ Type RCM(objective_function<Type> *obj) {
   matrix<Type> Ipred(n_y, nsurvey);          // Predicted index at year
 
   vector<Type> R(n_y+1);            // Recruitment at year
+  vector<Type> Rec_dev(n_y);
   vector<Type> R_early(n_age-1);
+  vector<Type> Rec_dev_early(n_age-1);
   matrix<Type> VB(n_y+1, nfleet);   // Vulnerable biomass at year
   vector<Type> B(n_y+1);            // Total biomass at year
   vector<Type> E(n_y+1);            // Spawning biomass at year
+  
+  Rec_dev.fill(1);
+  Rec_dev_early.fill(1);
 
   C_eq_pred.setZero();
   CAApred.setZero();
@@ -225,14 +230,26 @@ Type RCM(objective_function<Type> *obj) {
   R_eq /= Brec * EPR_eq;
   
   R(0) = R_eq;
-  if(est_rec_dev(0)) R(0) *= exp(log_rec_dev(0) - 0.5 * tau * tau);
+  if(est_rec_dev(0)) {
+    Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
+    SIMULATE {
+      Rec_dev(0) = exp(rnorm(log_rec_dev(0) - 0.5 * tau * tau, tau));
+    }
+    R(0) *= Rec_dev(0);
+  }
   
   for(int a=0;a<n_age;a++) {
     if(a == 0) {
       N(0,a) = R(0) * NPR_equilibrium(a);
     } else {
       R_early(a-1) = R_eq;
-      if(est_early_rec_dev(a-1)) R_early(a-1) *= exp(log_early_rec_dev(a-1) - 0.5 * tau * tau);
+      if(est_early_rec_dev(a-1)) {
+        Rec_dev_early(a-1) = exp(log_early_rec_dev(a-1) - 0.5 * tau * tau);
+        SIMULATE {
+          Rec_dev_early(a-1) = exp(rnorm(log_early_rec_dev(a-1) - 0.5 * tau * tau, tau));
+        }
+        R_early(a-1) *= Rec_dev_early(a-1);
+      }
       N(0,a) = R_early(a-1) * NPR_equilibrium(a);
     }
     
@@ -298,7 +315,13 @@ Type RCM(objective_function<Type> *obj) {
       R(y+1) = Ricker_SR(E(y+1), h, R0, E0_SR);
     }
     
-    if(y<n_y-1 && est_rec_dev(y+1)) R(y+1) *= exp(log_rec_dev(y+1) - 0.5 * tau * tau);
+    if(y<n_y-1 && est_rec_dev(y+1)) {
+      Rec_dev(y+1) = exp(log_rec_dev(y+1) - 0.5 * tau * tau);
+      SIMULATE {
+        Rec_dev(y+1) = exp(rnorm(log_rec_dev(y+1) - 0.5 * tau * tau, tau));
+      }
+      R(y+1) *= Rec_dev(y+1);
+    }
     N(y+1,0) = R(y+1);
     
     for(int a=0;a<n_age;a++) {
@@ -357,6 +380,9 @@ Type RCM(objective_function<Type> *obj) {
     for(int y=0;y<n_y;y++) {
       if(LWT_index(sur,0) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
         nll_index(y,sur,0) -= LWT_index(sur,0) * dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
+        SIMULATE {
+          I_hist(y,sur) = exp(rnorm(log(Ipred(y,sur)), sigma_I(y,sur)));
+        }
       }
       
       if(LWT_index(sur,1) > 0 && !R_IsNA(asDouble(IAA_n(y,sur))) && IAA_n(y,sur) > 0) {
@@ -388,6 +414,9 @@ Type RCM(objective_function<Type> *obj) {
   for(int ff=0;ff<nfleet;ff++) {
     if(LWT_fleet(ff,1) > 0 && C_eq(ff) > 0) {
       nll_fleet(0,ff,1) -= LWT_fleet(ff,1) * dnorm_(log(C_eq(ff)), log(C_eq_pred(ff)), sigma_Ceq(ff), true);
+      SIMULATE {
+        C_eq(ff) = exp(rnorm(log(C_eq_pred(ff)), sigma_Ceq(ff)));
+      }
     }
     
     for(int y=0;y<n_y;y++) {
@@ -397,6 +426,14 @@ Type RCM(objective_function<Type> *obj) {
         
         if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {
           nll_fleet(y,ff,0) -= LWT_fleet(ff,0) * dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
+          
+          SIMULATE {
+            C_hist(y,ff) = exp(rnorm(log(Cpred(y,ff)), sigma_C(y,ff)));
+          }
+        } else if(!R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {
+          SIMULATE {
+            C_hist(y,ff) = Cpred(y,ff);
+          }
         }
         
         if(LWT_fleet(ff,2) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
@@ -426,8 +463,14 @@ Type RCM(objective_function<Type> *obj) {
         if(LWT_fleet(ff,4) > 0 && !R_IsNA(asDouble(msize(y,ff))) && msize(y,ff) > 0) {
           if(msize_type == "length") {
             nll_fleet(y,ff,4) -= LWT_fleet(ff,4) * dnorm_(msize(y,ff), MLpred(y,ff), CV_msize(ff) * msize(y,ff), true);
+            SIMULATE {
+              msize(y,ff) = rnorm(MLpred(y,ff), CV_msize(ff) * msize(y,ff));
+            }
           } else {
             nll_fleet(y,ff,4) -= LWT_fleet(ff,4) * dnorm_(msize(y,ff), MWpred(y,ff), CV_msize(ff) * msize(y,ff), true);
+            SIMULATE {
+              msize(y,ff) = rnorm(MWpred(y,ff), CV_msize(ff) * msize(y,ff));
+            }
           }
         }
       }
@@ -533,6 +576,11 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(nll);
   REPORT(penalty);
   REPORT(prior);
+  
+  if(comp_like == "dirmult1" || comp_like == "dirmult2") {
+    REPORT(log_compf);
+    REPORT(log_compi);
+  }
 
   if(age_error.trace() != Type(n_age)) {
     REPORT(CAAtrue);
@@ -552,6 +600,13 @@ Type RCM(objective_function<Type> *obj) {
   if(nll_gr) {
     ADREPORT(nll_fleet);
     ADREPORT(nll_index);
+  }
+  
+  SIMULATE {
+    REPORT(C_eq);
+    REPORT(C_hist);
+    REPORT(I_hist);
+    REPORT(msize);
   }
 
   return nll;

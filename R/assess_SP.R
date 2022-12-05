@@ -180,7 +180,7 @@ SP_Fox <- function(x = 1, Data, ...) {
   SP_args$start$n <- 1
   SP_args$fix_n <- TRUE
   
-  do.call2(SP, SP_args)
+  do.call2("SP", SP_args)
 }
 class(SP_Fox) <- "Assess"
 

@@ -581,8 +581,8 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
     report$nll_index[, 1:data$nsurvey, 2] <- IAAmv$nll
     report$nll_index[, 1:data$nsurvey, 3] <- IALmv$nll
     
-    report$compf <- cbind(CAAmv$tau, CALmv$tau)
-    report$compi <- cbind(IAAmv$tau, IALmv$tau)
+    report$log_compf <- log(cbind(CAAmv$tau, CALmv$tau))
+    report$log_compi <- log(cbind(IAAmv$tau, IALmv$tau))
   }
   return(report)
 }
