@@ -483,9 +483,7 @@ RCM_retro <- function(x, nyr = 5) {
   if(length(x@mean_fit) == 0) stop("Re-run RCM() with argument `mean_fit = TRUE`", .call = FALSE)
   
   data <- x@mean_fit$obj$env$data
-  params <- x@mean_fit$obj$env$parameters
   n_y <- data$n_y
-  map <- x@mean_fit$obj$env$map
   
   if(data$nfleet > 1) {
     retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, data$nfleet + 4))
@@ -496,7 +494,8 @@ RCM_retro <- function(x, nyr = 5) {
   }
   dimnames(retro_ts) <- list(Peel = 0:nyr, Year = (x@OM@CurrentYr - n_y):x@OM@CurrentYr + 1, Var = TS_var)
   
-  new_args <- lapply(n_y - 0:nyr, RCM_retro_subset, data = data, params = params, map = map)
+  new_args <- lapply(n_y - 0:nyr, RCM_retro_subset, data = data, 
+                     params = x@mean_fit$obj$env$parameters, map = x@mean_fit$obj$env$map)
   lapply_fn <- function(i, new_args, x) {
     obj2 <- MakeADFun(data = new_args[[i+1]]$data, parameters = new_args[[i+1]]$params, map = new_args[[i+1]]$map,
                       random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
@@ -510,10 +509,9 @@ RCM_retro <- function(x, nyr = 5) {
     }
     mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), do_sd = FALSE)
     opt2 <- mod[[1]]
-    SD <- mod[[2]]
     
     if(!is.character(opt2)) {
-      report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2, dynamic_SSB0 = FALSE)
+      report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2)
       
       FMort <- rbind(report$F, matrix(NA, i + 1, ncol(report$F)))
       if(data$nfleet > 1) FMort <- cbind(FMort, apply(report$F_at_age, 1, max, na.rm = TRUE) %>% c(rep(NA, i+1)))

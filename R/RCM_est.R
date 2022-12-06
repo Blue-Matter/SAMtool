@@ -485,9 +485,7 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
     new_data <- obj$env$data
     new_data$C_hist[] <- 1e-8
     
-    new_params <- lapply(obj$env$parameters, function(x) if(!is.null(attr(x, "map"))) attr(x, "shape") else x)
-    
-    obj2 <- MakeADFun(data = new_data, parameters = new_params, 
+    obj2 <- MakeADFun(data = new_data, parameters = clean_tmb_parameters(obj), 
                       map = obj$env$map, random = obj$env$random,
                       DLL = "SAMtool", silent = TRUE)
     out <- obj2$report(par)$E

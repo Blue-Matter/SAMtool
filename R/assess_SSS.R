@@ -174,7 +174,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
 
   Yearplusone <- c(Year, max(Year) + 1)
   
-  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj) %>% 
     structure(names = Yearplusone)
   
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)

@@ -49,13 +49,12 @@ setMethod("posterior", signature(x = "RCModel"),
             }
             
             if(priors_only) {
+              newdata <- structure(obj$env$data, check.passed = NULL)
+              newdata$LWT_fleet[] <- 0
+              newdata$LWT_index[] <- 0
               
-              data <- structure(obj$env$data, check.passed = NULL)
-              params <- lapply(obj$env$parameters, function(x) if(!is.null(attr(x, "map"))) attr(x, "shape") else x)
-              
-              data$LWT_fleet[] <- 0
-              data$LWT_index[] <- 0
-              obj_new <- MakeADFun(data = data, parameters = params, map = obj$env$map, 
+              obj_new <- MakeADFun(data = newdata, 
+                                   parameters = clean_tmb_parameters(obj), map = obj$env$map, 
                                    random = obj$env$random, DLL = obj$env$DLL, silent = obj$env$silent)
               
               obj_new$env$last.par <- obj$env$last.par

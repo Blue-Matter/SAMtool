@@ -622,7 +622,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   R <- c(rev(report$R_early), report$R)
   
   Dev <- structure(c(rev(report$log_early_rec_dev), report$log_rec_dev), names = YearDev)
-  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+  report$dynamic_SSB0 <- SCA_dynamic_SSB0(obj) %>% 
     structure(names = Yearplusone)
   
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
@@ -877,12 +877,13 @@ yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Are
 }
 
 SCA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
+  
+  newdata <- obj$env$data
   if(obj$env$data$catch_eq == "Pope") {
-    dots <- list(...)
-    dots$data$C_hist <- rep(1e-8, dots$data$n_y)
+    newdata$C_hist <- rep(1e-8, newdata$n_y)
     par[names(par) == "F_equilibrium"] <- 0
     
-    obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
+    obj2 <- MakeADFun(data = newdata, parameters = clean_tmb_parameters(obj), map = obj$env$map, 
                       random = obj$env$random, DLL = "SAMtool", silent = TRUE)
     out <- obj2$report(par)$E
   } else {

@@ -337,7 +337,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     NLL_name <- "Catch"
   }
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
-  report$dynamic_SSB0 <- DD_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+  report$dynamic_SSB0 <- DD_dynamic_SSB0(obj) %>% 
     structure(names = Yearplusone)
   Assessment <- new("Assessment", Model = ifelse(state_space, "DD_SS", "DD_TMB"),
                     Name = Data@Name, conv = SD$pdHess,
@@ -437,14 +437,15 @@ yield_fn_DD <- function(x, M, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, log_tr
 DD_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   dots <- list(...)
   
-  if(dots$data$condition == "catch") {
-    dots$data$C_hist <- rep(1e-8, dots$data$ny)
-  } else if(dots$data$condition == "effort") {
+  newdata <- obj$env$data
+  if(newdata$condition == "catch") {
+    newdata$C_hist <- rep(1e-8, newdata$ny)
+  } else if(newdata$condition == "effort") {
     par[names(par) == "log_q_effort"] <- -1e8
   }
   par[names(par) == "F_equilibrium"] <- 0
   
-  obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
+  obj2 <- MakeADFun(data = newdata, parameters = clean_tmb_parameters(obj), map = obj$env$map, 
                     random = obj$env$random, DLL = "SAMtool", silent = TRUE)
   obj2$report(par)$B
 }

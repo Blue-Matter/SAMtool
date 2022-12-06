@@ -263,6 +263,11 @@ sdreport_int <- function(object, select = c("all", "fixed", "random", "report"),
   return(out)
 }
 
+# Remove map attributes
+clean_tmb_parameters <- function(obj) {
+  lapply(obj$env$parameters, function(x) if(!is.null(attr(x, "map"))) attr(x, "shape") else x)
+}
+
 # Call from inside generate_plots() and summary.Assessment
 assign_Assessment_slots <- function(Assessment = NULL) {
   if(is.null(Assessment)) Assessment <- get("Assessment", envir = parent.frame(), inherits = FALSE)

@@ -297,7 +297,7 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
 
   nll_report <- ifelse(is.character(opt), ifelse(integrate, NA, report$nll), opt$objective)
   
-  report$dynamic_SSB0 <- SP_dynamic_SSB0(obj, data = info$data, params = info$params, map = map) %>% 
+  report$dynamic_SSB0 <- SP_dynamic_SSB0(obj) %>% 
     structure(names = Yearplusone)
   Assessment <- new("Assessment", Model = ifelse(state_space, "SP_SS", "SP"), 
                     Name = Data@Name, conv = SD$pdHess,
@@ -395,10 +395,13 @@ Euler_Lotka_fn <- function(log_r, M, h, weight, mat, maxage, SR_type) {
 
 SP_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   dots <- list(...)
-  dots$data$C_hist <- rep(1e-8, dots$data$ny)
-  dots$params$log_dep <- log(1)
+  newdata <- obj$env$data
+  newdata$C_hist <- rep(1e-8, newdata$ny)
   
-  obj2 <- MakeADFun(data = dots$data, parameters = dots$params, map = dots$map, 
+  newparams <- clean_tmb_parameters(obj)
+  newparams$log_dep <- log(1)
+  
+  obj2 <- MakeADFun(data = newdata, parameters = newparams, map = obj$env$map, 
                     random = obj$env$random, DLL = "SAMtool", silent = TRUE)
   obj2$report(par)$B
 }
