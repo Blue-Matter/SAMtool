@@ -23,6 +23,7 @@ Type SP(objective_function<Type> *obj) {
   DATA_SCALAR(dt);
   DATA_INTEGER(n_itF);
   DATA_VECTOR(r_prior);
+  DATA_INTEGER(sim_process_error);
   //DATA_VECTOR_INDICATOR(keep, I_hist);
 
   PARAMETER(log_FMSY);
@@ -53,11 +54,13 @@ Type SP(objective_function<Type> *obj) {
 
   vector<Type> B(ny+1);
   vector<Type> B_dev(ny);
-  B_dev.fill(1);
   vector<Type> SP(ny);
   vector<Type> Cpred(ny);
   matrix<Type> Ipred(ny,nsurvey);
   vector<Type> F(ny);
+  vector<Type> log_B_dev_sim = log_B_dev;
+  
+  B_dev.fill(1);
 
   Type penalty = 0;
   Type prior = 0;
@@ -68,9 +71,9 @@ Type SP(objective_function<Type> *obj) {
   for(int y=0;y<ny;y++) {
     if(est_B_dev(y)) {
       B_dev(y) = exp(log_B_dev(y) - 0.5 * tau * tau);
-      
-      SIMULATE {
-        B_dev(y) = exp(rnorm(log_B_dev(y) - 0.5 * tau * tau, tau));
+      SIMULATE if(sim_process_error) {
+        log_B_dev_sim(y) = rnorm(log_B_dev(y), tau);
+        B_dev(y) = exp(log_B_dev_sim(y) - 0.5 * tau * tau);
       }
       B(y) *= B_dev(y);
     }
@@ -158,6 +161,7 @@ Type SP(objective_function<Type> *obj) {
   SIMULATE {
     REPORT(C_hist);
     REPORT(I_hist);
+    REPORT(log_B_dev_sim);
   }
 
   return nll;

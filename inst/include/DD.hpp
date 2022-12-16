@@ -31,6 +31,7 @@ Type DD(objective_function<Type> *obj) {
   DATA_INTEGER(state_space);
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see make_prior fn)
+  DATA_INTEGER(sim_process_error);
 
   PARAMETER(R0x);
   PARAMETER(transformed_h);
@@ -91,6 +92,8 @@ Type DD(objective_function<Type> *obj) {
   vector<Type> MWpred(ny);
   //vector<Type> Sp(ny);
   vector<Type> F(ny);
+  
+  vector<Type> log_rec_dev_sim = log_rec_dev;
 
   //--INITIALIZE
   Type Seq = S0 * exp(-F_equilibrium);
@@ -108,8 +111,9 @@ Type DD(objective_function<Type> *obj) {
   for(int tt=0;tt<k;tt++) R(tt) = Req;
   if(state_space) {
     Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
-    SIMULATE { 
-      Rec_dev(0) = exp(rnorm(log_rec_dev(0) - 0.5 * tau * tau, tau));
+    SIMULATE if(sim_process_error) { 
+      log_rec_dev_sim(0) = rnorm(log_rec_dev(0), tau);
+      Rec_dev(0) = exp(log_rec_dev_sim(0) - 0.5 * tau * tau);
     }
     R(0) *= Rec_dev(0);
   } else {
@@ -146,8 +150,9 @@ Type DD(objective_function<Type> *obj) {
     }
     if(state_space && tt<ny-1) {
       Rec_dev(tt+1) = exp(log_rec_dev(tt+1) - 0.5 * tau * tau);
-      SIMULATE {
-        Rec_dev(tt+1) = exp(rnorm(log_rec_dev(tt+1) - 0.5 * tau * tau, tau));
+      SIMULATE if(sim_process_error) {
+        log_rec_dev_sim(tt+1) = rnorm(log_rec_dev(tt+1), tau);
+        Rec_dev(tt+1) = exp(log_rec_dev_sim(tt+1) - 0.5 * tau * tau);
       }
       R(tt+1) *= Rec_dev(tt+1);
     }
@@ -249,6 +254,7 @@ Type DD(objective_function<Type> *obj) {
     REPORT(C_hist);
     REPORT(I_hist);
     REPORT(MW_hist);
+    REPORT(log_rec_dev_sim);
   }
 
   return nll;

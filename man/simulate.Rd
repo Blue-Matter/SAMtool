@@ -10,9 +10,25 @@
 \usage{
 simulate(object, ...)
 
-\S4method{simulate}{Assessment}(object, nsim = 1, seed = NULL, refit = FALSE, cores = 1, ...)
+\S4method{simulate}{Assessment}(
+  object,
+  nsim = 1,
+  seed = NULL,
+  process_error = FALSE,
+  refit = FALSE,
+  cores = 1,
+  ...
+)
 
-\S4method{simulate}{RCModel}(object, nsim = 1, seed = 12, refit = FALSE, cores = 1, ...)
+\S4method{simulate}{RCModel}(
+  object,
+  nsim = 1,
+  seed = NULL,
+  process_error = FALSE,
+  refit = FALSE,
+  cores = 1,
+  ...
+)
 }
 \arguments{
 \item{object}{An object of class \linkS4class{Assessment} or \linkS4class{RCModel} containing the fitted model.}
@@ -23,12 +39,15 @@ simulate(object, ...)
 
 \item{seed}{Used for the random number generator}
 
+\item{process_error}{Logical, indicates if process error is re-sampled in the simulation.}
+
 \item{refit}{Logical, whether to re-fit the model for each simulated dataset.}
 
 \item{cores}{The number of CPUs for parallel processing for model re-fitting if \code{refit = TRUE}.}
 }
 \value{
-A list of length `nsim` containing simulated data. If refitting the model,
+A \link{sim-class} object returning the original data, simulated data, original parameters, parameters estimated
+from simulated data, and process error used to simulate data.
 then a nested list of model output (`opt`, `SD`, and `report`).
 }
 \description{

@@ -217,7 +217,8 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
                rescale = rescale, I_hist = I_hist, I_units = I_units, I_sd = I_sd, MW_hist = MW_hist,
                SR_type = SR, n_itF = n_itF, LWT = c(LWT$Index, LWT$MW), nsurvey = nsurvey,
                fix_sigma = as.integer(fix_sigma), state_space = as.integer(state_space),
-               use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
+               use_prior = prior$use_prior, prior_dist = prior$pr_matrix,
+               sim_process_error = 0L)
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k, fit_mod = fit_mod)
 
   params <- list()
@@ -394,7 +395,7 @@ cDD_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   newdata$C_hist <- rep(1e-8, newdata$ny)
   par[names(par) == "F_equilibrium"] <- 0
   
-  obj2 <- MakeADFun(data = newdata, parameters = clean_tmb_params(obj$env$parameters), 
+  obj2 <- MakeADFun(data = newdata, parameters = clean_tmb_parameters(obj), 
                     map = obj$env$map, random = obj$env$random, 
                     DLL = "SAMtool", silent = TRUE)
   obj2$report(par)$B

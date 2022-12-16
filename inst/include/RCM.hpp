@@ -87,6 +87,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_IVECTOR(est_early_rec_dev); // Indicates years in which log_early_rec_dev are estimated. Then, lognormal bias correction estimates are added..
   DATA_IVECTOR(est_rec_dev); // Indicates years in which log_rec_dev are estimated.
   
+  DATA_INTEGER(sim_process_error); 
+  
 
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
@@ -201,9 +203,9 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> B(n_y+1);            // Total biomass at year
   vector<Type> E(n_y+1);            // Spawning biomass at year
   
-  Rec_dev.fill(1);
-  Rec_dev_early.fill(1);
-
+  vector<Type> log_rec_dev_sim = log_rec_dev;
+  vector<Type> log_early_rec_dev_sim = log_early_rec_dev;
+  
   C_eq_pred.setZero();
   CAApred.setZero();
   CALpred.setZero();
@@ -216,7 +218,13 @@ Type RCM(objective_function<Type> *obj) {
   VB.setZero();
   B.setZero();
   E.setZero();
-
+  
+  Rec_dev.fill(1);
+  Rec_dev_early.fill(1);
+  
+  log_rec_dev_sim.setZero();
+  log_early_rec_dev_sim.setZero();
+  
   // Equilibrium quantities (leading into first year of model)
   vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup);
   Type EPR_eq = sum_EPR(NPR_equilibrium, wt, mat, n_age, 0);
@@ -232,8 +240,9 @@ Type RCM(objective_function<Type> *obj) {
   R(0) = R_eq;
   if(est_rec_dev(0)) {
     Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
-    SIMULATE {
-      Rec_dev(0) = exp(rnorm(log_rec_dev(0) - 0.5 * tau * tau, tau));
+    SIMULATE if(sim_process_error) {
+      log_rec_dev_sim(0) = rnorm(log_rec_dev(0), tau);
+      Rec_dev(0) = exp(log_rec_dev_sim(0) - 0.5 * tau * tau);
     }
     R(0) *= Rec_dev(0);
   }
@@ -245,8 +254,9 @@ Type RCM(objective_function<Type> *obj) {
       R_early(a-1) = R_eq;
       if(est_early_rec_dev(a-1)) {
         Rec_dev_early(a-1) = exp(log_early_rec_dev(a-1) - 0.5 * tau * tau);
-        SIMULATE {
-          Rec_dev_early(a-1) = exp(rnorm(log_early_rec_dev(a-1) - 0.5 * tau * tau, tau));
+        SIMULATE if(sim_process_error) {
+          log_early_rec_dev_sim(a-1) = rnorm(log_early_rec_dev(a-1), tau);
+          Rec_dev_early(a-1) = exp(log_early_rec_dev_sim(a-1) - 0.5 * tau * tau);
         }
         R_early(a-1) *= Rec_dev_early(a-1);
       }
@@ -317,8 +327,9 @@ Type RCM(objective_function<Type> *obj) {
     
     if(y<n_y-1 && est_rec_dev(y+1)) {
       Rec_dev(y+1) = exp(log_rec_dev(y+1) - 0.5 * tau * tau);
-      SIMULATE {
-        Rec_dev(y+1) = exp(rnorm(log_rec_dev(y+1) - 0.5 * tau * tau, tau));
+      SIMULATE if(sim_process_error) {
+        log_rec_dev_sim(y+1) = rnorm(log_rec_dev(y+1), tau);
+        Rec_dev(y+1) = exp(log_rec_dev_sim(y+1) - 0.5 * tau * tau);
       }
       R(y+1) *= Rec_dev(y+1);
     }
@@ -607,6 +618,10 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(C_hist);
     REPORT(I_hist);
     REPORT(msize);
+    
+    REPORT(log_rec_dev_sim);
+    REPORT(log_early_rec_dev_sim);
+
   }
 
   return nll;

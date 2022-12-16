@@ -1,5 +1,28 @@
 
 
+#' Class-\code{sim}
+#'
+#' An S4 class that contains output from \link{simulate}.
+#'
+#' @name sim-class
+#' @docType class
+#'
+#' @slot Model Name of the assessment model.
+#' @slot data List of data from the assessment. 
+#' @slot data_sim List of simulated data values. Each value returns an array.
+#' @slot process_sim List of simulated process error.
+#' @slot est Estimates from the original model fit.
+#' @slot est_sim Estimates from the simulated data.
+#' @author Q. Huynh
+#' @export sim
+#' @exportClass sim
+sim <- setClass("sim", slots = c(Model = "character", 
+                                 data = "list",
+                                 data_sim = "list",
+                                 process_sim = "list",
+                                 est = "list",
+                                 est_sim = "list"))
+
 
 #' @name simulate
 #' @title Generate simulated data from TMB models in SAMtool
@@ -8,7 +31,8 @@
 #' @param object An object of class \linkS4class{Assessment} or \linkS4class{RCModel} containing the fitted model.
 #' @author Q. Huynh
 #' @details Process error, e.g., recruitment deviations, will be re-sampled in the simulation.
-#' @return A list of length `nsim` containing simulated data. If refitting the model,
+#' @return A \link{sim-class} object returning the original data, simulated data, original parameters, parameters estimated
+#' from simulated data, and process error used to simulate data.
 #' then a nested list of model output (`opt`, `SD`, and `report`).
 #' @export
 setGeneric("simulate", function(object, ...) standardGeneric("simulate"))
@@ -19,6 +43,7 @@ setGeneric("simulate", function(object, ...) standardGeneric("simulate"))
 #' @aliases simulate,Assessment-method simulate.Assessment
 #' @param nsim Number of simulations
 #' @param seed Used for the random number generator
+#' @param process_error Logical, indicates if process error is re-sampled in the simulation.
 #' @param refit Logical, whether to re-fit the model for each simulated dataset.
 #' @param cores The number of CPUs for parallel processing for model re-fitting if \code{refit = TRUE}.
 #' @param ... Additional arguments
@@ -26,7 +51,8 @@ setGeneric("simulate", function(object, ...) standardGeneric("simulate"))
 #' @importFrom stats runif
 #' @exportMethod simulate
 setMethod("simulate", signature(object = "Assessment"),
-          function(object, nsim = 1, seed = NULL, refit = FALSE, cores = 1, ...) {
+          function(object, nsim = 1, seed = NULL, process_error = FALSE, 
+                   refit = FALSE, cores = 1, ...) {
             
             if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1)
             if (is.null(seed)) {
@@ -50,13 +76,25 @@ setMethod("simulate", signature(object = "Assessment"),
             )
             if(is.null(vars)) stop("Can not simulate data from model.", .call = FALSE)
             
+            process_vars <- switch(object@Model,
+                                   "cDD" = NULL,
+                                   "cDD_SS" = "log_rec_dev_sim",
+                                   "DD_TMB" = NULL,
+                                   "DD_SS" = "log_rec_dev_sim",
+                                   "SP" = NULL,
+                                   "SP_SS" = "log_B_dev_sim",
+                                   "VPA" = NULL,
+                                   "SCA" = c("log_rec_dev_sim", "log_early_rec_dev_sim", "logit_M_sim", "logit_M_walk_sim")
+            )
+            if(process_error && is.null(process_vars)) message("No process error found for this model.")
+            
             # Do simulation
-            val <- lapply(1:nsim, Assess_sim, obj = object@obj, vars = vars) %>% 
+            val <- lapply(1:nsim, Assess_sim, obj = object@obj, vars = vars, 
+                          process_error = process_error, process_vars = process_vars) %>% 
               structure(names = paste0("sim_", 1:nsim))
             
-            # Refit model from simulated model
+            # Refit model from simulated data
             if(refit) {
-              
               if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
               
               fit <- pbapply::pblapply(1:nsim, function(x) {
@@ -69,21 +107,18 @@ setMethod("simulate", signature(object = "Assessment"),
                                   DLL = "SAMtool", silent = TRUE)
                 mod <- optimize_TMB_model(obj2, control = object@info$control, restart = 0)
                 mod$report <- obj2$report(obj2$env$last.par.best)
+                mod$obj <- obj2
                 return(mod)
               }, cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>%
                 structure(names = paste0("sim_", 1:nsim))
               
-              attr(fit, "seed") <- RNGstate
-              return(fit)
-              
             } else {
-              
-              attr(val, "seed") <- RNGstate
-              return(val)
-              
+              fit <- NULL
             }
             
-            return(invisible())
+            output <- create_sim_object(object, fit, val, vars, process_vars)
+            attr(output, "seed") <- RNGstate
+            return(output)
           })
 
 
@@ -91,7 +126,7 @@ setMethod("simulate", signature(object = "Assessment"),
 #' @aliases simulate,RCModel-method simulate.RCModel
 #' @exportMethod simulate
 setMethod("simulate", signature(object = "RCModel"),
-          function(object, nsim = 1, seed = 12, refit = FALSE, cores = 1, ...) {
+          function(object, nsim = 1, seed = NULL, process_error = FALSE, refit = FALSE, cores = 1, ...) {
             
             if(!length(object@mean_fit)) stop("No TMB object was found. Re-run RCM with mean_fit = TRUE")
             
@@ -106,7 +141,12 @@ setMethod("simulate", signature(object = "RCModel"),
             }
             
             # Do simulation
-            val <- lapply(1:nsim, RCM_sim, obj = object@mean_fit$obj) %>% 
+            tmbvars <- c("C_eq", "C_hist", "I_hist", "msize")
+            process_vars <- c("log_rec_dev", "log_rec_dev_sim")
+            comp_vars <- c("CAA", "CAL", "IAA", "IAL")
+            Rvars <- paste0(comp_vars, "_hist")
+            
+            val <- lapply(1:nsim, RCM_sim, obj = object@mean_fit$obj, process_error = process_error) %>% 
               structure(names = paste0("sim_", 1:nsim))
             
             # Refit model from simulated model
@@ -115,33 +155,30 @@ setMethod("simulate", signature(object = "RCModel"),
               if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
               
               fit <- pbapply::pblapply(1:nsim, function(x) {
-                vars <- names(val)[[1]]
-                
-                newdata <- object@obj$env$data
-                newdata[vars] <- val[[x]]
-                newparams <- as.list(object@SD, what = "Estimate")
+                newdata <- object@mean_fit$obj$env$data
+                newdata[c(tmbvars, Rvars)] <- val[[x]][c(tmbvars, Rvars)]
+                newparams <- as.list(object@mean_fit$SD, what = "Estimate")
                 
                 obj2 <- MakeADFun(data = newdata, parameters = newparams, 
-                                  random = object@obj$env$random, map = object@obj$env$map,
+                                  random = object@mean_fit$obj$env$random, map = object@mean_fit$obj$env$map,
                                   DLL = "SAMtool", silent = TRUE)
+                obj2$par[] <- object@mean_fit$obj$par
                 mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), restart = 0)
                 mod$report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2)
+                mod$obj <- obj2
                 return(mod)
               }, cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>% 
                 structure(names = paste0("sim_", 1:nsim))
               
-              attr(fit, "seed") <- RNGstate
-              return(fit)
-              
             } else {
-              
-              attr(val, "seed") <- RNGstate
-              return(val)
-              
+              fit <- NULL
             }
             
-            
-            return(invisible())
+            output <- create_sim_object(object, fit, val, 
+                                        vars = c(tmbvars, Rvars), 
+                                        process_vars = process_vars)
+            attr(output, "seed") <- RNGstate
+            return(output)
           })
 
 
@@ -199,15 +236,29 @@ simulate_comp <- function(x,
 }
 
 
-RCM_sim <- function(..., obj) {
+RCM_sim <- function(..., obj, process_error = FALSE) {
   
   tmbvars <- c("C_eq", "C_hist", "I_hist", "msize")
+  process_vars <- c("log_rec_dev", "log_rec_dev_sim")
   comp_vars <- c("CAA", "CAL", "IAA", "IAL")
   Rvars <- paste0(comp_vars, "_hist")
   
-  report <- obj$simulate(obj$env$last.par.best) %>% RCM_posthoc_adjust(obj)
+  newdata <- obj$env$data %>% structure(check.passed = NULL)
   
-  res <- report[tmbvars]
+  if(process_error && any(names(newdata) == "sim_process_error")) {
+    
+    newdata$sim_process_error <- 1L
+    newparams <- clean_tmb_parameters(obj)
+    
+    obj2 <- MakeADFun(data = newdata, parameters = newparams,
+                      random = obj$env$random, map = obj$env$map,
+                      DLL = "SAMtool", silent = obj$env$silent)
+    report <- obj2$simulate(obj$env$last.par.best) %>% RCM_posthoc_adjust(obj)
+  } else {
+    report <- obj$simulate(obj$env$last.par.best) %>% RCM_posthoc_adjust(obj)
+  }
+  
+  res <- report[c(tmbvars, process_vars)]
   res[Rvars] <- obj$env$data[Rvars]
   
   comp_like <- obj$env$data$comp_like
@@ -285,16 +336,33 @@ RCM_sim <- function(..., obj) {
   return(res)
 }
 
-Assess_sim <- function(..., obj, vars) {
-  report <- obj$simulate(obj$env$last.par.best)
-  res <- report[vars]
-  comp_dist <- match.arg(obj$env$data$comp_dist, choices = c("multinomial", "lognormal"))
+Assess_sim <- function(..., obj, vars, process_error = FALSE, process_vars = NULL) {
   
-  if(any(vars == "CAA_hist") && is.null(res$CAA_hist)) {
-    res$CAA_hist <- obj$env$data$CAA_hist
+  newdata <- obj$env$data %>% structure(check.passed = NULL)
+  
+  if(process_error && any(names(newdata) == "sim_process_error")) {
     
-    for(y in 1:obj$env$data$n_y) {
-      if(obj$env$data$CAA_n[y] > 0) {
+    newdata$sim_process_error <- 1L
+    newparams <- clean_tmb_parameters(obj)
+    
+    obj2 <- MakeADFun(data = newdata, parameters = newparams,
+                      random = obj$env$random, map = obj$env$map,
+                      DLL = "SAMtool", silent = obj$env$silent)
+    report <- obj2$simulate(obj$env$last.par.best)
+    
+  } else {
+    report <- obj$simulate(obj$env$last.par.best) 
+  }
+  res <- report[c(vars, process_vars)]
+  
+  if(!is.null(newdata$comp_dist)) {
+    comp_dist <- match.arg(newdata$comp_dist, choices = c("multinomial", "lognormal"))
+  }
+  if(any(vars == "CAA_hist") && is.null(res$CAA_hist)) {
+    res$CAA_hist <- newdata$CAA_hist
+    
+    for(y in 1:newdata$n_y) {
+      if(newdata$CAA_n[y] > 0) {
         
         if(comp_dist == "lognormal") {
           obs <- res$CAA_hist[y, ]
@@ -304,17 +372,17 @@ Assess_sim <- function(..., obj, vars) {
         }
         res$CAA_hist[y, ] <- simulate_comp(x = report$CAApred[y, ],
                                            dist = comp_dist,
-                                           N = obj$env$data$CAA_n[y],
+                                           N = newdata$CAA_n[y],
                                            tau = dispersion_par)
       }
     }
   }
   
   if(any(vars == "CAL_hist") && is.null(res$CAL_hist)) {
-    res$CAL_hist <- obj$env$data$CAL_hist
+    res$CAL_hist <- newdata$CAL_hist
     
-    for(y in 1:obj$env$data$n_y) {
-      if(obj$env$data$CAL_n[y] > 0) {
+    for(y in 1:newdata$n_y) {
+      if(newdata$CAL_n[y] > 0) {
         
         if(comp_dist == "lognormal") {
           obs <- res$CAL_hist[y, ]
@@ -324,7 +392,7 @@ Assess_sim <- function(..., obj, vars) {
         }
         res$CAL_hist[y, ] <- simulate_comp(x = report$CALpred[y, ],
                                            dist = comp_dist,
-                                           N = obj$env$data$CAL_n[y],
+                                           N = newdata$CAL_n[y],
                                            tau = dispersion_par)
       }
     }
@@ -333,3 +401,56 @@ Assess_sim <- function(..., obj, vars) {
   return(res)
 }
 
+create_sim_object <- function(object, fit = NULL, val, vars, process_vars) {
+  
+  data_sim <- lapply(vars, function(v) {
+    sapply(val, getElement, v, simplify = "array")
+  }) %>% structure(names = vars)
+  
+  if(inherits(object, "Assessment")) {
+    obj <- object@obj
+  } else if(inherits(object, "RCModel")) {
+    obj <- object@mean_fit$obj
+  }
+  sim_out <- new("sim",
+                 data = obj$env$data[vars],
+                 data_sim = data_sim)
+  
+  if(!is.null(process_vars)) {
+    sim_out@process_sim <- lapply(process_vars, function(v) {
+      sapply(val, getElement, v, simplify = "array")
+    }) %>% structure(names = process_vars)
+  }
+  
+  if(!is.null(fit)) {
+    
+    if(inherits(object, "Assessment")) {
+      model <- object@Model
+      TMB_report <- object@TMB_report
+    } else if(inherits(object, "RCModel")) {
+      model <- "RCM"
+      TMB_report <- object@mean_fit$report
+    }
+    
+    est_vars <- switch(model,
+                       "cDD" = c("R0", "h", "B", "F", "R"),
+                       "cDD_SS" = c("R0", "h", "B", "F", "R"),
+                       "DD_TMB" = c("R0", "h", "B", "F", "R"),
+                       "DD_SS" = c("R0", "h", "B", "F", "R"),
+                       "SP" = c("FMSY", "MSY", "r", "K", "B", "F"),
+                       "SP_SS" = c("FMSY", "MSY", "r", "K", "B", "F"),
+                       "VPA" = c("B", "VB", "F"),
+                       "SCA" = c("R0", "h", "B", "E", "F", "R", "VB"),
+                       "RCM" = NULL
+                       )
+    
+    sim_out@est <- TMB_report[est_vars]
+    
+    sim_out@est_sim <- lapply(est_vars, function(v) {
+      sapply(fit, function(x) x$report[[v]], simplify = "array")
+    }) %>% structure(names = est_vars)
+    
+  }
+  
+  return(sim_out)
+}

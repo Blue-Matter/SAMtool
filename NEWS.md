@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.5.0
+- Add `simulate` method for RCM and assessment models.
+
 ## SAMtool 1.4.2
 - Add progress bar to `RCM` with `pbapply`.
 

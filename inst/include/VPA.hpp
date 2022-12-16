@@ -182,6 +182,10 @@ Type VPA(objective_function<Type> *obj) {
   REPORT(penalty);
   REPORT(prior);
   REPORT(nll);
+  
+  SIMULATE {
+    REPORT(I_hist);
+  }
 
   return nll;
 }

@@ -255,7 +255,8 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
                wk = wk, C_hist = C_hist, dep = dep, rescale = rescale, I_hist = I_hist, I_units = I_units, I_sd = I_sd,
                E_hist = E_hist, MW_hist = MW_hist, SR_type = SR, condition = condition, LWT = c(LWT$Index, LWT$MW),
                nsurvey = nsurvey, fix_sigma = as.integer(fix_sigma), n_itF = n_itF, state_space = as.integer(state_space),
-               use_prior = prior$use_prior, prior_dist = prior$pr_matrix)
+               use_prior = prior$use_prior, prior_dist = prior$pr_matrix, 
+               sim_process_error = 0L)
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k)
 
   params <- list()

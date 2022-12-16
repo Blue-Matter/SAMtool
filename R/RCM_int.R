@@ -479,6 +479,7 @@ process_AddIndV <- function(sur, Misc, s_sel, n_age, nfleet, nyears) { # Return 
   return(out)
 }
 
+#' @importFrom pbapply pbsapply
 RCM_retro <- function(x, nyr = 5) {
   if(length(x@mean_fit) == 0) stop("Re-run RCM() with argument `mean_fit = TRUE`", .call = FALSE)
   
