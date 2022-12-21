@@ -301,6 +301,7 @@ expand_comp_matrix <- function(Data, comp_type = c("CAA", "CAL")) {
 }
 
 sample_steepness3 <- function(n, mu, cv, SR_type = c("BH", "Ricker")) {
+  SR_type <- match.arg(SR_type)
   if(n == 1) {
     return(mu)
   } else if(SR_type == "BH") {
@@ -385,6 +386,34 @@ dev_AC <- function(n, mu = 1, stdev, AC, seed, chain_start) {
   return(out)
 }
 
+
+# Calculates the recruitment from the SSB or SSB/R
+MesnilRochet_SR <- function(x, Shinge, Rmax, gamma, isSB = TRUE) {
+  c1 <- Shinge^2 + 0.25 * gamma^2
+  K <- sqrt(c1)
+  beta <- Rmax/(Shinge + K)
+  
+  if(isSB) { # x is the SSB
+    c2 <- (x - Shinge)^2 + 0.25 * gamma^2
+    c3 <- x + K - sqrt(c2)
+    Rpred <- beta * c3
+  } else { # x is SSBpR
+    num <- 2 * K/x/beta - 2 * (Shinge + K)
+    den <- 1/x/x/beta/beta - 2/x/beta
+    Se <- num/den
+    Rpred <- ifelse(1/x > 2 * beta, 0, Se/x)
+  }
+  return(Rpred)
+}
+
+# Calculates SPRcrash from unfished SSB/R
+MesnilRochet_SPRcrash <- function(SSBpR0, Shinge, Rmax, gamma) {
+  c1 <- Shinge^2 + 0.25 * gamma^2
+  K <- sqrt(c1)
+  beta <- Rmax/(Shinge + K)
+  SSBpR_crash <- 0.5/beta
+  SSBpR_crash/SSBpR0
+}
 
 make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # log_R0, log_M, h, q
   if(length(prior) == 0 && !is.null(dots$priors)) prior <- dots$priors
@@ -474,6 +503,8 @@ solve_F <- function(N, M, plusgroup = TRUE) {
   FM[is.na(FM) | FM < 0] <- 1e-8
   return(FM)
 }
+
+
 
 message <- function(...) {
   if(requireNamespace("usethis", quietly = TRUE)) {

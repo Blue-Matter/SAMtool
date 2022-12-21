@@ -89,9 +89,9 @@ Type RCM(objective_function<Type> *obj) {
   
   DATA_INTEGER(sim_process_error); 
   
-
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
+  PARAMETER_VECTOR(MR_SRR);             // Mesnil-Rochet parameters: (1) logit_Ehinge_E0, (2) log_delta
   PARAMETER(log_M);                     // Age and time constant M (only if there's a prior, then it will override M_data)
   PARAMETER_MATRIX(vul_par);            // Matrix of vul_par 3 rows and nsel_block columns
   PARAMETER_MATRIX(ivul_par);           // Matrix of index selectivity parameters, 3 rows and nsurvey columns
@@ -109,14 +109,16 @@ Type RCM(objective_function<Type> *obj) {
 
   int nlbin = lbinmid.size();
 
-  Type R0 = exp(R0x)/rescale;
-  Type h;
+  Type R0 = 0;
+  Type h = 0;
   if(SR_type == "BH") {
-    h = 0.8 * invlogit(transformed_h);
-  } else {
-    h = exp(transformed_h);
+    h = 0.8 * invlogit(transformed_h) + 0.2;
+    R0 = exp(R0x)/rescale;
+  } else if(SR_type == "Ricker") {
+    h = exp(transformed_h) + 0.2;
+    R0 = exp(R0x)/rescale;
   }
-  h += 0.2;
+  
   Type Mest = exp(log_M);
   matrix<Type> M(n_y, n_age);
   if(use_prior(2)) {
@@ -164,21 +166,42 @@ Type RCM(objective_function<Type> *obj) {
     if(y <= ageM) EPR0_SR += EPR0(y);
   }
   EPR0_SR /= Type(ageM + 1);
-  Type E0_SR = R0 * EPR0_SR;
-
-  Type CR_SR, Brec;
+  Type E0_SR = 0;
+  
+  Type CR_SR = 0;
+  Type Arec = 0;
+  Type Brec = 0;
+  Type MRRmax = 0;
+  Type MRhinge = 0;
+  Type MRgamma = 0;
   if(SR_type == "BH") {
+    E0_SR = R0 * EPR0_SR;
     CR_SR = 4 *h;
     CR_SR /= 1-h;
     Brec = 5*h - 1;
     Brec /= (1-h);
-  } else {
+    Brec /= E0_SR;
+    Arec = CR_SR/EPR0_SR;
+  } else if(SR_type == "Ricker") {
+    E0_SR = R0 * EPR0_SR;
     CR_SR = pow(5*h, 1.25);
     Brec = 1.25;
     Brec *= log(5*h);
+    Brec /= E0_SR;
+    Arec = CR_SR/EPR0_SR;
+  } else if(SR_type == "Mesnil-Rochet") {
+    MRRmax = exp(R0x)/rescale;
+    MRhinge = invlogit(MR_SRR(0)) * MRRmax * EPR0_SR;
+    MRgamma = exp(MR_SRR(1));
+    
+    R0 = MesnilRochet_SR(EPR0_SR, MRgamma, MRRmax, MRhinge, 0);
+    E0_SR = R0 * EPR0_SR;
+    
+    Type MR_K = pow(MRhinge * MRhinge + 0.25 * MRgamma * MRgamma, 0.5);
+    Type MR_beta = R0/(MRhinge + MR_K);
+    
+    CR_SR = 2 * MR_beta * EPR0_SR;
   }
-  Type Arec = CR_SR/EPR0_SR;
-  Brec /= E0_SR;
   
   ////// During time series year = 1, 2, ..., n_y
   vector<matrix<Type> > PLA(n_y);
@@ -232,10 +255,13 @@ Type RCM(objective_function<Type> *obj) {
 
   if(SR_type == "BH") {
     R_eq = Arec * EPR_eq - 1;
-  } else {
+    R_eq /= Brec * EPR_eq;
+  } else if(SR_type == "Ricker") {
     R_eq = log(Arec * EPR_eq);
+    R_eq /= Brec * EPR_eq;
+  } else {
+    R_eq = MesnilRochet_SR(EPR_eq, MRgamma, MRRmax, MRhinge, 0);
   }
-  R_eq /= Brec * EPR_eq;
   
   R(0) = R_eq;
   if(est_rec_dev(0)) {
@@ -321,8 +347,10 @@ Type RCM(objective_function<Type> *obj) {
     // Calc next year's recruitment, total biomass, and vulnerable biomass
     if(SR_type == "BH") {
       R(y+1) = BH_SR(E(y+1), h, R0, E0_SR);
-    } else {
+    } else if(SR_type == "Ricker") {
       R(y+1) = Ricker_SR(E(y+1), h, R0, E0_SR);
+    } else { // Mesnil-Rochet
+      R(y+1) = MesnilRochet_SR(E(y+1), MRgamma, MRRmax, MRhinge);
     }
     
     if(y<n_y-1 && est_rec_dev(y+1)) {
@@ -530,6 +558,17 @@ Type RCM(objective_function<Type> *obj) {
 
   REPORT(R0x);
   REPORT(transformed_h);
+  
+  if(SR_type == "Mesnil-Rochet") {
+    REPORT(MR_SRR);
+    REPORT(MRRmax);
+    REPORT(MRhinge);
+    REPORT(MRgamma);
+    ADREPORT(MRRmax);
+    ADREPORT(MRhinge);
+    ADREPORT(MRgamma);
+  }
+  
   REPORT(vul_par);
   REPORT(LFS);
   REPORT(L5);
@@ -552,9 +591,11 @@ Type RCM(objective_function<Type> *obj) {
 
   REPORT(NPR_unfished);
   REPORT(EPR0);
-
-  REPORT(Arec);
-  REPORT(Brec);
+  
+  if(SR_type != "Mesnil-Rochet") {
+    REPORT(Arec);
+    REPORT(Brec);
+  }
   REPORT(E0_SR);
   REPORT(EPR0_SR);
   REPORT(CR_SR);
@@ -572,6 +613,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(VB);
   REPORT(B);
   REPORT(E);
+  REPORT(Rec_dev);
 
   REPORT(NPR_equilibrium);
   REPORT(EPR_eq);

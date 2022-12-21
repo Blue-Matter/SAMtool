@@ -396,11 +396,13 @@ rmd_RCM_SPR2 <- function() {
 
 rmd_RCM_SR <- function() {
   c("```{r, fig.cap = \"Stock-recruit relationship and estimated recruitment.\"}",
-    "if(OM@SRrel == 1) {",
+    "if(!is.null(report$Rec_dev)) {",
+    "  expectedR <- report$R/c(report$Rec_dev, 1)",
+    "} else if(OM@SRrel == 1) {",
     "  expectedR <- report$Arec * report$E / (1 + report$Brec * report$E)",
-    "} else {",
+    "} else if(OM@SRrel == 2) {",
     "  expectedR <- report$Arec * report$E * exp(-report$Brec * report$E)",
-    "}",
+    "} else stop(\"Error in plotting recruitment\")",
     "plot_SR(report$E, expectedR, report$R0, report$E0_SR, report$R)",
     "```\n")
 }

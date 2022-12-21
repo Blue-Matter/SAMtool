@@ -51,7 +51,11 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
 RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), comp_like, prior, max_F,
                          StockPars, ObsPars, FleetPars, mean_fit = FALSE, map, dots = list()) {
   
-  SR_type <- ifelse(StockPars$SRrel[x] == 1, "BH", "Ricker")
+  SR_type <- switch(StockPars$SRrel[x],
+                    "1" = "BH",
+                    "2" = "Ricker",
+                    "3" = "Mesnil-Rochet")
+  if(is.null(SR_type)) stop("Can not identify stock-recruit function in OM@SRrel")
   
   nyears <- RCMdata@Misc$nyears
   nfleet <- RCMdata@Misc$nfleet
@@ -200,16 +204,21 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if(!is.null(dots$map_log_rec_dev)) stop("Specify map_log_rec_dev via map$log_rec_dev")
   if(!is.null(dots$map_log_early_rec_dev)) stop("Specify map_log_early_rec_dev via map$log_early_rec_dev")
   
-  SR_type <- ifelse(StockPars$SRrel[x] == 1, "BH", "Ricker")
+  SR_type <- switch(StockPars$SRrel[x],
+                    "1" = "BH",
+                    "2" = "Ricker",
+                    "3" = "Mesnil-Rochet")
+  if(is.null(SR_type)) stop("Can not identify stock-recruit function in OM@SRrel")
   
   nyears <- RCMdata@Misc$nyears
   nfleet <- RCMdata@Misc$nfleet
   n_age <- dim(RCMdata@CAA)[2]
   nsurvey <- ncol(RCMdata@Index)
   
-  if(SR_type == "BH") {
-    transformed_h <- logit((StockPars$hs[x] - 0.2)/0.8)
-  } else transformed_h <- log(StockPars$hs[x] - 0.2)
+  transformed_h <- switch(SR_type,
+                          "BH" = logit((StockPars$hs[x] - 0.2)/0.8),
+                          "Ricker" = log(StockPars$hs[x] - 0.2),
+                          "Mesnil-Rochet" = 0)
   
   LFS <- FleetPars$LFS_y[x, nyears]
   L5 <- FleetPars$L5_y[x, nyears]
@@ -332,10 +341,16 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if(length(start$log_early_rec_dev) != n_age - 1) stop("start$log_early_rec_dev is not a vector of length n_age - 1")
   
   if(is.null(start$log_rec_dev)) start$log_rec_dev <- rep(0, nyears)
-  if(length(start$log_rec_dev) != nyears) stop("log_rec_dev is not a vector of length nyears")
+  if(length(start$log_rec_dev) != nyears) stop("start$log_rec_dev is not a vector of length nyears")
+  
+  # Mesnil Rochet parameters
+  if(is.null(start$MR_SRR)) start$MR_SRR <- c(0.8, 0.001)
+  if(length(start$MR_SRR) != 2) stop("start$MR_SRR needs to be a length 2 vector.")
   
   TMB_params <- list(R0x = ifelse(!is.na(StockPars$R0[x]), log(StockPars$R0[x] * dots$rescale), 0),
-                     transformed_h = transformed_h, log_M = log(mean(StockPars$M_ageArray[x, , nyears])),
+                     transformed_h = transformed_h, 
+                     MR_SRR = c(logit(start$MR_SRR[1]), log(start$MR_SRR[2])), # Shinge/S0, gamma 
+                     log_M = log(mean(StockPars$M_ageArray[x, , nyears])),
                      vul_par = start$vul_par, 
                      ivul_par = start$ivul_par,
                      log_q_effort = rep(log(0.1), nfleet), 
@@ -358,7 +373,15 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if(RCMdata@Misc$condition == "effort" && !sum(RCMdata@Chist, na.rm = TRUE) && !prior$use_prior[1]) {
     map_out$R0x <- factor(NA) # Fix if condition on effort, no catches, and no prior on R0
   }
-  if(!prior$use_prior[2]) map_out$transformed_h <- factor(NA)
+  if(SR_type == "Mesnil-Rochet" || !prior$use_prior[2]) map_out$transformed_h <- factor(NA)
+  
+  if(SR_type == "Mesnil-Rochet") {
+    if(is.null(map$MR_SRR)) map$MR_SRR <- c(1, NA)  # Estimates Ehinge/E0, fixes gamma = 0.001 --> hockey-stick
+    map_out$MR_SRR <- factor(map$MR_SRR)
+  } else {
+    map_out$MR_SRR <- factor(c(NA, NA))
+  }
+  
   if(!prior$use_prior[3]) map_out$log_M <- factor(NA)
   
   map_out$log_tau <- factor(NA)
@@ -522,12 +545,29 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
       h <- report$Arec * report$EPR0/(4 + report$Arec * report$EPR0)
       ifelse(h < 0.2, NA_real_, h)
     })
-  } else {
+    
+    report$CR <- report$Arec * report$EPR0 # Annual compensation ratio recalculated from annual EPR0
+  } else if(data$SR_type == "Ricker") {
     report$E0 <- pmax(log(report$Arec * report$EPR0)/report$Brec, 0)
     report$h_annual <- local({
       h <- 0.2 * (report$Arec * report$EPR0)^0.8
       ifelse(h < 0.2, NA_real_, h)
     })
+    
+    report$CR <- report$Arec * report$EPR0 # Annual compensation ratio recalculated from annual EPR0
+  } else if(data$SR_type == "Mesnil-Rochet") {
+    
+    MR_K <- sqrt(report$MRhinge^2 + 0.25 * report$MRgamma^2)
+    MR_beta <- report$MRRmax/(report$MRhinge + MR_K)
+    
+    report$E0 <- local({
+      num <- 2 * MR_K / report$EPR0 / MR_beta - 2 * (report$MRhinge + MR_K)
+      den <- 1/report$EPR0/report$EPR0/MR_beta/MR_beta - 2/report$EPR0/MR_beta
+      
+      ifelse(1/report$EPR0 > 2 * MR_beta, 0, num/den)
+    })
+    
+    report$CR <- 2 * MR_beta * report$EPR0 # Annual compensation ratio recalculated from annual EPR0
   }
   report$R0_annual <- report$E0/report$EPR0
   report$N0 <- apply(report$NPR_unfished * report$R0_annual, 1, sum)
@@ -535,8 +575,6 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
 
   lmid <- obj$env$data$lbinmid
   nlbin <- length(lmid)
-  
-  report$CR <- report$Arec * report$EPR0 # Annual compensation ratio recalculated from annual EPR0
   
   age_only_model <- data$len_age %>%
     apply(1, function(x) all(x == 1:data$n_age)) %>% 

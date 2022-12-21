@@ -262,6 +262,35 @@ Type Ricker_SR(Type SSB, Type h, Type R0, Type SSB0) {
   return Rpred;
 }
 
+template<class Type>
+Type MesnilRochet_SR(Type x, Type gamma, Type Rmax, Type Shinge, int Sp = 1) {
+  Type c1 = Shinge * Shinge + 0.25 * gamma * gamma;
+  Type K = pow(c1, 0.5);
+  Type beta = Rmax/(Shinge + K);
+  Type Rpred;
+  
+  if (Sp) { // x is the number of spawners
+    
+    Type c2 = (x - Shinge) * (x - Shinge) + 0.25 * gamma * gamma;
+    Type c3 = x + K - pow(c2, 0.5);
+    Rpred = beta * c3;
+    
+  } else { // x is the spawners per recruit
+    
+    Type Se = 2*K/x/beta; // Equilibrium SSB
+    Se -= 2 * (Shinge + K);
+    
+    Type Se_denom = 1/x/x/beta/beta;
+    Se_denom -= 2/x/beta;
+    
+    Se /= Se_denom;
+    
+    Rpred = CppAD::CondExpGt(1/x, 2 * beta, Type(0), Se/x);
+  }
+  
+  return Rpred;
+}
+
 #include "ns/ns_cDD.hpp"
 #include "ns/ns_DD.hpp"
 #include "ns/ns_SCA.hpp"

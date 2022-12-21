@@ -58,7 +58,10 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   RCMdata@Misc$LWT <- make_LWT(LWT, nfleet, nsurvey)
   
   # SR
-  message("\n", ifelse(OM@SRrel == 1, "Beverton-Holt", "Ricker"), " stock-recruitment relationship used.")
+  message("\n", switch(OM@SRrel,
+                       "1" = "Beverton-Holt", 
+                       "2" = "Ricker",
+                       "3" = "Mesnil-Rochet"), " stock-recruitment relationship used.")
   
   # Generate priors
   prior <- make_prior(prior, nsurvey, OM@SRrel, dots)
@@ -221,14 +224,17 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   Perr_y[, maxage + 1:nyears] <- OM_par$Perr
   message("Historical recruitment set in OM@cpars$Perr_y.")
   
+  # Resample future recruitment with autocorrelation
+  OM@cpars$AC <- OM_par$AC
+  OM@AC <- range(OM_par$AC)
   if(any(OM_par$AC != 0)) {
-    OM@cpars$AC <- OM_par$AC
-    OM@AC <- range(OM_par$AC)
     message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
     
     OM@cpars$Perr_y <- RCM_sample_future_dev(obj_data$est_rec_dev, OM_par$procsd, OM_par$AC, 
                                              OM_par$log_rec_dev, Perr_y, maxage, nyears, proyears)
     message("Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).\n")
+  } else {
+    OM@cpars$Perr_y <- Perr_y
   }
   
   ### Assign OM variables that were used in the RCM to the output
@@ -267,6 +273,32 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   if(!is.null(dots$plusgroup) && !dots$plusgroup) OM@cpars$plusgroup <- 0L
   if(!any(RCMdata@I_sd > 0, na.rm = TRUE)) OM@cpars$Iobs <- ObsPars$Iobs
   message("Growth, maturity, natural mortality, and steepness values from RCM are set in OM@cpars.\n")
+  
+  
+  ### Mesnil-Rochet stock recruit relationship
+  if(OM@SRrel == 3 && !is.null(OM_par$MRRmax)) {
+    
+    SRRfun <- function(SB, SRRpars) {
+      MesnilRochet_SR(x = SB, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma)
+    }
+    
+    SRRpars <- data.frame(MRRmax = OM_par$MRRmax,
+                          MRhinge = OM_par$MRhinge,
+                          MRgamma = OM_par$MRgamma)
+    
+    relRfun <- function(SSBpR, SRRpars) {
+      MesnilRochet_SR(x = SSBpR, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma,
+                      isSB = FALSE)
+    }
+    
+    SPRcrashfun <- function(SSBpR0, SRRpars) {
+      MesnilRochet_SPRcrash(SSBpR0, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma)
+    }
+    
+    OM@cpars$SRR <- list(SRRfun = SRRfun, SRRpars = SRRpars,
+                         relRfun = relRfun, SPRcrashfun = SPRcrashfun)
+    message("Mesnil-Rochet stock recruitment relationship specified in OM@cpars$SRR.\n")
+  }
   
   ### Output S4 object
   RCMdata@Misc$prior <- prior
@@ -424,6 +456,13 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length
   out$NAA <- sapply(res, getElement, "N", simplify = "array") %>% aperm(c(3, 1, 2))
   out$CAA <- sapply(res, getElement, "CAApred", simplify = "array") %>% aperm(c(4, 1:3))
   out$CAL <- sapply(res, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))
+  
+  # Mesnil Rochet parameters
+  if(!is.null(res[[1]]$MR_SRR)) {
+    out$MRRmax <- vapply(res, getElement, numeric(1), "MRRmax") 
+    out$MRhinge <- vapply(res, getElement, numeric(1), "MRhinge") 
+    out$MRgamma <- vapply(res, getElement, numeric(1), "MRgamma") 
+  }
   
   if(length(res) == 1) {
     lapply(out, function(x) {
@@ -705,7 +744,7 @@ profile_likelihood_RCM <- function(x, ...) {
       new_args$params$R0x <- log(profile_grid$R0[i]  * new_args$data$rescale)
       if(new_args$data$SR_type == "BH") {
         new_args$params$transformed_h <- logit((profile_grid$h[i] - 0.2)/0.8)
-      } else {
+      } else if(new_args$data$SR_type == "Ricker") {
         new_args$params$transformed_h <- log(profile_grid$h[i] - 0.2)
       }
       
