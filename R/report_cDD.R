@@ -248,7 +248,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
+    mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 

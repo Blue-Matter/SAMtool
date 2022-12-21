@@ -138,7 +138,7 @@ retrospective_VPA <- function(Assessment, nyr) {
     info$data$CAA_hist <- info$data$CAA_hist[1:n_y_ret, ]
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map, DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
+    mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 

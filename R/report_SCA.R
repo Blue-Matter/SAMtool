@@ -298,7 +298,7 @@ retrospective_SCA <- function(Assessment, nyr) { # Incorporates SCA, SCA2, and S
     
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
+    mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
     

@@ -180,9 +180,10 @@ retrospective_SP <- function(Assessment, nyr, state_space = FALSE) {
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = map, random = obj$env$random,
                       DLL = "SAMtool", silent = TRUE)
-    mod <- optimize_TMB_model(obj2, info$control, do_sd = FALSE)
+    mod <- optimize_TMB_model(obj2, info$control)
     opt2 <- mod[[1]]
     SD <- mod[[2]]
+    browser()
 
     if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
