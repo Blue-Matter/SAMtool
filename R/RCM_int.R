@@ -4,7 +4,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                     comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                     drop_highF = FALSE,
-                    control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
+                    control = list(iter.max = 2e+05, eval.max = 4e+05), 
+                    start = list(), map = list(), ...) {
   
   dots <- list(...) # can be vul_par, ivul_par, log_rec_dev, log_early_rec_dev, map_vul_par, map_ivul_par, map_log_rec_dev, map_log_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
   if(!is.null(dots$maxF)) max_F <- dots$maxF
@@ -74,7 +75,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                                max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                               FleetPars = FleetPars, mean_fit = TRUE, dots = dots)
+                               FleetPars = FleetPars, mean_fit = TRUE, 
+                               start = start, map = map, dots = dots)
     
     if(mean_fit_output$report$conv) {
       message("Model converged. Sampling covariance matrix for nsim = ", nsim, " replicates...")
@@ -111,7 +113,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                                max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                               FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
+                               FleetPars = FleetPars, mean_fit = TRUE, control = control,
+                               start = start, map = map, dots = dots)
     
     if(mean_fit_output$report$conv) {
       message("Model converged.")
@@ -131,7 +134,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     mod <- pblapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                     LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                     max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                    FleetPars = FleetPars, control = control, dots = dots,
+                    FleetPars = FleetPars, control = control, start = start, map = map, dots = dots,
                     cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
     
     if(mean_fit) { ### Fit to life history means if mean_fit = TRUE
@@ -139,7 +142,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                  LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                                  max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                                 FleetPars = FleetPars, mean_fit = TRUE, control = control, dots = dots)
+                                 FleetPars = FleetPars, mean_fit = TRUE, control = control, 
+                                 start = start, map = map, dots = dots)
       
       if(!mean_fit_output$report$conv) warning("Mean fit model did not appear to converge.")
     } else {

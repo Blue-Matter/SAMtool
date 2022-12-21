@@ -2,7 +2,8 @@
 RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
                     comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                     max_F = 3, integrate = FALSE, StockPars, ObsPars, FleetPars, mean_fit = FALSE,
-                    control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), dots = list()) {
+                    control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), 
+                    start = list(), map = list(), dots = list()) {
   
   comp_like <- match.arg(comp_like)
   
@@ -14,7 +15,8 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
     }
   }
   
-  TMB_params <- RCM_est_params(x, RCMdata, selectivity, s_selectivity, prior, LWT, comp_like, StockPars, FleetPars, dots)
+  TMB_params <- RCM_est_params(x, RCMdata, selectivity, s_selectivity, prior, LWT, comp_like, StockPars, FleetPars, 
+                               start, map, dots)
   TMB_data <- RCM_est_data(x, RCMdata, selectivity, s_selectivity, LWT, comp_like, prior, max_F, 
                            StockPars, ObsPars, FleetPars, mean_fit, TMB_params$map, dots)
   
@@ -186,7 +188,17 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
 }
 
 RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(), LWT = list(), comp_like,
-                           StockPars, FleetPars, dots = list()) {
+                           StockPars, FleetPars, start = list(), map = list(), dots = list()) {
+  
+  if(!is.null(dots$vul_par)) stop("Specify vul_par via start$vul_par")
+  if(!is.null(dots$ivul_par)) stop("Specify ivul_par via start$vul_par")
+  if(!is.null(dots$log_rec_dev)) stop("Specify log_rec_dev via start$log_rec_dev")
+  if(!is.null(dots$log_early_rec_dev)) stop("Specify log_early_rec_dev via start$log_early_rec_dev")
+  
+  if(!is.null(dots$map_vul_par)) stop("Specify map_vul_par via map$vul_par")
+  if(!is.null(dots$map_ivul_par)) stop("Specify map_ivul_par via map$ivul_par")
+  if(!is.null(dots$map_log_rec_dev)) stop("Specify map_log_rec_dev via map$log_rec_dev")
+  if(!is.null(dots$map_log_early_rec_dev)) stop("Specify map_log_early_rec_dev via map$log_early_rec_dev")
   
   SR_type <- ifelse(StockPars$SRrel[x] == 1, "BH", "Ricker")
   
@@ -203,21 +215,17 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   L5 <- FleetPars$L5_y[x, nyears]
   Vmaxlen <- FleetPars$Vmaxlen_y[x, nyears]
   
-  if(is.null(dots$vul_par)) {
+  if(is.null(start$vul_par)) {
     if(any(selectivity == -2)) {
-      stop("Some fleet selectivity specified to be free parameters. Provide vul_par matrix to RCM.")
+      stop("Some fleet selectivity specified to be free parameters. Provide start$vul_par matrix to RCM.")
     }
-    vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, RCMdata@Misc$nsel_block)
-  } else {
-    vul_par <- dots$vul_par
-    
-    if(ncol(vul_par) != RCMdata@Misc$nsel_block) {
-      stop("vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
-    }
-    if(any(selectivity == -2) && nrow(vul_par) != n_age) {
-      stop("vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
-    }
-    
+    start$vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, RCMdata@Misc$nsel_block)
+  }
+  if(ncol(start$vul_par) != RCMdata@Misc$nsel_block) {
+    stop("start$vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
+  }
+  if(any(selectivity == -2) && nrow(start$vul_par) != n_age) {
+    stop("start$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
   }
   
   # Check for functional selectivity functions (dome or logistic)
@@ -227,155 +235,143 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   Linf <- ifelse(age_only_model, n_age, StockPars$Linf[x])
   
   sel_check <- selectivity == -1 | selectivity == 0
-  vul_par[2, sel_check] <- log(vul_par[1, sel_check] - vul_par[2, sel_check])
-  vul_par[1, sel_check] <- logit(pmin(vul_par[1, sel_check]/Linf/0.99, 0.99))
-  vul_par[3, sel_check] <- logit(pmin(vul_par[3, sel_check], 0.99))
+  start$vul_par[2, sel_check] <- log(start$vul_par[1, sel_check] - start$vul_par[2, sel_check])
+  start$vul_par[1, sel_check] <- logit(pmin(start$vul_par[1, sel_check]/Linf/0.99, 0.99))
+  start$vul_par[3, sel_check] <- logit(pmin(start$vul_par[3, sel_check], 0.99))
   
   if(any(selectivity == -2)) {
-    vul_par[, selectivity == -2] <- logit(vul_par[, selectivity == -2], soft_bounds = TRUE)
+    start$vul_par[, selectivity == -2] <- logit(start$vul_par[, selectivity == -2], soft_bounds = TRUE)
   }
   
-  if(is.null(dots$map_vul_par)) {
+  if(is.null(map$vul_par)) {
     if(any(selectivity == -2)) {
       stop("Some (fleet) selectivity specified to be free parameters. Provide map_vul_par matrix to RCM.")
     }
-    map_vul_par <- matrix(0, 3, RCMdata@Misc$nsel_block)
-    map_vul_par[3, selectivity == -1] <- NA # Fix third parameter for logistic sel
+    map$vul_par <- matrix(0, 3, RCMdata@Misc$nsel_block)
+    map$vul_par[3, selectivity == -1] <- NA # Fix third parameter for logistic sel
     if(!is.null(dots$fix_dome) && dots$fix_dome) { # Obsolete
-      map_vul_par[3, selectivity == 0] <- NA # Fix dome
+      map$vul_par[3, selectivity == 0] <- NA # Fix dome
     }
     
     for(ff in 1:nfleet) {
       if(all(RCMdata@CAA[,,ff] <= 0, na.rm = TRUE) && all(RCMdata@CAL[,,ff] <= 0, na.rm = TRUE)) {
-        map_vul_par[, unique(RCMdata@sel_block[, ff])] <- NA # Fix sel if no comp data
+        map$vul_par[, unique(RCMdata@sel_block[, ff])] <- NA # Fix sel if no comp data
       }
     }
-    if(any(!is.na(map_vul_par))) {
-      map_vul_par[!is.na(map_vul_par)] <- 1:sum(!is.na(map_vul_par))
+    if(any(!is.na(map$vul_par))) {
+      map$vul_par[!is.na(map$vul_par)] <- 1:sum(!is.na(map$vul_par))
     }
-  } else {
-    map_vul_par <- dots$map_vul_par
-    
-    if(ncol(map_vul_par) != RCMdata@Misc$nsel_block) {
-      stop("map_vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
-    }
-    if(any(selectivity == -2) && nrow(map_vul_par) != n_age) {
-      stop("map_vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
-    }
+  }
+  if(ncol(map$vul_par) != RCMdata@Misc$nsel_block) {
+    stop("map$vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
+  }
+  if(any(selectivity == -2) && nrow(map$vul_par) != n_age) {
+    stop("map$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
   }
   
   if(any(selectivity == -2)) {
-    test <- dots$vul_par[, selectivity == -2] %in% c(0, 1) & is.na(map_vul_par[, selectivity == -2])
-    vul_par[, selectivity == -2][test] <- logit(dots$vul_par[, selectivity == -2][test], soft_bounds = FALSE)
+    test <- start$vul_par[, selectivity == -2] %in% c(0, 1) & is.na(map$vul_par[, selectivity == -2])
+    vul_par[, selectivity == -2][test] <- logit(start$vul_par[, selectivity == -2][test], soft_bounds = FALSE)
   }
   
   # Index selectivity (ivul_par)
-  if(!is.null(dots$s_vul_par)) dots$ivul_par <- dots$s_vul_par # Backwards compatibility
-  if(is.null(dots$ivul_par)) {
+  if(!is.null(dots$s_vul_par)) stop("Pass index selectivity parameters via start$ivul_par")
+  if(is.null(start$ivul_par)) {
     if(any(s_selectivity == -2)) {
-      stop("Some s_selectivity specified to be free parameters. Provide ivul_par matrix to RCM.")
+      stop("Some s_selectivity specified to be free parameters. Provide start$ivul_par matrix to RCM.")
     }
-    ivul_par <- matrix(c(LFS, L5, Vmaxlen), 3, nsurvey)
-  } else {
-    ivul_par <- dots$ivul_par
-    
-    if(ncol(ivul_par) != nsurvey) {
-      stop("ivul_par needs to be a matrix with ", nsurvey, " columns.")
-    }
-    if(any(s_selectivity == -2) && nrow(ivul_par) != n_age) {
-      stop("ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
-    }
+    start$ivul_par <- matrix(c(LFS, L5, Vmaxlen), 3, nsurvey)
+  }
+  if(ncol(start$ivul_par) != nsurvey) {
+    stop("start$ivul_par needs to be a matrix with ", nsurvey, " columns.")
+  }
+  if(any(s_selectivity == -2) && nrow(start$ivul_par) != n_age) {
+    stop("start$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
   }
   
   # Check for function selectivity (dome/logistic)
   parametric_sel <- s_selectivity == -1 | s_selectivity == 0
-  ivul_par[2, parametric_sel] <- log(ivul_par[1, parametric_sel] - ivul_par[2, parametric_sel])
-  ivul_par[1, parametric_sel] <- logit(ivul_par[1, parametric_sel]/Linf/0.99)
-  ivul_par[3, parametric_sel] <- logit(ivul_par[3, parametric_sel])
+  start$ivul_par[2, parametric_sel] <- log(start$ivul_par[1, parametric_sel] - start$ivul_par[2, parametric_sel])
+  start$ivul_par[1, parametric_sel] <- logit(start$ivul_par[1, parametric_sel]/Linf/0.99)
+  start$ivul_par[3, parametric_sel] <- logit(start$ivul_par[3, parametric_sel])
   
   if(any(s_selectivity == -2)) {
-    ivul_par[, s_selectivity == -2] <- logit(ivul_par[, s_selectivity == -2], soft_bounds = TRUE)
+    start$ivul_par[, s_selectivity == -2] <- logit(start$ivul_par[, s_selectivity == -2], soft_bounds = TRUE)
   }
-  if(!is.null(dots$map_s_vul_par)) dots$map_ivul_par <- dots$map_s_vul_par # Backwards compatibility
   
-  if(is.null(dots$map_ivul_par)) {
+  if(!is.null(dots$map_s_vul_par)) stop("Pass map argument of index selectivity parameters via map$ivul_par")
+  if(is.null(map$ivul_par)) {
     if(any(s_selectivity == -2)) {
       stop("Some s_selectivity specified to be free parameters. Provide map_ivul_par matrix to RCM.")
     }
-    map_ivul_par <- matrix(0, 3, nsurvey)
-    map_ivul_par[3, s_selectivity < 0] <- NA # if logistic
+    map$ivul_par <- matrix(0, 3, nsurvey)
+    map$ivul_par[3, s_selectivity < 0] <- NA # if logistic
     for(sur in 1:nsurvey) {
       if(s_selectivity[sur] < -2 || s_selectivity[sur] > 0 ||
          (all(RCMdata@IAA[,,sur] <= 0, na.rm = TRUE) & all(RCMdata@IAL[,,sur] <= 0, na.rm = TRUE))) {
-        map_ivul_par[, sur] <- NA
+        map$ivul_par[, sur] <- NA
       }
     }
-    if(any(!is.na(map_ivul_par))) {
-      map_ivul_par[!is.na(map_ivul_par)] <- 1:sum(!is.na(map_ivul_par))
+    if(any(!is.na(map$ivul_par))) {
+      map$ivul_par[!is.na(map$ivul_par)] <- 1:sum(!is.na(map$ivul_par))
     }
-  } else {
-    map_ivul_par <- dots$map_ivul_par
-    
-    if(ncol(map_ivul_par) != nsurvey) {
-      stop("ivul_par needs to be a matrix with ", nsurvey, " columns.")
-    }
-    if(any(s_selectivity == -2) && nrow(map_ivul_par) != n_age) {
-      stop("ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
-    }
+  }
+  if(ncol(map$ivul_par) != nsurvey) {
+    stop("map$ivul_par needs to be a matrix with ", nsurvey, " columns.")
+  }
+  if(any(s_selectivity == -2) && nrow(map$ivul_par) != n_age) {
+    stop("map$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
   }
   
   if(any(s_selectivity == -2)) {
-    test <- dots$ivul_par[, s_selectivity == -2] %in% c(0, 1) & is.na(map_ivul_par[, s_selectivity == -2])
-    ivul_par[, s_selectivity == -2][test] <- logit(dots$ivul_par[, s_selectivity == -2][test], soft_bounds = FALSE)
+    test <- start$ivul_par[, s_selectivity == -2] %in% c(0, 1) & is.na(map$ivul_par[, s_selectivity == -2])
+    start$ivul_par[, s_selectivity == -2][test] <- logit(start$ivul_par[, s_selectivity == -2][test], soft_bounds = FALSE)
   }
   
-  if(!is.null(dots$log_early_rec_dev)) {
-    if(length(dots$log_early_rec_dev) != n_age - 1) stop("early_rec_dev is not a vector of length n_age - 1")
-    log_early_rec_dev <- dots$log_early_rec_dev
-  } else {
-    log_early_rec_dev <- rep(0, n_age - 1)
-  }
+  if(is.null(start$log_early_rec_dev)) start$log_early_rec_dev <- rep(0, n_age - 1)
+  if(length(start$log_early_rec_dev) != n_age - 1) stop("start$log_early_rec_dev is not a vector of length n_age - 1")
   
-  if(!is.null(dots$log_rec_dev)) {
-    if(length(dots$log_rec_dev) != nyears) stop("log_rec_dev is not a vector of length nyears")
-    log_rec_dev <- dots$log_rec_dev
-  } else {
-    log_rec_dev <- rep(0, nyears)
-  }
+  if(is.null(start$log_rec_dev)) start$log_rec_dev <- rep(0, nyears)
+  if(length(start$log_rec_dev) != nyears) stop("log_rec_dev is not a vector of length nyears")
   
   TMB_params <- list(R0x = ifelse(!is.na(StockPars$R0[x]), log(StockPars$R0[x] * dots$rescale), 0),
                      transformed_h = transformed_h, log_M = log(mean(StockPars$M_ageArray[x, , nyears])),
-                     vul_par = vul_par, ivul_par = ivul_par,
-                     log_q_effort = rep(log(0.1), nfleet), log_F_dev = matrix(0, nyears, nfleet),
+                     vul_par = start$vul_par, 
+                     ivul_par = start$ivul_par,
+                     log_q_effort = rep(log(0.1), nfleet), 
+                     log_F_dev = matrix(0, nyears, nfleet),
                      log_F_equilibrium = rep(log(0.05), nfleet),
-                     log_CV_msize = log(RCMdata@MS_cv), log_tau = log(StockPars$procsd[x]),
-                     log_early_rec_dev = log_early_rec_dev, log_rec_dev = log_rec_dev,
-                     log_compf = matrix(0, nfleet, 2), log_compi = matrix(0, nsurvey, 2))
+                     log_CV_msize = log(RCMdata@MS_cv), 
+                     log_tau = log(StockPars$procsd[x]),
+                     log_early_rec_dev = start$log_early_rec_dev, 
+                     log_rec_dev = start$log_rec_dev,
+                     log_compf = matrix(0, nfleet, 2),
+                     log_compi = matrix(0, nsurvey, 2))
   
   if(RCMdata@Misc$condition == "catch") {
     TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, ] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
   }
   
   # Map list (to fix parameters)
-  map <- list()
+  map_out <- list()
   
   if(RCMdata@Misc$condition == "effort" && !sum(RCMdata@Chist, na.rm = TRUE) && !prior$use_prior[1]) {
-    map$R0x <- factor(NA) # Fix if condition on effort, no catches, and no prior on R0
+    map_out$R0x <- factor(NA) # Fix if condition on effort, no catches, and no prior on R0
   }
-  if(!prior$use_prior[2]) map$transformed_h <- factor(NA)
-  if(!prior$use_prior[3]) map$log_M <- factor(NA)
+  if(!prior$use_prior[2]) map_out$transformed_h <- factor(NA)
+  if(!prior$use_prior[3]) map_out$log_M <- factor(NA)
   
-  map$log_tau <- factor(NA)
-  map$vul_par <- factor(map_vul_par)
-  map$ivul_par <- factor(map_ivul_par)
+  map_out$log_tau <- factor(NA)
+  map_out$vul_par <- factor(map$vul_par)
+  map_out$ivul_par <- factor(map$ivul_par)
   
   if(RCMdata@Misc$condition == "effort") {
-    map$log_F_equilibrium <- factor(rep(NA, nfleet))
+    map_out$log_F_equilibrium <- factor(rep(NA, nfleet))
   } else {
-    map$log_q_effort <- factor(rep(NA, nfleet))
+    map_out$log_q_effort <- factor(rep(NA, nfleet))
     
     if(any(RCMdata@C_eq == 0)) {
-      map$log_F_equilibrium <- local({
+      map_out$log_F_equilibrium <- local({
         m <- rep(NA, nfleet)
         m[RCMdata@C_eq > 0] <- 1:sum(RCMdata@C_eq > 0)
         factor(m)
@@ -384,29 +380,29 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   }
   
   if(RCMdata@Misc$condition != "catch") {
-    map$log_F_dev <- factor(matrix(NA, nyears, nfleet))
+    map_out$log_F_dev <- factor(matrix(NA, nyears, nfleet))
   }
-  map$log_CV_msize <- factor(rep(NA, nfleet))
+  map_out$log_CV_msize <- factor(rep(NA, nfleet))
   
-  if(is.null(dots$map_log_early_rec_dev)) {
-    map$log_early_rec_dev <- factor(rep(NA, n_age - 1))
+  if(is.null(map$log_early_rec_dev)) {
+    map_out$log_early_rec_dev <- factor(rep(NA, n_age - 1))
   } else {
-    map$log_early_rec_dev <- factor(dots$map_log_early_rec_dev)
-    if(length(map$log_early_rec_dev) != n_age - 1) {
-      stop("map_log_early_rec_dev needs to be a vector of length ", n_age - 1)
+    map_out$log_early_rec_dev <- factor(map$log_early_rec_dev)
+    if(length(map_out$log_early_rec_dev) != n_age - 1) {
+      stop("map$log_early_rec_dev needs to be a vector of length ", n_age - 1)
     }
   }
   
-  if(is.null(dots$map_log_rec_dev)) {
-    map$log_rec_dev <- factor(1:nyears)
+  if(is.null(map$log_rec_dev)) {
+    map_out$log_rec_dev <- factor(1:nyears)
   } else {
-    map$log_rec_dev <- factor(dots$map_log_rec_dev)
-    if(length(map$log_rec_dev) != nyears) {
-      stop("map_log_rec_dev needs to be a vector of length ", nyears)
+    map_out$log_rec_dev <- factor(map$log_rec_dev)
+    if(length(map_out$log_rec_dev) != nyears) {
+      stop("map$log_rec_dev needs to be a vector of length ", nyears)
     }
   }
   
-  map$log_compf <- local({
+  map_out$log_compf <- local({
     mapf <- matrix(NA, nfleet, 2)
     
     if(comp_like %in% c("dirmult1", "dirmult2")) {
@@ -420,7 +416,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     factor(mapf)
   })
   
-  map$log_compi <- local({
+  map_out$log_compi <- local({
     mapi <- matrix(NA, nsurvey, 2)
     
     if(comp_like %in% c("dirmult1", "dirmult2")) {
@@ -433,7 +429,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     factor(mapi)
   })
   
-  list(params = TMB_params, map = map)
+  list(params = TMB_params, map = map_out)
 }
 
 par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, RCMdata, dots) {
