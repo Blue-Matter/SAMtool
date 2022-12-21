@@ -32,12 +32,13 @@
 #' Not used when data are provided in a \linkS4class{RCMdata} object.
 #' @param prior A named list for the parameters of any priors to be added to the model. See below.
 #' @param max_F The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also \code{drop_highF}.
-#' @param cores Integer for the number of CPU cores for the stock reduction analysis.
+#' @param cores Integer for the number of CPU cores (set greater than 1 for parallel processing).
 #' @param integrate Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).
 #' @param mean_fit Logical, whether to run an additional with mean values of life history parameters from the OM.
 #' @param drop_nonconv Logical, whether to drop non-converged fits of the RCM, including fits where F = NA.
 #' @param drop_highF Logical, whether to drop fits of the RCM where F = \code{max_F}.
 #' @param control A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.
+#' @param map The \code{map} argument to TMB models, see \link[TMB]{MakeADFun} to override defaults.
 #' @param ... Other arguments to pass in for starting values of parameters and fixing parameters. See details.
 #'
 #' @section Priors:
@@ -238,10 +239,11 @@ setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
           function(OM, data, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
-                   drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), ...) {
+                   drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), 
+                   map = list(), ...) {
             RCM_int(OM = OM, RCMdata = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
                     comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
-                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, ...)
+                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, map = map, ...)
           })
 
 #' @rdname RCM
