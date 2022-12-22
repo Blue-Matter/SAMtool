@@ -97,7 +97,8 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
                weight = Wa, PLA = matrix(1, n_age, 1), mat = mat_age, vul_type = "logistic",
                SR_type = SR, comp_dist = "multinomial", catch_eq = catch_eq,
                est_early_rec_dev = rep(0, n_age - 1), est_rec_dev = rep(0, n_y), yindF = 0,
-               tv_M = "none", M_bounds = c(0, 1e4), use_prior = rep(0, 4), prior_dist = matrix(NA, 4, 2))
+               tv_M = "none", M_bounds = c(0, 1e4), use_prior = rep(0, 4), prior_dist = matrix(NA, 4, 2),
+               sim_process_error = 0L)
   if(any(names(dots) == "M_at_age") && dots$M_at_age) data$M_data <- M
 
   # Starting values

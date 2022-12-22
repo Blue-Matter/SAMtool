@@ -271,7 +271,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   
   if(any(selectivity == -2)) {
     test <- start$vul_par[, selectivity == -2] %in% c(0, 1) & is.na(map$vul_par[, selectivity == -2])
-    vul_par[, selectivity == -2][test] <- logit(start$vul_par[, selectivity == -2][test], soft_bounds = FALSE)
+    start$vul_par[, selectivity == -2][test] <- logit(start$vul_par[, selectivity == -2][test], soft_bounds = FALSE)
   }
   
   # Index selectivity (ivul_par)
