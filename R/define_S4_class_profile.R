@@ -103,7 +103,8 @@ setMethod("plot", signature(x = "prof", y = "missing"),
 #' \item SSS: \code{R0}
 #' }
 #' 
-#' For RCM: \code{D} (spawning biomass depletion), \code{R0}, and \code{h} are used.
+#' For RCM: \code{D} (spawning biomass depletion), \code{R0}, and \code{h} are used. If the Mesnil-Rochet stock-recruit function
+#' is used, can also profile \code{MRRmax} and \code{MRgamma}.
 #' @author Q. Huynh
 #' @return An object of class \linkS4class{prof} that contains a data frame of negative log-likelihood values from the profile and, optionally,
 #' a figure of the likelihood surface.

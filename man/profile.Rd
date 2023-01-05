@@ -37,7 +37,8 @@ For the following assessment models, possible sequence of values for profiling a
 \item SSS: \code{R0}
 }
 
-For RCM: \code{D} (spawning biomass depletion), \code{R0}, and \code{h} are used.
+For RCM: \code{D} (spawning biomass depletion), \code{R0}, and \code{h} are used. If the Mesnil-Rochet stock-recruit function
+is used, can also profile \code{MRRmax} and \code{MRgamma}.
 }
 \examples{
 \donttest{
