@@ -254,7 +254,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
 
     if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
-      ref_pt <- ref_pt_cDD(info$data, report$Arec, report$Brec)
+      ref_pt <- ref_pt_cDD(info$data, report$Arec, report$Brec, report$M)
       report <- c(report, ref_pt)
 
       FMort <- c(report$F, rep(NA, k + i))

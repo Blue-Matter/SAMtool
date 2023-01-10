@@ -551,8 +551,9 @@ RCM_retro <- function(x, nyr = 5) {
         }
       }
     }
-    mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05), do_sd = FALSE)
+    mod <- optimize_TMB_model(obj2, control = list(iter.max = 2e+05, eval.max = 4e+05))
     opt2 <- mod[[1]]
+    SD <- mod[[2]]
     
     if(!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2)
@@ -664,6 +665,7 @@ profile_likelihood_RCM <- function(x, ...) {
     profile_grid <- expand.grid(D = dots$D)
     
     # Create a dummy index = depletion
+    n_y <- new_args$data$n_y
     new_args$data$IAA_hist <- abind::abind(new_args$data$IAA_hist, 
                                            array(NA, c(n_y, new_args$data$n_age, 1)), 
                                            along = 3)
@@ -691,8 +693,7 @@ profile_likelihood_RCM <- function(x, ...) {
     LWT$IAA <- c(LWT$IAA, 1)
     LWT$IAL <- c(LWT$IAL, 1)
     
-    profile_fn <- function(i, new_args, x) {
-      # Add new survey of SSB depletion
+    profile_fn <- function(i, new_args, x) { # Add new survey of SSB depletion
       SSB_index <- SSB_Isd <- rep(NA_real_, n_y)
       SSB_index[1] <- 1
       SSB_index[n_y] <- profile_grid$D[i]
@@ -709,17 +710,6 @@ profile_likelihood_RCM <- function(x, ...) {
                           s_name = paste0("Index_", 1:(new_args$data$nsurvey-1)) %>% c("SSB_depletion"))
     }
     
-    do_profile <- pblapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x,
-                           cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
-    profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
-    
-    prof <- sapply(do_profile, nll_depletion_profile) %>% t()
-    prof_out <- apply(prof, 2, sum) %>% as.logical()
-    
-    profile_grid <- cbind(profile_grid, prof[, prof_out] %>% as.data.frame())
-    
-    output <- new("prof", Model = "RCM", Par = "D", 
-                  MLE = x@mean_fit$report$E[n_y]/x@mean_fit$report$E0_SR, grid = profile_grid)
   } else {
     
     valid_par <- c("R0", "h", "MRRmax", "MRgamma")
@@ -727,8 +717,6 @@ profile_likelihood_RCM <- function(x, ...) {
     
     profile_par <- valid_par[valid_par %in% names(dots)]
     profile_grid <- do.call(expand.grid, dots[profile_par])
-    
-    #joint_profile <- !exists("profile_par", inherits = FALSE)
     
     profile_fn <- function(i, new_args, x) {
       
@@ -766,36 +754,41 @@ profile_likelihood_RCM <- function(x, ...) {
                           s_name = paste0("Index_", 1:new_args$data$nsurvey))
     }
     
-    do_profile <- pblapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x,
-                           cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
-    
-    profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
-    
-    prof <- sapply(do_profile, nll_depletion_profile) %>% t()
-    prof_out <- apply(prof, 2, sum) %>% as.logical()
-    
-    profile_grid <- cbind(profile_grid, prof[, prof_out] %>% as.data.frame())
-    MLE <- vapply(profile_par, function(xx) getElement(x@mean_fit$report, xx), numeric(1))
-    
-    output <- new("prof", Model = "RCM", Par = profile_par, MLE = MLE, grid = profile_grid)
   }
+  
+  do_profile <- pblapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x,
+                         cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+  
+  profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
+  
+  prof <- sapply(do_profile, RCM_nll_profile_summary) %>% t()
+  prof_out <- apply(prof, 2, sum) %>% as.logical()
+  
+  profile_grid <- cbind(profile_grid, prof[, prof_out] %>% as.data.frame())
+  
+  if(!is.null(dots$D)) {
+    MLE <- x@mean_fit$report$E[n_y]/x@mean_fit$report$E0_SR
+  } else {
+    MLE <- vapply(profile_par, function(xx) getElement(x@mean_fit$report, xx), numeric(1))
+  }
+  
+  output <- new("prof", Model = "RCM", Par = profile_par, MLE = MLE, grid = profile_grid)
   return(output)
 }
 
 #' @importFrom dplyr select starts_with
-nll_depletion_profile <- function(xx) {
-  nll_fleet <- xx[[2]][-nrow(xx[[2]]), ] %>% select(starts_with("Fleet"))
+RCM_nll_profile_summary <- function(x) { # Summary table of RCM likelihoods for each data-gear combination
+  nll_fleet <- x[[2]][-nrow(x[[2]]), ] %>% select(starts_with("Fleet"))
   nll_fleet$Data <- rownames(nll_fleet)
   nll_fleet <- reshape2::melt(nll_fleet, id.var = "Data", value.var = "nll")
   
-  nll_index <- xx[[4]][-nrow(xx[[4]]), ] %>% select(starts_with("Index"))
+  nll_index <- x[[4]][-nrow(x[[4]]), ] %>% select(starts_with("Index"))
   nll_index$Data <- rownames(nll_index)
   nll_index <- reshape2::melt(nll_index, id.var = "Data", value.var = "nll")
   
   nll <- rbind(nll_fleet, nll_index)
-  
   nll$Name <- paste(nll$variable, nll$Data)
   
-  c(nll$value, xx[[1]][c(2, 5, 6), 1]) %>% 
+  c(nll$value, x[[1]][c(2, 5, 6), 1]) %>% 
     structure(names = paste(nll$variable, nll$Data) %>% c("Recruitment Deviations", "Penalty", "Prior"))
 }
