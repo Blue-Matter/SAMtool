@@ -74,7 +74,7 @@ setMethod("simulate", signature(object = "Assessment"),
               "VPA" = "I_hist",
               "SCA" = c("C_hist", "I_hist", "CAA_hist", "CAL_hist")
             )
-            if(is.null(vars)) stop("Can not simulate data from model.", .call = FALSE)
+            if (is.null(vars)) stop("Can not simulate data from model.", .call = FALSE)
             
             process_vars <- switch(object@Model,
                                    "cDD" = NULL,
@@ -86,7 +86,7 @@ setMethod("simulate", signature(object = "Assessment"),
                                    "VPA" = NULL,
                                    "SCA" = c("log_rec_dev_sim", "log_early_rec_dev_sim", "logit_M_sim", "logit_M_walk_sim")
             )
-            if(process_error && is.null(process_vars)) message("No process error found for this model.")
+            if (process_error && is.null(process_vars)) message("No process error found for this model.")
             
             # Do simulation
             val <- lapply(1:nsim, Assess_sim, obj = object@obj, vars = vars, 
@@ -94,8 +94,8 @@ setMethod("simulate", signature(object = "Assessment"),
               structure(names = paste0("sim_", 1:nsim))
             
             # Refit model from simulated data
-            if(refit) {
-              if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
+            if (refit) {
+              if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
               
               fit <- pbapply::pblapply(1:nsim, function(x) {
                 newdata <- object@obj$env$data
@@ -109,7 +109,7 @@ setMethod("simulate", signature(object = "Assessment"),
                 mod$report <- obj2$report(obj2$env$last.par.best)
                 mod$obj <- obj2
                 return(mod)
-              }, cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>%
+              }, cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>%
                 structure(names = paste0("sim_", 1:nsim))
               
             } else {
@@ -128,7 +128,7 @@ setMethod("simulate", signature(object = "Assessment"),
 setMethod("simulate", signature(object = "RCModel"),
           function(object, nsim = 1, seed = NULL, process_error = FALSE, refit = FALSE, cores = 1, ...) {
             
-            if(!length(object@mean_fit)) stop("No TMB object was found. Re-run RCM with mean_fit = TRUE")
+            if (!length(object@mean_fit)) stop("No TMB object was found. Re-run RCM with mean_fit = TRUE")
             
             if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1)
             if (is.null(seed)) {
@@ -150,9 +150,9 @@ setMethod("simulate", signature(object = "RCModel"),
               structure(names = paste0("sim_", 1:nsim))
             
             # Refit model from simulated model
-            if(refit) {
+            if (refit) {
               
-              if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
+              if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
               
               fit <- pbapply::pblapply(1:nsim, function(x) {
                 newdata <- object@mean_fit$obj$env$data
@@ -167,7 +167,7 @@ setMethod("simulate", signature(object = "RCModel"),
                 mod$report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2)
                 mod$obj <- obj2
                 return(mod)
-              }, cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>% 
+              }, cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>% 
                 structure(names = paste0("sim_", 1:nsim))
               
             } else {
@@ -194,42 +194,42 @@ simulate_comp <- function(x,
   dots <- list(...)
   
   out <- numeric(length(x))
-  if(dist == "multinomial") {
+  if (dist == "multinomial") {
     
-    if(is.null(dots$N)) stop("N not provided for lognormal distribution")
+    if (is.null(dots$N)) stop("N not provided for lognormal distribution")
     out[] <- rmultinom(n = 1, size = dots$N, prob = x)
     
-  } else if(dist == "lognormal") {
+  } else if (dist == "lognormal") {
     
-    if(is.null(dots$tau)) stop("tau not provided for lognormal distribution")
-    if(!requireNamespace("mvtnorm", quietly = TRUE)) stop("Please install the mvtnorm package.", call. = FALSE)
+    if (is.null(dots$tau)) stop("tau not provided for lognormal distribution")
+    if (!requireNamespace("mvtnorm", quietly = TRUE)) stop("Please install the mvtnorm package.", call. = FALSE)
     # tau = sqrt(0.02/p_obs)
     samp <- mvtnorm::rmvnorm(n = 1, mean = log(x), sigma = dots$tau * diag(length(x)))
     out[] <- exp(samp)
     
-  } else if(dist == "mvlogistic") {
+  } else if (dist == "mvlogistic") {
     
-    if(is.null(dots$tau)) stop("tau not provided for mvlogistic distribution")
+    if (is.null(dots$tau)) stop("tau not provided for mvlogistic distribution")
     mu <- mean(log(x))
     samp <- mvtnorm::rmvnorm(n = 1, mean = log(x) - mu, sigma = dots$tau * diag(length(x)))
     out[] <- exp(samp + mu)
     
-  } else if(dist == "dirmult1") {
+  } else if (dist == "dirmult1") {
     
-    if(is.null(dots$N)) stop("N not provided for dirmult1 distribution")
-    if(is.null(dots$theta)) stop("theta not provided for dirmult1 distribution")
-    if(!requireNamespace("extraDistr", quietly = TRUE)) stop("Please install the extraDistr package.", call. = FALSE)
+    if (is.null(dots$N)) stop("N not provided for dirmult1 distribution")
+    if (is.null(dots$theta)) stop("theta not provided for dirmult1 distribution")
+    if (!requireNamespace("extraDistr", quietly = TRUE)) stop("Please install the extraDistr package.", call. = FALSE)
     
     out[] <- extraDistr::rdirmnom(n = 1, size = dots$N, alpha = dots$theta * dots$N * x/sum(x))
   } else {
     
-    if(is.null(dots$beta)) stop("theta not provided for dirmult2 distribution")
-    if(!requireNamespace("extraDistr", quietly = TRUE)) stop("Please install the extraDistr package.", call. = FALSE)
+    if (is.null(dots$beta)) stop("theta not provided for dirmult2 distribution")
+    if (!requireNamespace("extraDistr", quietly = TRUE)) stop("Please install the extraDistr package.", call. = FALSE)
     
     out[] <- extraDistr::rdirmnom(n = 1, size = dots$N, alpha = beta * x/sum(x))
   }
   
-  if(prop) out <- out/sum(out)
+  if (prop) out <- out/sum(out)
   
   return(out)
   
@@ -245,7 +245,7 @@ RCM_sim <- function(..., obj, process_error = FALSE) {
   
   newdata <- obj$env$data %>% structure(check.passed = NULL)
   
-  if(process_error && any(names(newdata) == "sim_process_error")) {
+  if (process_error && any(names(newdata) == "sim_process_error")) {
     
     newdata$sim_process_error <- 1L
     newparams <- clean_tmb_parameters(obj)
@@ -265,9 +265,9 @@ RCM_sim <- function(..., obj, process_error = FALSE) {
   
   for(y in 1:obj$env$data$n_y) {
     for(ff in 1:obj$env$data$nfleet) {
-      if(obj$env$data$CAA_n[y, ff] > 0) {
+      if (obj$env$data$CAA_n[y, ff] > 0) {
         
-        if(comp_like == "lognormal") {
+        if (comp_like == "lognormal") {
           obs <- res$CAA_hist[y, , ff]
           dispersion_par <- sqrt(0.02/(obs/sum(obs)))
         } else {
@@ -281,9 +281,9 @@ RCM_sim <- function(..., obj, process_error = FALSE) {
                                                beta = dispersion_par)
       }
       
-      if(obj$env$data$CAL_n[y, ff] > 0) {
+      if (obj$env$data$CAL_n[y, ff] > 0) {
         
-        if(comp_like == "lognormal") {
+        if (comp_like == "lognormal") {
           obs <- res$CAL_hist[y, , ff]
           dispersion_par <- sqrt(0.02/(obs/sum(obs)))
         } else {
@@ -299,9 +299,9 @@ RCM_sim <- function(..., obj, process_error = FALSE) {
     }
     
     for(sur in 1:obj$env$data$nsurvey) {
-      if(obj$env$data$IAA_n[y, sur] > 0) {
+      if (obj$env$data$IAA_n[y, sur] > 0) {
         
-        if(comp_like == "lognormal") {
+        if (comp_like == "lognormal") {
           obs <- res$IAA_hist[y, , sur]
           dispersion_par <- sqrt(0.02/(obs/sum(obs)))
         } else {
@@ -315,9 +315,9 @@ RCM_sim <- function(..., obj, process_error = FALSE) {
                                                 beta = dispersion_par)
       }
       
-      if(obj$env$data$IAL_n[y, ff] > 0) {
+      if (obj$env$data$IAL_n[y, ff] > 0) {
         
-        if(comp_like == "lognormal") {
+        if (comp_like == "lognormal") {
           obs <- res$IAL_hist[y, , sur]
           dispersion_par <- sqrt(0.02/(obs/sum(obs)))
         } else {
@@ -340,7 +340,7 @@ Assess_sim <- function(..., obj, vars, process_error = FALSE, process_vars = NUL
   
   newdata <- obj$env$data %>% structure(check.passed = NULL)
   
-  if(process_error && any(names(newdata) == "sim_process_error")) {
+  if (process_error && any(names(newdata) == "sim_process_error")) {
     
     newdata$sim_process_error <- 1L
     newparams <- clean_tmb_parameters(obj)
@@ -355,16 +355,16 @@ Assess_sim <- function(..., obj, vars, process_error = FALSE, process_vars = NUL
   }
   res <- report[c(vars, process_vars)]
   
-  if(!is.null(newdata$comp_dist)) {
+  if (!is.null(newdata$comp_dist)) {
     comp_dist <- match.arg(newdata$comp_dist, choices = c("multinomial", "lognormal"))
   }
-  if(any(vars == "CAA_hist") && is.null(res$CAA_hist)) {
+  if (any(vars == "CAA_hist") && is.null(res$CAA_hist)) {
     res$CAA_hist <- newdata$CAA_hist
     
     for(y in 1:newdata$n_y) {
-      if(newdata$CAA_n[y] > 0) {
+      if (newdata$CAA_n[y] > 0) {
         
-        if(comp_dist == "lognormal") {
+        if (comp_dist == "lognormal") {
           obs <- res$CAA_hist[y, ]
           dispersion_par <- sqrt(0.02/(obs/sum(obs)))
         } else {
@@ -378,13 +378,13 @@ Assess_sim <- function(..., obj, vars, process_error = FALSE, process_vars = NUL
     }
   }
   
-  if(any(vars == "CAL_hist") && is.null(res$CAL_hist)) {
+  if (any(vars == "CAL_hist") && is.null(res$CAL_hist)) {
     res$CAL_hist <- newdata$CAL_hist
     
     for(y in 1:newdata$n_y) {
-      if(newdata$CAL_n[y] > 0) {
+      if (newdata$CAL_n[y] > 0) {
         
-        if(comp_dist == "lognormal") {
+        if (comp_dist == "lognormal") {
           obs <- res$CAL_hist[y, ]
           dispersion_par <- sqrt(0.02/(obs/sum(obs)))
         } else {
@@ -407,27 +407,27 @@ create_sim_object <- function(object, fit = NULL, val, vars, process_vars) {
     sapply(val, getElement, v, simplify = "array")
   }) %>% structure(names = vars)
   
-  if(inherits(object, "Assessment")) {
+  if (inherits(object, "Assessment")) {
     obj <- object@obj
-  } else if(inherits(object, "RCModel")) {
+  } else if (inherits(object, "RCModel")) {
     obj <- object@mean_fit$obj
   }
   sim_out <- new("sim",
                  data = obj$env$data[vars],
                  data_sim = data_sim)
   
-  if(!is.null(process_vars)) {
+  if (!is.null(process_vars)) {
     sim_out@process_sim <- lapply(process_vars, function(v) {
       sapply(val, getElement, v, simplify = "array")
     }) %>% structure(names = process_vars)
   }
   
-  if(!is.null(fit)) {
+  if (!is.null(fit)) {
     
-    if(inherits(object, "Assessment")) {
+    if (inherits(object, "Assessment")) {
       model <- object@Model
       TMB_report <- object@TMB_report
-    } else if(inherits(object, "RCModel")) {
+    } else if (inherits(object, "RCModel")) {
       model <- "RCM"
       TMB_report <- object@mean_fit$report
     }

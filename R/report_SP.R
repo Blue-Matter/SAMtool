@@ -8,22 +8,22 @@ summary_SP <- function(Assessment, state_space = FALSE) {
   Value <- numeric(0)
   Description <- character(0)
   rownam <- character(0)
-  if("log_dep" %in% names(obj$env$map)) {
+  if ("log_dep" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$dep)
     Description <- c(Description, "Initial depletion")
     rownam <- c(rownam, "dep")
   }
-  if("log_n" %in% names(obj$env$map)) {
+  if ("log_n" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$n)
     Description <- c(Description, "Production exponent")
     rownam <- c(rownam, "n")
   }
-  if(state_space && "log_tau" %in% names(obj$env$map)) {
+  if (state_space && "log_tau" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$tau)
     Description <- c(Description, "Biomass deviation SD (log-space)")
     rownam <- c(rownam, "tau")
   }
-  if(length(Value) == 0) input_parameters <- data.frame() else {
+  if (length(Value) == 0) input_parameters <- data.frame() else {
     input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
     rownames(input_parameters) <- rownam
   }
@@ -35,12 +35,12 @@ summary_SP <- function(Assessment, state_space = FALSE) {
   rownames(derived) <- c("r", "K", "BMSY", "BMSY/B0")
 
   model_estimates <- sdreport_int(SD)
-  if(!is.character(model_estimates)) {
+  if (!is.character(model_estimates)) {
     rownames(model_estimates)[rownames(model_estimates) == "log_B_dev"] <- paste0("log_B_dev_", names(FMort)[as.logical(obj$env$data$est_B_dev)])
   }
 
   model_name <- "Surplus Production"
-  if(state_space) model_name <- paste(model_name, "(State-Space)")
+  if (state_space) model_name <- paste(model_name, "(State-Space)")
   output <- list(model = model_name, current_status = current_status,
                  input_parameters = input_parameters, derived_quantities = derived,
                  model_estimates = model_estimates,
@@ -49,7 +49,7 @@ summary_SP <- function(Assessment, state_space = FALSE) {
 }
 
 rmd_SP <- function(Assessment, state_space = FALSE, ...) {
-  if(state_space) {
+  if (state_space) {
     ss <- rmd_summary("Surplus Production (State-Space)")
   } else ss <- rmd_summary("Surplus Production")
 
@@ -64,7 +64,7 @@ rmd_SP <- function(Assessment, state_space = FALSE, ...) {
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)),
                   rmd_assess_fit("Catch", "catch", match = TRUE))
 
-  if(state_space) {
+  if (state_space) {
     assess_fit2 <- c(rmd_residual("Dev", fig.cap = "Time series of biomass deviations.", label = Assessment@Dev_type),
                      rmd_residual("Dev", "SE_Dev", fig.cap = "Time series of biomass deviations with 95% confidence intervals.",
                                   label = Assessment@Dev_type, conv_check = TRUE))
@@ -85,12 +85,12 @@ rmd_SP <- function(Assessment, state_space = FALSE, ...) {
 
 profile_likelihood_SP <- function(Assessment, ...) {
   dots <- list(...)
-  if(!"FMSY" %in% names(dots) && !"MSY" %in% names(dots)) stop("Sequence of neither FMSY nor MSY was found. See help file.")
-  if(!is.null(dots$FMSY)) FMSY <- dots$FMSY else {
+  if (!"FMSY" %in% names(dots) && !"MSY" %in% names(dots)) stop("Sequence of neither FMSY nor MSY was found. See help file.")
+  if (!is.null(dots$FMSY)) FMSY <- dots$FMSY else {
     FMSY <- Assessment@FMSY
     profile_par <- "MSY"
   }
-  if(!is.null(dots$MSY)) MSY <- dots$MSY else {
+  if (!is.null(dots$MSY)) MSY <- dots$MSY else {
     MSY <- Assessment@MSY
     profile_par <- "FMSY"
   }
@@ -105,35 +105,35 @@ profile_likelihood_SP <- function(Assessment, ...) {
     params$log_FMSY <- log(profile_grid[i, 1])
     params$MSYx <- log(profile_grid[i, 2] * Assessment@obj$env$data$rescale)
 
-    if(joint_profile && length(Assessment@obj$par) == 2) {
+    if (joint_profile && length(Assessment@obj$par) == 2) {
       nll <- Assessment@obj$fn(x = c(params$log_FMSY, params$MSYx))
     } else {
-      if(joint_profile) map$MSYx <- map$log_FMSY <- factor(NA) else {
-        if(profile_par == "MSY") map$MSYx <- factor(NA) else map$log_FMSY <- factor(NA)
+      if (joint_profile) map$MSYx <- map$log_FMSY <- factor(NA) else {
+        if (profile_par == "MSY") map$MSYx <- factor(NA) else map$log_FMSY <- factor(NA)
       }
       obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map,
                         random = Assessment@obj$env$random, DLL = "SAMtool", silent = TRUE)
       high_F <- try(obj2$report(c(obj2$par, obj2$env$last.par[obj$env$random]))$penalty > 0 ||
                       any(is.na(obj2$report(c(obj2$par, obj2$env$last.par[obj$env$random]))$F)), silent = TRUE)
-      if(!is.character(high_F) && !is.na(high_F) && high_F) {
+      if (!is.character(high_F) && !is.na(high_F) && high_F) {
         for(ii in 1:10) {
-          if(profile_par == "MSY") {
+          if (profile_par == "MSY") {
             obj2$par["log_FMSY"] <- -0.5 + obj2$par["log_FMSY"]
           } else {
             obj2$par["MSYx"] <- 0.5 + obj2$par["MSYx"]
           }
-          if(obj2$report(c(obj2$par, obj2$env$last.par[obj2$env$random]))$penalty > 0) break
+          if (obj2$report(c(obj2$par, obj2$env$last.par[obj2$env$random]))$penalty > 0) break
         }
       }
       opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
-      if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
+      if (!is.character(opt2)) nll <- opt2$objective else nll <- NA
     }
     return(nll)
   }
   nll <- vapply(1:nrow(profile_grid), profile_fn, numeric(1), Assessment = Assessment, params = params, map = map) - Assessment@opt$objective
   profile_grid$nll <- nll
 
-  if(joint_profile) {
+  if (joint_profile) {
     pars <- c("FMSY", "MSY")
     MLE <- vapply(pars, function(x, y) slot(y, x), y = Assessment, numeric(1))
   } else {
@@ -172,7 +172,7 @@ retrospective_SP <- function(Assessment, nyr, state_space = FALSE) {
     info$data$I_sd <- info$data$I_sd[1:ny_ret, , drop = FALSE]
 
     map <- obj$env$map
-    if(state_space) {
+    if (state_space) {
       info$data$est_B_dev <- info$data$est_B_dev[1:ny_ret]
       info$params$log_B_dev <- rep(0, ny_ret)
       map$log_B_dev <- obj$env$map$log_B_dev[1:ny_ret]
@@ -184,7 +184,7 @@ retrospective_SP <- function(Assessment, nyr, state_space = FALSE) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
     
-    if(!is.character(opt2)) {
+    if (!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
 
       FMort <- c(report$F, rep(NA, 1 + i))
@@ -205,7 +205,7 @@ retrospective_SP <- function(Assessment, nyr, state_space = FALSE) {
   }
 
   conv <- vapply(0:nyr, lapply_fn, logical(1), info = info, obj = obj, state_space = state_space)
-  if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
+  if (any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
 
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
@@ -234,7 +234,7 @@ plot_yield_SP <- function(data = NULL, report, fmsy, msy, xaxis = c("F", "Biomas
   n <- report$n
   BMSY <- report$BMSY
 
-  if(n == 1) {
+  if (n == 1) {
     Yield <- ifelse(BKratio == 0, 0, -exp(1) * msy * BKratio * log(BKratio))
   } else {
     gamma.par <- n^(n/(n-1))/(n-1)
@@ -244,26 +244,26 @@ plot_yield_SP <- function(data = NULL, report, fmsy, msy, xaxis = c("F", "Biomas
   Biomass <- BKratio * K
   F.vector <- Yield/Biomass
 
-  if(relative_yaxis) {
+  if (relative_yaxis) {
     Yield <- Yield/max(Yield)
     ylab <- "Relative Equilibrium Yield"
   } else ylab <- "Equilibrium Yield"
 
-  if(xaxis == "F") {
+  if (xaxis == "F") {
     plot(F.vector, Yield, typ = 'l', xlab = "Fishing Mortality F", ylab = ylab)
     segments(x0 = fmsy, y0 = 0, y1 = max(Yield), lty = 2)
     segments(x0 = 0, y0 = max(Yield), x1 = fmsy, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
-  if(xaxis == "Biomass") {
+  if (xaxis == "Biomass") {
     plot(Biomass, Yield, typ = 'l', xlab = "Biomass", ylab = ylab)
     segments(x0 = BMSY, y0 = 0, y1 = max(Yield), lty = 2)
     segments(x0 = 0, y0 = max(Yield), x1 = BMSY, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
-  if(xaxis == "Depletion") {
+  if (xaxis == "Depletion") {
     plot(BKratio, Yield, typ = 'l', xlab = expression(B/B[0]), ylab = ylab)
     segments(x0 = BMSY/K, y0 = 0, y1 = max(Yield), lty = 2)
     segments(x0 = 0, y0 = max(Yield), x1 = BMSY/K, lty = 2)
@@ -292,21 +292,18 @@ plot_yield_SP <- function(data = NULL, report, fmsy, msy, xaxis = c("F", "Biomas
 #' @export SP_production
 SP_production <- function(depletion, figure = TRUE) {
 
-  if(length(depletion) > 1) {
+  if (length(depletion) > 1) {
     depletion <- depletion[1]
     message(paste("Function is not vectorized. Depletion value of", depletion, "is used."))
   }
-  if(depletion <= 0 || depletion >= 1) stop(paste("Proposed depletion =", depletion, "but value must be between 0 and 1."))
+  if (depletion <= 0 || depletion >= 1) stop(paste("Proposed depletion =", depletion, "but value must be between 0 and 1."))
 
-  calc_depletion <- function(n) {
-    depletion_MSY <- if(n==1) 1/exp(1) else n^(1/(1-n))
-    return(depletion_MSY)
-  }
+  calc_depletion <- function(n) ifelse(n == 1, 1/exp(1), n^(1/(1-n))) # Depletion at BMSY
   n_solver <- function(x) calc_depletion(x) - depletion
   get_n <- uniroot(f = n_solver, interval = c(0, 1e3))
   n_answer <- round(get_n$root, 3)
 
-  if(figure) {
+  if (figure) {
     fmsy <- 0.1
     msy <- fmsy * depletion
     plot_yield_SP(report = list(n = n_answer, BMSY = depletion, K = 1), fmsy = fmsy,

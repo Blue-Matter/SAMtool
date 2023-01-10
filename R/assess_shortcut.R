@@ -61,11 +61,11 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   method <- match.arg(method)
   .P <- Data@Misc$StockPars[c("N_P", "Biomass_P", "VBiomass_P", "SSB_P")]
   
-  if(is.null(.P) || all(is.na(names(.P)))) {
+  if (is.null(.P) || all(is.na(names(.P)))) {
     .P <- NULL
     OM_ind <- lapply(1:length(sys.calls()), function(xx) try(get("N_P", envir = sys.frames()[[xx]], inherits = FALSE), silent = TRUE)) %>%
       vapply(function(xx) !is.character(xx), logical(1)) %>% which()
-    if(!length(OM_ind)) {
+    if (!length(OM_ind)) {
       stop("No operating model was found.")
       #return(new("Assessment", opt = "", SD = "", conv = FALSE))
     }
@@ -86,12 +86,12 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   B_hist <- Hist$StockPars$Biomass[x, , , ] %>% apply(2, sum)
   N_hist <- Hist$StockPars$N[x, , , ] %>% apply(1:2, sum)
   
-  if(!is.null(.P)) {
+  if (!is.null(.P)) {
     SSB_P <- .P$SSB_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
     VB_P <- .P$VBiomass_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
     B_P <- .P$Biomass_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
     N_P <- .P$N_P[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(1:2, sum)
-  } else if(exists("OM_ind", inherits = FALSE)) {
+  } else if (exists("OM_ind", inherits = FALSE)) {
     SSB_P <- get("SSB_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
     VB_P <- get("VBiomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ][, 1:year_p, , drop = FALSE] %>% apply(2, sum)
     B_P <- get("Biomass_P", envir = sys.frames()[[OM_ind]], inherits = FALSE)[x, , , ] [, 1:year_p, , drop = FALSE] %>% apply(2, sum)
@@ -106,7 +106,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
                      plusgroup = unique(Hist$StockPars$plusgroup)) %>% apply(1, max)
   R <- N[1, ]
   
-  if(!missing(VAR_model) && year_p > 1) {
+  if (!missing(VAR_model) && year_p > 1) {
     VAR_proj <- predict(VAR_model, n.ahead = year_p)
     F_dev <- exp(c(VAR_proj$endog[, "FM"], VAR_proj$fcst$FM[2:year_p - 1, "fcst"]))
   } else {
@@ -115,9 +115,9 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   }
   F_out <- Fapical * F_dev
   
-  if(method == "B") {
+  if (method == "B") {
     
-    if(!missing(VAR_model) && year_p > 1) {
+    if (!missing(VAR_model) && year_p > 1) {
       B_dev <- exp(c(VAR_proj$endog[, "B"], VAR_proj$fcst$B[, "fcst"]))
     } else {
       stopifnot(length(B_err) >= 3)
@@ -127,9 +127,9 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     VB_out <- VB * B_dev
     B_out <- B * B_dev
     
-  } else if(method == "N") {
+  } else if (method == "N") {
     
-    if(!missing(VAR_model) && year_p > 1) {
+    if (!missing(VAR_model) && year_p > 1) {
       N_dev_proj <- vapply(paste0("N.", 1:n_age), function(xx) getElement(VAR_proj$fcst, xx)[, "fcst"], numeric(year_p))
       N_dev <- exp(rbind(VAR_proj$endog[, 1:n_age], N_dev_proj)) %>% t()
     } else {
@@ -150,8 +150,8 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     VB_out <- colSums(N_out * V_age * Wt_age)
     B_out <- colSums(N_out * Wt_age)
     
-  } else if(method == "RF") {
-    if(!missing(VAR_model) && year_p > 1) {
+  } else if (method == "RF") {
+    if (!missing(VAR_model) && year_p > 1) {
       R_dev <- exp(c(VAR_proj$endog[, "R"], VAR_proj$fcst$R[, "fcst"]))
     } else {
       stopifnot(length(R_err) >= 3)
@@ -185,17 +185,17 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
                     Obs_C_at_age = Data@CAA[x, , ],
                     opt = "No assessment.",
                     SD = "No assessment.")
-  if(exists("N_out", inherits = FALSE)) Assessment@N_at_age <- t(N_out)
-  if(exists("R_out", inherits = FALSE)) {
+  if (exists("N_out", inherits = FALSE)) Assessment@N_at_age <- t(N_out)
+  if (exists("R_out", inherits = FALSE)) {
     Assessment@R <- structure(R_out, names = Year_plusone)
   } else {
     Assessment@R <- structure(Assessment@N_at_age[, 1], names = Year_plusone)
   }
   
-  if(missing(VAR_model)) {
-    if(method == "B") {
+  if (missing(VAR_model)) {
+    if (method == "B") {
       mag_bias <- B_err[3]
-    } else if(method == "N") {
+    } else if (method == "N") {
       mag_bias <- N_err[3]
     } else {
       mag_bias <- R_err[3]
@@ -218,7 +218,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   Assessment@SSB_SSB0 <- Assessment@SSB/Assessment@SSB0
   Assessment@VB_VB0 <- Assessment@VB/Assessment@VB0
   
-  if(method == "B") {
+  if (method == "B") {
     catch_eq <- function(Ftarget) {
       catch_equation(method = "frac", Utarget = 1 - exp(-Ftarget), B = Assessment@VB[length(Assessment@VB)])
     }
@@ -235,7 +235,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   F_SPR <- Data@Misc$ReferencePoints$ByYear$F_SPR[x, , n_y + 1] %>% rev()
   SPR <- F_SPR %>% names() %>% substr(3,4) %>% as.numeric()
   SPR <- SPR/100
-  if(all(F_SPR != 0)) {
+  if (all(F_SPR != 0)) {
     F_SPR <- c(0, F_SPR) 
     SPR <- c(1, SPR)
   }
@@ -257,18 +257,18 @@ class(Shortcut) <- "Assess"
 Shortcut2 <- function(x, Data, method = "N", SCA_args = list(), VAR_args = list(type = "none"), ...) {
   method <- match.arg(method, choices = c("N", "B", "RF"))
   
-  if(!is.null(Data@Misc[[x]]$VAR_model)) {
+  if (!is.null(Data@Misc[[x]]$VAR_model)) {
     run_Shortcut <- Shortcut(x = x, Data = Data, method = method, VAR_model = Data@Misc[[x]]$VAR_model)
     
     run_Shortcut@info$Misc$VAR_model <- Data@Misc[[x]]$VAR_model
     return(run_Shortcut)
-  } else if(max(Data@Year) == Data@LHYear) {
+  } else if (max(Data@Year) == Data@LHYear) {
     SCA_args$x <- x
     SCA_args$Data <- Data
-    if(is.null(SCA_args$SR) && !is.null(Data@Misc$StockPars$SRrel)) {
+    if (is.null(SCA_args$SR) && !is.null(Data@Misc$StockPars$SRrel)) {
       SCA_args$SR <- ifelse(Data@Misc$StockPars$SRrel[x] == 1, "BH", "Ricker")
     }
-    if(is.null(SCA_args$vulnerability) && !is.null(Data@OM$Vmaxlen)) {
+    if (is.null(SCA_args$vulnerability) && !is.null(Data@OM$Vmaxlen)) {
       SCA_args$vulnerability <- ifelse(Data@OM$Vmaxlen[x] != 1, "dome", "logistic")
     }
     
@@ -277,13 +277,13 @@ Shortcut2 <- function(x, Data, method = "N", SCA_args = list(), VAR_args = list(
     F_est <- run_SCA@FMort
     F_OM <- Data@Misc$FleetPars$Find[x, ] * Data@Misc$FleetPars$qs[x]
     
-    if(method == "B") {
+    if (method == "B") {
       SSB_est <- run_SCA@SSB[-length(run_SCA@SSB)]
       SSB_OM <- apply(Data@Misc$StockPars$SSB[x, , , ], 2, sum)
       
       var_resid <- data.frame(B = log(SSB_est/SSB_OM), FM = log(F_est/F_OM))
       
-    } else if(method == "N") {
+    } else if (method == "N") {
       N_est <- run_SCA@N_at_age[-length(run_SCA@SSB), ]
       N_OM <- apply(Data@Misc$StockPars$N[x, , , ], 1:2, sum) %>% t()
       
@@ -331,7 +331,7 @@ project_ASM <- function(x, R_out, F_out, Hist, Data) {
   for(y in 1:n_y) {
     N[1, y+1] <- R_out[y+1]
     for(a in 2:n_age - 1) N[a+1, y+1] <- N[a, y] * exp(-V[a, y] * F_out[y] - M[a, y])
-    if(Hist$StockPars$plusgroup) N[n_age, y+1] <- N[n_age, y+1] + N[n_age, y] * exp(-V[n_age, y] * F_out[y] - M[n_age, y])
+    if (Hist$StockPars$plusgroup) N[n_age, y+1] <- N[n_age, y+1] + N[n_age, y] * exp(-V[n_age, y] * F_out[y] - M[n_age, y])
   }
   
   SSB <- colSums(N * Wt * Mat)
@@ -343,7 +343,7 @@ project_ASM <- function(x, R_out, F_out, Hist, Data) {
 
 
 #calc_err <- function(x_est, x_OM, AC_method) {
-#  if(AC_method == "mle") {
+#  if (AC_method == "mle") {
 #    opt <- nlminb(c(log(0.1), 0), err_likelihood, x_est = x_est, x_OM = x_OM, n = length(x_est))
 #    c(exp(opt$par[1]), ilogit2(opt$par[2], -1, 1, 0), 1)
 #  } else {

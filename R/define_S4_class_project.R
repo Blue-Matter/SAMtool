@@ -55,36 +55,37 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 projection <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catch, p_years = 50, p_sim = 200,
                        obs_error, process_error, max_F = 3, seed = 499) {
   constrain <- match.arg(constrain)
-  if(constrain == "Catch") {
-    if(missing(Catch)) stop("Need a value of argument Catch.")
-    if(length(Catch) == 1) {
+  if (constrain == "Catch") {
+    if (missing(Catch)) stop("Need a value of argument Catch.")
+    if (length(Catch) == 1) {
       Catch <- rep(Catch, p_years)
     } else {
       stop(paste0("Catch needs to be of length p_years (", p_years, ")"))
     }
     Ftarget <- NULL 
   }
-  if(constrain == "F") {
-    if(missing(Ftarget)) stop("Need a value of F (argument \"Ftarget\").")
-    if(length(Ftarget) == 1) {
+  if (constrain == "F") {
+    if (missing(Ftarget)) stop("Need a value of F (argument \"Ftarget\").")
+    if (length(Ftarget) == 1) {
       Ftarget <- rep(Ftarget, p_years)
     } else stop(paste0("Ftarget needs to be of length p_years (", p_years, ")"))
     Catch <- NULL
   }
-  if(!missing(obs_error)) {
-    if(length(obs_error) < 2) {
+  if (!missing(obs_error)) {
+    if (length(obs_error) < 2) {
       stop("obs_error should be a list of length 2 for the standard deviation of index and catch, respectively.")
     }
   } else {
     nsurvey <- ifelse(is.matrix(Assessment@Index), Assessment@Index %>% ncol(), 1)
     obs_error <- list(array(1, c(p_sim, p_years, nsurvey)), matrix(1, p_sim, p_years))
   }
-  if(missing(process_error)) process_error <- matrix(1, p_sim, p_years)
-  if(!Assessment@conv) warning("Assessment model did not appear to converge.")
+  if (missing(process_error)) process_error <- matrix(1, p_sim, p_years)
+  if (!Assessment@conv) warning("Assessment model did not appear to converge.")
 
-  f <- get(paste0("projection_", Assessment@Model))
-  out <- f(Assessment, constrain = constrain, Catch = Catch, Ftarget = Ftarget, p_years = p_years, p_sim = p_sim,
-           process_error = process_error, obs_error = obs_error, max_F = max_F, seed = seed)
+  func <- paste0("projection_", Assessment@Model)
+  pars <- list(Assessment = Assessment, constrain = constrain, Catch = Catch, Ftarget = Ftarget, p_years = p_years, p_sim = p_sim,
+               process_error = process_error, obs_error = obs_error, max_F = max_F, seed = seed)
+  out <- do.call2(func, pars)
   return(out)
 }
 
@@ -97,25 +98,25 @@ projection_SP <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catc
   
   # Sample rec_devs and obs_error
   set.seed(seed)
-  if(is.matrix(process_error)) {
-    if(nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
-    if(ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
+  if (is.matrix(process_error)) {
+    if (nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
+    if (ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
     B_dev <- process_error
   } else {
     tau <- ifelse(!is.null(process_error), process_error[1], TMB_report$tau)
-    if(!is.null(tau) && tau > 0) B_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
+    if (!is.null(tau) && tau > 0) B_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
   }
-  if(!exists("B_dev", inherits = FALSE)) B_dev <- matrix(1, p_sim, p_years)
+  if (!exists("B_dev", inherits = FALSE)) B_dev <- matrix(1, p_sim, p_years)
   
   nsurvey <- ifelse(is.matrix(Assessment@Index), Assessment@Index %>% ncol(), 1)
-  if(is.array(obs_error[[1]])) {
+  if (is.array(obs_error[[1]])) {
     Iobs_err <- obs_error[[1]]
   } else {
     samps <- rnorm(p_years * p_sim * nsurvey, 0, obs_error[[1]]) %>% array(c(nsurvey, p_sim, p_years)) %>% 
       aperm(c(2, 3, 1))
     Iobs_err <- exp(samps)
   }
-  if(is.array(obs_error[[2]])) {
+  if (is.array(obs_error[[2]])) {
     Cobs_err <- obs_error[[2]]
   } else {
     omega <- ifelse(!is.null(obs_error[[2]]), obs_error[[2]], 0)
@@ -126,14 +127,14 @@ projection_SP <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catc
   B[, 1] <- TMB_report$B[length(TMB_report$B)] * B_dev[, 1]
   Ipred <- array(NA_real_, c(p_sim, p_years, nsurvey))
   
-  if(constrain == "F") {
+  if (constrain == "F") {
     Fout <- matrix(pmin(Ftarget, ifelse(TMB_data$dt < 1, max_F, 1 - exp(-max_F))), p_sim, p_years, byrow = TRUE)
   } else {
     Fout <- matrix(NA, p_sim, p_years)
   }
   
   for(y in 1:p_years + 1) {
-    if(constrain == "F") {
+    if (constrain == "F") {
       one_ts <- lapply(B[, y-1], function(x, ...) SP_catch_solver(B = x, ...), FM = Ftarget[y-1], dt = TMB_data$dt,
                        MSY = TMB_report$MSY, K = TMB_report$K, n = TMB_report$n, n_term = TMB_report$n_term)
     } else {
@@ -146,7 +147,7 @@ projection_SP <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Catc
     }
     Cpred[, y-1] <- vapply(one_ts, getElement, numeric(1), 1)
     Ipred[, y-1, ] <- outer(B[, y-1], TMB_report$q) * Iobs_err[, y-1, ]
-    if(y <= p_years) B[, y] <- vapply(one_ts, getElement, numeric(1), 2)
+    if (y <= p_years) B[, y] <- vapply(one_ts, getElement, numeric(1), 2)
   }
   
   return(new("project", Catch = Cpred * Cobs_err, Index = Ipred, B = B, VB = B, SSB = B, FMort = Fout))
@@ -163,7 +164,7 @@ SP_catch_solver <- function(FM, B, dt, MSY, K, n, n_term, TAC = NULL) {
       ifelse(n == 1, -exp(1) * MSY * B_int[j]/K * log(B_int[j]/K),
              n_term/(n-1) * MSY * (B_int[j]/K - (B_int[j]/K)^n))
   }
-  if(!is.null(TAC)) {
+  if (!is.null(TAC)) {
     return((sum(Cpred_int) - TAC)^2)
   } else {
     return(c(sum(Cpred_int), B_int[length(B_int)]))
@@ -184,26 +185,26 @@ projection_SCA <- function(Assessment, constrain = c("F", "Catch"), Ftarget, Cat
   
   # Sample rec_devs and obs_error
   set.seed(seed)
-  if(is.matrix(process_error)) {
-    if(nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
-    if(ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
+  if (is.matrix(process_error)) {
+    if (nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
+    if (ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
     p_log_rec_dev <- process_error
   } else {
     tau <- ifelse(!is.null(process_error), process_error[1], TMB_report$tau)
-    if(!is.null(tau) && tau > 0) p_log_rec_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
+    if (!is.null(tau) && tau > 0) p_log_rec_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
   }
   
-  if(!exists("p_log_rec_dev", inherits = FALSE)) p_log_rec_dev <- matrix(1, p_sim, p_years)
+  if (!exists("p_log_rec_dev", inherits = FALSE)) p_log_rec_dev <- matrix(1, p_sim, p_years)
   
   nsurvey <- ifelse(is.matrix(Assessment@Index), Assessment@Index %>% ncol(), 1)
-  if(is.array(obs_error[[1]])) {
+  if (is.array(obs_error[[1]])) {
     Iobs_err <- obs_error[[1]]
   } else {
     samps <- rnorm(p_years * p_sim * nsurvey, 0, obs_error[[1]]) %>% array(c(nsurvey, p_sim, p_years)) %>% 
       aperm(c(2, 3, 1))
     Iobs_err <- exp(samps)
   }
-  if(is.array(obs_error[[2]])) {
+  if (is.array(obs_error[[2]])) {
     Cobs_err <- obs_error[[2]]
   } else {
     omega <- ifelse(!is.null(obs_error[[2]]), obs_error[[2]], 0)
@@ -237,8 +238,8 @@ projection_SCA_internal <- function(x, FMort, Catch, constrain, TMB_report, TMB_
   tv_M <- TMB_data$tv_M
   M_bounds <- TMB_data$M_bounds
 
-  if(constrain == "F") {
-    if(Pope) {
+  if (constrain == "F") {
+    if (Pope) {
       Fout <- pmin(FMort, 1 - exp(-max_F))
       UU <- vul %o% FMort
     } else {
@@ -247,7 +248,7 @@ projection_SCA_internal <- function(x, FMort, Catch, constrain, TMB_report, TMB_
     }
   } else {
     Fout <- numeric(ncol(p_log_rec_dev))
-    if(Pope) {
+    if (Pope) {
       UU <- matrix(NA, length(vul), ncol(p_log_rec_dev))
     } else {
       FF <- matrix(NA, length(vul), ncol(p_log_rec_dev))
@@ -264,8 +265,8 @@ projection_SCA_internal <- function(x, FMort, Catch, constrain, TMB_report, TMB_
   E[1] <- sum(N[1, ] * mat * weight)
   B[1] <- sum(N[1, ] * weight)
   for(y in 1:ncol(p_log_rec_dev)) {
-    if(constrain == "Catch") {
-      if(Pope) {
+    if (constrain == "Catch") {
+      if (Pope) {
         VB[y] <- sum(N[y, ] * exp(-0.5 * M_p[, y]) * vul * weight)
         Fout[y] <- ifelse(Catch[y]/VB[y] > 1 - exp(-max_F), 1 - exp(-max_F), Catch[y]/VB[y])
         UU[, y] <- vul * Fout[y]
@@ -275,20 +276,20 @@ projection_SCA_internal <- function(x, FMort, Catch, constrain, TMB_report, TMB_
       }
     }
     
-    if(Pope) {
+    if (Pope) {
       surv[, y] <- (1 - UU[, y]) * exp(-M_p[, y])
     } else {
       surv[, y] <- exp(-FF[, y] - M_p[, y])
     }
 
-    if(y < ncol(p_log_rec_dev)) {
+    if (y < ncol(p_log_rec_dev)) {
       N[y+1, 2:ncol(N)] <- N[y, 1:(ncol(N)-1)] * surv[1:(ncol(N)-1), y]
       N[y+1, ncol(N)] <- N[y+1, ncol(N)] + N[y, ncol(N)] * surv[ncol(N), y]
       
       E[y+1] <- sum(N[y+1, ] * mat * weight, na.rm = TRUE)
       B[y+1] <- sum(N[y+1, ] * weight, na.rm = TRUE)
       
-      if(tv_M == "DD") {
+      if (tv_M == "DD") {
         M_p[, y+1] <- ifelse(B[y+1] <= TMB_report$B0, M_bounds[1] + (M_bounds[2] - M_bounds[1]) * (1 - B[y+1]/TMB_report$B0), M_bounds[1])
       } else {
         M_p[, y+1] <- M_p[, 1]
@@ -296,9 +297,9 @@ projection_SCA_internal <- function(x, FMort, Catch, constrain, TMB_report, TMB_
       N[y+1, 1] <- R_pred(E[y+1], TMB_report$h, TMB_report$R0, TMB_report$E0, TMB_data$SR_type) * p_log_rec_dev[x, y+1]
     }
   }
-  if(Pope) {
+  if (Pope) {
     CAApred <- t(t(N) * exp(-0.5 * M_p) * UU)
-    if(constrain == "F") VB <- colSums(t(N) * TMB_report$vul * weight * exp(-0.5 * M_p))
+    if (constrain == "F") VB <- colSums(t(N) * TMB_report$vul * weight * exp(-0.5 * M_p))
     Cpred <- colSums(t(CAApred) * weight)
   } else {
     out <- lapply(1:length(Fout), function(x) SCA_catch_solver(FM = Fout[x], N = N[x, ], weight = weight, vul = vul, M = M_p[, x]))
@@ -308,13 +309,13 @@ projection_SCA_internal <- function(x, FMort, Catch, constrain, TMB_report, TMB_
   }
   
   Ipred <- vapply(1:TMB_data$nsurvey, function(sur) {
-    if(sum(TMB_data$I_vul[sur])) {
+    if (sum(TMB_data$I_vul[sur])) {
       I_vul <- TMB_data$I_vul[, sur]
     } else {
       I_vul <- vul
     }
     N_sur <- I_vul * t(N)
-    if(TMB_data$I_units[sur]) {
+    if (TMB_data$I_units[sur]) {
       survey <- colSums(N_sur * weight)
     } else {
       survey <- colSums(N_sur)
@@ -336,7 +337,7 @@ Baranov <- function(sel = 1, apicalF, M, N) {
 SCA_catch_solver <- function(FM, N, weight = 1, vul = 1, M, TAC = NULL) {
   CAA <- Baranov(vul, FM, M, N)
   Cw <- sum(CAA * weight)
-  if(!is.null(TAC)) {
+  if (!is.null(TAC)) {
     return((Cw - TAC)^2)
   } else {
     return(list(CAA = CAA, Cpred = Cw, FM = FM))
@@ -346,10 +347,10 @@ SCA_catch_solver <- function(FM, N, weight = 1, vul = 1, M, TAC = NULL) {
 
 R_pred <- function(SSB, h, R0, SSB0, SR_type = c("BH", "Ricker", "none")) {
   SR_type <- match.arg(SR_type)
-  if(SR_type == "BH") {
+  if (SR_type == "BH") {
     den <- SSB0 * (1 - h) + (5*h - 1) * SSB
     RR <- 4 * h * R0 * SSB / den
-  } else if(SR_type == "Ricker") {
+  } else if (SR_type == "Ricker") {
     expon <- 1.25 * (1 - SSB/SSB0)
     RR <- (5*h)^expon * SSB * R0 / SSB0
   } else {
@@ -368,26 +369,26 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
   
   # Sample rec_devs and obs_error
   set.seed(seed)
-  if(is.matrix(process_error)) {
-    if(nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
-    if(ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
+  if (is.matrix(process_error)) {
+    if (nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
+    if (ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
     p_log_rec_dev <- process_error
   } else {
     tau <- ifelse(!is.null(process_error), process_error[1], TMB_report$tau)
-    if(!is.null(tau) && tau > 0) p_log_rec_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
+    if (!is.null(tau) && tau > 0) p_log_rec_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
   }
   
-  if(!exists("p_log_rec_dev", inherits = FALSE)) p_log_rec_dev <- matrix(1, p_sim, p_years)
+  if (!exists("p_log_rec_dev", inherits = FALSE)) p_log_rec_dev <- matrix(1, p_sim, p_years)
   
   nsurvey <- ifelse(is.matrix(Assessment@Index), Assessment@Index %>% ncol(), 1)
-  if(is.array(obs_error[[1]])) {
+  if (is.array(obs_error[[1]])) {
     Iobs_err <- obs_error[[1]]
   } else {
     samps <- rnorm(p_years * p_sim * nsurvey, 0, obs_error[[1]]) %>% array(c(nsurvey, p_sim, p_years)) %>% 
       aperm(c(2, 3, 1))
     Iobs_err <- exp(samps)
   }
-  if(is.array(obs_error[[2]])) {
+  if (is.array(obs_error[[2]])) {
     Cobs_err <- obs_error[[2]]
   } else {
     omega <- ifelse(!is.null(obs_error[[2]]), obs_error[[2]], 0)
@@ -401,19 +402,19 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
   R[, 1:TMB_data$k] <- rep(TMB_report$R[(length(TMB_report$R) - TMB_data$k + 1):length(TMB_report$R)], each = p_sim) *
     p_log_rec_dev[, 1:TMB_data$k]
 
-  if(constrain == "F") {
+  if (constrain == "F") {
     Fout <- matrix(pmin(Ftarget, max_F), p_sim, p_years, byrow = TRUE)
   } else {
     Fout <- matrix(NA, p_sim, p_years)
   }
 
   for(y in 1:p_years + 1) {
-    if(y+TMB_data$k-1 <= p_years) {
+    if (y+TMB_data$k-1 <= p_years) {
       R[, y+TMB_data$k-1] <- R_pred(B[, y-1], TMB_report$h, TMB_report$R0, TMB_report$B0, TMB_data$SR_type) *
         p_log_rec_dev[, y+TMB_data$k-1]
     }
 
-    if(constrain == "F") {
+    if (constrain == "F") {
       one_ts <- Map(function(x, y, z, ...) cDD_catch_solver(B = x, N = y, R = z, ...), x = B[, y-1], y = N[, y-1], z = R[, y-1],
                     MoreArgs = list(FM = Ftarget[y-1], Kappa = TMB_data$Kappa, Winf = TMB_data$Winf, wk = TMB_data$wk, M = TMB_report$M))
     } else {
@@ -429,7 +430,7 @@ projection_cDD <- projection_cDD_SS <- function(Assessment, constrain = c("F", "
     Cpred[, y-1] <- vapply(one_ts, getElement, numeric(1), 1)
     Ipred[, y-1, ] <- outer(B[, y-1], TMB_report$q) * Iobs_err[, y-1, ]
 
-    if(y <= p_years) {
+    if (y <= p_years) {
       N[, y] <- vapply(one_ts, getElement, numeric(1), 2)
       B[, y] <- vapply(one_ts, getElement, numeric(1), 3)
     }
@@ -451,7 +452,7 @@ cDD_catch_solver <- function(FM, B, N, R, M, Kappa, Winf, wk, TAC = NULL) {
   C4 <- Binf + (N - Ninf) * Kappa * Winf / ZK
   Cpred <- FM * ((C1 * C2)/ZK + C4)
 
-  if(!is.null(TAC)) {
+  if (!is.null(TAC)) {
     return((Cpred - TAC)^2)
   } else {
 
@@ -475,26 +476,26 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
   
   # Sample rec_devs and obs_error
   set.seed(seed)
-  if(is.matrix(process_error)) {
-    if(nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
-    if(ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
+  if (is.matrix(process_error)) {
+    if (nrow(process_error) != p_sim) stop("Number of rows of process_error not equal to ", p_sim, call. = FALSE)
+    if (ncol(process_error) != p_years) stop("Number of columns of process_error not equal to ", p_years, call. = FALSE)
     p_log_rec_dev <- process_error
   } else {
     tau <- ifelse(!is.null(process_error), process_error[1], TMB_report$tau)
-    if(!is.null(tau) && tau > 0) p_log_rec_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
+    if (!is.null(tau) && tau > 0) p_log_rec_dev <- exp(matrix(rnorm(p_years * p_sim, 0, tau), p_sim, p_years) - 0.5 * tau^2)
   }
   
-  if(!exists("p_log_rec_dev", inherits = FALSE)) p_log_rec_dev <- matrix(1, p_sim, p_years)
+  if (!exists("p_log_rec_dev", inherits = FALSE)) p_log_rec_dev <- matrix(1, p_sim, p_years)
   
   nsurvey <- ifelse(is.matrix(Assessment@Index), Assessment@Index %>% ncol(), 1)
-  if(is.array(obs_error[[1]])) {
+  if (is.array(obs_error[[1]])) {
     Iobs_err <- obs_error[[1]]
   } else {
     samps <- rnorm(p_years * p_sim * nsurvey, 0, obs_error[[1]]) %>% array(c(nsurvey, p_sim, p_years)) %>% 
       aperm(c(2, 3, 1))
     Iobs_err <- exp(samps)
   }
-  if(is.array(obs_error[[2]])) {
+  if (is.array(obs_error[[2]])) {
     Cobs_err <- obs_error[[2]]
   } else {
     omega <- ifelse(!is.null(obs_error[[2]]), obs_error[[2]], 0)
@@ -508,7 +509,7 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
   R[, 1:TMB_data$k] <- rep(TMB_report$R[(length(TMB_report$R) - TMB_data$k + 1):length(TMB_report$R)], each = p_sim) *
     p_log_rec_dev[, 1:TMB_data$k]
 
-  if(constrain == "F") {
+  if (constrain == "F") {
     Fout <- matrix(pmin(Ftarget, max_F), p_sim, p_years, byrow = TRUE)
     surv <- exp(-TMB_report$M - Fout)
   } else {
@@ -516,26 +517,26 @@ projection_DD_TMB <- projection_DD_SS <- function(Assessment, constrain = c("F",
   }
 
   for(y in 1:p_years + 1) {
-    if(y+TMB_data$k-1 <= p_years) {
+    if (y+TMB_data$k-1 <= p_years) {
       R[, y+TMB_data$k-1] <- R_pred(B[, y-1], TMB_report$h, TMB_report$R0, TMB_report$B0, TMB_data$SR_type) *
         p_log_rec_dev[, y+TMB_data$k-1]
     }
-    if(constrain == "Catch") {
+    if (constrain == "Catch") {
       Fout[,y-1] <- vapply(1:p_sim, function(i) {
         optimize(SCA_catch_solver, c(1e-8, max_F), N = B[i, y-1], M = TMB_report$M, TAC = Catch[y-1])$minimum
       }, numeric(1))
       surv[, y-1] <- exp(-TMB_report$M - Fout[,y-1])
     }
     Cpred[, y-1] <- vapply(1:p_sim, function(i) Baranov(apicalF = Fout[i, y-1], M = TMB_report$M, N = B[i, y-1]), numeric(1))
-    if(Assessment@obj$env$data$condition == "catch") {
+    if (Assessment@obj$env$data$condition == "catch") {
       Ipred[, y-1, ] <- outer(B[, y-1], TMB_report$q) * Iobs_err[, y-1, ]
     } 
-    if(y <= p_years) {
+    if (y <= p_years) {
       B[, y] <- surv[, y-1] * (TMB_data$Alpha * N[, y-1] + TMB_data$Rho * B[, y-1]) + TMB_data$wk * R[, y]
       N[, y] <- surv[, y-1] * N[, y-1] + R[, y]
     }
   }
-  if(Assessment@obj$env$data$condition == "effort") {
+  if (Assessment@obj$env$data$condition == "effort") {
     Eff <- Fout/TMB_report$q/Assessment@info$E_rescale
     Ipred <- Cpred/Eff * Iobs_err
   }

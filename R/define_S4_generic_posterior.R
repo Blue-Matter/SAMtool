@@ -39,16 +39,16 @@ setMethod("posterior", signature(x = "RCModel"),
           function(x, priors_only = FALSE, 
                    laplace = FALSE, chains = 2, iter = 2000, warmup = floor(iter/2), thin = 5,
                    seed = 34, init = "last.par.best", cores = chains, ...) {
-            if(!requireNamespace("tmbstan", quietly = TRUE)) stop("Install tmbstan to use this function.")
+            if (!requireNamespace("tmbstan", quietly = TRUE)) stop("Install tmbstan to use this function.")
             
             xchar <- substitute(x) %>% as.character()
             obj <- x@mean_fit$obj
             
-            if(is.null(obj)) {
+            if (is.null(obj)) {
               stop(paste0("No TMB object was found in ", xchar, "@mean_fit$obj. Re-run RCM with mean_fit = TRUE."))
             }
             
-            if(priors_only) {
+            if (priors_only) {
               newdata <- structure(obj$env$data, check.passed = NULL)
               newdata$LWT_fleet[] <- 0
               newdata$LWT_index[] <- 0
@@ -71,7 +71,7 @@ setMethod("posterior", signature(x = "RCModel"),
             lower <- rep(-Inf, length(obj$par))
             upper <- rep(Inf, length(obj$par))
             
-            if(!is.null(obj$env$data$use_prior[1]) && obj$env$data$use_prior[1] > 0) { # Uniform priors need bounds
+            if (!is.null(obj$env$data$use_prior[1]) && obj$env$data$use_prior[1] > 0) { # Uniform priors need bounds
               lower[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
               upper[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
             }
@@ -86,8 +86,8 @@ setMethod("posterior", signature(x = "RCModel"),
 #' @exportMethod posterior
 setMethod("posterior", signature(x = "Assessment"),
           function(x, priors_only = FALSE, ...) {
-            if(!requireNamespace("tmbstan", quietly = TRUE)) stop("Install tmbstan to use this function.")
-            
+            stop("Posterior sampling not set up for assessment models.")
+            if (!requireNamespace("tmbstan", quietly = TRUE)) stop("Install tmbstan to use this function.")
             xchar <- substitute(x) %>% as.character()
             f <- get(paste0("posterior_", x@Model))
             f(x, ...)
@@ -107,19 +107,19 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   nchains <- stanfit@sim$chains
   nsim_stan <- length(stanfit@sim$samples[[1]][[1]])
   
-  if(missing(sim)) {
+  if (missing(sim)) {
     sim_stan <- matrix(0, nsim, 2)
     sim_stan[, 1] <- sample(1:nchains, nsim, replace = TRUE)
     sim_stan[, 2] <- sample(1:nsim_stan, nsim, replace = nsim_stan < nsim)
-  } else if(!is.matrix(sim)) {
+  } else if (!is.matrix(sim)) {
     sim_stan <- matrix(1, nsim, 2)
     sim_stan[, 2] <- sim
   } else {
     sim_stan <- sim
   }
   
-  if(any(sim_stan[, 1] > nchains)) stop("There is only ", nchains, " chain(s) in the stan model.")
-  if(any(sim_stan[, 2] > nsim_stan)) stop("There are only ", nsim_stan, " iterations in the stan model.")
+  if (any(sim_stan[, 1] > nchains)) stop("There is only ", nchains, " chain(s) in the stan model.")
+  if (any(sim_stan[, 2] > nsim_stan)) stop("There are only ", nsim_stan, " iterations in the stan model.")
   
   # Get samps
   message("Sampling ", nsim, " iterations for the operating model...")
@@ -135,14 +135,14 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   nyears <- OM@nyears
   proyears <- OM@proyears
   obj <- RCModel@mean_fit$obj
-  if(is.null(obj)) stop("No TMB object found in RCModel@mean_fit.")
+  if (is.null(obj)) stop("No TMB object found in RCModel@mean_fit.")
   
   message("Re-constructing population model...")
   
-  if(cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
+  if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
   
   res <- pblapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE, 
-                  cl = if(snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+                  cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
   
   OM_par <- RCM_update_OM(res, obj$env$data, maxage, nyears, proyears)
   message("Updating operating model with MCMC samples...\n")
@@ -169,8 +169,8 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   Eff <- apply(OM@cpars$Find, 2, range)
   OM@EffLower <- Eff[1, ]
   OM@EffUpper <- Eff[2, ]
-  if(length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
-  if(length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
+  if (length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
+  if (length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
   message("Historical effort trends set in OM@EffLower and OM@EffUpper.\n")
   
   ### Rec devs
@@ -182,7 +182,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   Perr_y[, maxage + 1:nyears] <- OM_par$Perr
   message("Historical recruitment set in OM@cpars$Perr_y.")
   
-  if(any(OM_par$AC != 0)) {
+  if (any(OM_par$AC != 0)) {
     OM@cpars$AC <- OM_par$AC
     OM@AC <- range(OM_par$AC)
     message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
@@ -193,8 +193,8 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   }
   
   prior <- list(use_prior = obj$env$data$use_prior)
-  if(prior$use_prior[2]) OM@cpars$hs <- OM_par$h
-  if(prior$use_prior[3]) OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
+  if (prior$use_prior[2]) OM@cpars$hs <- OM_par$h
+  if (prior$use_prior[3]) OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
   
   RCModel@OM <- OM
   RCModel@SSB <- OM_par$SSB

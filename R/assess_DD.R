@@ -174,7 +174,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   wa <- Data@wla[x] * la^Data@wlb[x]
   a50V <- iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x])
   a50V <- max(a50V, 1)
-  if(any(names(dots) == "yind")) {
+  if (any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
   } else {
     ystart <- which(!is.na(Data@Cat[x, ]))[1]
@@ -186,25 +186,25 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   ny <- length(C_hist)
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- vapply(Ind, getElement, numeric(ny), "I_hist")
-  if(is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
+  if (is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
   
   I_sd <- vapply(Ind, getElement, numeric(ny), "I_sd")
   I_units <- vapply(Ind, getElement, numeric(1), "I_units")
 
   nsurvey <- ncol(I_hist)
 
-  if(condition == "effort") {
-    if(nsurvey > 1) message("Only one index time series can be used when conditioning on effort.", call. = FALSE)
+  if (condition == "effort") {
+    if (nsurvey > 1) message("Only one index time series can be used when conditioning on effort.", call. = FALSE)
     E_hist <- C_hist/I_hist[, 1]
-    if(any(is.na(E_hist))) stop("Missing values in catch and index in Data object.")
+    if (any(is.na(E_hist))) stop("Missing values in catch and index in Data object.")
     E_rescale <- 1/mean(E_hist)
     E_hist <- E_hist * E_rescale
   } else {
     E_hist <- rep(1, length(yind))
   }
   
-  if(MW) {
-    if(!is.null(Data@Misc[[x]]$MW)) {
+  if (MW) {
+    if (!is.null(Data@Misc[[x]]$MW)) {
       MW_hist <- Data@Misc[[x]]$MW
     } else {
       MW_hist <- apply(Data@CAL[x, , ], 1, function(xx) {
@@ -219,18 +219,18 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   # Generate priors
   prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
 
-  if(!is.null(start$k)) {
+  if (!is.null(start$k)) {
     k <- start$k
   } else {
     k <- ceiling(a50V)  # get age nearest to 50% vulnerability (ascending limb)
     k[k > Data@MaxAge/2] <- ceiling(Data@MaxAge/2)  # to stop stupidly high estimates of age at 50% vulnerability
   }
-  if(!is.null(start$Rho)) {
+  if (!is.null(start$Rho)) {
     Rho <- start$Rho
   } else {
     Rho <- (wa[k + 2] - Winf)/(wa[k + 1] - Winf)
   }
-  if(!is.null(start$Alpha)) {
+  if (!is.null(start$Alpha)) {
     Alpha <- start$Alpha
   } else {
     Alpha <- Winf * (1 - Rho)
@@ -238,15 +238,15 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   M <- Data@Mort[x]
   wk <- wa[k]
 
-  if(rescale == "mean1") rescale <- 1/mean(C_hist)
-  if(dep <= 0 || dep > 1) stop("Initial depletion (dep) must be between > 0 and <= 1.")
-  if(!is.list(LWT)) {
-    if(!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  if (rescale == "mean1") rescale <- 1/mean(C_hist)
+  if (dep <= 0 || dep > 1) stop("Initial depletion (dep) must be between > 0 and <= 1.")
+  if (!is.list(LWT)) {
+    if (!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
     LWT <- list(Index = LWT)
     LWT$MW <- 1
   } else {
-    if(is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
-    if(is.null(LWT$MW)) LWT$MW <- 1 
+    if (is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
+    if (is.null(LWT$MW)) LWT$MW <- 1 
   }
 
   fix_sigma <- condition == "effort" || nsurvey > 1 || MW || fix_sd
@@ -260,66 +260,66 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k)
 
   params <- list()
-  if(!is.null(start)) {
-    if(!is.null(start$R0) && is.numeric(start$R0)) params$R0x <- log(start$R0[1] * rescale)
-    if(!is.null(start$h) && is.numeric(start$h)) {
-      if(SR == "BH") {
+  if (!is.null(start)) {
+    if (!is.null(start$R0) && is.numeric(start$R0)) params$R0x <- log(start$R0[1] * rescale)
+    if (!is.null(start$h) && is.numeric(start$h)) {
+      if (SR == "BH") {
         h_start <- (start$h[1] - 0.2)/0.8
         params$transformed_h <- logit(h_start)
       } else {
         params$transformed_h <- log(start$h[1] - 0.2)
       }
     }
-    if(!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M[1])
-    if(!is.null(start$q_effort) && is.numeric(start$q_effort)) params$log_q_effort <- log(start$q_effort[1])
-    if(!is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) params$F_equilibrium <- start$F_equilibrium
-    if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega[1])
-    if(!is.null(start[["sigma"]]) && is.numeric(start[["sigma"]])) params$log_sigma <- log(start[["sigma"]])
-    if(!is.null(start[["sigma_W"]]) && is.numeric(start[["sigma_W"]])) params$log_sigma_W <- log(start[["sigma_W"]])
-    if(!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau[1])
+    if (!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M[1])
+    if (!is.null(start$q_effort) && is.numeric(start$q_effort)) params$log_q_effort <- log(start$q_effort[1])
+    if (!is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) params$F_equilibrium <- start$F_equilibrium
+    if (!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega[1])
+    if (!is.null(start[["sigma"]]) && is.numeric(start[["sigma"]])) params$log_sigma <- log(start[["sigma"]])
+    if (!is.null(start[["sigma_W"]]) && is.numeric(start[["sigma_W"]])) params$log_sigma_W <- log(start[["sigma_W"]])
+    if (!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau[1])
   }
-  if(is.null(params$R0x)) {
+  if (is.null(params$R0x)) {
     params$R0x <- ifelse(is.null(Data@OM$R0[x]), log(4 * mean(data$C_hist)), log(1.5 * rescale * Data@OM$R0[x]))
   }
-  if(is.null(params$transformed_h)) {
+  if (is.null(params$transformed_h)) {
     h_start <- ifelse(is.na(Data@steep[x]), 0.9, Data@steep[x])
-    if(SR == "BH") {
+    if (SR == "BH") {
       h_start <- (h_start - 0.2)/0.8
       params$transformed_h <- logit(h_start)
     } else {
       params$transformed_h <- log(h_start - 0.2)
     }
   }
-  if(is.null(params$log_M)) params$log_M <- log(M)
-  if(is.null(params$log_q_effort)) params$log_q_effort <- log(1)
-  if(is.null(params$F_equilibrium)) params$F_equilibrium <- ifelse(dep < 1, 0.1, 0)
-  if(is.null(params$log_omega)) {
+  if (is.null(params$log_M)) params$log_M <- log(M)
+  if (is.null(params$log_q_effort)) params$log_q_effort <- log(1)
+  if (is.null(params$F_equilibrium)) params$F_equilibrium <- ifelse(dep < 1, 0.1, 0)
+  if (is.null(params$log_omega)) {
     params$log_omega <- max(0.05, sdconv(1, Data@CV_Cat[x]), na.rm = TRUE) %>% log()
   }
-  if(is.null(params[["log_sigma"]])) params$log_sigma <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE) %>% log()
-  if(is.null(params[["log_sigma_W"]])) params$log_sigma_W <- log(0.1)
-  if(is.null(params$log_tau)) {
+  if (is.null(params[["log_sigma"]])) params$log_sigma <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE) %>% log()
+  if (is.null(params[["log_sigma_W"]])) params$log_sigma_W <- log(0.1)
+  if (is.null(params$log_tau)) {
     params$log_tau <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x]) %>% log()
   }
   params$log_rec_dev = rep(0, ny)
 
   info <- list(Year = Year, data = data, params = params, I_hist = I_hist, LH = LH,
                rescale = rescale, control = control, inner.control = inner.control)
-  if(condition == "effort") info$E_rescale <- E_rescale
+  if (condition == "effort") info$E_rescale <- E_rescale
 
   map <- list()
-  if(condition == "catch") map$log_q_effort <- factor(NA)
-  if(fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
-  if(!prior$use_prior[3]) map$log_M <- factor(NA)
-  if(dep == 1) map$F_equilibrium <- factor(NA)
-  if(fix_omega) map$log_omega <- factor(NA)
-  if(fix_sigma) map$log_sigma <- factor(NA)
+  if (condition == "catch") map$log_q_effort <- factor(NA)
+  if (fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if (!prior$use_prior[3]) map$log_M <- factor(NA)
+  if (dep == 1) map$F_equilibrium <- factor(NA)
+  if (fix_omega) map$log_omega <- factor(NA)
+  if (fix_sigma) map$log_sigma <- factor(NA)
   map$log_sigma_W <- factor(NA)
-  if(fix_tau) map$log_tau <- factor(NA)
-  if(!state_space) map$log_rec_dev <- factor(rep(NA, ny))
+  if (fix_tau) map$log_tau <- factor(NA)
+  if (!state_space) map$log_rec_dev <- factor(rep(NA, ny))
 
   random <- NULL
-  if(integrate) random <- "log_rec_dev"
+  if (integrate) random <- "log_rec_dev"
   
   obj <- MakeADFun(data = info$data, parameters = info$params, random = random,
                    map = map, hessian = TRUE, DLL = "SAMtool", inner.control = inner.control, silent = silent)
@@ -332,7 +332,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   Yearplusone <- c(Year, max(Year) + 1)
   Yearplusk <- c(Year, max(Year) + 1:k)
 
-  if(condition == "catch") {
+  if (condition == "catch") {
     NLL_name <- paste0("Index_", 1:nsurvey)
   } else {
     NLL_name <- "Catch"
@@ -361,14 +361,14 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
                                     names = c("Total", NLL_name, "MW", "Dev", "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
-  if(!MW) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "MW"]
+  if (!MW) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "MW"]
 
-  if(state_space) {
+  if (state_space) {
     Assessment@Dev <- structure(report$log_rec_dev, names = Year)
     Assessment@Dev_type <- "log-Recruitment deviations"
   }
 
-  if(Assessment@conv) {
+  if (Assessment@conv) {
     ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec, report$M)
     report <- c(report, ref_pt[1:3])
 
@@ -379,7 +379,7 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
     Assessment@B_BMSY <- Assessment@SSB_SSBMSY <- Assessment@VB_VBMSY <- structure(report$B/report$BMSY, names = Yearplusone)
     Assessment@TMB_report <- report
 
-    if(state_space) {
+    if (state_space) {
       Assessment@SE_Dev <- structure(as.list(SD, "Std. Error")$log_rec_dev, names = Year)
     }
     
@@ -415,7 +415,7 @@ ref_pt_DD <- function(TMB_data, Arec, Brec, M) {
 }
 
 yield_fn_DD <- function(x, M, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, log_trans = FALSE) {
-  if(log_trans) {
+  if (log_trans) {
     FF <- exp(x)
   } else {
     FF <- x
@@ -423,12 +423,12 @@ yield_fn_DD <- function(x, M, Alpha, Rho, wk, SR, Arec, Brec, opt = TRUE, log_tr
   S0 <- exp(-M)
   SS <- S0 * exp(-FF)
   Spr <- (SS * Alpha/(1 - SS) + wk)/(1 - Rho * SS)
-  if(SR == "BH") Req <- (Arec * Spr - 1)/(Brec * Spr)
-  if(SR == "Ricker") Req <- log(Arec * Spr)/(Brec * Spr)
+  if (SR == "BH") Req <- (Arec * Spr - 1)/(Brec * Spr)
+  if (SR == "Ricker") Req <- log(Arec * Spr)/(Brec * Spr)
   Beq <- Spr * Req
   Ypr <- FF * Spr * (1 - SS) / (FF + M)
   Yield <- Ypr * Req
-  if(opt) {
+  if (opt) {
     return(-1 * Yield)
   } else {
     return(c(SPR = Spr, Yield = Yield, YPR = Ypr, B = Beq, R = Req))
@@ -439,9 +439,9 @@ DD_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   dots <- list(...)
   
   newdata <- obj$env$data
-  if(newdata$condition == "catch") {
+  if (newdata$condition == "catch") {
     newdata$C_hist <- rep(1e-8, newdata$ny)
-  } else if(newdata$condition == "effort") {
+  } else if (newdata$condition == "effort") {
     par[names(par) == "log_q_effort"] <- -1e8
   }
   par[names(par) == "F_equilibrium"] <- 0

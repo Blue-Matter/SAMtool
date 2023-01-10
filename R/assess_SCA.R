@@ -251,14 +251,14 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   catch_eq <- match.arg(catch_eq)
   comp <- match.arg(comp, several.ok = TRUE)
   comp_dist <- match.arg(comp_dist)
-  if(length(comp_multiplier) == 1) comp_multiplier <- rep(comp_multiplier, 2)
+  if (length(comp_multiplier) == 1) comp_multiplier <- rep(comp_multiplier, 2)
   SR <- match.arg(SR)  
   tv_M <- match.arg(tv_M)
   
-  if(is.character(early_dev)) early_dev <- match.arg(early_dev)
-  if(is.numeric(early_dev)) stopifnot(early_dev < length(Data@Year))
+  if (is.character(early_dev)) early_dev <- match.arg(early_dev)
+  if (is.numeric(early_dev)) stopifnot(early_dev < length(Data@Year))
   
-  if(any(names(dots) == "yind")) {
+  if (any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
   } else {
     yind <- which(!is.na(Data@Cat[x, ]))[1]
@@ -266,10 +266,10 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }
   Year <- Data@Year[yind]
   C_hist <- Data@Cat[x, yind]
-  if(any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
+  if (any(is.na(C_hist) | C_hist < 0)) warning("Error. Catch time series is not complete.")
   
   n_y <- length(C_hist)
-  if(any(names(dots) == "M_at_age") && dots$M_at_age) {
+  if (any(names(dots) == "M_at_age") && dots$M_at_age) {
     M <- Data@Misc$StockPars$M_ageArray[x, , n_y] * Data@Obs$Mbias[x]
     prior$M <- NULL
   } else {
@@ -288,29 +288,29 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   mat_age <- c(0, 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50)))) # Age-0 is immature
   mat_age <- mat_age/max(mat_age)
   
-  if(any(comp == "age")) {
+  if (any(comp == "age")) {
     Data <- expand_comp_matrix(Data, "CAA") # Make sure dimensions of CAA match that in catch (nyears).
     CAA_hist <- Data@CAA[x, yind, 1:n_age]
-    if(max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
+    if (max_age < Data@MaxAge) CAA_hist[, n_age] <- rowSums(Data@CAA[x, yind, n_age:(Data@MaxAge+1)], na.rm = TRUE)
     
-    if(all(is.na(CAA_hist))) warning("No age composition found in Data object", call. = FALSE)
+    if (all(is.na(CAA_hist))) warning("No age composition found in Data object", call. = FALSE)
   } else {
     CAA_hist <- matrix(0, n_y, n_age)
   }
   CAA_n_nominal <- rowSums(CAA_hist, na.rm = TRUE)
-  if(comp_multiplier[1] <= 1) {
+  if (comp_multiplier[1] <= 1) {
     CAA_n_rescale <- comp_multiplier[1] * CAA_n_nominal
   } else {
     CAA_n_rescale <- pmin(CAA_n_nominal, comp_multiplier[1])
   }
   
-  if(any(comp == "length")) {
+  if (any(comp == "length")) {
     CAL_hist <- Data@CAL[x, yind, ]
     CAL_sum <- colSums(CAL_hist, na.rm = TRUE) # Remove length bins with zeros for all years
     CAL_cdf <- cumsum(CAL_sum)
     CAL_ind <- which(CAL_sum > 0)[1]:which.max(CAL_cdf)[1]
     CAL_hist <- CAL_hist[, CAL_ind]
-    if(all(is.na(CAL_hist))) warning("No length composition found in Data object", call. = FALSE)
+    if (all(is.na(CAL_hist))) warning("No length composition found in Data object", call. = FALSE)
     
     CAL_mids <- Data@CAL_mids[CAL_ind]
     CAL_bins <- Data@CAL_bins[CAL_ind]
@@ -321,29 +321,29 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     CAL_bins <- CAL_mids <- 1
   }
   CAL_n_nominal <- rowSums(CAL_hist, na.rm = TRUE)
-  if(comp_multiplier[2] <= 1) {
+  if (comp_multiplier[2] <= 1) {
     CAL_n_rescale <- comp_multiplier[2] * CAL_n_nominal
   } else {
     CAL_n_rescale <- pmin(CAL_n_nominal, comp_multiplier[2])
   }
   
-  if(early_dev == "all") {
+  if (early_dev == "all") {
     est_early_rec_dev <- rep(1, n_age - 1)
     est_rec_dev <- rep(1, n_y)
-  } else if(early_dev == "comp") {
+  } else if (early_dev == "comp") {
     est_early_rec_dev <- rep(0, n_age-1)
-    if(any(comp == "age")) {
+    if (any(comp == "age")) {
       est_rec_dev <- ifelse(1:n_y < which(CAA_n_nominal > 0)[1], 0, 1)
     } else {
       est_rec_dev <- ifelse(1:n_y < which(CAL_n_nominal > 0)[1], 0, 1)
     }
-  } else if(early_dev == "comp_onegen") {
-    if(any(comp == "age")) {
+  } else if (early_dev == "comp_onegen") {
+    if (any(comp == "age")) {
       istart <- which(CAA_n_nominal > 0)[1] - n_age
     } else {
       istart <- which(CAL_n_nominal > 0)[1] - n_age
     }
-    if(istart < 0) {
+    if (istart < 0) {
       early_start <- n_age + istart
       est_early_rec_dev <- ifelse(2:n_age < early_start, 0, 1) %>% rev()
       est_rec_dev <- rep(1, n_y)
@@ -351,8 +351,8 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       est_early_rec_dev <- rep(0, n_age - 1)
       est_rec_dev <- ifelse(1:n_y < istart, 0, 1)
     }
-  } else if(is.numeric(early_dev)) {
-    if(early_dev > 1) {
+  } else if (is.numeric(early_dev)) {
+    if (early_dev > 1) {
       est_early_rec_dev <- rep(0, n_age-1)
       est_rec_dev <- ifelse(1:n_y < early_dev, 0, 11)
     } else {
@@ -361,10 +361,10 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       est_rec_dev <- rep(1, n_y)
     }
   }
-  if(tv_M == "DD") est_early_rec_dev <- rep(0, n_age-1) # Temporary for now
+  if (tv_M == "DD") est_early_rec_dev <- rep(0, n_age-1) # Temporary for now
   
-  if(is.character(late_dev) && late_dev == "comp50") {
-    if(any(comp == "age")) {
+  if (is.character(late_dev) && late_dev == "comp50") {
+    if (any(comp == "age")) {
       comp_ldev <- colSums(CAA_hist, na.rm = TRUE)/max(colSums(CAA_hist, na.rm = TRUE))
     } else {
       comp_ldev <- colSums(CAL_hist, na.rm = TRUE)/max(colSums(CAL_hist, na.rm = TRUE))
@@ -372,30 +372,30 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     comp_mode <- which.max(comp_ldev)[1]
     comp50_ind <- which(comp_ldev[1:comp_mode] <= 0.5)
     comp50_ind <- comp50_ind[length(comp50_ind)]
-    if(all(comp != "age")) comp50_ind <- ceiling(LinInterp(La, 0:n_age, Data@CAL_mids[comp50_ind]))
+    if (all(comp != "age")) comp50_ind <- ceiling(LinInterp(La, 0:n_age, Data@CAL_mids[comp50_ind]))
     late_dev <- ifelse(is.na(comp50_ind), 0, comp50_ind)
   }
-  if(is.numeric(late_dev) && late_dev > 0) {
-    if(late_dev > length(est_rec_dev)) late_dev <- length(est_rec_dev)
+  if (is.numeric(late_dev) && late_dev > 0) {
+    if (late_dev > length(est_rec_dev)) late_dev <- length(est_rec_dev)
     ind_late <- (length(est_rec_dev) - late_dev + 1):length(est_rec_dev)
     est_rec_dev[ind_late] <- ifelse(SR == "none", max(est_rec_dev[-ind_late]), 0)
   }
   
-  if(rescale == "mean1") rescale <- 1/mean(C_hist)
+  if (rescale == "mean1") rescale <- 1/mean(C_hist)
   
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- vapply(Ind, getElement, numeric(n_y), "I_hist")
-  if(is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
+  if (is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
   
   I_sd <- vapply(Ind, getElement, numeric(n_y), "I_sd") %>% pmax(0.05)
   I_units <- vapply(Ind, getElement, numeric(1), "I_units")
   
   I_vul <- vapply(AddInd, function(xx) {
-    if(xx == "B") {
+    if (xx == "B") {
       return(rep(1, n_age))
-    } else if(xx == "SSB") {
+    } else if (xx == "SSB") {
       return(mat_age)
-    } else if(xx == "VB") {
+    } else if (xx == "VB") {
       return(rep(0, n_age))
     } else {
       return(Data@AddIndV[x, suppressWarnings(as.numeric(xx)), 1:n_age])
@@ -403,23 +403,23 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
   }, numeric(n_age))
   nsurvey <- ncol(I_hist)
   
-  if(!is.list(LWT)) {
-    if(!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  if (!is.list(LWT)) {
+    if (!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
     LWT <- list(Index = LWT)
     LWT$CAA <- LWT$CAL <- LWT$Catch <- 1
   } else {
-    if(is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
-    if(is.null(LWT$CAA)) LWT$CAA <- 1
-    if(is.null(LWT$CAL)) LWT$CAL <- 1
-    if(is.null(LWT$Catch)) LWT$Catch <- 1 
+    if (is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
+    if (is.null(LWT$CAA)) LWT$CAA <- 1
+    if (is.null(LWT$CAL)) LWT$CAL <- 1
+    if (is.null(LWT$Catch)) LWT$Catch <- 1 
   }
   
   # Generate priors
   prior <- make_prior(prior, nsurvey, ifelse(SR == "BH", 1, 2), msg = FALSE)
   
   # M_bounds
-  if(is.null(M_bounds)) {
-    if(tv_M == "none") {
+  if (is.null(M_bounds)) {
+    if (tv_M == "none") {
       M_bounds <- c(0, 1e4)
     } else {
       M_bounds <- c(0.75, 1.25) * range(M)
@@ -438,49 +438,49 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                est_early_rec_dev = est_early_rec_dev, est_rec_dev = est_rec_dev, yindF = as.integer(0.5 * n_y),
                tv_M = tv_M, M_bounds = M_bounds, use_prior = prior$use_prior, prior_dist = prior$pr_matrix,
                sim_process_error = 0L)
-  if(any(names(dots) == "M_at_age") && dots$M_at_age) data$M_data <- M
-  if(data$n_bin == 1) data$CAL_hist <- t(data$CAL_hist)
+  if (any(names(dots) == "M_at_age") && dots$M_at_age) data$M_data <- M
+  if (data$n_bin == 1) data$CAL_hist <- t(data$CAL_hist)
   
   # Starting values
   params <- list()
-  if(!is.null(start)) {
-    if(!is.null(start$R0) && is.numeric(start$R0)) params$R0x <- log(start$R0[1] * rescale)
-    if(!is.null(start$h) && is.numeric(start$h)) {
-      if(SR == "BH") {
+  if (!is.null(start)) {
+    if (!is.null(start$R0) && is.numeric(start$R0)) params$R0x <- log(start$R0[1] * rescale)
+    if (!is.null(start$h) && is.numeric(start$h)) {
+      if (SR == "BH") {
         h_start <- (start$h[1] - 0.2)/0.8
         params$transformed_h <- logit(h_start)
-      } else if(SR == "Ricker") {
+      } else if (SR == "Ricker") {
         params$transformed_h <- log(start$h[1] - 0.2)
       }
     }
-    if(!is.null(start$M) && is.numeric(start$M)) params$log_M0 <- log(start$M)
-    if(catch_eq == "Baranov" && !is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) {
+    if (!is.null(start$M) && is.numeric(start$M)) params$log_M0 <- log(start$M)
+    if (catch_eq == "Baranov" && !is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) {
       params$F_equilibrium <- start$F_equilibrium
     }
-    if(catch_eq == "Pope" && !is.null(start$U_equilibrium) && is.numeric(start$U_equilibrium)) {
+    if (catch_eq == "Pope" && !is.null(start$U_equilibrium) && is.numeric(start$U_equilibrium)) {
       params$F_equilibrium <- start$U_equilibrium
     }
-    if(!is.null(start$vul_par) && is.numeric(start$vul_par)) {
-      if(start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * Data@MaxAge (see help).")
-      if(vulnerability == "logistic") {
-        if(length(start$vul_par) < 2) stop("Two parameters needed for start$vul_par with logistic vulnerability (see help).")
-        if(start$vul_par[1] <= start$vul_par[2]) stop("start$vul_par[1] needs to be greater than start$vul_par[2] (see help).")
+    if (!is.null(start$vul_par) && is.numeric(start$vul_par)) {
+      if (start$vul_par[1] > 0.75 * max_age) stop("start$vul_par[1] needs to be less than 0.75 * Data@MaxAge (see help).")
+      if (vulnerability == "logistic") {
+        if (length(start$vul_par) < 2) stop("Two parameters needed for start$vul_par with logistic vulnerability (see help).")
+        if (start$vul_par[1] <= start$vul_par[2]) stop("start$vul_par[1] needs to be greater than start$vul_par[2] (see help).")
         
         params$vul_par <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]))
       }
-      if(vulnerability == "dome") {
-        if(length(start$vul_par) < 4) stop("Four parameters needed for start$vul_par with dome vulnerability (see help).")
-        if(start$vul_par[1] <= start$vul_par[2]) stop("start$vul_par[1] needs to be greater than start$vul_par[2] (see help).")
-        if(start$vul_par[3] <= start$vul_par[1] || start$vul_par[3] >= max_age) {
+      if (vulnerability == "dome") {
+        if (length(start$vul_par) < 4) stop("Four parameters needed for start$vul_par with dome vulnerability (see help).")
+        if (start$vul_par[1] <= start$vul_par[2]) stop("start$vul_par[1] needs to be greater than start$vul_par[2] (see help).")
+        if (start$vul_par[3] <= start$vul_par[1] || start$vul_par[3] >= max_age) {
           stop("start$vul_par[3] needs to be between start$vul_par[1] and Data@MaxAge (see help).")
         }
-        if(start$vul_par[4] <= 0 || start$vul_par[4] >= 1) stop("start$vul_par[4] needs to be between 0-1 (see help).")
+        if (start$vul_par[4] <= 0 || start$vul_par[4] >= 1) stop("start$vul_par[4] needs to be between 0-1 (see help).")
         
         params$vul_par <- c(logit(start$vul_par[1]/max_age/0.75), log(start$vul_par[1] - start$vul_par[2]),
                             logit(1/(max_age - start$vul_par[1])), logit(start$vul_par[4]))
       }
     }
-    if(!is.null(start$F) && is.numeric(start$F)) {
+    if (!is.null(start$F) && is.numeric(start$F)) {
       Fstart <- numeric(n_y)
       Fstart_ind <- data$yindF + 1
       Fstart[Fstart_ind] <- log(start$F[Fstart_ind])
@@ -488,44 +488,44 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       params$log_F_dev <- Fstart
     }
     
-    if(!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega)
-    if(!is.null(start[["tau"]]) && is.numeric(start[["tau"]])) params$log_tau <- log(start[["tau"]])
-    if(!is.null(start[["tau_M"]]) && is.numeric(start[["tau_M"]])) params$log_tau_M <- log(start[["tau_M"]])
+    if (!is.null(start$omega) && is.numeric(start$omega)) params$log_omega <- log(start$omega)
+    if (!is.null(start[["tau"]]) && is.numeric(start[["tau"]])) params$log_tau <- log(start[["tau"]])
+    if (!is.null(start[["tau_M"]]) && is.numeric(start[["tau_M"]])) params$log_tau_M <- log(start[["tau_M"]])
   }
   
-  if(is.null(params$R0x)) {
+  if (is.null(params$R0x)) {
     params$R0x <- ifelse(is.null(Data@OM$R0[x]), log(mean(data$C_hist)) + 4, log(1.5 * rescale * Data@OM$R0[x]))
   }
-  if(is.null(params$transformed_h)) {
+  if (is.null(params$transformed_h)) {
     h_start <- ifelse(!fix_h && is.na(Data@steep[x]), 0.9, Data@steep[x])
-    if(SR == "BH") {
+    if (SR == "BH") {
       h_start <- (h_start - 0.2)/0.8
       params$transformed_h <- logit(h_start)
-    } else if(SR == "Ricker") {
+    } else if (SR == "Ricker") {
       params$transformed_h <- log(h_start - 0.2)
     } else {
       params$transformed_h <- 0
     }
   }
-  if(is.null(params$log_M0)) params$log_M0 <- log(M) %>% mean()
-  if(is.null(params$logit_M_walk)) params$logit_M_walk <- rep(0, n_y)
-  if(is.null(params$F_equilibrium)) params$F_equilibrium <- 0
-  if(is.null(params$vul_par)) {
-    if(any(comp == "age")) {
+  if (is.null(params$log_M0)) params$log_M0 <- log(M) %>% mean()
+  if (is.null(params$logit_M_walk)) params$logit_M_walk <- rep(0, n_y)
+  if (is.null(params$F_equilibrium)) params$F_equilibrium <- 0
+  if (is.null(params$vul_par)) {
+    if (any(comp == "age")) {
       comp_ldev <- colSums(CAA_hist, na.rm = TRUE)/max(colSums(CAA_hist, na.rm = TRUE))
     } else {
       comp_ldev <- colSums(CAL_hist, na.rm = TRUE)/max(colSums(CAL_hist, na.rm = TRUE))
     }
     comp_mode <- which.max(comp_ldev)[1]
     
-    if(is.na(Data@LFC[x]) && is.na(Data@LFS[x]) || Data@LFC[x] > Linf || Data@LFS[x] > Linf) {
+    if (is.na(Data@LFC[x]) && is.na(Data@LFS[x]) || Data@LFC[x] > Linf || Data@LFS[x] > Linf) {
       
-      if(all(comp == "length")) {
+      if (all(comp == "length")) {
         comp_mode <- ceiling(LinInterp(La, 0:max_age, Data@CAL_mids[comp_mode]))
-        if(!length(comp_mode)) comp_mode <- 1
+        if (!length(comp_mode)) comp_mode <- 1
       }
-      if(vulnerability == "logistic") params$vul_par <- c(logit(comp_mode/max_age/0.75), log(1))
-      if(vulnerability == "dome") {
+      if (vulnerability == "logistic") params$vul_par <- c(logit(comp_mode/max_age/0.75), log(1))
+      if (vulnerability == "dome") {
         params$vul_par <- c(logit(comp_mode/max_age/0.75), log(1), logit(1/(max_age - comp_mode)), logit(0.5))
       }
     } else {
@@ -534,28 +534,28 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       A5 <- min(A5, Afull - 0.5)
       A50_vul <- mean(c(A5, Afull))
       
-      if(vulnerability == "logistic") params$vul_par <- c(logit(Afull/max_age/0.75), log(Afull - A50_vul))
-      if(vulnerability == "dome") {
+      if (vulnerability == "logistic") params$vul_par <- c(logit(Afull/max_age/0.75), log(Afull - A50_vul))
+      if (vulnerability == "dome") {
         params$vul_par <- c(logit(Afull/max_age/0.75), log(Afull - A50_vul), logit(0.1/(max_age - Afull)), logit(0.5))
       }
     }
   }
-  if(is.na(params$vul_par[1])) params$vul_par[1] <- 1
-  if(is.null(params$log_F_dev)) {
+  if (is.na(params$vul_par[1])) params$vul_par[1] <- 1
+  if (is.null(params$log_F_dev)) {
     Fstart <- numeric(n_y)
     Fstart[data$yindF + 1] <- log(0.75 * mean(M))
     params$log_F_dev <- Fstart
   }
   
-  if(is.null(params$log_omega)) {
+  if (is.null(params$log_omega)) {
     sigmaC <- max(0.01, sdconv(1, Data@CV_Cat[x]), na.rm = TRUE)
     params$log_omega <- log(sigmaC)
   }
-  if(is.null(params[["log_tau"]])) {
+  if (is.null(params[["log_tau"]])) {
     tau_start <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x])
     params$log_tau <- log(tau_start)
   }
-  if(is.null(params[["log_tau_M"]])) params$log_tau_M <- log(0.05)
+  if (is.null(params[["log_tau_M"]])) params$log_tau_M <- log(0.05)
   
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
@@ -565,39 +565,39 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                inner.control = inner.control)
   
   map <- list()
-  if(catch_eq == "Baranov" && any(info$data$C_hist <= 0)) {
+  if (catch_eq == "Baranov" && any(info$data$C_hist <= 0)) {
     ind <- info$data$C_hist <= 0
     info$params$log_F_dev[ind] <- -20
     map_logF <- length(params$log_F_dev)
     map_logF[ind] <- NA
     map_logF[!ind] <- 1:sum(!ind)
     map$log_F_dev <- factor(map_logF)
-  } else if(catch_eq == "Pope") {
+  } else if (catch_eq == "Pope") {
     map$log_F_dev <- factor(rep(NA, n_y))
   }
-  if(fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
-  if(!prior$use_prior[3]) map$log_M0 <- factor(NA)
-  if(tv_M != "walk") map$logit_M_walk <- factor(rep(NA, n_y))
-  if(fix_F_equilibrium) map$F_equilibrium <- factor(NA)
-  if(fix_omega) map$log_omega <- factor(NA)
-  if(fix_tau) map$log_tau <- factor(NA)
+  if (fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if (!prior$use_prior[3]) map$log_M0 <- factor(NA)
+  if (tv_M != "walk") map$logit_M_walk <- factor(rep(NA, n_y))
+  if (fix_F_equilibrium) map$F_equilibrium <- factor(NA)
+  if (fix_omega) map$log_omega <- factor(NA)
+  if (fix_tau) map$log_tau <- factor(NA)
   map$log_tau_M <- factor(NA)
-  if(any(!est_early_rec_dev)) map$log_early_rec_dev <- factor(ifelse(est_early_rec_dev, 1:sum(est_early_rec_dev), NA))
-  if(any(!est_rec_dev)) map$log_rec_dev <- factor(ifelse(est_rec_dev, 1:sum(est_rec_dev), NA))
-  if(vulnerability == "dome") map$vul_par <- factor(c(1, 2, NA, 3))
+  if (any(!est_early_rec_dev)) map$log_early_rec_dev <- factor(ifelse(est_early_rec_dev, 1:sum(est_early_rec_dev), NA))
+  if (any(!est_rec_dev)) map$log_rec_dev <- factor(ifelse(est_rec_dev, 1:sum(est_rec_dev), NA))
+  if (vulnerability == "dome") map$vul_par <- factor(c(1, 2, NA, 3))
   
   random <- NULL
-  if(integrate) random <- c("log_early_rec_dev", "log_rec_dev", "logit_M_walk")
+  if (integrate) random <- c("log_early_rec_dev", "log_rec_dev", "logit_M_walk")
   
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                    map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
   
-  if(catch_eq == "Pope") {
+  if (catch_eq == "Pope") {
     # Add starting values for rec-devs and increase R0 start value if U is too high (> 0.975)
     high_U <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0, silent = TRUE)
-    if(!is.character(high_U) && !is.na(high_U) && high_U) {
+    if (!is.character(high_U) && !is.na(high_U) && high_U) {
       Recruit <- try(Data@Rec[x, ], silent = TRUE)
-      if(is.numeric(Recruit) && length(Recruit) == n_y && any(!is.na(Recruit))) {
+      if (is.numeric(Recruit) && length(Recruit) == n_y && any(!is.na(Recruit))) {
         log_rec_dev <- log(Recruit/mean(Recruit, na.rm = TRUE))
         log_rec_dev[is.na(est_rec_dev) | is.na(log_rec_dev) | is.infinite(log_rec_dev)] <- 0
         info$params$log_rec_dev <- log_rec_dev
@@ -605,7 +605,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
         obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                          map = map, random = random, DLL = "SAMtool", inner.control = inner.control, silent = silent)
       }
-      while(obj$par["R0x"] < 30 && obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0) {
+      while (obj$par["R0x"] < 30 && obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0) {
         obj$par["R0x"] <- obj$par["R0x"] + 1
       }
     }
@@ -652,22 +652,22 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                                     names = c("Total", paste0("Index_", 1:nsurvey), "CAA", "CAL", "Catch", "Dev", "M_dev", "Prior", "Penalty")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
-  if(tv_M != "walk") Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "M_dev"]
-  if(all(comp != "age")) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "CAA"]
-  if(all(comp != "length")) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "CAL"]
-  if(catch_eq == "Pope") Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "Catch"]
-  if(SR != "none") Assessment@h <- report$h
-  if(catch_eq == "Baranov") {
+  if (tv_M != "walk") Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "M_dev"]
+  if (all(comp != "age")) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "CAA"]
+  if (all(comp != "length")) Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "CAL"]
+  if (catch_eq == "Pope") Assessment@NLL <- Assessment@NLL[names(Assessment@NLL) != "Catch"]
+  if (SR != "none") Assessment@h <- report$h
+  if (catch_eq == "Baranov") {
     Assessment@FMort <- structure(report$F, names = Year)
   } else {
     Assessment@U <- structure(report$U, names = Year)
   }
   
-  if(Assessment@conv) {
+  if (Assessment@conv) {
     SE_Early <- as.list(SD, "Std. Error")$log_early_rec_dev %>% rev()
     SE_Main <- as.list(SD, "Std. Error")$log_rec_dev
     SE_Dev <- structure(c(SE_Early, SE_Main), names = YearDev)
-    if(any(is.na(SE_Dev))) {
+    if (any(is.na(SE_Dev))) {
       Dev <- Dev[seq(which(!is.na(SE_Dev))[1], length(YearDev))]
       SE_Dev <- SE_Dev[seq(which(!is.na(SE_Dev))[1], length(YearDev))]
       SE_Dev[is.na(SE_Dev)] <- 0
@@ -676,7 +676,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     refyear <- eval(refyear)
     
     ref_pt <- ref_pt_SCA(y = refyear, obj = obj, report = report)
-    if(catch_eq == "Baranov") {
+    if (catch_eq == "Baranov") {
       report$FMSY <- ref_pt$FMSY
     } else {
       report$UMSY <- ref_pt$UMSY
@@ -688,7 +688,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
     report$EMSY <- ref_pt$EMSY
     report$refyear <- refyear
     
-    if(!all(refyear == 1)) { # New reference points based on change in M
+    if (!all(refyear == 1)) { # New reference points based on change in M
       report$new_B0 <- Assessment@B0 <- ref_pt$new_B0
       report$new_E0 <- Assessment@SSB0 <- ref_pt$new_E0
       report$new_VB0 <- Assessment@VB0 <- ref_pt$new_VB0
@@ -700,7 +700,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
       Assessment@VB_VB0 <- Assessment@VB/Assessment@VB0
     }
     
-    if(catch_eq == "Baranov") {
+    if (catch_eq == "Baranov") {
       Assessment@FMSY <- report$FMSY
       Assessment@F_FMSY <- structure(report$F/Assessment@FMSY, names = Year)
     } else {
@@ -730,7 +730,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
 
 ref_pt_SCA <- function(y = 1, obj, report) {
 
-  if(obj$env$data$SR_type == "none") {
+  if (obj$env$data$SR_type == "none") {
     # Fit BH 
     R0_start <- log(mean(report$R))
     h_start <- logit((0.7 - 0.2)/0.8)
@@ -764,7 +764,7 @@ ref_pt_SCA <- function(y = 1, obj, report) {
   opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
                        Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, B0 = B0, tv_M = tv_M, M_bounds = M_bounds)
   
-  if(catch_eq == "Baranov") {
+  if (catch_eq == "Baranov") {
     FMSY <- opt2$minimum
   } else {
     UMSY <- opt2$minimum
@@ -775,7 +775,7 @@ ref_pt_SCA <- function(y = 1, obj, report) {
   BMSY <- opt3["B"]
   EMSY <- opt3["E"]
   
-  if(catch_eq == "Baranov") {
+  if (catch_eq == "Baranov") {
     Fvec <- seq(0, 2.5 * FMSY, length.out = 100)
   } else {
     Fvec <- seq(0, 0.99, 0.01)
@@ -791,13 +791,13 @@ ref_pt_SCA <- function(y = 1, obj, report) {
   new_E0 <- yield[[1]]["E"]
   new_VB0 <- yield[[1]]["VB"]
   new_R0 <- yield[[1]]["R"]
-  if(SR == "BH") {
+  if (SR == "BH") {
     new_h <- Arec * EPR[1]/ (4 + Arec * EPR[1])
   } else {
     new_h <- 0.2 * (Arec * EPR[1])^0.8
   }
   
-  if(catch_eq == "Baranov") {
+  if (catch_eq == "Baranov") {
     return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
                 per_recruit = data.frame(FM = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR_par,
                 new_B0 = new_B0, new_E0 = new_B0, new_VB0 = new_VB0, new_R0 = new_R0, new_h = new_h))
@@ -812,10 +812,10 @@ ref_pt_SCA <- function(y = 1, obj, report) {
 yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, Brec, 
                          catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE, B0 = 1,
                          tv_M = c("none", "walk", "DD"), M_bounds = NULL) {
-  if(is.null(tv_M)) tv_M <- "none"
+  if (is.null(tv_M)) tv_M <- "none"
   tv_M <- match.arg(tv_M)
   
-  if(tv_M != "DD") {
+  if (tv_M != "DD") {
     yield_fn_SCA_int(x, M, mat, weight, vul, SR, Arec, Brec, catch_eq, opt, x_transform)
   } else {
     
@@ -826,11 +826,11 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, B
                         ifelse(dep[i] <= 0, M_bounds[2], M_bounds[1] + (M_bounds[2] - M_bounds[1]) * (1 - dep[i])))
       out <- yield_fn_SCA_int(x, M = rep(M_DD[i], length(mat)), mat, weight, vul, SR, Arec, Brec, catch_eq, 
                               opt = FALSE, x_transform = x_transform)
-      if(abs(out["B"]/B0 - dep[i]) <= 1e-4) break
+      if (abs(out["B"]/B0 - dep[i]) <= 1e-4) break
       dep[i+1] <- out["B"]/B0
     }
     
-    if(opt) {
+    if (opt) {
       return(-1 * out["Yield"])
     } else {
       return(out)
@@ -842,7 +842,7 @@ yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Are
                              catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE) {
   SR <- match.arg(SR)
   catch_eq <- match.arg(catch_eq)
-  if(catch_eq == "Baranov") {
+  if (catch_eq == "Baranov") {
     FMort <- ifelse(x_transform, exp(x), x)
     surv <- exp(-vul * FMort - M)
   } else {
@@ -852,20 +852,20 @@ yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Are
   n_age <- length(M)
   NPR <- calc_NPR(surv, n_age)
   EPR <- sum(NPR * mat * weight)
-  if(SR == "BH") {
+  if (SR == "BH") {
     Req <- (Arec * EPR - 1)/(Brec * EPR)
-  } else if(SR == "Ricker") {
+  } else if (SR == "Ricker") {
     Req <- log(Arec * EPR)/(Brec * EPR)
   }
   
-  if(catch_eq == "Baranov") {
+  if (catch_eq == "Baranov") {
     CPR <- Baranov(vul, FMort, M, NPR)
   } else {
     CPR <- vul * U * NPR * exp(-0.5 * M)
   }
   YPR <- sum(CPR * weight)
   Yield <- YPR * Req
-  if(opt) {
+  if (opt) {
     return(-1 * Yield)
   } else {
     
@@ -880,7 +880,7 @@ yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Are
 SCA_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best, ...) {
   
   newdata <- obj$env$data
-  if(obj$env$data$catch_eq == "Pope") {
+  if (obj$env$data$catch_eq == "Pope") {
     newdata$C_hist <- rep(1e-8, newdata$n_y)
     par[names(par) == "F_equilibrium"] <- 0
     
@@ -900,14 +900,14 @@ get_SR <- function(pars, E, R, EPR0, opt = TRUE, figure = FALSE, type = c("BH", 
   
   R0 <- exp(pars[1])
   E0 <- R0 * EPR0
-  if(type == "BH") {
-    if(!fix_h) h <- 0.2 + 0.8 * ilogit(pars[1])
+  if (type == "BH") {
+    if (!fix_h) h <- 0.2 + 0.8 * ilogit(pars[1])
     Arec <- 4*h/(1-h)/EPR0
     Brec <- (5*h-1)/(1-h)/E0
     
     Rpred <- Arec * E / (1 + Brec * E)
-  } else if(type == "Ricker") {
-    if(!fix_h) h <- 0.2 + exp(pars[1])
+  } else if (type == "Ricker") {
+    if (!fix_h) h <- 0.2 + exp(pars[1])
     Arec <- 1/EPR0 * (5*h)^1.25
     Brec <- 1.25 * log(5*h) / E0
     
@@ -915,16 +915,16 @@ get_SR <- function(pars, E, R, EPR0, opt = TRUE, figure = FALSE, type = c("BH", 
   }
   sigmaR <- sqrt(sum((log(R/Rpred))^2)/length(R))
   
-  if(opt){
+  if (opt){
     return(-sum(dnorm(log(R/Rpred), 0, sigmaR, log = TRUE)))
   } else {
     
-    if(figure) {
+    if (figure) {
       plot(E, R, ylim = c(0, max(R, R0)), xlim = c(0, max(E, E0)), xlab = "SSB", ylab = "Recruitment")
       
       E2 <- seq(0, E0, length.out = 500)
-      if(type == "BH") Rpred2 <- Arec * E2 / (1 + Brec * E2)
-      if(type == "Ricker") Rpred2 <- Arec * E2 * exp(-Brec * E2)
+      if (type == "BH") Rpred2 <- Arec * E2 / (1 + Brec * E2)
+      if (type == "Ricker") Rpred2 <- Arec * E2 * exp(-Brec * E2)
       
       lines(E2, Rpred2, col = "blue")
       abline(v = c(0.2 * E0, E0), h = c(h * R0, R0), lty = 2, col = "red")

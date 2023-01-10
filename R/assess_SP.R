@@ -197,7 +197,7 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   start <- lapply(start, eval, envir = environment())
 
   early_dev <- match.arg(early_dev)
-  if(any(names(dots) == "yind")) {
+  if (any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
   } else {
     ystart <- which(!is.na(Data@Cat[x, ]))[1]
@@ -205,39 +205,39 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   }
   Year <- Data@Year[yind]
   C_hist <- Data@Cat[x, yind]
-  if(any(is.na(C_hist))) stop('Model is conditioned on complete catch time series, but there is missing catch.')
+  if (any(is.na(C_hist))) stop('Model is conditioned on complete catch time series, but there is missing catch.')
   ny <- length(C_hist)
-  if(rescale == "mean1") rescale <- 1/mean(C_hist)
+  if (rescale == "mean1") rescale <- 1/mean(C_hist)
 
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- vapply(Ind, getElement, numeric(ny), "I_hist")
-  if(is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
+  if (is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
   
   I_sd <- vapply(Ind, getElement, numeric(ny), "I_sd")
   nsurvey <- ncol(I_hist)
 
-  if(state_space) {
-    if(early_dev == "all") est_B_dev <- rep(1, ny)
-    if(early_dev == "index") {
+  if (state_space) {
+    if (early_dev == "all") est_B_dev <- rep(1, ny)
+    if (early_dev == "index") {
       first_year_index <- which(apply(I_hist, 1, function(x) any(!is.na(x))))[1]
       est_B_dev <- ifelse(1:ny < first_year_index, 0, 1)
     }
   } else {
-    if(nsurvey == 1 && (AddInd == 0 | AddInd == "B")) {
+    if (nsurvey == 1 && (AddInd == 0 | AddInd == "B")) {
       fix_sigma <- FALSE # Override: estimate sigma if there's a single survey
     }
     est_B_dev <- rep(0, ny)
   }
 
-  if(is.null(LWT)) LWT <- rep(1, nsurvey)
-  if(length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  if (is.null(LWT)) LWT <- rep(1, nsurvey)
+  if (length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
   data <- list(model = "SP", C_hist = C_hist, rescale = rescale, I_hist = I_hist, I_sd = I_sd, I_lambda = LWT,
                fix_sigma = as.integer(fix_sigma), nsurvey = nsurvey, ny = ny,
                est_B_dev = est_B_dev, nstep = n_seas, dt = 1/n_seas, n_itF = n_itF,
                sim_process_error = 0L)
 
-  if(use_r_prior) {
-    if(!is.null(start$r_prior) && length(start$r_prior) == 2) {
+  if (use_r_prior) {
+    if (!is.null(start$r_prior) && length(start$r_prior) == 2) {
       rp <- data$r_prior <- start$r_prior
     } else {
       rp <- r_prior_fn(x, Data, r_reps = r_reps, SR_type = SR_type)
@@ -248,31 +248,31 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   }
 
   params <- list()
-  if(!is.null(start)) {
-    if(!is.null(start$FMSY) && is.numeric(start$FMSY)) params$log_FMSY <- log(start$FMSY[1])
-    if(!is.null(start$MSY) && is.numeric(start$MSY)) params$MSYx <- log(start$MSY[1])
-    if(!is.null(start$dep) && is.numeric(start$dep)) params$log_dep <- log(start$dep[1])
-    if(!is.null(start$n) && is.numeric(start$n)) params$log_n <- log(start$n[1])
-    if(!is.null(start$sigma) && is.numeric(start$sigma)) params$log_sigma <- log(start$sigma)
-    if(!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau[1])
+  if (!is.null(start)) {
+    if (!is.null(start$FMSY) && is.numeric(start$FMSY)) params$log_FMSY <- log(start$FMSY[1])
+    if (!is.null(start$MSY) && is.numeric(start$MSY)) params$MSYx <- log(start$MSY[1])
+    if (!is.null(start$dep) && is.numeric(start$dep)) params$log_dep <- log(start$dep[1])
+    if (!is.null(start$n) && is.numeric(start$n)) params$log_n <- log(start$n[1])
+    if (!is.null(start$sigma) && is.numeric(start$sigma)) params$log_sigma <- log(start$sigma)
+    if (!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau[1])
   }
-  if(is.null(params$log_FMSY)) params$log_FMSY <- ifelse(is.na(Data@Mort[x]), 0.2, 0.5 * Data@Mort[x]) %>% log()
-  if(is.null(params$MSYx)) params$MSYx <- mean(3 * C_hist * rescale) %>% log()
-  if(is.null(params$log_dep)) params$log_dep <- log(1)
-  if(is.null(params$log_n)) params$log_n <- log(2)
-  if(is.null(params$log_sigma)) params$log_sigma <- rep(log(0.05), nsurvey)
-  if(is.null(params$log_tau)) params$log_tau <- log(0.1)
+  if (is.null(params$log_FMSY)) params$log_FMSY <- ifelse(is.na(Data@Mort[x]), 0.2, 0.5 * Data@Mort[x]) %>% log()
+  if (is.null(params$MSYx)) params$MSYx <- mean(3 * C_hist * rescale) %>% log()
+  if (is.null(params$log_dep)) params$log_dep <- log(1)
+  if (is.null(params$log_n)) params$log_n <- log(2)
+  if (is.null(params$log_sigma)) params$log_sigma <- rep(log(0.05), nsurvey)
+  if (is.null(params$log_tau)) params$log_tau <- log(0.1)
   params$log_B_dev <- rep(0, ny)
 
   map <- list()
-  if(fix_dep) map$log_dep <- factor(NA)
-  if(fix_n) map$log_n <- factor(NA)
-  if(fix_sigma) map$log_sigma <- factor(rep(NA, nsurvey))
-  if(fix_tau) map$log_tau <- factor(NA)
-  if(any(!est_B_dev)) map$log_B_dev <- factor(ifelse(est_B_dev, 1:sum(est_B_dev), NA))
+  if (fix_dep) map$log_dep <- factor(NA)
+  if (fix_n) map$log_n <- factor(NA)
+  if (fix_sigma) map$log_sigma <- factor(rep(NA, nsurvey))
+  if (fix_tau) map$log_tau <- factor(NA)
+  if (any(!est_B_dev)) map$log_B_dev <- factor(ifelse(est_B_dev, 1:sum(est_B_dev), NA))
 
   random <- NULL
-  if(integrate) random <- "log_B_dev"
+  if (integrate) random <- "log_B_dev"
 
   info <- list(Year = Year, data = data, params = params, rp = rp, control = control, inner.control = inner.control)
 
@@ -281,10 +281,10 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   
   high_F <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0 ||
                   any(is.na(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$F)), silent = TRUE)
-  if(!is.character(high_F) && !is.na(high_F) && high_F) {
+  if (!is.character(high_F) && !is.na(high_F) && high_F) {
     for(ii in 1:10) {
       obj$par["MSYx"] <- 0.5 + obj$par["MSYx"]
-      if(all(!is.na(obj$report(obj$par)$F)) && 
+      if (all(!is.na(obj$report(obj$par)$F)) && 
          obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty == 0) break
     }
   }
@@ -321,7 +321,7 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
 
-  if(state_space) {
+  if (state_space) {
     Assessment@Dev <- structure(report$log_B_dev, names = Year)
     Assessment@Dev_type <- "log-Biomass deviations"
     Assessment@NLL <- structure(c(nll_report, report$nll_comp, report$penalty, report$prior),
@@ -331,8 +331,8 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
                                 names = c("Total", paste0("Index_", 1:nsurvey), "Penalty", "Prior"))
   }
 
-  if(Assessment@conv) {
-    if(state_space) {
+  if (Assessment@conv) {
+    if (state_space) {
       SE_Dev <- as.list(SD, "Std. Error")$log_B_dev
       Assessment@SE_Dev <- structure(ifelse(is.na(SE_Dev), 0, SE_Dev), names = Year)
     }

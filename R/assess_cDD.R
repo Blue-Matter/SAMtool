@@ -147,7 +147,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   wa <- Data@wla[x] * la^Data@wlb[x]
   a50V <- iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x],  Data@L50[x])
   a50V <- max(a50V, 1)
-  if(any(names(dots) == "yind")) {
+  if (any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
   } else {
     ystart <- which(!is.na(Data@Cat[x, ]))[1]
@@ -156,19 +156,19 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   Year <- Data@Year[yind]
   C_hist <- Data@Cat[x, yind]
   ny <- length(C_hist)
-  if(any(is.na(C_hist))) stop('Model is conditioned on complete catch time series, but there is missing catch.')
+  if (any(is.na(C_hist))) stop('Model is conditioned on complete catch time series, but there is missing catch.')
 
   Ind <- lapply(AddInd, Assess_I_hist, Data = Data, x = x, yind = yind)
   I_hist <- vapply(Ind, getElement, numeric(ny), "I_hist")
-  if(is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
+  if (is.null(I_hist) || all(is.na(I_hist))) stop("No indices found.", call. = FALSE)
   
   I_sd <- vapply(Ind, getElement, numeric(ny), "I_sd")
   I_units <- vapply(Ind, getElement, numeric(1), "I_units")
   
   nsurvey <- ncol(I_hist)
   
-  if(MW) {
-    if(!is.null(Data@Misc[[x]]$MW)) {
+  if (MW) {
+    if (!is.null(Data@Misc[[x]]$MW)) {
       MW_hist <- Data@Misc[[x]]$MW
     } else {
       MW_hist <- apply(Data@CAL[x, , ], 1, function(xx) {
@@ -194,23 +194,23 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   mod_formula <- formula(W2 ~ Winf + (W - Winf) * exp(-Kappa))
   fit_mod <- nls(mod_formula, wt_df, start = list(Kappa = Data@vbK[x]))
   
-  if(!is.null(start$Kappa)) {
+  if (!is.null(start$Kappa)) {
     Kappa <- start$Kappa
   } else {
     Kappa <- coef(fit_mod)[["Kappa"]]
   }
   M <- Data@Mort[x]
 
-  if(!state_space && (nsurvey == 1 & AddInd == "B")) fix_sigma <- FALSE # Override: estimate sigma if there's a single survey
-  if(rescale == "mean1") rescale <- 1/mean(C_hist)
-  if(dep <= 0 || dep > 1) stop("Initial depletion (dep) must be > 0 and <= 1.")
-  if(!is.list(LWT)) {
-    if(!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
+  if (!state_space && (nsurvey == 1 & AddInd == "B")) fix_sigma <- FALSE # Override: estimate sigma if there's a single survey
+  if (rescale == "mean1") rescale <- 1/mean(C_hist)
+  if (dep <= 0 || dep > 1) stop("Initial depletion (dep) must be > 0 and <= 1.")
+  if (!is.list(LWT)) {
+    if (!is.null(LWT) && length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
     LWT <- list(Index = LWT)
     LWT$MW <- 1
   } else {
-    if(is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
-    if(is.null(LWT$MW)) LWT$MW <- 1 
+    if (is.null(LWT$Index)) LWT$Index <- rep(1, nsurvey)
+    if (is.null(LWT$MW)) LWT$MW <- 1 
   }
 
   data <- list(model = "cDD", Winf = Winf, Kappa = Kappa, ny = ny, k = k, wk = wk, C_hist = C_hist, dep = dep,
@@ -222,65 +222,65 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   LH <- list(LAA = la, WAA = wa, maxage = Data@MaxAge, A50 = k, fit_mod = fit_mod)
 
   params <- list()
-  if(!is.null(start)) {
-    if(!is.null(start$R0) && is.numeric(start$R0)) params$R0x <- log(start$R0[1] * rescale)
-    if(!is.null(start$h) && is.numeric(start$h)) {
-      if(SR == "BH") {
+  if (!is.null(start)) {
+    if (!is.null(start$R0) && is.numeric(start$R0)) params$R0x <- log(start$R0[1] * rescale)
+    if (!is.null(start$h) && is.numeric(start$h)) {
+      if (SR == "BH") {
         h_start <- (start$h[1] - 0.2)/0.8
         params$transformed_h <- logit(h_start)
       } else {
         params$transformed_h <- log(start$h[1] - 0.2)
       }
     }
-    if(!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M[1])
-    if(!is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) params$F_equilibrium <- start$F_equililbrium
-    if(!is.null(start[["sigma"]]) && is.numeric(start[["sigma"]])) params$log_sigma <- log(start[["sigma"]])
-    if(!is.null(start[["sigma_W"]]) && is.numeric(start[["sigma_W"]])) params$log_sigma_W <- log(start[["sigma_W"]])
-    if(!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau[1])
+    if (!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M[1])
+    if (!is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) params$F_equilibrium <- start$F_equililbrium
+    if (!is.null(start[["sigma"]]) && is.numeric(start[["sigma"]])) params$log_sigma <- log(start[["sigma"]])
+    if (!is.null(start[["sigma_W"]]) && is.numeric(start[["sigma_W"]])) params$log_sigma_W <- log(start[["sigma_W"]])
+    if (!is.null(start$tau) && is.numeric(start$tau)) params$log_tau <- log(start$tau[1])
   }
   
-  if(is.null(params$R0x)) {
+  if (is.null(params$R0x)) {
     params$R0x <- ifelse(is.null(Data@OM$R0[x]), log(4 * mean(data$C_hist)), log(1.5 * rescale * Data@OM$R0[x]))
   }
-  if(is.null(params$transformed_h)) {
+  if (is.null(params$transformed_h)) {
     h_start <- ifelse(is.na(Data@steep[x]), 0.9, Data@steep[x])
-    if(SR == "BH") {
+    if (SR == "BH") {
       h_start <- (h_start - 0.2)/0.8
       params$transformed_h <- logit(h_start)
     } else {
       params$transformed_h <- log(h_start - 0.2)
     }
   }
-  if(is.null(params$log_M)) params$log_M <- log(M)
-  if(is.null(params$F_equilibrium)) params$F_equilibrium <- ifelse(dep < 1, 0.1, 0)
-  if(is.null(params[["log_sigma"]])) params$log_sigma <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE) %>% log()
-  if(is.null(params[["log_sigma_W"]])) params$log_sigma_W <- log(0.1)
-  if(is.null(params$log_tau)) params$log_tau <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x]) %>% log()
+  if (is.null(params$log_M)) params$log_M <- log(M)
+  if (is.null(params$F_equilibrium)) params$F_equilibrium <- ifelse(dep < 1, 0.1, 0)
+  if (is.null(params[["log_sigma"]])) params$log_sigma <- max(0.05, sdconv(1, Data@CV_Ind[x]), na.rm = TRUE) %>% log()
+  if (is.null(params[["log_sigma_W"]])) params$log_sigma_W <- log(0.1)
+  if (is.null(params$log_tau)) params$log_tau <- ifelse(is.na(Data@sigmaR[x]), 0.6, Data@sigmaR[x]) %>% log()
   params$log_rec_dev <- rep(0, ny)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control, inner.control = inner.control)
 
   map <- list()
-  if(fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
-  if(!prior$use_prior[3]) map$log_M <- factor(NA)
-  if(dep == 1) map$F_equilibrium <- factor(NA)
-  if(fix_sigma) map$log_sigma <- factor(NA)
+  if (fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if (!prior$use_prior[3]) map$log_M <- factor(NA)
+  if (dep == 1) map$F_equilibrium <- factor(NA)
+  if (fix_sigma) map$log_sigma <- factor(NA)
   map$log_sigma_W <- factor(NA)
-  if(fix_tau) map$log_tau <- factor(NA)
-  if(!state_space) map$log_rec_dev <- factor(rep(NA, ny))
+  if (fix_tau) map$log_tau <- factor(NA)
+  if (!state_space) map$log_rec_dev <- factor(rep(NA, ny))
 
   random <- NULL
-  if(integrate) random <- "log_rec_dev"
+  if (integrate) random <- "log_rec_dev"
 
   obj <- MakeADFun(data = info$data, parameters = info$params, random = random, map = map, hessian = TRUE,
                    DLL = "SAMtool", inner.control = inner.control, silent = silent)
   
   high_F <- try(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty > 0 ||
                   any(is.na(obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$F)), silent = TRUE)
-  if(!is.character(high_F) && !is.na(high_F) && high_F) {
+  if (!is.character(high_F) && !is.na(high_F) && high_F) {
     for(ii in 1:10) {
       obj$par["R0x"] <- 0.5 + obj$par["R0x"]
-      if(all(!is.na(obj$report(obj$par)$F)) && 
+      if (all(!is.na(obj$report(obj$par)$F)) && 
          obj$report(c(obj$par, obj$env$last.par[obj$env$random]))$penalty == 0) break
     }
   }
@@ -320,12 +320,12 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,
                     dependencies = dependencies)
 
-  if(state_space) {
+  if (state_space) {
     Assessment@Dev <- structure(report$log_rec_dev, names = Year)
     Assessment@Dev_type <- "log-Recruitment deviations"
   }
 
-  if(Assessment@conv) {
+  if (Assessment@conv) {
     ref_pt <- ref_pt_cDD(info$data, report$Arec, report$Brec, report$M)
     report <- c(report, ref_pt[1:3])
 
@@ -336,7 +336,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
     Assessment@B_BMSY <- Assessment@SSB_SSBMSY <- Assessment@VB_VBMSY <- structure(report$B/report$BMSY, names = Yearplusone)
     Assessment@TMB_report <- report
 
-    if(state_space) {
+    if (state_space) {
       Assessment@SE_Dev <- structure(as.list(SD, "Std. Error")$log_rec_dev, names = Year)
     }
     
@@ -370,19 +370,19 @@ ref_pt_cDD <- function(TMB_data, Arec, Brec, M) {
 }
 
 yield_fn_cDD <- function(x, M, Kappa, Winf, wk, SR, Arec, Brec, opt = TRUE, log_trans = FALSE) {
-  if(log_trans) {
+  if (log_trans) {
     FMort <- exp(x)
   } else {
     FMort <- x
   } 
   Z <- FMort + M
   BPR <- (wk + Kappa * Winf/Z)/(Z+Kappa)
-  if(SR == "BH") Req <- (Arec * BPR - 1)/Brec/BPR
-  if(SR == "Ricker") Req <- log(Arec * BPR)/Brec/BPR
+  if (SR == "BH") Req <- (Arec * BPR - 1)/Brec/BPR
+  if (SR == "Ricker") Req <- log(Arec * BPR)/Brec/BPR
   Beq <- BPR * Req
   YPR <- FMort * BPR
   Yield <- FMort * Beq
-  if(opt) {
+  if (opt) {
     return(-1 * Yield)
   } else {
     return(c(SPR = BPR, Yield = Yield, YPR = YPR, B = Beq, R = Req))

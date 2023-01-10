@@ -31,14 +31,14 @@ setGeneric("retrospective", function(x, ...) standardGeneric("retrospective"))
 #' @exportMethod retrospective
 setMethod("retrospective", signature(x = "Assessment"),
           function(x, nyr = 5, figure = TRUE) {
-            if(figure) {
+            if (figure) {
               old_par <- par(no.readonly = TRUE)
               on.exit(par(old_par))
             }
-
-            f <- get(paste0('retrospective_', x@Model))
-            res <- f(x, nyr)
-            if(figure) plot(res)
+            
+            func <- paste0('retrospective_', x@Model)
+            res <- do.call2(func, list(Assessment = x, nyr = nyr))
+            if (figure) plot(res)
             return(res)
           })
 
@@ -48,12 +48,12 @@ setMethod("retrospective", signature(x = "Assessment"),
 #' @exportMethod retrospective
 setMethod("retrospective", signature(x = "RCModel"),
           function(x, nyr = 5, figure = TRUE) {
-            if(figure) {
+            if (figure) {
               old_par <- par(no.readonly = TRUE)
               on.exit(par(old_par))
             }
             res <- RCM_retro(x, nyr)
-            if(figure) plot(res)
+            if (figure) plot(res)
             return(res)
           })
 
@@ -112,7 +112,7 @@ setMethod("plot", signature(x = "retro", y = "missing"),
             on.exit(par(old_par))
 
             retro <- x
-            if(is.null(color) || length(color) != dim(retro@TS)[1]) color <- rich.colors(dim(retro@TS)[1])
+            if (is.null(color) || length(color) != dim(retro@TS)[1]) color <- rich.colors(dim(retro@TS)[1])
             Year <- as.numeric(dimnames(retro@TS)$Year)
             xlim <- range(as.numeric(dimnames(retro@TS)$Year))
             nyr_label <- dimnames(retro@TS)$Peel
@@ -124,7 +124,7 @@ setMethod("plot", signature(x = "retro", y = "missing"),
 
               plot(NULL, NULL, xlim = xlim, ylim = ylim, xlab = "Year", ylab = ylab)
               abline(h = 0, col = "grey")
-              if(grepl("MSY", as.character(ylab))) abline(h = 1, lty = 3)
+              if (grepl("MSY", as.character(ylab))) abline(h = 1, lty = 3)
 
               matlines(Year, matrix_to_plot, col = color, lty = 1)
 

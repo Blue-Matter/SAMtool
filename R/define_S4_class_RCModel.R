@@ -89,7 +89,7 @@ RCModel <- setClass("RCModel", slots = c(OM = "ANY", SSB = "matrix", NAA = "arra
 
 setMethod("initialize", "RCModel", function(.Object, ...) {
   dots <- list(...)
-  if(length(dots)) {
+  if (length(dots)) {
     for(i in names(dots)) slot(.Object, i) <- dots[[i]]
   }
   attr(.Object, "version") <- paste("SAMtool", packageVersion("SAMtool"), "with MSEtool", packageVersion("MSEtool"))
@@ -137,46 +137,46 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             # Run retrospective (dots$retrospective = TRUE with dots$nyr)
             # Or directly provide a retrospective object (dots$retro)
             dots <- list(...)
-            if(!is.null(dots$retrospective) && dots$retrospective) {
+            if (!is.null(dots$retrospective) && dots$retrospective) {
               message("Running retrospective on mean fit object...")
-              if(is.null(dots$nyr)) {
+              if (is.null(dots$nyr)) {
                 retro <- retrospective(x)
               } else retro <- retrospective(x, dots$nyr)
-            } else if(!is.null(dots$retro)) {
+            } else if (!is.null(dots$retro)) {
               retro <- dots$retro
             }
 
             # Update scenario
-            if(is.null(scenario$col)) {
+            if (is.null(scenario$col)) {
               scenario$col <- "red"
               scenario$col2 <- "black"
             } else {
               scenario$col2 <- scenario$col
             }
 
-            if(is.null(scenario$lwd)) scenario$lwd <- 1
-            if(is.null(scenario$lty)) scenario$lty <- 1
+            if (is.null(scenario$lwd)) scenario$lwd <- 1
+            if (is.null(scenario$lty)) scenario$lty <- 1
 
             ####### Function arguments for rmarkdown::render
             filename_rmd <- paste0(filename, ".Rmd")
 
-            if(missing(render_args)) render_args <- list()
+            if (missing(render_args)) render_args <- list()
             render_args$input <- file.path(dir, filename_rmd)
-            if(is.null(render_args$output_format)) {
+            if (is.null(render_args$output_format)) {
               render_args$output_format <- "html_document"
             }
-            if(is.null(render_args$output_options)) {
-              if(render_args$output_format == "html_document") {
+            if (is.null(render_args$output_options)) {
+              if (render_args$output_format == "html_document") {
                 render_args$output_options <- list(df_print = "paged")
               } else {
                 render_args$output_options <- list(toc = TRUE, df_print = "kable")
               }
             }
-            if(is.null(render_args$quiet)) render_args$quiet <- quiet
+            if (is.null(render_args$quiet)) render_args$quiet <- quiet
 
             ####### Assign variables
             OM <- MSEtool::SubCpars(x@OM, sims)
-            if(length(x@Misc) == 1) {
+            if (length(x@Misc) == 1) {
               report_list <- x@Misc
             } else {
               report_list <- x@Misc[sims]
@@ -190,7 +190,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             age <- 0:max_age
             nyears <- OM@nyears
             proyears <- OM@proyears
-            if(is.null(Year)) Year <- (OM@CurrentYr - nyears + 1):OM@CurrentYr
+            if (is.null(Year)) Year <- (OM@CurrentYr - nyears + 1):OM@CurrentYr
             Yearplusone <- c(Year, max(Year) + 1)
 
             nfleet <- RCMdata@Misc$nfleet
@@ -198,9 +198,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             nsurvey <- RCMdata@Misc$nsurvey
             length_bin <- RCMdata@Misc$lbinmid
 
-            if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
-            if(is.null(s_name)) {
-              if(nsurvey > 0) {
+            if (is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
+            if (is.null(s_name)) {
+              if (nsurvey > 0) {
                 s_name <- paste("Index", 1:nsurvey)
               } else {
                 s_name <- "Index"
@@ -208,7 +208,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             }
 
             ####### Document header
-            if(is.null(title)) title <- "Operating model (OM) conditioning report for `r ifelse(nchar(OM@Name) > 0, OM@Name, substitute(x))`"
+            if (is.null(title)) title <- "Operating model (OM) conditioning report for `r ifelse(nchar(OM@Name) > 0, OM@Name, substitute(x))`"
             header <- c("---",
                         paste0("title: \"", title, "\""),
                         "subtitle: Output from SAMtool Rapid Conditioning Model (RCM)",
@@ -236,18 +236,18 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             vary_hs <- !is.null(OM@cpars$hs) && length(unique(OM@cpars$hs)) > 1
             vary_M <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1 # Only plot there is a prior
             
-            if(sum(vary_R0, vary_D, vary_hs, vary_M) > 1) {
+            if (sum(vary_R0, vary_D, vary_hs, vary_M) > 1) {
               vars <- c("R0", "D", "hs", "M")
               var_labs <- c(R0 = "expression(R[0])", D = "\"Depletion\"", hs = "\"Steepness\"", M = "\"Natural mortality\"")
               var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", M = "natural mortality")
               
               corr_series <- do.call(rbind, lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])))
               corr_rmd <- local({
-                if(vary_M) OM@cpars$M <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
+                if (vary_M) OM@cpars$M <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
                 lapply(1:nrow(corr_series), function(i) {
                   x <- corr_series$x[i]
                   y <- corr_series$y[i]
-                  if(eval(as.symbol(paste0("vary_", x))) && eval(as.symbol(paste0("vary_", y)))) { 
+                  if (eval(as.symbol(paste0("vary_", x))) && eval(as.symbol(paste0("vary_", y)))) { 
                     rmd_corr(paste0("OM@cpars$", x), paste0("OM@cpars$", y), 
                              var_labs[x], var_labs[y], 
                              paste0("Correlation between ", var_names[x], " and ", var_names[y], " in operating model.")
@@ -264,7 +264,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             ####### Output from all simulations {.tabset}
             fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
-            if(any(RCMdata@Index > 0, na.rm = TRUE)) {
+            if (any(RCMdata@Index > 0, na.rm = TRUE)) {
               index_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
             } else index_output <- NULL
 
@@ -275,13 +275,13 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             ####### Fit to mean inputs from operating model
             # Generate summary table (parameter estimates)
 
-            if(length(x@mean_fit)) {
+            if (length(x@mean_fit)) {
               report <- x@mean_fit$report
               conv <- report$conv
               data_mean_fit <- x@mean_fit$obj$env$data
               SD <- x@mean_fit$SD
 
-              if(render_args$output_format == "html_document") {
+              if (render_args$output_format == "html_document") {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
                            "### RCM Estimates\n",
                            "`r sdreport_int(SD) %>% signif(4) %>% format() %>% as.data.frame()`\n\n")
@@ -296,30 +296,30 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 n_unique <- apply(x, 2, function(y) length(unique(y)))
                 any(n_unique > 1)
               }
-              if(any(data_mean_fit$MLpred > 0) && any(data_mean_fit$CALpred > 0)) {
+              if (any(data_mean_fit$MLpred > 0) && any(data_mean_fit$CALpred > 0)) {
                 SD_LAA <- "data_mean_fit$SD_LAA[nyears, ]"
               } else {
                 SD_LAA <- ""
               }
               LAA <- rmd_LAA(age = "age", LAA = "data_mean_fit$len_age[nyears, ]", header = "### Life History\n", 
                              SD_LAA = SD_LAA, fig.cap = "Length-at-age in last historical year.")
-              if(LH_varies_fn(data_mean_fit$len_age)) {
+              if (LH_varies_fn(data_mean_fit$len_age)) {
                 LAA_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$len_age[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Length-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual length-at-age.")
               } else LAA_persp <- NULL
 
               mat <- rmd_mat(age = "age", "data_mean_fit$mat[nyears, ]", fig.cap = "Maturity-at-age in last historical year.")
-              if(LH_varies_fn(data_mean_fit$mat)) {
+              if (LH_varies_fn(data_mean_fit$mat)) {
                 mat_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$mat[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Maturity-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual maturity-at-age.")
               } else mat_persp <- NULL
 
-              if(data_mean_fit$use_prior[3]) {
+              if (data_mean_fit$use_prior[3]) {
                 NatM <- rmd_at_age(age = "age", "rep(report$Mest, length(age))", fig.cap = "Natural mortality (time constant).", label = "Natural mortality")
               } else {
                 NatM <- rmd_at_age(age = "age", "data_mean_fit$M[nyears, ]", fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
               }
-              if(!data_mean_fit$use_prior[3] && LH_varies_fn(data_mean_fit$M)) {
+              if (!data_mean_fit$use_prior[3] && LH_varies_fn(data_mean_fit$M)) {
                 NatM_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$M[1:nyears, ]", xlab = "Year", ylab = "Age",
                                              zlab = "Natural mortality", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual M-at-age.")
               } else NatM_persp <- NULL
@@ -328,7 +328,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
               # Data and fit section
               individual_matrix_fn <- function(i, obs, pred, fig.cap, label, resids = FALSE, match = FALSE) {
-                if(resids) {
+                if (resids) {
                   rmd_assess_resid2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
                                     fig.cap = paste(fig.cap, i), label = label[i])
                 } else {
@@ -344,7 +344,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 fig.cap2 <- paste0("Residuals for ", comps, " composition from ", label[i], ".")
                 fig.cap3 <- paste0("Observed (black) and predicted (red) mean ", comps, " from the composition data for ", 
                                    label[i], ".")
-                if(comps == "age") {
+                if (comps == "age") {
                   #rr <- rmd_fit_comps("Year", obs2, pred2, type = c("annual", "bubble_residuals", "mean"), 
                   #                    ages = "age", fig.cap = fig.cap)
                   rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", ages = "age", fig.cap = fig.cap)
@@ -358,19 +358,19 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 c(rr, rr2, rr3)
               }
 
-              if(any(RCMdata@Chist > 0, na.rm = TRUE)) {
+              if (any(RCMdata@Chist > 0, na.rm = TRUE)) {
                 C_matplot <- rmd_matplot(x = "Year", y = "RCMdata@Chist", col = "rich.colors(nfleet)",
                                          xlab = "Year", ylab = "Catch", legend.lab = "f_name",
                                          fig.cap = "Catch time series.", header = "### Data and Fit {.tabset}\n#### Catch \n")
 
-                if(data_mean_fit$condition == "effort" || ncol(RCMdata@Chist) > 1) {
+                if (data_mean_fit$condition == "effort" || ncol(RCMdata@Chist) > 1) {
                   C_plots <- lapply(1:nfleet, individual_matrix_fn, obs = "RCMdata@Chist", pred = "report$Cpred",
                                     fig.cap = "catch from fleet", label = f_name, match = data_mean_fit$condition == "catch2")
                 } else C_plots <- NULL
               } else C_matplot <- C_plots <- NULL
 
-              if(any(RCMdata@Ehist > 0, na.rm = TRUE)) {
-                if(is.null(C_matplot)) {
+              if (any(RCMdata@Ehist > 0, na.rm = TRUE)) {
+                if (is.null(C_matplot)) {
                   E_header <- "### Data and Fit {.tabset}\n#### Effort \n"
                 } else {
                   E_header <- "#### Effort \n"
@@ -379,7 +379,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                          xlab = "Year", ylab = "Effort", legend.lab = "f_name", fig.cap = "Effort time series.", header = E_header)
               } else E_matplot <- NULL
 
-              if(any(RCMdata@Index > 0, na.rm = TRUE)) {
+              if (any(RCMdata@Index > 0, na.rm = TRUE)) {
                 I_plots <- c("#### Index \n",
                              lapply(1:nsurvey, individual_matrix_fn, obs = "RCMdata@Index", pred = "report$Ipred",
                                     fig.cap = "index from survey", label = s_name),
@@ -387,18 +387,18 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                     fig.cap = "index from survey", label = paste(s_name, "Residuals"), resids = TRUE))
               } else I_plots <- NULL
 
-              if(any(RCMdata@CAA > 0, na.rm = TRUE)) {
+              if (any(RCMdata@CAA > 0, na.rm = TRUE)) {
                 CAA_plots <- c("#### Age comps \n",
                                lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAA", pred = "report$CAApred", comps = "age", label = f_name))
               } else CAA_plots <- NULL
 
-              if(any(RCMdata@CAL > 0, na.rm = TRUE)) {
+              if (any(RCMdata@CAL > 0, na.rm = TRUE)) {
                 CAL_plots <- c("#### Length comps \n",
                                lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAL", pred = "report$CALpred", comps = "length", label = f_name))
               } else CAL_plots <- NULL
 
-              if(any(RCMdata@MS > 0, na.rm = TRUE)) {
-                if(RCMdata@MS_type == "length") {
+              if (any(RCMdata@MS > 0, na.rm = TRUE)) {
+                if (RCMdata@MS_type == "length") {
                   MS_label <- paste("Mean Length from", f_name)
                 } else {
                   MS_label <- paste("Mean Weight from", f_name)
@@ -409,12 +409,12 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                      fig.cap = paste("mean", RCMdata@MS_type, "from fleet"), label = MS_label))
               } else MS_plots <- NULL
 
-              if(any(RCMdata@IAA > 0, na.rm = TRUE)) {
+              if (any(RCMdata@IAA > 0, na.rm = TRUE)) {
                 IAA_plots <- c("#### Index age comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", comps = "age", label = s_name))
               } else IAA_plots <- NULL
 
-              if(any(RCMdata@IAL > 0, na.rm = TRUE)) {
+              if (any(RCMdata@IAL > 0, na.rm = TRUE)) {
                 IAL_plots <- c("#### Index length comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAL", pred = "report$IALpred", comps = "length", label = s_name))
               } else IAL_plots <- NULL
@@ -430,7 +430,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                        xlab = "Year", ylab = "Fishing Mortality (F)", legend.lab = "f_name",
                                        fig.cap = "Time series of fishing mortality by fleet.")
 
-              if(length(unique(report$E0)) > 1) {
+              if (length(unique(report$E0)) > 1) {
                 SSB0_plot <- rmd_assess_timeseries("structure(report$E0, names = Year)", "unfished spawning depletion (growth and/or M are time-varying)",
                                                    "expression(SSB[0])")
               } else SSB0_plot <- NULL
@@ -440,7 +440,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                        fig.cap = "Predicted catch-at-age (summed over all fleets).", 
                                        bubble_adj = as.character(bubble_adj))
 
-              if(sum(report$CALpred, na.rm = TRUE) > 0) {
+              if (sum(report$CALpred, na.rm = TRUE) > 0) {
                 CAL_bubble <- rmd_bubble("Year", "apply(report$CALpred, 1:2, sum)", CAL_bins = "RCMdata@Misc$lbinmid",
                                          fig.cap = "Predicted catch-at-length (summed over all fleets).", bubble_adj = as.character(bubble_adj))
               } else CAL_bubble <- NULL
@@ -474,7 +474,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               corr_matrix <- c("### Correlation matrix\n",
                                "`r SD$env$corr.fixed %>% structure(dimnames = list(make_unique_names(rownames(.)), make_unique_names(colnames(.)))) %>% as.data.frame()`\n\n")
               
-              if(exists("retro", inherits = FALSE)) {
+              if (exists("retro", inherits = FALSE)) {
                 ret <- rmd_RCM_retrospective(render_args)
               } else ret <- NULL
               
@@ -485,7 +485,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                 "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")
             }
 
-            if(compare) {
+            if (compare) {
               message("Getting Hist object from runMSE...")
               Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
               compare_rmd <- rmd_RCM_Hist_compare()
@@ -495,10 +495,10 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             }
 
             rmd <- c(header, OM_update, all_sims_output, mean_fit_rmd, compare_rmd, rmd_footer())
-            if(is.list(rmd)) rmd <- do.call(c, rmd)
+            if (is.list(rmd)) rmd <- do.call(c, rmd)
 
             # Generate markdown report
-            if(!dir.exists(dir)) {
+            if (!dir.exists(dir)) {
               message("Creating directory: \n", dir)
               dir.create(dir)
             }
@@ -510,7 +510,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             output_filename <- do.call(rmarkdown::render, render_args)
             message("Rendered file: ", output_filename)
 
-            if(open_file) browseURL(output_filename)
+            if (open_file) browseURL(output_filename)
             invisible(output_filename)
           })
 
@@ -526,38 +526,38 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
 
   dots <- list(...)
   test <- vapply(dots, inherits, logical(1), what = "RCModel") %>% all()
-  if(!test) stop("Objects provided are not of class RCModel.", call. = FALSE)
+  if (!test) stop("Objects provided are not of class RCModel.", call. = FALSE)
   
   # Update scenario
-  if(is.null(scenario$names)) scenario$names <- paste("Scenario", 1:length(dots))
-  if(is.null(scenario$col)) {
+  if (is.null(scenario$names)) scenario$names <- paste("Scenario", 1:length(dots))
+  if (is.null(scenario$col)) {
     scenario$col <- gplots::rich.colors(length(dots))
   }
   scenario$col2 <- scenario$col
 
-  if(is.null(scenario$lwd)) scenario$lwd <- 1
-  if(is.null(scenario$lty)) scenario$lty <- 1
+  if (is.null(scenario$lwd)) scenario$lwd <- 1
+  if (is.null(scenario$lty)) scenario$lty <- 1
 
   ####### Function arguments for rmarkdown::render
   filename_rmd <- paste0(filename, ".Rmd")
 
-  if(missing(render_args)) render_args <- list()
+  if (missing(render_args)) render_args <- list()
   render_args$input <- file.path(dir, filename_rmd)
-  if(is.null(render_args$output_format)) {
+  if (is.null(render_args$output_format)) {
     render_args$output_format <- "html_document"
   }
-  if(is.null(render_args$output_options)) {
-    if(render_args$output_format == "html_document") {
+  if (is.null(render_args$output_options)) {
+    if (render_args$output_format == "html_document") {
       render_args$output_options <- list(df_print = "paged")
     } else {
       render_args$output_options <- list(toc = TRUE, df_print = "kable")
     }
   }
-  if(is.null(render_args$quiet)) render_args$quiet <- quiet
+  if (is.null(render_args$quiet)) render_args$quiet <- quiet
 
   ####### Assign variables
   x <- dots[[1]] # Dummy variable
-  report_list <- lapply(dots, function(xx) if(length(xx@mean_fit) > 0) return(xx@mean_fit$report) else stop("Error in RCM objects."))
+  report_list <- lapply(dots, function(xx) if (length(xx@mean_fit)) return(xx@mean_fit$report) else stop("Error in RCM objects."))
 
   nsim <- length(report_list)
   RCMdata <- dots[[1]]@data
@@ -565,18 +565,18 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   max_age <- dots[[1]]@OM@maxage
   age <- 0:max_age
   nyears <- dots[[1]]@OM@nyears
-  if(is.null(Year)) Year <- (dots[[1]]@OM@CurrentYr - nyears + 1):dots[[1]]@OM@CurrentYr
+  if (is.null(Year)) Year <- (dots[[1]]@OM@CurrentYr - nyears + 1):dots[[1]]@OM@CurrentYr
   Yearplusone <- c(Year, max(Year) + 1)
 
   nfleet <- vapply(dots, function(xx) xx@data@Misc$nfleet, numeric(1)) %>% unique()
   nsurvey <- vapply(dots, function(xx) xx@data@Misc$nsurvey, numeric(1)) %>% unique()
   length_bin <- RCMdata@Misc$lbinmid
 
-  if(is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
-  if(is.null(s_name)) s_name <- paste("Index", 1:nsurvey)
+  if (is.null(f_name)) f_name <- paste("Fleet", 1:nfleet)
+  if (is.null(s_name)) s_name <- paste("Index", 1:nsurvey)
 
   ####### Document header
-  if(is.null(title)) title <- "Comparisons of OM conditioning"
+  if (is.null(title)) title <- "Comparisons of OM conditioning"
   header <- c("---",
               paste0("title: \"", title, "\""),
               "subtitle: Output from Rapid Conditioning Model (RCM)",
@@ -598,14 +598,14 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   ####### Output from all simulations {.tabset}
   fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
-  if(any(RCMdata@Index > 0, na.rm = TRUE)) {
+  if (any(RCMdata@Index > 0, na.rm = TRUE)) {
     survey_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
   } else survey_output <- NULL
 
   #### MSY comparisons
-  if(compare) {
+  if (compare) {
     message("Running runMSE() to get MSY reference points...")
-    if(snowfall::sfIsRunning()) {
+    if (snowfall::sfIsRunning()) {
       Hist <- snowfall::sfClusterApplyLB(dots, function(xx) runMSE(xx@OM, Hist = TRUE, silent = TRUE))
     } else {
       Hist <- lapply(dots, function(xx) runMSE(xx@OM, Hist = TRUE, silent = TRUE))
@@ -618,14 +618,14 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
                  "matplot(Year, SSB_SSBMSY, typ = \"n\", xlab = \"Year\", ylab = expression(SSB/SSB[MSY]), ylim = c(0, 1.1 * max(SSB_SSBMSY)))",
                  "matlines(Year, SSB_SSBMSY, col = scenario$col2)",
                  "abline(h = c(0, MSY_ref), col = \"grey\")",
-                 "if(!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty)",
+                 "if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty)",
                  "```\n")
 
     ref_pt_fn <- function(xx) c(mean(xx@Ref$ReferencePoints$FMSY), mean(xx@Ref$ReferencePoints$MSY), mean(xx@Ref$ReferencePoints$SSBMSY_SSB0))
     ref_pt <- do.call(cbind, lapply(Hist, ref_pt_fn)) %>%
       structure(dimnames = list(c("FMSY", "MSY", "Spawning depletion at MSY"), scenario$names)) %>% as.data.frame()
 
-    if(render_args$output_format == "html_document") {
+    if (render_args$output_format == "html_document") {
       rmd_ref_pt <- paste0("## Reference points \n",
                            "`r ref_pt`\n\n")
     } else {
@@ -647,7 +647,7 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   summary_nll <- vapply(nll, function(xx) xx[[1]] %>% as.matrix(), numeric(6)) %>%
     structure(dimnames = list(rownames(nll[[1]][[1]]), scenario$names)) %>% as.data.frame()
 
-  if(render_args$output_format == "html_document") {
+  if (render_args$output_format == "html_document") {
 
     nll_table_fn <- function(i, ii) {
       c(paste0("#### ", scenario$names[i]),
@@ -685,10 +685,10 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   }
 
   rmd <- c(header, all_sims_output, nll_table, rmd_ref_pt, rmd_footer())
-  if(is.list(rmd)) rmd <- do.call(c, rmd)
+  if (is.list(rmd)) rmd <- do.call(c, rmd)
 
   # Generate markdown report
-  if(!dir.exists(dir)) {
+  if (!dir.exists(dir)) {
     message("Creating directory: \n", dir)
     dir.create(dir)
   }
@@ -700,7 +700,7 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   output_filename <- do.call(rmarkdown::render, render_args)
   message("Rendered file: ", output_filename)
 
-  if(open_file) browseURL(output_filename)
+  if (open_file) browseURL(output_filename)
   invisible(output_filename)
 }
 

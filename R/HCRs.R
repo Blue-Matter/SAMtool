@@ -73,50 +73,50 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
   Ftarget_type <- match.arg(Ftarget_type)
   
   n_OCP <- length(OCP)
-  if(length(relF) != n_OCP) stop("Length of relF should be equal to length of OCP.")
+  if (length(relF) != n_OCP) stop("Length of relF should be equal to length of OCP.")
   
-  if(Assessment@conv) {
+  if (Assessment@conv) {
     
-    if(OCP_type == "SSB_SSB0" && length(Assessment@SSB_SSB0)) {
+    if (OCP_type == "SSB_SSB0" && length(Assessment@SSB_SSB0)) {
       OCP_val <- Assessment@SSB_SSB0[length(Assessment@SSB_SSB0)]
-    } else if(OCP_type == "SSB_SSBMSY" && length(Assessment@SSB_SSBMSY)) {
+    } else if (OCP_type == "SSB_SSBMSY" && length(Assessment@SSB_SSBMSY)) {
       OCP_val <- Assessment@SSB_SSBMSY[length(Assessment@SSB_SSBMSY)]
-    } else if(OCP_type == "SSB_dSSB0" && !is.null(Assessment@TMB_report$dynamic_SSB0)) {
+    } else if (OCP_type == "SSB_dSSB0" && !is.null(Assessment@TMB_report$dynamic_SSB0)) {
       OCP_val <- Assessment@SSB/Assessment@TMB_report$dynamic_SSB0
       OCP_val <- OCP_val[length(OCP_val)]
-    } else if(OCP_type == "F_FMSY") {
-      if(length(Assessment@U_UMSY)) {
+    } else if (OCP_type == "F_FMSY") {
+      if (length(Assessment@U_UMSY)) {
         OCP_val <- Assessment@U_UMSY[length(Assessment@U_UMSY)]
-      } else if(length(Assessment@F_FMSY)) {
+      } else if (length(Assessment@F_FMSY)) {
         OCP_val <- Assessment@F_FMSY[length(Assessment@F_FMSY)]
       } else {
         OCP_val <- NA_real_
       }
-    } else if(OCP_type == "F_F01" && length(Assessment@FMort)) {
-      if(!is.null(Assessment@forecast$per_recruit$F01)) {
+    } else if (OCP_type == "F_F01" && length(Assessment@FMort)) {
+      if (!is.null(Assessment@forecast$per_recruit$F01)) {
         F01 <- Assessment@forecast$per_recruit$F01
         OCP_val <- Assessment@FMort[length(Assessment@FMort)]/F01
-      } else if(!is.null(Assessment@forecast$per_recruit$U)) {
+      } else if (!is.null(Assessment@forecast$per_recruit$U)) {
         U01 <- get_F01(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
         OCP_val <- Assessment@U[length(Assessment@U)]/U01
       } else {
         F01 <- get_F01(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$YPR)
         OCP_val <- Assessment@FMort[length(Assessment@FMort)]/F01
       }
-    } else if(OCP_type == "F_Fmax" && length(Assessment@FMort)) {
-      if(!is.null(Assessment@forecast$per_recruit$Fmax)) {
+    } else if (OCP_type == "F_Fmax" && length(Assessment@FMort)) {
+      if (!is.null(Assessment@forecast$per_recruit$Fmax)) {
         Fmax <- Assessment@forecast$per_recruit$Fmax
         OCP_val <- Assessment@FMort[length(Assessment@FMort)]/Fmax
-      } else if(!is.null(Assessment@forecast$per_recruit$U)) {
+      } else if (!is.null(Assessment@forecast$per_recruit$U)) {
         Umax <- get_Fmax(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
         OCP_val <- Assessment@U[length(Assessment@U)]/Fmax
       } else {
         Fmax <- get_Fmax(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$YPR)
         OCP_val <- Assessment@FMort[length(Assessment@FMort)]/Fmax
       }
-    } else if(OCP_type == "F_FSPR" && length(Assessment@FMort)) {
-      if(missing(SPR_OCP)) SPR_OCP <- 0.4
-      if(!is.null(Assessment@forecast$per_recruit$U)) {
+    } else if (OCP_type == "F_FSPR" && length(Assessment@FMort)) {
+      if (missing(SPR_OCP)) SPR_OCP <- 0.4
+      if (!is.null(Assessment@forecast$per_recruit$U)) {
         U_SPR <- get_FSPR(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$SPR, target = SPR_OCP)
         OCP_val <- Assessment@U[length(Assessment@U)]/U_SPR
       } else {
@@ -128,55 +128,55 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
       OCP_val <- NA_real_
     }
     
-    if(!is.na(OCP_val) && OCP_val > 0) {
+    if (!is.na(OCP_val) && OCP_val > 0) {
       alpha <- HCRlinesegment(OCP_val, OCP, relF)
       
-      if(Ftarget_type == "FMSY") {
-        if(length(Assessment@UMSY)) {
+      if (Ftarget_type == "FMSY") {
+        if (length(Assessment@UMSY)) {
           Fout <- -log(1 - alpha * Assessment@UMSY)
           SE <- alpha * Assessment@SE_UMSY
-        } else if(length(Assessment@FMSY)) {
+        } else if (length(Assessment@FMSY)) {
           Fout <- alpha * Assessment@FMSY
           SE <- alpha * Assessment@SE_FMSY
         } 
-      } else if(Ftarget_type == "F01") {
-        if(!is.null(Assessment@forecast$per_recruit$F01)) {
+      } else if (Ftarget_type == "F01") {
+        if (!is.null(Assessment@forecast$per_recruit$F01)) {
           Fout <- alpha * Assessment@forecast$per_recruit$F01[1]
-        } else if(!is.null(Assessment@forecast$per_recruit$U)) {
+        } else if (!is.null(Assessment@forecast$per_recruit$U)) {
           U01 <- get_F01(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
           Fout <- -log(1 - alpha * U01)
         } else {
           Fout <- alpha * get_F01(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$YPR)
         }
-      } else if(Ftarget_type == "Fmax") {
-        if(!is.null(Assessment@forecast$per_recruit$Fmax)) {
+      } else if (Ftarget_type == "Fmax") {
+        if (!is.null(Assessment@forecast$per_recruit$Fmax)) {
           Fout <- alpha * Assessment@forecast$per_recruit$Fmax[1]
-        } else if(!is.null(Assessment@forecast$per_recruit$U)) {
+        } else if (!is.null(Assessment@forecast$per_recruit$U)) {
           Umax <- get_Fmax(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$YPR)
           Fout <- -log(1 - alpha * Umax)
         } else {
           Fout <- alpha * get_Fmax(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$YPR)
         }
-      } else if(Ftarget_type == "FSPR") {
-        if(missing(SPR_targ)) {
-          if(!is.null(dots$SPR)) {
+      } else if (Ftarget_type == "FSPR") {
+        if (missing(SPR_targ)) {
+          if (!is.null(dots$SPR)) {
             SPR_targ <- dots$SPR
           } else SPR_targ <- 0.4
         }
-        if(!is.null(Assessment@forecast$per_recruit$U)) {
+        if (!is.null(Assessment@forecast$per_recruit$U)) {
           U_SPR <- get_FSPR(Assessment@forecast$per_recruit$U, Assessment@forecast$per_recruit$SPR, target = SPR_targ)
           Fout <- -log(1 - alpha * U_SPR)
         } else {
           Fout <- alpha * get_FSPR(Assessment@forecast$per_recruit$FM, Assessment@forecast$per_recruit$SPR,
                                    target = SPR_targ)
         }
-      } else if(Ftarget_type == "abs") {
+      } else if (Ftarget_type == "abs") {
         Fout <- alpha
       }
       
-      if(exists("Fout", inherits = FALSE) && !is.na(Fout)) {
-        if(Fout > 0) {
-          if(!exists("SE", inherits = FALSE) || !length(SE)) SE <- 0
+      if (exists("Fout", inherits = FALSE) && !is.na(Fout)) {
+        if (Fout > 0) {
+          if (!exists("SE", inherits = FALSE) || !length(SE)) SE <- 0
           FM <- trlnorm(reps, Fout, SE/Fout)
         } else {
           FM <- rep(0, reps)
@@ -185,7 +185,7 @@ HCR_segment <- function(Assessment, reps = 1, OCP_type = c("SSB_SSB0", "SSB_SSBM
       }
     }
   }
-  if(!exists("TAC", inherits = FALSE)) TAC <- rep(NA_real_, reps)
+  if (!exists("TAC", inherits = FALSE)) TAC <- rep(NA_real_, reps)
   
   Rec <- new("Rec")
   Rec@TAC <- TACfilter(TAC)
@@ -401,7 +401,7 @@ class(HCR_escapement) <- "HCR"
 #' }
 #' @export
 HCR_fixedF <- function(Assessment, reps = 1, Ftarget = 0.1) {
-  if(Assessment@conv) {
+  if (Assessment@conv) {
     TAC <- calculate_TAC(Assessment, Ftarget = Ftarget)
   } else {
     TAC <- NA_real_
@@ -511,18 +511,18 @@ powdif<-function(x,z,g){
 #' @aliases calculate_TAC
 #' @export
 TAC_MSY <- function(Assessment, reps, MSY_frac = 1) {
-  if(length(Assessment@UMSY)) {
+  if (length(Assessment@UMSY)) {
     Fout <- -log(1 - MSY_frac * Assessment@UMSY)
     SE <- MSY_frac * Assessment@SE_UMSY
-  } else if(length(Assessment@FMSY)) {
+  } else if (length(Assessment@FMSY)) {
     Fout <- MSY_frac * Assessment@FMSY
     SE <- MSY_frac * Assessment@SE_FMSY
   } else {
     Fout <- SE <- numeric(0)
   }
   
-  if(length(Fout) && !is.na(Fout) && Fout > 0) {
-    if(length(SE)) {
+  if (length(Fout) && !is.na(Fout) && Fout > 0) {
+    if (length(SE)) {
       FM <- trlnorm(reps, Fout, SE/Fout)
       TAC <- calculate_TAC(Assessment, Ftarget = FM)
     } else {
@@ -535,15 +535,15 @@ TAC_MSY <- function(Assessment, reps, MSY_frac = 1) {
 }
 
 calculate_TAC <- function(Assessment, Ftarget, Utarget) { # Vectorized for Ftarget or Utarget
-  if(Assessment@conv) {
+  if (Assessment@conv) {
     TAC <- try(vapply(Ftarget, Assessment@forecast$catch_eq, numeric(1)), silent = TRUE)
-    if(is.character(TAC)) {
+    if (is.character(TAC)) {
       TAC <- try(mapply(catch_equation, Utarget = 1 - exp(-Ftarget), 
                         MoreArgs = list(method = "frac", B = Assessment@VB[length(Assessment@VB)])),
                  silent = TRUE)
     }
   } 
-  if(!exists("TAC", inherits = FALSE) || is.character(TAC)) TAC <- rep(NA_real_, length(Ftarget))
+  if (!exists("TAC", inherits = FALSE) || is.character(TAC)) TAC <- rep(NA_real_, length(Ftarget))
   return(TAC)
 }
 
@@ -552,22 +552,22 @@ catch_equation <- function(method = c("frac", "Baranov", "cDD", "SP"), ...) {
   method <- match.arg(method)
   dots <- list(...)
   
-  if(method == "frac") {
+  if (method == "frac") {
     args <- dots_check(c("Utarget", "B"), dots)
     catch <- args$Utarget * args$B
     
-  } else if(method == "Baranov") {
+  } else if (method == "Baranov") {
     args <- dots_check(c("sel", "Ftarget", "M", "wt", "N"), dots)
     catch <- SCA_catch_solver(FM = args$Ftarget, N = args$N, weight = args$wt, vul = args$sel, M = args$M)$Cpred
   
-  } else if(method == "cDD") {
+  } else if (method == "cDD") {
     args <- dots_check(c("Ftarget", "B", "N", "R", "M", "Kappa", "Winf", "wk"), dots)
     catch <- cDD_catch_solver(FM = args$Ftarget, B = args$B, N = args$N, R = args$R, M = args$M, Kappa = args$Kappa,
                               Winf = args$Winf, wk = args$wk)[1]
     
-  } else if(method == "SP") {
+  } else if (method == "SP") {
     args <- dots_check(c("Ftarget", "B", "MSY", "K", "n"), dots)
-    if(is.null(dots$n_seas)) {
+    if (is.null(dots$n_seas)) {
       dt <- 1
     } else {
       dt <- 1/dots$n_seas
@@ -577,14 +577,14 @@ catch_equation <- function(method = c("frac", "Baranov", "cDD", "SP"), ...) {
     catch <- SP_catch_solver(FM = args$Ftarget, B = args$B, dt = dt, MSY = args$MSY, 
                              K = args$K, n = args$n, n_term = n_term)[1]
   }
-  if(!exists("catch", inherits = FALSE)) catch <- NA_real_
+  if (!exists("catch", inherits = FALSE)) catch <- NA_real_
   return(catch)
 }
 
 dots_check <- function(vars, dots) {
   out <- lapply(vars, function(x) getElement(dots, x)) %>% structure(names = vars)
   check <- vapply(out, is.null, logical(1))
-  if(any(check)) {
+  if (any(check)) {
     stop(paste0(paste(vars[check], collapse = ", "), " was not found in call to catch_equation()."),
          call.= FALSE)
   }

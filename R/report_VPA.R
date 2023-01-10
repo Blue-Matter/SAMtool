@@ -2,7 +2,7 @@
 summary_VPA <- function(Assessment) {
   assign_Assessment_slots(Assessment)
 
-  if(conv) current_status <- c(F_FMSY[length(F_FMSY)], SSB_SSBMSY[length(SSB_SSBMSY)], SSB_SSB0[length(SSB_SSB0)])
+  if (conv) current_status <- c(F_FMSY[length(F_FMSY)], SSB_SSBMSY[length(SSB_SSBMSY)], SSB_SSB0[length(SSB_SSB0)])
   else current_status <- rep(NA, 3)
   current_status <- data.frame(Value = current_status)
   rownames(current_status) <- c("F/FMSY", "SSB/SSBMSY", "SSB/SSB0")
@@ -14,9 +14,9 @@ summary_VPA <- function(Assessment) {
   rownam <- c("h", "M", "minage", "maxage", "Linf", "K", "t0", "Winf", "A50", "A95")
   input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
   rownames(input_parameters) <- rownam
-  if(!info$fix_h) input_parameters <- input_parameters[-1, ]
+  if (!info$fix_h) input_parameters <- input_parameters[-1, ]
 
-  if(conv) Value <- c(VB0, SSB0, MSY, FMSY, VBMSY, SSBMSY, SSBMSY/SSB0)
+  if (conv) Value <- c(VB0, SSB0, MSY, FMSY, VBMSY, SSBMSY, SSBMSY/SSB0)
   else Value <- rep(NA, 7)
 
   Description <- c("Unfished vulnerable biomass",
@@ -69,7 +69,7 @@ rmd_VPA <- function(Assessment, ...) {
 
   # Productivity
   SR_calc <- c("SSB_SR <- SSB[1:(length(SSB) - min(info$ages))]",
-               "if(info$SR == \"BH\") {",
+               "if (info$SR == \"BH\") {",
                "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
                "} else {",
                "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
@@ -92,7 +92,7 @@ plot_yield_VPA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
 
 profile_likelihood_VPA <- function(Assessment, ...) {
   dots <- list(...)
-  if(!"Fterm" %in% names(dots)) stop("Sequence of Fterm was not found. See help file.")
+  if (!"Fterm" %in% names(dots)) stop("Sequence of Fterm was not found. See help file.")
   Fterm <- dots$Fterm
 
   params <- Assessment@info$params
@@ -103,7 +103,7 @@ profile_likelihood_VPA <- function(Assessment, ...) {
     params$log_Fterm <- log(Fterm[i])
     obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, DLL = "SAMtool", silent = TRUE)
     opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
-    if(!is.character(opt2)) nll <- opt2$objective else nll <- NA_real_
+    if (!is.character(opt2)) nll <- opt2$objective else nll <- NA_real_
     return(nll)
   }
   nll <- vapply(1:length(Fterm), profile_fn, numeric(1), Assessment = Assessment, params = params, map = map) - Assessment@opt$objective
@@ -142,7 +142,7 @@ retrospective_VPA <- function(Assessment, nyr) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 
-    if(!is.character(opt2)) {
+    if (!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best) %>% VPA_posthoc(info)
 
       #Z_mat <- t(report$F) + info$data$M
@@ -163,7 +163,7 @@ retrospective_VPA <- function(Assessment, nyr) {
   }
 
   conv <- vapply(0:nyr, lapply_fn, logical(1), info = info, obj = obj)
-  if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
+  if (any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
 
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)

@@ -2,7 +2,7 @@
 summary_DD_TMB <- function(Assessment, state_space = FALSE) {
   assign_Assessment_slots()
 
-  if(conv) current_status <- c(F_FMSY[length(F_FMSY)], B_BMSY[length(B_BMSY)], B_B0[length(B_B0)])
+  if (conv) current_status <- c(F_FMSY[length(F_FMSY)], B_BMSY[length(B_BMSY)], B_B0[length(B_B0)])
   else current_status <- c(NA, NA, B_B0[length(B_B0)])
   current_status <- data.frame(Value = current_status)
   rownames(current_status) <- c("F/FMSY", "B/BMSY", "B/B0")
@@ -13,27 +13,27 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
                   "Age of knife-edge selectivity",
                   "Weight at age k")
   rownam <- c("alpha", "rho", "k", "w_k")
-  if(Assessment@obj$env$data$condition == "effort" && "log_omega" %in% names(obj$env$map)) {
+  if (Assessment@obj$env$data$condition == "effort" && "log_omega" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$omega)
     Description <- c(Description, "Catch SD (log-space)")
     rownam <- c(rownam, "omega")
   }
-  if(state_space && "log_tau" %in% names(obj$env$map)) {
+  if (state_space && "log_tau" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$tau)
     Description <- c(Description, "log-Recruitment deviation SD")
     rownam <- c(rownam, "tau")
   }
-  if("transformed_h" %in% names(obj$env$map)) {
+  if ("transformed_h" %in% names(obj$env$map)) {
     Value <- c(Value, h)
     Description <- c(Description, "Stock-recruit steepness")
     rownam <- c(rownam, "h")
   }
-  if("log_M" %in% names(obj$env$map)) {
+  if ("log_M" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$M)
     Description <- c(Description, "Natural mortality")
     rownam <- c(rownam, "M")
   }
-  if(any(info$data$MW_hist > 0, na.rm = TRUE) && "log_sigma_W" %in% names(obj$env$map)) {
+  if (any(info$data$MW_hist > 0, na.rm = TRUE) && "log_sigma_W" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$sigma_W)
     Description <- c(Description, "Mean weight SD")
     rownam <- c(rownam, "sigma_W")
@@ -41,8 +41,9 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
   input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
   rownames(input_parameters) <- rownam
 
-  if(conv) derived <- c(B0, N0, MSY, FMSY, BMSY, BMSY/B0)
-  else derived <- rep(NA, 6)
+  if (conv) {
+    derived <- c(B0, N0, MSY, FMSY, BMSY, BMSY/B0)
+  } else derived <- rep(NA, 6)
   derived <- data.frame(Value = derived,
                         Description = c("Unfished biomass", "Unfished abundance", "Maximum sustainable yield (MSY)",
                                         "Fishing mortality at MSY", "Biomass at MSY", "Depletion at MSY"),
@@ -50,12 +51,12 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
   rownames(derived) <- c("B0", "N0", "MSY", "FMSY", "BMSY", "BMSY/B0")
 
   model_estimates <- sdreport_int(SD)
-  if(!is.character(model_estimates)) {
+  if (!is.character(model_estimates)) {
     rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(Dev))
   }
 
   model_name <- "Delay-Difference"
-  if(state_space) model_name <- paste(model_name, "(State-Space)")
+  if (state_space) model_name <- paste(model_name, "(State-Space)")
   output <- list(model = model_name,
                  current_status = current_status, input_parameters = input_parameters,
                  derived_quantities = derived, model_estimates = model_estimates,
@@ -65,7 +66,7 @@ summary_DD_TMB <- function(Assessment, state_space = FALSE) {
 
 
 rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
-  if(state_space) {
+  if (state_space) {
     ss <- rmd_summary("Delay-Difference (State-Space)")
   } else ss <- rmd_summary("Delay-Difference")
 
@@ -76,7 +77,7 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
                           fig.cap = "Assumed knife-edge maturity at age corresponding to length of 50% maturity."))
 
   # Data section
-  if(any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
+  if (any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
     data_MW <- rmd_data_MW()
   } else {
     data_MW <- ""
@@ -91,20 +92,20 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
                   rmd_sel(age = "1:info$LH$maxage", sel = "ifelse(1:info$LH$maxage < info$data$k, 0, 1)", 
                           fig.cap = "Knife-edge selectivity set to the age corresponding to the length of 50% maturity."))
 
-  if(Assessment@obj$env$data$condition == "effort") {
+  if (Assessment@obj$env$data$condition == "effort") {
     assess_data <- c(rmd_assess_fit("Catch", "catch"), rmd_assess_resid("Catch"), rmd_assess_qq("Catch", "catch"))
   } else {
     assess_data <- c(rmd_assess_fit("Catch", "catch", match = TRUE), 
                      rmd_assess_fit_series(nsets = ncol(Assessment@Index)))
   }
-  if(any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
+  if (any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
     fit_MW <- rmd_assess_fit_MW()
   } else {
     fit_MW <- ""
   }
   assess_fit <- c(assess_all, assess_data, fit_MW)
 
-  if(state_space) {
+  if (state_space) {
     assess_fit2 <- c(rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type),
                      rmd_residual("Dev", "SE_Dev", fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
                                   label = Assessment@Dev_type, conv_check = TRUE))
@@ -118,7 +119,7 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
 
   #### Productivity
   SR_calc <- c("SSB_SR <- SSB[1:info$data$ny]",
-               "if(info$data$SR_type == \"BH\") {",
+               "if (info$data$SR_type == \"BH\") {",
                "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
                "} else {",
                "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
@@ -136,12 +137,12 @@ rmd_DD_TMB <- function(Assessment, state_space = FALSE, ...) {
 
 profile_likelihood_DD_TMB <- function(Assessment, ...) {
   dots <- list(...)
-  if(!"R0" %in% names(dots) && !"h" %in% names(dots)) stop("Sequence of neither R0 nor h was not found. See help file.")
-  if(!is.null(dots$R0)) R0 <- dots$R0 else {
+  if (!"R0" %in% names(dots) && !"h" %in% names(dots)) stop("Sequence of neither R0 nor h was not found. See help file.")
+  if (!is.null(dots$R0)) R0 <- dots$R0 else {
     R0 <- Assessment@R0
     profile_par <- "h"
   }
-  if(!is.null(dots$h)) h <- dots$h else {
+  if (!is.null(dots$h)) h <- dots$h else {
     h <- Assessment@h
     profile_par <- "R0"
   }
@@ -154,27 +155,27 @@ profile_likelihood_DD_TMB <- function(Assessment, ...) {
 
   profile_fn <- function(i, Assessment, params, map) {
     params$R0x <- log(profile_grid[i, 1] * Assessment@obj$env$data$rescale)
-    if(Assessment@info$data$SR_type == "BH") {
+    if (Assessment@info$data$SR_type == "BH") {
       params$transformed_h <- logit((profile_grid[i, 2] - 0.2)/0.8)
     } else {
       params$transformed_h <- log(profile_grid[i, 2] - 0.2)
     }
 
-    if(joint_profile) {
+    if (joint_profile) {
       map$R0x <- map$transformed_h <- factor(NA)
     } else {
-      if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
+      if (profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
     }
     obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
                       DLL = "SAMtool", silent = TRUE)
     opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
-    if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
+    if (!is.character(opt2)) nll <- opt2$objective else nll <- NA
     return(nll)
   }
   nll <- vapply(1:nrow(profile_grid), profile_fn, numeric(1), Assessment = Assessment, params = params, map = map) - Assessment@opt$objective
   profile_grid$nll <- nll
 
-  if(joint_profile) {
+  if (joint_profile) {
     pars <- c("R0", "h")
     MLE <- vapply(pars, function(x, y) slot(y, x), y = Assessment, numeric(1))
   } else {
@@ -215,7 +216,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
     info$data$I_sd <- info$data$I_sd[1:ny_ret, , drop = FALSE]
     info$data$MW_hist <- info$data$MW_hist[1:ny_ret]
 
-    if(state_space) info$params$log_rec_dev <- rep(0, ny_ret)
+    if (state_space) info$params$log_rec_dev <- rep(0, ny_ret)
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, random = obj$env$random, map = obj$env$map,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
@@ -223,7 +224,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 
-    if(!is.character(opt2)) {
+    if (!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
       ref_pt <- ref_pt_DD(info$data, report$Arec, report$Brec, report$M)
       report <- c(report, ref_pt)
@@ -248,7 +249,7 @@ retrospective_DD_TMB <- function(Assessment, nyr, state_space = FALSE) {
   }
 
   conv <- vapply(0:nyr, lapply_fn, logical(1), info = info, obj = obj, state_space = state_space)
-  if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
+  if (any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
 
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
@@ -283,7 +284,7 @@ plot_yield_DD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "De
   R <- vapply(yield, getElement, numeric(1), "R")
   ind <- R >= 0
 
-  if(xaxis == "F") {
+  if (xaxis == "F") {
     plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing mortality",
          ylab = "Equilibrium yield")
     segments(x0 = fmsy, y0 = 0, y1 = msy, lty = 2)
@@ -291,7 +292,7 @@ plot_yield_DD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "De
     abline(h = 0, col = 'grey')
   }
 
-  if(xaxis == "Biomass") {
+  if (xaxis == "Biomass") {
     plot(Biomass[ind], Yield[ind], typ = 'l', xlab = "Biomass",
          ylab = "Equilibrium yield")
     segments(x0 = report$BMSY, y0 = 0, y1 = msy, lty = 2)
@@ -299,7 +300,7 @@ plot_yield_DD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "De
     abline(h = 0, col = 'grey')
   }
 
-  if(xaxis == "Depletion") {
+  if (xaxis == "Depletion") {
     plot(Biomass[ind]/report$B0, Yield[ind], typ = 'l',
          xlab = expression(B/B[0]), ylab = "Equilibrium yield")
     segments(x0 = report$BMSY/report$B0, y0 = 0, y1 = msy, lty = 2)

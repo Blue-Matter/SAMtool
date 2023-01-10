@@ -46,22 +46,22 @@
 #' @export
 make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
   diagnostic <- match.arg(diagnostic)
-  if(is.character(.Assess)) {
+  if (is.character(.Assess)) {
     Assess_char <- .Assess
     .Assess <- as.symbol(.Assess)
   } else {
     .Assess <- substitute(.Assess)
     Assess_char <- as.character(.Assess)
   }
-  if(is.character(.HCR)) {
+  if (is.character(.HCR)) {
     .HCR <- as.symbol(.HCR)
   } else {
     .HCR <- substitute(.HCR)
   }
-  if(!inherits(eval(.Assess), "Assess")) {
+  if (!inherits(eval(.Assess), "Assess")) {
     stop(paste(.Assess, "does not belong to class 'Assess'. Use: avail('Assess') to find eligible objects."))
   }
-  if(!inherits(eval(.HCR), "HCR")) {
+  if (!inherits(eval(.HCR), "HCR")) {
     stop(paste(.HCR, "does not belong to class 'HCR.' Use: avail('HCR') to find eligible objects."))
   }
 
@@ -76,8 +76,8 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
     dependencies <- .(get_dependencies(Assess_char, dots))
     do_Assessment <- .(Assess_call)
     Rec <- .(HCR_call)
-    if(diagnostic != "none") Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
-    if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
+    if (diagnostic != "none") Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
+    if (!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
     return(Rec)
   })
 
@@ -137,7 +137,7 @@ get_dependencies <- function(Assess, arg = list()) {
   dep_match <- pmatch(names(dep_args), names(formals2)) # From formals
   more_deps <- dep_args[do.call(c, formals2[dep_match])]
 
-  if(length(more_deps) > 0) {
+  if (length(more_deps) > 0) {
     more_deps <- paste(do.call(c, more_deps), collapse = ", ")
     dep <- paste(c(dep, more_deps), collapse = ", ")
   }

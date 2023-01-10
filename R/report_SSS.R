@@ -40,7 +40,7 @@ rmd_SSS <- function(Assessment, ...) {
 
 profile_likelihood_SSS <- function(Assessment, ...) {
   dots <- list(...)
-  if(!"R0" %in% names(dots)) stop("Sequence of R0 is needed for profile.")
+  if (!"R0" %in% names(dots)) stop("Sequence of R0 is needed for profile.")
 
   nll <- vapply(log(dots$R0 * Assessment@obj$env$data$rescale), function(xx) Assessment@obj$fn(xx), numeric(1))
   output <- new("prof", Model = Assessment@Model, Name = Assessment@Name, Par = "R0", MLE = Assessment@R0,

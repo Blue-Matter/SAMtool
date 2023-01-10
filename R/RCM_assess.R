@@ -50,7 +50,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   SR <- match.arg(SR)
   selectivity <- match.arg(selectivity)
   
-  if(any(names(dots) == "yind")) {
+  if (any(names(dots) == "yind")) {
     yind <- eval(dots$yind)
   } else {
     yind <- which(!is.na(Data@Cat[x, ]))[1]
@@ -76,7 +76,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   RCMdata@CAA <- Data@CAA[x, yind, , drop = FALSE] %>% aperm(c(2, 3, 1))
   RCMdata@CAA_ESS <- local({
     N <- apply(RCMdata@CAA, c(1, 3), sum, na.rm = TRUE)
-    if(CAA_multiplier > 1) {
+    if (CAA_multiplier > 1) {
       pmin(N, CAA_multiplier)
     } else {
       N * CAA_multiplier
@@ -127,10 +127,10 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   nsim <- 1
   
   # Create StockPars_out from Data, OM, or custom list
-  if(is.character(StockPars)) {
-    if(StockPars == "Data") {
+  if (is.character(StockPars)) {
+    if (StockPars == "Data") {
       StockPars_out <- RCM_assess_StockPars(x, Data, list(), n_age, nyears, nsim, SR)
-    } else if(StockPars == "OM") {
+    } else if (StockPars == "OM") {
       StockPars_out <- RCM_assess_StockPars(x, Data, Data@Misc$StockPars, n_age, nyears, nsim, SR)
     } else {
       stop("StockPars should be either \"Data\", \"OM\", or a list of parameters")
@@ -174,7 +174,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
                     obj = obj, opt = opt, SD = SD, TMB_report = report)
   
   # Calculate annual reference points
-  if(conv) {
+  if (conv) {
     ref_pt <- lapply(1:nyears, function(y) {
       M <- obj$env$data$M_data[y, ]
       mat <- obj$env$data$mat[y, ]
@@ -210,7 +210,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
       new_E0 <- yield[[1]]["E"]
       new_VB0 <- yield[[1]]["VB"]
       new_R0 <- yield[[1]]["R"]
-      if(SR == "BH") {
+      if (SR == "BH") {
         new_h <- Arec * EPR[1]/ (4 + Arec * EPR[1])
       } else {
         new_h <- 0.2 * (Arec * EPR[1])^0.8
@@ -273,7 +273,7 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
   Ages <- 1:n_age - 1
   
   # Age-only model for now
-  #if(is.null(StockPars$Len_age)) {
+  #if (is.null(StockPars$Len_age)) {
   #  Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
   #  out$Len_age <- local({
   #    Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
@@ -283,13 +283,13 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
   #  out$Len_age <- StockPars$Len_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
   #}
   
-  #if(is.null(StockPars$Linf)) {
+  #if (is.null(StockPars$Linf)) {
   #  out$Linf <- Data@vbLinf[x]
   #} else {
   #  out$Linf <- StockPars$Linf[x]
   #}
   
-  #if(is.null(StockPars$LatASD)) {
+  #if (is.null(StockPars$LatASD)) {
   #  Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
   #  out$LatASD <- out$Len_age * Data@LenCV[x]
   #} else {
@@ -298,7 +298,7 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
   out$Len_age <- out$LatASD <- array(1:n_age, dim = c(nsim, n_age, nyears+1))
   out$Linf <- n_age
   
-  if(is.null(StockPars$Wt_age)) {
+  if (is.null(StockPars$Wt_age)) {
     out$Wt_age <- local({
       Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
       array(Data@wla[x] * Len_age ^ Data@wlb[x], dim = c(nsim, n_age, nyears+1))
@@ -307,14 +307,14 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
     out$Wt_age <- StockPars$Wt_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
   }
   
-  if(is.null(StockPars$ageM)) {
+  if (is.null(StockPars$ageM)) {
     out$ageM <- min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x])) %>% matrix(1, 1)
   } else {
     out$ageM <- StockPars$ageM[x]
   }
-  if(!is.matrix(out$ageM)) out$ageM <- matrix(out$ageM, 1, 1)
+  if (!is.matrix(out$ageM)) out$ageM <- matrix(out$ageM, 1, 1)
   
-  if(is.null(StockPars$Mat_age)) {
+  if (is.null(StockPars$Mat_age)) {
     out$Mat_age <- local({
       A50 <- min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x]))
       A95 <- max(A50+0.5, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L95[x]))
@@ -325,37 +325,37 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
     out$Mat_age <- StockPars$Mat_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
   }
   
-  if(is.null(StockPars$SRrel)) {
+  if (is.null(StockPars$SRrel)) {
     out$SRrel <- ifelse(SR == "BH", 1, 2)
   } else {
     out$SRrel <- StockPars$SRrel[x]
   }
   
-  if(is.null(StockPars$procsd)) {
+  if (is.null(StockPars$procsd)) {
     out$procsd <- Data@sigmaR[x]
   } else {
     out$procsd <- StockPars$procsd
   }
   
-  if(is.null(StockPars$R0)) {
+  if (is.null(StockPars$R0)) {
     out$R0 <- 2 * mean(Data@Cat[x, ])
   } else {
     out$R0 <- StockPars$R0[x]
   }
   
-  if(is.null(StockPars$hs)) {
+  if (is.null(StockPars$hs)) {
     out$hs <- Data@steep[x]
   } else {
     out$hs <- StockPars$hs[x]
   }
   
-  if(is.null(StockPars$M_ageArray)) {
+  if (is.null(StockPars$M_ageArray)) {
     out$M_ageArray <- array(Data@Mort[x], dim = c(nsim, n_age, nyears+1))
   } else {
     out$M_ageArray <- StockPars$M_ageArray[x, 1:n_age, 1:(nyears+1), drop = FALSE]
   }
   
   check <- vapply(out, function(y) any(is.na(y)), logical(1))
-  if(any(check)) stop("Input parameters not found for RCM_assess: ", paste(names(check)[check], collapse = ", "))
+  if (any(check)) stop("Input parameters not found for RCM_assess: ", paste(names(check)[check], collapse = ", "))
   return(out)
 }

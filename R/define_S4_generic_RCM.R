@@ -268,66 +268,66 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
             .Deprecated(msg = "Using a list of input data to RCM is now deprecated. Use an RCMdata object, i.e., new(\"RCMdata\")")
             
             dataS4 <- new("RCMdata")
-            if(length(ESS) == 1) ESS <- rep(ESS, 2)
+            if (length(ESS) == 1) ESS <- rep(ESS, 2)
             
-            if(!is.null(data$Chist)) dataS4@Chist <- data$Chist 
-            if(!is.null(data$C_sd)) dataS4@C_sd <- data$C_sd 
-            if(!is.null(data$Ehist)) dataS4@Ehist <- data$Ehist
+            if (!is.null(data$Chist)) dataS4@Chist <- data$Chist 
+            if (!is.null(data$C_sd)) dataS4@C_sd <- data$C_sd 
+            if (!is.null(data$Ehist)) dataS4@Ehist <- data$Ehist
             
-            if(!is.null(data$CAA)) {
+            if (!is.null(data$CAA)) {
               dataS4@CAA <- data$CAA
-              if(is.matrix(dataS4@CAA)) {
+              if (is.matrix(dataS4@CAA)) {
                 dataS4@CAA_ESS <- apply(dataS4@CAA, 1, sum, na.rm = TRUE) %>% pmin(ESS[1])
               } else {
                 dataS4@CAA_ESS <- apply(dataS4@CAA, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[1])
               }
             }
-            if(!is.null(data$CAL)) {
+            if (!is.null(data$CAL)) {
               dataS4@CAL <- data$CAL 
-              if(is.matrix(dataS4@CAL)) {
+              if (is.matrix(dataS4@CAL)) {
                 dataS4@CAL_ESS <- apply(dataS4@CAL, 1, sum, na.rm = TRUE) %>% pmin(ESS[2])
               } else {
                 dataS4@CAL_ESS <- apply(dataS4@CAL, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[2])
               }
             }
             
-            if(!is.null(data$length_bin)) dataS4@length_bin <- data$length_bin 
-            if(!is.null(data$MS)) dataS4@MS <- data$MS
-            if(!is.null(data$MS_type)) dataS4@MS_type <- data$MS_type
-            if(!is.null(data$MS_cv)) dataS4@MS_cv <- data$MS_cv
+            if (!is.null(data$length_bin)) dataS4@length_bin <- data$length_bin 
+            if (!is.null(data$MS)) dataS4@MS <- data$MS
+            if (!is.null(data$MS_type)) dataS4@MS_type <- data$MS_type
+            if (!is.null(data$MS_cv)) dataS4@MS_cv <- data$MS_cv
             
-            if(!is.null(data$Index)) dataS4@Index <- data$Index
-            if(!is.null(data$I_sd)) dataS4@I_sd <- data$I_sd
+            if (!is.null(data$Index)) dataS4@Index <- data$Index
+            if (!is.null(data$I_sd)) dataS4@I_sd <- data$I_sd
             
-            if(!is.null(data$s_CAA)) dataS4@IAA <- data$s_CAA
-            if(!is.null(data$IAA)) dataS4@IAA <- data$IAA
-            if(length(dataS4@IAA)) {
-              if(is.matrix(dataS4@IAA)) {
+            if (!is.null(data$s_CAA)) dataS4@IAA <- data$s_CAA
+            if (!is.null(data$IAA)) dataS4@IAA <- data$IAA
+            if (length(dataS4@IAA)) {
+              if (is.matrix(dataS4@IAA)) {
                 dataS4@IAA_ESS <- apply(dataS4@IAA, 1, sum, na.rm = TRUE) %>% pmin(ESS[1])
               } else {
                 dataS4@IAA_ESS <- apply(dataS4@IAA, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[1])
               }
             }
             
-            if(!is.null(data$s_CAL)) dataS4@IAL <- data$s_CAL
-            if(!is.null(data$IAL)) dataS4@IAL <- data$IAL
-            if(length(dataS4@IAL)) {
-              if(is.matrix(dataS4@IAL)) {
+            if (!is.null(data$s_CAL)) dataS4@IAL <- data$s_CAL
+            if (!is.null(data$IAL)) dataS4@IAL <- data$IAL
+            if (length(dataS4@IAL)) {
+              if (is.matrix(dataS4@IAL)) {
                 dataS4@IAL_ESS <- apply(dataS4@IAL, 1, sum, na.rm = TRUE) %>% pmin(ESS[2])
               } else {
                 dataS4@IAL_ESS <- apply(dataS4@IAL, c(1, 3), sum, na.rm = TRUE) %>% pmin(ESS[2])
               }
             }
             
-            if(!is.null(data$C_eq)) dataS4@C_eq <- data$C_eq
-            if(!is.null(data$C_eq_sd)) dataS4@C_eq_sd <- data$C_eq_sd
-            if(!is.null(data$E_eq)) dataS4@E_eq <- data$E_eq
+            if (!is.null(data$C_eq)) dataS4@C_eq <- data$C_eq
+            if (!is.null(data$C_eq_sd)) dataS4@C_eq_sd <- data$C_eq_sd
+            if (!is.null(data$E_eq)) dataS4@E_eq <- data$E_eq
             
-            if(!is.null(data$abs_I)) dataS4@abs_I <- data$abs_I
-            if(!is.null(data$I_units)) dataS4@I_units <- data$I_units
+            if (!is.null(data$abs_I)) dataS4@abs_I <- data$abs_I
+            if (!is.null(data$I_units)) dataS4@I_units <- data$I_units
             
-            if(!is.null(data$age_error)) dataS4@age_error <- data$age_error
-            if(!is.null(data$sel_block)) dataS4@sel_block <- data$sel_block
+            if (!is.null(data$age_error)) dataS4@age_error <- data$age_error
+            if (!is.null(data$sel_block)) dataS4@sel_block <- data$sel_block
             
             RCM_int(OM = OM, RCMdata = dataS4, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
                     comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
@@ -346,7 +346,7 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
 
             condition <- match.arg(condition)
             extra_args <- list(...)
-            if(length(ESS) == 1) ESS <- rep(ESS, 2)
+            if (length(ESS) == 1) ESS <- rep(ESS, 2)
 
             ####### Catch and ML from Data object
             vec_slot <- c("Cat", "ML", "CV_Cat")
@@ -360,29 +360,29 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             dataS4 <- new("RCMdata")
 
             # Catch or effort
-            if(condition == "effort") {
-              if(all(is.na(data@Effort))) {
+            if (condition == "effort") {
+              if (all(is.na(data@Effort))) {
                 stop("Conditioning on effort but no effort series found", call. = FALSE)
               } else {
                 dataS4@Ehist <- data@Effort[1, ]
-                if(nrow(data@Effort) == OM@nsim) { # Add sketched effort matrix to OM
+                if (nrow(data@Effort) == OM@nsim) { # Add sketched effort matrix to OM
                   OM@cpars$Find <- data@Effort
                   extra_args$OMeff <- TRUE
                 }
               }
-            } else if(is.null(data_vec$Cat)) {
+            } else if (is.null(data_vec$Cat)) {
               stop("Conditioning on catch but no catch data found", call. = FALSE)
             }
-            if(!is.null(data_vec$Cat)) dataS4@Chist <- data_vec$Cat
-            if(!is.null(data_vec$CV_Cat)) dataS4@C_sd <- sdconv(1, data_vec$CV_Cat) 
+            if (!is.null(data_vec$Cat)) dataS4@Chist <- data_vec$Cat
+            if (!is.null(data_vec$CV_Cat)) dataS4@C_sd <- sdconv(1, data_vec$CV_Cat) 
 
             # Index
             Ind <- pull_Index(data, OM@maxage)
-            if(!is.null(Ind$Index)) {
+            if (!is.null(Ind$Index)) {
               dataS4@Index <- Ind$Index
               dataS4@I_sd <- Ind$I_sd
 
-              if(any(!is.na(Ind$V))) {
+              if (any(!is.na(Ind$V))) {
                 extra_args$ivul_par <- Ind$V
                 extra_args$map_ivul_par <- array(NA, dim = dim(Ind$V))
               }
@@ -390,29 +390,29 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             }
 
             # Length/age comps
-            if(!is.null(data_matrix$CAA)) {
+            if (!is.null(data_matrix$CAA)) {
               dataS4@CAA <- data_matrix$CAA
               dataS4@CAA_ESS <- apply(dataS4@CAA, 1, sum, na.rm = TRUE) %>% pmin(ESS[1])
             }
-            if(!is.null(data_matrix$CAL)) {
+            if (!is.null(data_matrix$CAL)) {
               dataS4@CAL <- data_matrix$CAL
               dataS4@CAL_ESS <- apply(dataS4@CAL, 1, sum, na.rm = TRUE) %>% pmin(ESS[2])
             }
-            if(!is.null(data_matrix$CAL)) {
-              if(all(is.na(data@CAL_mids))) {
+            if (!is.null(data_matrix$CAL)) {
+              if (all(is.na(data@CAL_mids))) {
                 stop("No length bins found in Data@CAL_mids.", call. = FALSE)
               } else dataS4@length_bin <- data@CAL_mids
             }
 
             # Mean length
-            if(!is.null(data_vec$ML)) dataS4@MS <- data_vec$ML # By default, MS_type = "length" and CV = 0.2
+            if (!is.null(data_vec$ML)) dataS4@MS <- data_vec$ML # By default, MS_type = "length" and CV = 0.2
 
             # Equilibrium catches and/or effort - nothing happens if NULL
-            if(!is.null(extra_args$C_eq)) dataS4@C_eq <- extra_args$C_eq
-            if(!is.null(extra_args$E_eq)) dataS4@E_eq <- extra_args$E_eq
+            if (!is.null(extra_args$C_eq)) dataS4@C_eq <- extra_args$C_eq
+            if (!is.null(extra_args$E_eq)) dataS4@E_eq <- extra_args$E_eq
             
-            if(!is.null(extra_args$ivul_par)) start$ivul_par <- extra_args$ivul_par
-            if(!is.null(extra_args$map_ivul_par)) map$ivul_par <- extra_args$map_ivul_par
+            if (!is.null(extra_args$ivul_par)) start$ivul_par <- extra_args$ivul_par
+            if (!is.null(extra_args$map_ivul_par)) map$ivul_par <- extra_args$map_ivul_par
 
             ####### Run RCM
             output <- RCM_int(OM = OM, RCMdata = dataS4, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
@@ -421,21 +421,21 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
                               map = map, start = start, OMeff = extra_args$OMeff, ...)
             
             ####### Re-assign index slots from AddInd to their original places
-            if(any(Ind$slotname != "AddInd")) {
+            if (any(Ind$slotname != "AddInd")) {
               Data_out <- output@OM@cpars$Data
               for(i in 1:length(Ind$slotname)) {
-                if(Ind$slotname[i] != "AddInd") {
+                if (Ind$slotname[i] != "AddInd") {
                   slot(Data_out, Ind$slotname[i]) <- Data_out@AddInd[, i, ]
                   slot(Data_out, paste0("CV_", Ind$slotname[i])) <- Data_out@CV_AddInd[, i, ]
                   
-                  if(Ind$slotname[i] == "Ind") output@OM@cpars$I_beta <- rep(1, output@OM@nsim)
-                  if(Ind$slotname[i] == "VInd") output@OM@cpars$VI_beta <- rep(1, output@OM@nsim)
-                  if(Ind$slotname[i] == "SpInd") output@OM@cpars$SpI_beta <- rep(1, output@OM@nsim)
+                  if (Ind$slotname[i] == "Ind") output@OM@cpars$I_beta <- rep(1, output@OM@nsim)
+                  if (Ind$slotname[i] == "VInd") output@OM@cpars$VI_beta <- rep(1, output@OM@nsim)
+                  if (Ind$slotname[i] == "SpInd") output@OM@cpars$SpI_beta <- rep(1, output@OM@nsim)
                 }
               }
 
               ind <- Ind$slotname == "AddInd"
-              if(all(!ind)) {
+              if (all(!ind)) {
                 Data_out@AddInd <- Data_out@CV_AddInd <- Data_out@AddIndV <- array(NA, c(1, 1, 1))
                 Data_out@AddIndType <- NA
                 

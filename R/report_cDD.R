@@ -2,7 +2,7 @@
 summary_cDD <- function(Assessment, state_space = FALSE) {
   assign_Assessment_slots(Assessment)
 
-  if(conv) current_status <- c(F_FMSY[length(F_FMSY)], B_BMSY[length(B_BMSY)], B_B0[length(B_B0)])
+  if (conv) current_status <- c(F_FMSY[length(F_FMSY)], B_BMSY[length(B_BMSY)], B_B0[length(B_B0)])
   else current_status <- c(NA, NA, B_B0[length(B_B0)])
   current_status <- data.frame(Value = current_status)
   rownames(current_status) <- c("F/FMSY", "B/BMSY", "B/B0")
@@ -11,22 +11,22 @@ summary_cDD <- function(Assessment, state_space = FALSE) {
   Description <- c("Weight coefficient", "Age of knife-edge selectivity", 
                    "Weight at age k", "Asymptotic weight")
   rownam <- c("Kappa", "k", "w_k", "Winf")
-  if(state_space && "log_tau" %in% names(obj$env$map)) {
+  if (state_space && "log_tau" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$tau)
     Description <- c(Description, "log-Recruitment deviation SD")
     rownam <- c(rownam, "tau")
   }
-  if("transformed_h" %in% names(obj$env$map)) {
+  if ("transformed_h" %in% names(obj$env$map)) {
     Value <- c(Value, h)
     Description <- c(Description, "Stock-recruit steepness")
     rownam <- c(rownam, "h")
   }
-  if("log_M" %in% names(obj$env$map)) {
+  if ("log_M" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$M)
     Description <- c(Description, "Natural mortality")
     rownam <- c(rownam, "M")
   }
-  if(any(info$data$MW_hist > 0, na.rm = TRUE) && "log_sigma_W" %in% names(obj$env$map)) {
+  if (any(info$data$MW_hist > 0, na.rm = TRUE) && "log_sigma_W" %in% names(obj$env$map)) {
     Value <- c(Value, TMB_report$sigma_W)
     Description <- c(Description, "Mean weight SD")
     rownam <- c(rownam, "sigma_W")
@@ -34,7 +34,7 @@ summary_cDD <- function(Assessment, state_space = FALSE) {
   input_parameters <- data.frame(Value = Value, Description = Description, stringsAsFactors = FALSE)
   rownames(input_parameters) <- rownam
 
-  if(conv) derived <- c(B0, N0, MSY, FMSY, BMSY, BMSY/B0)
+  if (conv) derived <- c(B0, N0, MSY, FMSY, BMSY, BMSY/B0)
   else derived <- rep(NA, 6)
   derived <- data.frame(Value = derived,
                         Description = c("Unfished biomass", "Unfished abundance", "Maximum sustainable yield (MSY)",
@@ -43,12 +43,12 @@ summary_cDD <- function(Assessment, state_space = FALSE) {
   rownames(derived) <- c("B0", "N0", "MSY", "FMSY", "BMSY", "BMSY/B0")
 
   model_estimates <- sdreport_int(SD)
-  if(!is.character(model_estimates)) {
+  if (!is.character(model_estimates)) {
     rownames(model_estimates)[rownames(model_estimates) == "log_rec_dev"] <- paste0("log_rec_dev_", names(Dev))
   }
 
   model_name <- "Continuous Delay-Differential"
-  if(state_space) model_name <- paste(model_name, "(State-Space)")
+  if (state_space) model_name <- paste(model_name, "(State-Space)")
   output <- list(model = model_name, current_status = current_status, input_parameters = input_parameters,
                  derived_quantities = derived, model_estimates = model_estimates,
                  log_likelihood = matrix(NLL, ncol = 1, dimnames = list(names(NLL), "Neg.LL")))
@@ -58,7 +58,7 @@ summary_cDD <- function(Assessment, state_space = FALSE) {
 
 
 rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
-  if(state_space) {
+  if (state_space) {
     ss <- rmd_summary("Continuous Delay-Differential (State-Space)")
   } else ss <- rmd_summary("Continuous Delay-Differential")
 
@@ -69,7 +69,7 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
                           fig.cap = "Assumed knife-edge maturity at age corresponding to length of 50% maturity."))
   
   # Data section
-  if(any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
+  if (any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
     data_MW <- rmd_data_MW()
   } else {
     data_MW <- ""
@@ -85,14 +85,14 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
                           fig.cap = "Knife-edge selectivity set to the age corresponding to the length of 50% maturity."),
                   rmd_assess_fit_series(nsets = ncol(Assessment@Index)), rmd_assess_fit("Catch", "catch", match = TRUE))
   
-  if(any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
+  if (any(Assessment@obj$env$data$MW_hist > 0, na.rm = TRUE)) {
     fit_MW <- rmd_assess_fit_MW()
   } else {
     fit_MW <- ""
   }
   assess_fit <- c(assess_fit, fit_MW)
   
-  if(state_space) {
+  if (state_space) {
     assess_fit2 <- c(rmd_residual("Dev", fig.cap = "Time series of recruitment deviations.", label = Assessment@Dev_type),
                      rmd_residual("Dev", "SE_Dev", fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
                                   label = Assessment@Dev_type, conv_check = TRUE))
@@ -107,7 +107,7 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
 
   #### Productivity
   SR_calc <- c("SSB_SR <- SSB[1:info$data$ny]",
-               "if(info$data$SR_type == \"BH\") {",
+               "if (info$data$SR_type == \"BH\") {",
                "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
                "} else {",
                "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
@@ -123,12 +123,12 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
 
 profile_likelihood_cDD <- function(Assessment, ...) {
   dots <- list(...)
-  if(!"R0" %in% names(dots) && !"h" %in% names(dots)) stop("Sequence of neither R0 nor h was not found. See help file.")
-  if(!is.null(dots$R0)) R0 <- dots$R0 else {
+  if (!"R0" %in% names(dots) && !"h" %in% names(dots)) stop("Sequence of neither R0 nor h was not found. See help file.")
+  if (!is.null(dots$R0)) R0 <- dots$R0 else {
     R0 <- Assessment@R0
     profile_par <- "h"
   }
-  if(!is.null(dots$h)) h <- dots$h else {
+  if (!is.null(dots$h)) h <- dots$h else {
     h <- Assessment@h
     profile_par <- "R0"
   }
@@ -142,61 +142,61 @@ profile_likelihood_cDD <- function(Assessment, ...) {
   profile_fn <- function(i, Assessment, params, map) {
     params$R0x <- log(profile_grid[i, 1] * Assessment@obj$env$data$rescale)
 
-    if(Assessment@info$data$SR_type == "BH") {
+    if (Assessment@info$data$SR_type == "BH") {
       params$transformed_h <- logit((profile_grid[i, 2] - 0.2)/0.8)
     } else {
       params$transformed_h <- log(profile_grid[i, 2] - 0.2)
     }
 
-    if(length(Assessment@opt$par) == 1) { # R0 is the only estimated parameter
-      if(!joint_profile && profile_par == "R0") {
+    if (length(Assessment@opt$par) == 1) { # R0 is the only estimated parameter
+      if (!joint_profile && profile_par == "R0") {
         nll <- Assessment@obj$fn(params$R0x)
       } else {
 
         obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
                           DLL = "SAMtool", silent = TRUE)
 
-        if(joint_profile) {
+        if (joint_profile) {
           nll <- obj2$fn(params$R0x)
         } else { # Profile h
           opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
-          if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
+          if (!is.character(opt2)) nll <- opt2$objective else nll <- NA
         }
       }
-    } else if(length(Assessment@opt$par) == 2) {
+    } else if (length(Assessment@opt$par) == 2) {
 
-      if(all(names(Assessment@opt$par) == c("R0x", "transformed_h"))) {
-        if(joint_profile) {
+      if (all(names(Assessment@opt$par) == c("R0x", "transformed_h"))) {
+        if (joint_profile) {
           nll <- Assessment@obj$fn(c(params$R0x, params$transformed_h))
         } else {
-          if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
+          if (profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
           obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
                             DLL = "SAMtool", silent = TRUE)
           opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
-          if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
+          if (!is.character(opt2)) nll <- opt2$objective else nll <- NA
         }
       } else { # R0, F
-        if(joint_profile || profile_par == "R0") map$R0x <- factor(NA)
+        if (joint_profile || profile_par == "R0") map$R0x <- factor(NA)
         obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random,
                           DLL = "SAMtool", silent = TRUE)
         opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
-        if(!is.character(opt2)) nll <- opt2$objective else nll <- NA
+        if (!is.character(opt2)) nll <- opt2$objective else nll <- NA
       }
 
     } else { # more than 2 parameters
 
-      if(joint_profile) {
+      if (joint_profile) {
         map$R0x <- factor(NA)
-        if(!"transformed_h" %in% names(Assessment@opt$par)) map$transformed_h <- factor(NA)
+        if (!"transformed_h" %in% names(Assessment@opt$par)) map$transformed_h <- factor(NA)
       } else {
-        if(profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
+        if (profile_par == "R0") map$R0x <- factor(NA) else map$transformed_h <- factor(NA)
       }
 
       obj2 <- MakeADFun(data = Assessment@info$data, parameters = params, map = map, random = Assessment@obj$env$random, DLL = "SAMtool", silent = TRUE)
       opt2 <- optimize_TMB_model(obj2, Assessment@info$control, do_sd = FALSE)[[1]]
-      if(!is.character(opt2)) nll <- opt2$objective else nll <- NA_real_
+      if (!is.character(opt2)) nll <- opt2$objective else nll <- NA_real_
     }
-    if(!exists("nll", inherits = FALSE)) nll <- NA_real_
+    if (!exists("nll", inherits = FALSE)) nll <- NA_real_
     return(nll)
   }
   nll <- pblapply(1:nrow(profile_grid), profile_fn, 
@@ -204,7 +204,7 @@ profile_likelihood_cDD <- function(Assessment, ...) {
                   cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
   profile_grid$nll <- do.call(c, nll) - Assessment@opt$objective
 
-  if(joint_profile) {
+  if (joint_profile) {
     pars <- c("R0", "h")
     MLE <- vapply(pars, function(x, y) slot(y, x), y = Assessment, numeric(1))
   } else {
@@ -244,7 +244,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
     info$data$I_sd <- info$data$I_sd[1:ny_ret, , drop = FALSE]
     info$data$MW_hist <- info$data$MW_hist[1:ny_ret]
 
-    if(state_space) info$params$log_rec_dev <- rep(0, ny_ret)
+    if (state_space) info$params$log_rec_dev <- rep(0, ny_ret)
 
     obj2 <- MakeADFun(data = info$data, parameters = info$params, map = obj$env$map, random = obj$env$random,
                       inner.control = info$inner.control, DLL = "SAMtool", silent = TRUE)
@@ -252,7 +252,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
     opt2 <- mod[[1]]
     SD <- mod[[2]]
 
-    if(!is.character(opt2)) {
+    if (!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best)
       ref_pt <- ref_pt_cDD(info$data, report$Arec, report$Brec, report$M)
       report <- c(report, ref_pt)
@@ -277,7 +277,7 @@ retrospective_cDD <- function(Assessment, nyr, state_space = FALSE) {
   }
 
   conv <- vapply(0:nyr, lapply_fn, logical(1), info = info, obj = obj, state_space = state_space)
-  if(any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
+  if (any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
 
   retro <- new("retro", Model = Assessment@Model, Name = Assessment@Name, TS_var = TS_var, TS = retro_ts,
                Est_var = dimnames(retro_est)[[2]], Est = retro_est)
@@ -300,7 +300,7 @@ retrospective_cDD_SS <- function(Assessment, nyr) retrospective_cDD(Assessment, 
 
 plot_yield_cDD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "Depletion")) {
   xaxis <- match.arg(xaxis)
-  if(xaxis == "F") F.vector <- seq(0, 2.5 * fmsy, length.out = 1e2) else F.vector <- seq(0, 5 * fmsy, length.out = 1e2)
+  if (xaxis == "F") F.vector <- seq(0, 2.5 * fmsy, length.out = 1e2) else F.vector <- seq(0, 5 * fmsy, length.out = 1e2)
   
   yield <- lapply(F.vector, yield_fn_cDD, M = report$M, Kappa = data$Kappa, 
                   Winf = data$Winf, wk = data$wk, SR = data$SR_type, 
@@ -310,21 +310,21 @@ plot_yield_cDD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   R <- vapply(yield, getElement, numeric(1), "R")
   ind <- R >= 0
 
-  if(xaxis == "F") {
+  if (xaxis == "F") {
     plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing Mortality", ylab = "Equilibrium yield")
     segments(x0 = fmsy, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = fmsy, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
-  if(xaxis == "Biomass") {
+  if (xaxis == "Biomass") {
     plot(Biomass[ind], Yield[ind], typ = 'l', xlab = "Biomass", ylab = "Equilibrium yield")
     segments(x0 = report$BMSY, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = report$BMSY, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
-  if(xaxis == "Depletion") {
+  if (xaxis == "Depletion") {
     plot(Biomass[ind]/report$B0, Yield[ind], typ = 'l', xlab = expression(B/B[0]), ylab = "Equilibrium yield")
     segments(x0 = report$BMSY/report$B0, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = report$BMSY/report$B0, lty = 2)

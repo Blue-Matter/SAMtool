@@ -52,22 +52,22 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
   type <- match.arg(type)
   diagnostic <- match.arg(diagnostic)
   
-  if(is.character(.Assess)) {
+  if (is.character(.Assess)) {
     Assess_char <- .Assess
     .Assess <- as.symbol(.Assess)
   } else {
     .Assess <- substitute(.Assess)
     Assess_char <- as.character(.Assess)
   }
-  if(is.character(.HCR)) {
+  if (is.character(.HCR)) {
     .HCR <- as.symbol(.HCR)
   } else {
     .HCR <- substitute(.HCR)
   }
-  if(!inherits(eval(.Assess), "Assess")) {
+  if (!inherits(eval(.Assess), "Assess")) {
     stop(paste(.Assess, "does not belong to class 'Assess'. Use: avail('Assess') to find eligible objects."))
   }
-  if(!inherits(eval(.HCR), "HCR")) {
+  if (!inherits(eval(.HCR), "HCR")) {
     stop(paste(.HCR, "does not belong to class 'HCR.' Use: avail('HCR') to find eligible objects."))
   }
   
@@ -88,21 +88,21 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
     run_assessment <- first_assess_yr || Current_Yr == Data@Misc[[x]]$interim$next_assess_yr
     run_interim <- !run_assessment
     
-    if(run_assessment) {
+    if (run_assessment) {
       do_Assessment <- .(Assess_call)
       
-      if(do_Assessment@conv) { # Assessment converged. Run the HCR and report parameters for future interim procedure
+      if (do_Assessment@conv) { # Assessment converged. Run the HCR and report parameters for future interim procedure
         Rec <- .(HCR_call)
         
-        if(diagnostic != "none") {
+        if (diagnostic != "none") {
           Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
         }
-        if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
+        if (!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
         
         Rec@Misc$interim <- list(Cref = Rec@TAC, # A vector of nsim reps
                                  Iref = do_Assessment@Index[ny, 1],
                                  next_assess_yr = Current_Yr + assessment_interval)
-        if(type == "buffer") {
+        if (type == "buffer") {
           Rec@Misc$interim$s <- log(do_Assessment@Obs_Index[, 1]/do_Assessment@Index[, 1]) %>% sd(na.rm = TRUE)
         } else {
           Rec@Misc$interim$s <- 0
@@ -113,15 +113,15 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
         
         next_assess_yr <- Current_Yr + 1
         
-        if(first_assess_yr || is.null(Data@Misc[[x]]$interim)) { # No assessment has been run in the past, can't do interim procedure, return TAC = NA
+        if (first_assess_yr || is.null(Data@Misc[[x]]$interim)) { # No assessment has been run in the past, can't do interim procedure, return TAC = NA
           
           Rec <- new("Rec")
           Rec@TAC <- rep(NA_real_, reps)
           
-          if(diagnostic != "none") {
+          if (diagnostic != "none") {
             Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
           }
-          if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
+          if (!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
           
           Rec@Misc$interim <- list(Cref = NA_real_, Iref = NA_real_, next_assess_yr = next_assess_yr, s = 0)
           return(Rec)
@@ -133,26 +133,26 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
       
     }
     
-    if(run_interim) {
+    if (run_interim) {
       Cref <- Data@Misc[[x]]$interim$Cref
       Iref <- Data@Misc[[x]]$interim$Iref
       I_y <- switch(type,
                     "buffer" = Assess_I_hist(AddInd[1], Data, x, ny)$I_hist,
                     "mean" =  local({
-                      if(is.null(type_par)) type_par <- 3
+                      if (is.null(type_par)) type_par <- 3
                       Assess_I_hist(AddInd[1], Data, x, seq(ny - type_par + 1, ny))$I_hist %>% mean(na.rm = TRUE)
                     }),
                     "loess" = local({
                       I_df <- data.frame(Year = Data@Year, Ind = Assess_I_hist(AddInd[1], Data, x, 1:ny)$I_hist)
-                      if(is.null(type_par)) type_par <- formals(loess)$span
+                      if (is.null(type_par)) type_par <- formals(loess)$span
                       fit <- loess(Ind ~ Year, data = I_df, span = type_par)
                       fit$fitted[length(fit$fitted)]
                     }),
                     "none" = Assess_I_hist(AddInd[1], Data, x, ny)$I_hist
       )
       
-      if(type == "buffer") {
-        if(is.null(type_par)) {
+      if (type == "buffer") {
+        if (is.null(type_par)) {
           b <- 1
         } else {
           b <- type_par
@@ -164,13 +164,13 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
       
       Rec <- new("Rec")
       TAC <- Cref * (I_y + b * s)/(Iref + b * s)
-      if(is.null(TAC)) TAC <- NA_real_
+      if (is.null(TAC)) TAC <- NA_real_
       Rec@TAC <- TAC
       
-      if(exists("next_assess_yr", inherits = FALSE)) Rec@Misc$interim$next_assess_yr <- next_assess_yr
-      if(exists("do_Assessment", inherits = FALSE) && diagnostic != "none") { # If we have an assessment
+      if (exists("next_assess_yr", inherits = FALSE)) Rec@Misc$interim$next_assess_yr <- next_assess_yr
+      if (exists("do_Assessment", inherits = FALSE) && diagnostic != "none") { # If we have an assessment
         Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
-        if(!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
+        if (!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
       }
       Rec@Misc <- c(Rec@Misc, Data@Misc[[x]][setdiff(names(Data@Misc[[x]]), names(Rec@Misc))]) # Only add items that are missing from Rec@Misc
     }
@@ -199,22 +199,22 @@ make_projection_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", assessment_int
                                diagnostic = c("min", "full", "none"), ...) {
   diagnostic <- match.arg(diagnostic)
   
-  if(is.character(.Assess)) {
+  if (is.character(.Assess)) {
     Assess_char <- .Assess
     .Assess <- as.symbol(.Assess)
   } else {
     .Assess <- substitute(.Assess)
     Assess_char <- as.character(.Assess)
   }
-  #if(is.character(.HCR)) {
+  #if (is.character(.HCR)) {
   #  .HCR <- as.symbol(.HCR)
   #} else {
   #  .HCR <- substitute(.HCR)
   #}
-  if(!inherits(eval(.Assess), "Assess")) {
+  if (!inherits(eval(.Assess), "Assess")) {
     stop(paste(.Assess, "does not belong to class 'Assess'. Use: avail('Assess') to find eligible objects."))
   }
-  #if(!inherits(eval(.HCR), "HCR")) {
+  #if (!inherits(eval(.HCR), "HCR")) {
   #  stop(paste(.HCR, "does not belong to class 'HCR.' Use: avail('HCR') to find eligible objects."))
   #}
   
@@ -240,14 +240,14 @@ make_projection_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", assessment_int
     get_projection <- !run_assessment
     
     Rec <- new("Rec")
-    if(run_assessment) {
+    if (run_assessment) {
       Assessment <- .(Assess_call)
-      if(diagnostic != "none") {
+      if (diagnostic != "none") {
         Rec@Misc <- Assess_diagnostic(x, Data, Assessment, include_assessment = .(diagnostic == "full"))
       }
-      if(!is.null(Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, Assessment@info$Misc)
+      if (!is.null(Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, Assessment@info$Misc)
       
-      if(Assessment@conv) { # Assessment converged. Run the projection and save future TACs
+      if (Assessment@conv) { # Assessment converged. Run the projection and save future TACs
         Ftarget <- eval(Ftarget)
         do_project <- .(proj_call)
         
@@ -262,7 +262,7 @@ make_projection_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", assessment_int
       }
     }
     
-    if(get_projection) {
+    if (get_projection) {
       Rec@Misc <- Data@Misc[[x]]
       Rec@TAC <- rep(Data@Misc[[x]]$proj$TACvec[as.character(Current_Yr + 1)], reps)
     }

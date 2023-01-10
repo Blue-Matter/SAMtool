@@ -56,7 +56,7 @@ make_pcod_OM <- function(nsim = 48, proyears = 50, FYr = 1956, maxage = 10, stoc
   OM@interval <- 2
   OM@maxF <- 3
   
-  if(stochastic) {
+  if (stochastic) {
     set.seed(24)
     OM@cpars$M <- rlnorm(nsim, log(0.31), sdconv(1, 0.1))
     

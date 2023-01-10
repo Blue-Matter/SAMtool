@@ -3,13 +3,13 @@ summary_spict <- function(Assessment) {
 
   input_parameters <- data.frame()
 
-  if(conv) {
+  if (conv) {
     current_status <- data.frame(Value = c(F_FMSY[length(F_FMSY)], B_BMSY[length(B_BMSY)],
                                            B_B0[length(B_B0)]))
     rownames(current_status) <- c("F/FMSY", "B/BMSY", "B/B0")
   } else current_status <- data.frame()
 
-  if(!is.character(SD)) {
+  if (!is.character(SD)) {
     derived <- data.frame(Value = c(SD$value["r"], TMB_report$Bmsy, TMB_report$Fmsy, exp(SD$value["logalpha"]), exp(SD$value["logbeta"]),
                                     BMSY/B0),
                           Description = c("Intrinsic rate of population increase", "Fishing mortality at MSY", "Biomass at MSY",
@@ -63,7 +63,7 @@ rmd_spict_FMSY <- function(header = NULL) {
   ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
            "if(conv) plot_normalvar(FMSY, SE_FMSY, label = expression(hat(F)[MSY]))",
            "```\n")
-  if(!is.null(header)) ans <- c(header, ans)
+  if (!is.null(header)) ans <- c(header, ans)
   return(ans)
 }
 
@@ -82,7 +82,7 @@ profile_likelihood_spict <- function(Assessment, ...) {
 
 
 retrospective_spict <- function(Assessment, nyr) {
-  spict_test <- parse(text = "if(!requireNamespace(\"spict\")) stop(\"The spict package is needed.\")")
+  spict_test <- parse(text = "if (!requireNamespace(\"spict\")) stop(\"The spict package is needed.\")")
   eval(spict_test)
 
   ny <- length(Assessment@B)
@@ -92,7 +92,7 @@ retrospective_spict <- function(Assessment, nyr) {
   spict_retro <- parse(text = "spict::retro(Assessment@info, nyr)$retro") %>% eval()
 
   lapply_fn <- function(i) {
-    if(i == 0) {
+    if (i == 0) {
       ret <- Assessment@info
     } else {
       ret <- spict_retro[[i]]

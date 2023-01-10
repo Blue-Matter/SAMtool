@@ -126,7 +126,7 @@ Assessment <- setClass("Assessment",
 
 setMethod("initialize", "Assessment", function(.Object, ...) {
   dots <- list(...)
-  if(length(dots)) {
+  if (length(dots)) {
     for(i in names(dots)) slot(.Object, i) <- dots[[i]]
   }
   attr(.Object, "version") <- paste("SAMtool", packageVersion("SAMtool"), "with MSEtool", packageVersion("MSEtool"))
@@ -148,9 +148,9 @@ setMethod("initialize", "Assessment", function(.Object, ...) {
 #' summary(output)
 #' @exportMethod summary
 setMethod("summary", signature(object = "Assessment"), function(object) {
-  if(is.character(object@opt) || is.character(object@SD)) warning("Did model converge?")
-  f <- get(paste0("summary_", object@Model))
-  f(object)
+  if (is.character(object@opt) || is.character(object@SD)) warning("Did model converge?")
+  func <- paste0("summary_", object@Model)
+  do.call2(func, list(object))
 })
 
 
@@ -184,7 +184,7 @@ setMethod("plot", signature(x = "Assessment", y = "missing"),
           function(x, filename = paste0("report_", x@Model), dir = tempdir(), ret_yr = 0L,
                    open_file = TRUE, quiet = TRUE, render_args = list(), ...) {
             # Generating retrospective
-            if(is.numeric(ret_yr) && ret_yr > 0) {
+            if (is.numeric(ret_yr) && ret_yr > 0) {
               ret_yr <- as.integer(ret_yr)
               message("Running retrospective...")
               ret <- retrospective(x, nyr = ret_yr, figure = FALSE)
@@ -192,7 +192,7 @@ setMethod("plot", signature(x = "Assessment", y = "missing"),
             report(x, ret, filename = filename, dir = dir, open_file = open_file, quiet = quiet, render_args = render_args, ...)
           })
 
-if(getRversion() >= "2.15.1") {
+if (getRversion() >= "2.15.1") {
   # Define global variables for Assessment objects
   utils::globalVariables(slotNames("Assessment"))
 }

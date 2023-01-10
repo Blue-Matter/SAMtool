@@ -4,6 +4,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Add `simulate` method for RCM and assessment models.
 - New `map` and `start` arguments for `RCM`.
 - Add progress bar with timers for RCM and various diagnostic functions using `pbapply`.
+- Add hockey-stick stock-recruit relationship in `RCM` using the [Mesnil and Rochet (2010)](https://doi.org/10.1093/icesjms/fsq055) parameterization.
 
 ## SAMtool 1.4.1
 - Fix `Data@CAL` check when using `RCM`.

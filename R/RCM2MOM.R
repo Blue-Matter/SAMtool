@@ -9,7 +9,7 @@
 #' @author Q. Huynh
 #' @export
 RCM2MOM <- function(RCModel) {
-  if(!requireNamespace("abind", quietly = TRUE)) stop("Install the abind package to use this function.")
+  if (!requireNamespace("abind", quietly = TRUE)) stop("Install the abind package to use this function.")
   
   MOM <- suppressMessages(new("MOM"))
   
@@ -26,11 +26,11 @@ RCM2MOM <- function(RCModel) {
     Vpro <- array(Vhist[, , dim(Vhist)[3]], c(dim(Vhist)[1:2], RCModel@OM@proyears))
     cp$V <- abind::abind(Vhist, Vpro, along = 3)
     
-    if(!is.null(cp$Data)) {
+    if (!is.null(cp$Data)) {
       if (sum(RCModel@data@Chist[, f] > 0, na.rm = TRUE)) {
         cp$Data@Cat <- matrix(RCModel@data@Chist[, f], 1, RCModel@OM@nyears)
         cp$Data@CV_Cat <- sqrt(exp(RCModel@data@C_sd[, f]^2 - 1)) %>% matrix(1, RCModel@OM@nyears)
-      } else if(!all(is.na(cp$Data@Cat))) {
+      } else if (!all(is.na(cp$Data@Cat))) {
         cp$Data@Cat <- new("Data")@Cat
         cp$Data@CV_Cat <- new("Data")@CV_Cat
       }
