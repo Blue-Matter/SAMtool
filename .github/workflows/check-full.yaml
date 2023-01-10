@@ -53,8 +53,3 @@ jobs:
         with:
           upload-snapshots: true
           
-      - name: Test coverage
-        if: success() && runner.os == 'Windows'
-        run: covr::codecov(type = "examples")
-        shell: Rscript {0}
-          
