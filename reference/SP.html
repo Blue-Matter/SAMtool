@@ -23,7 +23,7 @@ The function for the spict model (Pedersen and Berg, 2016) is available in MSEex
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.0</span>
       </span>
     </div>
 
@@ -320,9 +320,9 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpTxA9TM/report_SP.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpXakZGN/report_SP.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpTxA9TM/report_SP.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpXakZGN/report_SP.html</span>
 <span class="r-in"><span><span class="fu"><a href="profile.html">profile</a></span><span class="op">(</span><span class="va">res</span>, FMSY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.4</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="SP-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An object of class "prof"</span>
@@ -340,39 +340,189 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slot "grid":</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    FMSY      MSY          nll</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  0.10 14279.16 3.2294940699</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  0.11 14279.16 2.8709621889</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.12 14279.16 2.5306098844</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.13 14279.16 2.2099100337</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.14 14279.16 1.9099783048</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  0.15 14279.16 1.6316339875</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  0.16 14279.16 1.3754432106</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  0.17 14279.16 1.1417518078</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  0.18 14279.16 0.9307119587</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 0.19 14279.16 0.7423048923</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 0.20 14279.16 0.5763609104</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 0.21 14279.16 0.4325774337</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13 0.22 14279.16 0.3105354898</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14 0.23 14279.16 0.2097149079</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15 0.24 14279.16 0.1295084067</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 0.25 14279.16 0.0692347101</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17 0.26 14279.16 0.0281507868</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18 0.27 14279.16 0.0054632851</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19 0.28 14279.16 0.0003392047</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 0.29 14279.16 0.0119158312</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21 0.30 14279.16 0.0393099433</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22 0.31 14279.16 0.0816262912</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23 0.32 14279.16 0.1379653440</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24 0.33 14279.16 0.2074302985</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25 0.34 14279.16 0.2891333485</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26 0.35 14279.16 0.3822012176</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27 0.36 14279.16 0.4857799664</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 28 0.37 14279.16 0.5990390917</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29 0.38 14279.16 0.7211749445</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30 0.39 14279.16 0.8514134997</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31 0.40 14279.16 0.9890125181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  0.10 14279.16 3.229494e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  0.11 14279.16 2.870962e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.12 14279.16 2.530610e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.13 14279.16 2.209910e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.14 14279.16 1.909978e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  0.15 14279.16 1.631634e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  0.16 14279.16 1.375443e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  0.17 14279.16 1.141752e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  0.18 14279.16 9.307120e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 0.19 14279.16 7.423049e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 0.20 14279.16 5.763609e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 0.21 14279.16 4.325774e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13 0.22 14279.16 3.105355e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14 0.23 14279.16 2.097149e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 0.24 14279.16 1.295084e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16 0.25 14279.16 6.923471e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17 0.26 14279.16 2.815079e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18 0.27 14279.16 5.463285e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19 0.28 14279.16 3.392047e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 0.29 14279.16 1.191583e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21 0.30 14279.16 3.930994e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22 0.31 14279.16 8.162629e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23 0.32 14279.16 1.999949e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24 0.33 14279.16 2.074303e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25 0.34 14279.16 5.523536e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26 0.35 14279.16 3.822012e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27 0.36 14279.16 2.003749e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28 0.37 14279.16 2.004625e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29 0.38 14279.16 2.005471e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30 0.39 14279.16 1.466457e+01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31 0.40 14279.16 2.007081e+01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
 <span class="r-plt img"><img src="SP-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-4.png" alt="" width="700" height="433"></span>
@@ -390,9 +540,9 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_SS</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpTxA9TM/report_SP_SS.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpXakZGN/report_SP_SS.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpTxA9TM/report_SP_SS.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpXakZGN/report_SP_SS.html</span>
 <span class="r-plt img"><img src="SP-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
@@ -419,7 +569,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
