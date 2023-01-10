@@ -313,9 +313,9 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       }
     }
     if(.hasSlot(real_Data, "AddInd") && nsurvey > 0) {
-      real_Data@AddInd <- array(RCMdata@Index, c(nyears, nsurvey, output@OM@nsim)) %>%
-        aperm(perm = c(3, 2, 1))
-      real_Data@CV_AddInd <- array(sqrt(exp(RCMdata@I_sd^2) - 1), c(nyears, nsurvey, output@OM@nsim)) %>%
+      real_Data@AddInd <- array(RCMdata@Index, c(nyears, nsurvey, 1)) %>%
+        aperm(perm = c(3, 2, 1)) %>% structure(dimnames = list(1, colnames(RCMdata@Index), real_Data@Year))
+      real_Data@CV_AddInd <- array(sqrt(exp(RCMdata@I_sd^2) - 1), c(nyears, nsurvey, 1)) %>%
         aperm(perm = c(3, 2, 1))
       
       # Cannot accommodate indices mirrored to fleet when nfleet > 1 and fleet has time-varying sel
