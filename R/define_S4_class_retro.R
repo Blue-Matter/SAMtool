@@ -5,7 +5,7 @@
 #' @description Perform a retrospective analysis, successive removals of most recent years of data to evaluate resulting
 #' parameter estimates.
 #'
-#' @param x An S4 object of class \linkS4class{Assessment} of \linkS4class{RCModel}.
+#' @param x An S4 object of class \linkS4class{Assessment} or \linkS4class{RCModel}.
 #' @param nyr The maximum number of years to remove for the retrospective analysis.
 #' @param figure Indicates whether plots will be drawn.
 #' @param ... More arguments.
