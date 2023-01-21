@@ -320,9 +320,9 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpXakZGN/report_SP.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp1pVAlQ/report_SP.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpXakZGN/report_SP.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp1pVAlQ/report_SP.html</span>
 <span class="r-in"><span><span class="fu"><a href="profile.html">profile</a></span><span class="op">(</span><span class="va">res</span>, FMSY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.4</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="SP-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An object of class "prof"</span>
@@ -373,156 +373,6 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-out co"><span class="r-pr">#&gt;</span> 31 0.40 14279.16 2.007081e+01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="retrospective.html">retrospective</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: FUN(X[[i]], ...)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (!is.character(opt2)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     return(SD$pdHess)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: report &lt;- obj2$report(obj2$env$last.par.best)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: FMort &lt;- c(report$F, rep(NA, 1 + i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: F_FMSY &lt;- FMort/report$FMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B &lt;- c(report$B, rep(NA, i))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_BMSY &lt;- B/report$BMSY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: B_B0 &lt;- B/report$K</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_ts[i + 1, , ] &lt;&lt;- cbind(FMort, F_FMSY, B, B_BMSY, B_B0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- summary(SD, "fixed")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: sumry &lt;- sumry[rownames(sumry) != "log_B_dev", drop = FALSE]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: retro_est[i + 1, , ] &lt;&lt;- sumry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: return(SD$pdHess)</span>
 <span class="r-plt img"><img src="SP-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-4.png" alt="" width="700" height="433"></span>
@@ -540,9 +390,9 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_SS</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpXakZGN/report_SP_SS.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp1pVAlQ/report_SP_SS.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpXakZGN/report_SP_SS.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp1pVAlQ/report_SP_SS.html</span>
 <span class="r-plt img"><img src="SP-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
