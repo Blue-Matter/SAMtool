@@ -223,7 +223,7 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
       est_B_dev <- ifelse(1:ny < first_year_index, 0, 1)
     }
   } else {
-    if (nsurvey == 1 && (AddInd == 0 | AddInd == "B")) {
+    if (nsurvey == 1 && all(AddInd == 0 | AddInd == "B")) {
       fix_sigma <- FALSE # Override: estimate sigma if there's a single survey
     }
     est_B_dev <- rep(0, ny)
@@ -302,8 +302,10 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
     structure(names = Yearplusone)
   Assessment <- new("Assessment", Model = ifelse(state_space, "SP_SS", "SP"), 
                     Name = Data@Name, conv = SD$pdHess,
-                    FMSY = report$FMSY, MSY = report$MSY, BMSY = report$BMSY, VBMSY = report$BMSY,
-                    B0 = report$K, VB0 = report$K, FMort = structure(report$F, names = Year),
+                    FMSY = report$FMSY, MSY = report$MSY, 
+                    BMSY = report$BMSY, VBMSY = report$BMSY, SSBMSY = report$BMSY,
+                    B0 = report$K, VB0 = report$K, SSB0 = report$K, 
+                    FMort = structure(report$F, names = Year),
                     F_FMSY = structure(report$F/report$FMSY, names = Year),
                     B = structure(report$B, names = Yearplusone),
                     B_BMSY = structure(report$B/report$BMSY, names = Yearplusone),
@@ -314,8 +316,10 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
                     SSB = structure(report$B, names = Yearplusone),
                     SSB_SSBMSY = structure(report$B/report$BMSY, names = Yearplusone),
                     SSB_SSB0 = structure(report$B/report$K, names = Yearplusone),
-                    Obs_Catch = structure(C_hist, names = Year), Obs_Index = structure(I_hist, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
-                    Catch = structure(report$Cpred, names = Year), Index = structure(report$Ipred, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
+                    Obs_Catch = structure(C_hist, names = Year), 
+                    Obs_Index = structure(I_hist, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
+                    Catch = structure(report$Cpred, names = Year), 
+                    Index = structure(report$Ipred, dimnames = list(Year, paste0("Index_", 1:nsurvey))),
                     NLL = structure(c(nll_report, report$nll_comp, report$penalty, report$prior),
                                     names = c("Total", paste0("Index_", 1:nsurvey), "Dev", "Penalty", "Prior")),
                     info = info, obj = obj, opt = opt, SD = SD, TMB_report = report,

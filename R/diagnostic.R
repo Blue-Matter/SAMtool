@@ -118,19 +118,31 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
 
   message(paste0("Creating plots for MP:\n", paste(MPs, collapse = "\n")))
   res_mat <- matrix(NA, ncol = length(MPs), nrow = 5)
-  get_code <- function(x, y) vapply(x, getElement, numeric(1), y)
-  get_code_char <- function(x, y) vapply(x, getElement, character(1), y)
   for(i in 1:length(MPs)) {
-    objects <- MSE@PPD[[which(MPs[i] == MSE@MPs)]]
+    objects <- MSE@PPD[[MPs[i] == MSE@MPs]]
     diagnostic <- lapply(objects@Misc[1:MSE@nsim], getElement, "diagnostic")
 
     if (!is.null(diagnostic)) {
-      hessian_code <- lapply(diagnostic, get_code, y = "hess")
-      msg <- lapply(diagnostic, get_code_char, y = "msg")
-      max_gr <- lapply(diagnostic, get_code, y = "maxgrad")
-      iter <- lapply(diagnostic, get_code, y = "iter")
-      fn_eval <- lapply(diagnostic, get_code, y = "fn_eval")
-      Year <- lapply(diagnostic, get_code, y = "Year")
+      if (is.data.frame(diagnostic[[1]])) {
+        
+        hessian_code <- lapply(diagnostic, getElement, "hess")
+        msg <- lapply(diagnostic, getElement, "msg")
+        max_gr <- lapply(diagnostic, getElement, "maxgrad")
+        iter <- lapply(diagnostic, getElement, "iter")
+        fn_eval <- lapply(diagnostic, getElement, "fn_eval")
+        Year <- lapply(diagnostic, getElement, "Year")
+        
+      } else { # Backwards compatibility to version < 1.5.0
+        
+        get_code <- function(x, y) sapply(x, getElement, y)
+        hessian_code <- lapply(diagnostic, get_code, y = "hess")
+        msg <- lapply(diagnostic, get_code, y = "msg")
+        max_gr <- lapply(diagnostic, get_code, y = "maxgrad")
+        iter <- lapply(diagnostic, get_code, y = "iter")
+        fn_eval <- lapply(diagnostic, get_code, y = "fn_eval")
+        Year <- lapply(diagnostic, get_code, y = "Year")
+        
+      }
 
       if (figure) {
         layout(matrix(c(1, 2, 3, 4, 4, 5), ncol = 3, byrow = TRUE))
@@ -140,8 +152,8 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
         plot_msg(msg, Year)
         plot_max_gr(max_gr, Year, gradient_threshold)
 
-        plot_iter(iter, Year, "line", "Optimization iterations")
-        plot_iter(fn_eval, Year, "hist", "Function evaluations")
+        plot_iter(iter, Year, "line", "nlminb iterations")
+        plot_iter(fn_eval, Year, "hist", "nlminb function evaluations")
 
         title(paste(MPs[i], "management procedure"), outer = TRUE)
       }
@@ -222,7 +234,8 @@ plot_msg <- function(convergence_code, Year) {
 }
 
 #' @importFrom gplots rich.colors
-plot_iter <- function(x, Year, plot_type = c('line', 'hist'), lab = c("Optimization iterations", "Function evaluations")) {
+plot_iter <- function(x, Year, plot_type = c('line', 'hist'), 
+                      lab = c("nlminb iterations", "nlminb function evaluations")) {
   plot_type <- match.arg(plot_type)
   lab <- match.arg(lab)
   x_plot <- do.call(c, x)
@@ -292,37 +305,48 @@ Assess_diagnostic <- function(x, Data, Assessment, include_assessment = TRUE) {
     maxgrad <- ifelse(is.character(Assessment@SD), 1e10, max(abs(Assessment@SD$gradient.fixed)))
     iter <- ifelse(is.character(Assessment@opt), NA, Assessment@opt$iterations)
     fn_eval <- ifelse(is.character(Assessment@opt), NA, Assessment@opt$evaluations[1])
-
-    dg <- list(hess = hess, msg = msg, maxgrad = maxgrad, iter = iter, fn_eval = fn_eval, Year = Year)
-
+    
+    dg <- data.frame(Year = Year, hess = hess, msg = msg, maxgrad = maxgrad, iter = iter, fn_eval = fn_eval)
   } else {
-    dg <- list(hess = FALSE, msg = msg, maxgrad = 1e10, iter = NA, fn_eval = NA, Year = Year)
+    dg <- data.frame(Year = Year, hess = FALSE, msg = "", maxgrad = 1e10, iter = NA, fn_eval = NA)
   }
 
   # Assign report objects to output
-  if (length(Data@Misc) == 0) Data@Misc <- vector("list", length(Data@Mort))
-  diagnostic <- Data@Misc[[x]]$diagnostic
-  len_diag <- length(diagnostic)
-  diagnostic[[len_diag + 1]] <- dg
-
-  output <- list(diagnostic = diagnostic)
+  if (!length(Data@Misc)) Data@Misc <- vector("list", length(Data@Mort))
+  output <- list()
+  if (is.null(Data@Misc[[x]]$diagnostic) || !length(Data@Misc[[x]]$diagnostic)) {
+    output$diagnostic <- dg
+  } else {
+    output$diagnostic <- rbind(Data@Misc[[x]]$diagnostic, dg)
+  }
 
   if (include_assessment) {
     if (inherits(Assessment, "Assessment")) { # Remove some objects to save memory/disk space
-      Assessment@info <- Assessment@obj <- list()
-      Assessment@SD <- character(0)
-      Assessment@N_at_age <- Assessment@C_at_age <- Assessment@Obs_C_at_age <- 
-        Assessment@Selectivity <- array(dim = c(0, 0))
+      vars <- c("FMort", "SSB", "FMSY", "SSBMSY", "R0", "h", "SSB0", "R", "MSY", "VB", "conv")
+      Assessment_report <- lapply(vars, function(x) {
+        v <- slot(Assessment, x)
+        if (length(v)) {
+          Year_est <- suppressWarnings(as.numeric(names(v)))
+          if (is.null(Year_est) || !length(Year_est)) Year_est <- NA_real_
+          data.frame(Year_assess = Year,
+                     Year_est = Year_est,
+                     variable = x,
+                     value = as.numeric(v)) # for conv
+        } else {
+          data.frame()
+        }
+      }) %>% bind_rows()
+    } else {
+      Assessment_report <- data.frame()
     }
-
-    Assessment_report <- Data@Misc[[x]]$Assessment_report
-    len_Assess <- length(Assessment_report)
-    if (len_Assess > 0) {
-      Assessment_report[[len_Assess + 1]] <- Assessment
-    } else Assessment_report <- list(Assessment)
-    output$Assessment_report <- Assessment_report
+    if(is.null(Data@Misc[[x]]$Assessment_report) || !length(Data@Misc[[x]]$Assessment_report)) {
+      output$Assessment_report <- Assessment_report
+    } else {
+      output$Assessment_report <- rbind(Data@Misc[[x]]$Assessment_report, Assessment_report)
+    }
   }
-
+  
   return(output)
 }
+
 
