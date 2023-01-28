@@ -61,7 +61,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
     End_Assess_Yr <- unique(Assessment_report$Year_assess)
     color.vec <- rich.colors(length(End_Assess_Yr))
     
-    conv <- Assessment_report$value[Assessment_report$variable == "conv"]
+    conv <- Assessment_report$value[Assessment_report$variable == "conv"] %>% as.logical()
     Assess_Yr <- lapply(End_Assess_Yr, function(y) {
       ts <- Assessment_report[!is.na(Assessment_report$Year_est), ] %>% filter(Year_assess == y)
       unique(ts$Year_est)
@@ -102,14 +102,22 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
           ts <- Assessment_report %>% filter(Year_assess == y)
-          ts$value[ts$variable == "FMort"]/ts$value[ts$variable == "FMSY"]
+          val <- ts$value[ts$variable == "FMort"]/ts$value[ts$variable == "FMSY"]
+          if (!length(val)) {
+            U <- ts$value[ts$variable == "U"]
+            UMSY <- ts$value[ts$variable == "UMSY"]
+            val <- log(1-U)/log(1-UMSY)
+          }
+          return(val)
         })
       } else {
         Assess <- lapply(Assessment_report, slot, "F_FMSY")
         if (!length(do.call(c, Assess))) {
-          AssessU <- lapply(Assessment_report, slot, "U")
-          AssessUMSY <- lapply(Assessment_report, slot, "UMSY")
-          Assess <- Map(function(x, y) log(1-x)/log(1-y), x = AssessU, y = AssessUMSY)
+          Assess <- local({
+            AssessU <- lapply(Assessment_report, slot, "U")
+            AssessUMSY <- lapply(Assessment_report, slot, "UMSY")
+            Map(function(x, y) log(1-x)/log(1-y), x = AssessU, y = AssessUMSY)
+          })
         }
       }
       
@@ -134,7 +142,9 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
           ts <- Assessment_report %>% filter(Year_assess == y)
-          ts$value[ts$variable == "FMort"]
+          val <- ts$value[ts$variable == "FMort"]
+          if (!length(val)) val <- -log(1 - ts$value[ts$variable == "U"])
+          return(val)
         })
       } else {
         Assess <- lapply(Assessment_report, slot, "FMort")
