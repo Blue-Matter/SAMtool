@@ -700,6 +700,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c(
         points(Year[i], data_val[j], cex = 0.5 * diameter_max * pmin(obs[i, j], n2), pch = 21, bg = "white")
       }
     }
+    lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
     legend("topleft", legend = c(n1, paste0(">", n2)), pt.cex = 0.5 * diameter_max * c(n1, n2),
            pt.bg = "white", pch = 21, horiz = TRUE)
     return(invisible())
@@ -720,6 +721,9 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c(
     isPositive <- resid > 0
     points(Year_mat[!isPositive], data_mat[!isPositive], cex = pmin(0.5 * diameter_max * abs(resid[!isPositive]), diameter_max), pch = 21, bg = bubble_color[1])
     points(Year_mat[isPositive], data_mat[isPositive], cex = pmin(0.5 * diameter_max * resid[isPositive], diameter_max), pch = 21, bg = bubble_color[2])
+    
+    lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
+    
     legend("topleft", legend = c("<-10", "-1", "1", ">10"),
            pt.cex = c(diameter_max, 0.5 * diameter_max, 0.5 * diameter_max, diameter_max),
            pt.bg = rep(bubble_color, each = 2), pch = 21, horiz = TRUE)

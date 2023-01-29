@@ -11,6 +11,10 @@ max <- function(..., na.rm = TRUE) suppressWarnings(base::max(..., na.rm = na.rm
 
 arrows <- function(...) suppressWarnings(graphics::arrows(...))
 
+#' @importFrom graphics grid matplot
+plot.default <- function(...) graphics::plot.default(..., panel.first = graphics::grid())
+matplot <- function(...) graphics::matplot(..., panel.first = graphics::grid())
+
 hist.numeric <- function(x, ...) {
   if (all(!diff(signif(x, 3)))) {
     x <- signif(x, 3)
