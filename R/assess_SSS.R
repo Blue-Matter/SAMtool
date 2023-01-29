@@ -18,6 +18,7 @@
 #' \item \code{R0} Unfished recruitment
 #' \item \code{vul_par} A length-two vector for the age of 95\% and 50\% fleet selectivity. Fixed to maturity otherwise.
 #' }
+#' @param prior A named list for the parameters of any priors to be added to the model. See details in \code{SCA_Pope}.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
@@ -41,7 +42,8 @@
 #' @useDynLib SAMtool
 #' @export
 SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"), 
-                rescale = "mean1", start = NULL, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
+                rescale = "mean1", start = NULL, prior = list(),
+                silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 2e5, eval.max = 4e5), ...) {
   
   catch_eq <- "Pope"
@@ -86,8 +88,11 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
   mat_age <- c(0, 1/(1 + exp(-log(19) * (c(1:max_age) - A50)/(A95 - A50))))
   mat_age <- mat_age/max(mat_age)
   LH <- list(LAA = La, WAA = Wa, Linf = Linf, K = K, t0 = t0, a = a, b = b, A50 = A50, A95 = A95)
-
+  
+  # Generate priors
+  prior <- make_prior(prior, nsurvey = 0, ifelse(SR == "BH", 1, 2), msg = FALSE)
   if (rescale == "mean1") rescale <- 1/mean(C_hist)
+  
   data <- list(model = "SCA", C_hist = C_hist, rescale = rescale, 
                I_hist = I_hist, I_sd = matrix(0.01, n_y, 1), I_units = 1, I_vul = matrix(1, n_age, 1), 
                abs_I = 0, nsurvey = 1, LWT = 1,
@@ -97,7 +102,7 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
                weight = Wa, PLA = matrix(1, n_age, 1), mat = mat_age, vul_type = "logistic",
                SR_type = SR, comp_dist = "multinomial", catch_eq = catch_eq,
                est_early_rec_dev = rep(0, n_age - 1), est_rec_dev = rep(0, n_y), yindF = 0,
-               tv_M = "none", M_bounds = c(0, 1e4), use_prior = rep(0, 4), prior_dist = matrix(NA, 4, 2),
+               tv_M = "none", M_bounds = c(0, 1e4), use_prior = prior$use_prior, prior_dist = prior$pr_matrix,
                sim_process_error = 0L)
   if (any(names(dots) == "M_at_age") && dots$M_at_age) data$M_data <- M
 
@@ -141,14 +146,15 @@ SSS <- function(x = 1, Data, dep = 0.4, SR = c("BH", "Ricker"),
   if (is.null(params$vul_par)) params$vul_par <- c(logit(min(A95, 0.74 * max_age)/max_age/0.75), log(A95-A50))
 
   params$log_F_dev <- rep(0, n_y)
-  params$log_omega <- params$log_tau <- params$log_tau_M <- 0
+  params$log_omega <- params$log_tau <- params$log_tau_M <- log(0.01)
   params$log_early_rec_dev <- rep(0, n_age - 1)
   params$log_rec_dev <- rep(0, n_y)
 
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control)
 
   map <- list()
-  map$transformed_h <- map$log_M0 <- factor(NA)
+  if (!prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if (!prior$use_prior[3]) map$log_M0 <- factor(NA)
   map$logit_M_walk <- factor(rep(NA, n_y))
   map$F_equilibrium <- factor(NA)
   map$vul_par <- factor(c(NA, NA))

@@ -11,6 +11,7 @@ SSS(
   SR = c("BH", "Ricker"),
   rescale = "mean1",
   start = NULL,
+  prior = list(),
   silent = TRUE,
   opt_hess = FALSE,
   n_restart = ifelse(opt_hess, 0, 1),
@@ -36,6 +37,8 @@ Output is re-converted back to original units.}
 \item \code{R0} Unfished recruitment
 \item \code{vul_par} A length-two vector for the age of 95\% and 50\% fleet selectivity. Fixed to maturity otherwise.
 }}
+
+\item{prior}{A named list for the parameters of any priors to be added to the model. See details in \code{SCA_Pope}.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.}
