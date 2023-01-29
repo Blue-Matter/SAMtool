@@ -295,6 +295,7 @@ plot_max_gr <- function(max_gr, Year, threshold = 1) {
 
 
 # Call in MP created by make_MP when diagnostic = "min" or "full"
+#' @importFrom dplyr bind_rows
 Assess_diagnostic <- function(x, Data, Assessment, include_assessment = TRUE) {
 
   # Update reporting objects

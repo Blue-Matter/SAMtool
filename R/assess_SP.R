@@ -18,6 +18,7 @@
 #' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
+#' @param prior A named list for the parameters of any priors to be added to the model. See details.
 #' @param fix_dep Logical, whether to fix the initial depletion (ratio of biomass to carrying capacity in the
 #' first year of the model). If \code{TRUE}, uses the value in \code{start}, otherwise equal to 1
 #' (unfished conditions).
@@ -37,10 +38,9 @@
 #' Ignored if \code{n_seas} = 1.
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
 #' of the biomass deviations (thus, treating it as a state-space variable).
-#' @param use_r_prior Logical, whether a prior for the intrinsic rate of increase will be used in the model. See details.
-#' @param r_reps If \code{use_r_prior = TRUE}, the number of samples of natural mortality and steepness for calculating the
-#' mean and standard deviation of the r prior. To override and directly provide the r-prior mean and standard deviation, use the start list, e.g.
-#' \code{start = list(r_prior = c(0.1, 0.05))} (mean of 0.1 and s.d. of 0.05).
+#' @param Euler_Lotka Integer. If greater than zero, the function will calculate a prior for the intrinsic rate of increase to use in the estimation model
+#' (in lieu of an explicit prior in argument \code{prior}). The value of this argument specifies the number of stochastic samples used to calculate the prior SD. 
+#' See section on priors below.
 #' @param SR_type If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
 #' steepness and unfished spawners-per-recruit. Used to develop the r prior.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
@@ -68,12 +68,18 @@
 #' }
 #' 
 #' Multiple indices are supported in the model. 
-#'
-#' If \code{use_r_prior = TRUE}, \code{SP} and \code{SP_SS} will use a prior for the intrinsic rate of increase in the objective function.
-#' A vector of length two can be passed in the \code{start} list for the mean and standard deviation of the prior (see example). The normal
-#' distribution is used.
-#'
-#' If no values are provided, a prior is created using the Euler-Lotka method (Equation 15a of McAllister et al. 2001).
+#' 
+#' Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.
+#' @section Priors:
+#' The following priors can be added as a named list, e.g., prior = list(r = c(0.25, 0.15), MSY = c(50, 0.1). For each parameter below, provide a vector of values as described:
+#' 
+#' \itemize{
+#' \item \code{r} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space). 
+#' \item \code{MSY} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space).
+#' }
+#' 
+#' In lieu of an explicit r prior provided by the user, set argument \code{Euler_Lotka = TRUE} to calculate the prior mean and SD using
+#' the Euler-Lotka method (Equation 15a of McAllister et al. 2001).
 #' The Euler-Lotka method is modified to multiply the left-hand side of equation 15a by the alpha parameter of the
 #' stock-recruit relationship (Stanley et al. 2009). Natural mortality and steepness are sampled in order to generate
 #' a prior distribution for r. See \code{vignette("Surplus_production")} for more details.
@@ -81,8 +87,6 @@
 #' @note The model uses the Fletcher (1978) formulation and is parameterized with FMSY and MSY as
 #' leading parameters. The default conditions assume unfished conditions in the first year of the time series
 #' and a symmetric production function (n = 2).
-#'
-#' Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.
 #' 
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
@@ -141,19 +145,25 @@
 #' res_Fox <- SP(Data = swordfish, start = list(n = 1), fix_n = TRUE)
 #' res_Fox2 <- SP_Fox(Data = swordfish)
 #'
-#' #### SP with r_prior
-#' res_prior <- SP(Data = SimulatedData, use_r_prior = TRUE)
+#' #### SP with r prior calculated internally (100 stochastic samples to get prior SD)
+#' res_prior <- SP(Data = SimulatedData, Euler_Lotka = 100)
 #'
-#' #### Pass an r_prior to the model with mean = 0.35, sd = 0.10
-#' res_prior2 <- SP(Data = SimulatedData, use_r_prior = TRUE, start = list(r_prior = c(0.35, 0.10)))
+#' #### Pass an r prior to the model with mean = 0.35, lognormal sd = 0.10
+#' res_prior2 <- SP(Data = SimulatedData, prior = list(r = c(0.35, 0.10)))
+#' 
+#' #### Pass MSY prior to the model with mean = 1500, lognormal sd = 0.05
+#' res_prior3 <- SP(Data = SimulatedData, prior = list(MSY = c(1500, 0.05)))
 #' @seealso \link{SP_production} \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
 #' @export
-SP <- function(x = 1, Data, AddInd = "B", rescale = "mean1", start = NULL, fix_dep = TRUE, fix_n = TRUE, LWT = NULL,
-               n_seas = 4L, n_itF = 3L, use_r_prior = FALSE, r_reps = 1e2, SR_type = c("BH", "Ricker"),
+SP <- function(x = 1, Data, AddInd = "B", rescale = "mean1", start = NULL, prior = list(),
+               fix_dep = TRUE, fix_n = TRUE, LWT = NULL,
+               n_seas = 4L, n_itF = 3L, Euler_Lotka = 0L, SR_type = c("BH", "Ricker"),
                silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                control = list(iter.max = 5e3, eval.max = 1e4), ...) {
-  SP_(x = x, Data = Data, AddInd = AddInd, state_space = FALSE, rescale = rescale, start = start, fix_dep = fix_dep, fix_n = fix_n, fix_sigma = TRUE,
-      fix_tau = TRUE, LWT = LWT, n_seas = n_seas, n_itF = n_itF, use_r_prior = use_r_prior, r_reps = r_reps, SR_type = SR_type, integrate = FALSE,
+  SP_(x = x, Data = Data, AddInd = AddInd, state_space = FALSE, rescale = rescale, start = start, prior = prior, 
+      fix_dep = fix_dep, fix_n = fix_n, fix_sigma = TRUE,
+      fix_tau = TRUE, LWT = LWT, n_seas = n_seas, n_itF = n_itF, 
+      Euler_Lotka = Euler_Lotka, SR_type = SR_type, integrate = FALSE,
       silent = silent, opt_hess = opt_hess, n_restart = n_restart, control = control, inner.control = list(), ...)
 }
 class(SP) <- "Assess"
@@ -161,13 +171,16 @@ class(SP) <- "Assess"
 
 #' @rdname SP
 #' @export
-SP_SS <- function(x = 1, Data, AddInd = "B", rescale = "mean1", start = NULL, fix_dep = TRUE, fix_n = TRUE, fix_sigma = TRUE,
+SP_SS <- function(x = 1, Data, AddInd = "B", rescale = "mean1", start = NULL, prior = list(), 
+                  fix_dep = TRUE, fix_n = TRUE, fix_sigma = TRUE,
                   fix_tau = TRUE, LWT = NULL, early_dev = c("all", "index"), n_seas = 4L, n_itF = 3L,
-                  use_r_prior = FALSE, r_reps = 1e2, SR_type = c("BH", "Ricker"), integrate = FALSE,
+                  Euler_Lotka = 0L, SR_type = c("BH", "Ricker"), integrate = FALSE,
                   silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                   control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
-  SP_(x = x, Data = Data, AddInd = AddInd, state_space = TRUE, rescale = rescale, start = start, fix_dep = fix_dep, fix_n = fix_n, fix_sigma = fix_sigma,
-      fix_tau = fix_tau, early_dev = early_dev, LWT = LWT, n_seas = n_seas, n_itF = n_itF, use_r_prior = use_r_prior, r_reps = r_reps,
+  SP_(x = x, Data = Data, AddInd = AddInd, state_space = TRUE, rescale = rescale, start = start, prior = prior,
+      fix_dep = fix_dep, fix_n = fix_n, fix_sigma = fix_sigma,
+      fix_tau = fix_tau, early_dev = early_dev, LWT = LWT, n_seas = n_seas, n_itF = n_itF, 
+      Euler_Lotka = Euler_Lotka,
       SR_type = SR_type, integrate = integrate, silent = silent, opt_hess = opt_hess, n_restart = n_restart,
       control = control, inner.control = inner.control, ...)
 }
@@ -186,15 +199,21 @@ class(SP_Fox) <- "Assess"
 
 
 #' @useDynLib SAMtool
-SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1", start = NULL, fix_dep = TRUE, fix_n = TRUE, fix_sigma = TRUE,
+SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1", start = NULL, prior = list(),
+                fix_dep = TRUE, fix_n = TRUE, fix_sigma = TRUE,
                 fix_tau = TRUE, early_dev = c("all", "index"), LWT = NULL, n_seas = 4L, n_itF = 3L,
-                use_r_prior = FALSE, r_reps = 1e2, SR_type = c("BH", "Ricker"), integrate = FALSE,
+                Euler_Lotka = 0L, SR_type = c("BH", "Ricker"), integrate = FALSE,
                 silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),
                 control = list(iter.max = 5e3, eval.max = 1e4), inner.control = list(), ...) {
 
   dependencies = "Data@Cat, Data@Ind"
   dots <- list(...)
   start <- lapply(start, eval, envir = environment())
+  
+  if (all(c("use_r_prior", "r_reps") %in% names(dots))) { # Backward compatibility
+    if (dots$use_r_prior) Euler_Lotka <- dots$r_reps
+    if ("r_prior" %in% names(start)) prior$r <- start$r_prior
+  }
 
   early_dev <- match.arg(early_dev)
   if (any(names(dots) == "yind")) {
@@ -228,25 +247,21 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
     }
     est_B_dev <- rep(0, ny)
   }
-
+  
+  if (is.null(prior$r) && Euler_Lotka > 0L) {
+    r_samps <- r_prior_fn(x, Data, r_reps = Euler_Lotka, SR_type = SR_type)
+    prior$r <- c(mean(r_samps), sd(log(r_samps)))
+  }
+  prior <- make_prior_SP(prior)
+  
   if (is.null(LWT)) LWT <- rep(1, nsurvey)
   if (length(LWT) != nsurvey) stop("LWT needs to be a vector of length ", nsurvey)
   data <- list(model = "SP", C_hist = C_hist, rescale = rescale, I_hist = I_hist, I_sd = I_sd, I_lambda = LWT,
                fix_sigma = as.integer(fix_sigma), nsurvey = nsurvey, ny = ny,
                est_B_dev = est_B_dev, nstep = n_seas, dt = 1/n_seas, n_itF = n_itF,
+               use_prior = prior$use_prior, prior_dist = prior$pr_matrix,
                sim_process_error = 0L)
-
-  if (use_r_prior) {
-    if (!is.null(start$r_prior) && length(start$r_prior) == 2) {
-      rp <- data$r_prior <- start$r_prior
-    } else {
-      rp <- r_prior_fn(x, Data, r_reps = r_reps, SR_type = SR_type)
-      data$r_prior <- c(mean(rp), max(sd(rp), 0.1 * mean(rp)))
-    }
-  } else {
-    rp <- data$r_prior <- c(0, 0)
-  }
-
+  
   params <- list()
   if (!is.null(start)) {
     if (!is.null(start$FMSY) && is.numeric(start$FMSY)) params$log_FMSY <- log(start$FMSY[1])
@@ -274,7 +289,7 @@ SP_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, rescale = "mean1
   random <- NULL
   if (integrate) random <- "log_B_dev"
 
-  info <- list(Year = Year, data = data, params = params, rp = rp, control = control, inner.control = inner.control)
+  info <- list(Year = Year, data = data, params = params, control = control, inner.control = inner.control)
 
   obj <- MakeADFun(data = info$data, parameters = info$params, hessian = TRUE,
                    map = map, random = random, DLL = "SAMtool", silent = silent)

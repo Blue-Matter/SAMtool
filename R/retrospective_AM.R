@@ -63,8 +63,8 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
     
     conv <- Assessment_report$value[Assessment_report$variable == "conv"] %>% as.logical()
     Assess_Yr <- lapply(End_Assess_Yr, function(y) {
-      ts <- Assessment_report[!is.na(Assessment_report$Year_est), ] %>% filter(Year_assess == y)
-      unique(ts$Year_est)
+      ind <- !is.na(Assessment_report$Year_est) & Assessment_report$Year_assess == y
+      unique(Assessment_report[ind, "Year_est"])
     })
   } else { # Backwards compatibility with v 1.5.0
     
@@ -88,7 +88,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Proj <- MSE@SB_SBMSY[sim, MP_ind, ]
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
-          ts <- Assessment_report %>% filter(Year_assess == y)
+          ts <- Assessment_report[Assessment_report$Year_assess == y, ]
           ts$value[ts$variable == "SSB"]/ts$value[ts$variable == "SSBMSY"]
         })
       } else {
@@ -101,7 +101,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Proj <- MSE@F_FMSY[sim, MP_ind, ]
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
-          ts <- Assessment_report %>% filter(Year_assess == y)
+          ts <- Assessment_report[Assessment_report$Year_assess == y, ]
           val <- ts$value[ts$variable == "FMort"]/ts$value[ts$variable == "FMSY"]
           if (!length(val)) {
             U <- ts$value[ts$variable == "U"]
@@ -128,7 +128,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Proj <- MSE@SSB[sim, MP_ind, ]
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
-          ts <- Assessment_report %>% filter(Year_assess == y)
+          ts <- Assessment_report[Assessment_report$Year_assess == y, ]
           ts$value[ts$variable == "SSB"]
         })
       } else {
@@ -141,7 +141,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Proj <- MSE@FM[sim, MP_ind, ]
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
-          ts <- Assessment_report %>% filter(Year_assess == y)
+          ts <- Assessment_report[Assessment_report$Year_assess == y, ]
           val <- ts$value[ts$variable == "FMort"]
           if (!length(val)) val <- -log(1 - ts$value[ts$variable == "U"])
           return(val)
@@ -159,7 +159,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Proj <- MSE@SSB[sim, MP_ind, ]/MSE@OM$SSB0[sim]
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
-          ts <- Assessment_report %>% filter(Year_assess == y)
+          ts <- Assessment_report[Assessment_report$Year_assess == y, ]
           ts$value[ts$variable == "SSB"]/ts$value[ts$variable == "SSB0"]
         })
       } else {
@@ -179,7 +179,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       Proj <- MSE@VB[sim, MP_ind, ]
       if (is.data.frame(Assessment_report)) {
         Assess <- lapply(End_Assess_Yr, function(y) {
-          ts <- Assessment_report %>% filter(Year_assess == y)
+          ts <- Assessment_report[Assessment_report$Year_assess == y, ]
           ts$value[ts$variable == "VB"]
         })
       } else {

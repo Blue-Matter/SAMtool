@@ -22,7 +22,8 @@ Type SP(objective_function<Type> *obj) {
   DATA_INTEGER(nstep);
   DATA_SCALAR(dt);
   DATA_INTEGER(n_itF);
-  DATA_VECTOR(r_prior);
+  DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for r, MSY
+  DATA_MATRIX(prior_dist); // Distribution of priors, columns indicate parameters of distribution calculated in R (see make_prior_SP fn)
   DATA_INTEGER(sim_process_error);
   //DATA_VECTOR_INDICATOR(keep, I_hist);
 
@@ -65,8 +66,11 @@ Type SP(objective_function<Type> *obj) {
   Type penalty = 0;
   Type prior = 0;
 
-  if(r_prior(0) > 0) {
-    prior -= dnorm_(log(r), log(r_prior(0)), r_prior(1), true); // log-normal r prior with log-Jacobian transformation = 0, exact with fixed n
+  if(use_prior(0)) { // log-normal r prior with log-Jacobian transformation = 0, exact with fixed n
+    prior -= dnorm_(log(r), prior_dist(0,0), prior_dist(0,1), true);
+  }
+  if(use_prior(1)) { // log-normal MSY prior with log-Jacobian transformation = 0
+    prior -= dnorm_(log(MSY), prior_dist(1,0), prior_dist(1,1), true);
   }
 
   B(0) = dep * K;

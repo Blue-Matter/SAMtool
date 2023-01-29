@@ -71,7 +71,11 @@ setMethod("posterior", signature(x = "RCModel"),
             lower <- rep(-Inf, length(obj$par))
             upper <- rep(Inf, length(obj$par))
             
-            if (!is.null(obj$env$data$use_prior[1]) && obj$env$data$use_prior[1] > 0) { # Uniform priors need bounds
+            R0_prior <- !is.null(obj$env$data$use_prior[1]) &&
+              names(obj$env$data$use_prior)[1] == "R0" && 
+              obj$env$data$use_prior["R0"] > 1
+            
+            if (any(names(obj$par) == "R0x") && obj$env$data$use_prior["R0"] > 1) { # Uniform priors need bounds
               lower[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
               upper[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
             }

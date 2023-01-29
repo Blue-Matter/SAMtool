@@ -148,7 +148,7 @@ optimize_TMB_model <- function(obj, control = list(), use_hessian = FALSE, resta
   if (any(c("U_equilibrium", "F_equilibrium") %in% names(obj$par))) {
     low[match(c("U_equilibrium", "F_equilibrium"), names(obj$par))] <- 0
   }
-  if (!is.null(obj$env$data$use_prior[1]) && obj$env$data$use_prior[1] > 0) { # Uniform priors need bounds
+  if (any(names(obj$par) == "R0x") && obj$env$data$use_prior["R0"] > 1) { # R0 uniform priors need bounds
     R0x_ind <- names(obj$par) == "R0x"
     low[R0x_ind] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
     upr[R0x_ind] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
@@ -420,9 +420,10 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
   
   no_index <- nsurvey == 0
   if (no_index) nsurvey <- 1 # Use only on next two lines
-  use_prior <- rep(0L, nsurvey + 3)
+  var_names <- c("R0", "h", "log_M", paste0("q_", 1:nsurvey))
+  use_prior <- rep(0L, nsurvey + 3) %>% structure(names = var_names)
   pr_matrix <- matrix(NA_real_, nsurvey + 3, 2) %>% 
-    structure(dimnames = list(c("R0", "h", "log_M", paste0("q_", 1:nsurvey)), c("par1", "par2")))
+    structure(dimnames = list(var_names, c("par1", "par2")))
   
   if (!is.null(prior$R0)) {
     if (length(prior$R0) == 2) prior$R0 <- c(1, prior$R0) # Backwards compatibility
@@ -486,6 +487,22 @@ make_prior <- function(prior, nsurvey, SR_rel, dots = list(), msg = TRUE) { # lo
   return(list(use_prior = use_prior, pr_matrix = pr_matrix))
 }
 
+make_prior_SP <- function(prior) {
+  var_names <- c("r", "MSY")
+  pr_matrix <- matrix(NA_real_, 2, 2) %>% 
+    structure(dimnames = list(var_names, c("par1", "par2")))
+  use_prior <- rep(0L, 2) %>% structure(names = var_names)
+  
+  if (!is.null(prior$r)) {
+    pr_matrix[1, ] <- c(log(prior$r[1]), prior$r[2])
+    use_prior[1] <- 1L
+  }
+  if (!is.null(prior$MSY)) {
+    pr_matrix[2, ] <- c(log(prior$MSY[1]), prior$MSY[2])
+    use_prior[2] <- 1L
+  }
+  list(use_prior = use_prior, pr_matrix = pr_matrix)
+}
 
 solve_F <- function(N, M, plusgroup = TRUE) {
   FM <- array(NA_real_, dim(M))

@@ -12,13 +12,13 @@ SP(
   AddInd = "B",
   rescale = "mean1",
   start = NULL,
+  prior = list(),
   fix_dep = TRUE,
   fix_n = TRUE,
   LWT = NULL,
   n_seas = 4L,
   n_itF = 3L,
-  use_r_prior = FALSE,
-  r_reps = 100,
+  Euler_Lotka = 0L,
   SR_type = c("BH", "Ricker"),
   silent = TRUE,
   opt_hess = FALSE,
@@ -33,6 +33,7 @@ SP_SS(
   AddInd = "B",
   rescale = "mean1",
   start = NULL,
+  prior = list(),
   fix_dep = TRUE,
   fix_n = TRUE,
   fix_sigma = TRUE,
@@ -41,8 +42,7 @@ SP_SS(
   early_dev = c("all", "index"),
   n_seas = 4L,
   n_itF = 3L,
-  use_r_prior = FALSE,
-  r_reps = 100,
+  Euler_Lotka = 0L,
   SR_type = c("BH", "Ricker"),
   integrate = FALSE,
   silent = TRUE,
@@ -71,6 +71,8 @@ Output is re-converted back to original units.}
 
 \item{start}{Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.}
 
+\item{prior}{A named list for the parameters of any priors to be added to the model. See details.}
+
 \item{fix_dep}{Logical, whether to fix the initial depletion (ratio of biomass to carrying capacity in the
 first year of the model). If \code{TRUE}, uses the value in \code{start}, otherwise equal to 1
 (unfished conditions).}
@@ -86,11 +88,9 @@ is half of carrying capacity.}
 \item{n_itF}{Integer, the number of iterations to solve F conditional on the observed catch given multiple seasons within an annual time step.
 Ignored if \code{n_seas} = 1.}
 
-\item{use_r_prior}{Logical, whether a prior for the intrinsic rate of increase will be used in the model. See details.}
-
-\item{r_reps}{If \code{use_r_prior = TRUE}, the number of samples of natural mortality and steepness for calculating the
-mean and standard deviation of the r prior. To override and directly provide the r-prior mean and standard deviation, use the start list, e.g.
-\code{start = list(r_prior = c(0.1, 0.05))} (mean of 0.1 and s.d. of 0.05).}
+\item{Euler_Lotka}{Integer. If greater than zero, the function will calculate a prior for the intrinsic rate of increase to use in the estimation model
+(in lieu of an explicit prior in argument \code{prior}). The value of this argument specifies the number of stochastic samples used to calculate the prior SD. 
+See section on priors below.}
 
 \item{SR_type}{If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
 steepness and unfished spawners-per-recruit. Used to develop the r prior.}
@@ -152,22 +152,29 @@ used with multiple indices.
 
 Multiple indices are supported in the model. 
 
-If \code{use_r_prior = TRUE}, \code{SP} and \code{SP_SS} will use a prior for the intrinsic rate of increase in the objective function.
-A vector of length two can be passed in the \code{start} list for the mean and standard deviation of the prior (see example). The normal
-distribution is used.
-
-If no values are provided, a prior is created using the Euler-Lotka method (Equation 15a of McAllister et al. 2001).
-The Euler-Lotka method is modified to multiply the left-hand side of equation 15a by the alpha parameter of the
-stock-recruit relationship (Stanley et al. 2009). Natural mortality and steepness are sampled in order to generate
-a prior distribution for r. See \code{vignette("Surplus_production")} for more details.
+Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.
 }
 \note{
 The model uses the Fletcher (1978) formulation and is parameterized with FMSY and MSY as
 leading parameters. The default conditions assume unfished conditions in the first year of the time series
 and a symmetric production function (n = 2).
-
-Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.
 }
+\section{Priors}{
+
+The following priors can be added as a named list, e.g., prior = list(r = c(0.25, 0.15), MSY = c(50, 0.1). For each parameter below, provide a vector of values as described:
+
+\itemize{
+\item \code{r} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space). 
+\item \code{MSY} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space).
+}
+
+In lieu of an explicit r prior provided by the user, set argument \code{Euler_Lotka = TRUE} to calculate the prior mean and SD using
+the Euler-Lotka method (Equation 15a of McAllister et al. 2001).
+The Euler-Lotka method is modified to multiply the left-hand side of equation 15a by the alpha parameter of the
+stock-recruit relationship (Stanley et al. 2009). Natural mortality and steepness are sampled in order to generate
+a prior distribution for r. See \code{vignette("Surplus_production")} for more details.
+}
+
 \section{Online Documentation}{
 
 Model description and equations are available on the openMSE 
@@ -215,11 +222,14 @@ plot(res_SS)
 res_Fox <- SP(Data = swordfish, start = list(n = 1), fix_n = TRUE)
 res_Fox2 <- SP_Fox(Data = swordfish)
 
-#### SP with r_prior
-res_prior <- SP(Data = SimulatedData, use_r_prior = TRUE)
+#### SP with r prior calculated internally (100 stochastic samples to get prior SD)
+res_prior <- SP(Data = SimulatedData, Euler_Lotka = 100)
 
-#### Pass an r_prior to the model with mean = 0.35, sd = 0.10
-res_prior2 <- SP(Data = SimulatedData, use_r_prior = TRUE, start = list(r_prior = c(0.35, 0.10)))
+#### Pass an r prior to the model with mean = 0.35, lognormal sd = 0.10
+res_prior2 <- SP(Data = SimulatedData, prior = list(r = c(0.35, 0.10)))
+
+#### Pass MSY prior to the model with mean = 1500, lognormal sd = 0.05
+res_prior3 <- SP(Data = SimulatedData, prior = list(MSY = c(1500, 0.05)))
 }
 \references{
 Fletcher, R. I. 1978. On the restructuring of the Pella-Tomlinson system. Fishery Bulletin 76:515:521.
