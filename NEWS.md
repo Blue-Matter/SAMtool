@@ -5,6 +5,8 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - New `map` and `start` arguments for `RCM`.
 - Add progress bar with timers for RCM and various diagnostic functions using `pbapply`.
 - Add hockey-stick stock-recruit relationship in `RCM` using the [Mesnil and Rochet (2010)](https://doi.org/10.1093/icesjms/fsq055) parameterization.
+- Users can now add lognormal priors for `r` and `MSY` for surplus production models.
+- Update reporting of assessment output inside MSE. Use of data frames instead of lists should save space in the `MSE` object.
 
 ## SAMtool 1.4.1
 - Fix `Data@CAL` check when using `RCM`.
