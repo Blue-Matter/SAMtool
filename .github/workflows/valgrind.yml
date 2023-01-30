@@ -49,9 +49,9 @@ jobs:
           out <- RCM(OM = SubCpars(pcod$OM, 1:2), data = pcod$data, 
            condition = "catch", mean_fit = TRUE,
            selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
-           vul_par = matrix(mat_ogive, length(mat_ogive), 1),
-           map_vul_par = matrix(NA, length(mat_ogive), 1),
-           map_log_early_rec_dev = rep(1, pcod$OM@maxage),
+           start = list(vul_par = matrix(mat_ogive, length(mat_ogive), 1)),
+           map = list(vul_par = matrix(NA, length(mat_ogive), 1),
+                      log_early_rec_dev = rep(1, pcod$OM@maxage)),
            prior = pcod$prior)
           saveRDS(out@mean_fit$obj, file = "RCM_obj.rds")
           
