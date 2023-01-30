@@ -79,7 +79,7 @@ compare_models <- function(..., label = NULL, color = NULL) {
   if (!all(is.na(R))) ts_matplot(R, "Recruitment", color = color)
 
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
-  plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+  graphics::plot.default(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
   legend("bottom", label, col = color, xpd = TRUE, horiz = TRUE, bty = "n", lwd = 2)
 
   invisible()

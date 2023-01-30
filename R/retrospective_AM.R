@@ -209,7 +209,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
   title(paste0("Simulation #", sim, " of ", MP, "\n(OM in black, Assessment within MP in colors)"), outer = TRUE)
   
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
-  plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+  graphics::plot.default(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
   
   legend("right", c("OM", End_Assess_Yr), 
          col = c("black", color.vec), 
