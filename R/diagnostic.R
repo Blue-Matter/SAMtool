@@ -110,7 +110,7 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
   
   MPs <- MPs[has_diagnostic]
 
-  if (!missing(MP) && !is.null(MP)) {
+  if (!missing(MP)) {
     match_ind <- pmatch(MP, MPs)
     if (is.na(match_ind)) stop(paste(MP, "MP was not found in the MSE object. Available options are:", paste(MPs, collapse = " ")))
     MPs <- MPs[match_ind]
@@ -119,7 +119,7 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
   message(paste0("Creating plots for MP:\n", paste(MPs, collapse = "\n")))
   res_mat <- matrix(NA, ncol = length(MPs), nrow = 5)
   for(i in 1:length(MPs)) {
-    objects <- MSE@PPD[[MPs[i] == MSE@MPs]]
+    objects <- MSE@PPD[[grep(MPs[i], MSE@MPs)]]
     diagnostic <- lapply(objects@Misc[1:MSE@nsim], getElement, "diagnostic")
 
     if (!is.null(diagnostic)) {
