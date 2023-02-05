@@ -150,11 +150,7 @@ rmd_SCA <- function(Assessment, ...) {
   # Productivity
   if (Assessment@obj$env$data$SR_type != "none") {
     SR_calc <- c("SSB_SR <- SSB",
-                 "if (info$data$SR_type == \"BH\") {",
-                 "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
-                 "} else {",
-                 "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
-                 "}",
+                 "R_SR <- R_pred(SSB_SR, TMB_report$h, TMB_report$R0, TMB_report$E0, info$data$SR_type)",
                  "Rest <- R[as.numeric(names(R)) >= info$Year[1]]")
     SR_header <- c(rmd_SR(header = "### Productivity\n\n\n", SR_calc = SR_calc),
                    rmd_SR(fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE))

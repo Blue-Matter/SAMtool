@@ -866,22 +866,31 @@ plot_Kobe <- function(biomass, exploit, arrow_size = 0.07, color = TRUE, xlab = 
 #' @param ylab Character string for label on y-axis.
 #' @author Q. Huynh
 #' @return A stock-recruit plot
+#' @importFrom graphics text
 #' @export plot_SR
 plot_SR <- function(Spawners, expectedR, R0 = NULL, S0 = NULL, rec_dev = NULL, trajectory = FALSE,
                     y_zoom = NULL, ylab = "Recruitment") {
   if (is.null(rec_dev)) {
-    R.max <- 1.1 * max(expectedR)
+    R.max <- max(expectedR)
   } else {
-    if (is.null(y_zoom)) R.max <- 1.1 * max(rec_dev)
+    if (is.null(y_zoom)) R.max <- max(rec_dev)
     else R.max <- y_zoom * max(expectedR)
   }
-  S.max <- 1.1 * max(c(Spawners, S0))
-  plot(Spawners[order(Spawners)], expectedR[order(Spawners)], typ = "l", xlim = c(0, 1.05 * S.max), ylim = c(0, 1.1 * R.max),
+  S.max <- max(c(Spawners, S0))
+  plot(Spawners[order(Spawners)], expectedR[order(Spawners)], typ = "l", xlim = c(0, 1.1 * S.max), ylim = c(0, 1.1 * R.max),
        xlab = "Spawning Stock Biomass (SSB)", lwd = ifelse(is.null(rec_dev), 1, 3), ylab = ylab)
   if (trajectory) {
     n.arrows <- length(Spawners)
     arrows(x0 = Spawners[1:(n.arrows-1)], y0 = rec_dev[1:(n.arrows-1)],
            x1 = Spawners[2:n.arrows], y1 = rec_dev[2:n.arrows], length = 0.07)
+    
+    if (any(expectedR != rec_dev)) {
+      txt_ind <- seq(1, length(rec_dev), length.out = 10)
+      if (all(txt_ind != length(rec_dev))) txt_ind <- c(txt_ind, length(rec_dev))
+      text(Spawners[txt_ind], rec_dev[txt_ind], labels = names(rec_dev)[txt_ind], pos = 3)
+      text(Spawners[txt_ind], rec_dev[txt_ind], labels = names(rec_dev)[txt_ind], pos = 3)
+    }
+    
   } else {
     if (is.null(rec_dev)) {
       points(Spawners, expectedR)

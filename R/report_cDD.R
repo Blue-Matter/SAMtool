@@ -107,11 +107,7 @@ rmd_cDD <- function(Assessment, state_space = FALSE, ...) {
 
   #### Productivity
   SR_calc <- c("SSB_SR <- SSB[1:info$data$ny]",
-               "if (info$data$SR_type == \"BH\") {",
-               "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
-               "} else {",
-               "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
-               "}",
+               "R_SR <- R_pred(SSB_SR, TMB_report$h, TMB_report$R0, TMB_report$B0, info$data$SR_type)",
                "Rest <- R[1:info$data$ny + info$data$k]")
   productivity <- c(rmd_SR(header = "### Productivity\n\n\n", SR_calc = SR_calc),
                     rmd_SR(fig.cap = "Stock-recruit relationship (trajectory plot).", trajectory = TRUE),

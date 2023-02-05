@@ -395,15 +395,25 @@ rmd_RCM_SPR2 <- function() {
 
 
 rmd_RCM_SR <- function() {
-  c("```{r, fig.cap = \"Stock-recruit relationship and estimated recruitment.\"}",
+  c("```{r, fig.cap = \"Stock-recruit relationship and estimated recruitment. The red point indicates unfished values.\"}",
     "if (!is.null(report$Rec_dev)) {",
     "  expectedR <- report$R/c(report$Rec_dev, 1)",
-    "} else if (OM@SRrel == 1) {",
-    "  expectedR <- report$Arec * report$E / (1 + report$Brec * report$E)",
-    "} else if (OM@SRrel == 2) {",
-    "  expectedR <- report$Arec * report$E * exp(-report$Brec * report$E)",
+    "} else if (OM@SRrel %in% c(1, 2)) {",
+    "  expectedR <- R_pred(report$E, report[[\"h\"]], report[[\"R0\"]], report$E0_SR, switch(OM@SRrel, \"1\" = \"BH\", \"2\" = \"Ricker\"))",
     "} else stop(\"Error in plotting recruitment\")",
+    "E_full <- seq(0, 1.1 * max(report$E, report$E0_SR), length.out = 100)",
+    "if (OM@SRrel %in% c(1, 2)) {",
+    "  expectedR_full <- R_pred(E_full, report[[\"h\"]], report[[\"R0\"]], report$E0_SR, switch(OM@SRrel, \"1\" = \"BH\", \"2\" = \"Ricker\"))",
+    "} else {",
+    "  expectedR_full <- R_pred(E_full, SR_type = \"Mesnil-Rochet\", Shinge = report$MRhinge, Rmax = report$MRRmax, gamma = report$MRgamma)",
+    "}",
     "plot_SR(report$E, expectedR, report$R0, report$E0_SR, report$R)",
+    "lines(E_full, expectedR_full, lty = 2)",
+    "```\n",
+    "",
+    "```{r, fig.cap = \"Stock-recruit relationship with trajectory.\"}",
+    "plot_SR(report$E, expectedR, report$R0, report$E0_SR, report$R %>% structure(names = Yearplusone), trajectory = TRUE)",
+    "lines(E_full, expectedR_full, lty = 2)",
     "```\n")
 }
 

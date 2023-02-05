@@ -69,11 +69,7 @@ rmd_VPA <- function(Assessment, ...) {
 
   # Productivity
   SR_calc <- c("SSB_SR <- SSB[1:(length(SSB) - min(info$ages))]",
-               "if (info$SR == \"BH\") {",
-               "  R_SR <- TMB_report$Arec * SSB_SR / (1 + TMB_report$Brec * SSB_SR)",
-               "} else {",
-               "  R_SR <- TMB_report$Arec * SSB_SR * exp(-TMB_report$Brec * SSB_SR)",
-               "}",
+               "R_SR <- R_pred(SSB_SR, TMB_report$h, TMB_report$R0, TMB_report$E0, info$SR)",
                "Rest <- R[(min(info$ages)+1):length(SSB)]")
   productivity <- c(rmd_SR(ylab = paste0("Recruitment (age ", min(Assessment@info$ages), ")"),
                            header = "### Productivity\n\n\n", conv_check = TRUE,

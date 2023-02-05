@@ -345,7 +345,7 @@ SCA_catch_solver <- function(FM, N, weight = 1, vul = 1, M, TAC = NULL) {
 }
 
 
-R_pred <- function(SSB, h, R0, SSB0, SR_type = c("BH", "Ricker", "none")) {
+R_pred <- function(SSB, h, R0, SSB0, SR_type = c("BH", "Ricker", "Mesnil-Rochet", "none"), ...) {
   SR_type <- match.arg(SR_type)
   if (SR_type == "BH") {
     den <- SSB0 * (1 - h) + (5*h - 1) * SSB
@@ -353,6 +353,9 @@ R_pred <- function(SSB, h, R0, SSB0, SR_type = c("BH", "Ricker", "none")) {
   } else if (SR_type == "Ricker") {
     expon <- 1.25 * (1 - SSB/SSB0)
     RR <- (5*h)^expon * SSB * R0 / SSB0
+  } else if (SR_type == "Mesnil-Rochet") {
+    dots <- list(...)
+    RR <- MesnilRochet_SR(x = SSB, Shinge = dots$Shinge, Rmax = dots$Rmax, gamma = dots$gamma)
   } else {
     RR <- R0
   }
