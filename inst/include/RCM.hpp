@@ -408,6 +408,11 @@ Type RCM(objective_function<Type> *obj) {
   // Calc likelihood and parameter prior
   prior -= calc_prior(use_prior, prior_dist, R0x, h, SR_type == "BH", log_M, q, rescale);
   
+  // MR penalty if MRhinge < min(E)
+  if(SR_type == "Mesnil-Rochet") {
+    penalty -= CppAD::CondExpGt(MRhinge, min(E), Type(0), dnorm(log(MRhinge), log(min(E)), Type(2), true));
+  }
+  
   array<Type> nll_fleet(n_y,nfleet,5);
   array<Type> nll_index(n_y,nsurvey,3);
   Type nll_log_rec_dev = 0;

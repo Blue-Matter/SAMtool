@@ -543,10 +543,8 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   if (!test) stop("Objects provided are not of class RCModel.", call. = FALSE)
   
   # Update scenario
-  if (is.null(scenario$names)) scenario$names <- paste("Scenario", 1:length(dots))
-  if (is.null(scenario$col)) {
-    scenario$col <- gplots::rich.colors(length(dots))
-  }
+  if (is.null(scenario$names)) scenario$names <- as.character(substitute(list(...)))[-1]
+  if (is.null(scenario$col)) scenario$col <- gplots::rich.colors(length(dots))
   scenario$col2 <- scenario$col
 
   if (is.null(scenario$lwd)) scenario$lwd <- 1
