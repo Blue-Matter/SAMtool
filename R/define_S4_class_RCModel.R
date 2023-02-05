@@ -226,10 +226,11 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                "out.width = \"650px\", comment = \"#>\")"),
                         "```\n")
 
-            ####### Updated historical OM parameters
+            ####### Updated OM
             OM_update <- c("# Summary {.tabset}\n",
-                           "## Updated historical OM parameters\n", rmd_RCM_R0(),
-                           rmd_RCM_D(), rmd_RCM_Perr(), rmd_RCM_Find(), rmd_RCM_sel())
+                           "## Operating model {.tabset}\n",
+                           "### Updated parameters\n", 
+                           rmd_RCM_R0(), rmd_RCM_D(), rmd_RCM_Perr(), rmd_RCM_Find(), rmd_RCM_sel())
             
             vary_R0 <- !is.null(OM@cpars$R0) && length(unique(OM@cpars$R0)) > 1 
             vary_D <- !is.null(OM@cpars$D) && length(unique(OM@cpars$R0)) > 1
@@ -241,7 +242,8 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               var_labs <- c(R0 = "expression(R[0])", D = "\"Depletion\"", hs = "\"Steepness\"", M = "\"Natural mortality\"")
               var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", M = "natural mortality")
               
-              corr_series <- do.call(rbind, lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])))
+              corr_series <- lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])) %>%
+                bind_rows()
               corr_rmd <- local({
                 if (vary_M) OM@cpars$M <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
                 lapply(1:nrow(corr_series), function(i) {
@@ -258,8 +260,18 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 })
               })
               
-              OM_update <- c(OM_update, "## Correlations\n", do.call(c, corr_rmd))
+              OM_update <- c(OM_update, "### Parameter correlations\n", do.call(c, corr_rmd))
             }
+            
+            if (compare) {
+              message("Getting Hist object from runMSE...")
+              Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
+              compare_rmd <- rmd_RCM_Hist_compare()
+            } else {
+              compare_rmd <- c("### RCM-OM comparison\n",
+                               "Re-run `plot()` function with argument `compare = TRUE`.\n\n")
+            }
+            OM_update <- c(OM_update, compare_rmd)
 
             ####### Output from all simulations {.tabset}
             fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
@@ -284,11 +296,11 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (render_args$output_format == "html_document") {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
                            "### RCM Estimates\n",
-                           "`r sdreport_int(SD) %>% signif(4) %>% format() %>% as.data.frame()`\n\n")
+                           "`r sdreport_int(SD) %>% signif(3) %>% as.data.frame()`\n\n")
               } else {
                 sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
                            "### RCM Estimates\n",
-                           "`r sdreport_int(SD) %>% signif(4) %>% format() %>% as.data.frame() %>% knitr::kable(format = \"markdown\")`\n\n")
+                           "`r sdreport_int(SD) %>% signif(3) %>% as.data.frame() %>% knitr::kable(format = \"markdown\")`\n\n")
               }
 
               # Life History section
@@ -464,11 +476,11 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                              "`r nll[[1]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
                              "#### Fleet likelihoods\n",
                              "`r nll[[2]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
-                             "#### Fleet weights\n",
+                             "#### Fleet likelihood weights\n",
                              "`r nll[[3]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
                              "#### Survey likelihoods\n",
                              "`r nll[[4]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n",
-                             "#### Survey weights\n",
+                             "#### Survey likelihood weights\n",
                              "`r nll[[5]] ", ifelse(render_args$output_format == "html_document", "", "%>% knitr::kable(format = \"markdown\")"), "`\n\n")
               
               corr_matrix <- c("### Correlation matrix\n",
@@ -485,16 +497,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                 "No model found. Re-run `RCM()` with `mean_fit = TRUE`.\n\n")
             }
 
-            if (compare) {
-              message("Getting Hist object from runMSE...")
-              Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
-              compare_rmd <- rmd_RCM_Hist_compare()
-            } else {
-              compare_rmd <- c("## Updated OM\n",
-                               "Re-run `plot()` function with argument `compare = TRUE`.\n\n")
-            }
-
-            rmd <- c(header, OM_update, all_sims_output, mean_fit_rmd, compare_rmd, rmd_footer())
+            rmd <- c(header, OM_update, all_sims_output, mean_fit_rmd, rmd_footer())
             if (is.list(rmd)) rmd <- do.call(c, rmd)
 
             # Generate markdown report
