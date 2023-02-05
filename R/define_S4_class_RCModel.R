@@ -443,9 +443,15 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                        fig.cap = "Time series of fishing mortality by fleet.")
 
               if (length(unique(report$E0)) > 1) {
-                SSB0_plot <- rmd_assess_timeseries("structure(report$E0, names = Year)", "unfished spawning depletion (growth and/or M are time-varying)",
-                                                   "expression(SSB[0])")
-              } else SSB0_plot <- NULL
+                SSB0_eq_plot <- rmd_assess_timeseries("structure(report$E0, names = Year)", 
+                                                      "equilibrium unfished spawning biomass (growth and/or M are time-varying)",
+                                                      "expression(Equilibrium~SSB[0])")
+                SSB_SSB0_plot <- rmd_SSB_SSB0(FALSE, "structure(report$E/report$E0_SR, names = Yearplusone)",
+                                              fig.cap = "spawning depletion, using the unfished biomass from the replacement line at the beginning of time series")
+              } else {
+                SSB0_eq_plot <- NULL
+                SSB_SSB0_plot <- rmd_SSB_SSB0(FALSE, "structure(report$E/report$E0_SR, names = Yearplusone)")
+              }
 
               N_bubble <- rmd_bubble("Yearplusone", "report$N", ages = "age", fig.cap = "Predicted abundance-at-age.")
               CAA_bubble <- rmd_bubble("Year", "apply(report$CAApred, 1:2, sum)", ages = "age",
@@ -458,16 +464,22 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               } else CAL_bubble <- NULL
 
               ts_output <- c(sel_matplot, F_matplot, rmd_SSB("structure(report$E, names = Yearplusone)"), 
-                             SSB0_plot, rmd_SSB_SSB0(FALSE, "structure(report$E/report$E0_SR, names = Yearplusone)"), 
+                             SSB0_eq_plot, SSB_SSB0_plot, 
                              rmd_dynamic_SSB0("structure(report$dynamic_SSB0, names = Yearplusone)"), 
-                             rmd_R("structure(report$R, names = Yearplusone)"), rmd_RCM_SR(), rmd_RCM_SPR2(),
-                             rmd_residual("structure(report$log_rec_dev, names = Year)", fig.cap = "Time series of recruitment deviations.", label = "log-Recruitment deviations"),
+                             rmd_R("structure(report$R, names = Yearplusone)"), 
+                             rmd_RCM_SR(), rmd_RCM_SPR2(),
+                             rmd_residual("structure(report$log_rec_dev, names = Year)", 
+                                          fig.cap = "Time series of recruitment deviations.", 
+                                          label = "log-Recruitment deviations"),
                              rmd_residual("structure(report$log_rec_dev, names = Year)", 
                                           "ifelse(data_mean_fit$est_rec_dev == 1, as.list(SD, \"Std. Error\")$log_rec_dev, 0)", 
                                           fig.cap = "Time series of recruitment deviations with 95% confidence intervals.",
-                                          label = "log-Recruitment deviations", conv_check = TRUE),
+                                          label = "log-Recruitment deviations", 
+                                          conv_check = TRUE),
                              rmd_N("structure(rowSums(report$N), names = Yearplusone)"), 
-                             N_bubble, CAA_bubble, CAL_bubble)
+                             N_bubble, 
+                             CAA_bubble, 
+                             CAL_bubble)
 
               nll <- RCM_get_likelihoods(report, RCMdata@Misc$LWT, f_name, s_name)
               

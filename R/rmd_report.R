@@ -470,14 +470,15 @@ rmd_U_UMSY <- function(conv_check = TRUE, fig.cap = "U/UMSY") {
 
 rmd_SSB <- function(var = "SSB") rmd_assess_timeseries(var, "spawning biomass", "\"Spawning biomass\"")
 
-rmd_dynamic_SSB0 <- function(var = "dynamic_SSB0") rmd_assess_timeseries(var, "dynamic SSB0", "expression(\"Dynamic\"~SSB[0])")
-
+rmd_dynamic_SSB0 <- function(var = "dynamic_SSB0") {
+  rmd_assess_timeseries(var, "dynamic SSB0 (reconstructed population without fishing mortality)", "expression(\"Dynamic\"~SSB[0])")
+}
 rmd_SSB_SSBMSY <- function(conv_check = TRUE) {
   rmd_assess_timeseries("SSB_SSBMSY", "SSB/SSBMSY", "expression(SSB/SSB[MSY])", conv_check = conv_check, one_line = TRUE)
 }
 
-rmd_SSB_SSB0 <- function(conv_check = TRUE, var = "SSB_SSB0") {
-  rmd_assess_timeseries(var, "spawning depletion", "expression(SSB/SSB[0])", conv_check = conv_check)
+rmd_SSB_SSB0 <- function(conv_check = TRUE, var = "SSB_SSB0", fig.cap = "spawning depletion") {
+  rmd_assess_timeseries(var, fig.cap, "expression(SSB/SSB[0])", conv_check = conv_check)
 }
 
 rmd_B <- function() rmd_assess_timeseries("B", "biomass", "\"Biomass\"")
