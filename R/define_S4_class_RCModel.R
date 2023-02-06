@@ -235,29 +235,28 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             vary_R0 <- !is.null(OM@cpars$R0) && length(unique(OM@cpars$R0)) > 1 
             vary_D <- !is.null(OM@cpars$D) && length(unique(OM@cpars$R0)) > 1
             vary_hs <- !is.null(OM@cpars$hs) && length(unique(OM@cpars$hs)) > 1
-            vary_M <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1 # Only plot there is a prior
+            vary_Mest <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1 # Only plot there is a prior
             
-            if (sum(vary_R0, vary_D, vary_hs, vary_M) > 1) {
-              vars <- c("R0", "D", "hs", "M")
-              var_labs <- c(R0 = "expression(R[0])", D = "\"Depletion\"", hs = "\"Steepness\"", M = "\"Natural mortality\"")
-              var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", M = "natural mortality")
+            if (sum(vary_R0, vary_D, vary_hs, vary_Mest) > 1) {
+              vars <- c("R0", "D", "hs", "Mest")
+              var_labs <- c(R0 = "expression(R[0])", D = "\"Depletion\"", hs = "\"Steepness\"", Mest = "\"Natural mortality\"")
+              var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", Mest = "natural mortality")
+              
+              if (vary_Mest) OM@cpars[["Mest"]] <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
               
               corr_series <- lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])) %>%
                 bind_rows()
-              corr_rmd <- local({
-                if (vary_M) OM@cpars$M <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
-                lapply(1:nrow(corr_series), function(i) {
-                  x <- corr_series$x[i]
-                  y <- corr_series$y[i]
-                  if (eval(as.symbol(paste0("vary_", x))) && eval(as.symbol(paste0("vary_", y)))) { 
-                    rmd_corr(paste0("OM@cpars$", x), paste0("OM@cpars$", y), 
-                             var_labs[x], var_labs[y], 
-                             paste0("Correlation between ", var_names[x], " and ", var_names[y], " in operating model.")
-                             )
-                  } else {
-                    ""
-                  }
-                })
+              corr_rmd <- lapply(1:nrow(corr_series), function(i) {
+                x <- corr_series$x[i]
+                y <- corr_series$y[i]
+                if (eval(as.symbol(paste0("vary_", x))) && eval(as.symbol(paste0("vary_", y)))) { 
+                  rmd_corr(paste0("OM@cpars[[\"", x, "\"]]"), paste0("OM@cpars[[\"", y, "\"]]"), 
+                           var_labs[x], var_labs[y], 
+                           paste0("Correlation between ", var_names[x], " and ", var_names[y], " in operating model.")
+                  )
+                } else {
+                  ""
+                }
               })
               
               OM_update <- c(OM_update, "### Parameter correlations\n", do.call(c, corr_rmd))
