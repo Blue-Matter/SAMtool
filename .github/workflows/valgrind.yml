@@ -35,39 +35,54 @@ jobs:
           
           assess <- c("DD_TMB", "DD_SS", "SCA", "SCA2", "SCA_Pope", "SCA_RWM", "SP", "SP_SS", "VPA", "RCM_assess")
           assess_sim <- lapply(assess, do.call, args = list(Data = Hist@Data))
+          assess_sim <- lapply(assess_sim, slot, "obj")
           names(assess_sim) <- assess
           saveRDS(assess_sim, file = "assess_sim.rds")
           
           RS <- MSEtool::Red_snapper
           RS@sigmaR <- 0.6
           assess_rs <- lapply(assess[!grepl("VPA", assess)], do.call, args = list(Data = RS))
+          assess_rs <- lapply(assess_rs, slot, "obj")
           names(assess_rs) <- assess[!grepl("VPA", assess)]
           saveRDS(assess_rs, file = "assess_rs.rds")
           
           data(pcod) 
-          mat_ogive <- pcod$OM@cpars$Mat_age[1, , 1]
-          out <- RCM(OM = SubCpars(pcod$OM, 1:2), data = pcod$data, 
-           condition = "catch", mean_fit = TRUE,
-           selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
-           start = list(vul_par = matrix(mat_ogive, length(mat_ogive), 1)),
-           map = list(vul_par = matrix(NA, length(mat_ogive), 1),
-                      log_early_rec_dev = rep(1, pcod$OM@maxage)),
-           prior = pcod$prior)
-          saveRDS(out@mean_fit$obj, file = "RCM_obj.rds")
+          
+          fit_RCM <- function(OM) {
+            mat_ogive <- pcod$OM@cpars$Mat_age[1, , 1]
+            
+            RCM(OM = SubCpars(pcod$OM, 1:2), data = pcod$data, 
+                condition = "catch", mean_fit = TRUE,
+                selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
+                start = list(vul_par = matrix(mat_ogive, length(mat_ogive), 1)),
+                map = list(vul_par = matrix(NA, length(mat_ogive), 1),
+                           log_early_rec_dev = rep(1, pcod$OM@maxage)),
+                prior = pcod$prior)
+          }
+          out <- list()
+          out$BH <- fit_RCM(pcod$OM)@mean_fit$obj
+          
+          OM <- pcod$OM; OM@SRrel <- 3 # Test hockey-stick TMB calculations
+          out$MR <- fit_RCM(OM)@mean_fit$obj
+          saveRDS(out, file = "RCM_obj.rds")
           
           writeLines(c("library(SAMtool)",
           "assess_sim <- readRDS(\"assess_sim.rds\")",
           "for(i in 1:length(assess_sim)) {",
           "  print(names(assess_sim)[i])",
-          "  assess_sim[[i]]@obj$retape()",
+          "  assess_sim[[i]]$retape()",
           "}",
           "assess_rs <- readRDS(\"assess_rs.rds\")",
           "for(i in 1:length(assess_rs)) {",
           "  print(names(assess_rs)[i])",
-          "  assess_rs[[i]]@obj$retape()",
+          "  assess_rs[[i]]$retape()",
           "}",
           "RCM_obj <- readRDS(\"RCM_obj.rds\")",
-          "RCM_obj$retape()"), 
+          "for(i in 1:length(RCM_obj)) {",
+          "  print(names(RCM_obj)[i])",
+          "  RCM_obj[[i]]$retape()",
+          "}"),
+          
                     con = "val.R")
         shell: RDscript {0}
       
