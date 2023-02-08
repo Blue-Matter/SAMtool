@@ -1,5 +1,11 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.5.1
+- Add gridlines to markdown plots for easier viewing. Update some plots and re-organize tabs in RCM markdown report.
+- Add a Gaussian penalty of `dnorm(log(Shinge/min(SSB)), 2)` for hockey-stick SRR when the hinge point is less than the smallest SSB.
+- Convert zeros to 1e-8 when found in `RCMdata@Chist`. The trivially small catch still allows fishery age composition calculations with Baranov equation.
+- Fix bug in `diagnostic` introduced in 1.5.0.
+
 ## SAMtool 1.5.0
 - Add `simulate` method for RCM and assessment models.
 - New `map` and `start` arguments for `RCM`.
