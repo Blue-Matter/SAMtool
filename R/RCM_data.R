@@ -285,7 +285,12 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
       if (any(is.na(RCMdata@Chist))) {
         stop("One or more of the historical annual catch observations is missing. Suggestion: use linear interpolation to fill these data.", call. = FALSE)
       }
-      if (any(RCMdata@Chist < 0)) stop("All catch values should be zero or greater.", call. = FALSE)
+      if (any(RCMdata@Chist < 0)) {
+        stop("All catch values should be zero or greater.", call. = FALSE)
+      } else if (any(RCMdata@Chist == 0)) {
+        warning("Catch values of zero will be replaced with 1e-8.")
+        RCMdata@Chist[RCMdata@Chist == 0] <- 1e-8
+      }
 
       # Convert single fleet inputs to multiple fleet, e.g. matrices to arrays
       if (!is.matrix(RCMdata@Chist)) RCMdata@Chist <- matrix(RCMdata@Chist, ncol = 1)
