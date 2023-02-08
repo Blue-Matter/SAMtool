@@ -5,7 +5,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                     drop_highF = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), 
-                    start = list(), map = list(), ...) {
+                    start = list(), map = list(), silent = FALSE, ...) {
   
   dots <- list(...) # can be vul_par, ivul_par, log_rec_dev, log_early_rec_dev, map_vul_par, map_ivul_par, map_log_rec_dev, map_log_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
   if (!is.null(dots$maxF)) max_F <- dots$maxF
@@ -13,7 +13,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   comp_like <- match.arg(comp_like)
   condition <- match.arg(condition)
   
-  dat_update <- check_RCMdata(RCMdata, OM, condition)
+  dat_update <- check_RCMdata(RCMdata, OM, condition, silent = silent)
   OM <- dat_update$OM
   RCMdata <- dat_update$RCMdata
   StockPars <- dat_update$StockPars
@@ -28,12 +28,12 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   nsurvey <- RCMdata@Misc$nsurvey
   
   OM@maxF <- max_F
-  message("OM@maxF updated to ", max_F, ".")
+  if (!silent) message("Maximum F in RCM will be ", max_F, ". OM@maxF will also be updated.\n\n")
   
   # No comp data
   if (!any(RCMdata@CAA > 0, na.rm = TRUE) && !any(RCMdata@CAL > 0, na.rm = TRUE)) {
     fix_sel <- TRUE
-    message("No fishery length or age compositions were provided. Selectivity is fixed to values from OM.")
+    if (!silent) message("No fishery length or age compositions were provided. Selectivity is fixed to values from OM.\n\n")
   } else {
     fix_sel <- FALSE
   }
@@ -41,30 +41,31 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   # Selectivity
   if (length(selectivity) == 1) selectivity <- rep(selectivity, RCMdata@Misc$nsel_block)
   if (length(selectivity) < RCMdata@Misc$nsel_block) stop("selectivity vector should be of length ", RCMdata@Misc$nsel_block, ").", call. = FALSE)
-  sel <- int_sel(selectivity, RCMdata)
+  sel <- int_sel(selectivity, RCMdata, silent)
   
   # Survey selectivity
   if (nsurvey > 0) {
     if (is.null(s_selectivity)) s_selectivity <- rep("B", nsurvey)
     if (length(s_selectivity) == 1) s_selectivity <- rep(s_selectivity, nsurvey)
     if (length(s_selectivity) != nsurvey) stop("Length of s_selectivity is not equal to ", nsurvey)
-    s_sel <- int_s_sel(s_selectivity, nfleet)
+    s_sel <- int_s_sel(s_selectivity, nfleet, silent)
   } else {
-    s_sel <- int_s_sel(NULL)
+    s_sel <- int_s_sel(NULL, silent = silent)
   }
   
   # Likelihood weights
-  message("\n")
   RCMdata@Misc$LWT <- make_LWT(LWT, nfleet, nsurvey)
   
   # SR
-  message("\n", switch(OM@SRrel,
-                       "1" = "Beverton-Holt", 
-                       "2" = "Ricker",
-                       "3" = "Mesnil-Rochet"), " stock-recruitment relationship used.")
+  if (!silent) {
+    message(switch(OM@SRrel,
+                   "1" = "Beverton-Holt", 
+                   "2" = "Ricker",
+                   "3" = "Mesnil-Rochet"), " stock-recruitment relationship used.")
+  }
   
   # Generate priors
-  prior <- make_prior(prior, nsurvey, OM@SRrel, dots)
+  prior <- make_prior(prior, nsurvey, OM@SRrel, dots, msg = !silent)
   
   # Test for identical sims
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, ObsPars, RCMdata, dots)
@@ -74,7 +75,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     
     if (!requireNamespace("mvtnorm", quietly = TRUE)) stop("Please install the mvtnorm package.", call. = FALSE)
     
-    message("\nResample = TRUE. Running mean fit model first...")
+    if (!silent) message("\nFound miscellaneous argument: resample = TRUE. Running mean fit model first...")
     mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                                max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
@@ -82,27 +83,20 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                                start = start, map = map, dots = dots)
     
     if (mean_fit_output$report$conv) {
-      message("Model converged. Sampling covariance matrix for nsim = ", nsim, " replicates...")
+      message("Sampling covariance matrix for nsim = ", nsim, " replicates...")
       if (!all(par_identical_sims)) {
-        message("Note: not all ", nsim, " replicates are identical.")
-        message("These parameters should be identical among simulations: ",
+        warning("Note: not all ", nsim, " replicates are identical. These parameters should be identical for all simulations: ",
                 which(!par_identical_sims) %>% names() %>% paste0(collapse = " "))
       }
       samps <- mvtnorm::rmvnorm(nsim, mean_fit_output$opt$par, mean_fit_output$SD$cov.fixed)
       
       if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-      if (snowfall::sfIsRunning()) {
-        res <- snowfall::sfClusterApplyLB(1:nsim, RCM_report_samps, samps = samps, 
-                                          obj = mean_fit_output$obj, 
-                                          conv = mean_fit_output$report$conv)
-      } else {
-        res <- lapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
-      }
+      res <- pblapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv,
+                      cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
       
     } else {
-      warning("Mean fit model did not appear to converge. Will not be able to sample the covariance matrix.")
-      message("Model did not converge. Returning the mean-fit model for evaluation.")
-      
+      warning("Mean fit model did not appear to converge. Will not be able to sample the covariance matrix. 
+              Returning the mean-fit model for user evaluation.")
       res <- list(mean_fit_output$report) # Length 1
     }
     
@@ -111,7 +105,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     
   } else if (all(par_identical_sims)) { # All identical sims detected
       
-    message("\nAll ", nsim, " replicates are identical. Fitting once and replicating single fit...")
+    if (!silent) message("All ", nsim, " replicates are identical. Fitting once and replicating single fit...")
     
     mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
@@ -120,9 +114,9 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                                start = start, map = map, dots = dots)
     
     if (mean_fit_output$report$conv) {
-      message("Model converged.")
+      if (!silent) message("Model converged.")
     } else {
-      message("Model did not converge. Returning the mean-fit model for evaluation.")
+      warning("Model did not converge. Returning the mean-fit model for evaluation.")
     }
 
     mod <- list(mean_fit_output) # Length - 1
@@ -131,7 +125,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     
   } else {
     
-    message("\nFitting model (", nsim, " simulations) ...")
+    message("Fitting model (", nsim, " simulations) ...")
     if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
     
     mod <- pblapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
@@ -141,7 +135,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                     cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
     
     if (mean_fit) { ### Fit to life history means if mean_fit = TRUE
-      message("Generating additional model fit from mean values of parameters in the operating model...\n")
+      if (!silent) message("Generating additional model fit from mean values of parameters in the operating model...\n")
       mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                  LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                                  max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
@@ -159,28 +153,28 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   
   highF <- vapply(res, function(x) max(getElement(x, "F"), na.rm = TRUE) >= max_F, logical(1))
   if (length(res) == 1) {
-    if (highF) message("Single model fit had F on the upper boundary.\n")
+    if (highF) warning("Model had F on the upper boundary.\n")
   } else if (sum(highF)) {
-    message(sum(highF), " out of ", nsim , " model fits had F on the upper boundary (F = ", 
-            max_F, "; ", round(100 * sum(highF)/nsim, 2), "% of simulations).\n")
+    warning(sum(highF), " out of ", nsim , " model fits had F on the upper boundary (F = ", 
+            max_F, "; ", round(100 * mean(highF), 2), "% of simulations).")
     if (drop_highF) conv <- conv & !highF
   }
   
   NaF <- vapply(res, function(x) any(is.na(x$F) | is.infinite(x$F)), logical(1))
   if (length(res) == 1) {
-    if (NaF) message("Single model fit had F with NA's")
+    if (NaF) warning("Model had F with NA's")
   } else if (sum(NaF)) {
-    message(sum(NaF), " out of ", nsim , " iterations had F with NA's")
+    warning(sum(NaF), " out of ", nsim , " iterations (", round(100 * mean(naF), 2), "%) had F with NA's")
     if (drop_nonconv) conv <- conv & !NaF
   }
   
   keep <- !logical(OM@nsim) # Keep all simulations
   if (length(res) > 1 && sum(conv) < nsim) {
-    message("Non-converged iteration(s): ", paste(which(!conv), collapse = " "), "\n")
+    if (!silent) message("Non-converged iteration(s): ", paste(which(!conv), collapse = " "), "\n\n")
     if (!sum(conv)) {
-      message("Non-converged for all iterations. Returning all for evaluation.")
+      if (!silent) message("Non-converged for all iterations. Returning all for evaluation.\n\n")
     } else if (drop_nonconv || drop_highF) {
-      message("Non-converged and/or highF iterations will be removed.\n")
+      if (!silent) message("Non-converged and/or highF iterations will be removed.\n\n")
       keep <- conv
     }
   }
@@ -190,90 +184,56 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   OM_par <- RCM_update_OM(res, obj_data, maxage, nyears, proyears, nsim)
   
   ### R0
+  if (!silent) message("Updating operating model:\n\n")
   OM@cpars$R0 <- OM_par$R0
-  message("Range of unfished age-0 recruitment (OM@cpars$R0): ", paste(round(range(OM@cpars$R0), 2), collapse = " - "))
+  if (!silent) message("Range of unfished age-0 recruitment (OM@cpars$R0): ", paste(round(range(OM@cpars$R0), 2), collapse = " - "))
   
   ### Depletion and init D - init D is only reported, OM setup for initD by adjusting rec devs
-  message("Range of initial spawning depletion: ", paste(round(range(OM_par$initD), 2), collapse = " - "))
+  if (!silent) message("Range of initial spawning depletion: ", paste(round(range(OM_par$initD), 2), collapse = " - "))
   
   OM@cpars$D <- OM_par$D
-  message("Range of spawning depletion (OM@cpars$D): ", paste(round(range(OM@cpars$D), 2), collapse = " - "), "\n")
+  if (!silent) message("Range of spawning depletion (OM@cpars$D): ", paste(round(range(OM@cpars$D), 2), collapse = " - "), "\n")
   
   ### Selectivity and F
   ### Find
   OM@isRel <- FALSE
   OM@cpars$V <- OM_par$V
   OM@cpars$Find <- OM_par$Find
-  message("Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.")
-  message("Selectivity during projection period is set to that in most recent historical year.")
-  
   OM@cpars$qs <- rep(1, nsim)
+  if (!silent) {
+    message("Historical F set with OM@cpars$Find and OM@cpars$qs.")
+    message("Annual selectivity set in OM@cpars$V. Projection period uses selectivity of last historical year.")
+  }
+  
   Eff <- apply(OM@cpars$Find, 2, range)
   OM@EffLower <- Eff[1, ]
   OM@EffUpper <- Eff[2, ]
   if (length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
   if (length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
-  message("Historical effort trends set in OM@EffLower and OM@EffUpper.\n")
+  #if (!silent) message("Historical effort trends set in OM@EffLower and OM@EffUpper (N.B. not used).")
   
   ### Rec devs
   OM@cpars$Perr <- OM_par$procsd
-  message("Recruitment standard deviation set in OM@cpars$Perr.")
+  if (!silent) message("Recruitment standard deviation set in OM@cpars$Perr: ", paste(round(range(OM@cpars$Perr), 2), collapse = " - "))
   
   Perr_y <- StockPars$Perr_y
   Perr_y[, 1:maxage] <- OM_par$early_Perr
   Perr_y[, maxage + 1:nyears] <- OM_par$Perr
-  message("Historical recruitment set in OM@cpars$Perr_y.")
+  if (!silent) message("Historical recruitment deviations set in OM@cpars$Perr_y.")
   
   # Resample future recruitment with autocorrelation
   OM@cpars$AC <- OM_par$AC
   OM@AC <- range(OM_par$AC)
   if (any(OM_par$AC != 0)) {
-    message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
+    if (!silent) message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
     
     OM@cpars$Perr_y <- RCM_sample_future_dev(obj_data$est_rec_dev, OM_par$procsd, OM_par$AC, 
-                                             OM_par$log_rec_dev, Perr_y, maxage, nyears, proyears)
-    message("Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).\n")
+                                             OM_par$log_rec_dev, Perr_y, maxage, nyears, proyears,
+                                             silent = silent)
+    if (!silent) message("Future recruitment deviations in OM@cpars$Perr_y sampled with autocorrelation.")
   } else {
     OM@cpars$Perr_y <- Perr_y
   }
-  
-  ### Assign OM variables that were used in the RCM to the output
-  OM@cpars$Len_age <- StockPars$Len_age
-  OM@cpars$Linf <- StockPars$Linf
-  OM@cpars$K <- StockPars$K
-  OM@cpars$t0 <- StockPars$t0
-  OM@cpars$LenCV <- StockPars$LenCV
-  OM@cpars$LatASD <- StockPars$LatASD
-  OM@cpars$Wt_age <- StockPars$Wt_age
-  
-  if (any(apply(StockPars$Mat_age, 1, function(x) all(x >= 0.5)))) { # Any simulations where all mat_age > 0.5?
-    OM@cpars$L50 <- StockPars$L50
-    OM@cpars$L95 <- StockPars$L95
-  } else {
-    OM@cpars$Mat_age <- StockPars$Mat_age
-  }
-  if (prior$use_prior[2]) {
-    OM@cpars$hs <- OM_par$h
-  } else {
-    OM@cpars$hs <- StockPars$hs
-  }
-  if (prior$use_prior[3]) {
-    OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
-  } else {
-    OM@cpars$M_ageArray <- StockPars$M_ageArray
-  }
-  
-  if (any(RCMdata@CAL > 0, na.rm = TRUE) || (any(RCMdata@MS > 0, na.rm = TRUE) & RCMdata@MS_type == "length") ||
-     any(RCMdata@IAL > 0, na.rm = TRUE)) {
-    OM@cpars$CAL_bins <- RCMdata@Misc$lbin
-    OM@cpars$CAL_binsmid <- RCMdata@Misc$lbinmid
-    message("RCM length bins will be added to OM.")
-  }
-  
-  if (!is.null(dots$plusgroup) && !dots$plusgroup) OM@cpars$plusgroup <- 0L
-  if (!any(RCMdata@I_sd > 0, na.rm = TRUE)) OM@cpars$Iobs <- ObsPars$Iobs
-  message("Growth, maturity, natural mortality, and steepness values from RCM are set in OM@cpars.\n")
-  
   
   ### Mesnil-Rochet stock recruit relationship
   if (OM@SRrel == 3 && !is.null(OM_par$MRRmax)) {
@@ -297,8 +257,52 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     
     OM@cpars$SRR <- list(SRRfun = SRRfun, SRRpars = SRRpars,
                          relRfun = relRfun, SPRcrashfun = SPRcrashfun)
-    message("Mesnil-Rochet stock recruitment relationship specified in OM@cpars$SRR.\n")
+    if (!silent) message("Mesnil-Rochet stock recruitment relationship specified in OM@cpars$SRR.")
   }
+  
+  ### Assign OM variables that were used in the RCM to the output
+  OM@cpars$Len_age <- StockPars$Len_age
+  OM@cpars$Linf <- StockPars$Linf
+  OM@cpars$K <- StockPars$K
+  OM@cpars$t0 <- StockPars$t0
+  OM@cpars$LenCV <- StockPars$LenCV
+  OM@cpars$LatASD <- StockPars$LatASD
+  OM@cpars$Wt_age <- StockPars$Wt_age
+  
+  if (any(apply(StockPars$Mat_age, 1, function(x) all(x >= 0.5)))) { # Any simulations where all mat_age > 0.5?
+    OM@cpars$L50 <- StockPars$L50
+    OM@cpars$L95 <- StockPars$L95
+  } else {
+    OM@cpars$Mat_age <- StockPars$Mat_age
+  }
+  
+  if (!OM@SRrel == 3) {
+    if (prior$use_prior[2]) {
+      OM@cpars$hs <- OM_par$h
+    } else {
+      OM@cpars$hs <- StockPars$hs
+    }
+  }
+  
+  if (prior$use_prior[3]) {
+    OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
+  } else {
+    OM@cpars$M_ageArray <- StockPars$M_ageArray
+  }
+  
+  if (any(RCMdata@CAL > 0, na.rm = TRUE) || (any(RCMdata@MS > 0, na.rm = TRUE) & RCMdata@MS_type == "length") ||
+     any(RCMdata@IAL > 0, na.rm = TRUE)) {
+    OM@cpars$CAL_bins <- RCMdata@Misc$lbin
+    OM@cpars$CAL_binsmid <- RCMdata@Misc$lbinmid
+    if (!silent) message("RCMdata length bins will be added to OM.")
+  }
+  
+  if (!is.null(dots$plusgroup) && !dots$plusgroup) {
+    OM@cpars$plusgroup <- 0L
+    if (!silent) message("No plus group was used in RCM.")
+  }
+  if (!any(RCMdata@I_sd > 0, na.rm = TRUE)) OM@cpars$Iobs <- ObsPars$Iobs
+  if (!silent) message("Growth, maturity, natural mortality, and stock recruit parameters from RCM are set in OM@cpars.\n\n")
   
   ### Output S4 object
   RCMdata@Misc$prior <- prior
@@ -321,6 +325,8 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   
   # Data in cpars
   if (sum(RCMdata@Chist > 0, na.rm = TRUE) || nsurvey > 0) {
+    
+    if (!silent) message("Adding some RCMdata inputs into OM@cpars$Data:\n\n")
     real_Data <- new("Data")
     real_Data@Year <- (output@OM@CurrentYr - output@OM@nyears + 1):output@OM@CurrentYr
     real_Data@LHYear <- max(real_Data@Year)
@@ -329,19 +335,23 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       real_Data@Cat <- matrix(rowSums(RCMdata@Chist, na.rm = TRUE), 1, nyears)
       real_Data@CV_Cat <- sqrt(exp((rowSums(RCMdata@C_sd * RCMdata@Chist)/rowSums(RCMdata@Chist))^2 - 1)) %>% 
         matrix(1, nyears)
-      message("Historical catch data added to OM@cpars$Data@Cat.")
-      if (nfleet > 1) message("Annual catch CV is a weighted average by fleet-specific catch.")
+      
+      if (!silent) {
+        message("Historical catch data added to OM@cpars$Data@Cat.")
+        if (nfleet > 1) message("Annual catch CV is a weighted average by fleet-specific catch.")
+      }
+      
     }
     if (nfleet == 1) {
       if (sum(RCMdata@CAA, na.rm = TRUE)) {
         real_Data@CAA <- aperm(RCMdata@CAA, c(3, 1, 2))
-        message("Age comps added to OM@cpars$Data@CAA (nfleet = 1).")
+        if (!silent) message("Age comps added to OM@cpars$Data@CAA (nfleet = 1).")
       }
       if (sum(RCMdata@CAL, na.rm = TRUE)) {
         real_Data@CAL <- aperm(RCMdata@CAL, c(3, 1, 2))
         real_Data@CAL_mids <- RCMdata@Misc$lbinmid
         real_Data@CAL_bins <- RCMdata@Misc$lbin
-        message("Length comps added to OM@cpars$Data@CAL (nfleet = 1).")
+        if (!silent) message("Length comps added to OM@cpars$Data@CAL (nfleet = 1).")
       }
     }
     if (.hasSlot(real_Data, "AddInd") && nsurvey > 0) {
@@ -358,7 +368,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       real_Data@AddIunits <- RCMdata@I_units
       
       output@OM@cpars$AddIbeta <- matrix(1, output@OM@nsim, nsurvey)
-      message("Historical indices added to OM@cpars$Data@AddInd.")
+      if (!silent) message("Historical indices added to OM@cpars$Data@AddInd.")
     }
     output@OM@cpars$Data <- real_Data
   }
@@ -378,11 +388,14 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
     do_catch_check <- vapply(1:length(res), catch_check_fn, logical(1), report = res, RCMdata = RCMdata)
     if (any(do_catch_check)) {
       flag_ind <- paste(which(do_catch_check), collapse = " ")
-      message("Note: there is predicted catch that deviates from observed catch by more than 1%")
-      if (length(res) > 1) message("Simulations: ", flag_ind)
+      if (length(res) > 1) {
+        warning("Note: there is predicted catch that deviates from observed catch by more than 1% in simulations: ", flag_ind)
+      } else {
+        warning("Note: there is predicted catch that deviates from observed catch by more than 1%")
+      }
     }
   }
-  message("Complete.")
+  if (!silent) message("Complete.")
   
   return(output)
 }
@@ -480,7 +493,7 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length
 }
 
 
-RCM_sample_future_dev <- function(est_rec_dev, procsd, AC, log_rec_dev, Perr_y, maxage, nyears, proyears) {
+RCM_sample_future_dev <- function(est_rec_dev, procsd, AC, log_rec_dev, Perr_y, maxage, nyears, proyears, silent = FALSE) {
   if (any(!est_rec_dev)) { # Sample historical rec devs for OM for most recent years
     yr_fixed_rec_dev <- which(!est_rec_dev)
     if (any(yr_fixed_rec_dev > sum(est_rec_dev))) {
@@ -492,7 +505,7 @@ RCM_sample_future_dev <- function(est_rec_dev, procsd, AC, log_rec_dev, Perr_y, 
       log_rec_dev[, yr_hist_sample:nyears] <- do.call(rbind, samp_hist)
       
       Perr_y[, (maxage + yr_hist_sample):(maxage + nyears)] <- exp(log_rec_dev[, yr_hist_sample:nyears])
-      message("Historical recruitment deviations sampled with autocorrelation starting in year ", yr_hist_sample, " out of OM@nyears = ", nyears)
+      if (!silent) message("Historical recruitment deviations sampled with autocorrelation starting in year ", yr_hist_sample, " out of OM@nyears = ", nyears)
     }
   }
   samp_proj <- Map(dev_AC, AC = AC, stdev = procsd, 
@@ -524,7 +537,7 @@ process_AddIndV <- function(sur, Misc, s_sel, n_age, nfleet, nyears) { # Return 
 
 #' @importFrom pbapply pbsapply
 RCM_retro <- function(x, nyr = 5) {
-  if (length(x@mean_fit) == 0) stop("Re-run RCM() with argument `mean_fit = TRUE`", .call = FALSE)
+  if (!length(x@mean_fit)) stop("Re-run RCM() with argument `mean_fit = TRUE`", .call = FALSE)
   
   data <- x@mean_fit$obj$env$data
   n_y <- data$n_y

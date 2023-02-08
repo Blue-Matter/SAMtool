@@ -31,7 +31,7 @@
 #' @param ESS A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
 #' Not used when data are provided in a \linkS4class{RCMdata} object.
 #' @param prior A named list for the parameters of any priors to be added to the model. See below.
-#' @param max_F The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also \code{drop_highF}.
+#' @param max_F The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.
 #' @param cores Integer for the number of CPU cores (set greater than 1 for parallel processing).
 #' @param integrate Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).
 #' @param mean_fit Logical, whether to run an additional with mean values of life history parameters from the OM.
@@ -40,6 +40,7 @@
 #' @param control A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.
 #' @param start A list of starting values for the TMB model. See details.
 #' @param map A list of \code{map} argument to TMB models to override defaults. See \link[TMB]{MakeADFun} and details.
+#' @param silent Logical to indicate whether informative messages will be reported to console.
 #' @param ... Other arguments to pass in for starting values of parameters and fixing parameters. See details.
 #'
 #' @section Priors:
@@ -250,10 +251,10 @@ setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), 
-                   start = list(), map = list(), ...) {
+                   start = list(), map = list(), silent = FALSE, ...) {
             RCM_int(OM = OM, RCMdata = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
                     comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
-                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, start = start, map = map, ...)
+                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, start = start, map = map, silent = silent, ...)
           })
 
 #' @rdname RCM
@@ -263,7 +264,7 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), ESS = c(30, 30), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05),
-                   start = list(), map = list(), ...) {
+                   start = list(), map = list(), silent = FALSE, ...) {
             
             .Deprecated(msg = "Using a list of input data to RCM is now deprecated. Use an RCMdata object, i.e., new(\"RCMdata\")")
             
@@ -331,7 +332,7 @@ setMethod("RCM", signature(OM = "OM", data = "list"),
             
             RCM_int(OM = OM, RCMdata = dataS4, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
                     comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
-                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, start = start, map = map, ...)
+                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, start = start, map = map, silent = silent, ...)
           })
 
 
@@ -342,7 +343,7 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), ESS = c(30, 30), prior = list(),
                    max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                    drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), 
-                   start = list(), map = list(), ...) {
+                   start = list(), map = list(), silent = FALSE, ...) {
 
             condition <- match.arg(condition)
             extra_args <- list(...)
@@ -418,7 +419,7 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             output <- RCM_int(OM = OM, RCMdata = dataS4, condition = condition, selectivity = selectivity, s_selectivity = Ind$s_sel, LWT = LWT,
                               comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
                               drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control,
-                              map = map, start = start, OMeff = extra_args$OMeff, ...)
+                              map = map, start = start, silent = silent, OMeff = extra_args$OMeff, ...)
             
             ####### Re-assign index slots from AddInd to their original places
             if (any(Ind$slotname != "AddInd")) {

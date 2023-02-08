@@ -8,7 +8,12 @@
 \alias{RCM,OM,RCMdata-method}
 \title{Rapid Conditioning Model (RCM)}
 \usage{
-check_RCMdata(RCMdata, OM, condition = c("catch", "catch2", "effort"))
+check_RCMdata(
+  RCMdata,
+  OM,
+  condition = c("catch", "catch2", "effort"),
+  silent = FALSE
+)
 
 RCM(OM, data, ...)
 
@@ -30,6 +35,7 @@ RCM(OM, data, ...)
   control = list(iter.max = 2e+05, eval.max = 4e+05),
   start = list(),
   map = list(),
+  silent = FALSE,
   ...
 )
 
@@ -52,6 +58,7 @@ RCM(OM, data, ...)
   control = list(iter.max = 2e+05, eval.max = 4e+05),
   start = list(),
   map = list(),
+  silent = FALSE,
   ...
 )
 
@@ -74,6 +81,7 @@ RCM(OM, data, ...)
   control = list(iter.max = 2e+05, eval.max = 4e+05),
   start = list(),
   map = list(),
+  silent = FALSE,
   ...
 )
 }
@@ -85,6 +93,8 @@ steepness, maturity parameters (L50 and L50_95), standard deviation of recruitme
 
 \item{condition}{String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 or "effort".}
+
+\item{silent}{Logical to indicate whether informative messages will be reported to console.}
 
 \item{data}{Data inputs formatted in a \linkS4class{RCMdata} (preferred) or \linkS4class{Data} object. 
 Use of a list is deprecated. See Data section below.}
@@ -107,7 +117,7 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 \item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 
-\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). See also \code{drop_highF}.}
+\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.}
 
 \item{cores}{Integer for the number of CPU cores (set greater than 1 for parallel processing).}
 
