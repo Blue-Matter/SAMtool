@@ -164,7 +164,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   if (length(res) == 1) {
     if (NaF) warning("Model had F with NA's")
   } else if (sum(NaF)) {
-    warning(sum(NaF), " out of ", nsim , " iterations (", round(100 * mean(naF), 2), "%) had F with NA's")
+    warning(sum(NaF), " out of ", nsim , " iterations (", round(100 * mean(NaF), 2), "%) had F with NA's")
     if (drop_nonconv) conv <- conv & !NaF
   }
   

@@ -441,11 +441,11 @@ check_RCMdata <- function(RCMdata, OM, condition = c("catch", "catch2", "effort"
     RCMdata@CAA_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)
   }
   RCMdata@CAA <- apply(RCMdata@CAA, c(1, 3), find_na) %>% aperm(c(2, 1, 3))
-
+  
+  if (!silent) message("Checking OM and getting biological parameters...")
   OM_samp <- check_OM_for_sampling(OM, RCMdata) # Sample life history, selectivity, and obs parameters
 
   set.seed(OM@seed)
-  if (!silent) message("Getting biological parameters from OM...")
   suppressMessages({
     StockPars <- MSEtool::SampleStockPars(OM_samp, msg = FALSE)
     ObsPars <- MSEtool::SampleObsPars(OM_samp)
