@@ -21,6 +21,15 @@
 #' OM <- MSEtool::testOM; OM@@proyears <- 20
 #' myMSE <- MSEtool::runMSE(OM = OM, MPs = "SP_40_10")
 #' retrospective_AM(myMSE, MP = "SP_40_10", sim = 1)
+#' 
+#' # How to get all the estimates
+#' library(dplyr)
+#' assess_estimates <- lapply(1:myMSE@@nMPs, function(m) {
+#'   lapply(1:myMSE@@nsim, function(x) {
+#'     myMSE@@PPD[[m]]@@Misc[[x]]$Assessment_report %>% 
+#'       mutate(MP = myMSE@@MPs[m], Simulation = x)
+#'   }) %>% bind_rows()
+#' }) %>% bind_rows()
 #' }
 #' @seealso \link{diagnostic}
 #' @importFrom gplots rich.colors

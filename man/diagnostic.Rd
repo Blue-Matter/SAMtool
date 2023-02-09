@@ -37,6 +37,15 @@ This function summarizes and plots the diagnostic information.
 OM <- MSEtool::testOM; OM@proyears <- 20
 myMSE <- runMSE(OM, MPs = "SCA_4010")
 diagnostic(myMSE)
+
+# How to get all the reporting
+library(dplyr)
+conv_statistics <- lapply(1:myMSE@nMPs, function(m) {
+  lapply(1:myMSE@nsim, function(x) {
+    myMSE@PPD[[m]]@Misc[[x]]$diagnostic \%>\%
+      mutate(MP = myMSE@MPs[m], Simulation = x)
+ }) \%>\% bind_rows()
+}) \%>\% bind_rows()
 }
 }
 \seealso{
