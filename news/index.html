@@ -48,15 +48,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.5.1" id="samtool-151">SAMtool 1.5.1<small>2023-02-08</small><a class="anchor" aria-label="anchor" href="#samtool-151"></a></h2>
+<h2 class="page-header" data-toc-text="1.5.1" id="samtool-151-2023-02-08">SAMtool 1.5.1 (2023-02-08)<small>2023-02-08</small><a class="anchor" aria-label="anchor" href="#samtool-151-2023-02-08"></a></h2>
 <ul><li>Add gridlines to markdown plots for easier viewing. Update some plots and re-organize tabs in RCM markdown report.</li>
-<li>Add a Gaussian penalty of <code>dnorm(log(Shinge/min(SSB)), 2)</code> for hockey-stick SRR when the hinge point is less than the smallest SSB.</li>
-<li>Convert zeros to 1e-8 when found in <code>RCMdata@Chist</code>. The trivially small catch still allows fishery age composition calculations with Baranov equation.</li>
-<li>More warnings in RCM.</li>
+<li>Add a Gaussian penalty of <code>dnorm(log(Shinge/min(SSB)), 0, 2)</code> for hockey-stick SRR when the hinge point is less than the smallest SSB.</li>
+<li>Convert zeros to 1e-8 when found in <code>RCMdata@Chist</code>. The trivially small catch still allows predictions of fishery age composition from Baranov equation.</li>
+<li>Turn various RCM messages to warnings, e.g., for non-convergence, high F, etc.</li>
 <li>Fix bug in <code>diagnostic</code> introduced in 1.5.0.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.5.0" id="samtool-150">SAMtool 1.5.0<small>2023-01-29</small><a class="anchor" aria-label="anchor" href="#samtool-150"></a></h2>
+<h2 class="page-header" data-toc-text="1.5.0" id="samtool-150-2023-01-29">SAMtool 1.5.0 (2023-01-29)<small>2023-01-29</small><a class="anchor" aria-label="anchor" href="#samtool-150-2023-01-29"></a></h2>
 <ul><li>Add <code>simulate</code> method for RCM and assessment models.</li>
 <li>New <code>map</code> and <code>start</code> arguments for <code>RCM</code>.</li>
 <li>Add progress bar with timers for RCM and various diagnostic functions using <code>pbapply</code>.</li>
@@ -65,24 +65,24 @@
 <li>Update reporting of assessment output inside MSE. Use of data frames instead of lists should save space in the <code>MSE</code> object.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.4.1" id="samtool-141">SAMtool 1.4.1<small>2022-11-16</small><a class="anchor" aria-label="anchor" href="#samtool-141"></a></h2>
+<h2 class="page-header" data-toc-text="1.4.1" id="samtool-141-2022-11-16">SAMtool 1.4.1 (2022-11-16)<small>2022-11-16</small><a class="anchor" aria-label="anchor" href="#samtool-141-2022-11-16"></a></h2>
 <ul><li>Fix <code>Data@CAL</code> check when using <code>RCM</code>.</li>
 <li>Use <code><a href="https://rdrr.io/pkg/Gmisc/man/fastDoCall.html" class="external-link">Gmisc::fastDoCall</a></code> when fitting models, e.g., <code>SP_Fox</code>. <code>Gmisc</code> is a <code>Suggests</code> package.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.4.0" id="samtool-140">SAMtool 1.4.0<small>2022-06-07</small><a class="anchor" aria-label="anchor" href="#samtool-140"></a></h2>
+<h2 class="page-header" data-toc-text="1.4.0" id="samtool-140-2022-06-07">SAMtool 1.4.0 (2022-06-07)<small>2022-06-07</small><a class="anchor" aria-label="anchor" href="#samtool-140-2022-06-07"></a></h2>
 <ul><li>RCM can now use multivariate logistic and Dirichlet multinomial distributions for fitting to age/length comps.</li>
 <li>Compile with TMBAD library.</li>
 <li>Import individual functions in NAMESPACE to avoid package conflicts.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.3.1" id="samtool-131">SAMtool 1.3.1<small>2022-05-06</small><a class="anchor" aria-label="anchor" href="#samtool-131"></a></h2>
+<h2 class="page-header" data-toc-text="1.3.1" id="samtool-131-2022-05-06">SAMtool 1.3.1 (2022-05-06)<small>2022-05-06</small><a class="anchor" aria-label="anchor" href="#samtool-131-2022-05-06"></a></h2>
 <ul><li>Patch in RCM markdown report for plotting fishery length composition.</li></ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.3.0" id="samtool-130">SAMtool 1.3.0<small>2022-04-08</small><a class="anchor" aria-label="anchor" href="#samtool-130"></a></h2>
+<h2 class="page-header" data-toc-text="1.3.0" id="samtool-130-2022-04-08">SAMtool 1.3.0 (2022-04-08)<small>2022-04-08</small><a class="anchor" aria-label="anchor" href="#samtool-130-2022-04-08"></a></h2>
 <ul><li>Require TMB 1.8 (need TMB package consistency between compilation and model fitting)</li></ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.2.6" id="samtool-126">SAMtool 1.2.6<small>2022-03-31</small><a class="anchor" aria-label="anchor" href="#samtool-126"></a></h2>
+<h2 class="page-header" data-toc-text="1.2.6" id="samtool-126-2022-03-31">SAMtool 1.2.6 (2022-03-31)<small>2022-03-31</small><a class="anchor" aria-label="anchor" href="#samtool-126-2022-03-31"></a></h2>
 <div class="section level3">
 <h3 id="new-features-1-2-6">New features<a class="anchor" aria-label="anchor" href="#new-features-1-2-6"></a></h3>
 <ul><li>
@@ -107,18 +107,18 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.2.5" id="samtool-125">SAMtool 1.2.5<small>2022-01-12</small><a class="anchor" aria-label="anchor" href="#samtool-125"></a></h2>
+<h2 class="page-header" data-toc-text="1.2.5" id="samtool-125-2022-01-12">SAMtool 1.2.5 (2022-01-12)<small>2022-01-12</small><a class="anchor" aria-label="anchor" href="#samtool-125-2022-01-12"></a></h2>
 <ul><li>
 <code>SCA_RWM</code> can accept multiple years to the <code>refyear</code> argument, e.g., <code>expression(1:Data@Year)</code>. The model will calculate reference points (MSY, unfished values, and steepness) using the mean M during the specified years.</li>
 <li>Fix bug in interim MPs to return <code>NA</code> in <code>Rec@TAC</code> when multiple assessments do not converge.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.2.4" id="samtool-124">SAMtool 1.2.4<small>2021-12-14</small><a class="anchor" aria-label="anchor" href="#samtool-124"></a></h2>
+<h2 class="page-header" data-toc-text="1.2.4" id="samtool-124-2021-12-15">SAMtool 1.2.4 (2021-12-15)<small>2021-12-14</small><a class="anchor" aria-label="anchor" href="#samtool-124-2021-12-15"></a></h2>
 <ul><li>Update <code>Shortcut</code> indexing to align year of assessment with projection. An MP using the <code>Perfect</code> assessment and <code>HCR_MSY</code> annually will produce F = FMSY in the OM.</li>
 <li>Stabilize <code>VPA</code> when the catch-at-age in the plusgroup and plusgroup-1 is very small.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.2.3" id="samtool-123">SAMtool 1.2.3<small>2021-11-28</small><a class="anchor" aria-label="anchor" href="#samtool-123"></a></h2>
+<h2 class="page-header" data-toc-text="1.2.3" id="samtool-123-2021-11-28">SAMtool 1.2.3 (2021-11-28)<small>2021-11-28</small><a class="anchor" aria-label="anchor" href="#samtool-123-2021-11-28"></a></h2>
 <ul><li>
 <code>RCM</code> will check age and length comp data for NA’s and replaces with zero</li>
 <li>
@@ -128,7 +128,7 @@
 <li>Other minor fixes</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.2.2" id="samtool-122">SAMtool 1.2.2<small>2021-09-16</small><a class="anchor" aria-label="anchor" href="#samtool-122"></a></h2>
+<h2 class="page-header" data-toc-text="1.2.2" id="samtool-122-2021-09-16">SAMtool 1.2.2 (2021-09-16)<small>2021-09-16</small><a class="anchor" aria-label="anchor" href="#samtool-122-2021-09-16"></a></h2>
 <ul><li>The <code>make_interim_MP</code> function is added to generate MPs that adjust the TAC between periodic assessments using the index.</li>
 <li>An additional posfun to <code>SP</code> is added to avoid negative biomass situations.</li>
 <li>Fix sampling of recruitment deviations for projections in <code>RCM</code> so that the mean is one in normal space. This error was apparent when autocorrelation was very large.</li>
@@ -137,7 +137,7 @@
 <li>HCR returns TAC = NA when a control point or target point is negative.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.2.1" id="samtool-121">SAMtool 1.2.1<small>2021-08-12</small><a class="anchor" aria-label="anchor" href="#samtool-121"></a></h2>
+<h2 class="page-header" data-toc-text="1.2.1" id="samtool-121-2021-08-12">SAMtool 1.2.1 (2021-08-12)<small>2021-08-12</small><a class="anchor" aria-label="anchor" href="#samtool-121-2021-08-12"></a></h2>
 <ul><li>
 <code>HCR_segment</code> allows for creating control rules with any number of linear segments.</li>
 <li>Assign index beta = 1 for OMs conditioned by RCM.</li>
@@ -145,7 +145,7 @@
 <li>Fix assignment of length bins in OM by <code>RCM</code>.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.2.0" id="samtool-120">SAMtool 1.2.0<small>2021-07-06</small><a class="anchor" aria-label="anchor" href="#samtool-120"></a></h2>
+<h2 class="page-header" data-toc-text="1.2.0" id="samtool-120-2021-07-06">SAMtool 1.2.0 (2021-07-06)<small>2021-07-06</small><a class="anchor" aria-label="anchor" href="#samtool-120-2021-07-06"></a></h2>
 <div class="section level3">
 <h3 id="rcm-1-2-0">RCM<a class="anchor" aria-label="anchor" href="#rcm-1-2-0"></a></h3>
 <ul><li>A new S4 object, <code>RCMdata</code>, is used to send data to the RCM model, i.e., <code>RCM(OM, RCMdata)</code>. For now, backwards compatibility should still be maintained when feeding a data list (used prior to v1.2) to fit the model.</li>
@@ -175,19 +175,19 @@
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.1.2" id="samtool-112">SAMtool 1.1.2<small>2021-03-09</small><a class="anchor" aria-label="anchor" href="#samtool-112"></a></h2>
+<h2 class="page-header" data-toc-text="1.1.2" id="samtool-112-2021-03-09">SAMtool 1.1.2 (2021-03-09)<small>2021-03-09</small><a class="anchor" aria-label="anchor" href="#samtool-112-2021-03-09"></a></h2>
 <ul><li>Minor fix to vignette to fix MSEtool reverse dependency issue.</li></ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.1.1" id="samtool-111">SAMtool 1.1.1<small>2021-02-17</small><a class="anchor" aria-label="anchor" href="#samtool-111"></a></h2>
+<h2 class="page-header" data-toc-text="1.1.1" id="samtool-111-2021-02-17">SAMtool 1.1.1 (2021-02-17)<small>2021-02-17</small><a class="anchor" aria-label="anchor" href="#samtool-111-2021-02-17"></a></h2>
 <ul><li>Fix year range for depletion calculation from time-varying SSB0 in RCM.</li></ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.1.0" id="samtool-110">SAMtool 1.1.0<small>2021-02-02</small><a class="anchor" aria-label="anchor" href="#samtool-110"></a></h2>
+<h2 class="page-header" data-toc-text="1.1.0" id="samtool-110-2021-02-02">SAMtool 1.1.0 (2021-02-02)<small>2021-02-02</small><a class="anchor" aria-label="anchor" href="#samtool-110-2021-02-02"></a></h2>
 <ul><li>Edits to fix valgrind and sanitizer issues in TMB code.</li>
 <li>Likelihood gradients, the derivatives of the likelihood of each annual data point with respect to model parameters, are plotted in the RCM markdown report. For this purpose, the annual age or length composition is considered to be a single piece of data. This diagnostic could be informative on how informative the data are to model parameters, with more influential data points having larger gradients.</li>
 <li>When conditioned on effort, the <code>RCM</code> will now incorporate catches into the likelihood as a default. This allows the model to estimate F and R0 when conditioned on effort and there is patchy catch data.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.0.0" id="samtool-100">SAMtool 1.0.0<small>2021-01-22</small><a class="anchor" aria-label="anchor" href="#samtool-100"></a></h2>
+<h2 class="page-header" data-toc-text="1.0.0" id="samtool-100-2021-01-22">SAMtool 1.0.0 (2021-01-22)<small>2021-01-22</small><a class="anchor" aria-label="anchor" href="#samtool-100-2021-01-22"></a></h2>
 <ul><li>Development of the assessment models and OM conditioning model in SAMtool 1.0.0 continues from MSEtool 2.0.1. <code>multiMSE</code> remains in MSEtool.</li>
 <li>The age structure of the SCA models (<code>SCA</code>, <code>SCA_Pope</code>, <code>SSS</code>) start at age 0 following the change in the MSEtool OM.</li>
 <li>An additional SCA model (<code>SCA_RWM</code>) can be used to estimate time-varying M (constant with age) as a random walk. Fix the random walk SD to a low value to effectively estimate a time-constant M (see help page).</li>
