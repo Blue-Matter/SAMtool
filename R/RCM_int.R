@@ -9,6 +9,9 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   
   dots <- list(...) # can be vul_par, ivul_par, log_rec_dev, log_early_rec_dev, map_vul_par, map_ivul_par, map_log_rec_dev, map_log_early_rec_dev, rescale, plusgroup, resample, OMeff, fix_dome
   if (!is.null(dots$maxF)) max_F <- dots$maxF
+  if (!is.null(dots$resample) && dots$resample && !requireNamespace("mvtnorm", quietly = TRUE)) {
+    stop("Found argument: resample = TRUE. Please install the mvtnorm package.", call. = FALSE) # Re-sample covariance matrix
+  }
   
   comp_like <- match.arg(comp_like)
   condition <- match.arg(condition)
@@ -28,7 +31,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   nsurvey <- RCMdata@Misc$nsurvey
   
   OM@maxF <- max_F
-  if (!silent) message("Maximum F in RCM will be ", max_F, ". OM@maxF will also be updated.\n\n")
+  if (!silent) message("Maximum F in RCM will be ", max_F, ". OM@maxF is also updated.\n\n")
   
   # No comp data
   if (!any(RCMdata@CAA > 0, na.rm = TRUE) && !any(RCMdata@CAL > 0, na.rm = TRUE)) {
@@ -71,41 +74,9 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, ObsPars, RCMdata, dots)
   
   # Fit model
-  if (!is.null(dots$resample) && dots$resample) { # Re-sample covariance matrix
-    
-    if (!requireNamespace("mvtnorm", quietly = TRUE)) stop("Please install the mvtnorm package.", call. = FALSE)
-    
-    if (!silent) message("\nFound miscellaneous argument: resample = TRUE. Running mean fit model first...")
-    mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                               LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
-                               max_F = max_F, integrate = integrate, StockPars = StockPars, ObsPars = ObsPars,
-                               FleetPars = FleetPars, mean_fit = TRUE, 
-                               start = start, map = map, dots = dots)
-    
-    if (mean_fit_output$report$conv) {
-      message("Sampling covariance matrix for nsim = ", nsim, " replicates...")
-      if (!all(par_identical_sims)) {
-        warning("Note: not all ", nsim, " replicates are identical. These parameters should be identical for all simulations: ",
-                which(!par_identical_sims) %>% names() %>% paste0(collapse = " "))
-      }
-      samps <- mvtnorm::rmvnorm(nsim, mean_fit_output$opt$par, mean_fit_output$SD$cov.fixed)
+  if (all(par_identical_sims)) { # All identical sims detected
       
-      if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-      res <- pblapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv,
-                      cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
-      
-    } else {
-      warning("Mean fit model did not appear to converge. Will not be able to sample the covariance matrix. 
-              Returning the mean-fit model for user evaluation.")
-      res <- list(mean_fit_output$report) # Length 1
-    }
-    
-    mod <- list(mean_fit_output)
-    conv <- rep(mean_fit_output$report$conv, nsim)
-    
-  } else if (all(par_identical_sims)) { # All identical sims detected
-      
-    if (!silent) message("All ", nsim, " replicates are identical. Fitting once and replicating single fit...")
+    if (!silent) message("All ", nsim, " replicates are identical. Fitting one model...")
     
     mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
@@ -114,13 +85,29 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
                                start = start, map = map, dots = dots)
     
     if (mean_fit_output$report$conv) {
-      if (!silent) message("Model converged.")
+      
+      if (!is.null(dots$resample) && dots$resample) { # Re-sample covariance matrix
+        message("Sampling covariance matrix for nsim = ", nsim, " replicates...")
+
+        samps <- mvtnorm::rmvnorm(nsim, mean_fit_output$opt$par, mean_fit_output$SD$cov.fixed)
+        
+        if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
+        res <- pblapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv,
+                        cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+      } else {
+        if (!silent) message("Model converged and will be replicated for all simulations.")
+        res <- list(mean_fit_output$report) 
+      }
+      
     } else {
       warning("Model did not converge. Returning the mean-fit model for evaluation.")
+      if (!is.null(dots$resample) && dots$resample) {
+        warning("Could not sample covariance matrix.")
+      }
+      res <- list(mean_fit_output$report) 
     }
-
-    mod <- list(mean_fit_output) # Length - 1
-    res <- list(mean_fit_output$report) 
+    
+    mod <- list(mean_fit_output) # Length 1
     conv <- rep(mean_fit_output$report$conv, nsim)
     
   } else {
@@ -147,8 +134,22 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
       mean_fit_output <- list()
     }
     
-    res <- lapply(mod, getElement, "report")
-    conv <- vapply(res, getElement, logical(1), name = "conv")
+    conv <- vapply(mod, function(x) x[["report"]][["conv"]], logical(1))
+    if (!is.null(dots$resample) && dots$resample) {
+      
+      if (!silent) message("Sampling covariance matrix once for each replicate...")
+      res <- pblapply(1:nsim, function(x) {
+        if (conv[x]) {
+          samps <- mvtnorm::rmvnorm(1, mod[[x]]$opt$par, mod[[x]]$SD$cov.fixed, checkSymmetry = FALSE)
+          RCM_report_samps(1, samps = samps, obj = mod[[x]]$obj, conv = conv[x])
+        } else {
+          mod[[x]][["report"]]
+        } 
+      }, cl = NULL)
+      
+    } else {
+      res <- lapply(mod, getElement, "report")
+    }
   }
   
   highF <- vapply(res, function(x) max(getElement(x, "F"), na.rm = TRUE) >= max_F, logical(1))

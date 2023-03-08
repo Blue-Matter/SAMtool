@@ -1,5 +1,9 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.5.2
+- Fix bugs when `Data` object is passed to `RCM`.
+- Allow `resample = TRUE` with stochastic fits to `RCM`.
+
 ## SAMtool 1.5.1 (2023-02-08)
 - Add gridlines to markdown plots for easier viewing. Update some plots and re-organize tabs in RCM markdown report.
 - Add a Gaussian penalty of `dnorm(log(Shinge/min(SSB)), 0, 2)` for hockey-stick SRR when the hinge point is less than the smallest SSB.
