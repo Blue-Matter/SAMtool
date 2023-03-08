@@ -426,8 +426,10 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
               Data_out <- output@OM@cpars$Data
               for(i in 1:length(Ind$slotname)) {
                 if (Ind$slotname[i] != "AddInd") {
-                  slot(Data_out, Ind$slotname[i]) <- Data_out@AddInd[, i, ]
-                  slot(Data_out, paste0("CV_", Ind$slotname[i])) <- Data_out@CV_AddInd[, i, ]
+                  slot(Data_out, Ind$slotname[i]) <- Data_out@AddInd[, i, ] %>% 
+                    matrix(1, length(Data_out@Year))
+                  slot(Data_out, paste0("CV_", Ind$slotname[i])) <- Data_out@CV_AddInd[, i, ] %>% 
+                    matrix(1, length(Data_out@Year))
                   
                   if (Ind$slotname[i] == "Ind") output@OM@cpars$I_beta <- rep(1, output@OM@nsim)
                   if (Ind$slotname[i] == "VInd") output@OM@cpars$VI_beta <- rep(1, output@OM@nsim)
