@@ -348,6 +348,11 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             condition <- match.arg(condition)
             extra_args <- list(...)
             if (length(ESS) == 1) ESS <- rep(ESS, 2)
+            
+            ####### Check maxage from Data and OM
+            if (!is.na(data@MaxAge) && OM@maxage != Data@MaxAge) {
+              warning("Data@MaxAge is not equal to OM@maxage")
+            }
 
             ####### Catch and ML from Data object
             vec_slot <- c("Cat", "ML", "CV_Cat")
