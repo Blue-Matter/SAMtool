@@ -350,7 +350,7 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             if (length(ESS) == 1) ESS <- rep(ESS, 2)
             
             ####### Check maxage from Data and OM
-            if (!is.na(data@MaxAge) && OM@maxage != Data@MaxAge) {
+            if (!is.na(data@MaxAge) && OM@maxage != data@MaxAge) {
               warning("Data@MaxAge is not equal to OM@maxage")
             }
 
