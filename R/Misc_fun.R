@@ -18,8 +18,13 @@ matplot <- function(...) graphics::matplot(..., panel.first = graphics::grid())
 hist.numeric <- function(x, ...) {
   if (all(!diff(signif(x, 3)))) {
     x <- signif(x, 3)
-    breaks <- c(0.99, 1.01) * x[1]
-    xlim <- c(0.8, 1.2) * x[1]
+    if (all(!x)) { # if x is all zeros
+      breaks <- c(-0.1, 0.1)
+      xlim <- c(-1, 1)
+    } else {
+      breaks <- c(0.99, 1.01) * x[1]
+      xlim <- c(x[1] - 0.2 * abs(x[1]), x[1] + 0.2 * abs(x[1]))
+    }
     graphics::hist.default(x, breaks = breaks, xlim = xlim, ...)
   } else {
     graphics::hist.default(x, ...)
