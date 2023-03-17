@@ -7,7 +7,12 @@ do.call2 <- function(..., fast = TRUE) {
   }
 }
 
-max <- function(..., na.rm = TRUE) suppressWarnings(base::max(..., na.rm = na.rm))
+max <- function(..., na.rm = TRUE) {
+  dots <- list(...)
+  dots <- lapply(dots, function(x) x[is.finite(x)])
+  dots$na.rm <- na.rm
+  do.call(base::max, dots)
+}
 
 arrows <- function(...) suppressWarnings(graphics::arrows(...))
 
@@ -15,7 +20,14 @@ arrows <- function(...) suppressWarnings(graphics::arrows(...))
 plot.default <- function(...) graphics::plot.default(..., panel.first = graphics::grid())
 matplot <- function(...) graphics::matplot(..., panel.first = graphics::grid())
 
+#' @importFrom graphics hist legend
 hist.numeric <- function(x, ...) {
+  if (any(is.na(x))) {
+    na_rate <- mean(is.na(x))
+    x <- x[!is.na(x)]
+  } else {
+    na_rate <- 0
+  }
   if (all(!diff(signif(x, 3)))) {
     x <- signif(x, 3)
     if (all(!x)) { # if x is all zeros
@@ -25,11 +37,19 @@ hist.numeric <- function(x, ...) {
       breaks <- c(0.99, 1.01) * x[1]
       xlim <- c(x[1] - 0.2 * abs(x[1]), x[1] + 0.2 * abs(x[1]))
     }
-    graphics::hist.default(x, breaks = breaks, xlim = xlim, ...)
+    r <- graphics::hist.default(x, breaks = breaks, xlim = xlim, ...)
   } else {
-    graphics::hist.default(x, ...)
+    r <- graphics::hist.default(x, ...)
   }
+  if (na_rate > 0) {
+    legend("topright", 
+           paste0(round(100 * na_rate), "% NA's"), 
+           bty = "n",
+           text.col = "red")
+  }
+  invisible(r)
 }
+
 
 #' Get the SAMtool vignettes
 #'
