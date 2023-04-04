@@ -332,16 +332,43 @@ Assess_diagnostic <- function(x, Data, Assessment, include_assessment = TRUE) {
 
   if (include_assessment) {
     if (inherits(Assessment, "Assessment")) { # Remove some objects to save memory/disk space
-      vars <- c("FMort", "SSB", "R", "U", "UMSY", "FMSY", "SSBMSY", "R0", "h", "SSB0", "MSY", "VB", "conv")
+      vars <- c("FMort", "SSB", "R", "U", "UMSY", "FMSY", "SSBMSY", "R0", "h", "SSB0", "MSY", "VB", "conv", 
+                "Index", "q", "M")
+      vars_TMBreport <- c("q", "M")
       Assessment_report <- lapply(vars, function(x) {
-        v <- slot(Assessment, x)
+        
+        if (x %in% vars_TMBreport) {
+          v <- Assessment@TMB_report[[x]]
+          if (x == "M" && is.matrix(v)) {
+            v <- v[1:length(Data@Year), 1] %>% structure(names = Data@Year)
+          }
+        } else {
+          v <- slot(Assessment, x)
+        }
         if (length(v)) {
-          Year_est <- suppressWarnings(as.numeric(names(v)))
-          if (is.null(Year_est) || !length(Year_est)) Year_est <- NA_real_
-          data.frame(Year_assess = Year,
-                     Year_est = Year_est,
-                     variable = x,
-                     value = as.numeric(v)) # for conv
+          if (is.matrix(v)) {
+            if (!requireNamespace("reshape2", quietly = TRUE)) {
+              stop("Please install the reshape2 package.", call. = FALSE)
+            }
+            vmelt <- reshape2::melt(v)
+            data.frame(Year_assess = Year,
+                       Year_est = vmelt$Var1,
+                       variable = vmelt$Var2,
+                       value = as.numeric(vmelt$value))
+            
+          } else {
+            Year_est <- suppressWarnings(as.numeric(names(v)))
+            xout <- x
+            if (is.null(Year_est) || !length(Year_est)) {
+              Year_est <- NA_real_
+              if (length(v) > 1) xout <- paste0(x, "", 1:length(v))
+            } 
+            data.frame(Year_assess = Year,
+                       Year_est = Year_est,
+                       variable = xout,
+                       value = as.numeric(v)) # for conv
+          }
+         
         } else {
           data.frame()
         }

@@ -794,6 +794,11 @@ profile_likelihood_RCM <- function(x, ...) {
 
 #' @importFrom dplyr select starts_with
 RCM_nll_profile_summary <- function(x) { # Summary table of RCM likelihoods for each data-gear combination
+  
+  if (!requireNamespace("reshape2", quietly = TRUE)) {
+    stop("Please install the reshape2 package.", call. = FALSE)
+  }
+  
   nll_fleet <- x[[2]][-nrow(x[[2]]), ] %>% select(starts_with("Fleet"))
   nll_fleet$Data <- rownames(nll_fleet)
   nll_fleet <- reshape2::melt(nll_fleet, id.var = "Data", value.var = "nll")
