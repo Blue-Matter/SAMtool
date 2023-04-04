@@ -333,8 +333,8 @@ Assess_diagnostic <- function(x, Data, Assessment, include_assessment = TRUE) {
   if (include_assessment) {
     if (inherits(Assessment, "Assessment")) { # Remove some objects to save memory/disk space
       vars <- c("FMort", "SSB", "R", "U", "UMSY", "FMSY", "SSBMSY", "R0", "h", "SSB0", "MSY", "VB", "conv", 
-                "Index", "q", "M")
-      vars_TMBreport <- c("q", "M")
+                "dynamic_SSB0", "Index", "q", "M")
+      vars_TMBreport <- c("dynamic_SSB0", "q", "M")
       Assessment_report <- lapply(vars, function(x) {
         
         if (x %in% vars_TMBreport) {
