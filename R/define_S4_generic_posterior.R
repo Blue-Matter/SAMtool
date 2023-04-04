@@ -89,12 +89,51 @@ setMethod("posterior", signature(x = "RCModel"),
 #' @aliases posterior,Assessment-method posterior.Assessment
 #' @exportMethod posterior
 setMethod("posterior", signature(x = "Assessment"),
-          function(x, priors_only = FALSE, ...) {
+          function(x, priors_only = FALSE, laplace = FALSE, chains = 2, iter = 2000, warmup = floor(iter/2), thin = 5,
+                   seed = 34, init = "last.par.best", cores = chains, ...) {
             stop("Posterior sampling not set up for assessment models.")
             if (!requireNamespace("tmbstan", quietly = TRUE)) stop("Install tmbstan to use this function.")
             xchar <- substitute(x) %>% as.character()
             f <- get(paste0("posterior_", x@Model))
             f(x, ...)
+            
+            xchar <- substitute(x) %>% as.character()
+            obj <- x@obj
+            
+            if (priors_only) {
+              newdata <- structure(obj$env$data, check.passed = NULL)
+              newdata$LWT_fleet[] <- 0
+              newdata$LWT_index[] <- 0
+              
+              obj_new <- MakeADFun(data = newdata, 
+                                   parameters = clean_tmb_parameters(obj), map = obj$env$map, 
+                                   random = obj$env$random, DLL = obj$env$DLL, silent = obj$env$silent)
+              
+              obj_new$env$last.par <- obj$env$last.par
+              obj_new$env$last.par.best <- obj$env$last.par.best
+              obj_new$env$last.par.ok <- obj$env$last.par.ok
+              
+              obj_new$env$last.par1 <- obj$env$last.par1
+              obj_new$env$last.par2 <- obj$env$last.par2
+              
+            } else {
+              obj_new <- obj
+            }
+            
+            lower <- rep(-Inf, length(obj$par))
+            upper <- rep(Inf, length(obj$par))
+            
+            R0_prior <- !is.null(obj$env$data$use_prior[1]) &&
+              names(obj$env$data$use_prior)[1] == "R0" && 
+              obj$env$data$use_prior["R0"] > 1
+            
+            if (any(names(obj$par) == "R0x") && obj$env$data$use_prior["R0"] > 1) { # Uniform priors need bounds
+              lower[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 1]) + log(obj$env$data$rescale)
+              upper[names(obj$par) == "R0x"] <- log(obj$env$data$prior_dist[1, 2]) + log(obj$env$data$rescale)
+            }
+            
+            tmbstan::tmbstan(obj_new, chains = chains, iter = iter, warmup = warmup, thin = thin,
+                             seed = seed, init = init, cores = cores, lower = lower, upper = upper, ...)
           })
 
 
@@ -130,8 +169,8 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   samps <- sapply(1:nsim, function(x) {
     chain <- sim_stan[x, 1]
     sim_out <- sim_stan[x, 2]
-    pars <- sapply(stanfit@sim$samples[[chain]], getElement, sim_out)
-  }) %>% t()
+    sapply(stanfit@sim$samples[[chain]], getElement, sim_out)
+  })
   
   # Get model output
   OM <- RCModel@OM
@@ -145,11 +184,11 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   
   if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
   
-  res <- pblapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE, 
+  res <- pblapply(1:nsim, RCM_report_samps, samps = samps[-nrow(samps), ], obj = obj, conv = TRUE, 
                   cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
   
   OM_par <- RCM_update_OM(res, obj$env$data, maxage, nyears, proyears)
-  message("Updating operating model with MCMC samples...\n")
+  message("Updating operating model with MCMC samples...")
   
   ### R0
   OM@cpars$R0 <- OM_par$R0
@@ -166,20 +205,21 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   OM@isRel <- FALSE
   OM@cpars$V <- OM_par$V
   OM@cpars$Find <- OM_par$Find
-  message("Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.")
-  message("Selectivity during projection period is set to that in most recent historical year.")
-  
   OM@cpars$qs <- rep(1, nsim)
+  
+  message("Historical F set with OM@cpars$Find and OM@cpars$qs.")
+  message("Annual selectivity set in OM@cpars$V. Projection period uses selectivity of last historical year.")
+  
   Eff <- apply(OM@cpars$Find, 2, range)
   OM@EffLower <- Eff[1, ]
   OM@EffUpper <- Eff[2, ]
   if (length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
   if (length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
-  message("Historical effort trends set in OM@EffLower and OM@EffUpper.\n")
+  #message("Historical effort trends set in OM@EffLower and OM@EffUpper.")
   
   ### Rec devs
   OM@cpars$Perr <- OM_par$procsd
-  message("Recruitment standard deviation set in OM@cpars$Perr.")
+  message("Recruitment standard deviation set in OM@cpars$Perr: ", paste(round(range(OM@cpars$Perr), 2), collapse = " - "))
   
   Perr_y <- OM@cpars$Perr_y
   Perr_y[, 1:maxage] <- OM_par$early_Perr
@@ -193,12 +233,20 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
     
     OM@cpars$Perr_y <- RCM_sample_future_dev(obj$env$data$est_rec_dev, OM_par$procsd, OM_par$AC, 
                                              OM_par$log_rec_dev, Perr_y, maxage, nyears, proyears)
-    message("Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).\n")
+    message("Future recruitment deviations in OM@cpars$Perr_y sampled with autocorrelation.")
+  } else {
+    OM@cpars$Perr_y <- Perr_y
   }
   
   prior <- list(use_prior = obj$env$data$use_prior)
-  if (prior$use_prior[2]) OM@cpars$hs <- OM_par$h
-  if (prior$use_prior[3]) OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
+  if (prior$use_prior[2]) {
+    OM@cpars$hs <- OM_par$h
+    message("Updating steepness from posterior.")
+  }
+  if (prior$use_prior[3]) {
+    OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
+    message("Updating natural mortality from posterior.")
+  }
   
   RCModel@OM <- OM
   RCModel@SSB <- OM_par$SSB
