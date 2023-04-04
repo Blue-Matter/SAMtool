@@ -1,10 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
-## SAMtool 1.5.3 
+## SAMtool 1.5.2 
 - Custom internal `hist` function will report NA rate (percent of NA's) in a vector. Seen in markdown reports.
 - Internal `max` function excludes infinite values. Primarily used when generating axes limits in markdown reports.
-
-## SAMtool 1.5.2
 - Fix bugs when `Data` object is passed to `RCM`.
 - Allow `resample = TRUE` with stochastic fits to `RCM`.
 
