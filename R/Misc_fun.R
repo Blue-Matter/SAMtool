@@ -255,7 +255,7 @@ get_sdreport <- function(obj, getReportCovariance = FALSE) {
 sdreport_int <- function(object, select = c("all", "fixed", "random", "report"), p.value = FALSE, ...) {
   if (is.character(object)) return(object)
   select <- match.arg(select, several.ok = TRUE)
-  if (all %in% select) select <- c("fixed", "random", "report")
+  if ("all" %in% select) select <- c("fixed", "random", "report")
   if ("report" %in% select) {
     AD <- TMB::summary.sdreport(object, "report", p.value = p.value) %>% cbind("Gradient" = NA_real_)
   } else AD <- NULL
