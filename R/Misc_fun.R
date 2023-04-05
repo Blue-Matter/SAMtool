@@ -212,7 +212,7 @@ check_det <- function(h, abs_val = 0.1, is_null = TRUE) {
   !is.na(det_h) && det_h < abs_val
 }
 
-#' @importFrom corpcor pseudoinverse
+
 get_sdreport <- function(obj, getReportCovariance = FALSE) {
   par.fixed <- obj$env$last.par.best
   if (is.null(obj$env$random)) {
@@ -245,17 +245,6 @@ get_sdreport <- function(obj, getReportCovariance = FALSE) {
   obj2 <- MakeADFun(obj$env$data, obj$env$parameters, type = "ADFun", ADreport = TRUE, 
                     DLL = obj$env$DLL, silent = obj$env$silent)
   gr <- obj2$gr(obj$env$last.par.best)
-  if (any(is.na(gr))) {
-    res$env$gradient.AD <- rep(NA_real_, nrow(gr))
-  } else {
-    inv_gr <- try(corpcor::pseudoinverse(gr, tol = 1e-4), silent = TRUE)
-    if (is.character(inv_gr)) {
-      res$env$gradient.AD <- rep(NA_real_, nrow(gr))
-    } else {
-      if (!is.null(obj$env$random)) inv_gr <- inv_gr[-obj$env$random, , drop = FALSE]
-      res$env$gradient.AD <- colSums(inv_gr * as.vector(res$gradient.fixed))
-    }
-  }
   
   res$env$corr.fixed <- suppressWarnings(cov2cor(res$cov.fixed) %>% round(3)) %>% 
     structure(dimnames = list(names(res$par.fixed), names(res$par.fixed)))
@@ -266,14 +255,9 @@ get_sdreport <- function(obj, getReportCovariance = FALSE) {
 sdreport_int <- function(object, select = c("all", "fixed", "random", "report"), p.value = FALSE, ...) {
   if (is.character(object)) return(object)
   select <- match.arg(select, several.ok = TRUE)
+  if (all %in% select) select <- c("fixed", "random", "report")
   if ("report" %in% select) {
-    gradient.AD <- object$env$gradient.AD %>% as.vector()
-    if (is.null(gradient.AD)) {
-      gradient.AD <- rep(NA_real_, length(object$value))
-    } else {
-      gradient.AD <- ifelse(object$sd, gradient.AD, 0)
-    }
-    AD <- TMB::summary.sdreport(object, "report", p.value = p.value) %>% cbind("Gradient" = gradient.AD)
+    AD <- TMB::summary.sdreport(object, "report", p.value = p.value) %>% cbind("Gradient" = NA_real_)
   } else AD <- NULL
 
   if ("fixed" %in% select) {

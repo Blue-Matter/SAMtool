@@ -143,7 +143,6 @@ plot_crosscorr<-function(indPPD,indData,pp=1,dnam=c("CS","CV","CM","IS","MLS"),r
 #'  Position 2 is a matrix (2 rows, ntimeblock columns) which is (row 1) alpha: the rate of false positives, and row 2 the power (1-beta) the rate of true positives
 #' @author T. Carruthers
 #' @references Carruthers and Hordyk 2018
-#' @importFrom corpcor pseudoinverse
 #' @export
 Probs<-function(indPPD,indData,alpha=0.05,removedat=FALSE,removethresh=0.05){
 
@@ -217,7 +216,6 @@ Probs<-function(indPPD,indData,alpha=0.05,removedat=FALSE,removethresh=0.05){
 #' @param plotCC Logical, should the PPD cross correlations be plotted?
 #' @param removedat Logical, should data not contributing to the mahalanobis distance be removed?
 #' @param removethresh Positive fraction: the cumulative percentage of removed data (removedat=TRUE) that contribute to the mahalanobis distance
-#' @importFrom corpcor pseudoinverse
 #' @return A list object with two hierarchies of indexing, first by MP, second has two positions as described in \link{Probs}: (1) mahalanobis distance, (2) a matrix of type 1 error
 #' (first row) and statistical power (second row), by time block.
 #' @author T. Carruthers
@@ -262,28 +260,32 @@ PRBcalc=function(MSE_null,MSE_alt,
 }
 
 mahalanobis_robust<-function (x, center, cov, inverted = FALSE) {
-
+  if (!requireNamespace("corpcor", quietly = TRUE)) {
+    stop("Please install the corpcor package.", call. = FALSE)
+  }
   x <- if (is.vector(x))
     matrix(x, ncol = length(x))
   else as.matrix(x)
   if (!identical(center, FALSE))
     x <- sweep(x, 2L, center)
 
-  invcov <- pseudoinverse(cov)
+  invcov <- corpcor::pseudoinverse(cov)
   setNames(rowSums(x %*% invcov * x), rownames(x))
 
 }
 
 
 mahalanobis_contribution<-function(ind3Data,mu,covr){
-
+  if (!requireNamespace("corpcor", quietly = TRUE)) {
+    stop("Please install the corpcor package.", call. = FALSE)
+  }
   InvSD <- 1/sqrt(covr[cbind(1:nrow(covr),1:nrow(covr))])
   Dmat<-diag(InvSD)
   DSD <- Dmat %*% covr %*% Dmat
   eig <- eigen(DSD)
   InvRootEig<-1/sqrt(eig$val)
   InvDSDhalf <-  eig$vec %*% diag(InvRootEig) %*% t(eig$vec)
-  invcov <- pseudoinverse(covr)
+  invcov <- corpcor::pseudoinverse(covr)
   strcont<-array(NA,c(nrow(ind3Data),ncol(ind3Data)))
 
   for(i in 1:nrow(ind3Data)){
