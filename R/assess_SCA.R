@@ -901,13 +901,13 @@ get_SR <- function(pars, E, R, EPR0, opt = TRUE, figure = FALSE, type = c("BH", 
   R0 <- exp(pars[1])
   E0 <- R0 * EPR0
   if (type == "BH") {
-    if (!fix_h) h <- 0.2 + 0.8 * ilogit(pars[1])
+    if (!fix_h) h <- 0.2 + 0.8 * ilogit(pars[2])
     Arec <- 4*h/(1-h)/EPR0
     Brec <- (5*h-1)/(1-h)/E0
     
     Rpred <- Arec * E / (1 + Brec * E)
   } else if (type == "Ricker") {
-    if (!fix_h) h <- 0.2 + exp(pars[1])
+    if (!fix_h) h <- 0.2 + exp(pars[2])
     Arec <- 1/EPR0 * (5*h)^1.25
     Brec <- 1.25 * log(5*h) / E0
     
