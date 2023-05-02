@@ -2,6 +2,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.5.3
 - Fix indexing issue when estimating steepness post-hoc in `SCA2` and `VPA`.
+- Return warning when arguments to `make_MP` don't match formal arguments in `.Assess` and `.HCR`
 
 ## SAMtool 1.5.2 (2023-04-04)
 - Custom internal `hist` function will report NA rate (percent of NA's) in a vector. Seen in markdown reports.
