@@ -5,7 +5,7 @@
 #' Integers assign the index to the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, 
 #' "VB" represents vulnerable biomass in Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd. For the interim
 #' procedure, the function will use the first index in \code{AddInd}.
-#' @param assessment_interval The time interval for when the assesment model is applied (number of years). In all other years, the 
+#' @param assessment_interval The time interval for when the assessment model is applied (number of years). In all other years, the 
 #' interim procedure is applied.
 #' @param type How the index is used to calculate the TAC in the interim procedure. See details.
 #' @param type_par A control parameter for the interim procedure. See details.

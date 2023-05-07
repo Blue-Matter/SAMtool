@@ -39,7 +39,7 @@ Integers assign the index to the corresponding index in Data@AddInd, "B" (or 0) 
 "VB" represents vulnerable biomass in Data@VInd, and "SSB" represents spawning stock biomass in Data@SpInd. For the interim
 procedure, the function will use the first index in \code{AddInd}.}
 
-\item{assessment_interval}{The time interval for when the assesment model is applied (number of years). In all other years, the 
+\item{assessment_interval}{The time interval for when the assessment model is applied (number of years). In all other years, the 
 interim procedure is applied.}
 
 \item{type}{How the index is used to calculate the TAC in the interim procedure. See details.}
@@ -65,7 +65,7 @@ Function operator that creates a management procedure (MP) by combining an asses
 a harvest control rule (function of class \code{HCR}). The resulting function can then be tested in closed-loop simulation via 
 \code{\link[MSEtool]{runMSE}}. Use \code{make_MP} to specify constant TAC between assessments; the frequency of
 assessments is specified in \code{OM@interval}. Use \code{make_projection_MP} to set catches according to a schedule set by projections,
-specify assessment frequency in argument \code{assessment_interval} adn ensure that \code{OM@interval <- 1}. 
+specify assessment frequency in argument \code{assessment_interval} and ensure that \code{OM@interval <- 1}. 
 Use \code{make_interim_MP} to use an interim procedure to adjust the TAC between 
 assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument \code{assessment_interval} when 
 making the MP; ensure that \code{OM@interval <- 1}.

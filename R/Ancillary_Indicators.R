@@ -1,5 +1,5 @@
 # ===================================================================
-# === Ancilary indicators ===========================================
+# === Ancillary indicators ===========================================
 # ===================================================================
 
 # Linear model version
@@ -80,7 +80,7 @@ getinds<-function(PPD,styr,res=6, tsd= c("Cat","Cat","Cat","Ind","ML"),stat=c("s
 #' @param indData A 3D array of results arising from running getind on an MSE of the Alternative operating model (type of data/stat (e.g. mean catches),time period (chunk), simulation)
 #' @param pp Positive integer, the number of time chunks (blocks of years normally, second dimension of indPPD and indData) to produce the plot for.
 #' @param dnam A character vector of names of the data for plotting purposes (as long as dimension 1 of indPPD and indData).
-#' @param res The size of the temporal blocking that greated indPPD and indData - this is just used for labelling purposes
+#' @param res The size of the temporal blocking that created indPPD and indData - this is just used for labelling purposes
 #' @return A cross-correlation plot (ndata-1) x (ndata-1)
 #' @author T. Carruthers
 #' @references Carruthers and Hordyk 2018

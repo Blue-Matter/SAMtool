@@ -21,7 +21,7 @@ plot_crosscorr(
 
 \item{dnam}{A character vector of names of the data for plotting purposes (as long as dimension 1 of indPPD and indData).}
 
-\item{res}{The size of the temporal blocking that greated indPPD and indData - this is just used for labelling purposes}
+\item{res}{The size of the temporal blocking that created indPPD and indData - this is just used for labelling purposes}
 }
 \value{
 A cross-correlation plot (ndata-1) x (ndata-1)
