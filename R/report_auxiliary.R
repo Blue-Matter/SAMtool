@@ -626,7 +626,7 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' @param fit A matrix of predicted length or age composition from an assessment model.
 #' Same dimensions as obs.
 #' @param plot_type Indicates which plots to create. Options include annual distributions,
-#' bubble plot of the data, and bubble plot of the residuals, and annual means.
+#' bubble plot of the data, and bubble plot of the Pearson residuals, and annual means.
 #' @param N Annual sample sizes. Vector of length \code{nrow(obs)}.
 #' @param CAL_bins A vector of lengths corresponding to the columns in \code{obs}.
 #' and \code{fit}. Ignored for age data.
@@ -645,10 +645,43 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' @export
 #' @examples
 #' plot_composition(obs = SimulatedData@@CAA[1, 1:16, ])
-#' plot_composition(obs = SimulatedData@@CAA[1, , ], plot_type = "bubble_data", 
-#'                  ages = 0:SimulatedData@@MaxAge)
+#' plot_composition(
+#'   obs = SimulatedData@@CAA[1, , ], 
+#'   plot_type = "bubble_data", 
+#'   ages = 0:SimulatedData@@MaxAge
+#' )
+#'                  
+#' SCA_fit <- SCA(x = 2, Data = SimulatedData)
+#' plot_composition(
+#'   obs = SimulatedData@CAA[1, , ], fit = SCA_fit@C_at_age,
+#'   plot_type = "mean", ages = 0:SimulatedData@MaxAge
+#' )
 #' 
-plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c('annual', 'bubble_data', 'bubble_residuals', 'mean'),
+#' plot_composition(
+#'   obs = SimulatedData@CAA[1, 1:16, ], fit = SCA_fit@C_at_age[1:16, ],
+#'   plot_type = "annual", ages = 0:SimulatedData@MaxAge
+#' )
+#' 
+#' plot_composition(
+#'   obs = SimulatedData@CAA[1, , ], fit = SCA_fit@C_at_age,
+#'   plot_type = "bubble_residuals", ages = 0:SimulatedData@MaxAge,
+#'   bubble_adj = 10
+#' )
+#' 
+#' plot_composition(
+#'   obs = SimulatedData@CAA[1, , ], fit = SCA_fit@C_at_age,
+#'   plot_type = "heat_residuals", ages = 0:SimulatedData@MaxAge
+#' )
+#' 
+#' plot_composition(
+#'   obs = SimulatedData@CAA[1, , ], fit = SCA_fit@C_at_age,
+#'   plot_type = "hist_residuals", ages = 0:SimulatedData@MaxAge
+#' )
+#' 
+#' @importFrom gplots redblue
+#' @importFrom graphics rect
+plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, 
+                             plot_type = c('annual', 'bubble_data', 'bubble_residuals', 'mean', 'heat_residuals', 'hist_residuals'),
                              N = rowSums(obs), CAL_bins = NULL, ages = NULL, ind = 1:nrow(obs),
                              annual_ylab = "Frequency", annual_yscale = c("proportions", "raw"),
                              bubble_adj = 5, bubble_color = c("black", "white"), fit_linewidth = 3, fit_color = "red") {
@@ -687,7 +720,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c(
   if (!is.null(N)) N <- N[ind]
 
   # Bubble plot (obs)
-  if ('bubble_data' %in% plot_type) {
+  if (plot_type == 'bubble_data') {
     range_obs <- pretty(obs, n = 6)
     n1 <- range_obs[2]
     n2 <- pretty(quantile(obs[obs > 0], na.rm = TRUE, probs = 0.9))[2]
@@ -705,33 +738,66 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c(
            pt.bg = "white", pch = 21, horiz = TRUE)
     return(invisible())
   }
-  # Bubble plot (residuals if applicable)
-  if ('bubble_residuals' %in% plot_type) {
+  # Pearson residuals
+  if (grepl('residuals', plot_type)) {
     if (is.null(fit)) stop("No fitted data available.")
 
     obs_prob <- obs/rowSums(obs, na.rm = TRUE)
     fit_prob <- fit/rowSums(fit, na.rm = TRUE)
 
-    resid <- N * (obs_prob - fit_prob) / sqrt(N * fit_prob * (1 - fit_prob))
-    diameter_max <- bubble_adj / pmin(10, max(abs(resid), na.rm = TRUE))
-    plot(NULL, NULL, typ = 'n', xlim = range(Year), xlab = "Year", ylim = range(data_val), ylab = data_lab)
-
+    resid <- (obs_prob - fit_prob) / sqrt(fit_prob * (1 - fit_prob)/N)
+    max_abs_resid <- pmin(10, max(abs(resid), na.rm = TRUE))
+    
     Year_mat <- matrix(Year, ncol = ncol(resid), nrow = nrow(resid))
     data_mat <- matrix(data_val, ncol = ncol(resid), nrow = nrow(resid), byrow = TRUE)
-    isPositive <- resid > 0
-    points(Year_mat[!isPositive], data_mat[!isPositive], cex = pmin(0.5 * diameter_max * abs(resid[!isPositive]), diameter_max), pch = 21, bg = bubble_color[1])
-    points(Year_mat[isPositive], data_mat[isPositive], cex = pmin(0.5 * diameter_max * resid[isPositive], diameter_max), pch = 21, bg = bubble_color[2])
     
-    lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
+    plot(NULL, NULL, typ = 'n', xlim = range(Year), xlab = "Year", ylim = c(1, 1.1) * range(data_val), ylab = data_lab)
+    if (data_type == "age") {
+      lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
+    }
     
-    legend("topleft", legend = c("<-10", "-1", "1", ">10"),
-           pt.cex = c(diameter_max, 0.5 * diameter_max, 0.5 * diameter_max, diameter_max),
-           pt.bg = rep(bubble_color, each = 2), pch = 21, horiz = TRUE)
-
+    if (plot_type == "bubble_residuals") {
+      
+      diameter_max <- bubble_adj / max_abs_resid
+      
+      isPositive <- resid > 0
+      points(Year_mat[!isPositive], data_mat[!isPositive], 
+             cex = pmin(0.5 * diameter_max * abs(resid[!isPositive]), diameter_max), 
+             pch = 21, bg = bubble_color[1])
+      points(Year_mat[isPositive], data_mat[isPositive], 
+             cex = pmin(0.5 * diameter_max * resid[isPositive], diameter_max),
+             pch = 21, bg = bubble_color[2])
+      legend("topleft", 
+             legend = c(paste0("<-", round(max_abs_resid, 1)), "-1", "1", paste0(">", round(max_abs_resid, 1))),
+             pt.cex = c(diameter_max, 0.5 * diameter_max, 0.5 * diameter_max, diameter_max),
+             pt.bg = rep(bubble_color, each = 2), pch = 21, horiz = TRUE)
+      
+    } else if (plot_type == "heat_residuals") {
+      
+      resid_round <- pmin(resid, max_abs_resid) %>% pmax(resid, -max_abs_resid) %>% round(2)
+      vals <- unique(as.numeric(resid_round)) %>% sort()
+      ncolor <- length(vals)
+      cols_redblue <- gplots::redblue(ncolor) %>% structure(names = vals)
+      data_diff <- local({
+        dd <- apply(data_mat, 1, diff)
+        rbind(dd, dd[nrow(dd), ]) %>% t()
+      })
+      
+      rect(xleft = Year_mat - 0.5, xright = Year_mat + 0.5,
+           ybottom = data_mat - 0.5 * data_diff, ytop = data_mat + data_diff, 
+           border = "grey60", col = cols_redblue[as.character(resid_round)])
+      legend("topleft", 
+             legend = c(paste0("<-", round(max_abs_resid, 1)), "0", paste0(">", round(max_abs_resid, 1))),
+             col = "grey60", pt.cex = 1, pt.bg = cols_redblue[c(1, floor(0.5 * ncolor), ncolor)], 
+             pch = 22, horiz = TRUE)
+      
+    } else if (plot_type == "hist_residuals") {
+      hist(as.numeric(resid), xlab = "Pearson residuals", main = NULL)
+    }
     return(invisible())
   }
   # Mean length or age over time
-  if ('mean' %in% plot_type) {
+  if (plot_type == 'mean') {
     mu <- mupred <- numeric(length = length(Year))
     for(i in 1:length(mu)) {
       mu[i] <- weighted.mean(data_val, obs[i, ], na.rm = TRUE)
@@ -745,7 +811,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL, plot_type = c(
   }
 
   # Annual comps (obs vs. fitted if available)
-  if ("annual" %in% plot_type) {
+  if (plot_type == "annual") {
     old_par <- par(no.readonly = TRUE)
     on.exit(par(old_par))
     par(mfcol = c(4, 4), mar = rep(0, 4), oma = c(5.1, 5.1, 2.1, 2.1))
