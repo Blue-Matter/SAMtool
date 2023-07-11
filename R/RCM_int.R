@@ -1,6 +1,6 @@
 
 #' @importFrom pbapply pblapply
-RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), selectivity = "logistic", s_selectivity = "B", LWT = list(),
+RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", s_selectivity = "B", LWT = list(),
                     comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
                     max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
                     drop_highF = FALSE,
@@ -14,7 +14,7 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   }
   
   comp_like <- match.arg(comp_like)
-  condition <- match.arg(condition)
+  condition <- match.arg(condition, choices = c("catch", "catch2", "effort"), several.ok = TRUE)
   
   dat_update <- check_RCMdata(RCMdata, OM, condition, silent = silent)
   OM <- dat_update$OM
@@ -375,10 +375,11 @@ RCM_int <- function(OM, RCMdata, condition = c("catch", "catch2", "effort"), sel
   }
   
   # Check whether observed matches predicted
-  if (RCMdata@Misc$condition == "catch2") {
+  if (any(RCMdata@Misc$condition == "catch2")) {
     catch_check_fn <- function(x, report, RCMdata) {
       if (report[[x]]$conv) {
         catch_diff <- report[[x]]$Cpred/RCMdata@Chist - 1
+        catch_diff <- catch_diff[, RCMdata@Misc$condition == "catch2"]
         flag <- max(abs(catch_diff), na.rm = TRUE) > 0.01 | any(is.na(report[[x]]$Cpred))
       } else {
         flag <- FALSE
@@ -559,7 +560,7 @@ RCM_retro <- function(x, nyr = 5) {
   lapply_fn <- function(i, new_args, x) {
     obj2 <- MakeADFun(data = new_args[[i+1]]$data, parameters = new_args[[i+1]]$params, map = new_args[[i+1]]$map,
                       random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
-    if (new_args[[i+1]]$data$condition == "catch2") {
+    if (any(new_args[[i+1]]$data$condition == "1L")) {
       if (any(is.na(obj2$report(obj2$par)$F)) || any(is.infinite(obj2$report(obj2$par)$F))) {
         for(ii in 1:10) {
           obj2$par["R0x"] <- 0.5 + obj2$par["R0x"]
@@ -637,13 +638,14 @@ RCM_retro_subset <- function(yr, data, params, map) {
     if (!is.null(map$log_rec_dev)) map$log_rec_dev <- map$log_rec_dev[1:yr] %>% factor()
     
     # Update F
-    if (data_out$condition == "catch") {
+    if (any(data_out$condition == 0L)) { # catch
       params_out$log_F_dev <- params_out$log_F_dev[1:yr, , drop = FALSE]
       
       if (any(data_out$yind_F + 1 > yr)) {
         data_out$yind_F <- as.integer(0.5 * yr)
         params_out$log_F_dev[data_out$yind_F + 1, ] <- params$log_F_dev[data$yind_F + 1, ]
       }
+      map$log_F_dev <- map$log_F_dev[1:yr, , drop = FALSE]
     }
     
     ## Update nsel block if needed

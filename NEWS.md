@@ -1,6 +1,11 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
-## SAMtool 1.5.3
+## SAMtool 1.6.0
+- Add heat (red/blue) residuals for age comps with `plot_composition(plot_type = "heat_residuals")`. Not yet added to any markdown reports.
+- Add `spawn_time_frac` argument to RCM.
+- Add fleet-specific option for catch/effort conditioning to RCM.
+
+## SAMtool 1.5.3 (2023-05-23)
 - Fix indexing issue when estimating steepness post-hoc in `SCA2` and `VPA`.
 - Return warning when arguments to `make_MP` don't match formal arguments in `.Assess` and `.HCR`
 

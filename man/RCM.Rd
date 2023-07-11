@@ -8,19 +8,14 @@
 \alias{RCM,OM,RCMdata-method}
 \title{Rapid Conditioning Model (RCM)}
 \usage{
-check_RCMdata(
-  RCMdata,
-  OM,
-  condition = c("catch", "catch2", "effort"),
-  silent = FALSE
-)
+check_RCMdata(RCMdata, OM, condition = "catch", silent = FALSE)
 
 RCM(OM, data, ...)
 
 \S4method{RCM}{OM,RCMdata}(
   OM,
   data,
-  condition = c("catch", "catch2", "effort"),
+  condition = "catch",
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
@@ -42,7 +37,7 @@ RCM(OM, data, ...)
 \S4method{RCM}{OM,list}(
   OM,
   data,
-  condition = c("catch", "catch2", "effort"),
+  condition = "catch",
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
@@ -65,7 +60,7 @@ RCM(OM, data, ...)
 \S4method{RCM}{OM,Data}(
   OM,
   data,
-  condition = c("catch", "catch2", "effort"),
+  condition = "catch",
   selectivity = "logistic",
   s_selectivity = NULL,
   LWT = list(),
@@ -92,7 +87,7 @@ RCM(OM, data, ...)
 steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).}
 
 \item{condition}{String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
-or "effort".}
+or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be fleet specific.}
 
 \item{silent}{Logical to indicate whether informative messages will be reported to console.}
 
@@ -266,7 +261,7 @@ For \code{RCM}, additional arguments can be passed to the model via \code{...}:
 
 \itemize{
 \item plusgroup: Logical for whether the maximum age is a plusgroup or not. By default, TRUE.
-\item fix_dome: Logical for whether the dome selectivity parameter for fleets is fixed. Used primarily for backwards compatibility, this is overridden by map_vul_par.
+\item fix_dome: Logical for whether the dome selectivity parameter for fleets is fixed. Used primarily for backwards compatibility, this is overridden by the map argument.
 \item resample: Logical, whether the OM conditioning parameters (recruitment, fishing mortality, SSB, selectivity, etc.) are obtained by sampling the Hessian matrix from
 a single model fit. By default FALSE. This feature requires identical biological parameters among simulations.
 }

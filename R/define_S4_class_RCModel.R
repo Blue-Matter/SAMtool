@@ -338,13 +338,13 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               LH_section <- c(LAA, LAA_persp, mat, mat_persp, NatM, NatM_persp)
 
               # Data and fit section
-              individual_matrix_fn <- function(i, obs, pred, fig.cap, label, resids = FALSE, match = FALSE) {
+              individual_matrix_fn <- function(i, obs, pred, fig.cap, label, resids = FALSE, condition) {
                 if (resids) {
                   rmd_assess_resid2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
                                     fig.cap = paste(fig.cap, i), label = label[i])
                 } else {
                   rmd_assess_fit2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
-                                  fig.cap = paste(fig.cap, i), label = label[i], match = match)
+                                  fig.cap = paste(fig.cap, i), label = label[i], match = condition[i] == "catch2")
                 }
               }
               individual_array_fn <- function(i, obs, pred, comps = c("age", "length"), label, plot_mean = TRUE) {
@@ -374,9 +374,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                          xlab = "Year", ylab = "Catch", legend.lab = "f_name",
                                          fig.cap = "Catch time series.", header = "### Data and Fit {.tabset}\n#### Catch \n")
 
-                if (data_mean_fit$condition == "effort" || ncol(RCMdata@Chist) > 1) {
+                if (any(data_mean_fit$condition == "effort") || ncol(RCMdata@Chist) > 1) {
                   C_plots <- lapply(1:nfleet, individual_matrix_fn, obs = "RCMdata@Chist", pred = "report$Cpred",
-                                    fig.cap = "catch from fleet", label = f_name, match = data_mean_fit$condition == "catch2")
+                                    fig.cap = "catch from fleet", label = f_name, condition = data_mean_fit$condition)
                 } else C_plots <- NULL
               } else C_matplot <- C_plots <- NULL
 

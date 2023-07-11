@@ -29,7 +29,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   obj <- MakeADFun(data = TMB_data, parameters = TMB_params$params, map = TMB_params$map, random = random,
                    inner.control = inner.control, DLL = "SAMtool", silent = TRUE)
   
-  if (RCMdata@Misc$condition == "catch2") {
+  if (any(RCMdata@Misc$condition == "catch2")) {
     if (any(is.na(obj$report(obj$par)$F)) || any(is.infinite(obj$report(obj$par)$F))) {
       for(i in 1:10) {
         obj$par["R0x"] <- 0.5 + obj$par["R0x"]
@@ -90,7 +90,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     StockPars_ind <- match("ageMarray", names(StockPars))
     StockPars[StockPars_ind] <- lapply(StockPars[StockPars_ind], mean_matrix)
     
-    if (RCMdata@Misc$condition == "effort") {
+    if (all(RCMdata@Misc$condition == "effort")) {
       StockPars$R0 <- mean_vector(StockPars$R0)
       if (!is.null(dots$OMeff) && dots$OMeff) {
         FleetPars$Find <- apply(FleetPars$Find, 2, mean) %>% matrix(length(StockPars$R0), nyears, byrow = TRUE)
@@ -113,7 +113,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     C_hist <- matrix(0, nyears, nfleet)
   }
   
-  if (RCMdata@Misc$condition == "effort" && !is.null(dots$OMeff) && dots$OMeff) {
+  if (all(RCMdata@Misc$condition == "effort") && !is.null(dots$OMeff) && dots$OMeff) {
     RCMdata@Ehist <- matrix(FleetPars$Find[x, ], nyears, nfleet)
   }
   
@@ -140,7 +140,8 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
   TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, 
                    sigma_C = RCMdata@C_sd, sigma_Ceq = RCMdata@C_eq_sd, 
                    E_hist = E_hist, E_eq = E_eq,
-                   condition = RCMdata@Misc$condition, nll_C = as.integer(RCMdata@Misc$condition != "catch2"),
+                   condition = sapply(RCMdata@Misc$condition, switch, "catch" = 0, "catch2" = 1, "effort" = 2) %>% as.integer(), 
+                   nll_C = as.integer(any(RCMdata@Misc$condition != "catch2")),
                    I_hist = RCMdata@Index, sigma_I = RCMdata@I_sd, 
                    CAA_hist = RCMdata@CAA, CAA_n = RCMdata@CAA_ESS,
                    CAL_hist = RCMdata@CAL, CAL_n = RCMdata@CAL_ESS,
@@ -260,6 +261,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     map$vul_par <- matrix(0, 3, RCMdata@Misc$nsel_block)
     map$vul_par[3, selectivity == -1] <- NA # Fix third parameter for logistic sel
     if (!is.null(dots$fix_dome) && dots$fix_dome) { # Obsolete
+      warning("fix_dome is obsolete. Recommend using the map argument in RCM")
       map$vul_par[3, selectivity == 0] <- NA # Fix dome
     }
     
@@ -364,14 +366,15 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                      log_compf = matrix(0, nfleet, 2),
                      log_compi = matrix(0, nsurvey, 2))
   
-  if (RCMdata@Misc$condition == "catch") {
-    TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, ] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
+  if (any(RCMdata@Misc$condition == "catch")) {
+    TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, 
+                         RCMdata@Misc$condition == "catch"] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
   }
   
   # Map list (to fix parameters)
   map_out <- list()
   
-  if (RCMdata@Misc$condition == "effort" && !sum(RCMdata@Chist, na.rm = TRUE) && !prior$use_prior[1]) {
+  if (all(RCMdata@Misc$condition == "effort") && !sum(RCMdata@Chist, na.rm = TRUE) && !prior$use_prior[1]) {
     map_out$R0x <- factor(NA) # Fix if condition on effort, no catches, and no prior on R0
   }
   if (SR_type == "Mesnil-Rochet" || !prior$use_prior[2]) map_out$transformed_h <- factor(NA)
@@ -389,23 +392,32 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   map_out$vul_par <- factor(map$vul_par)
   map_out$ivul_par <- factor(map$ivul_par)
   
-  if (RCMdata@Misc$condition == "effort") {
-    map_out$log_F_equilibrium <- factor(rep(NA, nfleet))
-  } else {
-    map_out$log_q_effort <- factor(rep(NA, nfleet))
+  map_out$log_F_equilibrium <- local({
+    m <- rep(FALSE, nfleet)
+    m[grepl("catch", RCMdata@Misc$condition) & RCMdata@C_eq > 0] <- TRUE
     
-    if (any(RCMdata@C_eq == 0)) {
-      map_out$log_F_equilibrium <- local({
-        m <- rep(NA, nfleet)
-        m[RCMdata@C_eq > 0] <- 1:sum(RCMdata@C_eq > 0)
-        factor(m)
-      })
-    }
-  }
+    m[m] <- 1:sum(m, na.rm = TRUE)
+    m[!m] <- NA
+    factor(m)
+  })
   
-  if (RCMdata@Misc$condition != "catch") {
-    map_out$log_F_dev <- factor(matrix(NA, nyears, nfleet))
-  }
+  map_out$log_q_effort <- local({
+    m <- grepl("effort", RCMdata@Misc$condition)
+    m[m] <- 1:sum(m)
+    m[!m] <- NA
+    factor(m)
+  })
+  
+  map_out$log_F_dev <- local({
+    m <- matrix(FALSE, nyears, nfleet)
+    for(ff in 1:nfleet) {
+      if (RCMdata@Misc$condition[ff] == "catch") m[, ff] <- TRUE
+    }
+    m[m] <- 1:sum(m)
+    m[!m] <- NA
+    factor(m)
+  })
+  
   map_out$log_CV_msize <- factor(rep(NA, nfleet))
   
   if (is.null(map$log_early_rec_dev)) {
@@ -477,7 +489,7 @@ par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, RCMdata, dots) 
     F_test_sel <- vapply(FleetPars_subset, run_test, logical(1))
   } else F_test_sel <- NULL
   
-  if (RCMdata@Misc$condition == "effort" && !is.null(dots$OMeff) && dots$OMeff) {
+  if (all(RCMdata@Misc$condition == "effort") && !is.null(dots$OMeff) && dots$OMeff) {
     F_test_Find <- run_test(FleetPars$Find) %>% structure(names = "Find")
   } else F_test_Find <- NULL
   
@@ -496,28 +508,25 @@ par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, RCMdata, dots) 
 
 RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
   
-  if (obj$env$data$condition == "catch") {
-    
-    par[names(par) == "log_F_dev" | names(par) == "log_F_equilibrium"] <- log(1e-8)
-    out <- obj$report(par)$E
-    
-  } else if (obj$env$data$condition == "catch2") {
+  if (any(obj$env$data$condition == 1L)) { # catch2
     
     new_data <- obj$env$data
     new_data$C_hist[] <- 1e-8
     
-    obj2 <- MakeADFun(data = new_data, parameters = clean_tmb_parameters(obj), 
-                      map = obj$env$map, random = obj$env$random,
-                      DLL = "SAMtool", silent = TRUE)
-    out <- obj2$report(par)$E
+    obj2 <- MakeADFun(
+      data = new_data, parameters = clean_tmb_parameters(obj), 
+      map = obj$env$map, random = obj$env$random,
+      DLL = "SAMtool", silent = TRUE
+    )
     
   } else {
-    
-    par[names(par) == "log_q_effort"] <- log(1e-8)
-    out <- obj$report(par)$E
-    
+    obj2 <- obj
   }
   
+  par[names(par) == "log_F_dev" | names(par) == "log_F_equilibrium"] <- log(1e-8)
+  par[names(par) == "log_q_effort"] <- log(1e-8)
+  
+  out <- obj$report(par)$E
   return(out)
 }
 

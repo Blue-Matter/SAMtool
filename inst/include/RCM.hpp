@@ -18,8 +18,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(E_hist);    // Effort by year and fleet
   DATA_VECTOR(E_eq);      // Equilibrium effort by fleet
 
-  DATA_STRING(condition); // Indicates whether the model will condition on 'effort', 'catch' (estimated F's), 'catch2' (internally optimize for F)
-  DATA_INTEGER(nll_C);    // Indicates whether there is a likelihood for the catch. TRUE when (a) condition = 'catch' or (b) 'effort' with nfleet > 1
+  DATA_IVECTOR(condition); // Indicates whether the model will condition on catch with estimated F (0), internally solve for F (1) or 'effort' (2)
+  DATA_INTEGER(nll_C);    // Indicates whether there is a likelihood for the catch. TRUE when condition = 'catch' or 'effort' with nfleet > 1
 
   DATA_MATRIX(I_hist);    // Index by year and survey
   DATA_MATRIX(sigma_I);   // Standard deviation of index by year and survey
@@ -72,8 +72,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_SCALAR(rescale);   // R0 rescaler
   DATA_INTEGER(ageM);     // Age of maturity used for averaging E0 and EPR0 for stock-recruit relationship
 
-  DATA_IVECTOR(yind_F);   // When condition = "catch", the year in F's are estimated and all other F parameters are deviations from this F
-  DATA_INTEGER(n_itF);    // When condition = "catch2", the number of iterations for Newton-Raphson method to solve for F
+  DATA_IVECTOR(yind_F);   // When condition(ff) = "catch", the year in F's are estimated and all other F parameters are deviations from this F
+  DATA_INTEGER(n_itF);    // When condition(ff) = "catch2", the number of iterations for Newton-Raphson method to solve for F
   DATA_INTEGER(plusgroup) // Boolean, whether the maximum age in the plusgroup is modeled.
   
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
@@ -149,9 +149,9 @@ Type RCM(objective_function<Type> *obj) {
   for(int ff=0;ff<nfleet;ff++) {
     CV_msize(ff) = exp(log_CV_msize(ff));
     q_effort(ff) = exp(log_q_effort(ff));
-    if(condition != "effort" && C_eq(ff)>0) F_equilibrium(ff) = exp(log_F_equilibrium(ff));
-    if(condition == "effort" && E_eq(ff)>0) F_equilibrium(ff) = q_effort(ff) * E_eq(ff);
-    if(condition == "catch") {
+    if(condition(ff) != 2 && C_eq(ff)>0) F_equilibrium(ff) = exp(log_F_equilibrium(ff)); // catch/catch2
+    if(condition(ff) == 2 && E_eq(ff)>0) F_equilibrium(ff) = q_effort(ff) * E_eq(ff);    // effort
+    if(condition(ff) == 0) { //catch - set up F in midpoint of time series
       Type tmp = max_F - exp(log_F_dev(yind_F(ff),ff));
       F(yind_F(ff),ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), exp(log_F_dev(yind_F(ff),ff)));
     }
@@ -166,7 +166,7 @@ Type RCM(objective_function<Type> *obj) {
     EPR0(y) = sum_EPR(NPR_unfished(y), wt, mat, n_age, y);
     if(y <= ageM) EPR0_SR += EPR0(y);
   }
-  EPR0_SR /= Type(ageM + 1);
+  EPR0_SR /= Type(ageM + 1); // Unfished replacement line for SRR is the average across the first ageM years
   Type E0_SR = 0;
   
   Type CR_SR = 0;
@@ -250,7 +250,7 @@ Type RCM(objective_function<Type> *obj) {
   log_early_rec_dev_sim.setZero();
   
   // Equilibrium quantities (leading into first year of model)
-  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup);
+  vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup, Type(0));
   vector<Type> NPR_equilibrium_spawn = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup, spawn_time_frac);
   Type EPR_eq = sum_EPR(NPR_equilibrium_spawn, wt, mat, n_age, 0);
   Type R_eq;
@@ -305,56 +305,57 @@ Type RCM(objective_function<Type> *obj) {
   for(int y=0;y<n_y;y++) {
     // Calculate this year's probability of length-at-age (PLA) and fleet F
     if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
-    if(condition == "catch") {
-      for(int ff=0;ff<nfleet;ff++) {
+    
+    for(int ff=0;ff<nfleet;ff++) {
+      if(condition(ff) == 0) { // catch
         if(y != yind_F(ff)) {
-          Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff));
+          Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff)); // annual F as deviation from F in middle of time series
           F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
         }
-      }
-    } else if(condition == "catch2") {
-      F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
-    } else {
-      for(int ff=0;ff<nfleet;ff++) {
-        Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
-        F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
+      } else if(condition(ff) == 1) { //catch2
+        F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
+      } else { //effort
+        for(int ff=0;ff<nfleet;ff++) {
+          Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
+          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
+        }
       }
     }
     
-    // Calculate this year's total F, Z, SSB (ex. age-0), recruitment, and biomass; and next year's abundance (ex. age-0)
+    // Calculate this year's total F, Z, SSB (ex. age-0)
     for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) Z(y,a) += vul(y,a,ff) * F(y,ff);
-      if(a<n_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
-      if(plusgroup && a==n_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
-      
       if(a>0) E(y) += N(y,a) * exp(-spawn_time_frac * Z(y,a)) * wt(y,a) * mat(y,a);
-      
-      if(y>0) {
-        if(SR_type == "BH") {
-          R(y) = BH_SR(E(y), h, R0, E0_SR);
-        } else if(SR_type == "Ricker") {
-          R(y) = Ricker_SR(E(y), h, R0, E0_SR);
-        } else { // Mesnil-Rochet
-          R(y) = MesnilRochet_SR(E(y), MRgamma, MRRmax, MRhinge);
-        }
-        
-        if(est_rec_dev(y)) {
-          Rec_dev(y) = exp(log_rec_dev(y) - 0.5 * tau * tau);
-          SIMULATE if(sim_process_error) {
-            log_rec_dev_sim(y) = rnorm(log_rec_dev(y), tau);
-            Rec_dev(y) = exp(log_rec_dev_sim(y) - 0.5 * tau * tau);
-          }
-          R(y) *= Rec_dev(y);
-        }
-        N(y,0) = R(y);
-        
-        for(int a=0;a<n_age;a++) {
-          B(y) += N(y,a) * wt(y,a);
-          for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,a,ff) * N(y,a) * wt(y,a);
-        }
+    }
+    
+    // Calculate this year's recruitment and biomass
+    if(y>0) {
+      if(SR_type == "BH") {
+        R(y) = BH_SR(E(y), h, R0, E0_SR);
+      } else if(SR_type == "Ricker") {
+        R(y) = Ricker_SR(E(y), h, R0, E0_SR);
+      } else { // Mesnil-Rochet
+        R(y) = MesnilRochet_SR(E(y), MRgamma, MRRmax, MRhinge);
       }
       
-      // Calculate this year's CAA, catch, CAL, mean size 
+      if(est_rec_dev(y)) {
+        Rec_dev(y) = exp(log_rec_dev(y) - 0.5 * tau * tau);
+        SIMULATE if(sim_process_error) {
+          log_rec_dev_sim(y) = rnorm(log_rec_dev(y), tau);
+          Rec_dev(y) = exp(log_rec_dev_sim(y) - 0.5 * tau * tau);
+        }
+        R(y) *= Rec_dev(y);
+      }
+      N(y,0) = R(y);
+      
+      for(int a=0;a<n_age;a++) {
+        B(y) += N(y,a) * wt(y,a);
+        for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,a,ff) * N(y,a) * wt(y,a);
+      }
+    }
+    
+    // Calculate this year's CAA, catch, CAL, mean size, then next year's abundance
+    for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
         CN(y,ff) += CAAtrue(y,a,ff);
@@ -368,15 +369,18 @@ Type RCM(objective_function<Type> *obj) {
         }
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
       }
+      
+      if(a<n_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
+      if(plusgroup && a==n_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
     }
     if(Type(n_age) != Linf) for(int ff=0;ff<nfleet;ff++) MLpred(y,ff) /= CN(y,ff);
     if(msize_type == "weight") for(int ff=0;ff<nfleet;ff++) MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
   }
   
   // Biomass at beginning of n_y + 1
-  for(int a=1;a<n_age;a++) E(n_y) += N(y,a) * mat(y,a) * wt(y,a);
+  for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * mat(n_y,a) * wt(n_y,a);
   
-  if(spawn_time_frac > 0) {
+  if(spawn_time_frac > 0) { // Should work properly since spawn_time_frac is identified as DATA_SCALAR
     R(n_y) = R(n_y-1);
   } else if(SR_type == "BH") {
     R(n_y) = BH_SR(E(n_y), h, R0, E0_SR);
@@ -388,10 +392,10 @@ Type RCM(objective_function<Type> *obj) {
   N(n_y,0) = R(n_y);
   for(int a=0;a<n_age;a++) {
     B(n_y) += N(n_y,a) * wt(n_y,a);
-    for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,a,ff) * N(y,a) * wt(y,a);
+    for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,a,ff) * N(n_y,a) * wt(n_y,a);
   }
 
-  // Calculate survey q, selectivity, and age/length comps
+  // Calculate for surveys: q, selectivity, and age/length comps
   vector<Type> iLFS(nsurvey);
   vector<Type> iL5(nsurvey);
   vector<Type> iVmaxlen(nsurvey);
@@ -424,7 +428,7 @@ Type RCM(objective_function<Type> *obj) {
       }
     }
     if(!I_units(sur)) Itot.col(sur) = IN.col(sur); // Abundance vulnerable to survey
-    q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred
+    q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred, uses '&'
   }
 
   // Calc likelihood and parameter prior
@@ -486,8 +490,8 @@ Type RCM(objective_function<Type> *obj) {
     }
     
     for(int y=0;y<n_y;y++) {
-      int check1 = (condition != "effort") && (C_hist(y,ff) > 0);
-      int check2 = (condition == "effort") && (E_hist(y,ff) > 0);
+      int check1 = (condition(ff) != 2) && (C_hist(y,ff) > 0);
+      int check2 = (condition(ff) == 2) && (E_hist(y,ff) > 0);
       if(check1 || check2) {
         
         if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {
@@ -580,7 +584,7 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(Mest);
   }
   if(CppAD::Variable(log_tau)) ADREPORT(tau);
-  if(condition == "effort") ADREPORT(q_effort);
+  //if(condition == "effort") ADREPORT(q_effort);
   if(nll_index.col(0).sum() != 0) ADREPORT(q);
 
   REPORT(R0x);
@@ -610,7 +614,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(h);
   REPORT(tau);
   if(nll_fleet.col(4).sum() != 0) REPORT(CV_msize);
-  if(condition == "catch") REPORT(log_F_dev);
+  //if(condition == "catch") REPORT(log_F_dev);
   REPORT(F_equilibrium);
   REPORT(vul);
   REPORT(F);
