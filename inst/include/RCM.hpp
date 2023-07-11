@@ -49,12 +49,12 @@ Type RCM(objective_function<Type> *obj) {
   DATA_INTEGER(nfleet);   // Number of fleets
   DATA_INTEGER(nsurvey);  // Number of surveys
 
-  DATA_MATRIX(M_data);    // Natural mortality at age and year, overridden if there's a prior for log_M
-  DATA_MATRIX(len_age);   // Length-at-age
+  DATA_MATRIX(M_data);    // Natural mortality at age and year (n_y, n_age), overridden if there's a prior for log_M
+  DATA_MATRIX(len_age);   // Length-at-age (n_y + 1, n_age)
   DATA_SCALAR(Linf);      // Linf
-  DATA_MATRIX(SD_LAA);    // Length-at-age SD (year x age)
-  DATA_MATRIX(wt);        // Weight-at-age
-  DATA_MATRIX(mat);       // Maturity-at-age at the beginning of the year
+  DATA_MATRIX(SD_LAA);    // Length-at-age SD (n_y, n_age)
+  DATA_MATRIX(wt);        // Weight-at-age (n_y + 1, n_age)
+  DATA_MATRIX(mat);       // Maturity-at-age at the beginning of the year (n_y + 1, n_age)
 
   DATA_IVECTOR(vul_type); // Integer vector indicating whether free (-2), logistic (-1), or dome vul (0) is used
   DATA_IVECTOR(ivul_type); // Same but for surveys, but can also mirror to B (-4), SSB (-3), or fleet (>0)
@@ -63,14 +63,14 @@ Type RCM(objective_function<Type> *obj) {
 
   DATA_MATRIX(age_error); // Ageing error matrix
 
-  DATA_STRING(SR_type);   // String indicating whether Beverton-Holt or Ricker stock-recruit is used
+  DATA_STRING(SR_type);   // String indicating whether Beverton-Holt ("BH"), Ricker, or "Mesnil-Rochet" stock-recruit is used
   DATA_MATRIX(LWT_fleet); // Likelihood weights for catch, C_eq, CAA, CAL, MS
   DATA_MATRIX(LWT_index); // Likelihood weights for the indices data
   DATA_STRING(comp_like); // Distribution for age/length comps (multinomial, lognormal, mvlogistic, dirmult1, dirmult2)
 
   DATA_SCALAR(max_F);     // Maximum F in the model
   DATA_SCALAR(rescale);   // R0 rescaler
-  DATA_INTEGER(ageM);     // Age of maturity used for averaging E0 and EPR0
+  DATA_INTEGER(ageM);     // Age of maturity used for averaging E0 and EPR0 for stock-recruit relationship
 
   DATA_IVECTOR(yind_F);   // When condition = "catch", the year in F's are estimated and all other F parameters are deviations from this F
   DATA_INTEGER(n_itF);    // When condition = "catch2", the number of iterations for Newton-Raphson method to solve for F
@@ -87,7 +87,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_IVECTOR(est_early_rec_dev); // Indicates years in which log_early_rec_dev are estimated. Then, lognormal bias correction estimates are added..
   DATA_IVECTOR(est_rec_dev); // Indicates years in which log_rec_dev are estimated.
   
-  DATA_INTEGER(sim_process_error); 
+  DATA_INTEGER(sim_process_error); // Whether to simulate process error (when using the TMB SIMULATE module) 
+  DATA_SCALAR(spawn_time_frac);    // Fraction of year when spawning occurs for calculating spawning biomass
   
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
@@ -143,7 +144,7 @@ Type RCM(objective_function<Type> *obj) {
   F_equilibrium.setZero();
 
   matrix<Type> F(n_y,nfleet);
-  matrix<Type> Z = M;
+  matrix<Type> Z = M; // Add F during loop over years
 
   for(int ff=0;ff<nfleet;ff++) {
     CV_msize(ff) = exp(log_CV_msize(ff));
@@ -161,7 +162,7 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> EPR0(n_y);
   Type EPR0_SR = 0;
   for(int y=0;y<n_y;y++) {
-    NPR_unfished(y) = calc_NPR0(M, n_age, y, plusgroup);
+    NPR_unfished(y) = calc_NPR0(M, n_age, y, plusgroup, spawn_time_frac);
     EPR0(y) = sum_EPR(NPR_unfished(y), wt, mat, n_age, y);
     if(y <= ageM) EPR0_SR += EPR0(y);
   }
@@ -250,7 +251,8 @@ Type RCM(objective_function<Type> *obj) {
   
   // Equilibrium quantities (leading into first year of model)
   vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup);
-  Type EPR_eq = sum_EPR(NPR_equilibrium, wt, mat, n_age, 0);
+  vector<Type> NPR_equilibrium_spawn = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup, spawn_time_frac);
+  Type EPR_eq = sum_EPR(NPR_equilibrium_spawn, wt, mat, n_age, 0);
   Type R_eq;
 
   if(SR_type == "BH") {
@@ -289,20 +291,19 @@ Type RCM(objective_function<Type> *obj) {
       N(0,a) = R_early(a-1) * NPR_equilibrium(a);
     }
     
-    B(0) += N(0,a) * wt(0,a);
-    E(0) += N(0,a) * wt(0,a) * mat(0,a);
-
     Type Z_eq = M(0,a);
     for(int ff=0;ff<nfleet;ff++) Z_eq += vul(0,a,ff) * F_equilibrium(ff);
     for(int ff=0;ff<nfleet;ff++) {
       C_eq_pred(ff) += vul(0,a,ff) * F_equilibrium(ff) * wt(0,a) * N(0,a) * (1 - exp(-Z_eq)) / Z_eq;
       VB(0,ff) += N(0,a) * wt(0,a) * vul(0,a,ff);
     }
+    
+    B(0) += N(0,a) * wt(0,a);
   }
 
   // Loop over all other years
   for(int y=0;y<n_y;y++) {
-    // Calculate this year's probability of length-at-age (PLA) and F
+    // Calculate this year's probability of length-at-age (PLA) and fleet F
     if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
     if(condition == "catch") {
       for(int ff=0;ff<nfleet;ff++) {
@@ -320,12 +321,40 @@ Type RCM(objective_function<Type> *obj) {
       }
     }
     
-    // Calculate this year's catch, CAA, CAL, mean size; and next year's abundance and SSB (ex. age-0)
+    // Calculate this year's total F, Z, SSB (ex. age-0), recruitment, and biomass; and next year's abundance (ex. age-0)
     for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) Z(y,a) += vul(y,a,ff) * F(y,ff);
       if(a<n_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
       if(plusgroup && a==n_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
-
+      
+      if(a>0) E(y) += N(y,a) * exp(-spawn_time_frac * Z(y,a)) * wt(y,a) * mat(y,a);
+      
+      if(y>0) {
+        if(SR_type == "BH") {
+          R(y) = BH_SR(E(y), h, R0, E0_SR);
+        } else if(SR_type == "Ricker") {
+          R(y) = Ricker_SR(E(y), h, R0, E0_SR);
+        } else { // Mesnil-Rochet
+          R(y) = MesnilRochet_SR(E(y), MRgamma, MRRmax, MRhinge);
+        }
+        
+        if(est_rec_dev(y)) {
+          Rec_dev(y) = exp(log_rec_dev(y) - 0.5 * tau * tau);
+          SIMULATE if(sim_process_error) {
+            log_rec_dev_sim(y) = rnorm(log_rec_dev(y), tau);
+            Rec_dev(y) = exp(log_rec_dev_sim(y) - 0.5 * tau * tau);
+          }
+          R(y) *= Rec_dev(y);
+        }
+        N(y,0) = R(y);
+        
+        for(int a=0;a<n_age;a++) {
+          B(y) += N(y,a) * wt(y,a);
+          for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,a,ff) * N(y,a) * wt(y,a);
+        }
+      }
+      
+      // Calculate this year's CAA, catch, CAL, mean size 
       for(int ff=0;ff<nfleet;ff++) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
         CN(y,ff) += CAAtrue(y,a,ff);
@@ -339,34 +368,27 @@ Type RCM(objective_function<Type> *obj) {
         }
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
       }
-      if(a>0) E(y+1) += N(y+1,a) * wt(y+1,a) * mat(y+1,a);
     }
     if(Type(n_age) != Linf) for(int ff=0;ff<nfleet;ff++) MLpred(y,ff) /= CN(y,ff);
     if(msize_type == "weight") for(int ff=0;ff<nfleet;ff++) MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
-    
-    // Calc next year's recruitment, total biomass, and vulnerable biomass
-    if(SR_type == "BH") {
-      R(y+1) = BH_SR(E(y+1), h, R0, E0_SR);
-    } else if(SR_type == "Ricker") {
-      R(y+1) = Ricker_SR(E(y+1), h, R0, E0_SR);
-    } else { // Mesnil-Rochet
-      R(y+1) = MesnilRochet_SR(E(y+1), MRgamma, MRRmax, MRhinge);
-    }
-    
-    if(y<n_y-1 && est_rec_dev(y+1)) {
-      Rec_dev(y+1) = exp(log_rec_dev(y+1) - 0.5 * tau * tau);
-      SIMULATE if(sim_process_error) {
-        log_rec_dev_sim(y+1) = rnorm(log_rec_dev(y+1), tau);
-        Rec_dev(y+1) = exp(log_rec_dev_sim(y+1) - 0.5 * tau * tau);
-      }
-      R(y+1) *= Rec_dev(y+1);
-    }
-    N(y+1,0) = R(y+1);
-    
-    for(int a=0;a<n_age;a++) {
-      B(y+1) += N(y+1,a) * wt(y+1,a);
-      for(int ff=0;ff<nfleet;ff++) VB(y+1,ff) += vul(y+1,a,ff) * N(y+1,a) * wt(y+1,a);
-    }
+  }
+  
+  // Biomass at beginning of n_y + 1
+  for(int a=1;a<n_age;a++) E(n_y) += N(y,a) * mat(y,a) * wt(y,a);
+  
+  if(spawn_time_frac > 0) {
+    R(n_y) = R(n_y-1);
+  } else if(SR_type == "BH") {
+    R(n_y) = BH_SR(E(n_y), h, R0, E0_SR);
+  } else if(SR_type == "Ricker") {
+    R(n_y) = Ricker_SR(E(n_y), h, R0, E0_SR);
+  } else { // Mesnil-Rochet
+    R(n_y) = MesnilRochet_SR(E(n_y), MRgamma, MRRmax, MRhinge);
+  }
+  N(n_y,0) = R(n_y);
+  for(int a=0;a<n_age;a++) {
+    B(n_y) += N(n_y,a) * wt(n_y,a);
+    for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,a,ff) * N(y,a) * wt(y,a);
   }
 
   // Calculate survey q, selectivity, and age/length comps

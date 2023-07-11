@@ -26,26 +26,31 @@ matrix<Type> generate_PLA(vector<Type> lbin, matrix<Type> len_age, matrix<Type> 
 }
 
 template<class Type>
-vector<Type> calc_NPR0(matrix<Type> M, int n_age, int y, int plusgroup) {
+vector<Type> calc_NPR0(matrix<Type> M, int n_age, int y, int plusgroup, Type spawn_time_frac = 0) {
   vector<Type> NPR(n_age);
+  vector<Type> out(n_age);
   NPR(0) = 1;
   for(int a=1;a<n_age;a++) NPR(a) = NPR(a-1) * exp(-M(y,a-1));
   if(plusgroup) NPR(n_age-1) /= 1 - exp(-M(y,n_age-1));
-  return NPR;
+  for(int a=0;a<n_age;a++) out(a) = NPR(a) * exp(-spawn_time_frac * M(y,a));
+  return out;
 }
 
 
 template<class Type>
-vector<Type> calc_NPR(vector<Type> F, array<Type> vul, int nfleet, matrix<Type> M, int n_age, int y, int plusgroup) {
+vector<Type> calc_NPR(vector<Type> F, array<Type> vul, int nfleet, matrix<Type> M, int n_age, int y, int plusgroup,
+                      Type spawn_time_frac = 0) {
   vector<Type> NPR(n_age);
   vector<Type> Z = M.row(y);
+  vector<Type> out(n_age);
   NPR(0) = 1;
   for(int a=0;a<n_age;a++) {
     for(int ff=0;ff<nfleet;ff++) Z(a) += vul(y,a,ff) * F(ff);
     if(a > 0) NPR(a) = NPR(a-1) * exp(-Z(a-1));
   }
   if(plusgroup) NPR(n_age-1) /= 1 - exp(-Z(n_age-1));
-  return NPR;
+  for(int a=0;a<n_age;a++) out(a) = NPR(a) * exp(-spawn_time_frac * Z(a));
+  return out;
 }
 
 template<class Type>

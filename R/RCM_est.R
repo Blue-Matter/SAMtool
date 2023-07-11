@@ -173,7 +173,8 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    use_prior = prior$use_prior, 
                    prior_dist = prior$pr_matrix, 
                    nll_gr = 0L,
-                   sim_process_error = 0L)
+                   sim_process_error = 0L,
+                   spawn_time_frac = ifelse(is.null(StockPars$spawn_time_frac), 0, StockPars$spawn_time_frac[x]))
                    
   TMB_data$est_vul <- ifelse(is.na(map$vul_par) | duplicated(map$vul_par), 0, 1) %>%
     matrix(length(map$vul_par)/RCMdata@Misc$nsel_block, RCMdata@Misc$nsel_block)
