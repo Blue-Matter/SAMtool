@@ -57,6 +57,9 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                     "3" = "Mesnil-Rochet")
   if (is.null(SR_type)) stop("Can not identify stock-recruit function in OM@SRrel")
   
+  selectivity <- as.integer(selectivity)
+  s_selectivity <- as.integer(s_selectivity)
+  
   nyears <- RCMdata@Misc$nyears
   nfleet <- RCMdata@Misc$nfleet
   n_age <- dim(RCMdata@CAA)[2]
@@ -157,9 +160,14 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    Linf = ifelse(age_only_model, n_age, StockPars$Linf[x]),
                    SD_LAA = t(StockPars$LatASD[x, , 1:nyears]), 
                    wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
-                   mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]),
-                   vul_type = as.integer(selectivity),
-                   ivul_type = as.integer(s_selectivity), 
+                   mat = if (any(s_selectivity == -3L)) t(StockPars$Mat_age[x, , 1:(nyears+1)]) else matrix(1, 1, 1),
+                   fec = if (is.null(StockPars$Fec_Age)) {
+                     t(StockPars$Wt_age[x, , 1:(nyears+1)] * StockPars$Mat_age[x, , 1:(nyears+1)])
+                   } else {
+                     t(StockPars$Fec_Age[x, , 1:(nyears+1)])
+                   },
+                   vul_type = selectivity,
+                   ivul_type = s_selectivity, 
                    abs_I = RCMdata@abs_I, 
                    I_units = as.integer(RCMdata@I_units), 
                    age_error = RCMdata@age_error,

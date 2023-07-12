@@ -54,7 +54,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_SCALAR(Linf);      // Linf
   DATA_MATRIX(SD_LAA);    // Length-at-age SD (n_y, n_age)
   DATA_MATRIX(wt);        // Weight-at-age (n_y + 1, n_age)
-  DATA_MATRIX(mat);       // Maturity-at-age at the beginning of the year (n_y + 1, n_age)
+  DATA_MATRIX(mat);       // Maturity-at-age (n_y + 1, n_age) - only for matching survey selectivity to SSB
+  DATA_MATRIX(fec);       // Fecundity-at-age (n_y + 1, n_age) - product of maturity and spawning output
 
   DATA_IVECTOR(vul_type); // Integer vector indicating whether free (-2), logistic (-1), or dome vul (0) is used
   DATA_IVECTOR(ivul_type); // Same but for surveys, but can also mirror to B (-4), SSB (-3), or fleet (>0)
@@ -163,7 +164,7 @@ Type RCM(objective_function<Type> *obj) {
   Type EPR0_SR = 0;
   for(int y=0;y<n_y;y++) {
     NPR_unfished(y) = calc_NPR0(M, n_age, y, plusgroup, spawn_time_frac);
-    EPR0(y) = sum_EPR(NPR_unfished(y), wt, mat, n_age, y);
+    EPR0(y) = sum_EPR(NPR_unfished(y), fec, n_age, y);
     if(y <= ageM) EPR0_SR += EPR0(y);
   }
   EPR0_SR /= Type(ageM + 1); // Unfished replacement line for SRR is the average across the first ageM years
@@ -252,7 +253,7 @@ Type RCM(objective_function<Type> *obj) {
   // Equilibrium quantities (leading into first year of model)
   vector<Type> NPR_equilibrium = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup, Type(0));
   vector<Type> NPR_equilibrium_spawn = calc_NPR(F_equilibrium, vul, nfleet, M, n_age, 0, plusgroup, spawn_time_frac);
-  Type EPR_eq = sum_EPR(NPR_equilibrium_spawn, wt, mat, n_age, 0);
+  Type EPR_eq = sum_EPR(NPR_equilibrium_spawn, fec, n_age, 0);
   Type R_eq;
 
   if(SR_type == "BH") {
@@ -325,7 +326,7 @@ Type RCM(objective_function<Type> *obj) {
     // Calculate this year's total F, Z, SSB (ex. age-0)
     for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) Z(y,a) += vul(y,a,ff) * F(y,ff);
-      if(a>0) E(y) += N(y,a) * exp(-spawn_time_frac * Z(y,a)) * wt(y,a) * mat(y,a);
+      if(a>0) E(y) += N(y,a) * exp(-spawn_time_frac * Z(y,a)) * fec(y,a);
     }
     
     // Calculate this year's recruitment and biomass
@@ -378,7 +379,7 @@ Type RCM(objective_function<Type> *obj) {
   }
   
   // Biomass at beginning of n_y + 1
-  for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * mat(n_y,a) * wt(n_y,a);
+  for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * fec(n_y,a);
   
   if(spawn_time_frac > 0) { // Should work properly since spawn_time_frac is identified as DATA_SCALAR
     R(n_y) = R(n_y-1);

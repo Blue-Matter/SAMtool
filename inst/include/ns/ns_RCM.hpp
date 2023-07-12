@@ -54,9 +54,9 @@ vector<Type> calc_NPR(vector<Type> F, array<Type> vul, int nfleet, matrix<Type> 
 }
 
 template<class Type>
-Type sum_EPR(vector<Type> NPR, matrix<Type> wt, matrix<Type> mat, int n_age, int y) {
+Type sum_EPR(vector<Type> NPR, matrix<Type> fec, int n_age, int y) {
   Type EPR = 0.;
-  for(int a=0;a<n_age;a++) EPR += NPR(a) * wt(y,a) * mat(y,a);
+  for(int a=0;a<n_age;a++) EPR += NPR(a) * fec(y,a);
   return EPR;
 }
 
