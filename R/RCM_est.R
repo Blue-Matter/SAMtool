@@ -160,7 +160,8 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    Linf = ifelse(age_only_model, n_age, StockPars$Linf[x]),
                    SD_LAA = t(StockPars$LatASD[x, , 1:nyears]), 
                    wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
-                   mat = if (any(s_selectivity == -3L)) t(StockPars$Mat_age[x, , 1:(nyears+1)]) else matrix(1, 1, 1),
+                   mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]),
+                   #mat = if (any(s_selectivity == -3L)) t(StockPars$Mat_age[x, , 1:(nyears+1)]) else matrix(1, 1, 1),
                    fec = if (is.null(StockPars$Fec_Age)) {
                      t(StockPars$Wt_age[x, , 1:(nyears+1)] * StockPars$Mat_age[x, , 1:(nyears+1)])
                    } else {
