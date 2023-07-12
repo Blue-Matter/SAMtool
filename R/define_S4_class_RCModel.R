@@ -344,7 +344,8 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                     fig.cap = paste(fig.cap, i), label = label[i])
                 } else {
                   rmd_assess_fit2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
-                                  fig.cap = paste(fig.cap, i), label = label[i], match = condition[i] == "catch2")
+                                  fig.cap = paste(fig.cap, i), label = label[i], 
+                                  match = if(missing(condition)) FALSE else condition[i] == "catch2")
                 }
               }
               individual_array_fn <- function(i, obs, pred, comps = c("age", "length"), label, plot_mean = TRUE) {
