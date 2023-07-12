@@ -551,10 +551,11 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
   }
   report$F_at_age <- report$Z - M
   report$NPR_unfished <- do.call(rbind, report$NPR_unfished)
-  report$SPR_eq <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt)
-  report$SPR_dyn <- RCM_SPR(F_at_age = report$F_at_age, M = M, mat = data$mat, wt = data$wt, 
-                            N_at_age = report$N, R = report$R, R_early = report$R_early,
-                            equilibrium = FALSE)
+  report$SPR_eq <- RCM_SPR(F_at_age = report$F_at_age, M = M, fec = data$fec, 
+                           plusgroup = data$plusgroup, spawn_time_frac = data$spawn_time_frac)
+  report$SPR_dyn <- RCM_SPR(F_at_age = report$F_at_age, M = M, fec = data$fec,
+                            N_at_age = report$N, R = report$R, R_early = report$R_early, equilibrium = FALSE, 
+                            plusgroup = data$plusgroup, spawn_time_frac = data$spawn_time_frac)
   
   report$ageM <- data$ageM
   if (data$SR_type == "BH") {
@@ -674,20 +675,23 @@ get_ivul_len <- function(report, s_selectivity, lmid, Linf) {
   return(ivul_len)
 }
 
-RCM_SPR <- function(F_at_age, M, mat, wt, N_at_age, R, R_early, equilibrium = TRUE) {
+RCM_SPR <- function(F_at_age, M, fec, N_at_age, R, R_early, equilibrium = TRUE, 
+                    plusgroup = TRUE, spawn_time_frac = 0) {
   n_y <- nrow(F_at_age)
   n_age <- ncol(F_at_age)
+  Z <- F_at_age + M
   
-  if (equilibrium) { # Plusgroup always on
+  if (equilibrium) {
     SSPR_F <- vapply(1:n_y, function(y) {
-      yield_fn_SCA_int(max(F_at_age[y, ]), M = M[y, ], mat = mat[y, ], weight = wt[y, ], 
-                       vul = F_at_age[y, ]/max(F_at_age[y, ]), Arec = 1, Brec = 1, opt = FALSE)["EPR"]
+      NPR <- calc_NPR(exp(-Z[y, ]), n_age, plusgroup)
+      sum(NPR * exp(-spawn_time_frac * Z[y, ]) * fec[y, ])
     }, numeric(1))
     
     SSPR_0 <- vapply(1:n_y, function(y) {
-      yield_fn_SCA_int(0, M = M[y, ], mat = mat[y, ], weight = wt[y, ], 
-                       vul = rep(1, n_age), Arec = 1, Brec = 1, opt = FALSE)["EPR"]
+      NPR <- calc_NPR(exp(-M[y, ]), n_age, plusgroup)
+      sum(NPR * exp(-spawn_time_frac * M[y, ]) * fec[y, ])
     }, numeric(1))
+    
   } else {
     NPR_M <- NPR_F <- matrix(1, n_y, n_age)
     
@@ -695,17 +699,19 @@ RCM_SPR <- function(F_at_age, M, mat, wt, N_at_age, R, R_early, equilibrium = TR
     NPR_F[1, ] <- N_at_age[1, ]/rev(RR)
     
     NPR_M[1, -1] <- exp(-cumsum(M[1, -n_age]))
-    NPR_M[1, n_age] <- NPR_M[1, n_age]/(1 - exp(-M[1, n_age]))
+    if (plusgroup) NPR_M[1, n_age] <- NPR_M[1, n_age]/(1 - exp(-M[1, n_age]))
     for(y in 2:n_y) {
       for(a in 2:n_age) {
         NPR_M[y, a] <- NPR_M[y-1, a-1] * exp(-M[y-1, a-1])
-        NPR_F[y, a] <- NPR_F[y-1, a-1] * exp(-F_at_age[y-1, a-1] - M[y-1, a-1])
+        NPR_F[y, a] <- NPR_F[y-1, a-1] * exp(-Z[y-1, a-1])
       }
-      NPR_M[y, n_age] <- NPR_M[y, n_age] + NPR_M[y-1, n_age] * exp(-M[y-1, n_age])
-      NPR_F[y, n_age] <- NPR_F[y, n_age] + NPR_F[y-1, n_age] * exp(-F_at_age[y-1, n_age] - M[y-1, n_age])
+      if (plusgroup) {
+        NPR_M[y, n_age] <- NPR_M[y, n_age] + NPR_M[y-1, n_age] * exp(-M[y-1, n_age])
+        NPR_F[y, n_age] <- NPR_F[y, n_age] + NPR_F[y-1, n_age] * exp(-Z[y-1, n_age])
+      }
     }
-    SSPR_F <- rowSums(NPR_F * wt[1:n_y, ] * mat[1:n_y, ])
-    SSPR_0 <- rowSums(NPR_M * wt[1:n_y, ] * mat[1:n_y, ])
+    SSPR_F <- rowSums(NPR_F * exp(-spawn_time_frac * Z) * fec[1:n_y, ])
+    SSPR_0 <- rowSums(NPR_M * exp(-spawn_time_frac * M) * fec[1:n_y, ])
   }
   SPR <- SSPR_F/SSPR_0
   return(SPR)
