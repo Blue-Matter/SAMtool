@@ -218,7 +218,7 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            paste0("plot_composition_RCM(Year, CAA_plot, RCMdata@CAA[, , ", ff, "], ages = age, dat_col = scenario$col)"),
            "}",
            "```\n",
-           paste0("```{r, fig.cap = \"Predicted age composition from fleet ", ff, ".\"}"),
+           paste0("```{r, fig.cap = \"Predicted age composition from ", f_name[ff], ".\"}"),
            paste0("if (any(RCMdata@CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
            paste0("plot_composition_RCM(Year, CAA_plot, ages = age, dat_col = scenario$col)"),
            "}",

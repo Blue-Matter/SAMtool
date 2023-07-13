@@ -77,8 +77,9 @@ rmd_LAA <- function(age = "1:info$data$n_age - 1", LAA = "info$LH$LAA", header =
   return(ans)
 }
 
-rmd_WAA <- function(age = "1:info$data$n_age - 1", WAA = "info$LH$WAA", header = NULL) {
-  rmd_at_age(age, WAA, fig.cap = "Mean weight-at-age from Data object.", label = "Mean Weight-at-age", header = header)
+rmd_WAA <- function(age = "1:info$data$n_age - 1", WAA = "info$LH$WAA", header = NULL,
+                    fig.cap = "Mean weight-at-age from Data object.") {
+  rmd_at_age(age, WAA, fig.cap = fig.cap, label = "Mean weight-at-age", header = header)
 }
 
 rmd_LW <- function(LAA = "info$LH$LAA", WAA = "info$LH$WAA") {
@@ -90,6 +91,10 @@ rmd_LW <- function(LAA = "info$LH$LAA", WAA = "info$LH$WAA") {
 
 rmd_mat <- function(age = "1:info$data$n_age - 1", mat = "info$data$mat", fig.cap) {
   rmd_at_age(age, mat, fig.cap, "Maturity")
+}
+
+rmd_fec <- function(age, fec, fig.cap) {
+  rmd_at_age(age, fec, fig.cap, "Fecundity")
 }
 
 

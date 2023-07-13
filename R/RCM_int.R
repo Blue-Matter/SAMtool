@@ -277,6 +277,10 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     OM@cpars$Mat_age <- StockPars$Mat_age
   }
   
+  if (!identical(StockPars$Mat_age * StockPars$Wt_age, StockPars$Fec_Age)) {
+    OM@cpars$Fec_age <- StockPars$Fec_Age
+  }
+  
   if (!OM@SRrel == 3) {
     if (prior$use_prior[2]) {
       OM@cpars$hs <- OM_par$h
