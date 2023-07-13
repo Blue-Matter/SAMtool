@@ -684,7 +684,8 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
                              plot_type = c('annual', 'bubble_data', 'bubble_residuals', 'mean', 'heat_residuals', 'hist_residuals'),
                              N = rowSums(obs), CAL_bins = NULL, ages = NULL, ind = 1:nrow(obs),
                              annual_ylab = "Frequency", annual_yscale = c("proportions", "raw"),
-                             bubble_adj = 5, bubble_color = c("black", "white"), fit_linewidth = 3, fit_color = "red") {
+                             bubble_adj = 5, bubble_color = c("#99999999", "white"), # grDevices::gray(0.6, 0.6)
+                             fit_linewidth = 3, fit_color = "red") {
   plot_type <- match.arg(plot_type)
   annual_yscale <- match.arg(annual_yscale)
   if (is.null(CAL_bins)) data_type <- "age" else data_type <- "length"
@@ -746,7 +747,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     fit_prob <- fit/rowSums(fit, na.rm = TRUE)
 
     resid <- (obs_prob - fit_prob) / sqrt(fit_prob * (1 - fit_prob)/N)
-    max_abs_resid <- pmin(10, max(abs(resid), na.rm = TRUE))
+    max_abs_resid <- 3
     
     Year_mat <- matrix(Year, ncol = ncol(resid), nrow = nrow(resid))
     data_mat <- matrix(data_val, ncol = ncol(resid), nrow = nrow(resid), byrow = TRUE)
@@ -757,20 +758,17 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     }
     
     if (plot_type == "bubble_residuals") {
-      
-      diameter_max <- bubble_adj / max_abs_resid
-      
+      cex_bubble <- bubble_adj * sqrt(pmin(abs(resid), Inf))
       isPositive <- resid > 0
-      points(Year_mat[!isPositive], data_mat[!isPositive], 
-             cex = pmin(0.5 * diameter_max * abs(resid[!isPositive]), diameter_max), 
+      points(Year_mat[!isPositive], data_mat[!isPositive], cex = cex_bubble[!isPositive], 
              pch = 21, bg = bubble_color[1])
-      points(Year_mat[isPositive], data_mat[isPositive], 
-             cex = pmin(0.5 * diameter_max * resid[isPositive], diameter_max),
+      points(Year_mat[isPositive], data_mat[isPositive], cex = cex_bubble[isPositive],
              pch = 21, bg = bubble_color[2])
       legend("topleft", 
-             legend = c(paste0("<-", round(max_abs_resid, 1)), "-1", "1", paste0(">", round(max_abs_resid, 1))),
-             pt.cex = c(diameter_max, 0.5 * diameter_max, 0.5 * diameter_max, diameter_max),
-             pt.bg = rep(bubble_color, each = 2), pch = 21, horiz = TRUE)
+             legend = c(0.1, 0.5, 1, ">3"),
+             pt.cex = sqrt(c(0.1, 0.5, 1, 3)) * bubble_adj,
+             pt.bg = bubble_color[1],
+             pch = 21, horiz = TRUE)
       
     } else if (plot_type == "heat_residuals") {
       
@@ -778,13 +776,13 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
       vals <- unique(as.numeric(resid_round)) %>% sort()
       ncolor <- length(vals)
       cols_redblue <- gplots::redblue(ncolor) %>% structure(names = vals)
-      data_diff <- local({
+      ydiff <- local({
         dd <- apply(data_mat, 1, diff)
         rbind(dd, dd[nrow(dd), ]) %>% t()
       })
       
       rect(xleft = Year_mat - 0.5, xright = Year_mat + 0.5,
-           ybottom = data_mat - 0.5 * data_diff, ytop = data_mat + data_diff, 
+           ybottom = data_mat - 0.5 * ydiff, ytop = data_mat + 0.5 * ydiff, 
            border = "grey60", col = cols_redblue[as.character(resid_round)])
       legend("topleft", 
              legend = c(paste0("<-", round(max_abs_resid, 1)), "0", paste0(">", round(max_abs_resid, 1))),

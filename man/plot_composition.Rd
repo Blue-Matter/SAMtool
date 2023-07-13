@@ -17,7 +17,7 @@ plot_composition(
   annual_ylab = "Frequency",
   annual_yscale = c("proportions", "raw"),
   bubble_adj = 5,
-  bubble_color = c("black", "white"),
+  bubble_color = c("#99999999", "white"),
   fit_linewidth = 3,
   fit_color = "red"
 )
