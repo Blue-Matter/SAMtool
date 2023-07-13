@@ -40,15 +40,14 @@ rmd_assess_resid2 <- function(year, obs, fit, fig.cap, label = fig.cap) {
     "```\n")
 }
 
-
-
-rmd_fit_comps <- function(year, obs, fit, type = c("bubble_data", "annual", "bubble_residuals", "mean"), ages = "NULL", CAL_bins = "NULL", fig.cap,
-                          bubble_adj = "10") {
+rmd_fit_comps <- function(year, obs, fit, type = c("bubble_data", "annual", "bubble_residuals", "mean", "heat_residuals"), 
+                          ages = "NULL", CAL_bins = "NULL", N = "NULL", fig.cap,
+                          bubble_adj = ifelse(type == "bubble_data", "10", "1.5")) {
   type <- match.arg(type)
   arg <- paste0("\"", type, "\", CAL_bins = ", CAL_bins, ", ages = ", ages)
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     paste0("ind_valid <- rowSums(", obs, ", na.rm = TRUE) > 0"),
-    paste0("if (any(ind_valid)) plot_composition(", year, "[ind_valid], ", obs, "[ind_valid, , drop = FALSE], ", fit, "[ind_valid, , drop = FALSE], plot_type = ", arg, ", bubble_adj = ", bubble_adj, ")"),
+    paste0("if (any(ind_valid)) plot_composition(", year, "[ind_valid], ", obs, "[ind_valid, , drop = FALSE], ", fit, "[ind_valid, , drop = FALSE], plot_type = ", arg, ", N = ", N, "[ind_valid], bubble_adj = ", bubble_adj, ")"),
     "```\n")
 }
 
@@ -546,7 +545,9 @@ rmd_RCM_Hist_compare <- function() {
 }
 
 plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = NULL, annual_ylab = "Frequency",
-                                 annual_yscale = c("proportions", "raw"), N = if (is.null(dat)) NULL else round(rowSums(dat)), dat_linewidth = 2, dat_color = "black") {
+                                 annual_yscale = c("proportions", "raw"), 
+                                 N = if (is.null(dat)) NULL else round(rowSums(dat)), 
+                                 dat_linewidth = 2, dat_color = "black") {
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
   par(mfcol = c(4, 4), mar = rep(0, 4), oma = c(5.1, 5.1, 2.1, 2.1))

@@ -684,7 +684,8 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
                              plot_type = c('annual', 'bubble_data', 'bubble_residuals', 'mean', 'heat_residuals', 'hist_residuals'),
                              N = rowSums(obs), CAL_bins = NULL, ages = NULL, ind = 1:nrow(obs),
                              annual_ylab = "Frequency", annual_yscale = c("proportions", "raw"),
-                             bubble_adj = 5, bubble_color = c("#99999999", "white"), # grDevices::gray(0.6, 0.6)
+                             bubble_adj = ifelse(plot_type == 'bubble_data', 5, 1.5), 
+                             bubble_color = c("#99999999", "white"), # grDevices::gray(0.6, 0.6)
                              fit_linewidth = 3, fit_color = "red") {
   plot_type <- match.arg(plot_type)
   annual_yscale <- match.arg(annual_yscale)
@@ -700,7 +701,10 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     data_val <- if (is.null(ages)) 1:ncol(obs) else ages
     data_lab <- "Age"
   }
-  if (!is.null(N)) N <- round(N, 1)
+  if (!is.null(N)) {
+    N <- rowSums(obs)
+    N <- round(N, 1)
+  }
 
   if (annual_yscale == "proportions") {
     obs_prob_all <- obs/rowSums(obs, na.rm = TRUE)

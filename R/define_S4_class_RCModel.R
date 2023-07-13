@@ -348,26 +348,31 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                   match = if(missing(condition)) FALSE else condition[i] == "catch2")
                 }
               }
-              individual_array_fn <- function(i, obs, pred, comps = c("age", "length"), label, plot_mean = TRUE) {
+              individual_array_fn <- function(i, obs, pred, N, comps = c("age", "length"), label, plot_mean = TRUE) {
                 comps <- match.arg(comps)
-                obs2 <- paste0(obs, "[, , ", i, "]")
-                pred2 <- paste0(pred, "[, , ", i, "]")
-                fig.cap <- paste0("Observed (black) and predicted (red) ", comps, " composition from ", label[i], ".")
-                fig.cap2 <- paste0("Residuals for ", comps, " composition from ", label[i], ".")
-                fig.cap3 <- paste0("Observed (black) and predicted (red) mean ", comps, " from the composition data for ", 
-                                   label[i], ".")
+                
+                obs_ch <- paste0(obs, "[, , ", i, "]")
+                pred_ch <- paste0(pred, "[, , ", i, "]")
+                N_ch <- paste0(N, "[, ", i, "]")
+                
+                fig.cap <- list(
+                  annual = paste0("Observed (black) and predicted (red) ", comps, " composition from ", label[i], "."),
+                  bubble_residuals = paste0("Multinomial Pearson residuals (bubbles) for ", comps, " composition from ", label[i], "."),
+                  heat_residuals = paste0("Multinomial Pearson residuals (colored tiles) for ", comps, " composition from ", label[i], "."),
+                  mean = paste0("Observed (black) and predicted (red) mean ", comps, " from the composition data for ", 
+                                label[i], ".")
+                )
+                
                 if (comps == "age") {
-                  #rr <- rmd_fit_comps("Year", obs2, pred2, type = c("annual", "bubble_residuals", "mean"), 
-                  #                    ages = "age", fig.cap = fig.cap)
-                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", ages = "age", fig.cap = fig.cap)
-                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", ages = "age", fig.cap = fig.cap2)
-                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", ages = "age", fig.cap = fig.cap3)
+                  rr <- lapply(names(fig.cap), function(j) {
+                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, ages = "age", N = N_ch, fig.cap = fig.cap[[j]])
+                  })
                 } else {
-                  rr <- rmd_fit_comps("Year", obs2, pred2, type = "annual", CAL_bins = "RCMdata@Misc$lbinmid", fig.cap = fig.cap)
-                  rr2 <- rmd_fit_comps("Year", obs2, pred2, type = "bubble_residuals", CAL_bins = "RCMdata@Misc$lbinmid", fig.cap = fig.cap2)
-                  rr3 <- rmd_fit_comps("Year", obs2, pred2, type = "mean", CAL_bins = "RCMdata@Misc$lbinmid", fig.cap = fig.cap3)
+                  rr <- lapply(names(fig.cap), function(j) {
+                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, CAL_bins = "RCMdata@Misc$lbinmid", N = N_ch, fig.cap = fig.cap[[j]])
+                  })
                 }
-                c(rr, rr2, rr3)
+                do.call(c, rr)
               }
 
               if (any(RCMdata@Chist > 0, na.rm = TRUE)) {
@@ -401,12 +406,14 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
               if (any(RCMdata@CAA > 0, na.rm = TRUE)) {
                 CAA_plots <- c("#### Age comps \n",
-                               lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAA", pred = "report$CAApred", comps = "age", label = f_name))
+                               lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAA", pred = "report$CAApred", 
+                                      N = "RCMdata@CAA_ESS", comps = "age", label = f_name))
               } else CAA_plots <- NULL
 
               if (any(RCMdata@CAL > 0, na.rm = TRUE)) {
                 CAL_plots <- c("#### Length comps \n",
-                               lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAL", pred = "report$CALpred", comps = "length", label = f_name))
+                               lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAL", pred = "report$CALpred", 
+                                      N = "RCMdata@CAL_ESS", comps = "length", label = f_name))
               } else CAL_plots <- NULL
 
               if (any(RCMdata@MS > 0, na.rm = TRUE)) {
@@ -423,12 +430,14 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
               if (any(RCMdata@IAA > 0, na.rm = TRUE)) {
                 IAA_plots <- c("#### Index age comps \n",
-                                 lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", comps = "age", label = s_name))
+                                 lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", 
+                                        N = "RCMdata@IAA_ESS", comps = "age", label = s_name))
               } else IAA_plots <- NULL
 
               if (any(RCMdata@IAL > 0, na.rm = TRUE)) {
                 IAL_plots <- c("#### Index length comps \n",
-                                 lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAL", pred = "report$IALpred", comps = "length", label = s_name))
+                                 lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAL", pred = "report$IALpred", 
+                                        N = "RCMdata@IAL_ESS", comps = "length", label = s_name))
               } else IAL_plots <- NULL
 
               data_section <- c(C_matplot, C_plots, E_matplot, I_plots, CAA_plots, CAL_plots, MS_plots, IAA_plots, IAL_plots)
