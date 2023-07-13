@@ -316,10 +316,8 @@ Type RCM(objective_function<Type> *obj) {
       } else if(condition(ff) == 1) { //catch2
         F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
       } else { //effort
-        for(int ff=0;ff<nfleet;ff++) {
-          Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
-          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
-        }
+        Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
+        F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
       }
     }
     
