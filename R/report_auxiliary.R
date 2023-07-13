@@ -640,7 +640,7 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' @param fit_linewidth Argument \code{lwd} for fitted line.
 #' @param fit_color Color of fitted line.
 #' @param bubble_color Colors for negative and positive residuals, respectively, for bubble plots.
-#' @return Plots depending on \code{plot_type}.
+#' @return Plots depending on \code{plot_type}. Invisibly returns a matrix or list of values that were plotted.
 #' @author Q. Huynh
 #' @export
 #' @examples
@@ -741,7 +741,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
     legend("topleft", legend = c(n1, paste0(">", n2)), pt.cex = 0.5 * diameter_max * c(n1, n2),
            pt.bg = "white", pch = 21, horiz = TRUE)
-    return(invisible())
+    return(invisible(obs))
   }
   # Pearson residuals
   if (grepl('residuals', plot_type)) {
@@ -774,6 +774,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
              pt.bg = bubble_color[1],
              pch = 21, horiz = TRUE)
       
+      
     } else if (plot_type == "heat_residuals") {
       
       resid_round <- pmin(resid, max_abs_resid) %>% pmax(resid, -max_abs_resid) %>% round(2)
@@ -796,7 +797,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     } else if (plot_type == "hist_residuals") {
       hist(as.numeric(resid), xlab = "Pearson residuals", main = NULL)
     }
-    return(invisible())
+    return(invisible(resid))
   }
   # Mean length or age over time
   if (plot_type == 'mean') {
@@ -809,7 +810,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     plot(Year[ind2], mu[ind2], xlab = "Year", ylab = paste0("Mean ", data_type), typ = "o")
     if (!is.null(fit)) lines(Year[ind2], mupred[ind2], lwd = fit_linewidth, col = fit_color)
 
-    return(invisible())
+    return(invisible(mu))
   }
 
   # Annual comps (obs vs. fitted if available)
@@ -848,7 +849,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
         mtext(annual_ylab, side = 2, line = 3.5, outer = TRUE)
       }
     }
-    return(invisible())
+    return(invisible(list(obs = obs_prob, fit = fit_prob)))
 
   }
 

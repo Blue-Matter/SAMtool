@@ -16,7 +16,7 @@ plot_composition(
   ind = 1:nrow(obs),
   annual_ylab = "Frequency",
   annual_yscale = c("proportions", "raw"),
-  bubble_adj = 5,
+  bubble_adj = ifelse(plot_type == "bubble_data", 5, 1.5),
   bubble_color = c("#99999999", "white"),
   fit_linewidth = 3,
   fit_color = "red"
@@ -59,7 +59,7 @@ and \code{fit}. Ignored for age data.}
 \item{fit_color}{Color of fitted line.}
 }
 \value{
-Plots depending on \code{plot_type}.
+Plots depending on \code{plot_type}. Invisibly returns a matrix or list of values that were plotted.
 }
 \description{
 Plots annual length or age composition data.
