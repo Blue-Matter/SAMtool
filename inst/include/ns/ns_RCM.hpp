@@ -61,14 +61,6 @@ Type sum_EPR(vector<Type> NPR, matrix<Type> fec, int n_age, int y) {
 }
 
 template<class Type>
-Type sum_BPR(vector<Type> NPR, matrix<Type> wt, int n_age, int y) {
-  Type BPR = 0;
-  for(int a=0;a<n_age;a++) BPR += NPR(a) * wt(y,a);
-  return BPR;
-}
-
-
-template<class Type>
 array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Len_age, vector<Type> &LFS, vector<Type> &L5,
                      vector<Type> &Vmaxlen, Type Linf, int nfleet, matrix<int> sel_block, int nsel_block, Type &prior,
                      matrix<int> est_vul) {
