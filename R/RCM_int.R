@@ -200,6 +200,14 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   OM@isRel <- FALSE
   OM@cpars$V <- OM_par$V
   OM@cpars$Find <- OM_par$Find
+  
+  maxFind <- max(OM@cpars$Find)
+  
+  if (maxFind > max_F) {
+    OM@maxF <- maxFind
+    if (!silent) message("Updating OM@maxF to maximum F across fleets: ", round(maxFind, 2))
+  }
+  
   OM@cpars$qs <- rep(1, nsim)
   if (!silent) {
     message("Historical F set with OM@cpars$Find and OM@cpars$qs.")
