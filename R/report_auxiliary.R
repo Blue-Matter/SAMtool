@@ -152,7 +152,7 @@ report <- function(Assessment, retro = NULL, filename = paste0("report_", Assess
   }
   render_args$quiet <- quiet
 
-  message("Rendering markdown file...")
+  message("Rendering markdown file: ", file.path(dir, filename_rmd))
   output_filename <- do.call(rmarkdown::render, render_args)
   message("Rendered file: ", output_filename)
   message("See help(plot.Assessment) to adjust report and file directory.")

@@ -446,13 +446,13 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (any(RCMdata@IAA > 0, na.rm = TRUE)) {
                 IAA_plots <- c("#### Index age comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", 
-                                        N = "RCMdata@IAA_ESS", comps = "age", label = s_name))
+                                        N = "RCMdata@IAA_ESS", comps = "age", label = s_name, bubble_adj = as.character(bubble_adj)))
               } else IAA_plots <- NULL
 
               if (any(RCMdata@IAL > 0, na.rm = TRUE)) {
                 IAL_plots <- c("#### Index length comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAL", pred = "report$IALpred", 
-                                        N = "RCMdata@IAL_ESS", comps = "length", label = s_name))
+                                        N = "RCMdata@IAL_ESS", comps = "length", label = s_name, bubble_adj = as.character(bubble_adj)))
               } else IAL_plots <- NULL
 
               data_section <- c(C_matplot, C_plots, E_matplot, I_plots, CAA_plots, CAL_plots, MS_plots, IAA_plots, IAL_plots)
@@ -543,10 +543,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               dir.create(dir)
             }
             write(rmd, file = file.path(dir, filename_rmd))
-            message("Generated markdown file: ", file.path(dir, filename_rmd))
 
             # Rendering markdown file
-            message("Rendering markdown file...")
+            message("Rendering markdown file: ", file.path(dir, filename_rmd))
             output_filename <- do.call(rmarkdown::render, render_args)
             message("Rendered file: ", output_filename)
             message("See help(plot.RCModel) to adjust report and file directory.")
@@ -732,10 +731,9 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
     dir.create(dir)
   }
   write(rmd, file = file.path(dir, filename_rmd))
-  message("Generated markdown file: ", file.path(dir, filename_rmd))
 
   # Rendering markdown file
-  message("Rendering markdown file...")
+  message("Rendering markdown file: ", file.path(dir, filename_rmd))
   output_filename <- do.call(rmarkdown::render, render_args)
   message("Rendered file: ", output_filename)
 

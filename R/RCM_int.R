@@ -449,7 +449,10 @@ RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length
   out$Perr <- vapply(res, make_Perr, numeric(nyears), obj_data = obj_data) %>% t()
   
   make_early_Perr <- function(x, obj_data) {
-    res <- x$R_eq * x$NPR_equilibrium / x$R0 / x$NPR_unfished[1, ]
+    M <- if (is.null(x$Mest)) obj_data$M_data[1, ] else rep(x$Mest, n_age)
+    NPR_unfished <- calc_NPR(exp(-M), length(M), obj_data$plusgroup)
+    #NPR_unfished <- x$NPR_unfished[1, ]
+    res <- x$R_eq * x$NPR_equilibrium / x$R0 / NPR_unfished
     bias_corr <- ifelse(obj_data$est_early_rec_dev, exp(-0.5 * x$tau^2), 1)
     early_dev <- exp(x$log_early_rec_dev) * bias_corr
     out <- res[-1] * early_dev
