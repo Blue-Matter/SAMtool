@@ -415,7 +415,7 @@ rmd_residual <- function(par, se = "NULL", fig.cap, label, conv_check = FALSE, b
 rmd_fit_age_comps <- function(type = c("bubble", "annual"), ages = "0:(info$data$n_age-1)", match = FALSE)  {
   type <- match.arg(type)
   if (type == "bubble") {
-    arg <- paste("\"bubble_residuals\", bubble_adj = 20, ages =", ages)
+    arg <- paste("\"bubble_residuals\", bubble_adj = 1.5, ages =", ages)
     fig.cap = "Pearson residual bubble plot of age compositions (grey bubbles are negative, white are positive)."
   } else {
     arg <- paste("\"annual\", ages =", ages)
@@ -436,7 +436,7 @@ rmd_fit_age_comps <- function(type = c("bubble", "annual"), ages = "0:(info$data
 rmd_fit_length_comps <- function(type = c("bubble", "annual"), CAL_bins = "info$LH$CAL_mids")  {
   type <- match.arg(type)
   if (type == "bubble") {
-    arg <- paste("\"bubble_residuals\", bubble_adj = 20, CAL_bins =", CAL_bins)
+    arg <- paste("\"bubble_residuals\", bubble_adj = 1.5, CAL_bins =", CAL_bins)
     fig.cap = "Pearson residual bubble plot of length compositions (grey bubbles are negative, white are positive)."
   } else {
     arg <- paste("\"annual\", CAL_bins =", CAL_bins)
@@ -450,7 +450,7 @@ rmd_fit_length_comps <- function(type = c("bubble", "annual"), CAL_bins = "info$
     "```\n")
 }
 
-rmd_bubble <- function(year, par, CAL_bins = "NULL", ages = "NULL", fig.cap, bubble_adj = "5") {
+rmd_bubble <- function(year, par, CAL_bins = "NULL", ages = "NULL", fig.cap, bubble_adj = "1.5") {
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
     paste0("plot_composition(", year, ", ", par, ", CAL_bins = ", CAL_bins, ", ages = ", ages, ", plot_type = \"bubble_data\", bubble_adj = ", bubble_adj, ")"),
     "```\n")

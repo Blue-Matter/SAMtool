@@ -664,8 +664,7 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' 
 #' plot_composition(
 #'   obs = SimulatedData@CAA[1, , ], fit = SCA_fit@C_at_age,
-#'   plot_type = "bubble_residuals", ages = 0:SimulatedData@MaxAge,
-#'   bubble_adj = 10
+#'   plot_type = "bubble_residuals", ages = 0:SimulatedData@MaxAge
 #' )
 #' 
 #' plot_composition(
@@ -684,7 +683,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
                              plot_type = c('annual', 'bubble_data', 'bubble_residuals', 'mean', 'heat_residuals', 'hist_residuals'),
                              N = rowSums(obs), CAL_bins = NULL, ages = NULL, ind = 1:nrow(obs),
                              annual_ylab = "Frequency", annual_yscale = c("proportions", "raw"),
-                             bubble_adj = ifelse(plot_type == 'bubble_data', 5, 1.5), 
+                             bubble_adj = 1.5, #ifelse(plot_type == 'bubble_data', 5, 1.5), 
                              bubble_color = c("#99999999", "white"), # grDevices::gray(0.6, 0.6)
                              fit_linewidth = 3, fit_color = "red") {
   plot_type <- match.arg(plot_type)
@@ -701,10 +700,8 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     data_val <- if (is.null(ages)) 1:ncol(obs) else ages
     data_lab <- "Age"
   }
-  if (!is.null(N)) {
-    N <- rowSums(obs)
-    N <- round(N, 1)
-  }
+  if (is.null(N)) N <- rowSums(obs)
+  N <- round(N, 1)
 
   if (annual_yscale == "proportions") {
     obs_prob_all <- obs/rowSums(obs, na.rm = TRUE)
@@ -731,15 +728,19 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     n2 <- pretty(quantile(obs[obs > 0], na.rm = TRUE, probs = 0.9))[2]
     if (n2 < n1) n1 <- 0.5 * n2
     diameter_max <- bubble_adj / n2
+    
+    Year_mat <- matrix(Year, ncol = ncol(obs), nrow = nrow(obs))
+    data_mat <- matrix(data_val, ncol = ncol(obs), nrow = nrow(obs), byrow = TRUE)
+    
+    bubble_size <- bubble_adj * sqrt(pmin(obs * 3 / n2, 3))
     plot(NULL, NULL, typ = 'n', xlim = range(Year), xlab = "Year",
          ylim = range(data_val), ylab = data_lab)
-    for(i in 1:length(Year)) {
-      for(j in 1:length(data_val)) {
-        points(Year[i], data_val[j], cex = 0.5 * diameter_max * pmin(obs[i, j], n2), pch = 21, bg = "white")
-      }
+    points(Year_mat, data_mat, cex = bubble_size, pch = 21, bg = "white", col = "black")
+    
+    if (data_lab == "Age") {
+      lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
     }
-    lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
-    legend("topleft", legend = c(n1, paste0(">", n2)), pt.cex = 0.5 * diameter_max * c(n1, n2),
+    legend("topleft", legend = c(n1, paste0(">", n2)), pt.cex = bubble_adj * sqrt(c(n1, n2) * 3 / n2),
            pt.bg = "white", pch = 21, horiz = TRUE)
     return(invisible(obs))
   }
@@ -756,9 +757,11 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     Year_mat <- matrix(Year, ncol = ncol(resid), nrow = nrow(resid))
     data_mat <- matrix(data_val, ncol = ncol(resid), nrow = nrow(resid), byrow = TRUE)
     
-    plot(NULL, NULL, typ = 'n', xlim = range(Year), xlab = "Year", ylim = c(1, 1.1) * range(data_val), ylab = data_lab)
-    if (data_type == "age") {
-      lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
+    if (!grepl("hist", plot_type)) {
+      plot(NULL, NULL, typ = 'n', xlim = range(Year), xlab = "Year", ylim = c(1, 1.1) * range(data_val), ylab = data_lab)
+      if (data_type == "age") {
+        lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
+      }
     }
     
     if (plot_type == "bubble_residuals") {
@@ -773,7 +776,6 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
              pt.cex = sqrt(c(0.1, 0.5, 1, 3)) * bubble_adj,
              pt.bg = bubble_color[1],
              pch = 21, horiz = TRUE)
-      
       
     } else if (plot_type == "heat_residuals") {
       

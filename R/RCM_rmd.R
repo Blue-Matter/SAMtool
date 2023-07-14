@@ -42,7 +42,7 @@ rmd_assess_resid2 <- function(year, obs, fit, fig.cap, label = fig.cap) {
 
 rmd_fit_comps <- function(year, obs, fit, type = c("bubble_data", "annual", "bubble_residuals", "mean", "heat_residuals"), 
                           ages = "NULL", CAL_bins = "NULL", N = "NULL", fig.cap,
-                          bubble_adj = ifelse(type == "bubble_data", "10", "1.5")) {
+                          bubble_adj = "1.5") {
   type <- match.arg(type)
   arg <- paste0("\"", type, "\", CAL_bins = ", CAL_bins, ", ages = ", ages)
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),

@@ -16,7 +16,7 @@ plot_composition(
   ind = 1:nrow(obs),
   annual_ylab = "Frequency",
   annual_yscale = c("proportions", "raw"),
-  bubble_adj = ifelse(plot_type == "bubble_data", 5, 1.5),
+  bubble_adj = 1.5,
   bubble_color = c("#99999999", "white"),
   fit_linewidth = 3,
   fit_color = "red"
@@ -85,8 +85,7 @@ plot_composition(
 
 plot_composition(
   obs = SimulatedData@CAA[1, , ], fit = SCA_fit@C_at_age,
-  plot_type = "bubble_residuals", ages = 0:SimulatedData@MaxAge,
-  bubble_adj = 10
+  plot_type = "bubble_residuals", ages = 0:SimulatedData@MaxAge
 )
 
 plot_composition(

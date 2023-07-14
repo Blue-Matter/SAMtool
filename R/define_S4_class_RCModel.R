@@ -131,7 +131,7 @@ setMethod("initialize", "RCModel", function(.Object, ...) {
 #' @exportMethod plot
 setMethod("plot", signature(x = "RCModel", y = "missing"),
           function(x, compare = FALSE, filename = "RCM", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL,
-                   f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
+                   f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 1.5, scenario = list(), title = NULL,
                    open_file = TRUE, quiet = TRUE, render_args, ...) {
 
             # Run retrospective (dots$retrospective = TRUE with dots$nyr)
@@ -363,7 +363,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                   match = if(missing(condition)) FALSE else condition[i] == "catch2")
                 }
               }
-              individual_array_fn <- function(i, obs, pred, N, comps = c("age", "length"), label, plot_mean = TRUE) {
+              individual_array_fn <- function(i, obs, pred, N, comps = c("age", "length"), label, bubble_adj, plot_mean = TRUE) {
                 comps <- match.arg(comps)
                 
                 obs_ch <- paste0(obs, "[, , ", i, "]")
@@ -380,11 +380,11 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 
                 if (comps == "age") {
                   rr <- lapply(names(fig.cap), function(j) {
-                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, ages = "age", N = N_ch, fig.cap = fig.cap[[j]])
+                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, ages = "age", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
                   })
                 } else {
                   rr <- lapply(names(fig.cap), function(j) {
-                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, CAL_bins = "RCMdata@Misc$lbinmid", N = N_ch, fig.cap = fig.cap[[j]])
+                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, CAL_bins = "RCMdata@Misc$lbinmid", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
                   })
                 }
                 do.call(c, rr)
@@ -422,13 +422,13 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (any(RCMdata@CAA > 0, na.rm = TRUE)) {
                 CAA_plots <- c("#### Age comps \n",
                                lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAA", pred = "report$CAApred", 
-                                      N = "RCMdata@CAA_ESS", comps = "age", label = f_name))
+                                      N = "RCMdata@CAA_ESS", comps = "age", label = f_name, bubble_adj = as.character(bubble_adj)))
               } else CAA_plots <- NULL
 
               if (any(RCMdata@CAL > 0, na.rm = TRUE)) {
                 CAL_plots <- c("#### Length comps \n",
                                lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAL", pred = "report$CALpred", 
-                                      N = "RCMdata@CAL_ESS", comps = "length", label = f_name))
+                                      N = "RCMdata@CAL_ESS", comps = "length", label = f_name, bubble_adj = as.character(bubble_adj)))
               } else CAL_plots <- NULL
 
               if (any(RCMdata@MS > 0, na.rm = TRUE)) {
@@ -477,7 +477,8 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 SSB_SSB0_plot <- rmd_SSB_SSB0(FALSE, "structure(report$E/report$E0_SR, names = Yearplusone)")
               }
 
-              N_bubble <- rmd_bubble("Yearplusone", "report$N", ages = "age", fig.cap = "Predicted abundance-at-age.")
+              N_bubble <- rmd_bubble("Yearplusone", "report$N", ages = "age", fig.cap = "Predicted abundance-at-age.", 
+                                     bubble_adj = as.character(bubble_adj))
               CAA_bubble <- rmd_bubble("Year", "apply(report$CAApred, 1:2, sum)", ages = "age",
                                        fig.cap = "Predicted catch-at-age (summed over all fleets).", 
                                        bubble_adj = as.character(bubble_adj))
@@ -560,7 +561,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 #' @rdname plot.RCModel
 #' @export
 compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = tempdir(), Year = NULL,
-                        f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 10, scenario = list(), title = NULL,
+                        f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 1.5, scenario = list(), title = NULL,
                         open_file = TRUE, quiet = TRUE, render_args) {
 
   dots <- list(...)
