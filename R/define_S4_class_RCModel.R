@@ -549,6 +549,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             message("Rendering markdown file...")
             output_filename <- do.call(rmarkdown::render, render_args)
             message("Rendered file: ", output_filename)
+            message("See help(plot.RCModel) to adjust report and file directory.")
 
             if (open_file) browseURL(output_filename)
             invisible(output_filename)
