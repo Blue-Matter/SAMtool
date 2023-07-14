@@ -284,7 +284,7 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     RCMdata@Misc$nfleet <- ncol(RCMdata@Chist)
     
     if (RCMdata@Misc$nfleet > 1) {
-      if (length(condition) == 1) RCMdata@Misc$condition <- rep(condition, RCMdata@Misc$nfleet)
+      if (length(condition) == 1) RCMdata@Misc$condition <- condition <- rep(condition, RCMdata@Misc$nfleet)
       if (length(condition) != RCMdata@Misc$nfleet) stop("Length of condition vector should be equal to ", RCMdata@Misc$nfleet)
     }
     
@@ -320,7 +320,7 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     }
     
     if (RCMdata@Misc$nfleet > 1) {
-      if (length(condition) == 1) RCMdata@Misc$condition <- rep(condition, RCMdata@Misc$nfleet)
+      if (length(condition) == 1) RCMdata@Misc$condition <- condition <- rep(condition, RCMdata@Misc$nfleet)
       if (length(condition) != RCMdata@Misc$nfleet) stop("Length of condition vector should be equal to ", RCMdata@Misc$nfleet)
     }
     
