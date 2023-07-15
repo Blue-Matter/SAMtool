@@ -90,6 +90,7 @@ Type RCM(objective_function<Type> *obj) {
   
   DATA_INTEGER(sim_process_error); // Whether to simulate process error (when using the TMB SIMULATE module) 
   DATA_SCALAR(spawn_time_frac);    // Fraction of year when spawning occurs for calculating spawning biomass
+  DATA_IVECTOR(est_q);             // Whether to estimate index q (TRUE), otherwise solved analytically (FALSE)
   
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
@@ -108,9 +109,10 @@ Type RCM(objective_function<Type> *obj) {
   
   PARAMETER_MATRIX(log_compf);          // CAA/CAL dispersion parameter
   PARAMETER_MATRIX(log_compi);          // IAA/IAL dispersion parameter
+  
+  PARAMETER_VECTOR(log_q);              // Index q
 
   int nlbin = lbinmid.size();
-
   Type R0 = 0;
   Type h = 0;
   if(SR_type == "BH") {
@@ -135,8 +137,8 @@ Type RCM(objective_function<Type> *obj) {
   
   
   // Annual probability of length-at-age (PLA)
-  vector<matrix<Type> > PLA(n_y);
-  for(int y=0;y<n_y;y++) {
+  vector<matrix<Type> > PLA(n_y+1);
+  for(int y=0;y<=n_y;y++) {
     if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
   }
   
@@ -146,7 +148,7 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> Vmaxlen(nsel_block);
   matrix<Type> vul_len(nlbin,nsel_block);
   vul_len.setZero();
-  array<Type> vul = calc_vul(vul_par, vul_type, lbin, PLA, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, vul_len, prior, est_vul);
+  array<Type> vul = calc_vul(vul_par, vul_type, lbinmid, n_y+1, n_age, PLA, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, vul_len, prior, est_vul);
 
   vector<Type> q_effort(nfleet);
   vector<Type> CV_msize(nfleet);
@@ -421,7 +423,8 @@ Type RCM(objective_function<Type> *obj) {
   IN.setZero();
   Itot.setZero();
 
-  array<Type> ivul = calc_ivul(ivul_par, ivul_type, nlbin, PLA, iLFS, iL5, iVmaxlen, Linf, mat, vul, ivul_len prior, est_ivul);
+  array<Type> ivul = calc_ivul(ivul_par, ivul_type, lbinmid, n_y, n_age, PLA, iLFS, iL5, iVmaxlen, Linf, 
+                               mat, vul, ivul_len, prior, est_ivul);
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
@@ -438,7 +441,12 @@ Type RCM(objective_function<Type> *obj) {
       }
     }
     if(!I_units(sur)) Itot.col(sur) = IN.col(sur); // Abundance vulnerable to survey
-    q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred, uses '&'
+    if(est_q(sur)) {
+      q(sur) = exp(log_q(sur));
+      for(int y=0;y<n_y;y++) Ipred(y,sur) = q(sur) * Itot(y,sur);
+    } else {
+      q(sur) = calc_q(I_hist, Itot, sur, sur, Ipred, abs_I, n_y); // This function updates Ipred, uses '&'
+    }
   }
 
   // Calc likelihood and parameter prior

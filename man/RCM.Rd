@@ -281,6 +281,7 @@ If any \code{s_selectivity = "free"}, then this matrix needs to be of maxage+1 r
 the row specifies the selectivity at age. 
 \item log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.
 \item log_early_rec_dev: A numeric vector of length OM@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.
+\item q: A numeric vector of length nsurvey for index catchability.
 }
 
 Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
@@ -295,6 +296,8 @@ or survey, otherwise estimated. Unused cells in the vul_par matrix should be giv
 By default, no deviates are estimated (all are NA).
 \item log_rec_dev: A vector of length OM@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
 By default, all these deviates are estimated.
+\item q: A vector of length nsurvey for index catchability. q should be an estimated parameter when sharing across surveys (perhaps with differing selectivity). Otherwise, it is solved analytically
+where individual parameters are independent of other indices. Use \code{RCMdata@abs_I} for fixing the catchability to 1.
 }
 }
 

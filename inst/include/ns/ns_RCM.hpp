@@ -62,13 +62,12 @@ Type sum_EPR(vector<Type> NPR, matrix<Type> fec, int n_age, int y) {
 
 
 template<class Type>
-array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbin,
+array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbinmid, int n_y, int n_age,
                      vector<matrix<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
                      vector<Type> &Vmaxlen, Type Linf, int nfleet, matrix<int> sel_block, int nsel_block, 
                      matrix<Type> &vul_len, Type &prior, matrix<int> est_vul) {
-  int n_y = PLA.size();
-  int n_age = PLA(1).rows();
-  int nlbin = PLA(1).cols();
+  
+  int nlbin = lbinmid.size();
   array<Type> vul(n_y, n_age, nfleet); // Corresponding age based selectivity
   vul.setZero();
   vector<Type> sls(nsel_block);
@@ -93,14 +92,14 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
         }
       }
       for(int j=0;j<nlbin;j++) { // Calculate length-based sel
-        Type lo = pow(2, -((lbin(j) - LFS(b))/sls(b) * (lbin(j) - LFS(b))/sls(b)));
+        Type lo = pow(2, -((lbinmid(j) - LFS(b))/sls(b) * (lbinmid(j) - LFS(b))/sls(b)));
         Type hi;
         if(vul_type(b) < 0) {
           hi = 1;
         } else {
-          hi = pow(2, -((lbin(j) - LFS(b))/srs(b) * (lbin(j) - LFS(b))/srs(b)));
+          hi = pow(2, -((lbinmid(j) - LFS(b))/srs(b) * (lbinmid(j) - LFS(b))/srs(b)));
         }
-        vul_len(j,b) = CppAD::CondExpLt(lbin(j), LFS(b), lo, hi);
+        vul_len(j,b) = CppAD::CondExpLt(lbinmid(j), LFS(b), lo, hi);
       }
     } else if(vul_type(b) == -2) { // Free parameters - adding priors only
       for(int a=0;a<n_age;a++) {
@@ -130,33 +129,35 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
 }
 
 template<class Type>
-array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbin,
+array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbinmid, int n_y, int n_age,
                       vector<matrix<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
                       vector<Type> &Vmaxlen, Type Linf, matrix<Type> mat, array<Type> fleet_var, 
-                      matrix<Type> &vul_len, Type &prior,  matrix<int> est_vul) {
-  int n_y = PLA.size();
-  int n_age = PLA(1).rows();
-  int nlbin = PLA(1).cols();
+                      matrix<Type> &vul_len, Type &prior, matrix<int> est_vul) {
+  
+  int nlbin = lbinmid.size();
   array<Type> vul(n_y, n_age, vul_type.size()); // Corresponding age based selectivity
   vul.setZero();
+  
+  vector<Type> sls(vul_type.size());
+  vector<Type> srs(vul_type.size());
 
   for(int ff=0;ff<vul_type.size();ff++) {
 
     if(vul_type(ff) == -4) { // B
-      for(int y=0;y<Len_age.rows();y++) {
-        for(int a=0;a<Len_age.cols();a++) vul(y,a,ff) = 1;
+      for(int y=0;y<n_y;y++) {
+        for(int a=0;a<n_age;a++) vul(y,a,ff) = 1;
       }
     } else if(vul_type(ff) == -3) { // SSB
-      for(int y=0;y<Len_age.rows();y++) {
-        for(int a=0;a<Len_age.cols();a++) vul(y,a,ff) = mat(y,a);
+      for(int y=0;y<n_y;y++) {
+        for(int a=0;a<n_age;a++) vul(y,a,ff) = mat(y,a);
       }
     } else if(vul_type(ff) == -2) { // free parameters
-      for(int a=0;a<Len_age.cols();a++) {
+      for(int a=0;a<n_age;a++) {
         Type v = invlogit(vul_par(a,ff));
         if(est_vul(a,ff)) {
           prior -= dbeta_(v, Type(1.01), Type(1.01), true) + log(v - v * v);
         }
-        for(int y=0;y<Len_age.rows();y++) vul(y,a,ff) = v;
+        for(int y=0;y<n_y;y++) vul(y,a,ff) = v;
       }
     } else if(vul_type(ff) > 0) { // Index mirrored to fleet
       vul.col(ff) = fleet_var.col(vul_type(ff) - 1);
@@ -166,11 +167,13 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
 
       LFS(ff) = invlogit(vul_par(0,ff)) * 0.99 * Linf;
       L5(ff) = LFS(ff) - exp(vul_par(1,ff));
-      Type sls = (LFS(ff) - L5(ff))/pow(-log2(0.05), 0.5);
+      sls(ff) = (LFS(ff) - L5(ff))/pow(-log2(0.05), 0.5);
+      
       if(vul_type(ff) == -1) { // Logistic
         Vmaxlen(ff) = 1;
       } else { // Dome
         Vmaxlen(ff) = invlogit(vul_par(2,ff));
+        srs(ff) = (Linf - LFS(ff))/pow(-log2(Vmaxlen(ff)), 0.5);
         
         if(est_vul(2,ff)) {
           Type jac = Vmaxlen(ff) - Vmaxlen(ff) * Vmaxlen(ff);
@@ -178,18 +181,20 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
         }
       }
       for(int j=0;j<nlbin;j++) { // Calculate length-based sel
-        Type lo = pow(2, -((lbin(j) - LFS(b))/sls(b) * (lbin(j) - LFS(b))/sls(b)));
+        Type lo = pow(2, -((lbinmid(j) - LFS(ff))/sls(ff) * (lbinmid(j) - LFS(ff))/sls(ff)));
         Type hi;
-        if(vul_type(b) < 0) {
+        if(vul_type(ff) < 0) {
           hi = 1;
         } else {
-          hi = pow(2, -((lbin(j) - LFS(b))/srs(b) * (lbin(j) - LFS(b))/srs(b)));
+          hi = pow(2, -((lbinmid(j) - LFS(ff))/srs(ff) * (lbinmid(j) - LFS(ff))/srs(ff)));
         }
-        vul_len(j,ff) = CppAD::CondExpLt(lbin(j), LFS(b), lo, hi);
-      }
-
-      for(int y=0;y<n_yy++) {
-        for(int a=0;a<n_age;a++) vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,ff);
+        vul_len(j,ff) = CppAD::CondExpLt(lbinmid(j), LFS(ff), lo, hi);
+        
+        for(int y=0;y<n_y;y++) {
+          for(int a=0;a<n_age;a++) {
+            vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,ff);
+          }
+        }
       }
     }
   }

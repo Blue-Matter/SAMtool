@@ -158,7 +158,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    M_data = if (prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
                    len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
                    Linf = ifelse(age_only_model, n_age, StockPars$Linf[x]),
-                   SD_LAA = t(StockPars$LatASD[x, , 1:nyears]), 
+                   SD_LAA = t(StockPars$LatASD[x, , 1:(nyears+1)]), 
                    wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
                    mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]),
                    #mat = if (any(s_selectivity == -3L)) t(StockPars$Mat_age[x, , 1:(nyears+1)]) else matrix(1, 1, 1),
@@ -184,7 +184,8 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    prior_dist = prior$pr_matrix, 
                    nll_gr = 0L,
                    sim_process_error = 0L,
-                   spawn_time_frac = ifelse(is.null(StockPars$spawn_time_frac), 0, StockPars$spawn_time_frac[x]))
+                   spawn_time_frac = ifelse(is.null(StockPars$spawn_time_frac), 0, StockPars$spawn_time_frac[x]),
+                   est_q = ifelse(is.na(map$log_q), 0L, 1L))
                    
   TMB_data$est_vul <- ifelse(is.na(map$vul_par) | duplicated(map$vul_par), 0, 1) %>%
     matrix(length(map$vul_par)/RCMdata@Misc$nsel_block, RCMdata@Misc$nsel_block)
@@ -359,6 +360,10 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (is.null(start$MR_SRR)) start$MR_SRR <- c(0.8, 0.001)
   if (length(start$MR_SRR) != 2) stop("start$MR_SRR needs to be a length 2 vector.")
   
+  # Log q - can be either estimated by TMB or analytically calculated - see map argument later
+  if (is.null(start$q)) start$q <- rep(1, nsurvey)
+  if (length(start$q) != nsurvey) stop("start$q needs to be a length ", nsurvey, " vector.")
+  
   TMB_params <- list(R0x = ifelse(!is.na(StockPars$R0[x]), log(StockPars$R0[x] * dots$rescale), 0),
                      transformed_h = transformed_h, 
                      MR_SRR = c(logit(start$MR_SRR[1]), log(start$MR_SRR[2])), # Shinge/S0, gamma 
@@ -373,7 +378,8 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                      log_early_rec_dev = start$log_early_rec_dev, 
                      log_rec_dev = start$log_rec_dev,
                      log_compf = matrix(0, nfleet, 2),
-                     log_compi = matrix(0, nsurvey, 2))
+                     log_compi = matrix(0, nsurvey, 2),
+                     log_q = log(start$q))
   
   if (any(RCMdata@Misc$condition == "catch")) {
     TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, 
@@ -473,6 +479,11 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     }
     factor(mapi)
   })
+  
+  # If q is not estimated, it is solved analytically - can still fix it to 1 in RCMdata@abs_I
+  if (is.null(map$q)) map$q <- rep(NA, nsurvey)
+  if (length(map$q) != nsurvey) stop("map$q must be length ", nsurvey)
+  map_out$log_q <- factor(map$q)
   
   list(params = TMB_params, map = map_out)
 }
