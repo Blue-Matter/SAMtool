@@ -60,20 +60,25 @@ Type sum_EPR(vector<Type> NPR, matrix<Type> fec, int n_age, int y) {
   return EPR;
 }
 
+
 template<class Type>
-array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Len_age, vector<Type> &LFS, vector<Type> &L5,
-                     vector<Type> &Vmaxlen, Type Linf, int nfleet, matrix<int> sel_block, int nsel_block, Type &prior,
-                     matrix<int> est_vul) {
-  array<Type> vul(Len_age.rows(), Len_age.cols(), nfleet);
+array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbin,
+                     vector<matrix<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
+                     vector<Type> &Vmaxlen, Type Linf, int nfleet, matrix<int> sel_block, int nsel_block, 
+                     matrix<Type> &vul_len, Type &prior, matrix<int> est_vul) {
+  int n_y = PLA.size();
+  int n_age = PLA(1).rows();
+  int nlbin = PLA(1).cols();
+  array<Type> vul(n_y, n_age, nfleet); // Corresponding age based selectivity
   vul.setZero();
   vector<Type> sls(nsel_block);
   vector<Type> srs(nsel_block);
-
+  
   for(int b=0;b<nsel_block;b++) { // Parameters for sel_block
     if(vul_type(b) <= 0 && vul_type(b) > -2) { // Logistic or dome
       if(est_vul(0,b)) prior -= dnorm_(vul_par(0,b), Type(0), Type(3), true);
       if(est_vul(1,b)) prior -= dnorm_(vul_par(1,b), Type(0), Type(3), true);
-
+      
       LFS(b) = invlogit(vul_par(0,b)) * 0.99 * Linf;
       L5(b) = LFS(b) - exp(vul_par(1,b));
       sls(b) = (LFS(b) - L5(b))/pow(-log2(0.05), 0.5);
@@ -87,8 +92,18 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Le
           prior -= dbeta_(Vmaxlen(b), Type(1.01), Type(1.01), true) + log(jac);
         }
       }
+      for(int j=0;j<nlbin;j++) { // Calculate length-based sel
+        Type lo = pow(2, -((lbin(j) - LFS(b))/sls(b) * (lbin(j) - LFS(b))/sls(b)));
+        Type hi;
+        if(vul_type(b) < 0) {
+          hi = 1;
+        } else {
+          hi = pow(2, -((lbin(j) - LFS(b))/srs(b) * (lbin(j) - LFS(b))/srs(b)));
+        }
+        vul_len(j,b) = CppAD::CondExpLt(lbin(j), LFS(b), lo, hi);
+      }
     } else if(vul_type(b) == -2) { // Free parameters - adding priors only
-      for(int a=0;a<Len_age.cols();a++) {
+      for(int a=0;a<n_age;a++) {
         if(est_vul(a,b)) {
           Type v = invlogit(vul_par(a,b));
           prior -= dbeta_(v, Type(1.01), Type(1.01), true) + log(v - v * v);
@@ -96,25 +111,16 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Le
       }
     }
   }
-
+  
   for(int ff=0;ff<nfleet;ff++) { // Assign to fleet
-    for(int y=0;y<Len_age.rows();y++) {
+    for(int y=0;y<n_y;y++) {
       int vul_ind = sel_block(y,ff) - 1;
-
       if(vul_type(vul_ind) <= 0 && vul_type(vul_ind) > -2) { // Logistic or dome
-        for(int a=0;a<Len_age.cols();a++) {
-          Type lo = pow(2, -((Len_age(y,a) - LFS(vul_ind))/sls(vul_ind) * (Len_age(y,a) - LFS(vul_ind))/sls(vul_ind)));
-          Type hi;
-
-          if(vul_type(vul_ind) < 0) { // Logistic
-            hi = 1;
-          } else { // Dome
-            hi = pow(2, -((Len_age(y,a) - LFS(vul_ind))/srs(vul_ind) * (Len_age(y,a) - LFS(vul_ind))/srs(vul_ind)));
-          }
-          vul(y,a,ff) = CppAD::CondExpLt(Len_age(y,a), LFS(vul_ind), lo, hi);
+        for(int a=0;a<n_age;a++) {
+          for(int j=0;j<nlbin;j++) vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,vul_ind);
         }
       } else if(vul_type(vul_ind) == -2) { // Free parameters
-        for(int a=0;a<Len_age.cols();a++) vul(y,a,ff) = invlogit(vul_par(a, vul_ind));
+        for(int a=0;a<n_age;a++) vul(y,a,ff) = invlogit(vul_par(a, vul_ind));
       } else { // Age-specific index
         vul(y,vul_type(vul_ind)-1,ff) = 1;
       }
@@ -123,13 +129,15 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Le
   return vul;
 }
 
-
-
 template<class Type>
-array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> Len_age, vector<Type> &LFS, vector<Type> &L5,
-                      vector<Type> &Vmaxlen, Type Linf, matrix<Type> mat, array<Type> fleet_var, Type &prior,
-                      matrix<int> est_vul) {
-  array<Type> vul(Len_age.rows(), Len_age.cols(), vul_type.size());
+array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbin,
+                      vector<matrix<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
+                      vector<Type> &Vmaxlen, Type Linf, matrix<Type> mat, array<Type> fleet_var, 
+                      matrix<Type> &vul_len, Type &prior,  matrix<int> est_vul) {
+  int n_y = PLA.size();
+  int n_age = PLA(1).rows();
+  int nlbin = PLA(1).cols();
+  array<Type> vul(n_y, n_age, vul_type.size()); // Corresponding age based selectivity
   vul.setZero();
 
   for(int ff=0;ff<vul_type.size();ff++) {
@@ -169,20 +177,19 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, matrix<Type> L
           prior -= dbeta_(Vmaxlen(ff), Type(1.01), Type(1.01), true) + log(jac);
         }
       }
-
-      for(int y=0;y<Len_age.rows();y++) {
-        for(int a=0;a<Len_age.cols();a++) {
-          Type lo = pow(2, -((Len_age(y,a) - LFS(ff))/sls * (Len_age(y,a) - LFS(ff))/sls));
-          Type hi;
-
-          if(vul_type(ff) == -1) { // Logistic
-            hi = 1;
-          } else { // Dome
-            Type srs = (Linf - LFS(ff))/pow(-log2(Vmaxlen(ff)), 0.5);
-            hi = pow(2, -((Len_age(y,a) - LFS(ff))/srs * (Len_age(y,a) - LFS(ff))/srs));
-          }
-          vul(y,a,ff) = CppAD::CondExpLt(Len_age(y,a), LFS(ff), lo, hi);
+      for(int j=0;j<nlbin;j++) { // Calculate length-based sel
+        Type lo = pow(2, -((lbin(j) - LFS(b))/sls(b) * (lbin(j) - LFS(b))/sls(b)));
+        Type hi;
+        if(vul_type(b) < 0) {
+          hi = 1;
+        } else {
+          hi = pow(2, -((lbin(j) - LFS(b))/srs(b) * (lbin(j) - LFS(b))/srs(b)));
         }
+        vul_len(j,ff) = CppAD::CondExpLt(lbin(j), LFS(b), lo, hi);
+      }
+
+      for(int y=0;y<n_yy++) {
+        for(int a=0;a<n_age;a++) vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,ff);
       }
     }
   }

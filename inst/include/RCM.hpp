@@ -133,11 +133,20 @@ Type RCM(objective_function<Type> *obj) {
   Type penalty = 0;
   Type prior = 0;
   
+  
+  // Annual probability of length-at-age (PLA)
+  vector<matrix<Type> > PLA(n_y);
+  for(int y=0;y<n_y;y++) {
+    if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
+  }
+  
   // Vulnerability (length-based) and F parameters
   vector<Type> LFS(nsel_block);
   vector<Type> L5(nsel_block);
   vector<Type> Vmaxlen(nsel_block);
-  array<Type> vul = calc_vul(vul_par, vul_type, len_age, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, prior, est_vul);
+  matrix<Type> vul_len(nlbin,nsel_block);
+  vul_len.setZero();
+  array<Type> vul = calc_vul(vul_par, vul_type, lbin, PLA, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, vul_len, prior, est_vul);
 
   vector<Type> q_effort(nfleet);
   vector<Type> CV_msize(nfleet);
@@ -166,6 +175,8 @@ Type RCM(objective_function<Type> *obj) {
     NPR_unfished(y) = calc_NPR0(M, n_age, y, plusgroup, spawn_time_frac);
     EPR0(y) = sum_EPR(NPR_unfished(y), fec, n_age, y);
     if(y <= ageM) EPR0_SR += EPR0(y);
+    
+    if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
   }
   EPR0_SR /= Type(ageM + 1); // Unfished replacement line for SRR is the average across the first ageM years
   Type E0_SR = 0;
@@ -206,7 +217,6 @@ Type RCM(objective_function<Type> *obj) {
   }
   
   ////// During time series year = 1, 2, ..., n_y
-  vector<matrix<Type> > PLA(n_y);
   matrix<Type> N(n_y+1, n_age);
 
   vector<Type> C_eq_pred(nfleet);
@@ -304,9 +314,7 @@ Type RCM(objective_function<Type> *obj) {
 
   // Loop over all other years
   for(int y=0;y<n_y;y++) {
-    // Calculate this year's probability of length-at-age (PLA) and fleet F
-    if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
-    
+    // Calculate this year's fleet F
     for(int ff=0;ff<nfleet;ff++) {
       if(condition(ff) == 0) { // catch
         if(y != yind_F(ff)) {
@@ -398,19 +406,22 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> iLFS(nsurvey);
   vector<Type> iL5(nsurvey);
   vector<Type> iVmaxlen(nsurvey);
+  matrix<Type> ivul_len(nlbin, nsurvey);
 
   array<Type> IAAtrue(n_y, n_age, nsurvey); // True abundance at age vulnerable to survey
   array<Type> IAApred(n_y, n_age, nsurvey); // Predicted abundance (after ageing error) at age vulnerable to survey
   array<Type> IALpred(n_y, nlbin, nsurvey); // Abundance at length vulnerable to survey
   matrix<Type> IN(n_y, nsurvey);            // Total abundance vulnerable to the survey
   matrix<Type> Itot(n_y, nsurvey);          // Ipred/q - biomass or abundance vulnerable to the survey
-
+  
+  ivul_len.setZero();
+  
   IAApred.setZero();
   IALpred.setZero();
   IN.setZero();
   Itot.setZero();
 
-  array<Type> ivul = calc_ivul(ivul_par, ivul_type, len_age, iLFS, iL5, iVmaxlen, Linf, mat, vul, prior, est_ivul);
+  array<Type> ivul = calc_ivul(ivul_par, ivul_type, nlbin, PLA, iLFS, iL5, iVmaxlen, Linf, mat, vul, ivul_len prior, est_ivul);
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
@@ -616,6 +627,7 @@ Type RCM(objective_function<Type> *obj) {
   //if(condition == "catch") REPORT(log_F_dev);
   REPORT(F_equilibrium);
   REPORT(vul);
+  if(vul_len.sum() > 0) REPORT(vul_len);
   REPORT(F);
   REPORT(Z);
 
@@ -675,6 +687,7 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(IAApred);
     REPORT(IALpred);
     REPORT(ivul);
+    REPORT(ivul_len);
     REPORT(iL5);
     REPORT(iLFS);
     REPORT(iVmaxlen);
