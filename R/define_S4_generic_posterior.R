@@ -134,13 +134,9 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   }) %>% t()
   
   # Get model output
-  OM <- RCModel@OM
-  maxage <- OM@maxage
-  nyears <- OM@nyears
-  proyears <- OM@proyears
   obj <- RCModel@mean_fit$obj
   if (is.null(obj)) stop("No TMB object found in RCModel@mean_fit.")
-  
+    
   message("Re-constructing population model...")
   
   if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
@@ -148,63 +144,24 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   res <- pblapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE, 
                   cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
   
-  OM_par <- RCM_update_OM(res, obj$env$data, maxage, nyears, proyears)
   message("Updating operating model with MCMC samples...\n")
+  newOM <- RCM_update_OM(
+    OM = RCModel@OM, 
+    report = res, 
+    StockPars = list(Perr_y = matrix(1, nsim, OM@maxage + OM@nyears + OM@proyears)), 
+    obj_data = obj$env$data, 
+    maxage = OM@maxage, 
+    nyears = OM@nyears, 
+    proyears = OM@proyears, 
+    prior = list(use_prior = obj$env$data$use_prior), 
+    silent = FALSE
+  )
   
-  ### R0
-  OM@cpars$R0 <- OM_par$R0
-  message("Range of unfished age-0 recruitment (OM@cpars$R0): ", paste(round(range(OM@cpars$R0), 2), collapse = " - "))
-  
-  ### Depletion and init D - init D is only reported, OM setup for initD by adjusting rec devs
-  message("Range of initial spawning depletion: ", paste(round(range(OM_par$initD), 2), collapse = " - "))
-  
-  OM@cpars$D <- OM_par$D
-  message("Range of spawning depletion (OM@cpars$D): ", paste(round(range(OM@cpars$D), 2), collapse = " - "), "\n")
-  
-  ### Selectivity and F
-  ### Find
-  OM@isRel <- FALSE
-  OM@cpars$V <- OM_par$V
-  OM@cpars$Find <- OM_par$Find
-  message("Historical F and selectivity trends set in OM@cpars$Find and OM@cpars$V, respectively.")
-  message("Selectivity during projection period is set to that in most recent historical year.")
-  
-  OM@cpars$qs <- rep(1, nsim)
-  Eff <- apply(OM@cpars$Find, 2, range)
-  OM@EffLower <- Eff[1, ]
-  OM@EffUpper <- Eff[2, ]
-  if (length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
-  if (length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
-  message("Historical effort trends set in OM@EffLower and OM@EffUpper.\n")
-  
-  ### Rec devs
-  OM@cpars$Perr <- OM_par$procsd
-  message("Recruitment standard deviation set in OM@cpars$Perr.")
-  
-  Perr_y <- OM@cpars$Perr_y
-  Perr_y[, 1:maxage] <- OM_par$early_Perr
-  Perr_y[, maxage + 1:nyears] <- OM_par$Perr
-  message("Historical recruitment set in OM@cpars$Perr_y.")
-  
-  if (any(OM_par$AC != 0)) {
-    OM@cpars$AC <- OM_par$AC
-    OM@AC <- range(OM_par$AC)
-    message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
-    
-    OM@cpars$Perr_y <- RCM_sample_future_dev(obj$env$data$est_rec_dev, OM_par$procsd, OM_par$AC, 
-                                             OM_par$log_rec_dev, Perr_y, maxage, nyears, proyears)
-    message("Future recruitment deviations sampled with autocorrelation (in OM@cpars$Perr_y).\n")
-  }
-  
-  prior <- list(use_prior = obj$env$data$use_prior)
-  if (prior$use_prior[2]) OM@cpars$hs <- OM_par$h
-  if (prior$use_prior[3]) OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
-  
-  RCModel@OM <- OM
-  RCModel@SSB <- OM_par$SSB
-  RCModel@NAA <- OM_par$NAA
-  RCModel@CAA <- OM_par$CAA
-  RCModel@CAL <- OM_par$CAL
+  RCModel@OM <- newOM$OM
+  RCModel@SSB <- newOM$RCM_val$SSB
+  RCModel@NAA <- newOM$RCM_val$NAA
+  RCModel@CAA <- newOM$RCM_val$CAA
+  RCModel@CAL <- newOM$RCM_val$CAL
   RCModel@conv <- rep(TRUE, nsim)
   RCModel@Misc <- res
   RCModel@config$drop_sim <- integer(0)

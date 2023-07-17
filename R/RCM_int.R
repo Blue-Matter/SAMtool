@@ -182,148 +182,16 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   
   ### Get parameters to update OM
   obj_data <- mod[[1]]$obj$env$data
-  OM_par <- RCM_update_OM(res, obj_data, maxage, nyears, proyears, nsim)
-  
-  ### R0
-  if (!silent) message("Updating operating model:\n\n")
-  OM@cpars$R0 <- OM_par$R0
-  if (!silent) message("Range of unfished age-0 recruitment (OM@cpars$R0): ", paste(round(range(OM@cpars$R0), 2), collapse = " - "))
-  
-  ### Depletion and init D - init D is only reported, OM setup for initD by adjusting rec devs
-  if (!silent) message("Range of initial spawning depletion: ", paste(round(range(OM_par$initD), 2), collapse = " - "))
-  
-  OM@cpars$D <- OM_par$D
-  if (!silent) message("Range of spawning depletion (OM@cpars$D): ", paste(round(range(OM@cpars$D), 2), collapse = " - "), "\n")
-  
-  ### Selectivity and F
-  ### Find
-  OM@isRel <- FALSE
-  OM@cpars$V <- OM_par$V
-  OM@cpars$Find <- OM_par$Find
-  
-  maxFind <- max(OM@cpars$Find)
-  
-  if (maxFind > max_F) {
-    OM@maxF <- maxFind
-    if (!silent) message("Updating OM@maxF to maximum F across fleets: ", round(maxFind, 2))
-  }
-  
-  OM@cpars$qs <- rep(1, nsim)
-  if (!silent) {
-    message("Historical F set with OM@cpars$Find and OM@cpars$qs.")
-    message("Annual selectivity set in OM@cpars$V. Projection period uses selectivity of last historical year.")
-  }
-  
-  Eff <- apply(OM@cpars$Find, 2, range)
-  OM@EffLower <- Eff[1, ]
-  OM@EffUpper <- Eff[2, ]
-  if (length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
-  if (length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
-  #if (!silent) message("Historical effort trends set in OM@EffLower and OM@EffUpper (N.B. not used).")
-  
-  ### Rec devs
-  OM@cpars$Perr <- OM_par$procsd
-  if (!silent) message("Recruitment standard deviation set in OM@cpars$Perr: ", paste(round(range(OM@cpars$Perr), 2), collapse = " - "))
-  
-  Perr_y <- StockPars$Perr_y
-  Perr_y[, 1:maxage] <- OM_par$early_Perr
-  Perr_y[, maxage + 1:nyears] <- OM_par$Perr
-  if (!silent) message("Historical recruitment deviations set in OM@cpars$Perr_y.")
-  
-  # Resample future recruitment with autocorrelation
-  OM@cpars$AC <- OM_par$AC
-  OM@AC <- range(OM_par$AC)
-  if (any(OM_par$AC != 0)) {
-    if (!silent) message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
-    
-    OM@cpars$Perr_y <- RCM_sample_future_dev(obj_data$est_rec_dev, OM_par$procsd, OM_par$AC, 
-                                             OM_par$log_rec_dev, Perr_y, maxage, nyears, proyears,
-                                             silent = silent)
-    if (!silent) message("Future recruitment deviations in OM@cpars$Perr_y sampled with autocorrelation.")
-  } else {
-    OM@cpars$Perr_y <- Perr_y
-  }
-  
-  ### Mesnil-Rochet stock recruit relationship
-  if (OM@SRrel == 3 && !is.null(OM_par$MRRmax)) {
-    
-    SRRfun <- function(SB, SRRpars) {
-      MesnilRochet_SR(x = SB, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma)
-    }
-    
-    SRRpars <- data.frame(MRRmax = OM_par$MRRmax,
-                          MRhinge = OM_par$MRhinge,
-                          MRgamma = OM_par$MRgamma)
-    
-    relRfun <- function(SSBpR, SRRpars) {
-      MesnilRochet_SR(x = SSBpR, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma,
-                      isSB = FALSE)
-    }
-    
-    SPRcrashfun <- function(SSBpR0, SRRpars) {
-      MesnilRochet_SPRcrash(SSBpR0, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma)
-    }
-    
-    OM@cpars$SRR <- list(SRRfun = SRRfun, SRRpars = SRRpars,
-                         relRfun = relRfun, SPRcrashfun = SPRcrashfun)
-    if (!silent) message("Mesnil-Rochet stock recruitment relationship specified in OM@cpars$SRR.")
-  }
-  
-  ### Assign OM variables that were used in the RCM to the output
-  OM@cpars$Len_age <- StockPars$Len_age
-  OM@cpars$Linf <- StockPars$Linf
-  OM@cpars$K <- StockPars$K
-  OM@cpars$t0 <- StockPars$t0
-  OM@cpars$LenCV <- StockPars$LenCV
-  OM@cpars$LatASD <- StockPars$LatASD
-  OM@cpars$Wt_age <- StockPars$Wt_age
-  
-  if (any(apply(StockPars$Mat_age, 1, function(x) all(x >= 0.5)))) { # Any simulations where all mat_age > 0.5?
-    OM@cpars$L50 <- StockPars$L50
-    OM@cpars$L95 <- StockPars$L95
-  } else {
-    OM@cpars$Mat_age <- StockPars$Mat_age
-  }
-  
-  if (!identical(StockPars$Mat_age * StockPars$Wt_age, StockPars$Fec_Age)) {
-    OM@cpars$Fec_age <- StockPars$Fec_Age
-  }
-  
-  if (!OM@SRrel == 3) {
-    if (prior$use_prior[2]) {
-      OM@cpars$hs <- OM_par$h
-    } else {
-      OM@cpars$hs <- StockPars$hs
-    }
-  }
-  
-  if (prior$use_prior[3]) {
-    OM@cpars$M_ageArray <- array(OM_par$Mest, c(nsim, maxage+1, nyears + proyears))
-  } else {
-    OM@cpars$M_ageArray <- StockPars$M_ageArray
-  }
-  
-  if (any(RCMdata@CAL > 0, na.rm = TRUE) || (any(RCMdata@MS > 0, na.rm = TRUE) & RCMdata@MS_type == "length") ||
-     any(RCMdata@IAL > 0, na.rm = TRUE)) {
-    OM@cpars$CAL_bins <- RCMdata@Misc$lbin
-    OM@cpars$CAL_binsmid <- RCMdata@Misc$lbinmid
-    if (!silent) message("RCMdata length bins will be added to OM.")
-  }
-  
-  if (!is.null(dots$plusgroup) && !dots$plusgroup) {
-    OM@cpars$plusgroup <- 0L
-    if (!silent) message("No plus group was used in RCM.")
-  }
-  if (!any(RCMdata@I_sd > 0, na.rm = TRUE)) OM@cpars$Iobs <- ObsPars$Iobs
-  if (!silent) message("Growth, maturity, natural mortality, and stock recruit parameters from RCM are set in OM@cpars.\n\n")
+  newOM <- RCM_update_OM(OM, res, StockPars, obj_data, maxage, nyears, proyears, nsim, prior, silent)
   
   ### Output S4 object
   RCMdata@Misc$prior <- prior
-  output <- new("RCModel", OM = MSEtool::SubCpars(OM, keep), 
-                SSB = OM_par$SSB[keep, , drop = FALSE], 
-                NAA = OM_par$NAA[keep, , , drop = FALSE], 
-                CAA = OM_par$CAA[keep, , , , drop = FALSE], 
-                CAL = OM_par$CAL[keep, , , , drop = FALSE], 
+  output <- new("RCModel", 
+                OM = MSEtool::SubCpars(newOM$OM, keep), 
+                SSB = newOM$RCM_val$SSB[keep, , drop = FALSE], 
+                NAA = newOM$RCM_val$NAA[keep, , , drop = FALSE], 
+                CAA = newOM$RCM_val$CAA[keep, , , , drop = FALSE], 
+                CAL = newOM$RCM_val$CAL[keep, , , , drop = FALSE], 
                 mean_fit = mean_fit_output, 
                 conv = conv[keep], 
                 data = RCMdata)
@@ -380,6 +248,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
         simplify2array() %>% aperm(c(1, 3, 2))
       real_Data@AddIunits <- RCMdata@I_units
       
+      # Override to ensure index beta = 1
       output@OM@cpars$AddIbeta <- matrix(1, output@OM@nsim, nsurvey)
       if (!silent) message("Historical indices added to OM@cpars$Data@AddInd.")
     }
@@ -421,7 +290,146 @@ RCM_report_samps <- function(x, samps, obj, conv) {
   return(report)
 }
 
-RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length(res)) {
+RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears, proyears, nsim = length(res), prior = list(), silent = FALSE) {
+  
+  # Get parameters from RCM data and report list
+  RCM_val <- .RCM_update_OM(report, obj_data, maxage, nyears, proyears, nsim)
+  
+  ### R0
+  if (!silent) message("Updating operating model:\n\n")
+  OM@cpars$R0 <- RCM_val$R0
+  if (!silent) message("Range of unfished age-0 recruitment (OM@cpars$R0): ", paste(round(range(OM@cpars$R0), 2), collapse = " - "))
+  
+  ### Depletion and init D - init D is only reported, OM setup for initD by adjusting rec devs
+  if (!silent) message("Range of initial spawning depletion: ", paste(round(range(RCM_val$initD), 2), collapse = " - "))
+  
+  OM@cpars$D <- RCM_val$D
+  if (!silent) message("Range of spawning depletion (OM@cpars$D): ", paste(round(range(OM@cpars$D), 2), collapse = " - "), "\n")
+  
+  ### Selectivity and F
+  ### Find
+  OM@isRel <- FALSE
+  OM@cpars$V <- RCM_val$V
+  OM@cpars$Find <- RCM_val$Find
+  
+  maxFind <- max(OM@cpars$Find)
+  
+  if (maxFind > OM@maxF) {
+    OM@maxF <- maxFind
+    if (!silent) message("Updating OM@maxF to maximum F across all fleets: ", round(maxFind, 2))
+  }
+  
+  OM@cpars$qs <- rep(1, nsim)
+  if (!silent) {
+    message("Historical F set with OM@cpars$Find and OM@cpars$qs.")
+    message("Annual selectivity set in OM@cpars$V. Projection period uses selectivity of last historical year.")
+  }
+  
+  Eff <- apply(OM@cpars$Find, 2, range)
+  OM@EffLower <- Eff[1, ]
+  OM@EffUpper <- Eff[2, ]
+  if (length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
+  if (length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
+  #if (!silent) message("Historical effort trends set in OM@EffLower and OM@EffUpper (N.B. not used).")
+  
+  ### Rec devs
+  OM@cpars$Perr <- RCM_val$procsd
+  if (!silent) message("Recruitment standard deviation set in OM@cpars$Perr: ", paste(round(range(OM@cpars$Perr), 2), collapse = " - "))
+  
+  if (!is.null(StockPars$Perr_y)) {
+    Perr_y <- StockPars$Perr_y
+  } else {
+    Perr_y <- matrix(1, nsim, maxage + nyears + proyears)
+  }
+  Perr_y[, 1:maxage] <- RCM_val$early_Perr
+  Perr_y[, maxage + 1:nyears] <- RCM_val$Perr
+  if (!silent) message("Historical recruitment deviations set in OM@cpars$Perr_y.")
+  
+  # Resample future recruitment with autocorrelation
+  OM@cpars$AC <- RCM_val$AC
+  OM@AC <- range(RCM_val$AC)
+  if (any(RCM_val$AC != 0)) {
+    if (!silent) message("Range of recruitment autocorrelation OM@AC: ", paste(round(range(OM@AC), 2), collapse = " - "))
+    
+    OM@cpars$Perr_y <- RCM_sample_future_dev(obj_data$est_rec_dev, RCM_val$procsd, RCM_val$AC, 
+                                             RCM_val$log_rec_dev, Perr_y, maxage, nyears, proyears,
+                                             silent = silent)
+    if (!silent) message("Future recruitment deviations in OM@cpars$Perr_y sampled with autocorrelation.")
+  } else {
+    OM@cpars$Perr_y <- Perr_y
+  }
+  
+  ### Mesnil-Rochet stock recruit relationship
+  if (OM@SRrel == 3 && !is.null(RCM_val$MRRmax)) {
+    
+    SRRfun <- function(SB, SRRpars) {
+      MesnilRochet_SR(x = SB, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma)
+    }
+    
+    SRRpars <- data.frame(MRRmax = RCM_val$MRRmax,
+                          MRhinge = RCM_val$MRhinge,
+                          MRgamma = RCM_val$MRgamma)
+    
+    relRfun <- function(SSBpR, SRRpars) {
+      MesnilRochet_SR(x = SSBpR, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma,
+                      isSB = FALSE)
+    }
+    
+    SPRcrashfun <- function(SSBpR0, SRRpars) {
+      MesnilRochet_SPRcrash(SSBpR0, Shinge = SRRpars$MRhinge, Rmax = SRRpars$MRRmax, gamma = SRRpars$MRgamma)
+    }
+    
+    OM@cpars$SRR <- list(SRRfun = SRRfun, SRRpars = SRRpars,
+                         relRfun = relRfun, SPRcrashfun = SPRcrashfun)
+    if (!silent) message("Mesnil-Rochet stock recruitment relationship specified in OM@cpars$SRR.")
+  }
+  
+  ### Assign OM variables that were used in the RCM to the output
+  if (!is.null(StockPars$Len_age)) OM@cpars$Len_age <- StockPars$Len_age
+  if (!is.null(StockPars$Linf)) OM@cpars$Linf <- StockPars$Linf
+  if (!is.null(StockPars$K)) OM@cpars$K <- StockPars$K
+  if (!is.null(StockPars$t0)) OM@cpars$t0 <- StockPars$t0
+  if (!is.null(StockPars$LenCV)) OM@cpars$LenCV <- StockPars$LenCV
+  if (!is.null(StockPars$LatASD)) OM@cpars$LatASD <- StockPars$LatASD
+  if (!is.null(StockPars$Wt_age)) OM@cpars$Wt_age <- StockPars$Wt_age
+  if (!is.null(StockPars$Mat_age)) OM@cpars$Mat_age <- StockPars$Mat_age
+  
+  if (!is.null(StockPars$Fec_Age) && !identical(StockPars$Mat_age * StockPars$Wt_age, StockPars$Fec_Age)) {
+    OM@cpars$Fec_age <- StockPars$Fec_Age
+  }
+  
+  if (!OM@SRrel == 3) {
+    if (prior$use_prior[2]) {
+      OM@cpars$hs <- RCM_val$h
+    } else if (!is.null(StockPars$hs)) {
+      OM@cpars$hs <- StockPars$hs
+    }
+  }
+  
+  if (prior$use_prior[3]) {
+    OM@cpars$M_ageArray <- array(RCM_val$Mest, c(nsim, maxage+1, nyears + proyears))
+  } else if (!is.null(StockPars$M_ageArray)) {
+    OM@cpars$M_ageArray <- StockPars$M_ageArray
+  }
+  
+  if (any(obj_data$CAL_hist > 0, na.rm = TRUE) || (any(obj_data$msize > 0, na.rm = TRUE) & obj_data$msize_type == "length") ||
+      any(obj_data$IAL_hist > 0, na.rm = TRUE)) {
+    OM@cpars$CAL_bins <- obj_data$lbin
+    OM@cpars$CAL_binsmid <- obj_data$lbinmid
+    if (!silent) message("RCMdata length bins will be added to OM.")
+  }
+  
+  if (!obj_data$plusgroup) {
+    OM@cpars$plusgroup <- 0L
+    if (!silent) message("No plus group was used in RCM.")
+  }
+  #if (!any(obj_data$I_sd > 0, na.rm = TRUE)) OM@cpars$Iobs <- ObsPars$Iobs
+  if (!silent) message("Growth, maturity, natural mortality, and stock recruit parameters from RCM are set in OM@cpars.\n\n")
+  
+  return(list(OM = OM, RCM_val = RCM_val))
+}
+
+.RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length(res)) {
   out <- list()
   
   out$R0 <- vapply(res, getElement, numeric(1), "R0")
