@@ -136,9 +136,6 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
   
   if (is.null(dots$n_itF)) n_itF <- 3L else n_itF <- dots$n_itF
   if (is.null(dots$plusgroup)) plusgroup <- 1L else plusgroup <- as.integer(dots$plusgroup)
-  age_only_model <- StockPars$Len_age[x, , 1:(nyears+1)] %>%
-    apply(2, function(xx) all(xx == 1:n_age)) %>% 
-    all()
   
   TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, 
                    sigma_C = RCMdata@C_sd, sigma_Ceq = RCMdata@C_eq_sd, 
@@ -157,7 +154,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
                    M_data = if (prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
                    len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
-                   Linf = ifelse(age_only_model, n_age, StockPars$Linf[x]),
+                   Linf = StockPars$Linf[x],
                    SD_LAA = t(StockPars$LatASD[x, , 1:(nyears+1)]), 
                    wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
                    mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]),
@@ -216,6 +213,9 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (!is.null(dots$map_log_rec_dev)) stop("Specify map_log_rec_dev via map$log_rec_dev")
   if (!is.null(dots$map_log_early_rec_dev)) stop("Specify map_log_early_rec_dev via map$log_early_rec_dev")
   
+  if (!is.null(dots$map_s_vul_par)) stop("Pass map argument of index selectivity parameters via map$ivul_par")
+  if (!is.null(dots$s_vul_par)) stop("Pass index selectivity parameters via start$ivul_par")
+  
   SR_type <- switch(StockPars$SRrel[x],
                     "1" = "BH",
                     "2" = "Ricker",
@@ -225,6 +225,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   nyears <- RCMdata@Misc$nyears
   nfleet <- RCMdata@Misc$nfleet
   n_age <- dim(RCMdata@CAA)[2]
+  maxage <- n_age - 1
   nsurvey <- ncol(RCMdata@Index)
   
   transformed_h <- switch(SR_type,
@@ -235,12 +236,21 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   LFS <- FleetPars$LFS_y[x, nyears]
   L5 <- FleetPars$L5_y[x, nyears]
   Vmaxlen <- FleetPars$Vmaxlen_y[x, nyears]
+  Linf <- StockPars$Linf[x]
+  
+  # Check for functional selectivity functions (dome or logistic)
+  sel_check <- selectivity %in% c(0, -1, -5, -6)
+  sel_check_age <- selectivity %in% c(-5, -6)
+  sel_check_len <- sel_check & !sel_check_age
   
   if (is.null(start$vul_par)) {
     if (any(selectivity == -2)) {
       stop("Some fleet selectivity specified to be free parameters. Provide start$vul_par matrix to RCM.")
     }
     start$vul_par <- matrix(c(LFS, L5, Vmaxlen), 3, RCMdata@Misc$nsel_block)
+    
+    start$vul_par[1, sel_check_age] <- 0.5 * maxage
+    start$vul_par[2, sel_check_age] <- 0.25 * maxage
   }
   if (ncol(start$vul_par) != RCMdata@Misc$nsel_block) {
     stop("start$vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
@@ -249,18 +259,12 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     stop("start$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
   }
   
-  # Check for functional selectivity functions (dome or logistic)
-  age_only_model <- StockPars$Len_age[x, , 1:(nyears+1)] %>%
-    apply(2, function(xx) all(xx == 1:n_age)) %>% 
-    all()
-  Linf <- ifelse(age_only_model, n_age, StockPars$Linf[x])
-  
-  sel_check <- selectivity == -1 | selectivity == 0
   start$vul_par[2, sel_check] <- log(start$vul_par[1, sel_check] - start$vul_par[2, sel_check])
-  start$vul_par[1, sel_check] <- logit(pmin(start$vul_par[1, sel_check]/Linf/0.99, 0.99))
+  start$vul_par[1, sel_check_len] <- logit(pmin(start$vul_par[1, sel_check_len]/Linf/0.99, 0.99))
+  start$vul_par[1, sel_check_age] <- logit(pmin(start$vul_par[1, sel_check_age]/maxage/0.99, 0.99))
   start$vul_par[3, sel_check] <- logit(pmin(start$vul_par[3, sel_check], 0.99))
   
-  if (any(selectivity == -2)) {
+  if (any(selectivity == -2)) { # Free parameters
     start$vul_par[, selectivity == -2] <- logit(start$vul_par[, selectivity == -2], soft_bounds = TRUE)
   }
   
@@ -269,10 +273,10 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
       stop("Some (fleet) selectivity specified to be free parameters. Provide map_vul_par matrix to RCM.")
     }
     map$vul_par <- matrix(0, 3, RCMdata@Misc$nsel_block)
-    map$vul_par[3, selectivity == -1] <- NA # Fix third parameter for logistic sel
+    map$vul_par[3, selectivity == c(-1, -6)] <- NA # Fix third parameter for logistic sel
     if (!is.null(dots$fix_dome) && dots$fix_dome) { # Obsolete
       warning("fix_dome is obsolete. Recommend using the map argument in RCM")
-      map$vul_par[3, selectivity == 0] <- NA # Fix dome
+      map$vul_par[3, selectivity == c(0, -5)] <- NA # Fix dome
     }
     
     for(ff in 1:nfleet) {
@@ -297,12 +301,20 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   }
   
   # Index selectivity (ivul_par)
-  if (!is.null(dots$s_vul_par)) stop("Pass index selectivity parameters via start$ivul_par")
+  
+  # Check for function selectivity (dome/logistic)
+  sel_check <- s_selectivity %in% c(0, -1, -5, -6)
+  sel_check_age <- s_selectivity %in% c(-5, -6)
+  sel_check_len <- sel_check & !sel_check_age
+  
   if (is.null(start$ivul_par)) {
     if (any(s_selectivity == -2)) {
       stop("Some s_selectivity specified to be free parameters. Provide start$ivul_par matrix to RCM.")
     }
     start$ivul_par <- matrix(c(LFS, L5, Vmaxlen), 3, nsurvey)
+    
+    start$ivul_par[1, sel_check_age] <- 0.5 * maxage
+    start$ivul_par[2, sel_check_age] <- 0.25 * maxage
   }
   if (ncol(start$ivul_par) != nsurvey) {
     stop("start$ivul_par needs to be a matrix with ", nsurvey, " columns.")
@@ -311,17 +323,15 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     stop("start$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
   }
   
-  # Check for function selectivity (dome/logistic)
-  parametric_sel <- s_selectivity == -1 | s_selectivity == 0
-  start$ivul_par[2, parametric_sel] <- log(start$ivul_par[1, parametric_sel] - start$ivul_par[2, parametric_sel])
-  start$ivul_par[1, parametric_sel] <- logit(start$ivul_par[1, parametric_sel]/Linf/0.99)
-  start$ivul_par[3, parametric_sel] <- logit(start$ivul_par[3, parametric_sel])
+  start$ivul_par[2, sel_check] <- log(start$ivul_par[1, sel_check] - start$ivul_par[2, sel_check])
+  start$ivul_par[1, sel_check_len] <- logit(start$ivul_par[1, sel_check_len]/Linf/0.99)
+  start$ivul_par[1, sel_check_age] <- logit(start$ivul_par[1, sel_check_age]/maxage/0.99)
+  start$ivul_par[3, sel_check] <- logit(start$ivul_par[3, sel_check])
   
   if (any(s_selectivity == -2)) {
     start$ivul_par[, s_selectivity == -2] <- logit(start$ivul_par[, s_selectivity == -2], soft_bounds = TRUE)
   }
   
-  if (!is.null(dots$map_s_vul_par)) stop("Pass map argument of index selectivity parameters via map$ivul_par")
   if (is.null(map$ivul_par)) {
     if (any(s_selectivity == -2)) {
       stop("Some s_selectivity specified to be free parameters. Provide map_ivul_par matrix to RCM.")
@@ -329,7 +339,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     map$ivul_par <- matrix(0, 3, nsurvey)
     map$ivul_par[3, s_selectivity < 0] <- NA # if logistic
     for(sur in 1:nsurvey) {
-      if (s_selectivity[sur] < -2 || s_selectivity[sur] > 0 ||
+      if (s_selectivity[sur] %in% c(-3, 4) || s_selectivity[sur] > 0 ||
          (all(RCMdata@IAA[,,sur] <= 0, na.rm = TRUE) & all(RCMdata@IAL[,,sur] <= 0, na.rm = TRUE))) {
         map$ivul_par[, sur] <- NA
       }
@@ -609,20 +619,17 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
   lmid <- obj$env$data$lbinmid
   nlbin <- length(lmid)
   
-  age_only_model <- data$len_age %>%
-    apply(1, function(x) all(x == 1:data$n_age)) %>% 
-    all()
-  if (age_only_model) {
-    report$vul_len <- matrix(NA_real_, nlbin, data$nsel_block)
-    report$ivul_len <- matrix(NA_real_, nlbin, dim(report$ivul)[3])
-    
-    report$MLpred <- array(NA_real_, dim(report$F))
-    report$CALpred <- array(NA_real_, dim(report$CALpred))
-    report$IALpred <- array(NA_real_, dim(report$IALpred))
-  } else {
-    #report$vul_len <- get_vul_len(report, data$vul_type, lmid, data$Linf)
-    #report$ivul_len <- get_ivul_len(report, data$ivul_type, lmid, data$Linf)
-  }
+  #if (age_only_model) {
+  #  report$vul_len <- matrix(NA_real_, nlbin, data$nsel_block)
+  #  report$ivul_len <- matrix(NA_real_, nlbin, dim(report$ivul)[3])
+  #  
+  #  report$MLpred <- array(NA_real_, dim(report$F))
+  #  report$CALpred <- array(NA_real_, dim(report$CALpred))
+  #  report$IALpred <- array(NA_real_, dim(report$IALpred))
+  #} else {
+  #  report$vul_len <- get_vul_len(report, data$vul_type, lmid, data$Linf)
+  #  report$ivul_len <- get_ivul_len(report, data$ivul_type, lmid, data$Linf)
+  #}
   if (dynamic_SSB0) report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
   
   if (data$comp_like == "mvlogistic") {

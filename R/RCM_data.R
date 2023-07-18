@@ -115,13 +115,22 @@ pull_Index <- function(Data, maxage) {
 
 int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
   if (is.null(s_selectivity)) return(-4)
+  
+  if (!silent) {
+    if (any(s_selectivity == "logistic")) message("Converting \"logistic\" index selectivity to \"logistic_length\"")
+    if (any(s_selectivity == "dome")) message("Converting \"dome\" index selectivity to \"dome_length\"")
+  }
+  s_selectivity[s_selectivity == "logistic"] <- "logistic_length"
+  s_selectivity[s_selectivity == "dome"] <- "dome_length"
 
   s_sel <- suppressWarnings(as.numeric(s_selectivity)) # Numbers match fleets, otherwise see next lines
   s_sel[s_selectivity == "B"] <- -4
   s_sel[s_selectivity == "SSB"] <- -3
   s_sel[s_selectivity == "free"] <- -2
-  s_sel[s_selectivity == "logistic"] <- -1
-  s_sel[s_selectivity == "dome"] <- 0
+  s_sel[s_selectivity == "logistic_length"] <- -1
+  s_sel[s_selectivity == "dome_length"] <- 0
+  s_sel[s_selectivity == "logistic_age"] <- -6
+  s_sel[s_selectivity == "dome_age"] <- -5
 
   if (any(s_sel > nfleet, na.rm = TRUE)) {
     stop(paste("There are undefined fishing fleets in s_selectivity (for indices). There are only", nfleet, "fleets."),
@@ -129,7 +138,8 @@ int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
   }
 
   if (any(is.na(s_sel))) {
-    stop("Character entries for s_selectivity (for indices) must be either: \"B\", \"SSB\", \"logistic\", \"dome\", or \"free\"", call. = FALSE)
+    stop("Character entries for s_selectivity (for indices) must be either: \"B\", \"SSB\", \"logistic_length\", \"logistic_age\", 
+         \"dome_length\", \"dome_age\", or \"free\"", call. = FALSE)
   }
   
   if (!silent) {
@@ -140,11 +150,13 @@ int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
         sout <- paste("fishery fleet", s_sel[sur])
       } else {
         sout <- switch(s_sel[sur] %>% as.character(),
+                       "-6" = "logistic function (age)",
+                       "-5" = "dome function (age)",
                        "-4" = "total biomass",
                        "-3" = "spawning biomass",
                        "-2" = "individual parameters at age (free)",
-                       "-1" = "logistic function",
-                       "0" = "dome function")
+                       "-1" = "logistic function (length)",
+                       "0" = "dome function (length)")
       }
       message("Index ", sur, ": ", sout, ifelse(sur == nsurvey, "\n\n", ""))
     }
@@ -155,13 +167,30 @@ int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
 
 
 int_sel <- function(selectivity, RCMdata, silent = FALSE) {
+  
+  if (!silent) {
+    if (any(selectivity == "logistic")) message("Converting \"logistic\" fishery selectivity to \"logistic_length\"")
+    if (any(selectivity == "dome")) message("Converting \"dome\" fishery selectivity to \"dome_length\"")
+  }
+  selectivity[selectivity == "logistic"] <- "logistic_length"
+  selectivity[selectivity == "dome"] <- "dome_length"
+  
+  selectivity <- match.arg(
+    selectivity,
+    choices = c("logistic_length", "logistic_age", "dome_length", "dome_age", "free"),
+    several.ok = TRUE
+  )
+  
   sel <- suppressWarnings(as.numeric(selectivity))
   sel[selectivity == "free"] <- -2
-  sel[selectivity == "logistic"] <- -1
-  sel[selectivity == "dome"] <- 0
+  sel[selectivity == "logistic_length"] <- -1
+  sel[selectivity == "dome_length"] <- 0
+  sel[selectivity == "logistic_age"] <- -6
+  sel[selectivity == "dome_age"] <- -5
   
   if (any(is.na(sel))) {
-    stop("Character entries for selectivity (for fleets) must be either: \"logistic\", \"dome\", or \"free\"", call. = FALSE)
+    stop("Character entries for selectivity (for fleets) must be either: \"logistic_length\", \"logistic_age\", 
+         \"dome_length\", \"dome_age\" or \"free\"", call. = FALSE)
   }
   
   if (!silent && !missing(RCMdata)) {
@@ -170,9 +199,11 @@ int_sel <- function(selectivity, RCMdata, silent = FALSE) {
     no_blocks <- apply(RCMdata@sel_block, 2, function(x) length(unique(x)) == 1) %>% all()
     for(bb in 1:length(sel)) {
       fout <- switch(sel[bb] %>% as.character(),
+                     "-6" = "logistic function (age)",
+                     "-5" = "dome function (age)",
                      "-2" = "individual parameters at age (free)",
-                     "-1" = "logistic function",
-                     "0" = "dome function")
+                     "-1" = "logistic function (length)",
+                     "0" = "dome function (length)")
       if (no_blocks) {
         message("Fleet ", bb, ": ", fout, ifelse(bb == length(sel), "\n\n", ""))
       } else {

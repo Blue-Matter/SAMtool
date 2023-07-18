@@ -72,40 +72,55 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
   vul.setZero();
   vector<Type> sls(nsel_block);
   vector<Type> srs(nsel_block);
+  Type maxage = Type(n_age) - 1;
   
-  for(int b=0;b<nsel_block;b++) { // Parameters for sel_block
-    if(vul_type(b) <= 0 && vul_type(b) > -2) { // Logistic or dome
+  for(int b=0;b<nsel_block;b++) { // Parameters for sel_block - don't do anything for age-specific index
+    if(vul_type(b) == -2) { // Free parameters - adding priors only
+      for(int a=0;a<n_age;a++) {
+        if(est_vul(a,b)) {
+          Type v = invlogit(vul_par(a,b));
+          prior -= dbeta_(v, Type(1.01), Type(1.01), true) + log(v - v * v);
+        }
+      }
+    } else {
+      // Dome or logistic sel
       if(est_vul(0,b)) prior -= dnorm_(vul_par(0,b), Type(0), Type(3), true);
       if(est_vul(1,b)) prior -= dnorm_(vul_par(1,b), Type(0), Type(3), true);
       
-      LFS(b) = invlogit(vul_par(0,b)) * 0.99 * Linf;
+      if(vul_type(b) == 0 || vul_type(b) == - 1) {
+        LFS(b) = invlogit(vul_par(0,b)) * 0.99 * Linf;
+      } else {
+        LFS(b) = invlogit(vul_par(0,b)) * 0.99 * maxage;
+      }
       L5(b) = LFS(b) - exp(vul_par(1,b));
       sls(b) = (LFS(b) - L5(b))/pow(-log2(0.05), 0.5);
-      if(vul_type(b) < 0) { // Logistic
+      
+      if(vul_type(b) == -1 || vul_type(b) == -6) { // Logistic
         Vmaxlen(b) = 1;
       } else { // Dome
         Vmaxlen(b) = invlogit(vul_par(2,b));
-        srs(b) = (Linf - LFS(b))/pow(-log2(Vmaxlen(b)), 0.5);
+        
+        if(vul_type(b) == 0) {
+          srs(b) = (Linf - LFS(b))/pow(-log2(Vmaxlen(b)), 0.5);
+        } else {
+          srs(b) = (maxage - LFS(b))/pow(-log2(Vmaxlen(b)), 0.5);
+        }
         if(est_vul(2,b)) {
           Type jac = Vmaxlen(b) - Vmaxlen(b) * Vmaxlen(b);
           prior -= dbeta_(Vmaxlen(b), Type(1.01), Type(1.01), true) + log(jac);
         }
       }
-      for(int j=0;j<nlbin;j++) { // Calculate length-based sel
-        Type lo = pow(2, -((lbinmid(j) - LFS(b))/sls(b) * (lbinmid(j) - LFS(b))/sls(b)));
-        Type hi;
-        if(vul_type(b) < 0) {
-          hi = 1;
-        } else {
-          hi = pow(2, -((lbinmid(j) - LFS(b))/srs(b) * (lbinmid(j) - LFS(b))/srs(b)));
-        }
-        vul_len(j,b) = CppAD::CondExpLt(lbinmid(j), LFS(b), lo, hi);
-      }
-    } else if(vul_type(b) == -2) { // Free parameters - adding priors only
-      for(int a=0;a<n_age;a++) {
-        if(est_vul(a,b)) {
-          Type v = invlogit(vul_par(a,b));
-          prior -= dbeta_(v, Type(1.01), Type(1.01), true) + log(v - v * v);
+      
+      if(vul_type(b) == 0 || vul_type(b) == - 1) { // Calculate length-based sel
+        for(int j=0;j<nlbin;j++) {
+          Type lo = pow(2, -((lbinmid(j) - LFS(b))/sls(b) * (lbinmid(j) - LFS(b))/sls(b)));
+          Type hi;
+          if(vul_type(b) < 0) {
+            hi = 1;
+          } else {
+            hi = pow(2, -((lbinmid(j) - LFS(b))/srs(b) * (lbinmid(j) - LFS(b))/srs(b)));
+          }
+          vul_len(j,b) = CppAD::CondExpLt(lbinmid(j), LFS(b), lo, hi);
         }
       }
     }
@@ -114,15 +129,27 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
   for(int ff=0;ff<nfleet;ff++) { // Assign to fleet
     for(int y=0;y<n_y;y++) {
       int vul_ind = sel_block(y,ff) - 1;
-      if(vul_type(vul_ind) <= 0 && vul_type(vul_ind) > -2) { // Logistic or dome
+      if(vul_type(vul_ind) == 0 && vul_type(vul_ind) == -1) { // Convert length sel to age sel
         for(int a=0;a<n_age;a++) {
           for(int j=0;j<nlbin;j++) vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,vul_ind);
         }
-      } else if(vul_type(vul_ind) == -2) { // Free parameters
+      } else if(vul_type(vul_ind) == -5 && vul_type(vul_ind) == -6) {  // Dome or logistic, age
+        for(int a=0;a<n_age;j++) { // Calculate age-based sel
+          Type aa = Type(a);
+          Type lo = pow(2, -((aa - LFS(vul_ind))/sls(vul_ind) * (aa - LFS(vul_ind))/sls(vul_ind)));
+          Type hi;
+          if(vul_type(vul_ind) == -6) {
+            hi = 1;
+          } else {
+            hi = pow(2, -((aa - LFS(vul_ind))/srs(vul_ind) * (aa - LFS(vul_ind))/srs(vul_ind)));
+          }
+          vul(y,a,ff) = CppAD::CondExpLt(aa, LFS(vul_ind), lo, hi);
+        }
+      } else { //if(vul_type(vul_ind) == -2) { // Free parameters
         for(int a=0;a<n_age;a++) vul(y,a,ff) = invlogit(vul_par(a, vul_ind));
-      } else { // Age-specific index
-        vul(y,vul_type(vul_ind)-1,ff) = 1;
-      }
+      } //else { // Age-specific index - superseded by free parameters long ago
+        //vul(y,vul_type(vul_ind)-1,ff) = 1;
+      //}
     }
   }
   return vul;
@@ -140,6 +167,7 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
   
   vector<Type> sls(vul_type.size());
   vector<Type> srs(vul_type.size());
+  Type maxage = Type(n_age) - 1;
 
   for(int ff=0;ff<vul_type.size();ff++) {
 
@@ -161,42 +189,67 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
       }
     } else if(vul_type(ff) > 0) { // Index mirrored to fleet
       vul.col(ff) = fleet_var.col(vul_type(ff) - 1);
-    } else { // Logistic or dome
+    } else { // Logistic or dome vul_type %in% c(0, -1, -5, -6)
       if(est_vul(0,ff)) prior -= dnorm_(vul_par(0,ff), Type(0), Type(3), true);
       if(est_vul(1,ff)) prior -= dnorm_(vul_par(1,ff), Type(0), Type(3), true);
-
-      LFS(ff) = invlogit(vul_par(0,ff)) * 0.99 * Linf;
+      
+      if (vul_type(ff) == 0 || vul_type(ff) == -1) {
+        LFS(ff) = invlogit(vul_par(0,ff)) * 0.99 * Linf;
+      } else {
+        LFS(ff) = invlogit(vul_par(0,ff)) * 0.99 * maxage;
+      }
       L5(ff) = LFS(ff) - exp(vul_par(1,ff));
       sls(ff) = (LFS(ff) - L5(ff))/pow(-log2(0.05), 0.5);
       
-      if(vul_type(ff) == -1) { // Logistic
+      if(vul_type(ff) == -1 || vul_type(ff) == -6) { // Logistic
         Vmaxlen(ff) = 1;
       } else { // Dome
         Vmaxlen(ff) = invlogit(vul_par(2,ff));
-        srs(ff) = (Linf - LFS(ff))/pow(-log2(Vmaxlen(ff)), 0.5);
+        
+        if(vul_type(ff) == 0) {
+          srs(ff) = (Linf - LFS(ff))/pow(-log2(Vmaxlen(ff)), 0.5);
+        } else {
+          srs(ff) = (maxage - LFS(ff))/pow(-log2(Vmaxlen(ff)), 0.5);
+        }
         
         if(est_vul(2,ff)) {
           Type jac = Vmaxlen(ff) - Vmaxlen(ff) * Vmaxlen(ff);
           prior -= dbeta_(Vmaxlen(ff), Type(1.01), Type(1.01), true) + log(jac);
         }
       }
-      for(int j=0;j<nlbin;j++) { // Calculate length-based sel
-        Type lo = pow(2, -((lbinmid(j) - LFS(ff))/sls(ff) * (lbinmid(j) - LFS(ff))/sls(ff)));
-        Type hi;
-        if(vul_type(ff) < 0) {
-          hi = 1;
-        } else {
-          hi = pow(2, -((lbinmid(j) - LFS(ff))/srs(ff) * (lbinmid(j) - LFS(ff))/srs(ff)));
-        }
-        vul_len(j,ff) = CppAD::CondExpLt(lbinmid(j), LFS(ff), lo, hi);
-        
-        for(int y=0;y<n_y;y++) {
-          for(int a=0;a<n_age;a++) {
-            vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,ff);
+      if (vul_type(ff) == 0 || vul_type(ff) == -1) { // Calculate length-based sel and convert to age
+        for(int j=0;j<nlbin;j++) {
+          Type lo = pow(2, -((lbinmid(j) - LFS(ff))/sls(ff) * (lbinmid(j) - LFS(ff))/sls(ff)));
+          Type hi;
+          if(vul_type(ff) < 0) {
+            hi = 1;
+          } else {
+            hi = pow(2, -((lbinmid(j) - LFS(ff))/srs(ff) * (lbinmid(j) - LFS(ff))/srs(ff)));
           }
+          vul_len(j,ff) = CppAD::CondExpLt(lbinmid(j), LFS(ff), lo, hi);
+          
+          for(int y=0;y<n_y;y++) {
+            for(int a=0;a<n_age;a++) {
+              vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,ff);
+            }
+          }
+        }
+      } else { // Calculate age-based sel
+        for(int a=0;a<n_age;j++) {
+          Type aa = Type(a);
+          Type lo = pow(2, -((aa - LFS(ff))/sls(ff) * (aa - LFS(ff))/sls(ff)));
+          Type hi;
+          if(vul_type(ff) == -6) {
+            hi = 1;
+          } else {
+            hi = pow(2, -((aa - LFS(ff))/srs(ff) * (aa - LFS(ff))/srs(ff)));
+          }
+          Type vul_a = CppAD::CondExpLt(aa, LFS(ff), lo, hi);
+          for(int y=0;y<n_y;y++) vul(y,a,ff) = vul_a;
         }
       }
     }
+    
   }
   return vul;
 }
