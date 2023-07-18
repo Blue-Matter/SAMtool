@@ -7,10 +7,9 @@
 #' @param RCModel Output from \link{RCM}, a class \linkS4class{RCModel} object.
 #' @return A class \linkS4class{MOM} object.
 #' @author Q. Huynh
+#' @importFrom abind abind
 #' @export
 RCM2MOM <- function(RCModel) {
-  if (!requireNamespace("abind", quietly = TRUE)) stop("Install the abind package to use this function.")
-  
   MOM <- suppressMessages(new("MOM"))
   
   nf <- ncol(RCModel@data@Chist)

@@ -12,6 +12,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 ### Other additions
 - Add heat (red/blue) residuals for age comps in `plot_composition(plot_type = "heat_residuals")`. Also re-adjust default bubble residual size.
 - Switch back to TMB compilation with CppAD. TMBad appears to cause "file too big" errors with codecov.
+- Import abind (already done by MSEtool)
 
 ## SAMtool 1.5.3 (2023-05-23)
 - Fix indexing issue when estimating steepness post-hoc in `SCA2` and `VPA`.

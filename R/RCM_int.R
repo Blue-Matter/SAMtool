@@ -682,7 +682,7 @@ RCM_retro_subset <- function(yr, data, params, map) {
   return(list(data = data_out, params = params_out, map = map))
 }
 
-
+#' @importFrom abind abind
 profile_likelihood_RCM <- function(x, ...) {
   dots <- list(...)
   if (!length(x@mean_fit)) stop("No model found. Re-run RCM with mean_fit = TRUE.")
@@ -697,9 +697,6 @@ profile_likelihood_RCM <- function(x, ...) {
   
   if (!is.null(dots$D)) {
     if (length(dots) > 1) message("Only doing depletion profile...")
-    if (!requireNamespace("abind", quietly = TRUE)) {
-      stop("Please install the abind package to run this profile.")
-    }
     if (!requireNamespace("reshape2", quietly = TRUE)) {
       stop("Please install the reshape2 package to run this profile.")
     }

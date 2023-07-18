@@ -14,6 +14,7 @@ License: GPL-3
 Depends: R (>= 3.5.0), MSEtool (>= 3.0.0)
 Imports: 
     TMB (>= 1.9.0),
+    abind,
     dplyr,
     gplots,
     graphics,
@@ -26,7 +27,6 @@ Imports:
     vars
 LinkingTo: TMB, RcppEigen
 Suggests: 
-    abind,
     caret,
     corpcor,
     covr,
