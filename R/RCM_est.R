@@ -259,18 +259,16 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     stop("start$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
   }
   
-  start$vul_par[2, sel_check] <- log(start$vul_par[1, sel_check] - start$vul_par[2, sel_check])
-  start$vul_par[1, sel_check_len] <- logit(pmin(start$vul_par[1, sel_check_len]/Linf, 0.99))
-  start$vul_par[1, sel_check_age] <- logit(pmin(start$vul_par[1, sel_check_age]/maxage, 0.99))
-  start$vul_par[3, sel_check] <- logit(pmin(start$vul_par[3, sel_check], 0.99))
-  
-  if (any(selectivity == -2)) { # Free parameters
-    start$vul_par[, selectivity == -2] <- logit(start$vul_par[, selectivity == -2], soft_bounds = TRUE)
+  if (any(sel_check)) {  # Parametric sel
+    start$vul_par[2, sel_check] <- log(start$vul_par[1, sel_check] - start$vul_par[2, sel_check])
+    start$vul_par[1, sel_check_len] <- logit(pmin(start$vul_par[1, sel_check_len]/Linf, 0.99))
+    start$vul_par[1, sel_check_age] <- logit(pmin(start$vul_par[1, sel_check_age]/maxage, 0.99))
+    start$vul_par[3, sel_check] <- logit(pmin(start$vul_par[3, sel_check], 0.99))
   }
   
   if (is.null(map$vul_par)) {
     if (any(selectivity == -2)) {
-      stop("Some (fleet) selectivity specified to be free parameters. Provide map_vul_par matrix to RCM.")
+      stop("Some (fleet) selectivity specified to be free parameters. Provide map$vul_par matrix to RCM.")
     }
     map$vul_par <- matrix(0, 3, RCMdata@Misc$nsel_block)
     map$vul_par[3, selectivity %in% c(-1, -6)] <- NA # Fix third parameter for logistic sel
@@ -291,16 +289,20 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (ncol(map$vul_par) != RCMdata@Misc$nsel_block) {
     stop("map$vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
   }
-  if (any(selectivity == -2) && nrow(map$vul_par) != n_age) {
-    stop("map$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
+  
+  if (any(selectivity == -2) ) { # Free parameters, convert start matrix to logit space
+    if (nrow(map$vul_par) != n_age) stop("map$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
+
+    test <- start$vul_par[, selectivity == -2] %in% c(0, 1)
+    if (any(!test)) stop("There are free selectivity parameters in start$vul_par that are less than zero or greater than one.")
+    
+    test_est <- !is.na(map$vul_par[, selectivity == -2])
+    test_fix <- test & !test_est
+    start$vul_par[, selectivity == -2][test_fix] <- logit(start$vul_par[, selectivity == -2][test_fix], soft_bounds = FALSE)
+    start$vul_par[, selectivity == -2][test_est] <- logit(start$vul_par[, selectivity == -2][test_est], soft_bounds = TRUE)
   }
   
-  if (any(selectivity == -2)) {
-    test <- start$vul_par[, selectivity == -2] %in% c(0, 1) & is.na(map$vul_par[, selectivity == -2])
-    start$vul_par[, selectivity == -2][test] <- logit(start$vul_par[, selectivity == -2][test], soft_bounds = FALSE)
-  }
-  
-  # Index selectivity (ivul_par)
+  # Index selectivity (ivul_par) ----
   
   # Check for function selectivity (dome/logistic)
   sel_check <- s_selectivity %in% c(0, -1, -5, -6)
@@ -323,18 +325,16 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     stop("start$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
   }
   
-  start$ivul_par[2, sel_check] <- log(start$ivul_par[1, sel_check] - start$ivul_par[2, sel_check])
-  start$ivul_par[1, sel_check_len] <- logit(pmin(start$ivul_par[1, sel_check_len]/Linf, 0.99))
-  start$ivul_par[1, sel_check_age] <- logit(pmin(start$ivul_par[1, sel_check_age]/maxage, 0.99))
-  start$ivul_par[3, sel_check] <- logit(pmin(start$ivul_par[3, sel_check], 0.99))
-  
-  if (any(s_selectivity == -2)) {
-    start$ivul_par[, s_selectivity == -2] <- logit(start$ivul_par[, s_selectivity == -2], soft_bounds = TRUE)
+  if (any(sel_check)) { # Parametric sel
+    start$ivul_par[2, sel_check] <- log(start$ivul_par[1, sel_check] - start$ivul_par[2, sel_check])
+    start$ivul_par[1, sel_check_len] <- logit(pmin(start$ivul_par[1, sel_check_len]/Linf, 0.99))
+    start$ivul_par[1, sel_check_age] <- logit(pmin(start$ivul_par[1, sel_check_age]/maxage, 0.99))
+    start$ivul_par[3, sel_check] <- logit(pmin(start$ivul_par[3, sel_check], 0.99))
   }
   
   if (is.null(map$ivul_par)) {
     if (any(s_selectivity == -2)) {
-      stop("Some s_selectivity specified to be free parameters. Provide map_ivul_par matrix to RCM.")
+      stop("Some s_selectivity specified to be free parameters. Provide map$ivul_par matrix to RCM.")
     }
     map$ivul_par <- matrix(0, 3, nsurvey)
     map$ivul_par[3, s_selectivity < 0] <- NA # if logistic
@@ -351,13 +351,17 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (ncol(map$ivul_par) != nsurvey) {
     stop("map$ivul_par needs to be a matrix with ", nsurvey, " columns.")
   }
-  if (any(s_selectivity == -2) && nrow(map$ivul_par) != n_age) {
-    stop("map$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
-  }
   
-  if (any(s_selectivity == -2)) {
-    test <- start$ivul_par[, s_selectivity == -2] %in% c(0, 1) & is.na(map$ivul_par[, s_selectivity == -2])
-    start$ivul_par[, s_selectivity == -2][test] <- logit(start$ivul_par[, s_selectivity == -2][test], soft_bounds = FALSE)
+  if (any(s_selectivity == -2)) {  # Free parameters, convert start matrix to logit space
+    if (nrow(map$ivul_par) != n_age) stop("map$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
+    test <- start$ivul_par[, s_selectivity == -2] %in% c(0, 1) 
+    
+    if (any(!test)) stop("There are free selectivity parameters in start$ivul_par that are less than zero or greater than one.")
+    
+    test_est <- !is.na(map$ivul_par[, s_selectivity == -2])
+    test_fix <- test & !test_est
+    start$ivul_par[, s_selectivity == -2][test_fix] <- logit(start$ivul_par[, s_selectivity == -2][test_fix], soft_bounds = FALSE)
+    start$ivul_par[, s_selectivity == -2][test_est] <- logit(start$ivul_par[, s_selectivity == -2][test_est], soft_bounds = TRUE)
   }
   
   if (is.null(start$log_early_rec_dev)) start$log_early_rec_dev <- rep(0, n_age - 1)
