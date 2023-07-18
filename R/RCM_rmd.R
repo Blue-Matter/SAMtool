@@ -106,9 +106,7 @@ rmd_RCM_sel <- function(fig.cap = "Operating model selectivity in the last histo
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "vul <- sapply(report_list, getElement, \"vul_len\")",
     "if (nsim == 1) V_plot <- matrix(OM@cpars$V[, , nyears], 1, byrow = TRUE) else V_plot <- OM@cpars$V[, , nyears]",
-    "matplot(age, t(V_plot), type = \"l\", col = \"black\",",
-    "        xlab = \"Age\", ylab = \"Selectivity\", ylim = c(0, 1.1))",
-    "}",
+    "matplot(age, t(V_plot), type = \"l\", col = \"black\", xlab = \"Age\", ylab = \"Selectivity\", ylim = c(0, 1.1))",
     "abline(h = 0, col = \"grey\")",
     "```\n")
 }
