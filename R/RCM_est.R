@@ -260,8 +260,8 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   }
   
   start$vul_par[2, sel_check] <- log(start$vul_par[1, sel_check] - start$vul_par[2, sel_check])
-  start$vul_par[1, sel_check_len] <- logit(pmin(start$vul_par[1, sel_check_len]/Linf/0.99, 0.99))
-  start$vul_par[1, sel_check_age] <- logit(pmin(start$vul_par[1, sel_check_age]/maxage/0.99, 0.99))
+  start$vul_par[1, sel_check_len] <- logit(pmin(start$vul_par[1, sel_check_len]/Linf, 0.99))
+  start$vul_par[1, sel_check_age] <- logit(pmin(start$vul_par[1, sel_check_age]/maxage, 0.99))
   start$vul_par[3, sel_check] <- logit(pmin(start$vul_par[3, sel_check], 0.99))
   
   if (any(selectivity == -2)) { # Free parameters
@@ -273,10 +273,10 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
       stop("Some (fleet) selectivity specified to be free parameters. Provide map_vul_par matrix to RCM.")
     }
     map$vul_par <- matrix(0, 3, RCMdata@Misc$nsel_block)
-    map$vul_par[3, selectivity == c(-1, -6)] <- NA # Fix third parameter for logistic sel
+    map$vul_par[3, selectivity %in% c(-1, -6)] <- NA # Fix third parameter for logistic sel
     if (!is.null(dots$fix_dome) && dots$fix_dome) { # Obsolete
       warning("fix_dome is obsolete. Recommend using the map argument in RCM")
-      map$vul_par[3, selectivity == c(0, -5)] <- NA # Fix dome
+      map$vul_par[3, selectivity %in% c(0, -5)] <- NA # Fix dome
     }
     
     for(ff in 1:nfleet) {
@@ -324,9 +324,9 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   }
   
   start$ivul_par[2, sel_check] <- log(start$ivul_par[1, sel_check] - start$ivul_par[2, sel_check])
-  start$ivul_par[1, sel_check_len] <- logit(start$ivul_par[1, sel_check_len]/Linf/0.99)
-  start$ivul_par[1, sel_check_age] <- logit(start$ivul_par[1, sel_check_age]/maxage/0.99)
-  start$ivul_par[3, sel_check] <- logit(start$ivul_par[3, sel_check])
+  start$ivul_par[1, sel_check_len] <- logit(pmin(start$ivul_par[1, sel_check_len]/Linf, 0.99))
+  start$ivul_par[1, sel_check_age] <- logit(pmin(start$ivul_par[1, sel_check_age]/maxage, 0.99))
+  start$ivul_par[3, sel_check] <- logit(pmin(start$ivul_par[3, sel_check], 0.99))
   
   if (any(s_selectivity == -2)) {
     start$ivul_par[, s_selectivity == -2] <- logit(start$ivul_par[, s_selectivity == -2], soft_bounds = TRUE)

@@ -1,10 +1,16 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
 ## SAMtool 1.6.0
-- Add heat (red/blue) residuals for age comps in `plot_composition(plot_type = "heat_residuals")`. Also re-adjust default bubble residual size.
+### RCM updates
 - Add `spawn_time_frac` argument to RCM.
 - Add fleet-specific option for catch/effort conditioning to RCM.
-- New figures for RCM markdown reports.
+- Allow map argument for index q `RCM(map = list(q = c(1, 1)))`. This example allows sharing q between 2 indices. Currently, q can only be an explicit estimated parameter (map argument is an integer), solved analytically (map argument is NA), or fixed to 1 (map argument is NA and additional specification in RCMdata@abs_I).
+- Add explicit selectivity for length ("logistic_length", "dome_length") or age-based ("logistic_age", "dome_age") functions. For backwards compatibility, "logistic" and "dome" map to their length-based equivalents. 
+- Update prior for the length or age of full selectivity to be `x^0.01 * (1 - x)^0.01` where x is the ratio of the length of full selectivity to Linf or age of full selectivity to maxage.
+- Update figures for RCM markdown reports.
+
+### Other additions
+- Add heat (red/blue) residuals for age comps in `plot_composition(plot_type = "heat_residuals")`. Also re-adjust default bubble residual size.
 - Switch back to TMB compilation with CppAD. TMBad appears to cause "file too big" errors with codecov.
 
 ## SAMtool 1.5.3 (2023-05-23)

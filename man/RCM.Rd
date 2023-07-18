@@ -96,13 +96,13 @@ Use of a list is deprecated. See Data section below.}
 
 \item{...}{Other arguments to pass in for starting values of parameters and fixing parameters. See details.}
 
-\item{selectivity}{A character vector of length nfleet to indicate \code{"logistic"}, \code{"dome"}, or \code{"free"} selectivity for each fleet in \code{Chist}.
+\item{selectivity}{A character vector of length nfleet to indicate \code{"logistic_length"}, \code{"dome_length"}, \code{"logistic_age"}, \code{"dome_age"}, or \code{"free"} selectivity for each fleet in \code{Chist}.
 If there is time-varying selectivity, this is a character vector of length nsel_block (see Data section below). "free" indicates independent selectivity parameters for each age,
 and additional modifications for fixing selectivity parameters will likely be needed. See Additional arguments section.}
 
 \item{s_selectivity}{A vector of length nsurvey to indicate the selectivity of the corresponding columns in \code{data$Index}. Use \code{"B"} for
 total biomass, or \code{"SSB"} for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
-If the survey selectivity is otherwise independent of anything else in the model, use \code{"logistic"}, \code{"dome"}, or \code{"free"} to specify the functional form of selectivity, and
+If the survey selectivity is otherwise independent of anything else in the model, use \code{"logistic_length"}, \code{"dome_length"}, \code{"logistic_age"}, \code{"dome_age"}, or \code{"free"} to specify the functional form of selectivity, and
 see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.}
 
 \item{LWT}{A named list of likelihood weights for the RCM. See below.}
