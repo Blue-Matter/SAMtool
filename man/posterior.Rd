@@ -27,7 +27,7 @@ posterior(x, ...)
 
 \S4method{posterior}{Assessment}(x, priors_only = FALSE, ...)
 
-RCMstan(RCModel, stanfit, sim, cores = 1)
+RCMstan(RCModel, stanfit, sim, cores = 1, silent = FALSE)
 }
 \arguments{
 \item{x}{An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.}
@@ -59,6 +59,8 @@ for reconstructing the population.}
 
 \item{sim}{A matrix of \code{RCModel@OM@nsim} rows and 2 columns that specifies the samples used to update the
 operating model. The first column specifies the chain and the second columns specifies the MCMC iteration.}
+
+\item{silent}{Logical to indicate if progress messages should be printed to console.}
 }
 \value{
 \code{posterior} returns an object of class \code{stanfit}. See \code{class?stanfit}.

@@ -695,7 +695,7 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(IAApred);
     REPORT(IALpred);
     REPORT(ivul);
-    REPORT(ivul_len);
+    if(ivul_len.sum() > 0) REPORT(ivul_len);
     REPORT(iL5);
     REPORT(iLFS);
     REPORT(iVmaxlen);
@@ -714,7 +714,6 @@ Type RCM(objective_function<Type> *obj) {
     
     REPORT(log_rec_dev_sim);
     REPORT(log_early_rec_dev_sim);
-
   }
 
   return nll;

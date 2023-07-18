@@ -290,8 +290,7 @@ RCM_report_samps <- function(x, samps, obj, conv) {
   return(report)
 }
 
-RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears, proyears, nsim = length(res), prior = list(), silent = FALSE) {
-  
+RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears, proyears, nsim = length(report), prior = list(), silent = FALSE) {
   # Get parameters from RCM data and report list
   RCM_val <- .RCM_update_OM(report, obj_data, maxage, nyears, proyears, nsim)
   
@@ -429,12 +428,13 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   return(list(OM = OM, RCM_val = RCM_val))
 }
 
-.RCM_update_OM <- function(res, obj_data, maxage, nyears, proyears, nsim = length(res)) {
+.RCM_update_OM <- function(report, obj_data, maxage, nyears, proyears, nsim = length(report)) {
+  n_age <- maxage + 1
   out <- list()
   
-  out$R0 <- vapply(res, getElement, numeric(1), "R0")
-  out$initD <- vapply(res, function(x) x$E[1]/x$E0_SR, numeric(1))
-  out$D <- vapply(res, function(x) x$E[length(x$E)-1]/x$E0_SR, numeric(1))
+  out$R0 <- vapply(report, getElement, numeric(1), "R0")
+  out$initD <- vapply(report, function(x) x$E[1]/x$E0_SR, numeric(1))
+  out$D <- vapply(report, function(x) x$E[length(x$E)-1]/x$E0_SR, numeric(1))
   
   make_F <- function(x) { # Extra step to avoid apical F = 0
     apicalF <- x$F
@@ -443,18 +443,18 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
       simplify2array() %>% apply(1:2, sum)
     return(F_at_age)
   }
-  F_matrix <- lapply(res, make_F)
+  F_matrix <- lapply(report, make_F)
   apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
   
   expand_V_matrix <- function(x) {
-    y <- matrix(x[nyears, ], proyears, maxage + 1, byrow = TRUE)
+    y <- matrix(x[nyears, ], proyears, n_age, byrow = TRUE)
     rbind(x, y)
   }
   
   out$V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(3:1)
   out$Find <- do.call(rbind, apical_F)
   
-  out$procsd <- vapply(res, getElement, numeric(1), "tau")
+  out$procsd <- vapply(report, getElement, numeric(1), "tau")
   
   make_Perr <- function(x, obj_data) {
     bias_corr <- ifelse(obj_data$est_rec_dev, exp(-0.5 * x$tau^2), 1)
@@ -462,7 +462,7 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
     res[1] <- res[1] * x$R_eq/x$R0
     return(res)
   }
-  out$Perr <- vapply(res, make_Perr, numeric(nyears), obj_data = obj_data) %>% t()
+  out$Perr <- vapply(report, make_Perr, numeric(nyears), obj_data = obj_data) %>% t()
   
   make_early_Perr <- function(x, obj_data) {
     M <- if (is.null(x$Mest)) obj_data$M_data[1, ] else rep(x$Mest, n_age)
@@ -474,9 +474,9 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
     out <- res[-1] * early_dev
     return(rev(out))
   }
-  out$early_Perr <- vapply(res, make_early_Perr, numeric(maxage), obj_data = obj_data) %>% t()
+  out$early_Perr <- vapply(report, make_early_Perr, numeric(maxage), obj_data = obj_data) %>% t()
   
-  out$log_rec_dev <- vapply(res, getElement, numeric(nyears), "log_rec_dev") %>% t()
+  out$log_rec_dev <- vapply(report, getElement, numeric(nyears), "log_rec_dev") %>% t()
 
   if (!all(out$log_rec_dev == 0)) {
     out$AC <- apply(out$log_rec_dev, 1, function(x) {
@@ -484,25 +484,25 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
       ifelse(is.na(out), 0, out)
     })
   } else {
-    out$AC <- rep(0, length(res))
+    out$AC <- rep(0, length(report))
   }
   
-  out$h <- vapply(res, getElement, numeric(1), "h")
-  out$Mest <- vapply(res, function(x) ifelse(is.null(x$Mest), NA_real_, x$Mest), numeric(1))
+  out$h <- vapply(report, getElement, numeric(1), "h")
+  out$Mest <- vapply(report, function(x) ifelse(is.null(x$Mest), NA_real_, x$Mest), numeric(1))
   
-  out$SSB <- vapply(res, getElement, numeric(nyears + 1), "E") %>% t()
-  out$NAA <- sapply(res, getElement, "N", simplify = "array") %>% aperm(c(3, 1, 2))
-  out$CAA <- sapply(res, getElement, "CAApred", simplify = "array") %>% aperm(c(4, 1:3))
-  out$CAL <- sapply(res, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))
+  out$SSB <- vapply(report, getElement, numeric(nyears + 1), "E") %>% t()
+  out$NAA <- sapply(report, getElement, "N", simplify = "array") %>% aperm(c(3, 1, 2))
+  out$CAA <- sapply(report, getElement, "CAApred", simplify = "array") %>% aperm(c(4, 1:3))
+  out$CAL <- sapply(report, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))
   
   # Mesnil Rochet parameters
-  if (!is.null(res[[1]]$MR_SRR)) {
-    out$MRRmax <- vapply(res, getElement, numeric(1), "MRRmax") 
-    out$MRhinge <- vapply(res, getElement, numeric(1), "MRhinge") 
-    out$MRgamma <- vapply(res, getElement, numeric(1), "MRgamma") 
+  if (!is.null(report[[1]]$MR_SRR)) {
+    out$MRRmax <- vapply(report, getElement, numeric(1), "MRRmax") 
+    out$MRhinge <- vapply(report, getElement, numeric(1), "MRhinge") 
+    out$MRgamma <- vapply(report, getElement, numeric(1), "MRgamma") 
   }
   
-  if (length(res) == 1) {
+  if (length(report) == 1) {
     lapply(out, function(x) {
       if (is.array(x)) {
         dx <- dim(x)

@@ -104,9 +104,11 @@ setMethod("posterior", signature(x = "Assessment"),
 #' @param stanfit An object of class \code{stanfit} returned by \code{posterior}.
 #' @param sim A matrix of \code{RCModel@OM@nsim} rows and 2 columns that specifies the samples used to update the
 #' operating model. The first column specifies the chain and the second columns specifies the MCMC iteration.
+#' @param silent Logical to indicate if progress messages should be printed to console.
 #' @export
-RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
-  nsim <- RCModel@OM@nsim
+RCMstan <- function(RCModel, stanfit, sim, cores = 1, silent = FALSE) {
+  OM <- RCModel@OM
+  nsim <- OM@nsim
   
   nchains <- stanfit@sim$chains
   nsim_stan <- length(stanfit@sim$samples[[1]][[1]])
@@ -126,7 +128,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   if (any(sim_stan[, 2] > nsim_stan)) stop("There are only ", nsim_stan, " iterations in the stan model.")
   
   # Get samps
-  message("Sampling ", nsim, " iterations for the operating model...")
+  if (!silent) message("Sampling ", nsim, " iterations for the operating model...")
   samps <- sapply(1:nsim, function(x) {
     chain <- sim_stan[x, 1]
     sim_out <- sim_stan[x, 2]
@@ -137,16 +139,18 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   obj <- RCModel@mean_fit$obj
   if (is.null(obj)) stop("No TMB object found in RCModel@mean_fit.")
     
-  message("Re-constructing population model...")
+  if (!silent) message("Re-constructing population model from MCMC parameter samples...")
   
-  if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-  
+  if (cores > 1 && !snowfall::sfIsRunning()) {
+    MSEtool::setup(as.integer(cores))
+    on.exit(snowfall::sfStop())
+  }   
   res <- pblapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE, 
                   cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
   
-  message("Updating operating model with MCMC samples...\n")
+  if (!silent) message("Updating operating model with MCMC samples...\n")
   newOM <- RCM_update_OM(
-    OM = RCModel@OM, 
+    OM = OM, 
     report = res, 
     StockPars = list(Perr_y = matrix(1, nsim, OM@maxage + OM@nyears + OM@proyears)), 
     obj_data = obj$env$data, 
@@ -154,7 +158,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
     nyears = OM@nyears, 
     proyears = OM@proyears, 
     prior = list(use_prior = obj$env$data$use_prior), 
-    silent = FALSE
+    silent = silent
   )
   
   RCModel@OM <- newOM$OM
@@ -165,6 +169,8 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1) {
   RCModel@conv <- rep(TRUE, nsim)
   RCModel@Misc <- res
   RCModel@config$drop_sim <- integer(0)
+  
+  if (!silent) message("Finished.")
   
   return(RCModel)
 }

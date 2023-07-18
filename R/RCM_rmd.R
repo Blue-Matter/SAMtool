@@ -102,16 +102,12 @@ rmd_RCM_Find <- function(fig.cap = "Apical F from RCM model. These values may be
     "```\n")
 }
 
-rmd_RCM_sel <- function(fig.cap = "Operating model selectivity among simulations.") {
+rmd_RCM_sel <- function(fig.cap = "Operating model selectivity in the last historical year (all simulations).") {
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "vul <- sapply(report_list, getElement, \"vul_len\")",
-    "if (nsel_block == 1 && all(!is.na(vul))) {",
-    "  matplot(RCMdata@Misc$lbinmid, vul, type = \"l\", col = \"black\",",
-    "          xlab = \"Length\", ylab = \"Selectivity (last historical year)\", ylim = c(0, 1.1))",
-    "} else {",
-    "  if (nsim == 1) V_plot <- matrix(OM@cpars$V[, , nyears], 1, byrow = TRUE) else V_plot <- OM@cpars$V[, , nyears]",
-    "  matplot(age, t(V_plot), type = \"l\", col = \"black\",",
-    "          xlab = \"Age\", ylab = \"Selectivity (last historical year)\", ylim = c(0, 1.1))",
+    "if (nsim == 1) V_plot <- matrix(OM@cpars$V[, , nyears], 1, byrow = TRUE) else V_plot <- OM@cpars$V[, , nyears]",
+    "matplot(age, t(V_plot), type = \"l\", col = \"black\",",
+    "        xlab = \"Age\", ylab = \"Selectivity\", ylim = c(0, 1.1))",
     "}",
     "abline(h = 0, col = \"grey\")",
     "```\n")
@@ -120,7 +116,7 @@ rmd_RCM_sel <- function(fig.cap = "Operating model selectivity among simulations
 rmd_RCM_fleet_output <- function(ff, f_name) {
   if (ff == 1) header <- "## RCM output {.tabset}\n" else header <- NULL
   ans <- c(paste("### ", f_name[ff], "\n"),
-           paste0("```{r, fig.cap = \"Selectivity of ", f_name[ff], ".\"}"),
+           paste0("```{r, fig.cap = \"Length selectivity of ", f_name[ff], ".\"}"),
            paste0("bl <- unique(RCMdata@sel_block[, ", ff, "])"),
            "vul_bb <- list()",
            "bl_col <- gplots::rich.colors(length(bl))",
@@ -131,7 +127,7 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "}",
            "test <- vapply(vul_bb, function(x) all(!is.na(x)), logical(1))",
            "if (all(test)) {",
-           paste0("  matplot(RCMdata@Misc$lbinmid, RCMdata@Misc$lbinmid, type = \"n\", xlab = \"Length\", ylim = c(0, 1), ylab = \"Selectivity of Fleet ", ff, "\")"),
+           paste0("  matplot(RCMdata@Misc$lbinmid, RCMdata@Misc$lbinmid, type = \"n\", xlab = \"Length\", ylim = c(0, 1), ylab = \"Selectivity of ", f_name[ff], "\")"),
            "  abline(h = 0, col = \"grey\")",
            "  for(bb in 1:length(bl)) {",
            "    matlines(RCMdata@Misc$lbinmid, vul_bb[[bb]], type = \"l\", col = bl_col[bb], lty = scenario$lty, lwd = scenario$lwd)",
@@ -141,8 +137,8 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "}",
            "```\n",
            "",
-           paste0("```{r, fig.cap = \"Corresponding age-based selectivity of ", f_name[ff], ".\"}"),
-           paste0("matplot(age, age, type = \"n\", xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of Fleet ", ff, "\")"),
+           paste0("```{r, fig.cap = \"Age-based selectivity of ", f_name[ff], ".\"}"),
+           paste0("matplot(age, age, type = \"n\", xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of ", f_name[ff], "\")"),
            "abline(h = 0, col = \"grey\")",
            "",
            "for(bb in 1:length(bl)) {",
@@ -243,7 +239,16 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
 rmd_RCM_index_output <- function(sur, s_name) {
   ans <- c(paste0("### ", s_name[sur], " \n"),
            "",
-           paste0("```{r, fig.cap = \"Selectivity of ", s_name[sur], " in last historical year.\"}"),
+           paste0("```{r, fig.cap = \"Length selectivity of ", s_name[sur], ".\"}"),
+           "ivul_len <- sapply(report_list, function(x) x$ivul_len[, ", sur, "])",
+           "if (all(!is.na(ivul_len))) {",
+           paste0("  matplot(RCMdata@Misc$lbinmid, ivul_len, type = \"n\", xlab = \"Length\", ylim = c(0, 1), ylab = \"Selectivity of ", s_name[sur], "\")"),
+           "  abline(h = 0, col = \"grey\")",
+           "  if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty, lwd = scenario$lwd)",
+           "}",
+           "```\n",
+           "",
+           paste0("```{r, fig.cap = \"Age-based selectivity of ", s_name[sur], " in last historical year.\"}"),
            "if (!is.null(report_list[[1]]$ivul)) {",
            paste0("ivul_ff_age <- sapply(report_list, function(x) x$ivul[nyears, , ", sur, "])"),
            paste0("matplot(age, ivul_ff_age, type = \"l\", col = scenario$col2, xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of ", s_name[sur], "\")"),
