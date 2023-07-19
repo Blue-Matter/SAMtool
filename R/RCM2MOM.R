@@ -17,11 +17,20 @@ RCM2MOM <- function(RCModel) {
   slot_intersect <- intersect(slotNames("MOM"), slotNames("OM"))
   for(i in slot_intersect) slot(MOM, i) <- slot(RCModel@OM, i)
   
+  report <- RCModel@Misc
+  if (length(report) == 1) report <- lapply(1:MOM@nsim, function(...) RCModel@Misc[[1]])
   cpars <- lapply(1:nf, function(f) {
     cp <- RCModel@OM@cpars
-    cp$Find <- sapply(1:MOM@nsim, function(x) RCModel@Misc[[x]]$F[, f]) %>% t()
-    Vhist <- sapply(1:MOM@nsim, function(x) RCModel@Misc[[x]]$vul[1:RCModel@OM@nyears, , f], simplify = "array") %>%
-      aperm(3:1) 
+    
+    F_age <- sapply(
+      1:MOM@nsim, 
+      function(x) RCModel@Misc[[x]]$F[, f] * RCModel@Misc[[x]]$vul[1:RCModel@OM@nyears, , f],
+      simplify = "array"
+    ) %>% 
+      aperm(3:1)
+    
+    cp$Find <- apply(F_age, c(1, 3), max)
+    Vhist <- apply(F_age, c(1, 3), function(x) x/max(x))
     Vpro <- array(Vhist[, , dim(Vhist)[3]], c(dim(Vhist)[1:2], RCModel@OM@proyears))
     cp$V <- abind::abind(Vhist, Vpro, along = 3)
     
