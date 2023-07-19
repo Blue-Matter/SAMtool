@@ -273,35 +273,33 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
   Ages <- 1:n_age - 1
   
   # Age-only model for now
-  #if (is.null(StockPars$Len_age)) {
-  #  Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
-  #  out$Len_age <- local({
-  #    Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
-  #    array(Len_age, dim = c(nsim, n_age, nyears+1))
-  #  })
-  #} else {
-  #  out$Len_age <- StockPars$Len_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
-  #}
+  if (is.null(StockPars$Len_age)) {
+    Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
+    out$Len_age <- local({
+      Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
+      array(Len_age, dim = c(1, n_age, nyears+1))
+    })
+  } else {
+    out$Len_age <- StockPars$Len_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
+  }
   
-  #if (is.null(StockPars$Linf)) {
-  #  out$Linf <- Data@vbLinf[x]
-  #} else {
-  #  out$Linf <- StockPars$Linf[x]
-  #}
+  if (is.null(StockPars$Linf)) {
+    out$Linf <- Data@vbLinf[x]
+  } else {
+    out$Linf <- StockPars$Linf[x]
+  }
   
-  #if (is.null(StockPars$LatASD)) {
-  #  Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
-  #  out$LatASD <- out$Len_age * Data@LenCV[x]
-  #} else {
-  #  out$LatASD <- StockPars$LatASD[x, 1:n_age, 1:(nyears+1), drop = FALSE]
-  #}
-  out$Len_age <- out$LatASD <- array(1:n_age, dim = c(nsim, n_age, nyears+1))
-  out$Linf <- n_age
+  if (is.null(StockPars$LatASD)) {
+    Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
+    out$LatASD <- out$Len_age * Data@LenCV[x]
+  } else {
+    out$LatASD <- StockPars$LatASD[x, 1:n_age, 1:(nyears+1), drop = FALSE]
+  }
   
   if (is.null(StockPars$Wt_age)) {
     out$Wt_age <- local({
       Len_age <- Data@vbLinf[x]*(1-exp(-Data@vbK[x]*(Ages-Data@vbt0[x])))
-      array(Data@wla[x] * Len_age ^ Data@wlb[x], dim = c(nsim, n_age, nyears+1))
+      array(Data@wla[x] * Len_age ^ Data@wlb[x], dim = c(1, n_age, nyears+1))
     })
   } else {
     out$Wt_age <- StockPars$Wt_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
@@ -319,7 +317,7 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
       A50 <- min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x]))
       A95 <- max(A50+0.5, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L95[x]))
       m <- c(0, 1/(1 + exp(-log(19) * (c(1:Data@MaxAge) - A50)/(A95 - A50)))) # Age-0 is immature
-      array(m, dim = c(nsim, n_age, nyears+1))
+      array(m, dim = c(1, n_age, nyears+1))
     })
   } else {
     out$Mat_age <- StockPars$Mat_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
@@ -350,10 +348,12 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
   }
   
   if (is.null(StockPars$M_ageArray)) {
-    out$M_ageArray <- array(Data@Mort[x], dim = c(nsim, n_age, nyears+1))
+    out$M_ageArray <- array(Data@Mort[x], dim = c(1, n_age, nyears+1))
   } else {
     out$M_ageArray <- StockPars$M_ageArray[x, 1:n_age, 1:(nyears+1), drop = FALSE]
   }
+  
+  # Fec_age
   
   check <- vapply(out, function(y) any(is.na(y)), logical(1))
   if (any(check)) stop("Input parameters not found for RCM_assess: ", paste(names(check)[check], collapse = ", "))
