@@ -191,10 +191,10 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
                 SSB = newOM$RCM_val$SSB[keep, , drop = FALSE], 
                 NAA = newOM$RCM_val$NAA[keep, , , drop = FALSE], 
                 CAA = newOM$RCM_val$CAA[keep, , , , drop = FALSE], 
-                CAL = newOM$RCM_val$CAL[keep, , , , drop = FALSE], 
                 mean_fit = mean_fit_output, 
                 conv = conv[keep], 
                 data = RCMdata)
+  if (!is.null(newOM$RCM_val$CAL)) output@CAL = newOM$RCM_val$CAL[keep, , , , drop = FALSE] 
   
   if (length(res) > 1) {
     output@Misc <- res[keep]
@@ -493,7 +493,9 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   out$SSB <- vapply(report, getElement, numeric(nyears + 1), "E") %>% t()
   out$NAA <- sapply(report, getElement, "N", simplify = "array") %>% aperm(c(3, 1, 2))
   out$CAA <- sapply(report, getElement, "CAApred", simplify = "array") %>% aperm(c(4, 1:3))
-  out$CAL <- sapply(report, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))
+  if (!is.null(report[[1]]$CALpred)) {
+    out$CAL <- sapply(report, getElement, "CALpred", simplify = "array") %>% aperm(c(4, 1:3))
+  }
   
   # Mesnil Rochet parameters
   if (!is.null(report[[1]]$MR_SRR)) {

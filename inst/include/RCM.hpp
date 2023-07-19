@@ -135,14 +135,19 @@ Type RCM(objective_function<Type> *obj) {
   Type penalty = 0;
   Type prior = 0;
   
-  
-  // Annual probability of length-at-age (PLA)
+  // Annual probability of length-at-age (PLA) - do check if needed
   vector<matrix<Type> > PLA(n_y+1);
-  for(int y=0;y<=n_y;y++) {
-    if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
+  
+  int do_len = 0;
+  if(CAL_n.sum() > 0 || IAL_n.sum() > 0 || (msize_type == "length" && !R_IsNA(asDouble(msize.sum())))) do_len += 1;
+  for(int ff=0;ff<nfleet;ff++) if(vul_type(ff) == 0 || vul_type(ff) == -1) do_len += 1;
+  for(int sur=0;sur<nsurvey;sur++) if(ivul_type(sur) == 0 || ivul_type(sur) == -1) do_len += 1;
+  
+  if (do_len > 0) {
+    for(int y=0;y<=n_y;y++) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
   }
   
-  // Vulnerability (length-based) and F parameters
+  // Vulnerability (age or length-based) and F parameters
   vector<Type> LFS(nsel_block);
   vector<Type> L5(nsel_block);
   vector<Type> Vmaxlen(nsel_block);
@@ -156,7 +161,7 @@ Type RCM(objective_function<Type> *obj) {
   F_equilibrium.setZero();
 
   matrix<Type> F(n_y,nfleet);
-  matrix<Type> Z = M; // Add F during loop over years
+  matrix<Type> Z = M; // F to be added later during loop over years
 
   for(int ff=0;ff<nfleet;ff++) {
     CV_msize(ff) = exp(log_CV_msize(ff));
@@ -177,8 +182,6 @@ Type RCM(objective_function<Type> *obj) {
     NPR_unfished(y) = calc_NPR0(M, n_age, y, plusgroup, spawn_time_frac);
     EPR0(y) = sum_EPR(NPR_unfished(y), fec, n_age, y);
     if(y <= ageM) EPR0_SR += EPR0(y);
-    
-    if(Type(n_age) != Linf) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
   }
   EPR0_SR /= Type(ageM + 1); // Unfished replacement line for SRR is the average across the first ageM years
   Type E0_SR = 0;
@@ -369,21 +372,28 @@ Type RCM(objective_function<Type> *obj) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
         CN(y,ff) += CAAtrue(y,a,ff);
         Cpred(y,ff) += CAAtrue(y,a,ff) * wt(y,a);
-
-        if(Type(n_age) != Linf) {
-          for(int len=0;len<nlbin;len++) {
-            CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len);
-            MLpred(y,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len) * lbinmid(len);
-          }
-        }
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
+        
+        if (CAL_hist.col(ff).sum() > 0) {
+          for(int len=0;len<nlbin;len++) CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len);
+        }
+        if (msize_type == "length" && !R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
+          for(int len=0;len<nlbin;len++) MLpred(y,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len) * lbinmid(len);
+        }
       }
       
       if(a<n_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
       if(plusgroup && a==n_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
     }
-    if(Type(n_age) != Linf) for(int ff=0;ff<nfleet;ff++) MLpred(y,ff) /= CN(y,ff);
-    if(msize_type == "weight") for(int ff=0;ff<nfleet;ff++) MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
+    if (msize_type == "length") {
+      for(int ff=0;ff<nfleet;ff++) {
+        if (!R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
+          MLpred(y,ff) /= CN(y,ff);
+        }
+      }
+    } else { //if(msize_type == "weight") 
+      for(int ff=0;ff<nfleet;ff++) MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
+    }
   }
   
   // Biomass at beginning of n_y + 1
@@ -435,7 +445,7 @@ Type RCM(objective_function<Type> *obj) {
         for(int aa=0;aa<n_age;aa++) IAApred(y,aa,sur) += IAAtrue(y,a,sur) * age_error(a,aa);
 
         if(I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * wt(y,a); // Biomass vulnerable to survey
-        if(Type(n_age) != Linf && IAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
+        if(IAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
           for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLA(y)(a,len);
         }
       }
@@ -652,9 +662,9 @@ Type RCM(objective_function<Type> *obj) {
 
   REPORT(N);
   REPORT(CAApred);
-  REPORT(CALpred);
-  REPORT(MLpred);
-  if(msize_type == "weight") REPORT(MWpred);
+  if(CALpred.sum() > 0) REPORT(CALpred);
+  if(MLpred.sum() > 0) REPORT(MLpred);
+  if(msize_type == "weight" && MWpred.sum() > 0) REPORT(MWpred);
   REPORT(CN);
   REPORT(Cpred);
   REPORT(Ipred);
@@ -692,14 +702,14 @@ Type RCM(objective_function<Type> *obj) {
 
   if(nll_index.sum() != 0) {
     REPORT(ivul_par);
-    REPORT(IAApred);
-    REPORT(IALpred);
     REPORT(ivul);
     if(ivul_len.sum() > 0) REPORT(ivul_len);
     REPORT(iL5);
     REPORT(iLFS);
     REPORT(iVmaxlen);
+    REPORT(IAApred);
   }
+  if(IAL_n.sum() > 0) REPORT(IALpred);
   
   if(nll_gr) {
     ADREPORT(nll_fleet);

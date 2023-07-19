@@ -165,7 +165,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1, silent = FALSE) {
   RCModel@SSB <- newOM$RCM_val$SSB
   RCModel@NAA <- newOM$RCM_val$NAA
   RCModel@CAA <- newOM$RCM_val$CAA
-  RCModel@CAL <- newOM$RCM_val$CAL
+  if (!is.null(newOM$RCM_val$CAL)) RCModel@CAL <- newOM$RCM_val$CAL
   RCModel@conv <- rep(TRUE, nsim)
   RCModel@Misc <- res
   RCModel@config$drop_sim <- integer(0)

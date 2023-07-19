@@ -181,7 +181,7 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) mean lengths from ", f_name[ff], ".\"}"),
-           paste0("MLpred <- sapply(report_list, function(x) x$MLpred[, ", ff, "])"),
+           paste0("MLpred <- sapply(report_list, function(x) if(!is.null(x$MLpred)) x$MLpred[, ", ff, "] else NA)"),
            paste0("if (any(RCMdata@CAL[, , ", ff, "] > 0, na.rm = TRUE)) {"),
            paste0("  MLobs <- (RCMdata@CAL[, , ", ff, "] %*% RCMdata@Misc$lbinmid)/rowSums(RCMdata@CAL[, , ", ff, "], na.rm = TRUE)"),
            paste0("} else if (RCMdata@MS_type == \"length\" && any(RCMdata@MS[, ", ff, "] > 0, na.rm = TRUE)) MLobs <- RCMdata@MS[, ", ff, "] else MLobs <- NA"),
