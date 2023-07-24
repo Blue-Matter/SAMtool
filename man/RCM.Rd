@@ -189,7 +189,7 @@ Several articles are available for the RCM:
 \itemize{
 \item \href{https://openmse.com/tutorial-rcm/}{General overview of approach}
 \item \href{https://openmse.com/tutorial-rcm-eq/}{Mathematical description}
-\item \href{https://openmse.com/tutorial-rcm-select/}{Setup of selectivity settings} (useful for more data-rich cases)
+\item \href{https://openmse.com/tutorial-rcm-select/}{Setup of selectivity settings and index catchability} (useful for more data-rich cases)
 \item \href{https://openmse.com/features-assessment-models/5-priors/}{Description of priors}
 }
 }
@@ -281,7 +281,7 @@ If any \code{s_selectivity = "free"}, then this matrix needs to be of maxage+1 r
 the row specifies the selectivity at age. 
 \item log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.
 \item log_early_rec_dev: A numeric vector of length OM@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.
-\item q: A numeric vector of length nsurvey for index catchability.
+\item q: A numeric vector of length nsurvey for index catchability. See \href{https://openmse.com/tutorial-rcm-select/}{online article} for more information.
 }
 
 Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
@@ -297,7 +297,7 @@ By default, no deviates are estimated (all are NA).
 \item log_rec_dev: A vector of length OM@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
 By default, all these deviates are estimated.
 \item q: A vector of length nsurvey for index catchability. q should be an estimated parameter when sharing across surveys (perhaps with differing selectivity). Otherwise, it is solved analytically
-where individual parameters are independent of other indices. Use \code{RCMdata@abs_I} for fixing the catchability to 1.
+where individual parameters are independent of other indices. Use \code{RCMdata@abs_I} for fixing the catchability to 1. See \href{https://openmse.com/tutorial-rcm-select/}{online article} for more information.
 }
 }
 
