@@ -111,6 +111,9 @@ Type RCM(objective_function<Type> *obj) {
   PARAMETER_MATRIX(log_compi);          // IAA/IAL dispersion parameter
   
   PARAMETER_VECTOR(log_q);              // Index q
+  
+  PARAMETER(meanRx);                     // Merluza - mean recruitment
+  Type meanR = exp(meanRx)/rescale;      // Merluza
 
   int nlbin = lbinmid.size();
   Type R0 = 0;
@@ -236,6 +239,7 @@ Type RCM(objective_function<Type> *obj) {
   matrix<Type> Ipred(n_y, nsurvey);          // Predicted index at year
 
   vector<Type> R(n_y+1);            // Recruitment at year
+  vector<Type> Rpred(n_y+1);        // Merluza - SRR predicted recruitment
   vector<Type> Rec_dev(n_y);
   vector<Type> R_early(n_age-1);
   vector<Type> Rec_dev_early(n_age-1);
@@ -281,7 +285,7 @@ Type RCM(objective_function<Type> *obj) {
     R_eq = MesnilRochet_SR(EPR_eq, MRgamma, MRRmax, MRhinge, 0);
   }
   
-  R(0) = R_eq;
+  R(0) = meanR;
   if(est_rec_dev(0)) {
     Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
     SIMULATE if(sim_process_error) {
@@ -295,7 +299,7 @@ Type RCM(objective_function<Type> *obj) {
     if(a == 0) {
       N(0,a) = R(0) * NPR_equilibrium(a);
     } else {
-      R_early(a-1) = R_eq;
+      R_early(a-1) = meanR;
       if(est_early_rec_dev(a-1)) {
         Rec_dev_early(a-1) = exp(log_early_rec_dev(a-1) - 0.5 * tau * tau);
         SIMULATE if(sim_process_error) {
@@ -341,14 +345,24 @@ Type RCM(objective_function<Type> *obj) {
     }
     
     // Calculate this year's recruitment and biomass
+    // Merluza
+    if(SR_type == "BH") {
+      Rpred(y) = BH_SR(E(y), h, R0, E0_SR);
+    } else if(SR_type == "Ricker") {
+      Rpred(y) = Ricker_SR(E(y), h, R0, E0_SR);
+    } else { // Mesnil-Rochet
+      Rpred(y) = MesnilRochet_SR(E(y), MRgamma, MRRmax, MRhinge);
+    }
     if(y>0) {
-      if(SR_type == "BH") {
-        R(y) = BH_SR(E(y), h, R0, E0_SR);
-      } else if(SR_type == "Ricker") {
-        R(y) = Ricker_SR(E(y), h, R0, E0_SR);
-      } else { // Mesnil-Rochet
-        R(y) = MesnilRochet_SR(E(y), MRgamma, MRRmax, MRhinge);
-      }
+      R(y) = meanR; // Merluza
+      
+      //if(SR_type == "BH") {
+      //  R(y) = BH_SR(E(y), h, R0, E0_SR);
+      //} else if(SR_type == "Ricker") {
+      //  R(y) = Ricker_SR(E(y), h, R0, E0_SR);
+      //} else { // Mesnil-Rochet
+      //  R(y) = MesnilRochet_SR(E(y), MRgamma, MRRmax, MRhinge);
+      //}
       
       if(est_rec_dev(y)) {
         Rec_dev(y) = exp(log_rec_dev(y) - 0.5 * tau * tau);
@@ -399,15 +413,18 @@ Type RCM(objective_function<Type> *obj) {
   // Biomass at beginning of n_y + 1
   for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * fec(n_y,a);
   
-  if(spawn_time_frac > 0) { // Should work properly since spawn_time_frac is identified as DATA_SCALAR
-    R(n_y) = R(n_y-1);
-  } else if(SR_type == "BH") {
-    R(n_y) = BH_SR(E(n_y), h, R0, E0_SR);
-  } else if(SR_type == "Ricker") {
-    R(n_y) = Ricker_SR(E(n_y), h, R0, E0_SR);
-  } else { // Mesnil-Rochet
-    R(n_y) = MesnilRochet_SR(E(n_y), MRgamma, MRRmax, MRhinge);
-  }
+  // Merluza
+  R(n_y) = meanR;
+  
+  //if(spawn_time_frac > 0) { // Should work properly since spawn_time_frac is identified as DATA_SCALAR
+  //  R(n_y) = R(n_y-1);
+  //} else if(SR_type == "BH") {
+  //  R(n_y) = BH_SR(E(n_y), h, R0, E0_SR);
+  //} else if(SR_type == "Ricker") {
+  //  R(n_y) = Ricker_SR(E(n_y), h, R0, E0_SR);
+  //} else { // Mesnil-Rochet
+  //  R(n_y) = MesnilRochet_SR(E(n_y), MRgamma, MRRmax, MRhinge);
+  //}
   N(n_y,0) = R(n_y);
   for(int a=0;a<n_age;a++) {
     B(n_y) += N(n_y,a) * wt(n_y,a);
@@ -578,6 +595,12 @@ Type RCM(objective_function<Type> *obj) {
   for(int y=0;y<n_y;y++) {
     if(est_rec_dev(y) == 1) nll_log_rec_dev -= dnorm_(log_rec_dev(y), Type(0), tau, true);
   }
+  
+  // Merluza
+  for(int y=0;y<n_y-2;y++) {
+    if(est_rec_dev(y) == 1) nll_log_rec_dev -= dnorm_(log(R(y)), log(Rpred(y)) - 0.5 * tau * tau, tau, true);
+  }
+  
   for(int a=0;a<n_age-1;a++) {
     if(est_early_rec_dev(a) == 1) nll_log_rec_dev -= dnorm_(log_early_rec_dev(a), Type(0), tau, true);
   }
@@ -725,6 +748,10 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(log_rec_dev_sim);
     REPORT(log_early_rec_dev_sim);
   }
+  
+  // Merluza
+  REPORT(meanR);
+  REPORT(Rpred);
 
   return nll;
 }

@@ -409,6 +409,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                      log_compf = matrix(0, nfleet, 2),
                      log_compi = matrix(0, nsurvey, 2),
                      log_q = log(start$q))
+  TMB_params$meanRx <- TMB_params$R0x # Merluza
   
   if (any(RCMdata@Misc$condition == "catch")) {
     TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, 
@@ -421,7 +422,10 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (all(RCMdata@Misc$condition == "effort") && !sum(RCMdata@Chist, na.rm = TRUE) && !prior$use_prior[1]) {
     map_out$R0x <- factor(NA) # Fix if condition on effort, no catches, and no prior on R0
   }
-  if (SR_type == "Mesnil-Rochet" || !prior$use_prior[2]) map_out$transformed_h <- factor(NA)
+  
+  # Merluza
+  if (SR_type == "Mesnil-Rochet") map_out$transformed_h <- factor(NA)
+  #if (SR_type == "Mesnil-Rochet" || !prior$use_prior[2]) map_out$transformed_h <- factor(NA)
   
   if (SR_type == "Mesnil-Rochet") {
     if (is.null(map$MR_SRR)) map$MR_SRR <- c(1, NA)  # Estimates Ehinge/E0, fixes gamma = 0.001 --> hockey-stick
