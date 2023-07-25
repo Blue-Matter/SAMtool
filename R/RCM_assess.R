@@ -139,7 +139,6 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
     StockPars_out <- RCM_assess_StockPars(x, Data, StockPars, n_age, nyears, nsim, SR)
   }
   
-  
   # Create FleetPars from Data
   FleetPars <- list()
   #FleetPars$LFS_y <- array(Data@LFS[x], dim=c(1, nyears+1))
@@ -150,7 +149,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   FleetPars$Vmaxlen_y <- ifelse(is.null(Data@Vmaxlen[x]), 0.5, Data@Vmaxlen[x]) %>% array(c(1, nyears+1))
   
   RCM_out <- RCM_est(x = 1, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel, LWT = LWT,
-                     comp_like = "multinomial", prior = prior, StockPars = StockPars_out, ObsPars = list(Isd = Data@Obs$Isd[x]),
+                     comp_like = "multinomial", prior = prior, StockPars = StockPars_out,
                      FleetPars = FleetPars, mean_fit = FALSE)
   obj <- RCM_out$obj
   opt <- RCM_out$opt

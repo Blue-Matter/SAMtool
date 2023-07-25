@@ -77,7 +77,7 @@
 #'
 #' @return An object of class \linkS4class{RCModel} (see link for description of output).
 #' 
-#' \code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
+#' \code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
 #' from the OM.
 #'
 #' @section Online Documentation:
@@ -390,6 +390,7 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             if (!is.null(Ind$Index)) {
               dataS4@Index <- Ind$Index
               dataS4@I_sd <- Ind$I_sd
+              if (is.null(Ind$I_sd)) stop("No standard errors for the index was found.")
 
               if (any(!is.na(Ind$V))) {
                 extra_args$ivul_par <- Ind$V
