@@ -174,7 +174,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   
   # Calculate annual reference points
   if (conv) {
-    ref_pt <- RCM_assess_ref(obj, report, yref = 1:nyears)
+    ref_pt <- RCM_assess_ref(obj, yref = 1:nyears)
     
     report$FMSY <- sapply(ref_pt, getElement, "FMSY")
     tv_ref_pt <- length(unique(report$FMSY)) > 1
@@ -260,10 +260,10 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
     out$Wt_age <- StockPars$Wt_age[x, 1:n_age, 1:(nyears+1), drop = FALSE]
   }
   
-  if (is.null(StockPars$ageM)) {
-    out$ageM <- min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x])) %>% matrix(1, 1)
+  if (is.null(StockPars$ageMarray)) {
+    out$ageMarray <- min(0.5 * Data@MaxAge, iVB(Data@vbt0[x], Data@vbK[x], Data@vbLinf[x], Data@L50[x])) %>% matrix(1, 1)
   } else {
-    out$ageM <- StockPars$ageM[x]
+    out$ageMarray <- StockPars$ageMarray[x]
   }
   if (!is.matrix(out$ageM)) out$ageM <- matrix(out$ageM, 1, 1)
   
