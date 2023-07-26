@@ -136,7 +136,7 @@ Not used when data are provided in a \linkS4class{RCMdata} object.}
 \value{
 An object of class \linkS4class{RCModel} (see link for description of output).
 
-\code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
+\code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
 from the OM.
 }
 \description{

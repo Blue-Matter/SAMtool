@@ -174,51 +174,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   
   # Calculate annual reference points
   if (conv) {
-    ref_pt <- lapply(1:nyears, function(y) {
-      M <- obj$env$data$M_data[y, ]
-      mat <- obj$env$data$mat[y, ]
-      weight <- obj$env$data$wt[y, ]
-      vul <- report$F_at_age[y, ]/max(report$F_at_age[y, ])
-      SR <- obj$env$data$SR_type
-      catch_eq <- "Baranov"
-      tv_M <- "none"
-      Arec <- report$Arec
-      Brec <- report$Brec
-      
-      # Optimize for MSY
-      opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 4), M = M, mat = mat, weight = weight, vul = vul, 
-                       SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, tv_M = tv_M)
-      opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                           Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, tv_M = tv_M)
-      FMSY <- opt2$minimum
-      MSY <- -1 * opt2$objective
-      VBMSY <- opt3["VB"]
-      RMSY <- opt3["R"]
-      BMSY <- opt3["B"]
-      EMSY <- opt3["E"]
-      
-      Fvec <- seq(0, 2.5 * FMSY, length.out = 100)
-      
-      # Yield curve
-      yield <- lapply(Fvec, yield_fn_SCA, M = M, mat = mat, weight = weight, vul = vul, SR = SR, 
-                      Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, tv_M = tv_M)
-      EPR <- vapply(yield, getElement, numeric(1), "EPR")
-      YPR <- vapply(yield, getElement, numeric(1), "YPR")
-      
-      new_B0 <- yield[[1]]["B"] # New due to change in M
-      new_E0 <- yield[[1]]["E"]
-      new_VB0 <- yield[[1]]["VB"]
-      new_R0 <- yield[[1]]["R"]
-      if (SR == "BH") {
-        new_h <- Arec * EPR[1]/ (4 + Arec * EPR[1])
-      } else {
-        new_h <- 0.2 * (Arec * EPR[1])^0.8
-      }
-      
-      return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
-                  per_recruit = data.frame(FM = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR,
-                  new_B0 = new_B0, new_E0 = new_B0, new_VB0 = new_VB0, new_R0 = new_R0, new_h = new_h))
-    })
+    ref_pt <- RCM_assess_ref(obj, report, yref = 1:nyears)
     
     report$FMSY <- sapply(ref_pt, getElement, "FMSY")
     tv_ref_pt <- length(unique(report$FMSY)) > 1
@@ -358,3 +314,63 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
   if (any(check)) stop("Input parameters not found for RCM_assess: ", paste(names(check)[check], collapse = ", "))
   return(out)
 }
+
+
+RCM_assess_ref <- function(obj, yref = 1:obj$env$data$n_y) {
+  
+  ref_pt <- lapply(yref, function(y) {
+    M <- obj$env$data$M_data[y, ]
+    mat <- obj$env$data$mat[y, ]
+    weight <- obj$env$data$wt[y, ]
+    fec <- obj$env$data$fec[y, ]
+    spawn_time_frac <- obj$env$data$spawn_time_frac
+    
+    vul <- report$F_at_age[y, ]/max(report$F_at_age[y, ])
+    SR <- obj$env$data$SR_type
+    catch_eq <- "Baranov"
+    tv_M <- "none"
+    Arec <- report$Arec
+    Brec <- report$Brec
+    
+    # Optimize for MSY
+    opt2 <- optimize(yield_fn_SCA, interval = c(1e-4, 4), M = M, mat = mat, weight = weight, fec = fec, 
+                     vul = vul, SR = SR, Arec = Arec, Brec = Brec, catch_eq = catch_eq, tv_M = tv_M, 
+                     spawn_time_frac = spawn_time_frac)
+    opt3 <- yield_fn_SCA(opt2$minimum, M = M, mat = mat, weight = weight, fec = fec, vul = vul, SR = SR, 
+                         Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, tv_M = tv_M,
+                         spawn_time_frac = spawn_time_frac)
+    
+    FMSY <- opt2$minimum
+    MSY <- -1 * opt2$objective
+    VBMSY <- opt3["VB"]
+    RMSY <- opt3["R"]
+    BMSY <- opt3["B"]
+    EMSY <- opt3["E"]
+    
+    Fvec <- seq(0, 2.5 * FMSY, length.out = 100)
+    
+    # Yield curve
+    yield <- lapply(Fvec, yield_fn_SCA, M = M, mat = mat, weight = weight, fec = fec, vul = vul, SR = SR, 
+                    Arec = Arec, Brec = Brec, opt = FALSE, catch_eq = catch_eq, tv_M = tv_M, 
+                    spawn_time_frac = spawn_time_frac)
+    EPR <- vapply(yield, getElement, numeric(1), "EPR")
+    YPR <- vapply(yield, getElement, numeric(1), "YPR")
+    
+    new_B0 <- yield[[1]]["B"] # New due to change in M
+    new_E0 <- yield[[1]]["E"]
+    new_VB0 <- yield[[1]]["VB"]
+    new_R0 <- yield[[1]]["R"]
+    if (SR == "BH") {
+      new_h <- Arec * EPR[1]/ (4 + Arec * EPR[1])
+    } else {
+      new_h <- 0.2 * (Arec * EPR[1])^0.8
+    }
+    
+    return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
+                per_recruit = data.frame(FM = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR,
+                new_B0 = new_B0, new_E0 = new_B0, new_VB0 = new_VB0, new_R0 = new_R0, new_h = new_h))
+  })
+  
+  return(ref_pt)
+}
+  
