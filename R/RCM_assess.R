@@ -265,7 +265,7 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
   } else {
     out$ageMarray <- StockPars$ageMarray[x]
   }
-  if (!is.matrix(out$ageM)) out$ageM <- matrix(out$ageM, 1, 1)
+  if (!is.matrix(out$ageMarray)) out$ageMarray <- matrix(out$ageMarray, 1, 1)
   
   if (is.null(StockPars$Mat_age)) {
     out$Mat_age <- local({
