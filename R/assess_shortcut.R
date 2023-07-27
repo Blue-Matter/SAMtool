@@ -101,9 +101,21 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   VB <- c(VB_hist, VB_P)
   B <- c(B_hist, B_P)
   N <- cbind(N_hist, N_P)
+  spawn_time_frac <- Data@Misc$StockPars$spawn_time_frac[x]
   
-  Fapical <- solve_F(t(N), t(Hist$StockPars$M_ageArray[x, , 1:n_y]), 
-                     plusgroup = unique(Hist$StockPars$plusgroup)) %>% apply(1, max)
+  if (!is.null(spawn_time_frac) && spawn_time_frac > 0) { # year_p - update SSB based on spawn_time_frac (M only)
+    SSB[n_y + 1] <- local({
+      M <- Data@Misc$StockPars$M_ageArray[x, , n_y + 1]
+      fec <- Data@Misc$StockPars$Fec_Age[x, , n_y + 1]
+      sum(N[, n_y + 1] * exp(-spawn_time_frac * M) * fec)
+    })
+  }
+  F_age <- solve_F(
+    t(N), 
+    t(Hist$StockPars$M_ageArray[x, , 1:n_y]), 
+    plusgroup = unique(Hist$StockPars$plusgroup)
+  )
+  Fapical <- F_age %>% apply(1, max)
   R <- N[1, ]
   
   if (!missing(VAR_model) && year_p > 1) {
@@ -145,8 +157,21 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     Mat_age <- Hist$StockPars$Mat_age[x, , 0:n_y + 1]
     V_age <- Hist$FleetPars$V_real[x, , 0:n_y + 1]
     Fec_age <- Hist$StockPars$Fec_Age[x, , 0:n_y + 1]
+    M <- Hist$StockPars$M_ageArray[x, , 0:n_y + 1]
     
-    SSB_out <- colSums(N_out * Fec_age)
+    if (all(N_dev == 1)) {  # Just skip if perfect info
+      SSB_out <- SSB
+    } else {
+      F_age_out <- solve_F(
+        t(N_out), 
+        t(M[, 1:n_y]), 
+        plusgroup = unique(Hist$StockPars$plusgroup)
+      ) %>%
+        rbind(0) # Projection year F = 0 for SSB calc
+      Z_out <- t(F_age_out) + M
+      SSB_out <- colSums(N_out * Fec_age * exp(-spawn_time_frac * Z_out))
+    }
+    
     VB_out <- colSums(N_out * V_age * Wt_age)
     B_out <- colSums(N_out * Wt_age)
     
@@ -158,11 +183,11 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
       R_dev <- exp(dev_AC(n_y+1, mu = R_err[3], stdev = R_err[1], AC = R_err[2], seed = x * n_y))
     }
     R_out <- R * R_dev
-    ASM_out <- project_ASM(x, R_out, F_out, Hist, Data)
+    ASM_out <- project_ASM(x, R_out, F_out, Hist, Data) 
     
     N_out <- ASM_out$N
     
-    SSB_out <- ASM_out$SSB
+    SSB_out <- ASM_out$SSB  # Need to update to account for spawn timing
     VB_out <- ASM_out$VB
     B_out <- ASM_out$B
   }

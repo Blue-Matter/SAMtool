@@ -2,6 +2,7 @@
 namespace ns_SP {
 
 // Sub-annual time steps for SP and iteratively find the F that predicts the observed catch
+// Run the loop for n_itF iterations, then one more time with the final value of F, then save B and Cpred
 template<class Type>
 Type SP_F(Type U_start, Type C_hist, Type MSY, Type K, Type n, Type nterm, Type dt, int nstep, int n_itF,
           vector<Type> &Cpred, vector<Type> &B, int y, Type &penalty) {

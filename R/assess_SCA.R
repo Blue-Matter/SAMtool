@@ -809,14 +809,14 @@ ref_pt_SCA <- function(y = 1, obj, report) {
   
 }
 
-yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, Brec, 
+yield_fn_SCA <- function(x, M, mat, weight, fec = mat * weight, vul, SR = c("BH", "Ricker"), Arec, Brec, 
                          catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE, B0 = 1,
-                         tv_M = c("none", "walk", "DD"), M_bounds = NULL) {
+                         tv_M = c("none", "walk", "DD"), M_bounds = NULL, spawn_time_frac = 0) {
   if (is.null(tv_M)) tv_M <- "none"
   tv_M <- match.arg(tv_M)
   
   if (tv_M != "DD") {
-    yield_fn_SCA_int(x, M, mat, weight, vul, SR, Arec, Brec, catch_eq, opt, x_transform)
+    yield_fn_SCA_int(x, M, mat, weight, fec, vul, SR, Arec, Brec, catch_eq, opt, x_transform, spawn_time_frac)
   } else {
     
     dep <- M_DD <- numeric(21)
@@ -824,8 +824,8 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, B
     for(i in 1:20) {
       M_DD[i] <- ifelse(dep[i] >= 1, M_bounds[1], 
                         ifelse(dep[i] <= 0, M_bounds[2], M_bounds[1] + (M_bounds[2] - M_bounds[1]) * (1 - dep[i])))
-      out <- yield_fn_SCA_int(x, M = rep(M_DD[i], length(mat)), mat, weight, vul, SR, Arec, Brec, catch_eq, 
-                              opt = FALSE, x_transform = x_transform)
+      out <- yield_fn_SCA_int(x, M = rep(M_DD[i], length(mat)), mat, weight, fec, vul, SR, Arec, Brec, catch_eq, 
+                              opt = FALSE, x_transform = x_transform, spawn_time_frac = spawn_time_frac)
       if (abs(out["B"]/B0 - dep[i]) <= 1e-4) break
       dep[i+1] <- out["B"]/B0
     }
@@ -838,20 +838,25 @@ yield_fn_SCA <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, B
   }
 }
 
-yield_fn_SCA_int <- function(x, M, mat, weight, vul, SR = c("BH", "Ricker"), Arec, Brec, 
-                             catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE) {
+yield_fn_SCA_int <- function(x, M, mat, weight, fec = mat * weight, vul, SR = c("BH", "Ricker"), Arec, Brec, 
+                             catch_eq = c("Baranov", "Pope"), opt = TRUE, x_transform = FALSE,
+                             spawn_time_frac = 0) {
   SR <- match.arg(SR)
   catch_eq <- match.arg(catch_eq)
   if (catch_eq == "Baranov") {
     FMort <- ifelse(x_transform, exp(x), x)
-    surv <- exp(-vul * FMort - M)
+    Z <- vul * FMort + M
+    surv <- exp(-Z)
+    spawn_surv <- exp(-spawn_time_frac * Z)
   } else {
     U <- ifelse(x_transform, ilogit(x), x)
     surv <- exp(-M) * (1 - vul * U)
+    spawn_surv <- exp(-spawn_time_frac * M)
+    if (spawn_time_frac > 0.5) spawn_surv <- spawn_surv * (1 - vul * U) # If tied, spawning goes first
   }
   n_age <- length(M)
   NPR <- calc_NPR(surv, n_age)
-  EPR <- sum(NPR * mat * weight)
+  EPR <- sum(NPR * spawn_surv * fec)
   if (SR == "BH") {
     Req <- (Arec * EPR - 1)/(Brec * EPR)
   } else if (SR == "Ricker") {

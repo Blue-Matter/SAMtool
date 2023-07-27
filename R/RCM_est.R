@@ -1,7 +1,7 @@
 
 RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
                     comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
-                    max_F = 3, integrate = FALSE, StockPars, ObsPars, FleetPars, mean_fit = FALSE,
+                    max_F = 3, integrate = FALSE, StockPars, FleetPars, mean_fit = FALSE,
                     control = list(iter.max = 2e+05, eval.max = 4e+05), inner.control = list(maxit = 1e3), 
                     start = list(), map = list(), dots = list()) {
   
@@ -18,7 +18,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   TMB_params <- RCM_est_params(x, RCMdata, selectivity, s_selectivity, prior, LWT, comp_like, StockPars, FleetPars, 
                                start, map, dots)
   TMB_data <- RCM_est_data(x, RCMdata, selectivity, s_selectivity, LWT, comp_like, prior, max_F, 
-                           StockPars, ObsPars, FleetPars, mean_fit, TMB_params$map, dots)
+                           StockPars, FleetPars, mean_fit, TMB_params$map, dots)
   
   if (integrate) {
     random <- c("log_early_rec_dev", "log_rec_dev") 
@@ -49,7 +49,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
 
 
 RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), comp_like, prior, max_F,
-                         StockPars, ObsPars, FleetPars, mean_fit = FALSE, map, dots = list()) {
+                         StockPars, FleetPars, mean_fit = FALSE, map, dots = list()) {
   
   SR_type <- switch(StockPars$SRrel[x],
                     "1" = "BH",
@@ -73,7 +73,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
   RCMdata@IAL <- apply(RCMdata@IAL, c(1, 3), tiny_comp) %>% aperm(c(2, 1, 3))
   
   if (mean_fit) {
-    # Average across simulations for arrays: M_ageArray, Len_age, Mat_age (mean across index 1)
+    # Average across simulations for arrays: M_ageArray, Len_age, Mat_age, Fec_Age (mean across index 1)
     # Matrices: L5, LFS, Vmaxlen (mean across rows)
     # Vectors: Isd, Len_CV, hs, R0 (effort only)
     mean_vector <- function(x) rep(mean(x), length(x))
@@ -84,7 +84,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
       return(aperm(new_output, c(3,1,2)))
     }
     
-    StockPars_ind <- match(c("M_ageArray", "Len_age", "Mat_age"), names(StockPars))
+    StockPars_ind <- match(c("M_ageArray", "Len_age", "Mat_age", "Wt_age", "Fec_Age"), names(StockPars))
     StockPars[StockPars_ind] <- lapply(StockPars[StockPars_ind], mean_array)
     
     StockPars_ind <- match(c("hs", "LenCV", "procsd"), names(StockPars))
@@ -103,11 +103,6 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     FleetPars_ind <- match(c("L5_y", "LFS_y", "Vmaxlen_y"), names(FleetPars))
     FleetPars[FleetPars_ind] <- lapply(FleetPars[FleetPars_ind], mean_matrix)
     
-    ObsPars$Isd <- mean_vector(ObsPars$Isd)
-  }
-  
-  if (!length(RCMdata@I_sd) || !any(RCMdata@I_sd > 0, na.rm = TRUE)) {
-    RCMdata@I_sd <- matrix(sdconv(1, ObsPars$Isd[x]), nyears, nsurvey)
   }
   
   if (length(RCMdata@Chist) && any(RCMdata@Chist > 0, na.rm = TRUE)) {
@@ -174,7 +169,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    comp_like = comp_like,
                    max_F = max_F, 
                    rescale = dots$rescale, 
-                   ageM = min(nyears, ceiling(StockPars$ageM[x, 1])),
+                   ageM = min(nyears, ceiling(StockPars$ageMarray[x, 1])),
                    yind_F = as.integer(rep(0.5 * nyears, nfleet)), 
                    n_itF = n_itF, plusgroup = plusgroup,
                    use_prior = prior$use_prior, 
@@ -203,6 +198,15 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
 RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(), LWT = list(), comp_like,
                            StockPars, FleetPars, start = list(), map = list(), dots = list()) {
   
+  ## Reference for parameters that can passed through start and map ----
+  start_check <- c("vul_par", "ivul_par", "log_early_rec_dev", "log_rec_dev", "q", "MR_SRR")
+  map_check <- start_check
+  
+  ## Logical to indicate whether to transfrom selectivity parameters to estimation space
+  vul_transform <- TRUE
+  if (!is.null(dots$vul_transform)) vul_transform <- dots$vul_transform
+  
+  ## Check for obsolete arguments ----
   if (!is.null(dots$vul_par)) stop("Specify vul_par via start$vul_par")
   if (!is.null(dots$ivul_par)) stop("Specify ivul_par via start$vul_par")
   if (!is.null(dots$log_rec_dev)) stop("Specify log_rec_dev via start$log_rec_dev")
@@ -216,23 +220,13 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (!is.null(dots$map_s_vul_par)) stop("Pass map argument of index selectivity parameters via map$ivul_par")
   if (!is.null(dots$s_vul_par)) stop("Pass index selectivity parameters via start$ivul_par")
   
-  SR_type <- switch(StockPars$SRrel[x],
-                    "1" = "BH",
-                    "2" = "Ricker",
-                    "3" = "Mesnil-Rochet")
-  if (is.null(SR_type)) stop("Can not identify stock-recruit function in OM@SRrel")
-  
   nyears <- RCMdata@Misc$nyears
   nfleet <- RCMdata@Misc$nfleet
   n_age <- dim(RCMdata@CAA)[2]
   maxage <- n_age - 1
   nsurvey <- ncol(RCMdata@Index)
   
-  transformed_h <- switch(SR_type,
-                          "BH" = logit((StockPars$hs[x] - 0.2)/0.8),
-                          "Ricker" = log(StockPars$hs[x] - 0.2),
-                          "Mesnil-Rochet" = 0)
-  
+  ## Fishery selectivity ----
   LFS <- FleetPars$LFS_y[x, nyears]
   L5 <- FleetPars$L5_y[x, nyears]
   Vmaxlen <- FleetPars$Vmaxlen_y[x, nyears]
@@ -259,10 +253,12 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     stop("start$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
   }
   
-  if (any(sel_check)) {  # Parametric sel
+  if (vul_transform && any(sel_check)) {  # Parametric sel
     start$vul_par[2, sel_check] <- log(start$vul_par[1, sel_check] - start$vul_par[2, sel_check])
+    
     start$vul_par[1, sel_check_len] <- logit(pmin(start$vul_par[1, sel_check_len]/Linf, 0.99))
     start$vul_par[1, sel_check_age] <- logit(pmin(start$vul_par[1, sel_check_age]/maxage, 0.99))
+    
     start$vul_par[3, sel_check] <- logit(pmin(start$vul_par[3, sel_check], 0.99))
   }
   
@@ -292,18 +288,18 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   
   if (any(selectivity == -2) ) { # Free parameters, convert start matrix to logit space
     if (nrow(map$vul_par) != n_age) stop("map$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
-
-    test <- start$vul_par[, selectivity == -2] %in% c(0, 1)
-    if (any(!test)) stop("There are free selectivity parameters in start$vul_par that are less than zero or greater than one.")
     
-    test_est <- !is.na(map$vul_par[, selectivity == -2])
-    test_fix <- test & !test_est
-    start$vul_par[, selectivity == -2][test_fix] <- logit(start$vul_par[, selectivity == -2][test_fix], soft_bounds = FALSE)
-    start$vul_par[, selectivity == -2][test_est] <- logit(start$vul_par[, selectivity == -2][test_est], soft_bounds = TRUE)
+    if (vul_transform) {
+      test <- start$vul_par[, selectivity == -2] %in% c(0, 1)
+      if (any(!test)) stop("There are free selectivity parameters in start$vul_par that are less than zero or greater than one.")
+      test_est <- !is.na(map$vul_par[, selectivity == -2])
+      test_fix <- test & !test_est
+      start$vul_par[, selectivity == -2][test_fix] <- logit(start$vul_par[, selectivity == -2][test_fix], soft_bounds = FALSE)
+      start$vul_par[, selectivity == -2][test_est] <- logit(start$vul_par[, selectivity == -2][test_est], soft_bounds = TRUE)
+    }
   }
   
-  # Index selectivity (ivul_par) ----
-  
+  ## Index selectivity ----
   # Check for function selectivity (dome/logistic)
   sel_check <- s_selectivity %in% c(0, -1, -5, -6)
   sel_check_age <- s_selectivity %in% c(-5, -6)
@@ -325,10 +321,12 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     stop("start$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
   }
   
-  if (any(sel_check)) { # Parametric sel
+  if (vul_transform && any(sel_check)) { # Parametric sel
     start$ivul_par[2, sel_check] <- log(start$ivul_par[1, sel_check] - start$ivul_par[2, sel_check])
+    
     start$ivul_par[1, sel_check_len] <- logit(pmin(start$ivul_par[1, sel_check_len]/Linf, 0.99))
     start$ivul_par[1, sel_check_age] <- logit(pmin(start$ivul_par[1, sel_check_age]/maxage, 0.99))
+    
     start$ivul_par[3, sel_check] <- logit(pmin(start$ivul_par[3, sel_check], 0.99))
   }
   
@@ -354,14 +352,17 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   
   if (any(s_selectivity == -2)) {  # Free parameters, convert start matrix to logit space
     if (nrow(map$ivul_par) != n_age) stop("map$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
-    test <- start$ivul_par[, s_selectivity == -2] %in% c(0, 1) 
     
-    if (any(!test)) stop("There are free selectivity parameters in start$ivul_par that are less than zero or greater than one.")
-    
-    test_est <- !is.na(map$ivul_par[, s_selectivity == -2])
-    test_fix <- test & !test_est
-    start$ivul_par[, s_selectivity == -2][test_fix] <- logit(start$ivul_par[, s_selectivity == -2][test_fix], soft_bounds = FALSE)
-    start$ivul_par[, s_selectivity == -2][test_est] <- logit(start$ivul_par[, s_selectivity == -2][test_est], soft_bounds = TRUE)
+    if (vul_transform) {
+      test <- start$ivul_par[, s_selectivity == -2] %in% c(0, 1) 
+      
+      if (any(!test)) stop("There are free selectivity parameters in start$ivul_par that are less than zero or greater than one.")
+      
+      test_est <- !is.na(map$ivul_par[, s_selectivity == -2])
+      test_fix <- test & !test_est
+      start$ivul_par[, s_selectivity == -2][test_fix] <- logit(start$ivul_par[, s_selectivity == -2][test_fix], soft_bounds = FALSE)
+      start$ivul_par[, s_selectivity == -2][test_est] <- logit(start$ivul_par[, s_selectivity == -2][test_est], soft_bounds = TRUE)
+    }
   }
   
   if (is.null(start$log_early_rec_dev)) start$log_early_rec_dev <- rep(0, n_age - 1)
@@ -370,14 +371,28 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (is.null(start$log_rec_dev)) start$log_rec_dev <- rep(0, nyears)
   if (length(start$log_rec_dev) != nyears) stop("start$log_rec_dev is not a vector of length nyears")
   
-  # Mesnil Rochet parameters
+  ## Mesnil Rochet parameters ----
   if (is.null(start$MR_SRR)) start$MR_SRR <- c(0.8, 0.001)
   if (length(start$MR_SRR) != 2) stop("start$MR_SRR needs to be a length 2 vector.")
   
-  # Log q - can be either estimated by TMB or analytically calculated - see map argument later
+  ## Index q ----
+  # can be either estimated by TMB or analytically calculated - see map argument later
   if (is.null(start$q)) start$q <- rep(1, nsurvey)
   if (length(start$q) != nsurvey) stop("start$q needs to be a length ", nsurvey, " vector.")
   
+  ## SRR and steepness ----
+  SR_type <- switch(StockPars$SRrel[x],
+                    "1" = "BH",
+                    "2" = "Ricker",
+                    "3" = "Mesnil-Rochet")
+  if (is.null(SR_type)) stop("Can not identify stock-recruit function in OM@SRrel")
+  
+  transformed_h <- switch(SR_type,
+                          "BH" = logit((StockPars$hs[x] - 0.2)/0.8),
+                          "Ricker" = log(StockPars$hs[x] - 0.2),
+                          "Mesnil-Rochet" = 0)
+  
+  ## Full parameter list ----
   TMB_params <- list(R0x = ifelse(!is.na(StockPars$R0[x]), log(StockPars$R0[x] * dots$rescale), 0),
                      transformed_h = transformed_h, 
                      MR_SRR = c(logit(start$MR_SRR[1]), log(start$MR_SRR[2])), # Shinge/S0, gamma 
@@ -400,7 +415,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                          RCMdata@Misc$condition == "catch"] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
   }
   
-  # Map list (to fix parameters)
+  ## Map list (to fix parameters) ----
   map_out <- list()
   
   if (all(RCMdata@Misc$condition == "effort") && !sum(RCMdata@Chist, na.rm = TRUE) && !prior$use_prior[1]) {
@@ -502,7 +517,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   list(params = TMB_params, map = map_out)
 }
 
-par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, RCMdata, dots) {
+par_identical_sims_fn <- function(StockPars, FleetPars, RCMdata, dots) {
   vector_fn <- function(x) sum(mean(x) - x) == 0
   array_fn <- function(x) {
     x_mean <- apply(x, 2:length(dim(x)), mean)
@@ -510,7 +525,7 @@ par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, RCMdata, dots) 
   }
   run_test <- function(x) if (is.null(dim(x))) vector_fn(x) else array_fn(x)
   
-  StockPars_subset <- StockPars[c("hs", "procsd", "ageMarray", "M_ageArray", "Linf", "Len_age", "Wt_age", "Mat_age")]
+  StockPars_subset <- StockPars[c("hs", "procsd", "ageMarray", "M_ageArray", "Linf", "Len_age", "Wt_age", "Mat_age", "Fec_Age")]
   if (any(RCMdata@CAL > 0, na.rm = TRUE) || any(RCMdata@IAL > 0, na.rm = TRUE) || 
      (RCMdata@MS_type == "length" & any(RCMdata@MS > 0, na.rm = TRUE))) {
     StockPars_subset <- c(StockPars_subset, StockPars["LenCV"])
@@ -529,13 +544,7 @@ par_identical_sims_fn <- function(StockPars, FleetPars, ObsPars, RCMdata, dots) 
   
   F_test <- c(F_test_sel, F_test_Find)
   
-  if (RCMdata@Misc$nsurvey > 0 && !any(RCMdata@I_sd > 0, na.rm = TRUE)) {
-    O_test <- run_test(ObsPars$Isd) %>% structure(names = "Isd")
-  } else {
-    O_test <- NULL
-  }
-  
-  test_all <- c(S_test, F_test, O_test)
+  test_all <- c(S_test, F_test)
   return(test_all)
 }
 

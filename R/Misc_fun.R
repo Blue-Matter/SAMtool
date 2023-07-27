@@ -17,8 +17,21 @@ max <- function(..., na.rm = TRUE) {
 arrows <- function(...) suppressWarnings(graphics::arrows(...))
 
 #' @importFrom graphics grid matplot
-plot.default <- function(...) graphics::plot.default(..., panel.first = graphics::grid())
-matplot <- function(...) graphics::matplot(..., panel.first = graphics::grid())
+plot.default <- function(..., zero_line = FALSE) {
+  if (zero_line) {
+    graphics::plot.default(..., panel.first = {graphics::grid(); abline(h = 0, col = "grey")})
+  } else {
+    graphics::plot.default(..., panel.first = graphics::grid())
+  }
+}
+
+matplot <- function(..., zero_line = FALSE) {
+  if (zero_line) {
+    graphics::matplot(..., panel.first = {graphics::grid(); abline(h = 0, col = "grey")})
+  } else {
+    graphics::matplot(..., panel.first = graphics::grid())
+  }
+}
 
 #' @importFrom graphics hist legend
 hist.numeric <- function(x, ...) {

@@ -296,13 +296,21 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
 #' @param RCMdata An \linkS4class{RCMdata} object.
 #' @export
 check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
-
-  if (!silent) message("\nChecking OM and data...\n")
+  
+  if (!silent) message("\nChecking data...\n")
   condition <- match.arg(condition, choices = c("catch", "catch2", "effort"), several.ok = TRUE)
 
   # Preliminary OM check for basics
-  if (!length(OM@nyears)) stop("OM@nyears is needed.", call. = FALSE)
-  if (!length(OM@maxage)) stop("OM@maxage is needed.", call. = FALSE)
+  if (!missing(OM)) {
+    if (!length(OM@nyears)) stop("OM@nyears is needed.", call. = FALSE)
+    if (!length(OM@maxage)) stop("OM@maxage is needed.", call. = FALSE)
+    RCMdata@Misc$nyears <- nyears <- OM@nyears
+    RCMdata@Misc$maxage <- maxage <- OM@maxage
+    RCMdata@Misc$CurrentYr <- OM@CurrentYr
+  } else {
+    #nyears <- RCMdata@Misc$nyears
+    maxage <- RCMdata@Misc$maxage
+  }
   
   # Primarily dimension checking of catch and effort
   if (any(grepl("catch", condition))) {
@@ -392,7 +400,6 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     }
   }
   
-  RCMdata@Misc$CurrentYr <- OM@CurrentYr
   if (!silent) {
     message(RCMdata@Misc$nfleet, " fleet(s) detected.")
     message("RCM is conditioned on:")
@@ -403,21 +410,23 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   }
 
   # Match number of historical years of catch/effort to OM
-  if (OM@nyears != RCMdata@Misc$nyears) {
-    cpars_cond <- length(OM@cpars) && any(vapply(OM@cpars, function(x) inherits(x, "matrix") || inherits(x, "array"), logical(1)))
-    if (cpars_cond) {
-      stmt <- paste0("OM@nyears is not equal to ", RCMdata@Misc$nyears, ". ",
-                     "There will be indexing errors in your custom parameters (OM@cpars).")
-      stop(stmt, call. = FALSE)
-    } else {
-      warning("OM@nyears was updated to ", RCMdata@Misc$nyears)
-      OM@nyears <- RCMdata@Misc$nyears
+  if (!missing(OM)) {
+    if (nyears != RCMdata@Misc$nyears) {
+      cpars_cond <- length(OM@cpars) && any(vapply(OM@cpars, function(x) inherits(x, "matrix") || inherits(x, "array"), logical(1)))
+      if (cpars_cond) {
+        stmt <- paste0("OM@nyears is not equal to ", RCMdata@Misc$nyears, ". ",
+                       "There will be indexing errors in your custom parameters (OM@cpars).")
+        stop(stmt, call. = FALSE)
+      } else {
+        warning("OM@nyears was updated to ", RCMdata@Misc$nyears)
+        OM@nyears <- RCMdata@Misc$nyears
+      }
     }
+    if (!length(OM@CurrentYr)) OM@CurrentYr <- RCMdata@Misc$nyears
   }
-  if (!length(OM@CurrentYr)) OM@CurrentYr <- RCMdata@Misc$nyears
   
   # C_sd
-  if (length(RCMdata@C_sd)) {
+  if (sum(RCMdata@C_sd, na.rm = TRUE)) {
     if (is.vector(RCMdata@C_sd)) {
       if (length(RCMdata@C_sd) != RCMdata@Misc$nyears) stop("Length of C_sd vector does not equal nyears (", RCMdata@Misc$nyears, ").", call. = FALSE)
       RCMdata@C_sd <- matrix(RCMdata@C_sd, ncol = 1)
@@ -430,7 +439,7 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   }
 
   # Indices
-  if (length(RCMdata@Index)) {
+  if (sum(RCMdata@Index, na.rm = TRUE)) {
     if (is.vector(RCMdata@Index)) {
       if (length(RCMdata@Index) != RCMdata@Misc$nyears) stop("Length of Index vector does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
       RCMdata@Index <- matrix(RCMdata@Index, ncol = 1)
@@ -440,7 +449,7 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
 
     RCMdata@Misc$nsurvey <- ncol(RCMdata@Index)
     
-    if (length(RCMdata@I_sd)) {
+    if (sum(RCMdata@I_sd, na.rm = TRUE)) {
       if (is.vector(RCMdata@I_sd)) {
         if (length(RCMdata@I_sd) != RCMdata@Misc$nyears) stop("Length of I_sd vector does not equal nyears (", RCMdata@Misc$nyears, ").", call. = FALSE)
         RCMdata@I_sd <- matrix(RCMdata@I_sd, ncol = 1)
@@ -454,6 +463,8 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
         SD_out <- !is.na(RCMdata@Index[SD_NA])
         if (any(SD_out)) stop("There are NA's in data@I_sd for years associated with survey values in data@Index.", call. = FALSE)
       }
+    } else {
+      stop("No standard errors were found for the index.", call. = FALSE)
     }
   } else {
     RCMdata@Misc$nsurvey <- 0
@@ -462,29 +473,29 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   if (!silent) message(RCMdata@Misc$nsurvey, " survey(s) detected.")
 
   # Process age comps
-  if (length(RCMdata@CAA)) {
+  if (sum(RCMdata@CAA, na.rm = TRUE)) {
 
     if (is.matrix(RCMdata@CAA)) RCMdata@CAA <- array(RCMdata@CAA, c(dim(RCMdata@CAA), 1))
 
     if (dim(RCMdata@CAA)[1] != RCMdata@Misc$nyears) {
       stop("Number of CAA rows (", dim(RCMdata@CAA)[1], ") does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
     }
-    if (dim(RCMdata@CAA)[2] < OM@maxage + 1) {
-      warning("Number of CAA columns (", dim(RCMdata@CAA)[2], ") does not equal OM@maxage + 1 (", OM@maxage + 1, "). 
+    if (dim(RCMdata@CAA)[2] < maxage + 1) {
+      warning("Number of CAA columns (", dim(RCMdata@CAA)[2], ") does not equal maxage + 1 (", maxage + 1, "). 
               Assuming no observations for ages greater than 0 - ", dim(RCMdata@CAA)[2] - 1, " and filling with zeros.")
-      add_ages <- OM@maxage + 1 - dim(RCMdata@CAA)[2]
-      CAA_new <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, RCMdata@Misc$nfleet))
+      add_ages <- maxage + 1 - dim(RCMdata@CAA)[2]
+      CAA_new <- array(0, c(RCMdata@Misc$nyears, maxage + 1, RCMdata@Misc$nfleet))
       CAA_new[, 1:dim(RCMdata@CAA)[2], ] <- RCMdata@CAA
       RCMdata@CAA <- CAA_new
     }
-    if (dim(RCMdata@CAA)[2] > OM@maxage + 1) {
-      OM@maxage <- dim(RCMdata@CAA)[2] - 1
-      warning("Increasing OM@maxage to ", OM@maxage, " based on dimension of RCMdata@CAA.")
+    if (dim(RCMdata@CAA)[2] > maxage + 1) {
+      maxage <- dim(RCMdata@CAA)[2] - 1
+      warning("Increasing maxage to ", maxage, " based on dimension of RCMdata@CAA.")
     }
     if (dim(RCMdata@CAA)[3] != RCMdata@Misc$nfleet) {
       stop("Number of CAA slices (", dim(RCMdata@CAA)[3], ") does not equal nfleet (", RCMdata@Misc$nfleet, "). NAs are acceptable.", call. = FALSE)
     }
-    if (!silent) message("Fleet age comps (CAA) processed, assuming ages 0 - ", OM@maxage, " in array.")
+    if (!silent) message("Fleet age comps (CAA) processed, assuming ages 0 - ", maxage, " in array.")
     
     if (!length(RCMdata@CAA_ESS)) {
       RCMdata@CAA_ESS <- apply(RCMdata@CAA, c(1, 3), sum, na.rm = TRUE)
@@ -501,23 +512,26 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     RCMdata@CAA_ESS[apply(RCMdata@CAA, c(1, 3), sum, na.rm = TRUE) == 0] <- 0
     
   } else {
-    RCMdata@CAA <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, RCMdata@Misc$nfleet))
+    RCMdata@CAA <- array(0, c(RCMdata@Misc$nyears, maxage + 1, RCMdata@Misc$nfleet))
     RCMdata@CAA_ESS <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)
   }
   RCMdata@CAA <- apply(RCMdata@CAA, c(1, 3), find_na) %>% aperm(c(2, 1, 3))
   
-  if (!silent) message("Checking OM and getting biological parameters...")
-  OM_samp <- check_OM_for_sampling(OM, RCMdata) # Sample life history, selectivity, and obs parameters
-
-  set.seed(OM@seed)
-  suppressMessages({
-    StockPars <- MSEtool::SampleStockPars(OM_samp, msg = FALSE)
-    ObsPars <- MSEtool::SampleObsPars(OM_samp, Stock = StockPars)
-    FleetPars <- MSEtool::SampleFleetPars(OM_samp, msg = FALSE)
-  })
-
+  if (!missing(OM)) {
+    if (!silent) message("Checking OM and getting biological parameters...")
+    OM_samp <- check_OM_for_sampling(OM, RCMdata) # Sample life history, selectivity, and obs parameters
+    
+    set.seed(OM@seed)
+    suppressMessages({
+      StockPars <- MSEtool::SampleStockPars(OM_samp, msg = FALSE)
+      FleetPars <- MSEtool::SampleFleetPars(OM_samp, msg = FALSE)
+    })
+  } else {
+    StockPars <- FleetPars <- NULL
+  }
+  
   # Process length comps
-  if (length(RCMdata@CAL)) {
+  if (sum(RCMdata@CAL, na.rm = TRUE)) {
     if (is.matrix(RCMdata@CAL)) RCMdata@CAL <- array(RCMdata@CAL, c(dim(RCMdata@CAL), 1))
     
     if (dim(RCMdata@CAL)[1] != RCMdata@Misc$nyears) {
@@ -545,7 +559,7 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   }
 
   # Process mean size
-  if (length(RCMdata@MS)) {
+  if (sum(RCMdata@MS, na.rm = TRUE)) {
     if (!length(RCMdata@MS_type) || !nchar(RCMdata@MS_type)) {
       warning("Mean size (RCMdata@MS) found, but not type (RCMdata@MS_type). Assuming it's mean length.")
       RCMdata@MS_type <- "length"
@@ -604,26 +618,26 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   }
 
   # Process survey age comps
-  if (length(RCMdata@IAA)) {
+  if (sum(RCMdata@IAA, na.rm = TRUE)) {
     if (is.matrix(RCMdata@IAA)) RCMdata@IAA <- array(RCMdata@IAA, c(dim(RCMdata@IAA), 1))
     if (dim(RCMdata@IAA)[1] != RCMdata@Misc$nyears) {
       stop("Number of IAA rows (", dim(RCMdata@IAA)[1], ") does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
     }
-    if (dim(RCMdata@IAA)[2] < OM@maxage + 1) {
-      warning("Number of IAA columns (", dim(RCMdata@IAA)[2], ") does not equal OM@maxage + 1 (", OM@maxage + 1, "). 
+    if (dim(RCMdata@IAA)[2] < maxage + 1) {
+      warning("Number of IAA columns (", dim(RCMdata@IAA)[2], ") does not equal maxage + 1 (", maxage + 1, "). 
               Assuming no observations for ages greater than 0 - ", dim(RCMdata@IAA)[2] - 1, " and filling with zeros.")
-      add_ages <- OM@maxage + 1 - dim(RCMdata@IAA)[2]
-      IAA_new <- array(0, c(RCMdata@Misc$nyears, OM@maxage, RCMdata@Misc$nsurvey))
+      add_ages <- maxage + 1 - dim(RCMdata@IAA)[2]
+      IAA_new <- array(0, c(RCMdata@Misc$nyears, maxage, RCMdata@Misc$nsurvey))
       IAA_new[, 1:dim(RCMdata@IAA)[2], ] <- RCMdata@IAA
       RCMdata@IAA <- IAA_new
     }
-    if (dim(RCMdata@IAA)[2] > OM@maxage + 1) {
+    if (dim(RCMdata@IAA)[2] > maxage + 1) {
       stop("Error in age dimension of IAA.", call. = FALSE)
     }
     if (dim(RCMdata@IAA)[3] != RCMdata@Misc$nsurvey) {
       stop("Number of CAA slices (", dim(RCMdata@IAA)[3], ") does not equal nsurvey (", RCMdata@Misc$nsurvey, "). NAs are acceptable.", call. = FALSE)
     }
-    if (!silent) message("Index age comps (IAA) processed, assuming ages 0 - ", OM@maxage, " in array.")
+    if (!silent) message("Index age comps (IAA) processed, assuming ages 0 - ", maxage, " in array.")
     
     if (!length(RCMdata@IAA_ESS)) {
       RCMdata@IAA_ESS <- apply(RCMdata@IAA, c(1, 3), sum, na.rm = TRUE)
@@ -639,13 +653,13 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     # Check if IAA_ESS > 0 if there are no data
     RCMdata@IAA_ESS[apply(RCMdata@IAA, c(1, 3), sum, na.rm = TRUE) == 0] <- 0
   } else {
-    RCMdata@IAA <- array(0, c(RCMdata@Misc$nyears, OM@maxage + 1, ncol(RCMdata@Index)))
+    RCMdata@IAA <- array(0, c(RCMdata@Misc$nyears, maxage + 1, ncol(RCMdata@Index)))
     RCMdata@IAA_ESS <- array(0, dim(RCMdata@Index))
   }
   RCMdata@IAA <- apply(RCMdata@IAA, c(1, 3), find_na) %>% aperm(c(2, 1, 3))
 
   # Process survey length comps
-  if (length(RCMdata@IAL)) {
+  if (sum(RCMdata@IAL, na.rm = TRUE)) {
     if (is.matrix(RCMdata@IAL)) RCMdata@IAL <- array(RCMdata@IAL, c(dim(RCMdata@IAL), 1))
     if (dim(RCMdata@IAL)[1] != RCMdata@Misc$nyears) {
       stop("Number of IAL rows (", dim(RCMdata@IAL)[1], ") does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
@@ -673,8 +687,10 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   
   # Length bin
   if (!sum(RCMdata@CAL_ESS) && !sum(RCMdata@IAL_ESS)) { # No length/index data
-    RCMdata@Misc$lbin <- StockPars$CAL_bins
-    RCMdata@Misc$lbinmid <- StockPars$CAL_binsmid
+    if (!is.null(StockPars)) {
+      RCMdata@Misc$lbin <- StockPars$CAL_bins
+      RCMdata@Misc$lbinmid <- StockPars$CAL_binsmid
+    }
     RCMdata@Misc$nlbin <- length(RCMdata@Misc$lbinmid)
     RCMdata@CAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, RCMdata@Misc$nfleet))
     RCMdata@IAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, ncol(RCMdata@Index)))
@@ -730,8 +746,8 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   }
 
   # Ageing error
-  if (!length(RCMdata@age_error)) RCMdata@age_error <- diag(OM@maxage + 1)
-  if (any(dim(RCMdata@age_error) != OM@maxage + 1)) stop("age_error should be a square matrix of OM@maxage + 1 rows and columns", call. = FALSE)
+  if (!length(RCMdata@age_error)) RCMdata@age_error <- diag(maxage + 1)
+  if (any(dim(RCMdata@age_error) != maxage + 1)) stop("age_error should be a square matrix of maxage + 1 rows and columns", call. = FALSE)
 
   # Sel_block dummy fleets
   if (!length(RCMdata@sel_block)) {
@@ -745,8 +761,10 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     }
   }
   RCMdata@Misc$nsel_block <- as.numeric(RCMdata@sel_block) %>% unique() %>% length()
+  
+  if (missing(OM)) OM <- NULL
 
-  return(list(RCMdata = RCMdata, OM = OM, StockPars = StockPars, ObsPars = ObsPars, FleetPars = FleetPars))
+  return(list(RCMdata = RCMdata, OM = OM, StockPars = StockPars, FleetPars = FleetPars))
 }
 
 check_OM_for_sampling <- function(OM, RCMdata) {

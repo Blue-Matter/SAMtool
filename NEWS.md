@@ -1,6 +1,10 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
-## SAMtool 1.6.0
+## SAMtool 1.6.1
+- Patch updates to tidy up RCM report to prevent empty length selectivity figures.
+- `Perfect` uses spawn_timing to calculate spawning biomass (`exp(-spawn_time * M)`) in the middle of projection year. Note that perfect HCR implementation needs to iteratively re-calculate the projection year biomass, B/BMSY, B/B0 (`exp(-spawn_time * [Ftarget + M])`) when applying the HCR.
+
+## SAMtool 1.6.0 (2023-07-19)
 ### RCM updates
 - Add `spawn_time_frac` argument to RCM.
 - Add fleet-specific option for catch/effort conditioning to RCM.
