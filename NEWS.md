@@ -1,5 +1,10 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.6.1.999
+- Separate branch that adapts RCM for the Chilean common hake assessment. 
+- Recruitment deviations are estimated as deviations from the historic mean.
+- Stock recruit parameters are estimated. An additional likelihood component is added where the annual recruitment is penalized by the value predicted by the stock-recruit relationship.
+
 ## SAMtool 1.6.1
 - Patch updates to tidy up RCM report to prevent empty length selectivity figures.
 - `Perfect` uses spawn_timing to calculate spawning biomass (`exp(-spawn_time * M)`) in the middle of projection year. Note that perfect HCR implementation needs to iteratively re-calculate the projection year biomass, B/BMSY, B/B0 (`exp(-spawn_time * [Ftarget + M])`) when applying the HCR.
