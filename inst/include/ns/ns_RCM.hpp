@@ -26,6 +26,56 @@ matrix<Type> generate_PLA(vector<Type> lbin, matrix<Type> len_age, matrix<Type> 
 }
 
 template<class Type>
+array<Type> calculate_LAA(Type Linf, Type K, Type t0, matrix<Type> growth_time, 
+                          int n_y, int n_age, int nf) {
+  
+  array<Type> LAA(n_y, n_age, nf);
+  for(int a=0;a<n_age;a++) {
+    Type aa = a;
+    for(int ff=0;ff<nf;ff++) {
+      for(int y=0;y<n_y;y++) {
+        LAA(y,a,ff) = Linf * (1 - exp(-K * (aa + growth_time(y,ff) - t0)));
+      }
+    }
+  }
+  return LAA;
+}
+
+template<class Type>
+array<Type> calculate_SD_LAA(array<Type> Len_age, Type a, Type b, int n_y, int n_age, int nf) {
+  array<Type> SD_LAA(n_y, n_age, nf);
+  for(int a=0;a<n_age;a++) {
+    for(int ff=0;ff<nf;ff++) {
+      for(int y=0;y<n_y;y++) {
+        SD_LAA(y,a,ff) = a + b * Len_age(y,a,ff);
+      }
+    }
+  }
+  //for(int ff=0;ff<nf;ff++) SD_LAA.col(ff) = a + b * Len_age.col(ff);
+  return SD_LAA;
+}
+
+template<class Type>
+array<Type> generate_PLA(vector<Type> lbin, array<Type> len_age, array<Type> SD_LAA, 
+                         int n_age, int nlbin, int nf, int y) {
+  array<Type> PLA(n_age, nlbin, nf);
+  for(int ff=0;ff<nf;ff++) {
+    for(int a=0;a<n_age;a++) {
+      for(int j=0;j<nlbin;j++) {
+        if(j==nlbin-1) {
+          PLA(a,j,ff) = 1 - pnorm(lbin(j), len_age(y,a,ff), SD_LAA(y,a,ff));
+        } else {
+          PLA(a,j,ff) = pnorm(lbin(j+1), len_age(y,a,ff), SD_LAA(y,a,ff));
+          if(j>0) PLA(a,j,ff) -= pnorm(lbin(j), len_age(y,a,ff), SD_LAA(y,a,ff));
+        }
+      }
+    }
+  }
+  
+  return PLA;
+}
+
+template<class Type>
 vector<Type> calc_NPR0(matrix<Type> M, int n_age, int y, int plusgroup, Type spawn_time_frac = 0) {
   vector<Type> NPR(n_age);
   vector<Type> out(n_age);
@@ -63,7 +113,7 @@ Type sum_EPR(vector<Type> NPR, matrix<Type> fec, int n_age, int y) {
 
 template<class Type>
 array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbinmid, int n_y, int n_age,
-                     vector<matrix<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
+                     vector<array<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
                      vector<Type> &Vmaxlen, Type Linf, int nfleet, matrix<int> sel_block, int nsel_block, 
                      matrix<Type> &vul_len, Type &prior, matrix<int> est_vul) {
   
@@ -137,7 +187,7 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
       int vul_ind = sel_block(y,ff) - 1;
       if(vul_type(vul_ind) == 0 || vul_type(vul_ind) == -1) { // Convert length sel to age sel
         for(int a=0;a<n_age;a++) {
-          for(int j=0;j<nlbin;j++) vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,vul_ind);
+          for(int j=0;j<nlbin;j++) vul(y,a,ff) += PLA(y)(a,j,ff) * vul_len(j,vul_ind);
         }
       } else if(vul_type(vul_ind) == -5 || vul_type(vul_ind) == -6) {  // Dome or logistic, age
         for(int a=0;a<n_age;a++) { // Calculate age-based sel
@@ -163,7 +213,7 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
 
 template<class Type>
 array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbinmid, int n_y, int n_age,
-                      vector<matrix<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
+                      vector<array<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
                       vector<Type> &Vmaxlen, Type Linf, matrix<Type> mat, array<Type> fleet_var, 
                       matrix<Type> &vul_len, Type &prior, matrix<int> est_vul) {
   
@@ -239,7 +289,7 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
           
           for(int y=0;y<n_y;y++) {
             for(int a=0;a<n_age;a++) {
-              vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,ff);
+              vul(y,a,ff) += PLA(y)(a,j,ff) * vul_len(j,ff);
             }
           }
         }
