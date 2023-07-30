@@ -1,5 +1,11 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.6.1a
+- Various edits to adapt RCM for the Northern Chilean anchovy assessment model.
+- Length-at-age probability matrices are calculated annually for each fishery and index based on the `growth_time` matrix (duration within time step when matrices are calculated). Growth is also entered into the model as individual parameters Linf, K, and t0 and variability in growth-at-age is `a + b * L(a)`.
+- Index timing is based on `growth_time` matrix instead of the start of the time step.
+- Calculate catch and index (units of biomass) from weight at length and catch/index at length.
+
 ## SAMtool 1.6.1
 - Patch updates to tidy up RCM report to prevent empty length selectivity figures.
 - `Perfect` uses spawn_timing to calculate spawning biomass (`exp(-spawn_time * M)`) in the middle of projection year. Note that perfect HCR implementation needs to iteratively re-calculate the projection year biomass, B/BMSY, B/B0 (`exp(-spawn_time * [Ftarget + M])`) when applying the HCR.

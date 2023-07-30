@@ -133,7 +133,11 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
   if (is.null(dots$plusgroup)) plusgroup <- 1L else plusgroup <- as.integer(dots$plusgroup)
   
   if (is.null(dots$growth_time)) {
-    stop("growth_time for fleets and indices are needed for this version of RCM.")
+    stop("growth_time list for fleets and indices are needed for this version of RCM.")
+  }
+  
+  if (is.null(dots$wt_len)) {
+    stop("Need wt_len matrix (year x length) for this version of RCM.")
   }
   
   TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, 
@@ -152,13 +156,14 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    nsel_block = RCMdata@Misc$nsel_block,
                    n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
                    M_data = if (prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
-                   #len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
+                   len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
                    Linf = StockPars$Linf[x],
                    K = StockPars$K[x],
                    t0 = StockPars$t0[x],
                    growth_time_f = rbind(dots$growth_time$fleet, dots$growth_time$fleet[nyears, ]),
                    growth_time_i = dots$growth_time$index,
-                   #SD_LAA = t(StockPars$LatASD[x, , 1:(nyears+1)]), 
+                   wt_len = rbind(dots$wt_len, dots$wt_len[nyears, ]), 
+                   SD_LAA = t(StockPars$LatASD[x, , 1:(nyears+1)]), 
                    wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
                    mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]),
                    #mat = if (any(s_selectivity == -3L)) t(StockPars$Mat_age[x, , 1:(nyears+1)]) else matrix(1, 1, 1),

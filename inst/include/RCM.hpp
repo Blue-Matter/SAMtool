@@ -50,13 +50,16 @@ Type RCM(objective_function<Type> *obj) {
   DATA_INTEGER(nsurvey);  // Number of surveys
 
   DATA_MATRIX(M_data);    // Natural mortality at age and year (n_y, n_age), overridden if there's a prior for log_M
-  //DATA_MATRIX(len_age);   // Length-at-age (n_y + 1, n_age)
+  DATA_MATRIX(len_age);   // Length-at-age (n_y + 1, n_age)
   DATA_SCALAR(Linf);      // Linf
   DATA_SCALAR(K);
   DATA_SCALAR(t0);
   DATA_MATRIX(growth_time_f);
   DATA_MATRIX(growth_time_i);
-  //DATA_MATRIX(SD_LAA);    // Length-at-age SD (n_y, n_age)
+  
+  DATA_MATRIX(wt_len);
+  
+  DATA_MATRIX(SD_LAA);    // Length-at-age SD (n_y, n_age)
   DATA_MATRIX(wt);        // Weight-at-age (n_y + 1, n_age)
   DATA_MATRIX(mat);       // Maturity-at-age (n_y + 1, n_age) - only for matching survey selectivity to SSB
   DATA_MATRIX(fec);       // Fecundity-at-age (n_y + 1, n_age) - product of maturity and spawning output
@@ -389,13 +392,15 @@ Type RCM(objective_function<Type> *obj) {
       for(int ff=0;ff<nfleet;ff++) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
         CN(y,ff) += CAAtrue(y,a,ff);
-        Cpred(y,ff) += CAAtrue(y,a,ff) * wt(y,a);
+        //Cpred(y,ff) += CAAtrue(y,a,ff) * wt(y,a);
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
         
-        if (CAL_hist.col(ff).sum() > 0) {
-          
-          for(int len=0;len<nlbin;len++) CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLAf(y)(a,len,ff);
-        }
+        //if (CAL_hist.col(ff).sum() > 0) {
+          for(int len=0;len<nlbin;len++) {
+            CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLAf(y)(a,len,ff);
+            Cpred(y,ff) += CALpred(y,len,ff) * wt_len(y,len);
+          }
+        //}
         if (msize_type == "length" && !R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
           for(int len=0;len<nlbin;len++) MLpred(y,ff) += CAAtrue(y,a,ff) * PLAf(y)(a,len,ff) * lbinmid(len);
         }
@@ -458,15 +463,18 @@ Type RCM(objective_function<Type> *obj) {
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
       for(int a=0;a<n_age;a++) {
-        IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a);
+        IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a) * exp(-Z(y,a) * growth_time_i(y,sur));
         IN(y,sur) += IAAtrue(y,a,sur);
 
         for(int aa=0;aa<n_age;aa++) IAApred(y,aa,sur) += IAAtrue(y,a,sur) * age_error(a,aa);
 
-        if(I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * wt(y,a); // Biomass vulnerable to survey
-        if(IAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
-          for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLAi(y)(a,len,sur);
-        }
+        //if(I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * wt(y,a); // Biomass vulnerable to survey
+        //if(IAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
+          for(int len=0;len<nlbin;len++) {
+            IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLAi(y)(a,len,sur);
+            if(I_units(sur)) Itot(y,sur) += IALpred(y,len,sur) * wt_len(y,len);
+          }
+        //}
       }
     }
     if(!I_units(sur)) Itot.col(sur) = IN.col(sur); // Abundance vulnerable to survey
