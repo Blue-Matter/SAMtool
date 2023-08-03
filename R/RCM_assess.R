@@ -174,7 +174,7 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   
   # Calculate annual reference points
   if (conv) {
-    ref_pt <- RCM_assess_ref(obj, yref = 1:nyears)
+    ref_pt <- RCM_assess_ref(obj, report, yref = 1:nyears)
     
     report$FMSY <- sapply(ref_pt, getElement, "FMSY")
     tv_ref_pt <- length(unique(report$FMSY)) > 1
@@ -316,7 +316,7 @@ RCM_assess_StockPars <- function(x, Data, StockPars = list(), n_age, nyears, nsi
 }
 
 
-RCM_assess_ref <- function(obj, yref = 1:obj$env$data$n_y) {
+RCM_assess_ref <- function(obj, report, yref = 1:obj$env$data$n_y) {
   
   ref_pt <- lapply(yref, function(y) {
     M <- obj$env$data$M_data[y, ]
