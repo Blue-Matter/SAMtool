@@ -368,7 +368,7 @@ RCM_assess_ref <- function(obj, report, yref = 1:obj$env$data$n_y) {
     
     return(list(FMSY = FMSY, MSY = MSY, VBMSY = VBMSY, RMSY = RMSY, BMSY = BMSY, EMSY = EMSY,
                 per_recruit = data.frame(FM = Fvec, SPR = EPR/EPR[1], YPR = YPR), SR_par = SR,
-                new_B0 = new_B0, new_E0 = new_B0, new_VB0 = new_VB0, new_R0 = new_R0, new_h = new_h))
+                new_B0 = new_B0, new_E0 = new_E0, new_VB0 = new_VB0, new_R0 = new_R0, new_h = new_h))
   })
   
   return(ref_pt)
