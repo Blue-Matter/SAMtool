@@ -1,6 +1,6 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
-## SAMtool 1.6.1a
+## SAMtool 1.6.1.998
 - Various edits to adapt RCM for the Northern Chilean anchovy assessment model.
 - Length-at-age probability matrices are calculated annually for each fishery and index based on the `growth_time` matrix (duration within time step when matrices are calculated). Growth is also entered into the model as individual parameters Linf, K, and t0 and variability in growth-at-age is `a + b * L(a)`.
 - Index timing is based on `growth_time` matrix instead of the start of the time step.

@@ -140,6 +140,10 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     stop("Need wt_len matrix (year x length) for this version of RCM.")
   }
   
+  if (is.null(dots$wt_c)) {
+    stop("Need wt_c array (year x age x nfleet) for this version of RCM.")
+  }
+  
   TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, 
                    sigma_C = RCMdata@C_sd, sigma_Ceq = RCMdata@C_eq_sd, 
                    E_hist = E_hist, E_eq = E_eq,
@@ -172,6 +176,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    } else {
                      t(StockPars$Fec_Age[x, , 1:(nyears+1)])
                    },
+                   wt_c = dots$wt_c,
                    vul_type = selectivity,
                    ivul_type = s_selectivity, 
                    abs_I = RCMdata@abs_I, 

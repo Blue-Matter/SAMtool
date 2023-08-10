@@ -60,9 +60,11 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(wt_len);
   
   DATA_MATRIX(SD_LAA);    // Length-at-age SD (n_y, n_age)
-  DATA_MATRIX(wt);        // Weight-at-age (n_y + 1, n_age)
+  DATA_MATRIX(wt);        // Weight-at-age stock (n_y + 1, n_age)
   DATA_MATRIX(mat);       // Maturity-at-age (n_y + 1, n_age) - only for matching survey selectivity to SSB
   DATA_MATRIX(fec);       // Fecundity-at-age (n_y + 1, n_age) - product of maturity and spawning output
+  
+  DATA_ARRAY(wt_c);       // Weight-at-age for fishery (n_y + 1, n_age, nfleet)
 
   DATA_IVECTOR(vul_type); // Integer vector indicating whether free (-2), logistic (-1), or dome vul (0) is used
   DATA_IVECTOR(ivul_type); // Same but for surveys, but can also mirror to B (-4), SSB (-3), or fleet (>0)
@@ -331,8 +333,8 @@ Type RCM(objective_function<Type> *obj) {
     Type Z_eq = M(0,a);
     for(int ff=0;ff<nfleet;ff++) Z_eq += vul(0,a,ff) * F_equilibrium(ff);
     for(int ff=0;ff<nfleet;ff++) {
-      C_eq_pred(ff) += vul(0,a,ff) * F_equilibrium(ff) * wt(0,a) * N(0,a) * (1 - exp(-Z_eq)) / Z_eq;
-      VB(0,ff) += N(0,a) * wt(0,a) * vul(0,a,ff);
+      C_eq_pred(ff) += vul(0,a,ff) * F_equilibrium(ff) * wt_c(0,a,ff) * N(0,a) * (1 - exp(-Z_eq)) / Z_eq;
+      VB(0,ff) += N(0,a) * wt_c(0,a,ff) * vul(0,a,ff);
     }
     
     B(0) += N(0,a) * wt(0,a);
@@ -347,7 +349,7 @@ Type RCM(objective_function<Type> *obj) {
           Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff)); // annual F as deviation from F in middle of time series
           F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
         }
-      } else if(condition(ff) == 1) { //catch2
+      } else if(condition(ff) == 1) { //catch2 - do not use due to wt_c
         F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
       } else { //effort
         Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
@@ -383,7 +385,7 @@ Type RCM(objective_function<Type> *obj) {
       
       for(int a=0;a<n_age;a++) {
         B(y) += N(y,a) * wt(y,a);
-        for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,a,ff) * N(y,a) * wt(y,a);
+        for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,a,ff) * N(y,a) * wt_c(y,a,ff);
       }
     }
     
@@ -392,13 +394,13 @@ Type RCM(objective_function<Type> *obj) {
       for(int ff=0;ff<nfleet;ff++) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
         CN(y,ff) += CAAtrue(y,a,ff);
-        //Cpred(y,ff) += CAAtrue(y,a,ff) * wt(y,a);
+        Cpred(y,ff) += CAAtrue(y,a,ff) * wt_c(y,a,ff);
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
         
         //if (CAL_hist.col(ff).sum() > 0) {
           for(int len=0;len<nlbin;len++) {
             CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLAf(y)(a,len,ff);
-            Cpred(y,ff) += CALpred(y,len,ff) * wt_len(y,len);
+            //Cpred(y,ff) += CALpred(y,len,ff) * wt_len(y,len);
           }
         //}
         if (msize_type == "length" && !R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
@@ -435,7 +437,7 @@ Type RCM(objective_function<Type> *obj) {
   N(n_y,0) = R(n_y);
   for(int a=0;a<n_age;a++) {
     B(n_y) += N(n_y,a) * wt(n_y,a);
-    for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,a,ff) * N(n_y,a) * wt(n_y,a);
+    for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,a,ff) * N(n_y,a) * wt_c(n_y,a);
   }
 
   // Calculate for surveys: q, selectivity, and age/length comps
