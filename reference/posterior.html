@@ -19,7 +19,7 @@ with MCMC samples.."><meta property="og:image" content="https://SAMtool.openMSE.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.6.1</span>
       </span>
     </div>
 
@@ -77,7 +77,7 @@ with MCMC samples..</p>
 <span><span class="co"># S4 method for Assessment</span></span>
 <span><span class="fu">posterior</span><span class="op">(</span><span class="va">x</span>, priors_only <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">RCMstan</span><span class="op">(</span><span class="va">RCModel</span>, <span class="va">stanfit</span>, <span class="va">sim</span>, cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">RCMstan</span><span class="op">(</span><span class="va">RCModel</span>, <span class="va">stanfit</span>, <span class="va">sim</span>, cores <span class="op">=</span> <span class="fl">1</span>, silent <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -138,6 +138,10 @@ for reconstructing the population.</p></dd>
 <dt>sim</dt>
 <dd><p>A matrix of <code>RCModel@OM@nsim</code> rows and 2 columns that specifies the samples used to update the
 operating model. The first column specifies the chain and the second columns specifies the MCMC iteration.</p></dd>
+
+
+<dt>silent</dt>
+<dd><p>Logical to indicate if progress messages should be printed to console.</p></dd>
 
 </dl></div>
     <div id="value">

@@ -23,7 +23,7 @@ check_RCMdata evaluates whether the inputs in the S4 RCMdata object are correctl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.6.1</span>
       </span>
     </div>
 
@@ -65,12 +65,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">check_RCMdata</span><span class="op">(</span></span>
-<span>  <span class="va">RCMdata</span>,</span>
-<span>  <span class="va">OM</span>,</span>
-<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
-<span>  silent <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">check_RCMdata</span><span class="op">(</span><span class="va">RCMdata</span>, <span class="va">OM</span>, condition <span class="op">=</span> <span class="st">"catch"</span>, silent <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">RCM</span><span class="op">(</span><span class="va">OM</span>, <span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
@@ -78,7 +73,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
 <span><span class="fu">RCM</span><span class="op">(</span></span>
 <span>  <span class="va">OM</span>,</span>
 <span>  <span class="va">data</span>,</span>
-<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"catch"</span>,</span>
 <span>  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,</span>
 <span>  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -101,7 +96,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
 <span><span class="fu">RCM</span><span class="op">(</span></span>
 <span>  <span class="va">OM</span>,</span>
 <span>  <span class="va">data</span>,</span>
-<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"catch"</span>,</span>
 <span>  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,</span>
 <span>  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -125,7 +120,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
 <span><span class="fu">RCM</span><span class="op">(</span></span>
 <span>  <span class="va">OM</span>,</span>
 <span>  <span class="va">data</span>,</span>
-<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"catch"</span>, <span class="st">"catch2"</span>, <span class="st">"effort"</span><span class="op">)</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"catch"</span>,</span>
 <span>  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,</span>
 <span>  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -159,7 +154,7 @@ steepness, maturity parameters (L50 and L50_95), standard deviation of recruitme
 
 <dt>condition</dt>
 <dd><p>String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
-or "effort".</p></dd>
+or "effort" (F is proportional to an index series in <code>data@Ehist</code>. Can be fleet specific.</p></dd>
 
 
 <dt>silent</dt>
@@ -176,7 +171,7 @@ Use of a list is deprecated. See Data section below.</p></dd>
 
 
 <dt>selectivity</dt>
-<dd><p>A character vector of length nfleet to indicate <code>"logistic"</code>, <code>"dome"</code>, or <code>"free"</code> selectivity for each fleet in <code>Chist</code>.
+<dd><p>A character vector of length nfleet to indicate <code>"logistic_length"</code>, <code>"dome_length"</code>, <code>"logistic_age"</code>, <code>"dome_age"</code>, or <code>"free"</code> selectivity for each fleet in <code>Chist</code>.
 If there is time-varying selectivity, this is a character vector of length nsel_block (see Data section below). "free" indicates independent selectivity parameters for each age,
 and additional modifications for fixing selectivity parameters will likely be needed. See Additional arguments section.</p></dd>
 
@@ -184,7 +179,7 @@ and additional modifications for fixing selectivity parameters will likely be ne
 <dt>s_selectivity</dt>
 <dd><p>A vector of length nsurvey to indicate the selectivity of the corresponding columns in <code>data$Index</code>. Use <code>"B"</code> for
 total biomass, or <code>"SSB"</code> for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
-If the survey selectivity is otherwise independent of anything else in the model, use <code>"logistic"</code>, <code>"dome"</code>, or <code>"free"</code> to specify the functional form of selectivity, and
+If the survey selectivity is otherwise independent of anything else in the model, use <code>"logistic_length"</code>, <code>"dome_length"</code>, <code>"logistic_age"</code>, <code>"dome_age"</code>, or <code>"free"</code> to specify the functional form of selectivity, and
 see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.</p></dd>
 
 
@@ -249,7 +244,7 @@ Not used when data are provided in a <a href="RCMdata-class.html">RCMdata</a> ob
 <p>An object of class <a href="RCModel-class.html">RCModel</a> (see link for description of output).</p>
 
 
-<p><code>check_RCMdata</code> returns a list of updated RCMdata object, OM, and StockPars, ObsPars, and FleetPars from the Hist object generated
+<p><code>check_RCMdata</code> returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
 from the OM.</p>
     </div>
     <div id="details">
@@ -287,7 +282,7 @@ for the SD (in log space). Use <code>NA</code> in rows corresponding to indices 
 <p>Several articles are available for the RCM:</p>
 <ul><li><p><a href="https://openmse.com/tutorial-rcm/" class="external-link">General overview of approach</a></p></li>
 <li><p><a href="https://openmse.com/tutorial-rcm-eq/" class="external-link">Mathematical description</a></p></li>
-<li><p><a href="https://openmse.com/tutorial-rcm-select/" class="external-link">Setup of selectivity settings</a> (useful for more data-rich cases)</p></li>
+<li><p><a href="https://openmse.com/tutorial-rcm-select/" class="external-link">Setup of selectivity settings and index catchability</a> (useful for more data-rich cases)</p></li>
 <li><p><a href="https://openmse.com/features-assessment-models/5-priors/" class="external-link">Description of priors</a></p></li>
 </ul></div>
     <div id="data">
@@ -348,7 +343,7 @@ a-th row to observed age. Thus, all rows should sum to 1. Default is an identity
 
 <p>For <code>RCM</code>, additional arguments can be passed to the model via <code>...</code>:</p>
 <ul><li><p>plusgroup: Logical for whether the maximum age is a plusgroup or not. By default, TRUE.</p></li>
-<li><p>fix_dome: Logical for whether the dome selectivity parameter for fleets is fixed. Used primarily for backwards compatibility, this is overridden by map_vul_par.</p></li>
+<li><p>fix_dome: Logical for whether the dome selectivity parameter for fleets is fixed. Used primarily for backwards compatibility, this is overridden by the map argument.</p></li>
 <li><p>resample: Logical, whether the OM conditioning parameters (recruitment, fishing mortality, SSB, selectivity, etc.) are obtained by sampling the Hessian matrix from
 a single model fit. By default FALSE. This feature requires identical biological parameters among simulations.</p></li>
 </ul></div>
@@ -366,6 +361,7 @@ If any <code>s_selectivity = "free"</code>, then this matrix needs to be of maxa
 the row specifies the selectivity at age.</p></li>
 <li><p>log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.</p></li>
 <li><p>log_early_rec_dev: A numeric vector of length OM@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.</p></li>
+<li><p>q: A numeric vector of length nsurvey for index catchability. See <a href="https://openmse.com/tutorial-rcm-select/" class="external-link">online article</a> for more information.</p></li>
 </ul><p>Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
 vector or matrix in the map argument will be the same dimension as in the start entry. If an entry is <code>NA</code>, the corresponding parameter is fixed in the model to the starting
 value. Otherwise, an integer for each independent parameter, i.e., shared or mirrored parameters get the same integer entry.</p>
@@ -376,6 +372,8 @@ or survey, otherwise estimated. Unused cells in the vul_par matrix should be giv
 By default, no deviates are estimated (all are NA).</p></li>
 <li><p>log_rec_dev: A vector of length OM@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
 By default, all these deviates are estimated.</p></li>
+<li><p>q: A vector of length nsurvey for index catchability. q should be an estimated parameter when sharing across surveys (perhaps with differing selectivity). Otherwise, it is solved analytically
+where individual parameters are independent of other indices. Use <code>RCMdata@abs_I</code> for fixing the catchability to 1. See <a href="https://openmse.com/tutorial-rcm-select/" class="external-link">online article</a> for more information.</p></li>
 </ul></div>
     <div id="likelihood-weights">
     <h2>Likelihood weights</h2>
@@ -418,12 +416,13 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-in"><span>           map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>vul_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mat_ogive</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                      log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>           prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and data...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM is conditioned on: catch</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking data...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM is conditioned on:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fleet 1: catch</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 65 years of data detected.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> First year in model: 1956</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Last year in model: 2020</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 5 survey(s) detected.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and getting biological parameters...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Mean weight data found.</span>
@@ -447,14 +446,14 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating operating model:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6402.09 - 13658.66</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.46 - 1.52</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.15 - 0.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.87</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F set with OM@cpars$Find and OM@cpars$qs.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Annual selectivity set in OM@cpars$V. Projection period uses selectivity of last historical year.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Recruitment standard deviation set in OM@cpars$Perr: 0.8 - 0.8</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical recruitment deviations set in OM@cpars$Perr_y.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.32</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.31</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Future recruitment deviations in OM@cpars$Perr_y sampled with autocorrelation.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Growth, maturity, natural mortality, and stock recruit parameters from RCM are set in OM@cpars.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
@@ -464,9 +463,9 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpD7VZQ0/RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpD7VZQ0/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpoAJaFv/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpoAJaFv/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> See help(plot.RCModel) to adjust report and file directory.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span></span>
 <span class="r-in"><span><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span></span>
@@ -480,12 +479,13 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-in"><span>                 log_early_rec_dev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">maxage</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>      prior <span class="op">=</span> <span class="va">pcod</span><span class="op">$</span><span class="va">prior</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and data...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM is conditioned on: catch</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking data...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> RCM is conditioned on:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Fleet 1: catch</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 65 years of data detected.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> First year in model: 1956</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Last year in model: 2020</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 fleet(s) detected.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 5 survey(s) detected.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking OM and getting biological parameters...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Mean weight data found.</span>
@@ -509,14 +509,14 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating operating model:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6402.09 - 13658.66</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.46 - 1.52</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.15 - 0.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.87</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F set with OM@cpars$Find and OM@cpars$qs.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Annual selectivity set in OM@cpars$V. Projection period uses selectivity of last historical year.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Recruitment standard deviation set in OM@cpars$Perr: 0.8 - 0.8</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical recruitment deviations set in OM@cpars$Perr_y.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.32</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of recruitment autocorrelation OM@AC: 0.21 - 0.31</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Future recruitment deviations in OM@cpars$Perr_y sampled with autocorrelation.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Growth, maturity, natural mortality, and stock recruit parameters from RCM are set in OM@cpars.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
@@ -528,9 +528,8 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generated markdown file: /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpD7VZQ0/compare_RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpD7VZQ0/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpoAJaFv/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpoAJaFv/compare_RCM.html</span>
 <span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>

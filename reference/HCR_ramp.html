@@ -22,7 +22,7 @@ Class HCR objects are typically used with function make_MP."><meta property="og:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.6.1</span>
       </span>
     </div>
 
@@ -151,19 +151,19 @@ in the <a href="Assessment-class.html">Assessment</a> object:</p>
 <code>Assessment@SSB/Assessment@TMB_report$dynamic_SSB0</code>.</p></li>
 <li><p><code>"F_FMSY"</code>: Fishing mortality relative to MSY. Uses the last value in <code>Assessment@F_FMSY</code>.</p></li>
 <li><p><code>"F_F01"</code>: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
-<code>Asesssment@forecast[["per_recruit"]]</code>.</p></li>
+<code>Assessment@forecast[["per_recruit"]]</code>.</p></li>
 <li><p><code>"F_FSPR"</code>: Fishing mortality relative to F_SPR<!-- % (the F that produces the spawning potential ratio specified in -->
-<code>"SPR_OCP"</code>, calculated from the data frame in <code>Asesssment@forecast[["per_recruit"]]</code>.</p></li>
+<code>"SPR_OCP"</code>, calculated from the data frame in <code>Assessment@forecast[["per_recruit"]]</code>.</p></li>
 </ul><p><em>Fishing mortality target (Ftarget_type)</em></p>
 <p>The type of F for which the corresponding catch is calculated in the HCR is specified here. The source of those values
 in the <a href="Assessment-class.html">Assessment</a> object is specified:</p>
 <ul><li><p><strong>Default</strong> <code>"FMSY"</code>: Fishing mortality relative to MSY. Uses the value in <code>Assessment@FMSY</code>.</p></li>
 <li><p><code>"F01"</code>: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
-<code>Asesssment@forecast[["per_recruit"]]</code>.</p></li>
+<code>Assessment@forecast[["per_recruit"]]</code>.</p></li>
 <li><p><code>"Fmax"</code>: Fishing mortality relative to F_max (maximizing yield per recruit), calculated from the data frame in
-<code>Asesssment@forecast[["per_recruit"]]</code>.</p></li>
+<code>Assessment@forecast[["per_recruit"]]</code>.</p></li>
 <li><p><code>"FSPR"</code>: Fishing mortality relative to F_SPR<!-- % (the F that produces the spawning potential ratio specified in -->
-<code>"SPR_targ"</code>, calculated from data frame in <code>Asesssment@forecast[["per_recruit"]]</code>.</p></li>
+<code>"SPR_targ"</code>, calculated from data frame in <code>Assessment@forecast[["per_recruit"]]</code>.</p></li>
 <li><p><code>"abs"</code>: Fishing mortality is independent of any model output and is explicitly specified in <code>relF</code>.</p></li>
 </ul></div>
     <div id="functions">

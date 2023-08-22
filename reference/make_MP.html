@@ -3,7 +3,7 @@
 a harvest control rule (function of class HCR). The resulting function can then be tested in closed-loop simulation via 
 runMSE. Use make_MP to specify constant TAC between assessments; the frequency of
 assessments is specified in OM@interval. Use make_projection_MP to set catches according to a schedule set by projections,
-specify assessment frequency in argument assessment_interval adn ensure that OM@interval &amp;lt;- 1. 
+specify assessment frequency in argument assessment_interval and ensure that OM@interval &amp;lt;- 1. 
 Use make_interim_MP to use an interim procedure to adjust the TAC between 
 assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument assessment_interval when 
 making the MP; ensure that OM@interval &amp;lt;- 1."><meta property="og:image" content="https://SAMtool.openMSE.com/logo.png"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -24,7 +24,7 @@ making the MP; ensure that OM@interval &amp;lt;- 1."><meta property="og:image" c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SAMtool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.6.1</span>
       </span>
     </div>
 
@@ -60,7 +60,7 @@ making the MP; ensure that OM@interval &amp;lt;- 1."><meta property="og:image" c
 a harvest control rule (function of class <code>HCR</code>). The resulting function can then be tested in closed-loop simulation via 
 <code><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a></code>. Use <code>make_MP</code> to specify constant TAC between assessments; the frequency of
 assessments is specified in <code>OM@interval</code>. Use <code>make_projection_MP</code> to set catches according to a schedule set by projections,
-specify assessment frequency in argument <code>assessment_interval</code> adn ensure that <code>OM@interval &lt;- 1</code>. 
+specify assessment frequency in argument <code>assessment_interval</code> and ensure that <code>OM@interval &lt;- 1</code>. 
 Use <code>make_interim_MP</code> to use an interim procedure to adjust the TAC between 
 assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument <code>assessment_interval</code> when 
 making the MP; ensure that <code>OM@interval &lt;- 1</code>.</p>
@@ -109,7 +109,7 @@ procedure, the function will use the first index in <code>AddInd</code>.</p></dd
 
 
 <dt>assessment_interval</dt>
-<dd><p>The time interval for when the assesment model is applied (number of years). In all other years, the 
+<dd><p>The time interval for when the assessment model is applied (number of years). In all other years, the 
 interim procedure is applied.</p></dd>
 
 
@@ -210,7 +210,7 @@ frequency. Fish Fish. 21:663–679. <a href="https://doi.org/10.1111/faf.12453" 
 <span class="r-out co"><span class="r-pr">#&gt;</span>         Rec@Misc &lt;- c(Rec@Misc, do_Assessment@info$Misc)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     return(Rec)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x7f82bb8a2600&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x561fe3a83a68&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "MP"</span>
 <span class="r-in"><span></span></span>
