@@ -9,7 +9,6 @@
 status](https://www.r-pkg.org/badges/version/SAMtool)](https://CRAN.R-project.org/package=SAMtool)
 [![R build
 status](https://github.com/Blue-Matter/SAMtool/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions)
-[![](https://img.shields.io/badge/devel%20version-1.1.0-blue.svg)](https://github.com/Blue-Matter/SAMtool)
 <!-- badges: end -->
 
 The Stock Assessment Methods toolkit (`SAMtool`) is a collection of
@@ -35,6 +34,6 @@ install.packages("SAMtool")
 And the development version from [GitHub](https://github.com/Blue-Matter/SAMtool) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("Blue-Matter/SAMtool")
+# install.packages("remotes")
+remotes::install_github("Blue-Matter/SAMtool")
 ```
