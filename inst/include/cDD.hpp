@@ -32,19 +32,15 @@ Type cDD(objective_function<Type> *obj) {
   DATA_INTEGER(sim_process_error);
 
   PARAMETER(R0x);
-  PARAMETER(transformed_h);
+  PARAMETER(transformed_CR);
   PARAMETER(log_M);
   PARAMETER(F_equilibrium);
   PARAMETER(log_sigma);
   PARAMETER(log_sigma_W);
   PARAMETER(log_tau);
   PARAMETER_VECTOR(log_rec_dev);
-
-  Type h;
-  if(SR_type == "BH") {
-    h = 0.8 * invlogit(transformed_h);
-  } else h = exp(transformed_h);
-  h += 0.2;
+  
+  Type CR = exp(transformed_CR) + 1;
   Type R0 = exp(R0x)/rescale;
   Type M = exp(log_M);
   Type sigma = exp(log_sigma);
@@ -52,26 +48,24 @@ Type cDD(objective_function<Type> *obj) {
   Type tau = exp(log_tau);
   int SR_type2 = SR_type == "BH";
 
-
   //--DECLARING DERIVED VALUES
   Type BPR0 = cDD_BPR(Type(0), M, wk, Kappa, Winf);
   Type B0 = BPR0 * R0;
   Type N0 = R0/M;
-
-  Type CR, Brec;
-
+  
+  Type Arec = CR/BPR0;
+  Type h, Brec;
+  
   if(SR_type == "BH") {
-    CR = 4 *h;
-    CR /= 1-h;
+    h = CR/(4 + CR);
     Brec = 5*h - 1;
     Brec /= (1-h) * B0;
   } else {
-    CR = pow(5*h, 1.25);
+    h = 0.2 * pow(CR, 0.8);
     Brec = 1.25;
     Brec *= log(5*h);
     Brec /= B0;
   }
-  Type Arec = CR/BPR0;
 
   //--DECLARING STORAGE VECTORS
   vector<Type> B(ny+1);
@@ -200,6 +194,7 @@ Type cDD(objective_function<Type> *obj) {
   //-------REPORTING-------//
   ADREPORT(R0);
   ADREPORT(h);
+  ADREPORT(CR);
   if(CppAD::Variable(log_M)) ADREPORT(M);
   ADREPORT(q);
   if(CppAD::Variable(log_sigma)) ADREPORT(sigma);

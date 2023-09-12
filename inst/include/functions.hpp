@@ -224,7 +224,7 @@ Type calc_prior(matrix<int> use_prior, matrix<Type> prior_dist, Type R0x, Type h
   }
   if(use_prior(1)) { // Prior for h
     if(SR_type) { // Beverton-Holt - beta on y = (h - 0.2)/0.8 with log Jacobian transform of inverse logit fn
-      Type y = (h - 0.2)/0.8;
+      Type y = 1.25 * (h - 0.2);
       prior += dbeta_(y, prior_dist(1,0), prior_dist(1,1), true) + log(y - y * y); 
     } else { // Ricker - normal on h with log Jacobian transform
       prior += dnorm_(h, prior_dist(1,0), prior_dist(1,1), true) + log(h - 0.2);

@@ -177,9 +177,10 @@ report <- function(Assessment, retro = NULL, filename = paste0("report_", Assess
 #' @param logtransform Indicates whether the mean and standard deviation are in
 #' lognormal (TRUE) or normal (FALSE) space.
 #' @param color A vector of colors.
+#' @param ... Additional arguments to \code[graphics]{plot.default}.
 #' @return A plot of the probability distribution function. Vertical dotted line
 #' indicates mean of distribution. This function can plot multiple curves when multiple means
-#' and standard deviations are provided.
+#' and standard deviations are provided. Invisibly returns a list of x and y values
 #' @author Q. Huynh
 #' @export plot_lognormalvar
 #' @seealso \code{\link{plot_betavar}} \code{\link{plot_steepness}}
@@ -192,7 +193,7 @@ report <- function(Assessment, retro = NULL, filename = paste0("report_", Assess
 #' mu <- 0
 #' stddev <- 0.1
 #' plot_lognormalvar(mu, stddev, logtransform = TRUE) # mean of plot should be 1
-plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color = "black") {
+plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color = "black", ...) {
   # plots life history parameters: Linf, K, t0, M, FMSY_M
   ncurve <- length(m)
   if (!logtransform) {
@@ -219,7 +220,7 @@ plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color =
       xlim_truncated <- range(pretty(support))
       plot(support, dist[, 1], typ = 'l', xlab = label,
            ylab = 'Probability density function', xlim = xlim_truncated,
-           ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
+           ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1], ...)
       if (ncurve > 1) {
         for(i in 2:ncurve) lines(support, dist[, i], col = color[i])
       }
@@ -228,7 +229,7 @@ plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color =
       xlim_truncated <- range(pretty(support))
       plot(support, dist[, 1], typ = 'l', xlab = label,
            ylab = 'Probability density function', xlim = xlim_truncated,
-           ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
+           ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1], ...)
       if (ncurve > 1) {
         for(i in 2:ncurve) lines(support, dist[, i], col = color[i])
       }
@@ -245,8 +246,7 @@ plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color =
                         length.out = 1e3)
     support <- exp(support.norm)
 
-    dist <- matrix(NA, nrow = length(support), ncol = ncurve)
-    for(i in 1:ncurve) dist[, i] <- dnorm(support.norm, m[i], sd[i])/abs(support)
+    dist <- sapply(1:ncurve, function(i) dnorm(support.norm, m[i], sd[i]))/abs(support)
     dist[is.infinite(dist)] <- NA
 
     dist.max <- max(dist, na.rm = TRUE)
@@ -269,15 +269,14 @@ plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color =
     abline(v = exp(m), lty = 2, col = color)
   }
 
-  invisible()
+  invisible(list(x = support, y = dist))
 }
 
 
 plot_normalvar <- function(m, sd, label = NULL, color = "black") {
   ncurve <- length(m)
   support <- seq(max(0, min(m - 5 * sd)), max(m + 5 * sd), length.out = 1e3)
-  dist <- matrix(NA, nrow = length(support), ncol = ncurve)
-  for(i in 1:ncurve) dist[, i] <- dnorm(support, m[i], sd[i])
+  dist <- sapply(1:ncurve, function(i) dnorm(support, m[i], sd[i]))
   dist[is.infinite(dist)] <- NA
 
   dist.max <- max(dist, na.rm = TRUE)
@@ -329,20 +328,16 @@ plot_normalvar <- function(m, sd, label = NULL, color = "black") {
 plot_betavar <- function(m, sd, label = NULL, is_logit = FALSE, color = "black") {
   support <- seq(0.01, 0.99, length.out = 1e3)
   ncurve <- length(m)
-  dist <- matrix(NA, nrow = length(support), ncol = ncurve)
-  if (!is_logit) {
+  if (is_logit) {
+    #f_y(y) = f_x(g-1(y)) * abs(d/dy[g-1(y)])
+    #where f is the pdf of distribution, g(y) = 1/(1 + exp(-X)) is the transformation
+    #y is the beta variable, x is a normal variable
+    dist <- sapply(1:ncurve, function(i) dnorm(log(support/(1-support)), m[i], sd[i]))/abs(support * (1-support))
+    m <- ilogit(m)
+  } else {
     a <- alphaconv(m, sd)
     b <- betaconv(m, sd)
-    for(i in 1:ncurve) dist[, i] <- dbeta(support, a[i], b[i])
-  }
-  if (is_logit) {
-    for(i in 1:ncurve) {
-      #f_y(y) = f_x(g-1(y)) * abs(d/dy[g-1(y)])
-      #where f is the pdf of distribution, g(y) = 1/(1 + exp(-X)) is the transformation
-      #y is the beta variable, x is a normal variable
-      dist[, i] <- dnorm(log(support/(1-support)), m[i], sd[i])/abs(support * (1-support))
-      m[i] <- ilogit(m[i])
-    }
+    dist <- sapply(1:ncurve, function(i) dbeta(support, a[i], b[i]))
   }
   dist[is.infinite(dist)] <- NA
 
@@ -402,9 +397,7 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
       #where f is the pdf of distribution, g(y) = 0.2 + 0.8/(1 + exp(-X)) is the transformation
       #y is steepness, x is a normal variable
       z <- (support - 0.2)/0.8
-      for(i in 1:ncurve) {
-        dist[, i] <- dnorm(logit(z), m[i], sd[i]) * (1/z + 1/(1-z)) * 1.25 * support
-      }
+      dist <- sapply(1:ncurve, function(i) dnorm(logit(z), m[i], sd[i])) * (1/z + 1/(1-z)) * 1.25 * support
       m <- ilogit(m) * 0.8 + 0.2
     } else {
       #f_y(y) = f_x(g-1(y)) * abs(d/dy[g-1(y)])
@@ -432,9 +425,7 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
       support.norm <- seq(min(m - 5*sd, na.rm = TRUE), max(m+5*sd, na.rm = TRUE),
                           length.out = 1e3)
       support <- exp(support.norm) + 0.2
-      dist <- matrix(NA, nrow = length(support), ncol = ncurve)
-      for(i in 1:ncurve) dist[, i] <- dnorm(support.norm, m[i], sd[i]) / (support - 0.2)
-
+      dist <- sapply(1:ncurve, function(i) dnorm(support.norm, m[i], sd[i])) / (support - 0.2)
       dist[is.infinite(dist)] <- NA
 
       dist.max <- max(dist, na.rm = TRUE)
@@ -454,9 +445,7 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
       sdlog <- sdconv(m = m - 0.2, sd = sd)
       support <- seq(0.001, max(m + 5*sdlog), length.out = 1e3)
 
-      dist <- matrix(NA, nrow = length(support), ncol = ncurve)
-      for(i in 1:ncurve) dist[, i] <- dlnorm(support, mulog[i], sdlog[i])
-
+      dist <- sapply(1:ncurve, function(i) dlnorm(support, mulog[i], sdlog[i]))
       dist[is.infinite(dist)] <- NA
 
       dist.max <- max(dist, na.rm = TRUE)

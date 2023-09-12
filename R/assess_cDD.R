@@ -225,13 +225,9 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   if (!is.null(start)) {
     if (!is.null(start$R0) && is.numeric(start$R0)) params$R0x <- log(start$R0[1] * rescale)
     if (!is.null(start$h) && is.numeric(start$h)) {
-      if (SR == "BH") {
-        h_start <- (start$h[1] - 0.2)/0.8
-        params$transformed_h <- logit(h_start)
-      } else {
-        params$transformed_h <- log(start$h[1] - 0.2)
-      }
+      start$CR <- ifelse(SR == "BH", 4 * start$h/(1 - start$h), (5*start$h)^1.25)
     }
+    if (!is.null(start$CR) && is.numeric(start$CR)) params$transformed_CR <- log(start$CR - 1)
     if (!is.null(start$M) && is.numeric(start$M)) params$log_M <- log(start$M[1])
     if (!is.null(start$F_equilibrium) && is.numeric(start$F_equilibrium)) params$F_equilibrium <- start$F_equililbrium
     if (!is.null(start[["sigma"]]) && is.numeric(start[["sigma"]])) params$log_sigma <- log(start[["sigma"]])
@@ -242,14 +238,12 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   if (is.null(params$R0x)) {
     params$R0x <- ifelse(is.null(Data@OM$R0[x]), log(4 * mean(data$C_hist)), log(1.5 * rescale * Data@OM$R0[x]))
   }
-  if (is.null(params$transformed_h)) {
-    h_start <- ifelse(is.na(Data@steep[x]), 0.9, Data@steep[x])
-    if (SR == "BH") {
-      h_start <- (h_start - 0.2)/0.8
-      params$transformed_h <- logit(h_start)
-    } else {
-      params$transformed_h <- log(h_start - 0.2)
-    }
+  if (is.null(params$CR)) {
+    params$transformed_CR <- local({
+      h <- ifelse(is.na(Data@steep[x]), 0.9, Data@steep[x])
+      CR <- ifelse(SR == "BH", 4 * h/(1 - h), (5*h)^1.25)
+      log(CR - 1)
+    })
   }
   if (is.null(params$log_M)) params$log_M <- log(M)
   if (is.null(params$F_equilibrium)) params$F_equilibrium <- ifelse(dep < 1, 0.1, 0)
@@ -261,7 +255,7 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   info <- list(Year = Year, data = data, params = params, LH = LH, control = control, inner.control = inner.control)
 
   map <- list()
-  if (fix_h && !prior$use_prior[2]) map$transformed_h <- factor(NA)
+  if (fix_h && !prior$use_prior[2]) map$transformed_CR <- factor(NA)
   if (!prior$use_prior[3]) map$log_M <- factor(NA)
   if (dep == 1) map$F_equilibrium <- factor(NA)
   if (fix_sigma) map$log_sigma <- factor(NA)

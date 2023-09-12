@@ -182,9 +182,23 @@ rmd_R0 <- function(header = NULL) {
 rmd_h <- function() {
   fig.cap <- "Estimate of steepness, distribution based on normal approximation of estimated covariance matrix."
   c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
-    "if (conv && !\"transformed_h\" %in% names(obj$env$map)) {",
+    "if (conv && \"transformed_h\" %in% names(SD$par.fixed)) {",
     "  ind <- names(SD$par.fixed) == \"transformed_h\"",
     "  plot_steepness(SD$par.fixed[ind], sqrt(diag(SD$cov.fixed)[ind]), is_transform = TRUE, SR = info$data$SR_type)",
+    "}",
+    "```\n")
+}
+
+rmd_CR <- function() {
+  fig.cap <- "Estimate of compensation ratio, distribution based on normal approximation of estimated covariance matrix."
+  c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
+    "if (conv && \"transformed_CR\" %in% names(SD$par.fixed)) {",
+    "  ind <- names(SD$par.fixed) == \"transformed_CR\"",
+    "  CR <- plot_lognormalvar(SD$par.fixed[2], sqrt(diag(SD$cov.fixed)[2]), logtransform = TRUE, label = \"Compensation ratio\")",
+    "  xlim_truncated <- range(pretty(CR$x + 1), finite = TRUE, na.rm = TRUE)",
+    "  plot(CR$x + 1, CR$y, typ = \"l\", xlim = xlim_truncated, xlab = \"Compensation ratio\", ylab = \"Probability density function\")",
+    "  abline(h = 0, col = 'grey')",
+    "  abline(v = exp(SD$par.fixed[2]) + 1, lty = 2, col = color)",
     "}",
     "```\n")
 }
