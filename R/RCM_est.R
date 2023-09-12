@@ -16,7 +16,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
   }
   
   TMB_params <- RCM_est_params(x, RCMdata, selectivity, s_selectivity, prior, LWT, comp_like, StockPars, FleetPars, 
-                               start, map, dots)
+                               start, map, max_F, dots)
   TMB_data <- RCM_est_data(x, RCMdata, selectivity, s_selectivity, LWT, comp_like, prior, max_F, 
                            StockPars, FleetPars, mean_fit, TMB_params$map, dots)
   
@@ -49,7 +49,7 @@ RCM_est <- function(x = 1, RCMdata, selectivity, s_selectivity, LWT = list(),
 
 
 RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), comp_like, prior, max_F,
-                         StockPars, FleetPars, mean_fit = FALSE, map, dots = list()) {
+                         StockPars, FleetPars, mean_fit = FALSE, map = list(), dots = list()) {
   
   SR_type <- switch(StockPars$SRrel[x],
                     "1" = "BH",
@@ -196,7 +196,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
 }
 
 RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(), LWT = list(), comp_like,
-                           StockPars, FleetPars, start = list(), map = list(), dots = list()) {
+                           StockPars, FleetPars, start = list(), map = list(), max_F = 3, dots = list()) {
   
   ## Reference for parameters that can passed through start and map ----
   start_check <- c("vul_par", "ivul_par", "log_early_rec_dev", "log_rec_dev", "q", "MR_SRR")
@@ -400,7 +400,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                      vul_par = start$vul_par, 
                      ivul_par = start$ivul_par,
                      log_q_effort = rep(log(0.1), nfleet), 
-                     log_F_dev = matrix(0, nyears, nfleet),
+                     logit_F_dev = matrix(0, nyears, nfleet),
                      log_F_equilibrium = rep(log(0.05), nfleet),
                      log_CV_msize = log(RCMdata@MS_cv), 
                      log_tau = log(StockPars$procsd[x]),
@@ -411,8 +411,11 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
                      log_q = log(start$q))
   
   if (any(RCMdata@Misc$condition == "catch")) {
-    TMB_params$log_F_dev[as.integer(0.5 * nyears) + 1, 
-                         RCMdata@Misc$condition == "catch"] <- log(0.5 * mean(StockPars$M_ageArray[x, , nyears]))
+    TMB_params$logit_F_dev[as.integer(0.5 * nyears) + 1, RCMdata@Misc$condition == "catch"] <-
+      local({
+        Fstart <- 0.5 * min(mean(StockPars$M_ageArray[x, , nyears]), max_F)
+        ilogit2(Fstart, 0, max_F)
+      })
   }
   
   ## Map list (to fix parameters) ----
@@ -452,7 +455,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     factor(m)
   })
   
-  map_out$log_F_dev <- local({
+  map_out$logit_F_dev <- local({
     m <- matrix(FALSE, nyears, nfleet)
     for(ff in 1:nfleet) {
       if (RCMdata@Misc$condition[ff] == "catch") m[, ff] <- TRUE
@@ -566,7 +569,8 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
     obj2 <- obj
   }
   
-  par[names(par) == "log_F_dev" | names(par) == "log_F_equilibrium"] <- log(1e-8)
+  par[names(par) == "log_F_equilibrium"] <- log(1e-8)
+  par[names(par) == "logit_F_dev"] <- qlogis(1e-8)
   par[names(par) == "log_q_effort"] <- log(1e-8)
   
   out <- obj$report(par)$E
