@@ -662,19 +662,18 @@ RCM_retro_subset <- function(yr, data, params, map) {
     
     # Update F
     if (any(data_out$condition == 0L)) { # catch
-      params_out$log_F_dev <- params_out$log_F_dev[1:yr, , drop = FALSE]
+      params_out$logit_F_dev <- params_out$logit_F_dev[1:yr, , drop = FALSE]
       
       if (any(data_out$yind_F + 1 > yr)) {
         data_out$yind_F <- as.integer(0.5 * yr)
-        params_out$log_F_dev[data_out$yind_F + 1, ] <- params$log_F_dev[data$yind_F + 1, ]
+        params_out$logit_F_dev[data_out$yind_F + 1, ] <- params$logit_F_dev[data$yind_F + 1, ]
       }
       
-      if (!is.matrix(map$log_F_dev)) { # For newer versions of TMB (> 1.9.4 ?)
-        map$log_F_dev <- map$log_F_dev %>%
-          as.integer() %>%
+      if (!is.matrix(map$logit_F_dev)) { # For newer versions of TMB (> 1.9.4 ?)
+        map$logit_F_dev <- map$logit_F_dev %>% as.integer() %>%
           matrix(data$n_y, data$nfleet)
       } 
-      map$log_F_dev <- map$log_F_dev[1:yr, , drop = FALSE] %>% factor()
+      map$logit_F_dev <- map$logit_F_dev[1:yr, , drop = FALSE] %>% factor()
     }
     
     ## Update nsel block if needed

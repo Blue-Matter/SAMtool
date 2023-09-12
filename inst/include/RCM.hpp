@@ -99,7 +99,7 @@ Type RCM(objective_function<Type> *obj) {
   PARAMETER_MATRIX(vul_par);            // Matrix of vul_par 3 rows and nsel_block columns
   PARAMETER_MATRIX(ivul_par);           // Matrix of index selectivity parameters, 3 rows and nsurvey columns
   PARAMETER_VECTOR(log_q_effort);       // log_q for F when condition = "effort"
-  PARAMETER_MATRIX(log_F_dev);          // log_F_deviations when condition = "catch"
+  PARAMETER_MATRIX(logit_F_dev);        // logit_F_deviations when condition = "catch"
   PARAMETER_VECTOR(log_F_equilibrium);  // Equilibrium F by fleet when condition != "effort"
 
   PARAMETER_VECTOR(log_CV_msize);       // CV of mean size
@@ -169,8 +169,7 @@ Type RCM(objective_function<Type> *obj) {
     if(condition(ff) != 2 && C_eq(ff)>0) F_equilibrium(ff) = exp(log_F_equilibrium(ff)); // catch/catch2
     if(condition(ff) == 2 && E_eq(ff)>0) F_equilibrium(ff) = q_effort(ff) * E_eq(ff);    // effort
     if(condition(ff) == 0) { //catch - set up F in midpoint of time series
-      Type tmp = max_F - exp(log_F_dev(yind_F(ff),ff));
-      F(yind_F(ff),ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), exp(log_F_dev(yind_F(ff),ff)));
+      F(yind_F(ff),ff) = invlogit2(logit_F_dev(yind_F(ff),ff), Type(0), max_F);
     }
   }
 
@@ -323,11 +322,10 @@ Type RCM(objective_function<Type> *obj) {
     for(int ff=0;ff<nfleet;ff++) {
       if(condition(ff) == 0) { // catch
         if(y != yind_F(ff)) {
-          Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff)); // annual F as deviation from F in middle of time series
-          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
+          F(y,ff) = invlogit2(logit_F_dev(y,ff), Type(0), max_F, F(yind_F(ff),ff)); // annual F as logit deviation from F in middle of time series
         }
       } else if(condition(ff) == 1) { //catch2
-        F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
+        F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF);
       } else { //effort
         Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
         F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
@@ -642,7 +640,7 @@ Type RCM(objective_function<Type> *obj) {
   REPORT(h);
   REPORT(tau);
   if(nll_fleet.col(4).sum() != 0) REPORT(CV_msize);
-  //if(condition == "catch") REPORT(log_F_dev);
+  //if(condition == "catch") REPORT(logit_F_dev);
   REPORT(F_equilibrium);
   REPORT(vul);
   if(vul_len.sum() > 0) REPORT(vul_len);
