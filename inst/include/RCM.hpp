@@ -374,7 +374,7 @@ Type RCM(objective_function<Type> *obj) {
         Cpred(y,ff) += CAAtrue(y,a,ff) * wt(y,a);
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
         
-        if (CAL_hist.col(ff).sum() > 0) {
+        if (CAL_n.col(ff).sum() > 0 || CAL_hist.col(ff).sum() > 0) {
           for(int len=0;len<nlbin;len++) CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len);
         }
         if (msize_type == "length" && !R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
@@ -662,7 +662,7 @@ Type RCM(objective_function<Type> *obj) {
 
   REPORT(N);
   REPORT(CAApred);
-  if(CALpred.sum() > 0) REPORT(CALpred);
+  if(CAL_n.sum() > 0 || CALpred.sum() > 0) REPORT(CALpred);
   if(MLpred.sum() > 0) REPORT(MLpred);
   if(msize_type == "weight" && MWpred.sum() > 0) REPORT(MWpred);
   REPORT(CN);
