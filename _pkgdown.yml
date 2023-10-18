@@ -2,3 +2,97 @@ url: "https://samtool.openmse.com"
 template:
   bootstrap: 5
   
+reference:
+- title: internal
+  contents:
+  - Assessment-class
+  - RCMdata-class
+  - RCModel-class
+  - SAMtool-package
+  - SAMtool
+  - SP_production
+  - TAC_MSY
+  - HCR_FB
+  - HCRlin
+  - pcod
+  - prof-class
+  - project-class
+  - retro-class
+  - sim-class
+  - swordfish
+  - userguide
+  
+- title: Rapid Conditioning Model
+  desc: A population model intended for conditioning operating models from data-sparse to data-rich applications.
+  contents:
+  - RCM
+  - RCM2MOM
+  
+- title: Management procedures
+  desc: Make a management procedure from an assessment and control rule or use a suite of pre-made MPs.
+  contents:
+  - make_MP
+  - Model-based-MP
+  
+- title: Population models
+  desc: Assessment models that can be fitted with a Data object for closed-loop simulation.
+  contents:
+  - cDD
+  - DD_TMB
+  - SCA
+  - SCA_CAL
+  - SCA_DDM
+  - SCA_RWM
+  - SP
+  - RCM_assess
+  - SSS
+  - Shortcut
+  - VPA
+  - projection
+  
+- title: Harvest control rules
+  desc: Functions to pair with an assessment model to create a catch-based managment procedure.
+  contents:
+  - HCR_MSY
+  - HCR_escapement
+  - HCR_fixedF
+  - HCR_segment
+  - HCR_ramp
+  
+- title: Utility functions
+  desc: Functions to evaluate behavior of assessment models.
+  contents:
+  - compare_models
+  - diagnostic
+  - posterior
+  - prelim_AM
+  - profile
+  - simulate
+  - retrospective
+  - retrospective_AM
+
+- title: Plotting functions
+  desc: Generate summary and figures of assessment output.
+  contents:
+  - summary.Assessment
+  - plot.RCModel
+  - plot.Assessment
+  - plot.prof
+  - plot.retro
+  - plot_SR
+  - plot_betavar
+  - plot_composition
+  - plot_lognormalvar
+  - plot_residuals
+  - plot_steepness
+  - plot_timeseries
+  
+- title: Data indicators
+  desc: Calculate the statistical power of data indicators, generated in closed-loop simulation, to detect differences between operating models ([Carruthers and Hordyk 2018](https://doi.org/10.1139/cjfas-2018-0223)).
+  contents:
+  - PRBcalc
+  - Probs
+  - getinds
+  - mahplot
+  - plot_crosscorr
+
