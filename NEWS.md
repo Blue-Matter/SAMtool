@@ -2,12 +2,13 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.6.2
 - Minor `RCM` update to calculate fishery length comp when `CAL_n > 0`.
+- Update roxygen doc with markdown.
 
-## SAMtool 1.6.1
+## SAMtool 1.6.1 (2023-08-23)
 - Patch updates to tidy up RCM report to prevent empty length selectivity figures.
 - `Perfect` uses spawn_timing to calculate spawning biomass (`exp(-spawn_time * M)`) in the middle of projection year. Note that perfect HCR implementation needs to iteratively re-calculate the projection year biomass, B/BMSY, B/B0 (`exp(-spawn_time * [Ftarget + M])`) when applying the HCR.
 - Update URLs to describe how to map index q in RCM.
-- RCM no longer uses ObsPars$Isd.
+- RCM no longer uses `ObsPars$Isd`.
 - Update yield curve calcs for RCM with fecundity and spawn timing.
 - Update retrospective function for RCM (map dimensions changed in TMB).
 

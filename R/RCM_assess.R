@@ -32,10 +32,10 @@
 #' `StockPars` can be a named list of parameters used to provide inputs to the assessment model:
 #' 
 #' \itemize{
-#' \item `Wt_age` - annual weight at age, array [sim, ages, year]
-#' \item `Mat_age` - annual maturity at age, array [sim, ages, year]
-#' \item `hs` - Stock-recruit steepness, vector of length [sim]
-#' \item `M_ageArray` - annual natural mortality, array [sim, ages, year]  
+#' \item `Wt_age` - annual weight at age, array `[sim, ages, year]`
+#' \item `Mat_age` - annual maturity at age, array `[sim, ages, year]`
+#' \item `hs` - Stock-recruit steepness, vector of length `[sim]`
+#' \item `M_ageArray` - annual natural mortality, array `[sim, ages, year]`
 #' }
 #' 
 #' @examples  
