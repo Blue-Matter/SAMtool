@@ -1,5 +1,5 @@
 
-#' Class-\code{project}
+#' Class-`project`
 #'
 #' An S4 class for the output from \link{projection}.
 #'
@@ -8,15 +8,15 @@
 #'
 #' @slot Model Name of the assessment model.
 #' @slot Name Name of Data object.
-#' @slot FMort A matrix of fishing mortality over \code{p_sim} rows and \code{p_years} columns.
-#' @slot B An matrix of biomass with \code{p_sim} rows and \code{p_years} columns.
-#' @slot SSB A matrix of spawning biomass with \code{p_sim} rows and \code{p_years} columns.
-#' @slot VB A matrix of vulnerable biomass with \code{p_sim} rows and \code{p_years} columns.
-#' @slot R A matrix of recruitment over \code{p_sim} rows and \code{p_years} columns.
-#' @slot N A matrix of abundance over \code{p_sim} rows and \code{p_years} columns.
-#' @slot Catch A matrix of simulated observed catch over \code{p_sim} rows and \code{p_years} columns.
-#' @slot Index An array of simulated observed index of dimension \code{c(p_sim, p_years, nsurvey)}.
-#' @slot C_at_age An array for catch-at-age with dimension \code{c(p_sim, p_years, n_age)}.
+#' @slot FMort A matrix of fishing mortality over `p_sim` rows and `p_years` columns.
+#' @slot B An matrix of biomass with `p_sim` rows and `p_years` columns.
+#' @slot SSB A matrix of spawning biomass with `p_sim` rows and `p_years` columns.
+#' @slot VB A matrix of vulnerable biomass with `p_sim` rows and `p_years` columns.
+#' @slot R A matrix of recruitment over `p_sim` rows and `p_years` columns.
+#' @slot N A matrix of abundance over `p_sim` rows and `p_years` columns.
+#' @slot Catch A matrix of simulated observed catch over `p_sim` rows and `p_years` columns.
+#' @slot Index An array of simulated observed index of dimension `c(p_sim, p_years, nsurvey)`.
+#' @slot C_at_age An array for catch-at-age with dimension `c(p_sim, p_years, n_age)`.
 #' @seealso \link{projection}
 #' @author Q. Huynh
 #' @export project
@@ -40,7 +40,7 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 #' or alternatively an array of dimension p_sim, p_years, and nsurvey giving the deviates. The second entry is
 #' the standard deviation of the projected catch. Alternatively, a matrix of 
 #' simulation and year-specific error structure for the catch (p_sim rows and p_year columns; a matrix of ones indicates perfect data).
-#' @param process_error Numeric, standard deviation for process error (e.g., recruitment or biomass deviates). If \code{NULL},
+#' @param process_error Numeric, standard deviation for process error (e.g., recruitment or biomass deviates). If `NULL`,
 #' uses values from assessment model. Alternatively, a matrix of simulation and year-specific recruitment deviates (p_sim rows and p_year columns,
 #' a matrix of ones indicates no recruitment deviates).
 #' @param max_F The maximum allowable F if the projection is constrained on catch.

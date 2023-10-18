@@ -15,9 +15,9 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 
 
 
-#' Class-\code{Assessment}
+#' Class-`Assessment`
 #'
-#' An S4 class that contains assessment output. Created from a function of class \code{Assess}.
+#' An S4 class that contains assessment output. Created from a function of class `Assess`.
 #'
 #' @name Assessment-class
 #' @docType class
@@ -64,7 +64,7 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' @slot Dev A vector of estimated deviation parameters.
 #' @slot Dev_type A description of the deviation parameters, e.g. "log recruitment deviations".
 #' @slot NLL Negative log-likelihood. A vector for the total likelihood, integrated across random effects if applicable, components,
-#' and penalty term (applied when \code{U > 0.975} in any year).
+#' and penalty term (applied when `U > 0.975` in any year).
 #' @slot SE_UMSY Standard error of UMSY estimate.
 #' @slot SE_FMSY Standard error of FMSY estimate.
 #' @slot SE_MSY Standard error of MSY estimate.
@@ -81,16 +81,16 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' for the assessment.
 #' @slot forecast A list containing components for forecasting:
 #' \itemize{
-#' \item \code{per_recruit} A data frame of SPR (spawning potential ratio) and YPR (yield-per-recruit), calculated for
+#' \item `per_recruit` A data frame of SPR (spawning potential ratio) and YPR (yield-per-recruit), calculated for
 #' a range of exploitation rate of 0 - 0.99 or instantaneous F from 0 - 2.5 FMSY. 
-#' \item \code{catch_eq} A function that calculates the catch for the next year (after the model terminal year) when an
+#' \item `catch_eq` A function that calculates the catch for the next year (after the model terminal year) when an
 #' apical F is provided. 
 #' }
 #' @slot obj A list with components returned from \code{\link[TMB]{MakeADFun}}.
-#' @slot opt A list with components from calling \code{\link[stats]{nlminb}} to \code{obj}.
+#' @slot opt A list with components from calling \code{\link[stats]{nlminb}} to `obj`.
 #' @slot SD A list (class sdreport) with parameter estimates and their standard errors, obtained from
 #' \code{\link[TMB]{sdreport}}.
-#' @slot TMB_report A list of model output reported from the TMB executable, i.e. \code{obj$report()}, and derived quantities (e.g. MSY).
+#' @slot TMB_report A list of model output reported from the TMB executable, i.e. `obj$report()`, and derived quantities (e.g. MSY).
 #' @slot dependencies A character string of data types required for the assessment.
 #' @examples
 #' \donttest{
@@ -201,68 +201,68 @@ if (getRversion() >= "2.15.1") {
 
 
 
-#' Class-\code{RCMdata}
+#' Class-`RCMdata`
 #'
 #' An S4 class for the data inputs into \link{RCM}.
 #'
 #' @name RCMdata-class
 #' @docType class
 #' 
-#' @slot Chist Either a vector of historical catch, should be of length \code{OM@@nyears}, or if there are multiple fleets,
-#' a matrix of \code{OM@@nyears} rows and \code{nfleet} columns.
-#' Ideally, the first year of the catch series represents unfished conditions (see also slot \code{C_eq}).
-#' @slot C_sd Same dimension as \code{Chist}. Lognormal distribution standard deviations (by year and fleet) for the catches in \code{Chist}.
-#' If not provided, the default is 0.01. Not used if \code{RCM(condition = "catch2")}.
-#' @slot Ehist A vector of historical effort, should be of length \code{OM@@nyears}, or if there are multiple fleets: 
-#' a matrix of \code{OM@@nyears} rows and \code{nfleet} columns. See also slot \code{E_eq}).
-#' @slot CAA Fishery age composition matrix with \code{nyears} rows and \code{OM@@maxage+1} columns, or if multiple fleets: 
-#' an array with dimension: \code{nyears, OM@@maxage+1, nfleet}. Enter \code{NA} for years without any data. 
-#' Raw numbers will be converted to annual proportions (see slot \code{CAA_ESS} for sample sizes).
+#' @slot Chist Either a vector of historical catch, should be of length `OM@@nyears`, or if there are multiple fleets,
+#' a matrix of `OM@@nyears` rows and `nfleet` columns.
+#' Ideally, the first year of the catch series represents unfished conditions (see also slot `C_eq`).
+#' @slot C_sd Same dimension as `Chist`. Lognormal distribution standard deviations (by year and fleet) for the catches in `Chist`.
+#' If not provided, the default is 0.01. Not used if `RCM(condition = "catch2")`.
+#' @slot Ehist A vector of historical effort, should be of length `OM@@nyears`, or if there are multiple fleets: 
+#' a matrix of `OM@@nyears` rows and `nfleet` columns. See also slot `E_eq`).
+#' @slot CAA Fishery age composition matrix with `nyears` rows and `OM@@maxage+1` columns, or if multiple fleets: 
+#' an array with dimension: `nyears, OM@@maxage+1, nfleet`. Enter `NA` for years without any data. 
+#' Raw numbers will be converted to annual proportions (see slot `CAA_ESS` for sample sizes).
 #' @slot CAA_ESS Annual sample size (for the multinomial distribution) of the fishery age comps. 
-#' A vector of length \code{OM@@nyears}, or if there are multiple fleets: a matrix of \code{OM@@nyears} rows and \code{nfleet} columns.
+#' A vector of length `OM@@nyears`, or if there are multiple fleets: a matrix of `OM@@nyears` rows and `nfleet` columns.
 #' Enter zero for years without observations.
-#' An annual cap to the ESS, e.g., 50, can be calculated with something like: \code{pmin(apply(CAA, c(1, 3), sum, na.rm = TRUE), 50)}.
+#' An annual cap to the ESS, e.g., 50, can be calculated with something like: `pmin(apply(CAA, c(1, 3), sum, na.rm = TRUE), 50)`.
 #' By default, 
-#' @slot CAL Fishery length composition matrix with \code{nyears} rows and \code{n_bin} columns (indexing the length bin), or
-#' if multiple fleets: an array with dimension: \code{nyears, n_bin, nfleets}. Enter \code{NA} for years without any data.
-#' Raw numbers will be converted to annual proportions (see slot \code{CAL_ESS} for sample sizes).
+#' @slot CAL Fishery length composition matrix with `nyears` rows and `n_bin` columns (indexing the length bin), or
+#' if multiple fleets: an array with dimension: `nyears, n_bin, nfleets`. Enter `NA` for years without any data.
+#' Raw numbers will be converted to annual proportions (see slot `CAL_ESS` for sample sizes).
 #' @slot CAL_ESS Annual sample size (for the multinomial distribution) of the fishery length comps. 
-#' Same dimension as \code{CAA_ESS}.
-#' @slot length_bin - A vector (length \code{n_bin}) for the midpoints of the length bins for \code{CAL} and \code{IAL}, as well as the population model, if all bin widths are equal in size. 
-#' If length bins are unequal in width, then provide a vector of the boundaries of the length bins (vector of length \code{n_bin + 1}). 
-#' @slot MS Mean mean size (either mean length or mean weight) observations from the fishery. Same dimension as \code{Chist}.
-#' Generally, mean lengths should not be used alongside \code{CAL}, unless mean length and length comps are independently sampled.
-#' @slot MS_type A character (either \code{"length"} (default) or \code{"weight"}) to denote the type of mean size data.
-#' @slot MS_cv The coefficient of variation of the observed mean size. If there are multiple fleets, a vector of length \code{nfleet}.
+#' Same dimension as `CAA_ESS`.
+#' @slot length_bin - A vector (length `n_bin`) for the midpoints of the length bins for `CAL` and `IAL`, as well as the population model, if all bin widths are equal in size. 
+#' If length bins are unequal in width, then provide a vector of the boundaries of the length bins (vector of length `n_bin + 1`). 
+#' @slot MS Mean mean size (either mean length or mean weight) observations from the fishery. Same dimension as `Chist`.
+#' Generally, mean lengths should not be used alongside `CAL`, unless mean length and length comps are independently sampled.
+#' @slot MS_type A character (either `"length"` (default) or `"weight"`) to denote the type of mean size data.
+#' @slot MS_cv The coefficient of variation of the observed mean size. If there are multiple fleets, a vector of length `nfleet`.
 #' Default is 0.2.
-#' @slot Index Index of abundance. Enter \code{NA} for missing values. A vector length \code{OM@@nyears}, or if there are multiple surveys: 
-#' a matrix of \code{OM@@nyears} rows and \code{nsurvey} columns.
-#' @slot I_sd A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
-#' Same dimension as \code{Index}. If not provided, this function will use values from \code{OM@@Iobs}.
-#' @slot IAA Index age composition data, an array of dimension \code{nyears, maxage+1, nsurvey}.
-#' Raw numbers will be converted to annual proportions (see \code{IAA_ESS} for sample sizes).
+#' @slot Index Index of abundance. Enter `NA` for missing values. A vector length `OM@@nyears`, or if there are multiple surveys: 
+#' a matrix of `OM@@nyears` rows and `nsurvey` columns.
+#' @slot I_sd A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in `Index`.
+#' Same dimension as `Index`. If not provided, this function will use values from `OM@@Iobs`.
+#' @slot IAA Index age composition data, an array of dimension `nyears, maxage+1, nsurvey`.
+#' Raw numbers will be converted to annual proportions (see `IAA_ESS` for sample sizes).
 #' @slot IAA_ESS Annual sample size (for the multinomial distribution) of the index age comps. 
-#' A vector of length \code{OM@@nyears}. If there are multiple indices: a matrix of \code{OM@@nyears} rows and \code{nsurvey} columns.
-#' @slot IAL Index length composition data, an array of dimension \code{nyears, n_bin, nsurvey}. 
-#' Raw numbers will be converted to annual proportions (see slot \code{IAL_ESS} to enter sample sizes).
+#' A vector of length `OM@@nyears`. If there are multiple indices: a matrix of `OM@@nyears` rows and `nsurvey` columns.
+#' @slot IAL Index length composition data, an array of dimension `nyears, n_bin, nsurvey`. 
+#' Raw numbers will be converted to annual proportions (see slot `IAL_ESS` to enter sample sizes).
 #' @slot IAL_ESS Annual sample size (for the multinomial distribution) of the index length comps. 
-#' Same dimension as \code{IAA_ESS}.
-#' @slot C_eq Vector of length \code{nfleet} for the equilibrium catch for each fleet in \code{Chist} prior to the first year of the operating model.
+#' Same dimension as `IAA_ESS`.
+#' @slot C_eq Vector of length `nfleet` for the equilibrium catch for each fleet in `Chist` prior to the first year of the operating model.
 #' Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data. Alternatively,
 #' if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial depletion) 
 #' in the first year of the model (see additional arguments in \link{RCM}).
-#' @slot C_eq_sd - A vector of standard deviations (lognormal distribution) for the equilibrium catches in \code{C_eq}.
-#' Same dimension as \code{C_eq}. If not provided, the default is 0.01. Only used if \code{RCM(condition = "catch")}.
-#' @slot E_eq The equilibrium effort for each fleet in \code{Ehist} prior to the first year of the operating model.
+#' @slot C_eq_sd - A vector of standard deviations (lognormal distribution) for the equilibrium catches in `C_eq`.
+#' Same dimension as `C_eq`. If not provided, the default is 0.01. Only used if `RCM(condition = "catch")`.
+#' @slot E_eq The equilibrium effort for each fleet in `Ehist` prior to the first year of the operating model.
 #' Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data.
-#' @slot abs_I An integer vector length \code{nsurvey} to indicate which indices are in absolute magnitude. Use \code{1} to set \code{q = 1}, 
+#' @slot abs_I An integer vector length `nsurvey` to indicate which indices are in absolute magnitude. Use `1` to set `q = 1`, 
 #' otherwise use 0 (default) to estimate q.
 #' @slot I_units An integer vector to indicate whether indices are biomass based (1) or abundance-based (0). By default, all are biomass-based.
-#' @slot age_error A square matrix of \code{maxage + 1} rows and columns to specify ageing error. The \code{aa}-th column assigns a proportion of animals of 
-#' true age \code{aa} to observed age \code{a} in the \code{a}-th row. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).
-#' @slot sel_block For time-varying fleet selectivity (in time blocks), a integer matrix of \code{nyears} rows and \code{nfleet} columns to assign a selectivity 
+#' @slot age_error A square matrix of `maxage + 1` rows and columns to specify ageing error. The `aa`-th column assigns a proportion of animals of 
+#' true age `aa` to observed age `a` in the `a`-th row. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).
+#' @slot sel_block For time-varying fleet selectivity (in time blocks), a integer matrix of `nyears` rows and `nfleet` columns to assign a selectivity 
 #' function to a fleet for certain years. By default, constant selectivity for each individual fleet.
-#' See the \href{https://openmse.com/tutorial-rcm-select/}{selectivity} article for more details.
+#' See the [selectivity](https://openmse.com/tutorial-rcm-select/) article for more details.
 #' @slot Misc A list of miscellaneous inputs. Used internally.
 #'
 #' @seealso \link{RCM}

@@ -5,13 +5,13 @@
 #' 
 #' @inheritParams SCA
 #' @param CAL_dist Character, the statistical distribution for the likelihood of the catch-at-length.
-#' @param CAL_multiplier Numeric for data weighting of catch-at-length matrix if \code{CAL_hist = "multinomial"}. A value smaller than one
+#' @param CAL_multiplier Numeric for data weighting of catch-at-length matrix if `CAL_hist = "multinomial"`. A value smaller than one
 #' rescales annual sample sizes to this fraction of the original sample size. Values greater than one generates a cap of the annual sample
 #' size to this value.
 #' 
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
-#' \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
+#' [website](https://openmse.com/features-assessment-models/2-sca/).
 #' @author Q. Huynh
 #' @export
 SCA_CAL <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
@@ -37,8 +37,8 @@ class(SCA_CAL) <- "Assessment"
 
 #' SCA models with time-varying natural mortality
 #' 
-#' A modification of \code{SCA} that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).
-#' Set the bounds of M in the \code{M_bounds} argument, a length-2 vector where the first entry is M0, the M as B/B0 >= 1,
+#' A modification of `SCA` that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).
+#' Set the bounds of M in the `M_bounds` argument, a length-2 vector where the first entry is M0, the M as B/B0 >= 1,
 #' and the second entry is M1, the M as B/B0 approaches zero. Note that M0 can be greater than M1 (compensatory) 
 #' or M0 can be less than M1 (depensatory).
 #' 
@@ -53,7 +53,7 @@ class(SCA_CAL) <- "Assessment"
 #'
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
-#' \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
+#' [website](https://openmse.com/features-assessment-models/2-sca/).
 #' @examples
 #' res <- SCA_DDM(Data = MSEtool::SimulatedData)
 #' 
@@ -84,36 +84,36 @@ class(SCA_DDM) <- "Assess"
 
 #' SCA with random walk in M
 #'
-#' \code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age). 
-#' Set the variance (\code{start$tau_M}) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
+#' `SCA_RWM` is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age). 
+#' Set the variance (`start$tau_M`) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
 #' 
 #' @inheritParams SCA 
 #' @param refyear An expression for the year for which M is used to report MSY and unfished reference points. By default, terminal year. If multiple
 #' years are provided, then the mean M over the specified time period is used.
 #' @param M_bounds A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
-#' (\code{start$M}). The default min and max are 75% and 125%, respectively.
+#' (`start$M`). The default min and max are 75% and 125%, respectively.
 #' @details
 #' The model estimates year-specific M (constant with age) as a random walk in logit space, bounded by
-#' a proportion of \code{start$M} (specified in \code{M_bounds}).
+#' a proportion of `start$M` (specified in `M_bounds`).
 #' 
-#' The starting value for the first year M (start$M) is \code{Data@@Mort[x]} and is fixed, unless a prior is provided (\code{prior$M}). 
-#' The fixed SD of the random walk (\code{tau_M}) is 0.05, by default. 
+#' The starting value for the first year M (start$M) is `Data@@Mort[x]` and is fixed, unless a prior is provided (`prior$M`). 
+#' The fixed SD of the random walk (`tau_M`) is 0.05, by default. 
 #' 
 #' Steepness and unfished recruitment in the estimation model, along with unfished reference points, correspond to spawners per recruit using the first year M. 
-#' With argument \code{refyear}, new unfished reference points and steepness values are calculated. See examples. 
+#' With argument `refyear`, new unfished reference points and steepness values are calculated. See examples. 
 #' 
 #' Alternative values can be provided in the start list (see examples):
 #' \itemize{
-#' \item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
+#' \item `R0` Unfished recruitment, except when `SR = "none"` where it is mean recruitment. 
 #' By default, 150% `Data@@OM$R0[x]` is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
-#' \item \code{h} Steepness. Otherwise, `Data@@steep[x] is used, or 0.9 if empty.
-#' \item \code{M} Natural mortality in the first year. Otherwise, `Data@@Mort[x]` is used.
-#' \item \code{vul_par} Vulnerability parameters, see next paragraph.
-#' \item \code{F} A vector of length nyears for year-specific fishing mortality.
-#' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-#' \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, `Data@@CV_Cat[x]`.
-#' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, `Data@@sigmaR[x]`.
-#' \item \code{tau_M} The fixed SD of the random walk in M. By default, 0.05. 
+#' \item `h` Steepness. Otherwise, `Data@@steep[x]` is used, or 0.9 if empty.
+#' \item `M` Natural mortality in the first year. Otherwise, `Data@@Mort[x]` is used.
+#' \item `vul_par` Vulnerability parameters, see next paragraph.
+#' \item `F` A vector of length nyears for year-specific fishing mortality.
+#' \item `F_equilibrium` Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
+#' \item `omega` Lognormal SD of the catch (observation error) when `catch_eq = "Baranov"`. By default, `Data@@CV_Cat[x]`.
+#' \item `tau` Lognormal SD of the recruitment deviations (process error). By default, `Data@@sigmaR[x]`.
+#' \item `tau_M` The fixed SD of the random walk in M. By default, 0.05. 
 #' }
 #' 
 #' See \link{SCA} for all other information about the structure and setup of the model.
@@ -123,7 +123,7 @@ class(SCA_DDM) <- "Assess"
 #'
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
-#' \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
+#' [website](https://openmse.com/features-assessment-models/2-sca/).
 #' @examples
 #' res <- SCA_RWM(Data = MSEtool::SimulatedData, start = list(M_start = 0.4, tau_M = 0.05))
 #' res2 <- SCA(Data = MSEtool::SimulatedData)

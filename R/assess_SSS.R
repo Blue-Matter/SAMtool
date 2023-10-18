@@ -9,16 +9,16 @@
 #' @param x A position in the Data object (by default, equal to one for assessments).
 #' @param Data An object of class Data
 #' @param dep Depletion value to use in the model. Can be an expression that will be evaluated inside the function.
-#' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).
+#' @param SR Stock-recruit function (either `"BH"` for Beverton-Holt or `"Ricker"`).
 #' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
-#' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
+#' can improve convergence. By default, `"mean1"` scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
 #' @param start Optional named list of starting values. Entries can be expressions that are evaluated in the function:
 #' \itemize{
-#' \item \code{R0} Unfished recruitment
-#' \item \code{vul_par} A length-two vector for the age of 95% and 50% fleet selectivity. Fixed to maturity otherwise.
+#' \item `R0` Unfished recruitment
+#' \item `vul_par` A length-two vector for the age of 95% and 50% fleet selectivity. Fixed to maturity otherwise.
 #' }
-#' @param prior A named list for the parameters of any priors to be added to the model. See details in \code{SCA_Pope}.
+#' @param prior A named list for the parameters of any priors to be added to the model. See details in `SCA_Pope`.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization

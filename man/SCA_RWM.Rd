@@ -140,7 +140,13 @@ Alternative values can be provided in the start list (see examples):
 \itemize{
 \item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment.
 By default, 150\% \code{Data@OM$R0[x]} is used as the start value in closed-loop simulation, and 400\\% of mean catch otherwise.
-\item \code{h} Steepness. Otherwise, \verb{Data@steep[x] is used, or 0.9 if empty. \\item \code{M} Natural mortality in the first year. Otherwise, }Data@Mort\link{x}\verb{is used. \\item \code{vul_par} Vulnerability parameters, see next paragraph. \\item \code{F} A vector of length nyears for year-specific fishing mortality. \\item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0. \\item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default,}Data@CV_Cat\link{x}\verb{. \\item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, }Data@sigmaR\link{x}`.
+\item \code{h} Steepness. Otherwise, \code{Data@steep[x]} is used, or 0.9 if empty.
+\item \code{M} Natural mortality in the first year. Otherwise, \code{Data@Mort[x]} is used.
+\item \code{vul_par} Vulnerability parameters, see next paragraph.
+\item \code{F} A vector of length nyears for year-specific fishing mortality.
+\item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
+\item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, \code{Data@CV_Cat[x]}.
+\item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, \code{Data@sigmaR[x]}.
 \item \code{tau_M} The fixed SD of the random walk in M. By default, 0.05.
 }
 

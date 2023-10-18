@@ -1,70 +1,70 @@
 #' Surplus production model with FMSY and MSY as leading parameters
 #'
 #' A surplus production model that uses only a time-series of catches and a relative abundance index
-#' and coded in TMB. The base model, \code{SP}, is conditioned on catch and estimates a predicted index.
+#' and coded in TMB. The base model, `SP`, is conditioned on catch and estimates a predicted index.
 #' Continuous surplus production and fishing is modeled with sub-annual time steps which should approximate
-#' the behavior of ASPIC (Prager 1994). The Fox model, \code{SP_Fox}, fixes BMSY/K = 0.37 (1/e).
-#' The state-space version, \code{SP_SS} estimates annual deviates in biomass. An option allows for setting a
+#' the behavior of ASPIC (Prager 1994). The Fox model, `SP_Fox`, fixes BMSY/K = 0.37 (1/e).
+#' The state-space version, `SP_SS` estimates annual deviates in biomass. An option allows for setting a
 #' prior for the intrinsic rate of increase.
-#' The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[MSEtool]{MSEextra}.
+#' The function for the `spict` model (Pedersen and Berg, 2016) is available in \link[MSEtool]{MSEextra}.
 #'
-#' @param x An index for the objects in \code{Data} when running in \link[MSEtool]{runMSE}.
+#' @param x An index for the objects in `Data` when running in \link[MSEtool]{runMSE}.
 #' Otherwise, equals to 1 When running an assessment interactively.
 #' @param Data An object of class Data.
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 #' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
 #' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd.
 #' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
-#' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
+#' can improve convergence. By default, `"mean1"` scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
 #' @param prior A named list for the parameters of any priors to be added to the model. See details.
 #' @param fix_dep Logical, whether to fix the initial depletion (ratio of biomass to carrying capacity in the
-#' first year of the model). If \code{TRUE}, uses the value in \code{start}, otherwise equal to 1
+#' first year of the model). If `TRUE`, uses the value in `start`, otherwise equal to 1
 #' (unfished conditions).
-#' @param fix_n Logical, whether to fix the exponent of the production function. If \code{TRUE},
-#' uses the value in \code{start}, otherwise equal to \code{n = 2}, where the biomass at MSY
+#' @param fix_n Logical, whether to fix the exponent of the production function. If `TRUE`,
+#' uses the value in `start`, otherwise equal to `n = 2`, where the biomass at MSY
 #' is half of carrying capacity.
-#' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
-#' sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Ind}.
-#' @param fix_tau Logical, the standard deviation of the biomass deviations is fixed. If \code{TRUE},
-#' tau is fixed to value provided in \code{start} (if provided), otherwise, equal to 0.1.
-#' @param early_dev Character string describing the years for which biomass deviations are estimated in \code{SP_SS}.
-#' By default, deviations are estimated in each year of the model (\code{"all"}), while deviations could also be estimated
-#' once index data are available (\code{"index"}).
+#' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If `TRUE`,
+#' sigma is fixed to value provided in `start` (if provided), otherwise, value based on `Data@@CV_Ind`.
+#' @param fix_tau Logical, the standard deviation of the biomass deviations is fixed. If `TRUE`,
+#' tau is fixed to value provided in `start` (if provided), otherwise, equal to 0.1.
+#' @param early_dev Character string describing the years for which biomass deviations are estimated in `SP_SS`.
+#' By default, deviations are estimated in each year of the model (`"all"`), while deviations could also be estimated
+#' once index data are available (`"index"`).
 #' @param LWT A vector of likelihood weights for each survey.
 #' @param n_seas Integer, the number of seasons in the model for calculating continuous surplus production.
 #' @param n_itF Integer, the number of iterations to solve F conditional on the observed catch given multiple seasons within an annual time step.
-#' Ignored if \code{n_seas} = 1.
+#' Ignored if `n_seas` = 1.
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
 #' of the biomass deviations (thus, treating it as a state-space variable).
 #' @param Euler_Lotka Integer. If greater than zero, the function will calculate a prior for the intrinsic rate of increase to use in the estimation model
-#' (in lieu of an explicit prior in argument \code{prior}). The value of this argument specifies the number of stochastic samples used to calculate the prior SD. 
+#' (in lieu of an explicit prior in argument `prior`). The value of this argument specifies the number of stochastic samples used to calculate the prior SD. 
 #' See section on priors below.
-#' @param SR_type If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
+#' @param SR_type If `use_r_prior = TRUE`, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
 #' steepness and unfished spawners-per-recruit. Used to develop the r prior.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
-#' in convergence rate). Ignored if \code{integrate = TRUE}.
+#' in convergence rate). Ignored if `integrate = TRUE`.
 #' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param control A named list of parameters regarding optimization to be passed to
 #' \code{\link[stats]{nlminb}}.
 #' @param inner.control A named list of arguments for optimization of the random effects, which
 #' is passed on to \link[TMB]{newton} via \code{\link[TMB]{MakeADFun}}.
-#' @param ... For \code{SP_Fox}, additional arguments to pass to \code{SP}.
+#' @param ... For `SP_Fox`, additional arguments to pass to `SP`.
 #' @details
-#' For \code{start} (optional), a named list of starting values of estimates can be provided for:
+#' For `start` (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
-#' \item \code{MSY} Maximum sustainable yield.. Otherwise, 300% of mean catch by default.
-#' \item \code{FMSY} Steepness. Otherwise, `Data@@Mort[x]` or 0.2 is used.
-#' \item \code{dep} Initial depletion (B/B0) in the first year of the model. By default, 1.
-#' \item \code{n} The production function exponent that determines BMSY/B0. By default, 2 so that BMSY/B0 = 0.5.
-#' \item \code{sigma} Lognormal SD of the index (observation error). By default, 0.05. Not
+#' \item `MSY` Maximum sustainable yield.. Otherwise, 300% of mean catch by default.
+#' \item `FMSY` Steepness. Otherwise, `Data@@Mort[x]` or 0.2 is used.
+#' \item `dep` Initial depletion (B/B0) in the first year of the model. By default, 1.
+#' \item `n` The production function exponent that determines BMSY/B0. By default, 2 so that BMSY/B0 = 0.5.
+#' \item `sigma` Lognormal SD of the index (observation error). By default, 0.05. Not
 #' used with multiple indices.
-#' \item \code{tau} Lognormal SD of the biomass deviations (process error) in \code{SP_SS}. By default, 0.1.
+#' \item `tau` Lognormal SD of the biomass deviations (process error) in `SP_SS`. By default, 0.1.
 #' }
 #' 
 #' Multiple indices are supported in the model. 
@@ -74,15 +74,15 @@
 #' The following priors can be added as a named list, e.g., prior = list(r = c(0.25, 0.15), MSY = c(50, 0.1). For each parameter below, provide a vector of values as described:
 #' 
 #' \itemize{
-#' \item \code{r} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space). 
-#' \item \code{MSY} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space).
+#' \item `r` - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space). 
+#' \item `MSY` - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space).
 #' }
 #' 
-#' In lieu of an explicit r prior provided by the user, set argument \code{Euler_Lotka = TRUE} to calculate the prior mean and SD using
+#' In lieu of an explicit r prior provided by the user, set argument `Euler_Lotka = TRUE` to calculate the prior mean and SD using
 #' the Euler-Lotka method (Equation 15a of McAllister et al. 2001).
 #' The Euler-Lotka method is modified to multiply the left-hand side of equation 15a by the alpha parameter of the
 #' stock-recruit relationship (Stanley et al. 2009). Natural mortality and steepness are sampled in order to generate
-#' a prior distribution for r. See \code{vignette("Surplus_production")} for more details.
+#' a prior distribution for r. See `vignette("Surplus_production")` for more details.
 #' @return An object of \code{\linkS4class{Assessment}} containing objects and output from TMB.
 #' @note The model uses the Fletcher (1978) formulation and is parameterized with FMSY and MSY as
 #' leading parameters. The default conditions assume unfished conditions in the first year of the time series
@@ -90,7 +90,7 @@
 #' 
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
-#' \href{https://openmse.com/features-assessment-models/3-sp/}{website}.
+#' [website](https://openmse.com/features-assessment-models/3-sp/).
 #' 
 #' @author Q. Huynh
 #' @references
@@ -112,11 +112,11 @@
 #' paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 2009/055. xiv + 200 p.
 #' @section Required Data:
 #' \itemize{
-#' \item \code{SP}: Cat, Ind
-#' \item \code{SP_SS}: Cat, Ind
+#' \item `SP`: Cat, Ind
+#' \item `SP_SS`: Cat, Ind
 #' }
 #' @section Optional Data:
-#' \code{SP_SS}: CV_Ind
+#' `SP_SS`: CV_Ind
 #' @examples
 #' data(swordfish)
 #'

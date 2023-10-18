@@ -34,7 +34,7 @@ mu<-function(x,mat,ind){
 
 #' Characterize posterior predictive data
 #'
-#' @param PPD An object of class Data stored in the Misc slot of an MSE object following a call of \code{runMSE(PPD = TRUE)}.
+#' @param PPD An object of class Data stored in the Misc slot of an MSE object following a call of `runMSE(PPD = TRUE)`.
 #' @param styr Positive integer, the starting year for calculation of quantities
 #' @param res Positive integer, the temporal resolution (chunks - normally years) over which to calculate quantities
 #' @param tsd Character vector of names of types of data: Cat = catch, Ind = relative abundance index, ML = mean length in catches

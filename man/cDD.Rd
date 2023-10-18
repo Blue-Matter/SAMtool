@@ -138,7 +138,7 @@ For Data@AddInd, Data@I_units are used to identify a biomass vs. abundance-based
 }
 \section{Priors}{
 
-The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}.
+The following priors can be added as a named list, e.g., \verb{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}.
 For each parameter below, provide a vector of values as described:
 
 \itemize{

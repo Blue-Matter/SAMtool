@@ -57,7 +57,7 @@ setMethod("retrospective", signature(x = "RCModel"),
             return(res)
           })
 
-#' Class-\code{retro}
+#' Class-`retro`
 #'
 #' An S4 class that contains output from \link{retrospective}.
 #'
@@ -68,9 +68,9 @@ setMethod("retrospective", signature(x = "RCModel"),
 #' @slot Name Name of Data object.
 #' @slot TS_var Character vector of time series variables, e.g. recruitment, biomass, from the assessment.
 #' @slot TS An array of time series assessment output of dimension, indexed by: peel (the number of terminal years removed from the base assessment),
-#' years, and variables (corresponding to \code{TS_var}).
+#' years, and variables (corresponding to `TS_var`).
 #' @slot Est_var Character vector of estimated parameters, e.g. R0, steepness, in the assessment.
-#' @slot Est An array for estimated parameters of dimension, indexed by: peel, variables (corresponding to \code{Est_var}), and
+#' @slot Est An array for estimated parameters of dimension, indexed by: peel, variables (corresponding to `Est_var`), and
 #' value (length 2 for estimate and standard error).
 #' @seealso \link{plot.retro} \link{summary.retro} \link{plot.Assessment}
 #' @author Q. Huynh

@@ -283,7 +283,7 @@ plot_yield_SP <- function(data = NULL, report, fmsy, msy, xaxis = c("F", "Biomas
 #' @author Q. Huynh
 #' @references
 #' Fletcher, R. I. 1978. On the restructuring of the Pella-Tomlinson system. Fishery Bulletin 76:515:521.
-#' @note May be useful for parameterizing \code{n} in \link{SP} and \link{SP_SS}.
+#' @note May be useful for parameterizing `n` in \link{SP} and \link{SP_SS}.
 #' @examples SP_production(0.5)
 #' @return The production function exponent n (numeric).
 #' @examples

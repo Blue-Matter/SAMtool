@@ -1,6 +1,6 @@
 
 
-#' Class-\code{sim}
+#' Class-`sim`
 #'
 #' An S4 class that contains output from \link{simulate}.
 #'
@@ -26,7 +26,7 @@ sim <- setClass("sim", slots = c(Model = "character",
 
 #' @name simulate
 #' @title Generate simulated data from TMB models in SAMtool
-#' @description A convenient wrapper function (\code{simulate}) to simulate data (and process error) from the likelihood function.
+#' @description A convenient wrapper function (`simulate`) to simulate data (and process error) from the likelihood function.
 #' 
 #' @param object An object of class \linkS4class{Assessment} or \linkS4class{RCModel} containing the fitted model.
 #' @author Q. Huynh
@@ -45,7 +45,7 @@ setGeneric("simulate", function(object, ...) standardGeneric("simulate"))
 #' @param seed Used for the random number generator
 #' @param process_error Logical, indicates if process error is re-sampled in the simulation.
 #' @param refit Logical, whether to re-fit the model for each simulated dataset.
-#' @param cores The number of CPUs for parallel processing for model re-fitting if \code{refit = TRUE}.
+#' @param cores The number of CPUs for parallel processing for model re-fitting if `refit = TRUE`.
 #' @param ... Additional arguments
 #' 
 #' @importFrom stats runif

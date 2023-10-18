@@ -5,12 +5,12 @@
 #' apply the assessment model for Data generated during the historical period of the MSE, and report
 #' the convergence rate for the model and total time elapsed in running the assessments.
 #'
-#' @param x Either a \code{Hist}, \code{Data} or \code{OM} object.
-#' @param Assess An Assess function of class \code{Assess}.
+#' @param x Either a `Hist`, `Data` or `OM` object.
+#' @param Assess An Assess function of class `Assess`.
 #' @param ncpus Numeric, the number of CPUs to run the Assessment model (will run in parallel if greater than 1).
-#' @param ... Arguments to be passed to \code{Assess}, e.g., model configurations.
+#' @param ... Arguments to be passed to `Assess`, e.g., model configurations.
 #'
-#' @return Returns invisibly a list of \linkS4class{Assessment} objects of length \code{OM@@nsim}. Messages via console.
+#' @return Returns invisibly a list of \linkS4class{Assessment} objects of length `OM@@nsim`. Messages via console.
 #' @author Q. Huynh
 #' @examples
 #' \donttest{
@@ -68,15 +68,15 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' Diagnostic of assessments in MSE: did Assess models converge during MSE?
 #'
 #' Diagnostic check for convergence of Assess models during closed-loop simulation. Use when the MP was 
-#' created with \link{make_MP} with argument \code{diagnostic = "min"} or \code{"full"}. 
+#' created with \link{make_MP} with argument `diagnostic = "min"` or `"full"`. 
 #' This function summarizes and plots the diagnostic information.
 #'
 #' @param MSE An object of class MSE created by \code{\link[MSEtool]{runMSE}}.
 #' @param MP Optional, a character vector of MPs that use assessment models.
 #' @param gradient_threshold The maximum magnitude (absolute value) desired for the gradient of the likelihood.
 #' @param figure Logical, whether a figure will be drawn.
-#' @param ... Arguments to pass to \code{diagnostic}.
-#' @return A matrix with diagnostic performance of assessment models in the MSE. If \code{figure = TRUE},
+#' @param ... Arguments to pass to `diagnostic`.
+#' @return A matrix with diagnostic performance of assessment models in the MSE. If `figure = TRUE`,
 #' a set of figures: traffic light (red/green) plots indicating whether the model converged (defined if a positive-definite
 #' Hessian matrix was obtained), the optimizer reached pre-specified iteration limits (as passed to \code{\link[stats]{nlminb}}),
 #' and the maximum gradient of the likelihood in each assessment run. Also includes the number of optimization iterations

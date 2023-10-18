@@ -494,11 +494,11 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
 #' @param obs A vector of observed data.
 #' @param fit A vector of predicted data (e.g., from an assessment model).
 #' @param obs_CV A vector of year-specific coefficient of variation in the observed data.
-#' @param obs_CV_CI The confidence interval for the error bars based for \code{obs_CV}.
-#' @param obs_upper A vector of year-specific upper bounds for the error bars of the observed data (in lieu of argument \code{obs_CV}).
-#' @param obs_lower A vector of year-specific lower bounds for the error bars of the observed data (in lieu of argument \code{obs_CV}).
-#' @param obs_ind_blue Indices of \code{obs} for which the plotted points and error bars will be blue.
-#' @param fit_linewidth Argument \code{lwd} for fitted line.
+#' @param obs_CV_CI The confidence interval for the error bars based for `obs_CV`.
+#' @param obs_upper A vector of year-specific upper bounds for the error bars of the observed data (in lieu of argument `obs_CV`).
+#' @param obs_lower A vector of year-specific lower bounds for the error bars of the observed data (in lieu of argument `obs_CV`).
+#' @param obs_ind_blue Indices of `obs` for which the plotted points and error bars will be blue.
+#' @param fit_linewidth Argument `lwd` for fitted line.
 #' @param fit_color Color of fitted line.
 #' @param label Character string that describes the data to label the y-axis.
 #' @author Q. Huynh
@@ -560,13 +560,13 @@ plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.
 #'
 #' @param Year A vector of years for the data.
 #' @param res A vector of residuals.
-#' @param res_sd A vector of year specific standard deviation for \code{res}.
-#' @param res_sd_CI The confidence interval for the error bars based for \code{res_sd}.
-#' @param res_upper A vector of year-specific upper bounds for the error bars of the residual (in lieu of argument \code{res_CV}).
-#' @param res_lower A vector of year-specific lower bounds for the error bars of the residual (in lieu of argument \code{res_CV}).
-#' @param res_ind_blue Indices of \code{obs} for which the plotted residuals and error bars will be blue.
+#' @param res_sd A vector of year specific standard deviation for `res`.
+#' @param res_sd_CI The confidence interval for the error bars based for `res_sd`.
+#' @param res_upper A vector of year-specific upper bounds for the error bars of the residual (in lieu of argument `res_CV`).
+#' @param res_lower A vector of year-specific lower bounds for the error bars of the residual (in lieu of argument `res_CV`).
+#' @param res_ind_blue Indices of `obs` for which the plotted residuals and error bars will be blue.
 #' @param draw_zero Indicates whether a horizontal line should be drawn at zero.
-#' @param zero_linetype Passes argument \code{lty} (e.g. solid line = 1, dotted = 2) to \code{draw_zero}.
+#' @param zero_linetype Passes argument `lty` (e.g. solid line = 1, dotted = 2) to `draw_zero`.
 #' @param label Character string that describes the data to label the y-axis.
 #' @author Q. Huynh
 #' @seealso \code{\link{plot_timeseries}}
@@ -628,20 +628,20 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
 #' Same dimensions as obs.
 #' @param plot_type Indicates which plots to create. Options include annual distributions,
 #' bubble plot of the data, and bubble plot of the Pearson residuals, and annual means.
-#' @param N Annual sample sizes. Vector of length \code{nrow(obs)}.
-#' @param CAL_bins A vector of lengths corresponding to the columns in \code{obs}.
-#' and \code{fit}. Ignored for age data.
-#' @param ages An optional vector of ages corresponding to the columns in \code{obs}.
-#' @param ind A numeric vector for plotting a subset of rows (which indexes year) of \code{obs} and \code{fit}.
-#' @param annual_ylab Character string for y-axis label when \code{plot_type = "annual"}.
-#' @param annual_yscale For annual composition plots (\code{plot_type = "annual"}), whether the raw values
+#' @param N Annual sample sizes. Vector of length `nrow(obs)`.
+#' @param CAL_bins A vector of lengths corresponding to the columns in `obs`.
+#' and `fit`. Ignored for age data.
+#' @param ages An optional vector of ages corresponding to the columns in `obs`.
+#' @param ind A numeric vector for plotting a subset of rows (which indexes year) of `obs` and `fit`.
+#' @param annual_ylab Character string for y-axis label when `plot_type = "annual"`.
+#' @param annual_yscale For annual composition plots (`plot_type = "annual"`), whether the raw values
 #' ("raw") or frequencies ("proportions") are plotted.
 #' @param bubble_adj Numeric, for adjusting the relative size of bubbles in bubble plots
 #' (larger number = larger bubbles).
-#' @param fit_linewidth Argument \code{lwd} for fitted line.
+#' @param fit_linewidth Argument `lwd` for fitted line.
 #' @param fit_color Color of fitted line.
 #' @param bubble_color Colors for negative and positive residuals, respectively, for bubble plots.
-#' @return Plots depending on \code{plot_type}. Invisibly returns a matrix or list of values that were plotted.
+#' @return Plots depending on `plot_type`. Invisibly returns a matrix or list of values that were plotted.
 #' @author Q. Huynh
 #' @export
 #' @examples
@@ -926,15 +926,15 @@ plot_Kobe <- function(biomass, exploit, arrow_size = 0.07, color = TRUE, xlab = 
 #'
 #' @param Spawners A vector of the number of the spawners (x-axis).
 #' @param expectedR A vector of the expected recruitment (from the
-#' stock-recruit function) corresponding to values of \code{Spawners}.
+#' stock-recruit function) corresponding to values of `Spawners`.
 #' @param R0 Virgin recruitment.
 #' @param S0 Virgin spawners.
 #' @param rec_dev If recruitment deviations are estimated, a vector of estimated recruitment
-#' (in normal space) corresponding to values of \code{Spawners}.
+#' (in normal space) corresponding to values of `Spawners`.
 #' @param trajectory Indicates whether arrows will be drawn showing the trajectory of
 #' spawners and recruitment deviations over time.
 #' @param y_zoom If recruitment deviations are plotted, the y-axis limit relative to
-#' maximum expected recruitment \code{expectedR}. If \code{NULL}, all recruitment values are plotted.
+#' maximum expected recruitment `expectedR`. If `NULL`, all recruitment values are plotted.
 #' @param ylab Character string for label on y-axis.
 #' @author Q. Huynh
 #' @return A stock-recruit plot

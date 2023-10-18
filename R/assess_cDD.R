@@ -5,38 +5,38 @@
 #' much better for populations with high turnover (e.g. high F or M, continuous reproduction). This model is conditioned on catch and fits
 #' to the observed index. In the state-space version (cDD_SS), recruitment deviations from the stock-recruit relationship are estimated.
 #'
-#' @param x An index for the objects in \code{Data} when running in closed loop simulation.
+#' @param x An index for the objects in `Data` when running in closed loop simulation.
 #' Otherwise, equals to 1 when running an assessment.
 #' @param Data An object of class \linkS4class{Data}.
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 #' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
 #' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd.
-#' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}).
+#' @param SR Stock-recruit function (either `"BH"` for Beverton-Holt or `"Ricker"`).
 #' @param rescale A multiplicative factor that rescales the catch in the assessment model, which
-#' can improve convergence. By default, \code{"mean1"} scales the catch so that time series mean is 1, otherwise a numeric.
+#' can improve convergence. By default, `"mean1"` scales the catch so that time series mean is 1, otherwise a numeric.
 #' Output is re-converted back to original units.
-#' @param MW Logical, whether to fit to mean weight. In closed-loop simulation, mean weight will be grabbed from \code{Data@@Misc[[x]]$MW},
-#' otherwise calculated from \code{Data@@CAL}.
+#' @param MW Logical, whether to fit to mean weight. In closed-loop simulation, mean weight will be grabbed from `Data@@Misc[[x]]$MW`,
+#' otherwise calculated from `Data@@CAL`.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
 #' @param prior A named list for the parameters of any priors to be added to the model. See below.
-#' @param fix_h Logical, whether to fix steepness to value in \code{Data@@steep} in the assessment model.
-#' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If \code{TRUE},
-#' sigma is fixed to value provided in \code{start} (if provided), otherwise, value based on \code{Data@@CV_Ind}.
-#' @param fix_tau Logical, the standard deviation of the recruitment deviations is fixed. If \code{TRUE},
-#' tau is fixed to value provided in \code{start} (if provided), otherwise, equal to 1.
+#' @param fix_h Logical, whether to fix steepness to value in `Data@@steep` in the assessment model.
+#' @param fix_sigma Logical, whether the standard deviation of the index is fixed. If `TRUE`,
+#' sigma is fixed to value provided in `start` (if provided), otherwise, value based on `Data@@CV_Ind`.
+#' @param fix_tau Logical, the standard deviation of the recruitment deviations is fixed. If `TRUE`,
+#' tau is fixed to value provided in `start` (if provided), otherwise, equal to 1.
 #' @param dep The initial depletion in the first year of the model. A tight prior is placed on the model objective function
 #' to estimate the equilibrium fishing mortality corresponding to the initial depletion. Due to this tight prior, this F
 #' should not be considered to be an independent model parameter. Set to zero to eliminate this prior.
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
 #' of the recruitment deviations (thus, treating it as a state-space variable). Otherwise, recruitment deviations are penalized parameters.
-#' @param LWT A named list of likelihood weights. For \code{LWT$Index}, a vector of likelihood weights for each survey, while
-#' for \code{LWT$MW} a numeric.
+#' @param LWT A named list of likelihood weights. For `LWT$Index`, a vector of likelihood weights for each survey, while
+#' for `LWT$MW` a numeric.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param n_itF Integer, the number of iterations to solve F conditional on the observed catch.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
-#' in convergence rate). Ignored if \code{integrate = TRUE}.
+#' in convergence rate). Ignored if `integrate = TRUE`.
 #' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param control A named list of parameters regarding optimization to be passed to
@@ -47,32 +47,32 @@
 #' @return An object of \code{\linkS4class{Assessment}} containing objects and output
 #' from TMB.
 #' @section Priors:
-#' The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}. 
+#' The following priors can be added as a named list, e.g., `prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)`. 
 #' For each parameter below, provide a vector of values as described:
 #' 
 #' \itemize{
-#' \item \code{R0} - A vector of length 3. The first value indicates the distribution of the prior: \code{1} for lognormal, \code{2} for uniform
-#' on \code{log(R0)}, \code{3} for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
+#' \item `R0` - A vector of length 3. The first value indicates the distribution of the prior: `1` for lognormal, `2` for uniform
+#' on `log(R0)`, `3` for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
 #' Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).
-#' \item \code{h} - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+#' \item `h` - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
 #' while Ricker steepness uses a normal distribution.
-#' \item \code{M} - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.
-#' \item \code{q} - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
-#' for the SD (in log space). Use \code{NA} in rows corresponding to indices without priors.
+#' \item `M` - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.
+#' \item `q` - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+#' for the SD (in log space). Use `NA` in rows corresponding to indices without priors.
 #' }
 #' See online documentation for more details.
 #' 
 #' @details
-#' For \code{start} (optional), a named list of starting values of estimates can be provided for:
+#' For `start` (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
-#' \item \code{R0} Unfished recruitment. Otherwise, `Data@@OM$R0[x]` is used in closed-loop, and 400% of mean catch otherwise.
-#' \item \code{h} Steepness. Otherwise, `Data@@steep[x]` is used, or 0.9 if empty.
-#' \item \code{Kappa} Delay-differential Kappa parameter. Otherwise, calculated from biological parameters in the Data object.
-#' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-#' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, `Data@@sigmaR[x]`.
-#' \item \code{sigma} Lognormal SD of the index (observation error). By default, `Data@@CV_Ind[x]`. Not
+#' \item `R0` Unfished recruitment. Otherwise, `Data@@OM$R0[x]` is used in closed-loop, and 400% of mean catch otherwise.
+#' \item `h` Steepness. Otherwise, `Data@@steep[x]` is used, or 0.9 if empty.
+#' \item `Kappa` Delay-differential Kappa parameter. Otherwise, calculated from biological parameters in the Data object.
+#' \item `F_equilibrium` Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
+#' \item `tau` Lognormal SD of the recruitment deviations (process error) for `DD_SS`. By default, `Data@@sigmaR[x]`.
+#' \item `sigma` Lognormal SD of the index (observation error). By default, `Data@@CV_Ind[x]`. Not
 #' used if multiple indices are used.
-#' \item \code{sigma_W} Lognormal SD of the mean weight (observation error). By default, 0.1.
+#' \item `sigma_W` Lognormal SD of the mean weight (observation error). By default, 0.1.
 #' }
 #' 
 #' Multiple indices are supported in the model. Data@@Ind, Data@@VInd, and Data@@SpInd are all assumed to be biomass-based.
@@ -80,7 +80,7 @@
 #'
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
-#' \href{https://openmse.com/features-assessment-models/1-dd/}{website}.
+#' [website](https://openmse.com/features-assessment-models/1-dd/).
 #' 
 #' @author Q. Huynh
 #' @references
@@ -88,13 +88,13 @@
 #' Dynamics and Uncertainty. Chapman and Hall, New York.
 #' @section Required Data:
 #' \itemize{
-#' \item \code{cDD}: Cat, Ind, Mort, L50, vbK, vbLinf, vbt0, wla, wlb, MaxAge
-#' \item \code{cDD_SS}: Cat, Ind, Mort, L50, vbK, vbLinf, vbt0, wla, wlb, MaxAge
+#' \item `cDD`: Cat, Ind, Mort, L50, vbK, vbLinf, vbt0, wla, wlb, MaxAge
+#' \item `cDD_SS`: Cat, Ind, Mort, L50, vbK, vbLinf, vbt0, wla, wlb, MaxAge
 #' }
 #' @section Optional Data:
 #' \itemize{
-#' \item \code{cDD}: steep
-#' \item \code{cDD_SS}: steep, CV_Ind, sigmaR
+#' \item `cDD`: steep
+#' \item `cDD_SS`: steep, CV_Ind, sigmaR
 #' }
 #' @examples
 #' #### Observation-error delay difference model

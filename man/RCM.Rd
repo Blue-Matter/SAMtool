@@ -166,7 +166,7 @@ index but the data won't enter the likelihood. See section on likelihood weights
 }
 \section{Priors}{
 
-The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}.
+The following priors can be added as a named list, e.g., \verb{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}.
 For each parameter below, provide a vector of values as described:
 
 \describe{
@@ -225,10 +225,10 @@ Use of a list is deprecated. For backwards compatibility, here is the list of su
 
 \describe{
 \item{\code{Chist}}{A vector of historical catch, should be of length OM@nyears. If there are multiple fleets: a matrix of \code{OM@nyears} rows and \code{nfleet} columns.
-Ideally, the first year of the catch series represents unfished conditions (see also \code{C_eq})}.
+Ideally, the first year of the catch series represents unfished conditions (see also \code{C_eq}).}
 \item{\code{C_sd}}{A vector or matrix of standard deviations (lognormal distribution) for the catches in \code{Chist}.
-If not provided, the default is 0.01. Only used if \code{condition = "catch"}}.
-\item{\code{Ehist}}{A vector of historical effort, should be of length \code{OM@nyears} (see also \code{E_eq})}.
+If not provided, the default is 0.01. Only used if \code{condition = "catch"}.}
+\item{\code{Ehist}}{A vector of historical effort, should be of length \code{OM@nyears} (see also \code{E_eq}).}
 \item{\code{Index}}{A vector of values of an index (of length \code{OM@nyears}). If there are multiple indices: a matrix of historical indices of abundances, with rows
 indexing years and columns indexing the index.}
 \item{\code{I_sd}}{A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.

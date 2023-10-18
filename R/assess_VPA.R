@@ -9,32 +9,32 @@
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 #' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
 #' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd.
-#' @param expanded Whether the catch at age in \code{Data} has been expanded. If \code{FALSE}, then the catch in weight
-#' should be provided in \code{Data@@Cat} so that the function can calculate annual expansion factors.
-#' @param SR Stock-recruit function (either \code{"BH"} for Beverton-Holt or \code{"Ricker"}) for calculating MSY reference points.
-#' @param vulnerability Whether the terminal year vulnerability is \code{"logistic"} or \code{"dome"} (double-normal). If \code{"free"},
+#' @param expanded Whether the catch at age in `Data` has been expanded. If `FALSE`, then the catch in weight
+#' should be provided in `Data@@Cat` so that the function can calculate annual expansion factors.
+#' @param SR Stock-recruit function (either `"BH"` for Beverton-Holt or `"Ricker"`) for calculating MSY reference points.
+#' @param vulnerability Whether the terminal year vulnerability is `"logistic"` or `"dome"` (double-normal). If `"free"`,
 #' independent F's are calculated in the terminal year (subject to the assumed ratio of F of the plus-group to the previous age class).
 #' See details for parameterization.
 #' @param start Optional list of starting values. Entries can be expressions that are evaluated in the function. See details.
 #' @param fix_Fratio Logical, whether the ratio of F of the plus-group to the previous age class is fixed in the model.
-#' @param fix_h Logical, whether to fix steepness to value in \code{Data@@steep}. This only affects
+#' @param fix_h Logical, whether to fix steepness to value in `Data@@steep`. This only affects
 #' calculation of MSY and unfished reference points.
 #' @param fix_Fterm Logical, whether to fix the value of the terminal F.
 #' @param LWT A vector of likelihood weights for each survey.
 #' @param shrinkage A named list of up to length 2 to constrain parameters:
 #' \itemize{
-#' \item \code{vul} - a length two vector that constrains the vulnerability-at-age in the most recent years. The first number
+#' \item `vul` - a length two vector that constrains the vulnerability-at-age in the most recent years. The first number
 #' is the number of years in which vulnerability will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
 #' The default 
-#' \item \code{R} - a length two vector that constrains the recruitment estimates in the most recent years. The first number
+#' \item `R` - a length two vector that constrains the recruitment estimates in the most recent years. The first number
 #' is the number of years in which recruitment will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
 #' }
 #' @param refpt A named list of how many years to average parameters for calculating reference points, yield per recruit, and spawning potential ratio:
 #' \itemize{
 # #' \item \code{weight} An integer for the number of most recent years to average the weight-at-age schedule (default is 3).
-#' \item \code{vul} An integer for the number of most recent years to average the vulnerability schedule (default is 3).
-#' \item \code{R} A length two for the quantile used to calculate recruitment in the year following the terminal year and the number of years
-#' from which that quantile is used, i.e., \code{c(0.5, 5)} is the default that calculates median recruitment from the most recent 5 years of the model.
+#' \item `vul` An integer for the number of most recent years to average the vulnerability schedule (default is 3).
+#' \item `R` A length two for the quantile used to calculate recruitment in the year following the terminal year and the number of years
+#' from which that quantile is used, i.e., `c(0.5, 5)` is the default that calculates median recruitment from the most recent 5 years of the model.
 #' }
 #' @param n_itF The number of iterations for solving F in the model (via Newton's method).
 #' @param min_age An integer to specify the smallest age class in the VPA. By default, the youngest age with non-zero CAA in the terminal year is used.
@@ -43,27 +43,27 @@
 #' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
-#' in convergence rate). Ignored if \code{integrate = TRUE}.
+#' in convergence rate). Ignored if `integrate = TRUE`.
 #' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param control A named list of arguments for optimization to be passed to
 #' \code{\link[stats]{nlminb}}.
 #' @param ... Other arguments to be passed.
 #' @details
-#' The VPA is initialized by estimating the terminal F-at-age. Parameter \code{Fterm} is the apical terminal F if
-#' a functional form for vulnerability is used in the terminal year, i.e., when \code{vulnerability = "logistic"} or \code{"free"}.
+#' The VPA is initialized by estimating the terminal F-at-age. Parameter `Fterm` is the apical terminal F if
+#' a functional form for vulnerability is used in the terminal year, i.e., when `vulnerability = "logistic"` or `"free"`.
 #' If the terminal F-at-age are otherwise independent parameters,
-#' \code{Fterm} is the F for the reference age which is half the maximum age. Once terminal-year abundance is
+#' `Fterm` is the F for the reference age which is half the maximum age. Once terminal-year abundance is
 #' estimated, the abundance in historical years can be back-calculated. The oldest age group is a plus-group, and requires
 #' an assumption regarding the ratio of F's between the plus-group and the next youngest age class. The F-ratio can
 #' be fixed (default) or estimated.
 #'
-#' For \code{start} (optional), a named list of starting values of estimates can be provided for:
+#' For `start` (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
-#' \item \code{Fterm} The terminal year fishing mortality. This is the apical F when \code{vulnerability = "logistic"} or \code{"free"}.
-#' \item \code{Fratio} The ratio of F in the plus-group to the next youngest age. If not provided, a value of 1 is used.
-#' \item \code{vul_par} Vulnerability parameters in the terminal year. This will be of length 2 vector for \code{"logistic"} or length 4 for
-#' \code{"dome"}, see \link{SCA} for further documentation on parameterization. For option \code{"free"}, this will be a vector of length
+#' \item `Fterm` The terminal year fishing mortality. This is the apical F when `vulnerability = "logistic"` or `"free"`.
+#' \item `Fratio` The ratio of F in the plus-group to the next youngest age. If not provided, a value of 1 is used.
+#' \item `vul_par` Vulnerability parameters in the terminal year. This will be of length 2 vector for `"logistic"` or length 4 for
+#' `"dome"`, see \link{SCA} for further documentation on parameterization. For option `"free"`, this will be a vector of length
 #' A-2 where A is the number of age classes in the model. To estimate parameters, vulnerability is initially set to one at half the max age
 #' (and subsequently re-calculated relative to the maximum F experienced in that year). Vulnerability in the plus-group is also constrained
 #' by the Fratio.
@@ -85,7 +85,7 @@
 #' 
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
-#' \href{https://openmse.com/features-assessment-models/4-vpa/}{website}.
+#' [website](https://openmse.com/features-assessment-models/4-vpa/).
 #' 
 #' @return An object of class \linkS4class{Assessment}. The F vector is the apical fishing mortality experienced by any
 #' age class in a given year. 

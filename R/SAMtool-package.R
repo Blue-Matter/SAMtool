@@ -14,14 +14,14 @@
 #' The main features of SAMtool are the assessment models and the ability to make model-based management procedures by combining
 #' assessment models with harvest control rules. Such MPs can be used and tested in management strategy evaluation
 #' with MSEtool operating models. An overview of these features is available 
-#' on the \href{https://openmse.com/features-assessment-models/}{openMSE} website.
+#' on the [openMSE](https://openmse.com/features-assessment-models/) website.
 #'
 #' The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. 
 #' 
 #' The following articles are available on the openMSE website:
 #' \itemize{
-#' \item \href{https://openmse.com/features-assessment-models/}{Description of assessment models}
-#' \item \href{https://openmse.com/tutorial-rcm/}{General overview of RCM}
+#' \item [Description of assessment models](https://openmse.com/features-assessment-models/)
+#' \item [General overview of RCM](https://openmse.com/tutorial-rcm/)
 #' }
 #'
 #'

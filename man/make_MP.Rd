@@ -63,12 +63,17 @@ A function of class \code{MP}.
 \description{
 Function operator that creates a management procedure (MP) by combining an assessment model (function of class \code{Assess}) with
 a harvest control rule (function of class \code{HCR}). The resulting function can then be tested in closed-loop simulation via
-\code{\link[MSEtool]{runMSE}}. Use \code{make_MP} to specify constant TAC between assessments; the frequency of
-assessments is specified in \code{OM@interval}. Use \code{make_projection_MP} to set catches according to a schedule set by projections,
+\code{\link[MSEtool]{runMSE}}.
+
+\itemize{
+\item Use \code{make_MP} to specify constant TAC between assessments; the frequency of
+assessments is specified in \code{OM@interval}.
+\item Use \code{make_projection_MP} to set catches according to a schedule set by projections,
 specify assessment frequency in argument \code{assessment_interval} and ensure that \code{OM@interval <- 1}.
-Use \code{make_interim_MP} to use an interim procedure to adjust the TAC between
+\item Use \code{make_interim_MP} to use an interim procedure to adjust the TAC between
 assessments using an index (Huynh et al. 2020), with the frequency of assessments specified in argument \code{assessment_interval} when
 making the MP; ensure that \code{OM@interval <- 1}.
+}
 }
 \details{
 \code{make_interim_MP} creates an MP that runs the interim procedure (updating the TAC according to index observations in between periodic
@@ -78,7 +83,7 @@ assessment intervals. \strong{Always ensure to set:} \code{OM@interval <- 1}. Th
 In the year when the assessment is applied, the TAC is set by fitting the model and then running the harvest control rule. Between assessments,
 the TAC is updated as
 \deqn{
-TAC_{y+1} = Cref (I_y + b \times s)/(Iref + b \times s)
+\textrm{TAC}_{y+1} = C_{\textrm{ref}} (I_y + b \times s)/(I_{\textrm{ref}} + b \times s)
 }
 where \code{Cref} is the TAC calculated from the most recent assessment, \code{Iref} is the value of the index when \code{Cref} was calculated
 (see Equations 6 and 7 of Huynh et al. 2020). The value of \code{I_y} depends on \code{type}, with \code{b} and \code{s} equal zero unless

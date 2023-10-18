@@ -4,33 +4,33 @@
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the assessment model. 
 #' Integers assign the index to the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, 
 #' "VB" represents vulnerable biomass in Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd. For the interim
-#' procedure, the function will use the first index in \code{AddInd}.
+#' procedure, the function will use the first index in `AddInd`.
 #' @param assessment_interval The time interval for when the assessment model is applied (number of years). In all other years, the 
 #' interim procedure is applied.
 #' @param type How the index is used to calculate the TAC in the interim procedure. See details.
 #' @param type_par A control parameter for the interim procedure. See details.
 #' 
 #' @details 
-#' \code{make_interim_MP} creates an MP that runs the interim procedure (updating the TAC according to index observations in between periodic 
-#' assessment intervals. \strong{Always ensure to set:} \code{OM@@interval <- 1}. The assessment frequency is specified in argument 
-#' \code{assessment_interval}.
+#' `make_interim_MP` creates an MP that runs the interim procedure (updating the TAC according to index observations in between periodic 
+#' assessment intervals. **Always ensure to set:** `OM@@interval <- 1`. The assessment frequency is specified in argument 
+#' `assessment_interval`.
 #' 
 #' In the year when the assessment is applied, the TAC is set by fitting the model and then running the harvest control rule. Between assessments,
 #' the TAC is updated as
 #' \deqn{
-#' TAC_{y+1} = Cref (I_y + b \times s)/(Iref + b \times s)
+#' \textrm{TAC}_{y+1} = C_{\textrm{ref}} (I_y + b \times s)/(I_{\textrm{ref}} + b \times s)
 #' }
-#' where \code{Cref} is the TAC calculated from the most recent assessment, \code{Iref} is the value of the index when \code{Cref} was calculated
-#' (see Equations 6 and 7 of Huynh et al. 2020). The value of \code{I_y} depends on \code{type}, with \code{b} and \code{s} equal zero unless
-#' \code{type = "buffer"}:
+#' where `Cref` is the TAC calculated from the most recent assessment, `Iref` is the value of the index when `Cref` was calculated
+#' (see Equations 6 and 7 of Huynh et al. 2020). The value of `I_y` depends on `type`, with `b` and `s` equal zero unless
+#' `type = "buffer"`:
 #' 
 #' \itemize{
-#' \item \code{"buffer"} - \code{I_y} is the most recent index with \code{b} is specifed by \code{type_par} (default = 1), and \code{s} is 
+#' \item `"buffer"` - `I_y` is the most recent index with `b` is specifed by `type_par` (default = 1), and `s` is 
 #' the standard deviation of index residuals from the most recent assessment. 
-#' \item \code{"mean"} - \code{I_y} is the mean value of the index over the most recent \code{type_par} years (default = 3).
-#' \item \code{"loess"} - \code{I_y} is the most recent index predicted by a \link[stats]{loess} smoother applied over the entire time series of the index.
-#' Use \code{type_par} to adjust the \code{span} parameter (default = 0.75).
-#' \item \code{"none"} - \code{I_y} is the most recent index. Index values are not adjusted in the interim procedure.
+#' \item `"mean"` - `I_y` is the mean value of the index over the most recent `type_par` years (default = 3).
+#' \item `"loess"` - `I_y` is the most recent index predicted by a \link[stats]{loess} smoother applied over the entire time series of the index.
+#' Use `type_par` to adjust the `span` parameter (default = 0.75).
+#' \item `"none"` - `I_y` is the most recent index. Index values are not adjusted in the interim procedure.
 #' }
 #' 
 #' @references 

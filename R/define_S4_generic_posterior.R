@@ -3,16 +3,16 @@
 
 #' @name posterior
 #' @title Sample posterior of TMB models in SAMtool
-#' @description A convenient wrapper function (\code{posterior}) to sample the posterior using MCMC in rstan 
-#' and returns a \code{stanfit} object for diagnostics. Use \code{RCMstan} to update the RCM and the enclosed operating model
+#' @description A convenient wrapper function (`posterior`) to sample the posterior using MCMC in rstan 
+#' and returns a `stanfit` object for diagnostics. Use `RCMstan` to update the RCM and the enclosed operating model
 #' with MCMC samples..
 #'
 #' @param x An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.
-#' @param ... Additional arguments to pass to \code{rstan::sampling} via \code{tmbstan::tmbstan}.
+#' @param ... Additional arguments to pass to `rstan::sampling` via `tmbstan::tmbstan`.
 #' @author Q. Huynh
-#' @return \code{posterior} returns an object of class \code{stanfit}. See \code{class?stanfit}.
+#' @return `posterior` returns an object of class `stanfit`. See `class?stanfit`.
 #' 
-#' \code{RCMstan} returns an updated \code{RCModel}.
+#' `RCMstan` returns an updated `RCModel`.
 #' @export
 setGeneric("posterior", function(x, ...) standardGeneric("posterior"))
 
@@ -25,15 +25,15 @@ setGeneric("posterior", function(x, ...) standardGeneric("posterior"))
 #' @param chains The numer of MCMC chains.
 #' @param iter The number of iterations for each chain, including warmup.
 #' @param warmup The number of burnin iterations
-#' @param thin The frequency at which iterations are kept (e.g., \code{5} saves every fifth iteration)
+#' @param thin The frequency at which iterations are kept (e.g., `5` saves every fifth iteration)
 #' @param seed Seed for random number generator during the MCMC.
-#' @param init The initial values of parameters for starting the MCMC chain. See \code{tmbstan::tmbstan}.
-#' @param cores The number of cores for running in parallel, e.g., one core per MCMC chain. Used in \code{RCMstan}
+#' @param init The initial values of parameters for starting the MCMC chain. See `tmbstan::tmbstan`.
+#' @param cores The number of cores for running in parallel, e.g., one core per MCMC chain. Used in `RCMstan`
 #' for reconstructing the population.
 #' 
 #' @section Online Documentation:
 #' A vignette on the steps to run the MCMC is available on the openMSE 
-#' \href{https://openmse.com/tutorial-rcm/4-case-study-mcmc/}{website}.
+#' [website](https://openmse.com/tutorial-rcm/4-case-study-mcmc/).
 #' @exportMethod posterior
 setMethod("posterior", signature(x = "RCModel"),
           function(x, priors_only = FALSE, 
@@ -100,9 +100,9 @@ setMethod("posterior", signature(x = "Assessment"),
 
 #' @rdname posterior
 #' @aliases RCMstan
-#' @param RCModel An object of class \code{RCModel}
-#' @param stanfit An object of class \code{stanfit} returned by \code{posterior}.
-#' @param sim A matrix of \code{RCModel@OM@nsim} rows and 2 columns that specifies the samples used to update the
+#' @param RCModel An object of class `RCModel`
+#' @param stanfit An object of class `stanfit` returned by `posterior`.
+#' @param sim A matrix of `RCModel@OM@nsim` rows and 2 columns that specifies the samples used to update the
 #' operating model. The first column specifies the chain and the second columns specifies the MCMC iteration.
 #' @param silent Logical to indicate if progress messages should be printed to console.
 #' @export

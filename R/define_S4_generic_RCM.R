@@ -10,93 +10,93 @@
 #' provided by the user and fitting a statistical catch-at-age model (with the predicted catch equal to the observed catch).
 #' Alternatively one can do a single model fit and sample the covariance matrix to generate an operating model with uncertainty based on the model fit.
 #' Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.
-#' \code{check_RCMdata} evaluates whether the inputs in the S4 RCMdata object are correctly formatted.
+#' `check_RCMdata` evaluates whether the inputs in the S4 RCMdata object are correctly formatted.
 #' 
 #' @param OM An object of class \linkS4class{OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 #' steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).
 #' @param data Data inputs formatted in a \linkS4class{RCMdata} (preferred) or \linkS4class{Data} object. 
 #' Use of a list is deprecated. See Data section below.
 #' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
-#' or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be fleet specific.
-#' @param selectivity A character vector of length nfleet to indicate \code{"logistic_length"}, \code{"dome_length"}, \code{"logistic_age"}, \code{"dome_age"}, or \code{"free"} selectivity for each fleet in \code{Chist}.
+#' or "effort" (F is proportional to an index series in `data@Ehist`. Can be fleet specific.
+#' @param selectivity A character vector of length nfleet to indicate `"logistic_length"`, `"dome_length"`, `"logistic_age"`, `"dome_age"`, or `"free"` selectivity for each fleet in `Chist`.
 #' If there is time-varying selectivity, this is a character vector of length nsel_block (see Data section below). "free" indicates independent selectivity parameters for each age,
 #' and additional modifications for fixing selectivity parameters will likely be needed. See Additional arguments section.
-#' @param s_selectivity A vector of length nsurvey to indicate the selectivity of the corresponding columns in \code{data$Index}. Use \code{"B"} for
-#' total biomass, or \code{"SSB"} for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
-#' If the survey selectivity is otherwise independent of anything else in the model, use \code{"logistic_length"}, \code{"dome_length"}, \code{"logistic_age"}, \code{"dome_age"}, or \code{"free"} to specify the functional form of selectivity, and
+#' @param s_selectivity A vector of length nsurvey to indicate the selectivity of the corresponding columns in `data$Index`. Use `"B"` for
+#' total biomass, or `"SSB"` for spawning biomass (by default, "B" is used). Use numbers if the survey selectivity follows a fleet (corresponding to the columns in data$Chist, e.g., 1 = first fleet/column and so on).
+#' If the survey selectivity is otherwise independent of anything else in the model, use `"logistic_length"`, `"dome_length"`, `"logistic_age"`, `"dome_age"`, or `"free"` to specify the functional form of selectivity, and
 #' see Additional arguments section for setup of survey selectivity parameters and Articles section for more information.
 #' @param LWT A named list of likelihood weights for the RCM. See below.
-#' @param comp_like A string indicating the statistical distribution for the composition data, either \code{"multinomial"} (default), \code{"lognormal"}, \code{"mvlogistic"} (multivariate logistic),
-#' \code{"dirmult1"} (Dirichlet multinomial, linear version), or \code{"dirmult2"} (saturating version; see Thorson et al. 2017).
+#' @param comp_like A string indicating the statistical distribution for the composition data, either `"multinomial"` (default), `"lognormal"`, `"mvlogistic"` (multivariate logistic),
+#' `"dirmult1"` (Dirichlet multinomial, linear version), or `"dirmult2"` (saturating version; see Thorson et al. 2017).
 #' @param ESS A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
 #' Not used when data are provided in a \linkS4class{RCMdata} object.
 #' @param prior A named list for the parameters of any priors to be added to the model. See below.
-#' @param max_F The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.
+#' @param max_F The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update `OM@maxF`. See also `drop_highF`.
 #' @param cores Integer for the number of CPU cores (set greater than 1 for parallel processing).
 #' @param integrate Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).
 #' @param mean_fit Logical, whether to run an additional with mean values of life history parameters from the OM.
 #' @param drop_nonconv Logical, whether to drop non-converged fits of the RCM, including fits where F = NA.
-#' @param drop_highF Logical, whether to drop fits of the RCM where F = \code{max_F}.
+#' @param drop_highF Logical, whether to drop fits of the RCM where F = `max_F`.
 #' @param control A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.
 #' @param start A list of starting values for the TMB model. See details.
-#' @param map A list of \code{map} argument to TMB models to override defaults. See \link[TMB]{MakeADFun} and details.
+#' @param map A list of `map` argument to TMB models to override defaults. See \link[TMB]{MakeADFun} and details.
 #' @param silent Logical to indicate whether informative messages will be reported to console.
 #' @param ... Other arguments to pass in for starting values of parameters and fixing parameters. See details.
 #'
 #' @section Priors:
-#' The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}. 
+#' The following priors can be added as a named list, e.g., `prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)`. 
 #' For each parameter below, provide a vector of values as described:
 #' 
 #' \describe{
-#' \item{\code{R0}}{A vector of length 3. The first value indicates the distribution of the prior: \code{1} for lognormal, \code{2} for uniform
-#' on \code{log(R0)}, \code{3} for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
+#' \item{`R0`}{A vector of length 3. The first value indicates the distribution of the prior: `1` for lognormal, `2` for uniform
+#' on `log(R0)`, `3` for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
 #' Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).}
-#' \item{\code{h}}{A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+#' \item{`h`}{A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
 #' while Ricker steepness uses a normal distribution.}
-#' \item{\code{M}}{A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.}
-#' \item{\code{q}}{A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
-#' for the SD (in log space). Use \code{NA} in rows corresponding to indices without priors.}
+#' \item{`M`}{A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.}
+#' \item{`q`}{A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+#' for the SD (in log space). Use `NA` in rows corresponding to indices without priors.}
 #' }
 #' See online documentation for more details.
 #' 
 #' @details
-#' Fleet selectivity is fixed to values sampled from \code{OM} if no age or length compositions are provided.
+#' Fleet selectivity is fixed to values sampled from `OM` if no age or length compositions are provided.
 #'
-#' Survey selectivity is estimable only if \code{IAA} or \code{IAL} is provided. Otherwise, the selectivity should
-#' be mirrored to a fleet (vulnerable biomass selectivity) or indexed to total or spawning biomass (see \code{s_selectivity}).
+#' Survey selectivity is estimable only if `IAA` or `IAL` is provided. Otherwise, the selectivity should
+#' be mirrored to a fleet (vulnerable biomass selectivity) or indexed to total or spawning biomass (see `s_selectivity`).
 #'
-#' Parameters that were used in the fitting model are placed in the \code{RCM@@OM@@cpars} list.
+#' Parameters that were used in the fitting model are placed in the `RCM@@OM@@cpars` list.
 #' 
-#' If the operating model \code{OM} uses time-varying growth or M, then those trends will be used in the RCM as well.
+#' If the operating model `OM` uses time-varying growth or M, then those trends will be used in the RCM as well.
 #' Non-stationary productivity creates ambiguity in the calculation and interpretation of depletion and MSY reference points.
 #'
-#' The easiest way to turn off time-varying growth/M is by setting: \code{OM@@Msd <- OM@@Linfsd <- OM@@Ksd <- c(0, 0)}.
+#' The easiest way to turn off time-varying growth/M is by setting: `OM@@Msd <- OM@@Linfsd <- OM@@Ksd <- c(0, 0)`.
 #'
 #' To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 #' index but the data won't enter the likelihood. See section on likelihood weights.
 #'
 #' @return An object of class \linkS4class{RCModel} (see link for description of output).
 #' 
-#' \code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
+#' `check_RCMdata` returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
 #' from the OM.
 #'
 #' @section Online Documentation:
 #' Several articles are available for RCM:
 #'
 #' \itemize{
-#' \item \href{https://openmse.com/tutorial-rcm/}{General overview of approach}
-#' \item \href{https://openmse.com/tutorial-rcm-eq/}{Mathematical description}
-#' \item \href{https://openmse.com/tutorial-rcm-select/}{Setup of selectivity settings and index catchability} (useful for more data-rich cases)
-#' \item \href{https://openmse.com/features-assessment-models/5-priors/}{Description of priors}
+#' \item [General overview of approach](https://openmse.com/tutorial-rcm/)
+#' \item [Mathematical description](https://openmse.com/tutorial-rcm-eq/)
+#' \item [Setup of selectivity settings and index catchability](https://openmse.com/tutorial-rcm-select/) (useful for more data-rich cases)
+#' \item [Description of priors](https://openmse.com/features-assessment-models/5-priors/)
 #' }
 #'
 #' @section Data:
 #' One of indices, age compositions, or length compositions should be provided in addition to the historical catch or effort. Not all arguments
 #' are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).
 #'
-#' The \code{data} variable can be an object of class \linkS4class{RCMdata}. See help file for description of inputs.
+#' The `data` variable can be an object of class \linkS4class{RCMdata}. See help file for description of inputs.
 #'
-#' Alternatively, the \code{data} input can be a \linkS4class{Data} S4 object which will retrieve data from the following slots:
+#' Alternatively, the `data` input can be a \linkS4class{Data} S4 object which will retrieve data from the following slots:
 #'
 #' \describe{
 #' \item{`Data@@Cat`}{catch series (single fleet with the Data S4 object)}
@@ -111,42 +111,42 @@
 #' selectivity and units (i.e., biomass or abundance).}
 #' }
 #'
-#' There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., \code{RCM(OM, Data, C_eq = C_eq, ...)}.
+#' There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., `RCM(OM, Data, C_eq = C_eq, ...)`.
 #' 
 #' @section Data list:
 #' Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:
 #' 
 #' \describe{
 #' \item{`Chist`}{A vector of historical catch, should be of length OM@@nyears. If there are multiple fleets: a matrix of `OM@@nyears` rows and `nfleet` columns.
-#' Ideally, the first year of the catch series represents unfished conditions (see also \code{C_eq})}.
-#' \item{`C_sd`}{A vector or matrix of standard deviations (lognormal distribution) for the catches in \code{Chist}.
-#' If not provided, the default is 0.01. Only used if \code{condition = "catch"}}.
-#' \item{`Ehist`}{A vector of historical effort, should be of length `OM@@nyears` (see also \code{E_eq})}.
+#' Ideally, the first year of the catch series represents unfished conditions (see also `C_eq`).}
+#' \item{`C_sd`}{A vector or matrix of standard deviations (lognormal distribution) for the catches in `Chist`.
+#' If not provided, the default is 0.01. Only used if `condition = "catch"`.}
+#' \item{`Ehist`}{A vector of historical effort, should be of length `OM@@nyears` (see also `E_eq`).}
 #' \item{`Index`}{A vector of values of an index (of length `OM@@nyears`). If there are multiple indices: a matrix of historical indices of abundances, with rows
 #' indexing years and columns indexing the index.}
-#' \item{`I_sd`}{A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
-#' If not provided, this function will use values from \code{OM@@Iobs}.}
-#' \item{`I_type`}{Obsolete as of version 2.0. See \code{s_selectivity} argument.}
+#' \item{`I_sd`}{A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in `Index`.
+#' If not provided, this function will use values from `OM@@Iobs`.}
+#' \item{`I_type`}{Obsolete as of version 2.0. See `s_selectivity` argument.}
 #' \item{`CAA`}{Fishery age composition matrix with `nyears` rows and `OM@@maxage+1` columns. If multiple fleets: an array with dimension: 
 #' `nyears, OM@@maxage, and nfleet`.}
 #' \item{`CAL`}{Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets: 
 #' an array with dimension: `nyears, length bins, and nfleet`.}
 #' \item{`MS`}{A vector of fishery mean size (MS, either mean length or mean weight) observations (length `OM@@nyears`), 
 #' or if multiple fleets: matrix of dimension: `nyears, nfleet`.
-#' Generally, mean lengths should not be used if \code{CAL} is also provided, unless mean length and length comps are independently sampled.}
-#' \item{`MS_type`}{A character (either \code{"length"} (default) or \code{"weight"}) to denote the type of mean size data.}
+#' Generally, mean lengths should not be used if `CAL` is also provided, unless mean length and length comps are independently sampled.}
+#' \item{`MS_type`}{A character (either `"length"` (default) or `"weight"`) to denote the type of mean size data.}
 #' \item{`MS_cv`}{The coefficient of variation of the observed mean size. If there are multiple fleets, a vector of length `nfleet`.
 #' Default is 0.2.}
 #' \item{`s_CAA`}{Survey age composition data, an array of dimension `nyears, maxage+1, nsurvey`.}
 #' \item{`s_CAL`}{Survey length composition data, an array of dimension `nyears, length(length_bin), nsurvey`.}
-#' \item{`length_bin`}{A vector for the midpoints of the length bins for \code{CAL} and \code{s_CAL}. All bin widths should be equal in size.}
-#' \item{`C_eq`}{A numeric vector of length `nfleet` for the equilibrium catch for each fleet in \code{Chist} prior to the first year of the operating model.
+#' \item{`length_bin`}{A vector for the midpoints of the length bins for `CAL` and `s_CAL`. All bin widths should be equal in size.}
+#' \item{`C_eq`}{A numeric vector of length `nfleet` for the equilibrium catch for each fleet in `Chist` prior to the first year of the operating model.
 #' Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data. Alternatively,
 #' if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial 
 #' depletion) in the first year of the model (see additional arguments).}
-#' \item{`C_eq_sd`}{A vector of standard deviations (lognormal distribution) for the equilibrium catches in \code{C_eq}.
-#' If not provided, the default is 0.01. Only used if \code{condition = "catch"}.}
-#' \item{`E_eq`}{The equilibrium effort for each fleet in \code{Ehist} prior to the first year of the operating model.
+#' \item{`C_eq_sd`}{A vector of standard deviations (lognormal distribution) for the equilibrium catches in `C_eq`.
+#' If not provided, the default is 0.01. Only used if `condition = "catch"`.}
+#' \item{`E_eq`}{The equilibrium effort for each fleet in `Ehist` prior to the first year of the operating model.
 #' Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data.}
 #' \item{`abs_I`}{Optional, an integer vector to indicate which indices are in absolute magnitude. Use 1 to set `q = 1`, 
 #' otherwise use 0 to estimate q.}
@@ -160,7 +160,7 @@
 #' }
 #'  
 #' @section Additional arguments:
-#' For \code{RCM}, additional arguments can be passed to the model via \code{...}:
+#' For `RCM`, additional arguments can be passed to the model via `...`:
 #'
 #' \describe{
 #' \item{`plusgroup`}{Logical for whether the maximum age is a plusgroup or not. By default, TRUE.}
@@ -179,17 +179,17 @@
 #' the starting values are values from the OM object. If any `selectivity = "free"`, then this matrix needs to be of `maxage+1` rows where
 #' the row specifies the selectivity at age. See Articles section.}
 #' \item{`ivul_par`}{A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as `vul_par`. Values in the column are ignored
-#' if \code{s_selectivity} is mapped to a fishing fleet (add NA placeholders in that case). 
-#' If any \code{s_selectivity = "free"}, then this matrix needs to be of `maxage+1` rows where
+#' if `s_selectivity` is mapped to a fishing fleet (add NA placeholders in that case). 
+#' If any `s_selectivity = "free"`, then this matrix needs to be of `maxage+1` rows where
 #' the row specifies the selectivity at age.}
 #' \item{`log_rec_dev`}{A numeric vector of length `nyears` for the starting values of the log-recruitment deviations.}
 #' \item{`log_early_rec_dev`}{A numeric vector of length `OM@@maxage` for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.}
-#' \item{`q`}{A numeric vector of length nsurvey for index catchability. See \href{https://openmse.com/tutorial-rcm-select/}{online article} for more information.}
+#' \item{`q`}{A numeric vector of length nsurvey for index catchability. See [online article](https://openmse.com/tutorial-rcm-select/) for more information.}
 #' }
 #' 
 #' @section map:
 #' Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
-#' vector or matrix in the map argument will be the same dimension as in the start entry. If an entry is \code{NA}, the corresponding parameter is fixed in the model to the starting
+#' vector or matrix in the map argument will be the same dimension as in the start entry. If an entry is `NA`, the corresponding parameter is fixed in the model to the starting
 #' value. Otherwise, an integer for each independent parameter, i.e., shared or mirrored parameters get the same integer entry.
 #' 
 #' \describe{
@@ -201,11 +201,11 @@
 #' \item{`log_rec_dev`}{A vector of length `OM@@nyears` that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
 #' By default, all these deviates are estimated.}
 #' \item{`q`}{A vector of length `nsurvey` for index catchability. q should be an estimated parameter when sharing across surveys (perhaps with differing selectivity). Otherwise, it is solved analytically
-#' where individual parameters are independent of other indices. Use `RCMdata@abs_I` for fixing the catchability to 1. See \href{https://openmse.com/tutorial-rcm-select/}{online article} for more information.}
+#' where individual parameters are independent of other indices. Use `RCMdata@abs_I` for fixing the catchability to 1. See [online article](https://openmse.com/tutorial-rcm-select/) for more information.}
 #' }
 #' 
 #' @section Likelihood weights:
-#' \code{LWT} is an optional named list containing the likelihood weights (values >= 0) with the possible options:
+#' `LWT` is an optional named list containing the likelihood weights (values >= 0) with the possible options:
 #' \itemize{
 #' \item `Chist, CAA, CAL, MS, C_eq`: A vector of length nfleet for each.
 #' \item `Index, IAA, IAL`: A vector of length nsurvey for each.
@@ -214,7 +214,7 @@
 #' By default, all likelihood weights are equal to one if not specified by the user.
 #'
 #' Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
-#' \linkS4class{RCMdata} object. For a list or \linkS4class{Data} object, use the \code{ESS} argument.
+#' \linkS4class{RCMdata} object. For a list or \linkS4class{Data} object, use the `ESS` argument.
 #' @author Q. Huynh
 #' @examples 
 #' \donttest{ 
