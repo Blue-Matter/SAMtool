@@ -129,10 +129,10 @@ or operating model. Alternatively, a named list to provide custom parameters for
 <code>StockPars</code> argument.</p>
 <p>Options 2 and 3 allow for time-varying growth, maturity, and natural mortality. Natural mortality can also be age-varying.</p>
 <p><code>StockPars</code> can be a named list of parameters used to provide inputs to the assessment model:</p>
-<ul><li><p><code>Wt_age</code> - annual weight at age, array sim, ages, year</p></li>
-<li><p><code>Mat_age</code> - annual maturity at age, array sim, ages, year</p></li>
-<li><p><code>hs</code> - Stock-recruit steepness, vector of length <a href="sim-class.html">sim</a></p></li>
-<li><p><code>M_ageArray</code> - annual natural mortality, array sim, ages, year</p></li>
+<ul><li><p><code>Wt_age</code> - annual weight at age, array <code>[sim, ages, year]</code></p></li>
+<li><p><code>Mat_age</code> - annual maturity at age, array <code>[sim, ages, year]</code></p></li>
+<li><p><code>hs</code> - Stock-recruit steepness, vector of length <code>[sim]</code></p></li>
+<li><p><code>M_ageArray</code> - annual natural mortality, array <code>[sim, ages, year]</code></p></li>
 </ul></div>
 
     <div class="section level2">
