@@ -28,8 +28,8 @@ and the maximum gradient of the likelihood in each assessment run. Also includes
 function evaluations reported by \code{\link[stats]{nlminb}} for each application of the assessment model.
 }
 \description{
-Diagnostic check for convergence of Assess models during closed-loop simulation. Use when the MP was 
-created with \link{make_MP} with argument \code{diagnostic = "min"} or \code{"full"}. 
+Diagnostic check for convergence of Assess models during closed-loop simulation. Use when the MP was
+created with \link{make_MP} with argument \code{diagnostic = "min"} or \code{"full"}.
 This function summarizes and plots the diagnostic information.
 }
 \examples{

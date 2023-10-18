@@ -20,7 +20,7 @@ FMSY or UMSY and vulnerable biomass in terminal year.}
 
 \item{reps}{The number of stochastic samples of the TAC recommendation.}
 
-\item{OCP_type}{The type of operational control points (OCPs) for the harvest control rule used to determine 
+\item{OCP_type}{The type of operational control points (OCPs) for the harvest control rule used to determine
 whether there is fishing. By default, use (\code{"SSB_SSB0"} for spawning depletion. Other biomass OCPs include \code{"SSB_SSBMSY"} for spawning biomass relative to MSY and
 \code{"SSB_dSSB0"}, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
 For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR\% (see \code{SPR_OCP} argument) can be used.}

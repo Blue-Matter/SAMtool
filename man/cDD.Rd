@@ -123,12 +123,12 @@ to the observed index. In the state-space version (cDD_SS), recruitment deviatio
 \details{
 For \code{start} (optional), a named list of starting values of estimates can be provided for:
 \itemize{
-\item \code{R0} Unfished recruitment. Otherwise, Data@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
-\item \code{h} Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.
+\item \code{R0} Unfished recruitment. Otherwise, \code{Data@OM$R0[x]} is used in closed-loop, and 400\% of mean catch otherwise.
+\item \code{h} Steepness. Otherwise, \code{Data@steep[x]} is used, or 0.9 if empty.
 \item \code{Kappa} Delay-differential Kappa parameter. Otherwise, calculated from biological parameters in the Data object.
 \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-\item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@sigmaR[x].
-\item \code{sigma} Lognormal SD of the index (observation error). By default, Data@CV_Ind[x]. Not
+\item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, \code{Data@sigmaR[x]}.
+\item \code{sigma} Lognormal SD of the index (observation error). By default, \code{Data@CV_Ind[x]}. Not
 used if multiple indices are used.
 \item \code{sigma_W} Lognormal SD of the mean weight (observation error). By default, 0.1.
 }
@@ -138,17 +138,17 @@ For Data@AddInd, Data@I_units are used to identify a biomass vs. abundance-based
 }
 \section{Priors}{
 
-The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}. 
+The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}.
 For each parameter below, provide a vector of values as described:
 
 \itemize{
 \item \code{R0} - A vector of length 3. The first value indicates the distribution of the prior: \code{1} for lognormal, \code{2} for uniform
 on \code{log(R0)}, \code{3} for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
 Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).
-\item \code{h} - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+\item \code{h} - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution,
 while Ricker steepness uses a normal distribution.
 \item \code{M} - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.
-\item \code{q} - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+\item \code{q} - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column
 for the SD (in log space). Use \code{NA} in rows corresponding to indices without priors.
 }
 See online documentation for more details.
@@ -156,7 +156,7 @@ See online documentation for more details.
 
 \section{Online Documentation}{
 
-Model description and equations are available on the openMSE 
+Model description and equations are available on the openMSE
 \href{https://openmse.com/features-assessment-models/1-dd/}{website}.
 }
 

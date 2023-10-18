@@ -62,10 +62,10 @@ Options 2 and 3 allow for time-varying growth, maturity, and natural mortality. 
 \code{StockPars} can be a named list of parameters used to provide inputs to the assessment model:
 
 \itemize{
-\item \code{Wt_age} - annual weight at age, array [sim, ages, year]
-\item \code{Mat_age} - annual maturity at age, array [sim, ages, year]
-\item \code{hs} - Stock-recruit steepness, vector of length [sim]
-\item \code{M_ageArray} - annual natural mortality, array [sim, ages, year]  
+\item \code{Wt_age} - annual weight at age, array \link{sim, ages, year}
+\item \code{Mat_age} - annual maturity at age, array \link{sim, ages, year}
+\item \code{hs} - Stock-recruit steepness, vector of length \link{sim}
+\item \code{M_ageArray} - annual natural mortality, array \link{sim, ages, year}
 }
 }
 

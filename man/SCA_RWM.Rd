@@ -123,41 +123,35 @@ is passed on to \code{\link[TMB]{newton}}.}
 An object of class \linkS4class{Assessment}.
 }
 \description{
-\code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age). 
+\code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age).
 Set the variance (\code{start$tau_M}) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
 }
 \details{
 The model estimates year-specific M (constant with age) as a random walk in logit space, bounded by
 a proportion of \code{start$M} (specified in \code{M_bounds}).
 
-The starting value for the first year M (start$M) is \code{Data@Mort[x]} and is fixed, unless a prior is provided (\code{prior$M}). 
-The fixed SD of the random walk (\code{tau_M}) is 0.05, by default. 
+The starting value for the first year M (start$M) is \code{Data@Mort[x]} and is fixed, unless a prior is provided (\code{prior$M}).
+The fixed SD of the random walk (\code{tau_M}) is 0.05, by default.
 
-Steepness and unfished recruitment in the estimation model, along with unfished reference points, correspond to spawners per recruit using the first year M. 
-With argument \code{refyear}, new unfished reference points and steepness values are calculated. See examples. 
+Steepness and unfished recruitment in the estimation model, along with unfished reference points, correspond to spawners per recruit using the first year M.
+With argument \code{refyear}, new unfished reference points and steepness values are calculated. See examples.
 
 Alternative values can be provided in the start list (see examples):
 \itemize{
-\item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
-By default, 150\% Data@OM$R0[x] is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
-\item \code{h} Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.
-\item \code{M} Natural mortality in the first year. Otherwise, Data@Mort[x] is used.
-\item \code{vul_par} Vulnerability parameters, see next paragraph.
-\item \code{F} A vector of length nyears for year-specific fishing mortality.
-\item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-\item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, Data@CV_Cat[x].
-\item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].
-\item \code{tau_M} The fixed SD of the random walk in M. By default, 0.05. 
+\item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment.
+By default, 150\% \code{Data@OM$R0[x]} is used as the start value in closed-loop simulation, and 400\\% of mean catch otherwise.
+\item \code{h} Steepness. Otherwise, \verb{Data@steep[x] is used, or 0.9 if empty. \\item \code{M} Natural mortality in the first year. Otherwise, }Data@Mort\link{x}\verb{is used. \\item \code{vul_par} Vulnerability parameters, see next paragraph. \\item \code{F} A vector of length nyears for year-specific fishing mortality. \\item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0. \\item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default,}Data@CV_Cat\link{x}\verb{. \\item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, }Data@sigmaR\link{x}`.
+\item \code{tau_M} The fixed SD of the random walk in M. By default, 0.05.
 }
 
 See \link{SCA} for all other information about the structure and setup of the model.
 
-The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are 
+The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are
 calculated and reported in TMB_report of the \linkS4class{Assessment} object.
 }
 \section{Online Documentation}{
 
-Model description and equations are available on the openMSE 
+Model description and equations are available on the openMSE
 \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
 }
 

@@ -44,7 +44,7 @@ class(SCA_CAL) <- "Assessment"
 #' 
 #' @inheritParams SCA
 #' @param M_bounds A numeric vector of length 2 to indicate the M as B/B0 approaches zero and one, respectively.
-#' By default, set to 75\% and 125\%, respectively, of Data@@Mort[x].
+#' By default, set to 75% and 125%, respectively, of `Data@@Mort[x]`.
 #' @details
 #' See \link{SCA} for more information on all arguments.
 #' @references
@@ -91,7 +91,7 @@ class(SCA_DDM) <- "Assess"
 #' @param refyear An expression for the year for which M is used to report MSY and unfished reference points. By default, terminal year. If multiple
 #' years are provided, then the mean M over the specified time period is used.
 #' @param M_bounds A numeric vector of length 2 to indicate the minimum and maximum M in the random walk as a proportion of the starting M
-#' (\code{start$M}). The default min and max are 75\% and 125\%, respectively.
+#' (\code{start$M}). The default min and max are 75% and 125%, respectively.
 #' @details
 #' The model estimates year-specific M (constant with age) as a random walk in logit space, bounded by
 #' a proportion of \code{start$M} (specified in \code{M_bounds}).
@@ -105,14 +105,14 @@ class(SCA_DDM) <- "Assess"
 #' Alternative values can be provided in the start list (see examples):
 #' \itemize{
 #' \item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
-#' By default, 150\% Data@@OM$R0[x] is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
-#' \item \code{h} Steepness. Otherwise, Data@@steep[x] is used, or 0.9 if empty.
-#' \item \code{M} Natural mortality in the first year. Otherwise, Data@@Mort[x] is used.
+#' By default, 150% `Data@@OM$R0[x]` is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
+#' \item \code{h} Steepness. Otherwise, `Data@@steep[x] is used, or 0.9 if empty.
+#' \item \code{M} Natural mortality in the first year. Otherwise, `Data@@Mort[x]` is used.
 #' \item \code{vul_par} Vulnerability parameters, see next paragraph.
 #' \item \code{F} A vector of length nyears for year-specific fishing mortality.
 #' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
-#' \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, Data@@CV_Cat[x].
-#' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@@sigmaR[x].
+#' \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, `Data@@CV_Cat[x]`.
+#' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, `Data@@sigmaR[x]`.
 #' \item \code{tau_M} The fixed SD of the random walk in M. By default, 0.05. 
 #' }
 #' 

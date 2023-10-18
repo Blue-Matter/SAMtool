@@ -69,17 +69,17 @@
 #' @details 
 #' For \code{start} (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
-#' \item \code{R0} Unfished recruitment. Otherwise, Data@@OM$R0[x] is used in closed-loop, and 400\% of mean catch otherwise.
-#' \item \code{h} Steepness. Otherwise, Data@@steep[x] is used, or 0.9 if empty.
-#' \item \code{M} Natural mortality. Otherwise, Data@@Mort[x] is used.
-#' \item \code{k} Age of knife-edge maturity. By default, the age of 50\% maturity calculated from the slots in the Data object.
+#' \item \code{R0} Unfished recruitment. Otherwise, `Data@@OM$R0[x]` is used in closed-loop, and 400% of mean catch otherwise.
+#' \item \code{h} Steepness. Otherwise, `Data@@steep[x]` is used, or 0.9 if empty.
+#' \item \code{M} Natural mortality. Otherwise, `Data@@Mort[x]` is used.
+#' \item \code{k} Age of knife-edge maturity. By default, the age of 50% maturity calculated from the slots in the Data object.
 #' \item \code{Rho} Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{Alpha} Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.
 #' \item \code{q_effort} Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.
 #' \item \code{F_equilibrium} Equilibrium fishing mortality rate leading into first year of the model (to determine initial depletion). By default, 0.
-#' \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@@CV_Cat[x].
-#' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, Data@@sigmaR[x].
-#' \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@@CV_Ind[x]. Not
+#' \item \code{omega} Lognormal SD of the catch (observation error) when conditioning on effort. By default, `Data@@CV_Cat[x]`.
+#' \item \code{tau} Lognormal SD of the recruitment deviations (process error) for \code{DD_SS}. By default, `Data@@sigmaR[x]`.
+#' \item \code{sigma} Lognormal SD of the index (observation error) when conditioning on catch. By default, `Data@@CV_Ind[x]`. Not
 #' used if multiple indices are used.
 #' \item \code{sigma_W} Lognormal SD of the mean weight (observation error). By default, 0.1.
 #' }

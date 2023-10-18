@@ -61,7 +61,7 @@ calculation of MSY and unfished reference points.}
 \itemize{
 \item \code{vul} - a length two vector that constrains the vulnerability-at-age in the most recent years. The first number
 is the number of years in which vulnerability will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
-The default 
+The default
 \item \code{R} - a length two vector that constrains the recruitment estimates in the most recent years. The first number
 is the number of years in which recruitment will be constrained (as a random walk in log space), the second number is the standard deviation of the random walk.
 }}
@@ -134,14 +134,14 @@ if any catch-at-age value < 1e-4.
 
 It is recommended to do some preliminary fits with the VPA before running simulations en masse. See example below.
 
-Shrinkage, penalty functions that stabilize model estimates of recruitment and selectivity year-over-year near 
+Shrinkage, penalty functions that stabilize model estimates of recruitment and selectivity year-over-year near
 the end of the time series, alters the behavior of the model. This is something to tinker with in your initial
 model fits, and worth evaluating in closed-loop simulation.
 }
 
 \section{Online Documentation}{
 
-Model description and equations are available on the openMSE 
+Model description and equations are available on the openMSE
 \href{https://openmse.com/features-assessment-models/4-vpa/}{website}.
 }
 

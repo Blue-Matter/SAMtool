@@ -118,7 +118,7 @@ A single-fleet assessment that fits to catch, indices of abundance, and fishery 
 }
 \section{Online Documentation}{
 
-Model description and equations are available on the openMSE 
+Model description and equations are available on the openMSE
 \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
 }
 

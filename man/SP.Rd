@@ -89,10 +89,10 @@ is half of carrying capacity.}
 Ignored if \code{n_seas} = 1.}
 
 \item{Euler_Lotka}{Integer. If greater than zero, the function will calculate a prior for the intrinsic rate of increase to use in the estimation model
-(in lieu of an explicit prior in argument \code{prior}). The value of this argument specifies the number of stochastic samples used to calculate the prior SD. 
+(in lieu of an explicit prior in argument \code{prior}). The value of this argument specifies the number of stochastic samples used to calculate the prior SD.
 See section on priors below.}
 
-\item{SR_type}{If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
+\item{SR_type}{If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from
 steepness and unfished spawners-per-recruit. Used to develop the r prior.}
 
 \item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
@@ -142,7 +142,7 @@ The function for the \code{spict} model (Pedersen and Berg, 2016) is available i
 For \code{start} (optional), a named list of starting values of estimates can be provided for:
 \itemize{
 \item \code{MSY} Maximum sustainable yield.. Otherwise, 300\% of mean catch by default.
-\item \code{FMSY} Steepness. Otherwise, Data@Mort[x] or 0.2 is used.
+\item \code{FMSY} Steepness. Otherwise, \code{Data@Mort[x]} or 0.2 is used.
 \item \code{dep} Initial depletion (B/B0) in the first year of the model. By default, 1.
 \item \code{n} The production function exponent that determines BMSY/B0. By default, 2 so that BMSY/B0 = 0.5.
 \item \code{sigma} Lognormal SD of the index (observation error). By default, 0.05. Not
@@ -150,7 +150,7 @@ used with multiple indices.
 \item \code{tau} Lognormal SD of the biomass deviations (process error) in \code{SP_SS}. By default, 0.1.
 }
 
-Multiple indices are supported in the model. 
+Multiple indices are supported in the model.
 
 Tip: to create the Fox model (Fox 1970), just fix n = 1. See example.
 }
@@ -164,7 +164,7 @@ and a symmetric production function (n = 2).
 The following priors can be added as a named list, e.g., prior = list(r = c(0.25, 0.15), MSY = c(50, 0.1). For each parameter below, provide a vector of values as described:
 
 \itemize{
-\item \code{r} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space). 
+\item \code{r} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space).
 \item \code{MSY} - A vector of length 2 for the lognormal prior mean (normal space) and SD (lognormal space).
 }
 
@@ -177,7 +177,7 @@ a prior distribution for r. See \code{vignette("Surplus_production")} for more d
 
 \section{Online Documentation}{
 
-Model description and equations are available on the openMSE 
+Model description and equations are available on the openMSE
 \href{https://openmse.com/features-assessment-models/3-sp/}{website}.
 }
 

@@ -125,9 +125,9 @@ for the assessment.}
 \item{\code{forecast}}{A list containing components for forecasting:
 \itemize{
 \item \code{per_recruit} A data frame of SPR (spawning potential ratio) and YPR (yield-per-recruit), calculated for
-a range of exploitation rate of 0 - 0.99 or instantaneous F from 0 - 2.5 FMSY. 
+a range of exploitation rate of 0 - 0.99 or instantaneous F from 0 - 2.5 FMSY.
 \item \code{catch_eq} A function that calculates the catch for the next year (after the model terminal year) when an
-apical F is provided. 
+apical F is provided.
 }}
 
 \item{\code{obj}}{A list with components returned from \code{\link[TMB]{MakeADFun}}.}

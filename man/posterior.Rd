@@ -68,13 +68,13 @@ operating model. The first column specifies the chain and the second columns spe
 \code{RCMstan} returns an updated \code{RCModel}.
 }
 \description{
-A convenient wrapper function (\code{posterior}) to sample the posterior using MCMC in rstan 
+A convenient wrapper function (\code{posterior}) to sample the posterior using MCMC in rstan
 and returns a \code{stanfit} object for diagnostics. Use \code{RCMstan} to update the RCM and the enclosed operating model
 with MCMC samples..
 }
 \section{Online Documentation}{
 
-A vignette on the steps to run the MCMC is available on the openMSE 
+A vignette on the steps to run the MCMC is available on the openMSE
 \href{https://openmse.com/tutorial-rcm/4-case-study-mcmc/}{website}.
 }
 

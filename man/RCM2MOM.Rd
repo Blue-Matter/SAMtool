@@ -13,7 +13,7 @@ RCM2MOM(RCModel)
 A class \linkS4class{MOM} object.
 }
 \description{
-The RCM (Rapid Conditioning Model) returns a single-fleet operating model, implying constant effort among fleets for projections. 
+The RCM (Rapid Conditioning Model) returns a single-fleet operating model, implying constant effort among fleets for projections.
 Here, we convert the single-fleet OM to a multi-fleet OM, preserving the multiple fleet structure used in the conditioning model
 for projections. This allows for testing management procedures that explicitly specify fleet allocation in the management advice.
 }

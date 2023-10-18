@@ -58,8 +58,8 @@
 #' @details
 #' For \code{start} (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
-#' \item \code{MSY} Maximum sustainable yield.. Otherwise, 300\% of mean catch by default.
-#' \item \code{FMSY} Steepness. Otherwise, Data@@Mort[x] or 0.2 is used.
+#' \item \code{MSY} Maximum sustainable yield.. Otherwise, 300% of mean catch by default.
+#' \item \code{FMSY} Steepness. Otherwise, `Data@@Mort[x]` or 0.2 is used.
 #' \item \code{dep} Initial depletion (B/B0) in the first year of the model. By default, 1.
 #' \item \code{n} The production function exponent that determines BMSY/B0. By default, 2 so that BMSY/B0 = 0.5.
 #' \item \code{sigma} Lognormal SD of the index (observation error). By default, 0.05. Not

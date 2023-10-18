@@ -16,7 +16,7 @@
 #' @param start Optional named list of starting values. Entries can be expressions that are evaluated in the function:
 #' \itemize{
 #' \item \code{R0} Unfished recruitment
-#' \item \code{vul_par} A length-two vector for the age of 95\% and 50\% fleet selectivity. Fixed to maturity otherwise.
+#' \item \code{vul_par} A length-two vector for the age of 95% and 50% fleet selectivity. Fixed to maturity otherwise.
 #' }
 #' @param prior A named list for the parameters of any priors to be added to the model. See details in \code{SCA_Pope}.
 #' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB

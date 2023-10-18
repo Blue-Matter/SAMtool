@@ -217,6 +217,9 @@ selectivity and units (i.e., biomass or abundance).}
 }
 
 There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., \code{RCM(OM, Data, C_eq = C_eq, ...)}.
+}
+
+\section{Data list}{
 
 Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:
 
@@ -277,7 +280,7 @@ a single model fit. By default FALSE. This feature requires identical biological
 }
 }
 
-\section{start and map}{
+\section{start}{
 
 Starting values can be specified in a named list for the following:
 
@@ -294,6 +297,9 @@ the row specifies the selectivity at age.}
 \item{\code{log_early_rec_dev}}{A numeric vector of length \code{OM@maxage} for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.}
 \item{\code{q}}{A numeric vector of length nsurvey for index catchability. See \href{https://openmse.com/tutorial-rcm-select/}{online article} for more information.}
 }
+}
+
+\section{map}{
 
 Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
 vector or matrix in the map argument will be the same dimension as in the start entry. If an entry is \code{NA}, the corresponding parameter is fixed in the model to the starting

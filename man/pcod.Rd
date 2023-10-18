@@ -20,11 +20,11 @@ data(pcod)
 
 }
 \references{
-Forrest, R.E., Anderson, S.C., Grandin, C.J., and Starr, P.J. 2020. Assessment of Pacific Cod (Gadus macrocephalus) 
-for Hecate Strait and Queen Charlotte Sound (Area 5ABCD), and West Coast Vancouver Island (Area 3CD) in 2018. 
+Forrest, R.E., Anderson, S.C., Grandin, C.J., and Starr, P.J. 2020. Assessment of Pacific Cod (Gadus macrocephalus)
+for Hecate Strait and Queen Charlotte Sound (Area 5ABCD), and West Coast Vancouver Island (Area 3CD) in 2018.
 DFO Can. Sci. Advis. Sec. Res. Doc. 2020/070. v + 215 p.
 
-DFO. 2021. Status Update of Pacifc Cod (Gadus macrocephalus) for West Coast Vancouver Island (Area 3CD), 
+DFO. 2021. Status Update of Pacifc Cod (Gadus macrocephalus) for West Coast Vancouver Island (Area 3CD),
 and Hecate Strait and Queen Charlotte Sound (Area 5ABCD) in 2020. DFO Can. Sci. Advis. Sec. Sci. Resp. 2021/002.
 }
 \seealso{

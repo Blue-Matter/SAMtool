@@ -20,7 +20,7 @@ FMSY or UMSY and vulnerable biomass in terminal year.}
 An object of class \linkS4class{Rec} with the TAC recommendation.
 }
 \description{
-A simple control rule that specifies the total allowable catch (TAC) as a function of the abundance of the first 
+A simple control rule that specifies the total allowable catch (TAC) as a function of the abundance of the first
 projection year and some fraction of FMSY/UMSY.
 }
 \details{

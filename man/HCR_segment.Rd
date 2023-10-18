@@ -41,8 +41,8 @@ See below.}
 An object of class \linkS4class{Rec} with the TAC recommendation.
 }
 \description{
-A linear segmented output control rule where the target F (used for the TAC recommendation) 
-is a function of an operational control point (OCP) such as spawning depletion or spawning biomass. 
+A linear segmented output control rule where the target F (used for the TAC recommendation)
+is a function of an operational control point (OCP) such as spawning depletion or spawning biomass.
 The segments of the HCR are specified by arguments \code{OCP} and \code{relF}. Beyond the range of \code{OCP}, the response will be flat.
 \link{HCR_ramp} uses \code{HCR_segment} with two control points.
 }
@@ -63,7 +63,7 @@ in the \linkS4class{Assessment} object:
 \item \code{"F_FMSY"}: Fishing mortality relative to MSY. Uses the last value in \code{Assessment@F_FMSY}.
 \item \code{"F_F01"}: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
 \code{Assessment@forecast[["per_recruit"]]}.
-\item \code{"F_FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\item \code{"F_FSPR"}: Fishing mortality relative to F_SPR\% (the F that produces the spawning potential ratio specified in
 \code{"SPR_OCP"}, calculated from the data frame in \code{Assessment@forecast[["per_recruit"]]}.
 }
 
@@ -78,7 +78,7 @@ in the \linkS4class{Assessment} object is specified:
 \code{Assessment@forecast[["per_recruit"]]}.
 \item \code{"Fmax"}: Fishing mortality relative to F_max (maximizing yield per recruit), calculated from the data frame in
 \code{Assessment@forecast[["per_recruit"]]}.
-\item \code{"FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\item \code{"FSPR"}: Fishing mortality relative to F_SPR\% (the F that produces the spawning potential ratio specified in
 \code{"SPR_targ"}, calculated from data frame in \code{Assessment@forecast[["per_recruit"]]}.
 \item \code{"abs"}: Fishing mortality is independent of any model output and is explicitly specified in \code{relF}.
 }

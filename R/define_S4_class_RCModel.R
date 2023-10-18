@@ -17,7 +17,7 @@
 #' \itemize{
 #' \item B - total biomass - vector of length nyears+1
 #' \item EPR0 - annual unfished spawners per recruit - vector of length nyears
-#' \item ageM - age of 50\% maturity - integer
+#' \item ageM - age of 50% maturity - integer
 #' \item EPR0_SR - unfished spawners per recruit for the stock-recruit relationship (mean EPR0 over the first \code{ageM} years) - numeric
 #' \item R0 - unfished recruitment for the stock-recruit relationship - numeric
 #' \item h - steepness for the stock-recruit relationship - numeric

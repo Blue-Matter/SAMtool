@@ -80,7 +80,7 @@ in the \linkS4class{Assessment} object:
 \item \code{"F_FMSY"}: Fishing mortality relative to MSY. Uses the last value in \code{Assessment@F_FMSY}.
 \item \code{"F_F01"}: Fishing mortality relative to F_0.1 (yield per recruit), calculated from the data frame in
 \code{Assessment@forecast[["per_recruit"]]}.
-\item \code{"F_FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\item \code{"F_FSPR"}: Fishing mortality relative to F_SPR\% (the F that produces the spawning potential ratio specified in
 \code{"SPR_OCP"}, calculated from the data frame in \code{Assessment@forecast[["per_recruit"]]}.
 }
 
@@ -95,7 +95,7 @@ in the \linkS4class{Assessment} object is specified:
 \code{Assessment@forecast[["per_recruit"]]}.
 \item \code{"Fmax"}: Fishing mortality relative to F_max (maximizing yield per recruit), calculated from the data frame in
 \code{Assessment@forecast[["per_recruit"]]}.
-\item \code{"FSPR"}: Fishing mortality relative to F_SPR% (the F that produces the spawning potential ratio specified in
+\item \code{"FSPR"}: Fishing mortality relative to F_SPR\% (the F that produces the spawning potential ratio specified in
 \code{"SPR_targ"}, calculated from data frame in \code{Assessment@forecast[["per_recruit"]]}.
 \item \code{"abs"}: Fishing mortality is independent of any model output and is explicitly specified in \code{relF}.
 }

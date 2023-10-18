@@ -14,8 +14,8 @@
 #' @param OCP Numeric vector of operational control points for the HCR (in increasing order).
 #' @param Ftarget_type The type of F used for the target fishing mortality rate. See below.
 #' @param relF Numeric vector of Ftarget corresponding to the values in \code{OCP}.
-#' @param SPR_OCP The value of spawning potential ratio for the OCP if \code{OCP_type = "F_FSPR"}. By default, 0.4 (F40\%).
-#' @param SPR_targ The target value of spawning potential ratio if \code{Ftarget_type = "FSPR"}. By default, 0.4 (F40\%). 
+#' @param SPR_OCP The value of spawning potential ratio for the OCP if \code{OCP_type = "F_FSPR"}. By default, 0.4 (F40%).
+#' @param SPR_targ The target value of spawning potential ratio if \code{Ftarget_type = "FSPR"}. By default, 0.4 (F40%). 
 #' @param ... Miscellaneous arguments.
 #' @return An object of class \linkS4class{Rec} with the TAC recommendation.
 #' @author Q. Huynh
@@ -198,7 +198,7 @@ class(HCR_segment) <- "HCR"
 #' An output control rule with a ramp that reduces the target F (used for the TAC recommendation) linearly
 #' as a function of an operational control point (OCP) such as spawning depletion or spawning biomass. The reduction in F is linear when the OCP
 #' is between the target OCP (TOCP) and the limit OCP (LOCP). The target F is maximized at or above the TOCP. Below the LOCP,
-#' the target F is minimized. For example, the TOCP and LOCP for 40\% and 10\% spawning depletion, respectively, in the 40-10 control rule.
+#' the target F is minimized. For example, the TOCP and LOCP for 40% and 10% spawning depletion, respectively, in the 40-10 control rule.
 #' Ftarget is FMSY above the TOCP and zero below the LOCP. This type of control rule can generalized with more control points (>2) in \link{HCR_segment}.
 #' Class HCR objects are typically used with function \link{make_MP}.
 #'
@@ -308,7 +308,7 @@ class(HCR80_40MSY) <- "HCR"
 #' @param Assessment An object of class \linkS4class{Assessment} with estimates of
 #' FMSY or UMSY and vulnerable biomass in terminal year.
 #' @param reps The number of stochastic samples of the TAC recommendation.
-#' @param MSY_frac The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75\% of FMSY).
+#' @param MSY_frac The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75% of FMSY).
 #' @param ... Miscellaneous arguments.
 #' @details 
 #' The catch advice is calculated using the catch equation of the corresponding
@@ -338,7 +338,7 @@ class(HCR_MSY) <- "HCR"
 #' Fixed escapement harvest control rule
 #'
 #' A simple control rule that allows fishing when the operational control point (OCP) is above some threshold.
-#' By default, this function sets the TAC at F = 100\% FMSY when spawning depletion > 0.1.
+#' By default, this function sets the TAC at F = 100% FMSY when spawning depletion > 0.1.
 #'
 #' @param Assessment An object of class \linkS4class{Assessment} with estimates of
 #' FMSY or UMSY and vulnerable biomass in terminal year.
@@ -346,7 +346,7 @@ class(HCR_MSY) <- "HCR"
 #' @param OCP_type The type of operational control points (OCPs) for the harvest control rule used to determine 
 #' whether there is fishing. By default, use (\code{"SSB_SSB0"} for spawning depletion. Other biomass OCPs include \code{"SSB_SSBMSY"} for spawning biomass relative to MSY and
 #' \code{"SSB_dSSB0"}, for dynamic depletion (dynamic SSB0 is the historical reconstructed biomass with F = 0).
-#' For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR\% (see \code{SPR_OCP} argument) can be used.
+#' For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (using yield-per-recruit) or F-SPR% (see \code{SPR_OCP} argument) can be used.
 #' @param OCP_threshold The value of the OCP above which fishing can occur.
 #' @param Ftarget_type The type of F used for the target fishing mortality rate.
 #' @param relF_max The relative value of Ftarget if \code{OCP > OCP_treshold}.
@@ -502,7 +502,7 @@ powdif<-function(x,z,g){
 #' @param Assessment An Assessment object with estimates of UMSY or FMSY and
 #' terminal year vulnerable biomass.
 #' @param reps The number of stochastic draws of UMSY or FMSY.
-#' @param MSY_frac The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75\% of FMSY).
+#' @param MSY_frac The fraction of FMSY or UMSY for calculating the TAC (e.g. MSY_frac = 0.75 fishes at 75% of FMSY).
 #' @note \code{calculate_TAC} is deprecated as of version 1.2 in favor of \code{TAC_MSY} because
 #' the latter has a more informative name.
 #' @return A vector of length \code{reps} of stochastic samples of TAC recommendation. Returns NA's

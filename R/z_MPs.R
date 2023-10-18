@@ -163,7 +163,7 @@ dep_args <- list(fix_h = "Data@steep", fix_sigma = "Data@CV_Ind", fix_tau = "Dat
 SCA_MSY <- make_MP(SCA, HCR_MSY)
 
 
-#' @describeIn Model-based-MP An SCA with a TAC recommendation based on fishing at 75\% of FMSY.
+#' @describeIn Model-based-MP An SCA with a TAC recommendation based on fishing at 75% of FMSY.
 #' @export
 SCA_75MSY <- make_MP(SCA, HCR_MSY, MSY_frac = 0.75)
 
@@ -179,7 +179,7 @@ SCA_4010 <- make_MP(SCA, HCR40_10)
 DDSS_MSY <- make_MP(DD_SS, HCR_MSY)
 
 
-#' @describeIn Model-based-MP A state-space delay difference model with a TAC recommendation based on fishing at 75\% of FMSY.
+#' @describeIn Model-based-MP A state-space delay difference model with a TAC recommendation based on fishing at 75% of FMSY.
 #' @export
 DDSS_75MSY <- make_MP(DD_SS, HCR_MSY, MSY_frac = 0.75)
 
@@ -195,7 +195,7 @@ DDSS_4010 <- make_MP(DD_SS, HCR40_10)
 SP_MSY <- make_MP(SP, HCR_MSY)
 
 
-#' @describeIn Model-based-MP A surplus production model with a TAC recommendation based on fishing at 75\% of FMSY.
+#' @describeIn Model-based-MP A surplus production model with a TAC recommendation based on fishing at 75% of FMSY.
 #' @export
 SP_75MSY <- make_MP(SP, HCR_MSY, MSY_frac = 0.75)
 
@@ -209,7 +209,7 @@ SP_4010 <- make_MP(SP, HCR40_10)
 #' @export
 SSS_MSY <- make_MP(SSS, HCR_MSY)
 
-#' @describeIn Model-based-MP Simple stock synthesis (terminal depletion fixed to 0.4) with with a TAC recommendation based on fishing at 75\% FMSY.
+#' @describeIn Model-based-MP Simple stock synthesis (terminal depletion fixed to 0.4) with with a TAC recommendation based on fishing at 75% FMSY.
 #' @export
 SSS_75MSY <- make_MP(SSS, HCR_MSY, MSY_frac = 0.75)
 

@@ -88,7 +88,7 @@
 #' a multinomial distribution) and is manipulated via argument \code{CAA_multiplier}. This argument is
 #' interpreted in two different ways depending on the value provided. If \code{CAA_multiplier > 1}, then this value will cap the annual sample sizes
 #' to that number. If \code{CAA_multiplier <= 1}, then all the annual samples sizes will be re-scaled by that number, e.g. \code{CAA_multiplier = 0.1}
-#' multiplies the sample size to 10\% of the original number. By default, sample sizes are capped at 50.
+#' multiplies the sample size to 10% of the original number. By default, sample sizes are capped at 50.
 #'
 #' Alternatively, a lognormal distribution with inverse proportion variance can be used for the catch at age (Punt and Kennedy, 1994, as
 #' cited by Maunder 2011).
@@ -96,31 +96,31 @@
 #' For \code{start} (optional), a named list of starting values of estimates can be provided for:
 #' \itemize{
 #' \item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
-#' By default, 150\% Data@@OM$R0[x] is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
-#' \item \code{h} Steepness. Otherwise, Data@@steep[x] is used, or 0.9 if empty.
-#' \item \code{M} Natural mortality. Otherwise, Data@@Mort[x] is used.
+#' By default, 150% `Data@@OM$R0[x]` is used as the start value in closed-loop simulation, and 400% of mean catch otherwise.
+#' \item \code{h} Steepness. Otherwise, `Data@@steep[x]` is used, or 0.9 if empty.
+#' \item \code{M} Natural mortality. Otherwise, `Data@@Mort[x]` is used.
 #' \item \code{vul_par} Vulnerability parameters, see next paragraph.
-#' \item \code{F} A vector of length nyears for year-specific fishing mortality.
+#' \item \code{F} A vector of length `nyears` for year-specific fishing mortality.
 #' \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
 #' \item \code{U_equilibrium} Same as F_equilibrium when \code{catch_eq = "Pope"}. By default, 0.
-#' \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, Data@@CV_Cat[x].
-#' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@@sigmaR[x].
+#' \item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, `Data@@CV_Cat[x]`.
+#' \item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, `Data@@sigmaR[x]`.
 #' }
 #' 
 #' Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter
 #' vector \code{vul_par} is of length 2:
 #' \itemize{
-#' \item \code{vul_par[1]} corresponds to \code{a_95}, the age of 95\% vulnerability. \code{a_95} is a transformed parameter via logit transformation to constrain \code{a_95} to less than 75\%
+#' \item \code{vul_par[1]} corresponds to \code{a_95}, the age of 95% vulnerability. \code{a_95} is a transformed parameter via logit transformation to constrain \code{a_95} to less than 75%
 #' of the maximum age: \code{a_95 = 0.75 * max_age * plogis(x[1])}, where \code{x} is the estimated vector.
-#' \item \code{vul_par[2]} corresponds to \code{a_50}, the age of 50\% vulnerability. Estimated as an offset, i.e., \code{a_50 = a_95 - exp(x[2])}.
+#' \item \code{vul_par[2]} corresponds to \code{a_50}, the age of 50% vulnerability. Estimated as an offset, i.e., \code{a_50 = a_95 - exp(x[2])}.
 #' }
 #' 
 #' With dome vulnerability, a double Gaussian parameterization is used, where \code{vul_par}
 #' is an estimated vector of length 4:
 #' \itemize{
 #' \item \code{vul_par[1]} corresponds to  \code{a_asc}, the first age of full vulnerability for the ascending limb. In the model, \code{a_asc} is estimated via logit transformation
-#' to constrain \code{a_95} to less than 75\% of the maximum age: \code{a_asc = 0.75 * maxage * plogis(x[1])}, where \code{x} is the estimated vector.
-#' \item \code{vul_par[2]} corresponds to \code{a_50}, the age of 50\% vulnerability for the ascending limb. Estimated as an offset, i.e.,
+#' to constrain \code{a_95} to less than 75% of the maximum age: \code{a_asc = 0.75 * maxage * plogis(x[1])}, where \code{x} is the estimated vector.
+#' \item \code{vul_par[2]} corresponds to \code{a_50}, the age of 50% vulnerability for the ascending limb. Estimated as an offset, i.e.,
 #' \code{a_50 = a_asc - exp(x[2])}.
 #' \item \code{vul_par[3]} corresponds to \code{a_des}, the last age of full vulnerability (where the descending limb starts). Generated via logit transformation
 #' to constrain between \code{a_asc} and \code{max_age}, i.e., \code{a_des = (max_age - a_asc) * plogis(x[3]) + a_asc}. By default, fixed to a small value so that the dome is effectively

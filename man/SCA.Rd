@@ -171,7 +171,7 @@ be estimated (in \code{SCA2}, uninformative years will have a recruitment closer
 especially near the end of the time series). By default, \code{"comp50"} uses the number of ages (smaller than the mode)
 for which the catch-at-age matrix has less than half the abundance than that at the mode.}
 
-\item{fix_U_equilibrium}{Logical, same as `fix_F_equilibrium` for `SCA_Pope`.}
+\item{fix_U_equilibrium}{Logical, same as \code{fix_F_equilibrium} for \code{SCA_Pope}.}
 }
 \value{
 An object of class \linkS4class{Assessment}.
@@ -189,7 +189,7 @@ catch, and Pope's approximation is used to calculate the annual exploitation rat
 The basic data inputs are catch (by weight), index (by weight/biomass), and catch-at-age matrix (by numbers).
 
 With \code{catch_eq = "Baranov"} (default in SCA and SCA2), annual F's are estimated parameters assuming continuous fishing over the year, while
-an annual exploitation rate from pulse fishing in the middle of the year is estimated in \code{SCA_Pope} or \code{SCA(catch_eq = "Pope")}. 
+an annual exploitation rate from pulse fishing in the middle of the year is estimated in \code{SCA_Pope} or \code{SCA(catch_eq = "Pope")}.
 
 The annual sample sizes of the catch-at-age matrix is provided to the model (used in the likelihood for catch-at-age assuming
 a multinomial distribution) and is manipulated via argument \code{CAA_multiplier}. This argument is
@@ -202,16 +202,16 @@ cited by Maunder 2011).
 
 For \code{start} (optional), a named list of starting values of estimates can be provided for:
 \itemize{
-\item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment. 
-By default, 150\% Data@OM$R0[x] is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
-\item \code{h} Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.
-\item \code{M} Natural mortality. Otherwise, Data@Mort[x] is used.
+\item \code{R0} Unfished recruitment, except when \code{SR = "none"} where it is mean recruitment.
+By default, 150\% \code{Data@OM$R0[x]} is used as the start value in closed-loop simulation, and 400\% of mean catch otherwise.
+\item \code{h} Steepness. Otherwise, \code{Data@steep[x]} is used, or 0.9 if empty.
+\item \code{M} Natural mortality. Otherwise, \code{Data@Mort[x]} is used.
 \item \code{vul_par} Vulnerability parameters, see next paragraph.
-\item \code{F} A vector of length nyears for year-specific fishing mortality.
+\item \code{F} A vector of length \code{nyears} for year-specific fishing mortality.
 \item \code{F_equilibrium} Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.
 \item \code{U_equilibrium} Same as F_equilibrium when \code{catch_eq = "Pope"}. By default, 0.
-\item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, Data@CV_Cat[x].
-\item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].
+\item \code{omega} Lognormal SD of the catch (observation error) when \code{catch_eq = "Baranov"}. By default, \code{Data@CV_Cat[x]}.
+\item \code{tau} Lognormal SD of the recruitment deviations (process error). By default, \code{Data@sigmaR[x]}.
 }
 
 Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter
@@ -239,17 +239,17 @@ for example, when vulnerability >> 0.5 for the youngest age class.
 }
 \section{Priors}{
 
-The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}. 
+The following priors can be added as a named list, e.g., \code{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}.
 For each parameter below, provide a vector of values as described:
 
 \itemize{
 \item \code{R0} - A vector of length 3. The first value indicates the distribution of the prior: \code{1} for lognormal, \code{2} for uniform
 on \code{log(R0)}, \code{3} for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
 Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).
-\item \code{h} - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+\item \code{h} - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution,
 while Ricker steepness uses a normal distribution.
 \item \code{M} - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.
-\item \code{q} - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+\item \code{q} - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column
 for the SD (in log space). Use \code{NA} in rows corresponding to indices without priors.
 }
 See online documentation for more details.
@@ -257,7 +257,7 @@ See online documentation for more details.
 
 \section{Online Documentation}{
 
-Model description and equations are available on the openMSE 
+Model description and equations are available on the openMSE
 \href{https://openmse.com/features-assessment-models/2-sca/}{website}.
 }
 

@@ -21,7 +21,7 @@ HCRlin(OCP_val, LOCP, TOCP, relF_min = 0, relF_max = 1)
 Numeric adjustment factor.
 }
 \description{
-A general function used by \link{HCR_ramp} that adjusts the output (e.g., F) by a linear ramp based on 
+A general function used by \link{HCR_ramp} that adjusts the output (e.g., F) by a linear ramp based on
 the value of the OCP relative to target and limit values.
 }
 \examples{

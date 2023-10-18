@@ -6,18 +6,18 @@
 \alias{SAMtool}
 \title{Stock Assessment Methods Toolkit}
 \description{
-Simulation tools for closed-loop simulation are provided for the 'MSEtool' operating model to inform data-rich fisheries. 
-SAMtool provides an OM conditioning model, assessment models of varying complexity with standardized reporting, diagnostic tools for evaluating 
+Simulation tools for closed-loop simulation are provided for the 'MSEtool' operating model to inform data-rich fisheries.
+SAMtool provides an OM conditioning model, assessment models of varying complexity with standardized reporting, diagnostic tools for evaluating
 assessments within closed-loop simulation, and helper functions for building more complex operating models and model-based management procedures.
 }
 \section{How to use SAMtool}{
 
 The main features of SAMtool are the assessment models and the ability to make model-based management procedures by combining
 assessment models with harvest control rules. Such MPs can be used and tested in management strategy evaluation
-with MSEtool operating models. An overview of these features is available 
+with MSEtool operating models. An overview of these features is available
 on the \href{https://openmse.com/features-assessment-models/}{openMSE} website.
 
-The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. 
+The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data.
 
 The following articles are available on the openMSE website:
 \itemize{
