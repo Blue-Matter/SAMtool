@@ -166,7 +166,7 @@ or "effort" (F is proportional to an index series in <code>data@Ehist</code>. Ca
 
 
 <dt>data</dt>
-<dd><p>Data inputs formatted in a <a href="RCMdata-class.html">RCMdata</a> (preferred) or Data object. 
+<dd><p>Data inputs formatted in a <a href="RCMdata-class.html">RCMdata</a> (preferred) or Data object.
 Use of a list is deprecated. See Data section below.</p></dd>
 
 
@@ -225,7 +225,7 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 
 <dt>control</dt>
-<dd><p>A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+<dd><p>A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.</p></dd>
 
 
 <dt>start</dt>
@@ -237,7 +237,7 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 
 <dt>ESS</dt>
-<dd><p>A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
+<dd><p>A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions.
 Not used when data are provided in a <a href="RCMdata-class.html">RCMdata</a> object.</p></dd>
 
 </dl></div>
@@ -267,23 +267,32 @@ index but the data won't enter the likelihood. See section on likelihood weights
     <h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a></h2>
     
 
-<p>The following priors can be added as a named list, e.g., <code>prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)</code>. 
+<p>The following priors can be added as a named list, e.g., <code>prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)</code>.
 For each parameter below, provide a vector of values as described:</p>
-<ul><li><p><code>R0</code> - A vector of length 3. The first value indicates the distribution of the prior: <code>1</code> for lognormal, <code>2</code> for uniform
+<dl><dt><code>R0</code></dt>
+<dd><p>A vector of length 3. The first value indicates the distribution of the prior: <code>1</code> for lognormal, <code>2</code> for uniform
 on <code>log(R0)</code>, <code>3</code> for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
-Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).</p></li>
-<li><p><code>h</code> - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
-while Ricker steepness uses a normal distribution.</p></li>
-<li><p><code>M</code> - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.</p></li>
-<li><p><code>q</code> - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
-for the SD (in log space). Use <code>NA</code> in rows corresponding to indices without priors.</p></li>
-</ul><p>See online documentation for more details.</p>
+Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).</p></dd>
+
+<dt><code>h</code></dt>
+<dd><p>A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution,
+while Ricker steepness uses a normal distribution.</p></dd>
+
+<dt><code>M</code></dt>
+<dd><p>A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.</p></dd>
+
+<dt><code>q</code></dt>
+<dd><p>A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column
+for the SD (in log space). Use <code>NA</code> in rows corresponding to indices without priors.</p></dd>
+
+
+</dl><p>See online documentation for more details.</p>
     </div>
     <div class="section level2">
     <h2 id="online-documentation">Online Documentation<a class="anchor" aria-label="anchor" href="#online-documentation"></a></h2>
     
 
-<p>Several articles are available for the RCM:</p>
+<p>Several articles are available for RCM:</p>
 <ul><li><p><a href="https://openmse.com/tutorial-rcm/" class="external-link">General overview of approach</a></p></li>
 <li><p><a href="https://openmse.com/tutorial-rcm-eq/" class="external-link">Mathematical description</a></p></li>
 <li><p><a href="https://openmse.com/tutorial-rcm-select/" class="external-link">Setup of selectivity settings and index catchability</a> (useful for more data-rich cases)</p></li>
@@ -297,96 +306,206 @@ for the SD (in log space). Use <code>NA</code> in rows corresponding to indices 
 are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).</p>
 <p>The <code>data</code> variable can be an object of class <a href="RCMdata-class.html">RCMdata</a>. See help file for description of inputs.</p>
 <p>Alternatively, the <code>data</code> input can be a Data S4 object which will retrieve data from the following slots:</p>
-<ul><li><p>Data@Cat - catch series (single fleet with the Data S4 object)</p></li>
-<li><p>Data@Effort - effort series</p></li>
-<li><p>Data@CAA - fishery age composition</p></li>
-<li><p>Data@CAL, Data@CAL_mids - fishery length composition and corresponding length bins</p></li>
-<li><p>Data@Ind, Data@SpInd, Data@VInd, Data@AddInd - indices of abundance</p></li>
-<li><p>Data@CV_Ind, Data@CV_SpInd, Data@CV_VInd, Data@CV_AddInd - annual coefficients of variation for the corresponding indices of abundance. CVs will be converted to lognormal standard deviations.</p></li>
-<li><p>Data@ML - fishery mean lengths</p></li>
-<li><p>Data@AddIndV, Data@AddIndType, Data@AddIunits - Additional information for indices in Data@AddInd: selectivity and units (i.e., biomass or abundance).</p></li>
-</ul><p>There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., <code>RCM(OM, Data, C_eq = C_eq, ...)</code>.</p>
+<dl><dt><code>Data@Cat</code></dt>
+<dd><p>catch series (single fleet with the Data S4 object)</p></dd>
+
+<dt><code>Data@Effort</code></dt>
+<dd><p>effort series</p></dd>
+
+<dt><code>Data@CAA</code></dt>
+<dd><p>fishery age composition</p></dd>
+
+<dt><code>Data@CAL</code>, <code>Data@CAL_mids</code></dt>
+<dd><p>fishery length composition and corresponding length bins</p></dd>
+
+<dt><code>Data@Ind</code>, <code>Data@SpInd</code>, <code>Data@VInd</code>, <code>Data@AddInd</code></dt>
+<dd><p>indices of abundance</p></dd>
+
+<dt><code>Data@CV_Ind</code>, <code>Data@CV_SpInd</code>, <code>Data@CV_VInd</code>, <code>Data@CV_AddInd</code></dt>
+<dd><p>annual coefficients of variation for the corresponding indices
+of abundance. CVs will be converted to lognormal standard deviations.</p></dd>
+
+<dt><code>Data@ML</code></dt>
+<dd><p>fishery mean lengths</p></dd>
+
+<dt><code>Data@AddIndV</code>, <code>Data@AddIndType</code>, <code>Data@AddIunits</code></dt>
+<dd><p>Additional information for indices in <code>Data@AddInd</code>:
+selectivity and units (i.e., biomass or abundance).</p></dd>
+
+
+</dl><p>There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., <code>RCM(OM, Data, C_eq = C_eq, ...)</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="data-list">Data list<a class="anchor" aria-label="anchor" href="#data-list"></a></h2>
+    
+
 <p>Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:</p>
-<ul><li><p>Chist - A vector of historical catch, should be of length OM@nyears. If there are multiple fleets: a matrix of OM@nyears rows and nfleet columns.
-Ideally, the first year of the catch series represents unfished conditions (see also <code>C_eq</code>).</p></li>
-<li><p>C_sd - A vector or matrix of standard deviations (lognormal distribution) for the catches in <code>Chist</code>.
-If not provided, the default is 0.01. Only used if <code>condition = "catch"</code>.</p></li>
-<li><p>Ehist - A vector of historical effort, should be of length OM@nyears (see also <code>E_eq</code>).</p></li>
-<li><p>Index - A vector of values of an index (of length OM@nyears). If there are multiple indices: a matrix of historical indices of abundances, with rows
-indexing years and columns indexing the index.</p></li>
-<li><p>I_sd - A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in <code>Index</code>.
-If not provided, this function will use values from <code>OM@Iobs</code>.</p></li>
-<li><p>I_type - Obsolete as of version 2.0. See <code>s_selectivity</code> argument.</p></li>
-<li><p>CAA - Fishery age composition matrix with nyears rows and OM@maxage+1 columns. If multiple fleets: an array with dimension: nyears, OM@maxage, and nfleets.</p></li>
-<li><p>CAL - Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets: an array with dimension: nyears,
-length bins, and nfleets.</p></li>
-<li><p>MS - A vector of fishery mean size (MS, either mean length or mean weight) observations (length OM@nyears), or if multiple fleets: matrix of dimension: nyears and nfleets.
-Generally, mean lengths should not be used if <code>CAL</code> is also provided, unless mean length and length comps are independently sampled.</p></li>
-<li><p>MS_type - A character (either <code>"length"</code> (default) or <code>"weight"</code>) to denote the type of mean size data.</p></li>
-<li><p>MS_cv - The coefficient of variation of the observed mean size. If there are multiple fleets, a vector of length nfleet.
-Default is 0.2.</p></li>
-<li><p>s_CAA - Survey age composition data, an array of dimension nyears, maxage+1, nsurvey.</p></li>
-<li><p>s_CAL - Survey length composition data, an array of dimension nyears, length(length_bin), nsurvey.</p></li>
-<li><p>length_bin - A vector for the midpoints of the length bins for <code>CAL</code> and <code>s_CAL</code>. All bin widths should be equal in size.</p></li>
-<li><p>C_eq - A numeric vector of length nfleet for the equilibrium catch for each fleet in <code>Chist</code> prior to the first year of the operating model.
+<dl><dt><code>Chist</code></dt>
+<dd><p>A vector of historical catch, should be of length OM@nyears. If there are multiple fleets: a matrix of <code>OM@nyears</code> rows and <code>nfleet</code> columns.
+Ideally, the first year of the catch series represents unfished conditions (see also <code>C_eq</code>).</p></dd>
+
+<dt><code>C_sd</code></dt>
+<dd><p>A vector or matrix of standard deviations (lognormal distribution) for the catches in <code>Chist</code>.
+If not provided, the default is 0.01. Only used if <code>condition = "catch"</code>.</p></dd>
+
+<dt><code>Ehist</code></dt>
+<dd><p>A vector of historical effort, should be of length <code>OM@nyears</code> (see also <code>E_eq</code>).</p></dd>
+
+<dt><code>Index</code></dt>
+<dd><p>A vector of values of an index (of length <code>OM@nyears</code>). If there are multiple indices: a matrix of historical indices of abundances, with rows
+indexing years and columns indexing the index.</p></dd>
+
+<dt><code>I_sd</code></dt>
+<dd><p>A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in <code>Index</code>.
+If not provided, this function will use values from <code>OM@Iobs</code>.</p></dd>
+
+<dt><code>I_type</code></dt>
+<dd><p>Obsolete as of version 2.0. See <code>s_selectivity</code> argument.</p></dd>
+
+<dt><code>CAA</code></dt>
+<dd><p>Fishery age composition matrix with <code>nyears</code> rows and <code>OM@maxage+1</code> columns. If multiple fleets: an array with dimension:
+<code>nyears, OM@maxage, and nfleet</code>.</p></dd>
+
+<dt><code>CAL</code></dt>
+<dd><p>Fishery length composition matrix with nyears rows and columns indexing the length bin. If multiple fleets:
+an array with dimension: <code>nyears, length bins, and nfleet</code>.</p></dd>
+
+<dt><code>MS</code></dt>
+<dd><p>A vector of fishery mean size (MS, either mean length or mean weight) observations (length <code>OM@nyears</code>),
+or if multiple fleets: matrix of dimension: <code>nyears, nfleet</code>.
+Generally, mean lengths should not be used if <code>CAL</code> is also provided, unless mean length and length comps are independently sampled.</p></dd>
+
+<dt><code>MS_type</code></dt>
+<dd><p>A character (either <code>"length"</code> (default) or <code>"weight"</code>) to denote the type of mean size data.</p></dd>
+
+<dt><code>MS_cv</code></dt>
+<dd><p>The coefficient of variation of the observed mean size. If there are multiple fleets, a vector of length <code>nfleet</code>.
+Default is 0.2.</p></dd>
+
+<dt><code>s_CAA</code></dt>
+<dd><p>Survey age composition data, an array of dimension <code>nyears, maxage+1, nsurvey</code>.</p></dd>
+
+<dt><code>s_CAL</code></dt>
+<dd><p>Survey length composition data, an array of dimension <code>nyears, length(length_bin), nsurvey</code>.</p></dd>
+
+<dt><code>length_bin</code></dt>
+<dd><p>A vector for the midpoints of the length bins for <code>CAL</code> and <code>s_CAL</code>. All bin widths should be equal in size.</p></dd>
+
+<dt><code>C_eq</code></dt>
+<dd><p>A numeric vector of length <code>nfleet</code> for the equilibrium catch for each fleet in <code>Chist</code> prior to the first year of the operating model.
 Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data. Alternatively,
-if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial depletion) in the first year of the model (see additional arguments).</p></li>
-<li><p>C_eq_sd - A vector of standard deviations (lognormal distribution) for the equilibrium catches in <code>C_eq</code>.
-If not provided, the default is 0.01. Only used if <code>condition = "catch"</code>.</p></li>
-<li><p>E_eq - The equilibrium effort for each fleet in <code>Ehist</code> prior to the first year of the operating model.
-Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data.</p></li>
-<li><p>abs_I - Optional, an integer vector to indicate which indices are in absolute magnitude. Use 1 to set q = 1, otherwise use 0 to estimate q.</p></li>
-<li><p>I_units - Optional, an integer vector to indicate whether indices are biomass based (1) or abundance-based (0). By default, all are biomass-based.</p></li>
-<li><p>age_error - Optional, a square matrix of maxage + 1 rows and columns to specify ageing error. The aa-th column assigns a proportion of the true age in the
-a-th row to observed age. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).</p></li>
-<li><p>sel_block - Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of nyears rows and nfleet columns to assigns a selectivity function to a fleet for certain years.</p></li>
-</ul></div>
+if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial
+depletion) in the first year of the model (see additional arguments).</p></dd>
+
+<dt><code>C_eq_sd</code></dt>
+<dd><p>A vector of standard deviations (lognormal distribution) for the equilibrium catches in <code>C_eq</code>.
+If not provided, the default is 0.01. Only used if <code>condition = "catch"</code>.</p></dd>
+
+<dt><code>E_eq</code></dt>
+<dd><p>The equilibrium effort for each fleet in <code>Ehist</code> prior to the first year of the operating model.
+Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data.</p></dd>
+
+<dt><code>abs_I</code></dt>
+<dd><p>Optional, an integer vector to indicate which indices are in absolute magnitude. Use 1 to set <code>q = 1</code>,
+otherwise use 0 to estimate q.</p></dd>
+
+<dt><code>I_units</code></dt>
+<dd><p>Optional, an integer vector to indicate whether indices are biomass based (1) or abundance-based (0).
+By default, all are biomass-based.</p></dd>
+
+<dt><code>age_error</code></dt>
+<dd><p>Optional, a square matrix of maxage + 1 rows and columns to specify ageing error. The aa-th column
+assigns a proportion of the true age in the a-th row to observed age. Thus, all rows should sum to 1.
+Default is an identity matrix (no ageing error).</p></dd>
+
+<dt><code>sel_block</code></dt>
+<dd><p>Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of <code>nyears</code> rows and <code>nfleet</code> columns
+to assigns a selectivity function to a fleet for certain years.</p></dd>
+
+
+</dl></div>
     <div class="section level2">
     <h2 id="additional-arguments">Additional arguments<a class="anchor" aria-label="anchor" href="#additional-arguments"></a></h2>
     
 
 <p>For <code>RCM</code>, additional arguments can be passed to the model via <code>...</code>:</p>
-<ul><li><p>plusgroup: Logical for whether the maximum age is a plusgroup or not. By default, TRUE.</p></li>
-<li><p>fix_dome: Logical for whether the dome selectivity parameter for fleets is fixed. Used primarily for backwards compatibility, this is overridden by the map argument.</p></li>
-<li><p>resample: Logical, whether the OM conditioning parameters (recruitment, fishing mortality, SSB, selectivity, etc.) are obtained by sampling the Hessian matrix from
-a single model fit. By default FALSE. This feature requires identical biological parameters among simulations.</p></li>
-</ul></div>
+<dl><dt><code>plusgroup</code></dt>
+<dd><p>Logical for whether the maximum age is a plusgroup or not. By default, TRUE.</p></dd>
+
+<dt><code>fix_dome</code></dt>
+<dd><p>Logical for whether the dome selectivity parameter for fleets is fixed. Used primarily for backwards compatibility,
+this is overridden by the <code>map</code> argument.</p></dd>
+
+<dt><code>resample</code></dt>
+<dd><p>Logical, whether the OM conditioning parameters (recruitment, fishing mortality, SSB, selectivity, etc.) are obtained by sampling the Hessian matrix from
+a single model fit. By default FALSE. This feature requires identical biological parameters among simulations.</p></dd>
+
+
+</dl></div>
     <div class="section level2">
-    <h2 id="start-and-map">start and map<a class="anchor" aria-label="anchor" href="#start-and-map"></a></h2>
+    <h2 id="start">start<a class="anchor" aria-label="anchor" href="#start"></a></h2>
     
 
-<p>Starting values can be specified in a named list for the following:</p><ul><li><p>vul_par: A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
+<p>Starting values can be specified in a named list for the following:</p>
+<dl><dt><code>vul_par</code></dt>
+<dd><p>A matrix of 3 rows and nfleet columns for starting values for fleet selectivity. The three rows correspond
 to LFS (length of full selectivity), L5 (length of 5 percent selectivity), and Vmaxlen (selectivity at length Linf). By default,
-the starting values are values from the OM object. If any selectivity = "free", then this matrix needs to be of maxage+1 rows where
-the row specifies the selectivity at age. See Articles section.</p></li>
-<li><p>ivul_par: A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as vul_par. Values in the column are ignored
-if <code>s_selectivity</code> is mapped to a fishing fleet (add NA placeholders in that case). 
-If any <code>s_selectivity = "free"</code>, then this matrix needs to be of maxage+1 rows where
-the row specifies the selectivity at age.</p></li>
-<li><p>log_rec_dev: A numeric vector of length nyears for the starting values of the log-recruitment deviations.</p></li>
-<li><p>log_early_rec_dev: A numeric vector of length OM@maxage for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.</p></li>
-<li><p>q: A numeric vector of length nsurvey for index catchability. See <a href="https://openmse.com/tutorial-rcm-select/" class="external-link">online article</a> for more information.</p></li>
-</ul><p>Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
+the starting values are values from the OM object. If any <code>selectivity = "free"</code>, then this matrix needs to be of <code>maxage+1</code> rows where
+the row specifies the selectivity at age. See Articles section.</p></dd>
+
+<dt><code>ivul_par</code></dt>
+<dd><p>A matrix of 3 rows and nsurvey columns for starting values for fleet selectivity. Same setup as <code>vul_par</code>. Values in the column are ignored
+if <code>s_selectivity</code> is mapped to a fishing fleet (add NA placeholders in that case).
+If any <code>s_selectivity = "free"</code>, then this matrix needs to be of <code>maxage+1</code> rows where
+the row specifies the selectivity at age.</p></dd>
+
+<dt><code>log_rec_dev</code></dt>
+<dd><p>A numeric vector of length <code>nyears</code> for the starting values of the log-recruitment deviations.</p></dd>
+
+<dt><code>log_early_rec_dev</code></dt>
+<dd><p>A numeric vector of length <code>OM@maxage</code> for the starting values of the recruitment deviations controlling the abundance-at-age in the first year of the model.</p></dd>
+
+<dt><code>q</code></dt>
+<dd><p>A numeric vector of length nsurvey for index catchability. See <a href="https://openmse.com/tutorial-rcm-select/" class="external-link">online article</a> for more information.</p></dd>
+
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="map">map<a class="anchor" aria-label="anchor" href="#map"></a></h2>
+    
+
+<p>Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
 vector or matrix in the map argument will be the same dimension as in the start entry. If an entry is <code>NA</code>, the corresponding parameter is fixed in the model to the starting
 value. Otherwise, an integer for each independent parameter, i.e., shared or mirrored parameters get the same integer entry.</p>
-<ul><li><p>vul_par: An integer matrix of the same dimension as vul_par. By default, selectivity is fixed if there are no age or length composition for that fleet
-or survey, otherwise estimated. Unused cells in the vul_par matrix should be given NA in the map matrix.</p></li>
-<li><p>ivul_par: The map argument for the survey selectivity parameters (same dimension as ivul_par). Placeholder parameters should have a map value of NA.</p></li>
-<li><p>log_early_rec_dev: A vector of length OM@maxage that indexes which recruitment deviates for the cohorts in the first year of the model are fixed (using NA) or estimated (a separate integer).
-By default, no deviates are estimated (all are NA).</p></li>
-<li><p>log_rec_dev: A vector of length OM@nyears that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
-By default, all these deviates are estimated.</p></li>
-<li><p>q: A vector of length nsurvey for index catchability. q should be an estimated parameter when sharing across surveys (perhaps with differing selectivity). Otherwise, it is solved analytically
-where individual parameters are independent of other indices. Use <code>RCMdata@abs_I</code> for fixing the catchability to 1. See <a href="https://openmse.com/tutorial-rcm-select/" class="external-link">online article</a> for more information.</p></li>
-</ul></div>
+<dl><dt><code>vul_par</code></dt>
+<dd><p>An integer matrix of the same dimension as <code>start$vul_par</code>. By default, selectivity is fixed if there are no age or length composition for that fleet
+or survey, otherwise estimated. Unused cells in the <code>start$vul_par</code> matrix should be given NA in the map matrix.</p></dd>
+
+<dt><code>ivul_par</code></dt>
+<dd><p>The map argument for the survey selectivity parameters (same dimension as <code>start$ivul_par</code>). Placeholder parameters should have a map value of NA.</p></dd>
+
+<dt><code>log_early_rec_dev</code></dt>
+<dd><p>A vector of length <code>OM@maxage</code> that indexes which recruitment deviates for the cohorts in the first year of the model are fixed (using NA) or estimated (a separate integer).
+By default, no deviates are estimated (all are NA).</p></dd>
+
+<dt><code>log_rec_dev</code></dt>
+<dd><p>A vector of length <code>OM@nyears</code> that indexes which recruitment deviates are fixed (using NA) or estimated (a separate integer).
+By default, all these deviates are estimated.</p></dd>
+
+<dt><code>q</code></dt>
+<dd><p>A vector of length <code>nsurvey</code> for index catchability. q should be an estimated parameter when sharing across surveys (perhaps with differing selectivity). Otherwise, it is solved analytically
+where individual parameters are independent of other indices. Use <code>RCMdata@abs_I</code> for fixing the catchability to 1. See <a href="https://openmse.com/tutorial-rcm-select/" class="external-link">online article</a> for more information.</p></dd>
+
+
+</dl></div>
     <div class="section level2">
     <h2 id="likelihood-weights">Likelihood weights<a class="anchor" aria-label="anchor" href="#likelihood-weights"></a></h2>
     
 
-<p><code>LWT</code> is an optional named list containing the likelihood weights (values &gt;= 0) with the possible options:</p><ul><li><p>Chist, CAA, CAL, MS, C_eq: A vector of length nfleet for each.</p></li>
-<li><p>Index, IAA, IAL: A vector of length nsurvey for each.</p></li>
+<p><code>LWT</code> is an optional named list containing the likelihood weights (values &gt;= 0) with the possible options:</p><ul><li><p><code>Chist, CAA, CAL, MS, C_eq</code>: A vector of length nfleet for each.</p></li>
+<li><p><code>Index, IAA, IAL</code>: A vector of length nsurvey for each.</p></li>
 </ul><p>By default, all likelihood weights are equal to one if not specified by the user.</p>
-<p>Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
+<p>Annual multinomial sample sizes for the age and length comps can now be provided directly in the
 <a href="RCMdata-class.html">RCMdata</a> object. For a list or Data object, use the <code>ESS</code> argument.</p>
     </div>
     <div class="section level2">
@@ -450,7 +569,7 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating operating model:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.46 - 13782.9</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.87</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F set with OM@cpars$Find and OM@cpars$qs.</span>
@@ -467,8 +586,8 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpwNZUmh/RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpwNZUmh/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpOMCbLz/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpOMCbLz/RCM.html</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> See help(plot.RCModel) to adjust report and file directory.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span></span>
@@ -513,7 +632,7 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating additional model fit from mean values of parameters in the operating model...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating operating model:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.46 - 13782.9</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.87</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of initial spawning depletion: 0.44 - 1.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Range of spawning depletion (OM@cpars$D): 0.14 - 0.45</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical F set with OM@cpars$Find and OM@cpars$qs.</span>
@@ -532,8 +651,8 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpwNZUmh/compare_RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpwNZUmh/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpOMCbLz/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpOMCbLz/compare_RCM.html</span>
 <span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>

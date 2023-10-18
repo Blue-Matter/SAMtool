@@ -254,29 +254,29 @@ Otherwise, recruitment deviations are penalized parameters.</p></dd>
 
 
 <dt>silent</dt>
-<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
+<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun()</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
 
 
 <dt>opt_hess</dt>
-<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
+<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if <code>integrate = TRUE</code>.</p></dd>
 
 
 <dt>n_restart</dt>
-<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
+<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
 
 
 <dt>control</dt>
 <dd><p>A named list of arguments for optimization to be passed to
-<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.</p></dd>
 
 
 <dt>inner.control</dt>
 <dd><p>A named list of arguments for optimization of the random effects, which
-is passed on to <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton</a></code>.</p></dd>
+is passed on to <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">TMB::newton()</a></code>.</p></dd>
 
 
 <dt>...</dt>
@@ -291,7 +291,7 @@ for which the catch-at-age matrix has less than half the abundance than that at 
 
 
 <dt>fix_U_equilibrium</dt>
-<dd><p>Logical, same as `fix_F_equilibrium` for `SCA_Pope`.</p></dd>
+<dd><p>Logical, same as <code>fix_F_equilibrium</code> for <code>SCA_Pope</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -312,16 +312,16 @@ to that number. If <code>CAA_multiplier &lt;= 1</code>, then all the annual samp
 multiplies the sample size to 10% of the original number. By default, sample sizes are capped at 50.</p>
 <p>Alternatively, a lognormal distribution with inverse proportion variance can be used for the catch at age (Punt and Kennedy, 1994, as
 cited by Maunder 2011).</p>
-<p>For <code>start</code> (optional), a named list of starting values of estimates can be provided for:</p><ul><li><p><code>R0</code> Unfished recruitment, except when <code>SR = "none"</code> where it is mean recruitment. 
-By default, 150% Data@OM$R0[x] is used as the start value in closed-loop simulation, and 400% of mean catch otherwise.</p></li>
-<li><p><code>h</code> Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.</p></li>
-<li><p><code>M</code> Natural mortality. Otherwise, Data@Mort[x] is used.</p></li>
+<p>For <code>start</code> (optional), a named list of starting values of estimates can be provided for:</p><ul><li><p><code>R0</code> Unfished recruitment, except when <code>SR = "none"</code> where it is mean recruitment.
+By default, 150% <code>Data@OM$R0[x]</code> is used as the start value in closed-loop simulation, and 400% of mean catch otherwise.</p></li>
+<li><p><code>h</code> Steepness. Otherwise, <code>Data@steep[x]</code> is used, or 0.9 if empty.</p></li>
+<li><p><code>M</code> Natural mortality. Otherwise, <code>Data@Mort[x]</code> is used.</p></li>
 <li><p><code>vul_par</code> Vulnerability parameters, see next paragraph.</p></li>
-<li><p><code>F</code> A vector of length nyears for year-specific fishing mortality.</p></li>
+<li><p><code>F</code> A vector of length <code>nyears</code> for year-specific fishing mortality.</p></li>
 <li><p><code>F_equilibrium</code> Equilibrium fishing mortality leading into first year of the model (to determine initial depletion). By default, 0.</p></li>
 <li><p><code>U_equilibrium</code> Same as F_equilibrium when <code>catch_eq = "Pope"</code>. By default, 0.</p></li>
-<li><p><code>omega</code> Lognormal SD of the catch (observation error) when <code>catch_eq = "Baranov"</code>. By default, Data@CV_Cat[x].</p></li>
-<li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error). By default, Data@sigmaR[x].</p></li>
+<li><p><code>omega</code> Lognormal SD of the catch (observation error) when <code>catch_eq = "Baranov"</code>. By default, <code>Data@CV_Cat[x]</code>.</p></li>
+<li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error). By default, <code>Data@sigmaR[x]</code>.</p></li>
 </ul><p>Vulnerability can be specified to be either logistic or dome. If logistic, then the parameter
 vector <code>vul_par</code> is of length 2:</p><ul><li><p><code>vul_par[1]</code> corresponds to <code>a_95</code>, the age of 95% vulnerability. <code>a_95</code> is a transformed parameter via logit transformation to constrain <code>a_95</code> to less than 75%
 of the maximum age: <code>a_95 = 0.75 * max_age * plogis(x[1])</code>, where <code>x</code> is the estimated vector.</p></li>
@@ -342,15 +342,15 @@ for example, when vulnerability &gt;&gt; 0.5 for the youngest age class.</p>
     <h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a></h2>
     
 
-<p>The following priors can be added as a named list, e.g., <code>prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)</code>. 
+<p>The following priors can be added as a named list, e.g., <code>prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)</code>.
 For each parameter below, provide a vector of values as described:</p>
 <ul><li><p><code>R0</code> - A vector of length 3. The first value indicates the distribution of the prior: <code>1</code> for lognormal, <code>2</code> for uniform
 on <code>log(R0)</code>, <code>3</code> for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
 Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).</p></li>
-<li><p><code>h</code> - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+<li><p><code>h</code> - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution,
 while Ricker steepness uses a normal distribution.</p></li>
 <li><p><code>M</code> - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.</p></li>
-<li><p><code>q</code> - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+<li><p><code>q</code> - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column
 for the SD (in log space). Use <code>NA</code> in rows corresponding to indices without priors.</p></li>
 </ul><p>See online documentation for more details.</p>
     </div>
@@ -358,7 +358,7 @@ for the SD (in log space). Use <code>NA</code> in rows corresponding to indices 
     <h2 id="online-documentation">Online Documentation<a class="anchor" aria-label="anchor" href="#online-documentation"></a></h2>
     
 
-<p>Model description and equations are available on the openMSE 
+<p>Model description and equations are available on the openMSE
 <a href="https://openmse.com/features-assessment-models/2-sca/" class="external-link">website</a>.</p>
     </div>
     <div class="section level2">

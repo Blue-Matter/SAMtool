@@ -172,24 +172,24 @@ for <code>LWT$MW</code> a numeric.</p></dd>
 
 
 <dt>silent</dt>
-<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
+<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun()</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
 
 
 <dt>opt_hess</dt>
-<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
+<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if <code>integrate = TRUE</code>.</p></dd>
 
 
 <dt>n_restart</dt>
-<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
+<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
 
 
 <dt>control</dt>
 <dd><p>A named list of parameters regarding optimization to be passed to
-<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.</p></dd>
 
 
 <dt>...</dt>
@@ -199,7 +199,7 @@ hasn't converged. The optimization continues from the parameters from the previo
 <dt>fix_sd</dt>
 <dd><p>Logical, whether the standard deviation of the data in the likelihood (index for conditioning on catch or
 catch for conditioning on effort). If <code>TRUE</code>, the SD is fixed to value provided in <code>start</code> (if provided), otherwise,
- value based on either <code>Data@CV_Cat</code> or <code>Data@CV_Ind</code>.</p></dd>
+value based on either <code>Data@CV_Cat</code> or <code>Data@CV_Ind</code>.</p></dd>
 
 
 <dt>fix_tau</dt>
@@ -215,28 +215,28 @@ Otherwise, recruitment deviations are penalized parameters.</p></dd>
 
 <dt>inner.control</dt>
 <dd><p>A named list of arguments for optimization of the random effects, which
-is passed on to <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton</a></code> via <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>.</p></dd>
+is passed on to <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">TMB::newton()</a></code> via <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An object of <code><a href="Assessment-class.html">Assessment</a></code> containing objects and output from TMB.</p>
+<p>An object of <a href="Assessment-class.html">Assessment</a> containing objects and output from TMB.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>For <code>start</code> (optional), a named list of starting values of estimates can be provided for:</p><ul><li><p><code>R0</code> Unfished recruitment. Otherwise, Data@OM$R0[x] is used in closed-loop, and 400% of mean catch otherwise.</p></li>
-<li><p><code>h</code> Steepness. Otherwise, Data@steep[x] is used, or 0.9 if empty.</p></li>
-<li><p><code>M</code> Natural mortality. Otherwise, Data@Mort[x] is used.</p></li>
+    <p>For <code>start</code> (optional), a named list of starting values of estimates can be provided for:</p><ul><li><p><code>R0</code> Unfished recruitment. Otherwise, <code>Data@OM$R0[x]</code> is used in closed-loop, and 400% of mean catch otherwise.</p></li>
+<li><p><code>h</code> Steepness. Otherwise, <code>Data@steep[x]</code> is used, or 0.9 if empty.</p></li>
+<li><p><code>M</code> Natural mortality. Otherwise, <code>Data@Mort[x]</code> is used.</p></li>
 <li><p><code>k</code> Age of knife-edge maturity. By default, the age of 50% maturity calculated from the slots in the Data object.</p></li>
 <li><p><code>Rho</code> Delay-difference rho parameter. Otherwise, calculated from biological parameters in the Data object.</p></li>
 <li><p><code>Alpha</code> Delay-difference alpha parameter. Otherwise, calculated from biological parameters in the Data object.</p></li>
 <li><p><code>q_effort</code> Scalar coefficient when conditioning on effort (to scale to F). Otherwise, 1 is the default.</p></li>
 <li><p><code>F_equilibrium</code> Equilibrium fishing mortality rate leading into first year of the model (to determine initial depletion). By default, 0.</p></li>
-<li><p><code>omega</code> Lognormal SD of the catch (observation error) when conditioning on effort. By default, Data@CV_Cat[x].</p></li>
-<li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error) for <code>DD_SS</code>. By default, Data@sigmaR[x].</p></li>
-<li><p><code>sigma</code> Lognormal SD of the index (observation error) when conditioning on catch. By default, Data@CV_Ind[x]. Not
+<li><p><code>omega</code> Lognormal SD of the catch (observation error) when conditioning on effort. By default, <code>Data@CV_Cat[x]</code>.</p></li>
+<li><p><code>tau</code> Lognormal SD of the recruitment deviations (process error) for <code>DD_SS</code>. By default, <code>Data@sigmaR[x]</code>.</p></li>
+<li><p><code>sigma</code> Lognormal SD of the index (observation error) when conditioning on catch. By default, <code>Data@CV_Ind[x]</code>. Not
 used if multiple indices are used.</p></li>
 <li><p><code>sigma_W</code> Lognormal SD of the mean weight (observation error). By default, 0.1.</p></li>
 </ul><p>Multiple indices are supported in the model. Data@Ind, Data@VInd, and Data@SpInd are all assumed to be biomass-based.
@@ -251,15 +251,15 @@ violated tends to be the biggest driver of performance for this method.</p>
     <h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a></h2>
     
 
-<p>The following priors can be added as a named list, e.g., <code>prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)</code>. 
+<p>The following priors can be added as a named list, e.g., <code>prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)</code>.
 For each parameter below, provide a vector of values as described:</p>
 <ul><li><p><code>R0</code> - A vector of length 3. The first value indicates the distribution of the prior: <code>1</code> for lognormal, <code>2</code> for uniform
 on <code>log(R0)</code>, <code>3</code> for uniform on R0. If lognormal, the second and third values are the prior mean (in normal space) and SD (in log space).
 Otherwise, the second and third values are the lower and upper bounds of the uniform distribution (values in normal space).</p></li>
-<li><p><code>h</code> - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution, 
+<li><p><code>h</code> - A vector of length 2 for the prior mean and SD, both in normal space. Beverton-Holt steepness uses a beta distribution,
 while Ricker steepness uses a normal distribution.</p></li>
 <li><p><code>M</code> - A vector of length 2 for the prior mean (in normal space) and SD (in log space). Lognormal prior.</p></li>
-<li><p><code>q</code> - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column 
+<li><p><code>q</code> - A matrix for nsurvey rows and 2 columns. The first column is the prior mean (in normal space) and the second column
 for the SD (in log space). Use <code>NA</code> in rows corresponding to indices without priors.</p></li>
 </ul><p>See online documentation for more details.</p>
     </div>
@@ -267,7 +267,7 @@ for the SD (in log space). Use <code>NA</code> in rows corresponding to indices 
     <h2 id="online-documentation">Online Documentation<a class="anchor" aria-label="anchor" href="#online-documentation"></a></h2>
     
 
-<p>Model description and equations are available on the openMSE 
+<p>Model description and equations are available on the openMSE
 <a href="https://openmse.com/features-assessment-models/1-dd/" class="external-link">website</a>.</p>
     </div>
     <div class="section level2">

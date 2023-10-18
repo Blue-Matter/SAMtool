@@ -163,24 +163,24 @@ from which that quantile is used, i.e., <code>c(0.5, 5)</code> is the default th
 
 
 <dt>silent</dt>
-<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
+<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun()</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
 
 
 <dt>opt_hess</dt>
-<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
+<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if <code>integrate = TRUE</code>.</p></dd>
 
 
 <dt>n_restart</dt>
-<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
+<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
 
 
 <dt>control</dt>
 <dd><p>A named list of arguments for optimization to be passed to
-<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.</p></dd>
 
 
 <dt>...</dt>
@@ -221,7 +221,7 @@ quantities are also calculated, which may be used in harvest control rules.</p>
 model will crash the model, as well as if the catch-at-age values are close to zero. The model sets F-at-age to 1e-4
 if any catch-at-age value &lt; 1e-4.</p>
 <p>It is recommended to do some preliminary fits with the VPA before running simulations en masse. See example below.</p>
-<p>Shrinkage, penalty functions that stabilize model estimates of recruitment and selectivity year-over-year near 
+<p>Shrinkage, penalty functions that stabilize model estimates of recruitment and selectivity year-over-year near
 the end of the time series, alters the behavior of the model. This is something to tinker with in your initial
 model fits, and worth evaluating in closed-loop simulation.</p>
     </div>
@@ -229,7 +229,7 @@ model fits, and worth evaluating in closed-loop simulation.</p>
     <h2 id="online-documentation">Online Documentation<a class="anchor" aria-label="anchor" href="#online-documentation"></a></h2>
     
 
-<p>Model description and equations are available on the openMSE 
+<p>Model description and equations are available on the openMSE
 <a href="https://openmse.com/features-assessment-models/4-vpa/" class="external-link">website</a>.</p>
     </div>
     <div class="section level2">

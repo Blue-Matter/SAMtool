@@ -177,34 +177,34 @@ Ignored if <code>n_seas</code> = 1.</p></dd>
 
 <dt>Euler_Lotka</dt>
 <dd><p>Integer. If greater than zero, the function will calculate a prior for the intrinsic rate of increase to use in the estimation model
-(in lieu of an explicit prior in argument <code>prior</code>). The value of this argument specifies the number of stochastic samples used to calculate the prior SD. 
+(in lieu of an explicit prior in argument <code>prior</code>). The value of this argument specifies the number of stochastic samples used to calculate the prior SD.
 See section on priors below.</p></dd>
 
 
 <dt>SR_type</dt>
-<dd><p>If <code>use_r_prior = TRUE</code>, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
+<dd><p>If <code>use_r_prior = TRUE</code>, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from
 steepness and unfished spawners-per-recruit. Used to develop the r prior.</p></dd>
 
 
 <dt>silent</dt>
-<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>, whether TMB
+<dd><p>Logical, passed to <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun()</a></code>, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.</p></dd>
 
 
 <dt>opt_hess</dt>
-<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> during optimization
+<dd><p>Logical, whether the hessian function will be passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code> during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if <code>integrate = TRUE</code>.</p></dd>
 
 
 <dt>n_restart</dt>
-<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>) in the optimization procedure, so long as the model
+<dd><p>The number of restarts (calls to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.</p></dd>
 
 
 <dt>control</dt>
 <dd><p>A named list of parameters regarding optimization to be passed to
-<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code>.</p></dd>
+<code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.</p></dd>
 
 
 <dt>...</dt>
@@ -234,19 +234,19 @@ of the biomass deviations (thus, treating it as a state-space variable).</p></dd
 
 <dt>inner.control</dt>
 <dd><p>A named list of arguments for optimization of the random effects, which
-is passed on to <a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton</a> via <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>.</p></dd>
+is passed on to <a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton</a> via <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>An object of <code><a href="Assessment-class.html">Assessment</a></code> containing objects and output from TMB.</p>
+<p>An object of <a href="Assessment-class.html">Assessment</a> containing objects and output from TMB.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>For <code>start</code> (optional), a named list of starting values of estimates can be provided for:</p><ul><li><p><code>MSY</code> Maximum sustainable yield.. Otherwise, 300% of mean catch by default.</p></li>
-<li><p><code>FMSY</code> Steepness. Otherwise, Data@Mort[x] or 0.2 is used.</p></li>
+<li><p><code>FMSY</code> Steepness. Otherwise, <code>Data@Mort[x]</code> or 0.2 is used.</p></li>
 <li><p><code>dep</code> Initial depletion (B/B0) in the first year of the model. By default, 1.</p></li>
 <li><p><code>n</code> The production function exponent that determines BMSY/B0. By default, 2 so that BMSY/B0 = 0.5.</p></li>
 <li><p><code>sigma</code> Lognormal SD of the index (observation error). By default, 0.05. Not
@@ -278,7 +278,7 @@ a prior distribution for r. See <code>vignette("Surplus_production")</code> for 
     <h2 id="online-documentation">Online Documentation<a class="anchor" aria-label="anchor" href="#online-documentation"></a></h2>
     
 
-<p>Model description and equations are available on the openMSE 
+<p>Model description and equations are available on the openMSE
 <a href="https://openmse.com/features-assessment-models/3-sp/" class="external-link">website</a>.</p>
     </div>
     <div class="section level2">
@@ -330,9 +330,9 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /tmp/RtmpwNZUmh/report_SP.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpwNZUmh/report_SP.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpwNZUmh/report_SP.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /tmp/RtmpOMCbLz/report_SP.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpOMCbLz/report_SP.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpOMCbLz/report_SP.html</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> See help(plot.Assessment) to adjust report and file directory.</span>
 <span class="r-in"><span><span class="fu"><a href="profile.html">profile</a></span><span class="op">(</span><span class="va">res</span>, FMSY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.4</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="SP-1.png" alt="" width="700" height="433"></span>
@@ -401,9 +401,9 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_SS</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /tmp/RtmpwNZUmh/report_SP_SS.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpwNZUmh/report_SP_SS.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpwNZUmh/report_SP_SS.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Writing markdown file: /tmp/RtmpOMCbLz/report_SP_SS.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendering markdown file: /tmp/RtmpOMCbLz/report_SP_SS.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpOMCbLz/report_SP_SS.html</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> See help(plot.Assessment) to adjust report and file directory.</span>
 <span class="r-plt img"><img src="SP-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>

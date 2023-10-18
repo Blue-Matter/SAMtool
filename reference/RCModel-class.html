@@ -131,10 +131,10 @@
 
 <dt><code>mean_fit</code></dt>
 <dd><p>A list of output from fit to mean values of life history parameters in the operating model. The named list consists of:</p>
-<ul><li><p>obj - a list with components returned from <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a></code>.</p></li>
-<li><p>opt - a list with components from calling <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></code> to <code>obj</code>.</p></li>
+<ul><li><p>obj - a list with components returned from <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun()</a></code>.</p></li>
+<li><p>opt - a list with components from calling <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code> to <code>obj</code>.</p></li>
 <li><p>SD - a list (class sdreport) with parameter estimates and their standard errors, obtained from
-<code><a href="https://rdrr.io/pkg/TMB/man/sdreport.html" class="external-link">sdreport</a></code>.</p></li>
+<code><a href="https://rdrr.io/pkg/TMB/man/sdreport.html" class="external-link">TMB::sdreport()</a></code>.</p></li>
 <li><p>report - a list of model output reported from the TMB executable, i.e. <code>obj$report()</code>. See Misc.</p></li>
 </ul></dd>
 

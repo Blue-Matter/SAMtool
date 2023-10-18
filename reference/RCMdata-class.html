@@ -66,18 +66,18 @@ If not provided, the default is 0.01. Not used if <code>RCM(condition = "catch2"
 
 
 <dt><code>Ehist</code></dt>
-<dd><p>A vector of historical effort, should be of length <code>OM@nyears</code>, or if there are multiple fleets: 
+<dd><p>A vector of historical effort, should be of length <code>OM@nyears</code>, or if there are multiple fleets:
 a matrix of <code>OM@nyears</code> rows and <code>nfleet</code> columns. See also slot <code>E_eq</code>).</p></dd>
 
 
 <dt><code>CAA</code></dt>
-<dd><p>Fishery age composition matrix with <code>nyears</code> rows and <code>OM@maxage+1</code> columns, or if multiple fleets: 
-an array with dimension: <code>nyears, OM@maxage+1, nfleet</code>. Enter <code>NA</code> for years without any data. 
+<dd><p>Fishery age composition matrix with <code>nyears</code> rows and <code>OM@maxage+1</code> columns, or if multiple fleets:
+an array with dimension: <code>nyears, OM@maxage+1, nfleet</code>. Enter <code>NA</code> for years without any data.
 Raw numbers will be converted to annual proportions (see slot <code>CAA_ESS</code> for sample sizes).</p></dd>
 
 
 <dt><code>CAA_ESS</code></dt>
-<dd><p>Annual sample size (for the multinomial distribution) of the fishery age comps. 
+<dd><p>Annual sample size (for the multinomial distribution) of the fishery age comps.
 A vector of length <code>OM@nyears</code>, or if there are multiple fleets: a matrix of <code>OM@nyears</code> rows and <code>nfleet</code> columns.
 Enter zero for years without observations.
 An annual cap to the ESS, e.g., 50, can be calculated with something like: <code>pmin(apply(CAA, c(1, 3), sum, na.rm = TRUE), 50)</code>.
@@ -91,13 +91,14 @@ Raw numbers will be converted to annual proportions (see slot <code>CAL_ESS</cod
 
 
 <dt><code>CAL_ESS</code></dt>
-<dd><p>Annual sample size (for the multinomial distribution) of the fishery length comps. 
+<dd><p>Annual sample size (for the multinomial distribution) of the fishery length comps.
 Same dimension as <code>CAA_ESS</code>.</p></dd>
 
 
 <dt><code>length_bin</code></dt>
-<dd><p>- A vector (length <code>n_bin</code>) for the midpoints of the length bins for <code>CAL</code> and <code>IAL</code>, as well as the population model, if all bin widths are equal in size. 
-If length bins are unequal in width, then provide a vector of the boundaries of the length bins (vector of length <code>n_bin + 1</code>).</p></dd>
+<dd><ul><li><p>A vector (length <code>n_bin</code>) for the midpoints of the length bins for <code>CAL</code> and <code>IAL</code>, as well as the population model, if all bin widths are equal in size.
+If length bins are unequal in width, then provide a vector of the boundaries of the length bins (vector of length <code>n_bin + 1</code>).</p></li>
+</ul></dd>
 
 
 <dt><code>MS</code></dt>
@@ -115,7 +116,7 @@ Default is 0.2.</p></dd>
 
 
 <dt><code>Index</code></dt>
-<dd><p>Index of abundance. Enter <code>NA</code> for missing values. A vector length <code>OM@nyears</code>, or if there are multiple surveys: 
+<dd><p>Index of abundance. Enter <code>NA</code> for missing values. A vector length <code>OM@nyears</code>, or if there are multiple surveys:
 a matrix of <code>OM@nyears</code> rows and <code>nsurvey</code> columns.</p></dd>
 
 
@@ -130,30 +131,31 @@ Raw numbers will be converted to annual proportions (see <code>IAA_ESS</code> fo
 
 
 <dt><code>IAA_ESS</code></dt>
-<dd><p>Annual sample size (for the multinomial distribution) of the index age comps. 
+<dd><p>Annual sample size (for the multinomial distribution) of the index age comps.
 A vector of length <code>OM@nyears</code>. If there are multiple indices: a matrix of <code>OM@nyears</code> rows and <code>nsurvey</code> columns.</p></dd>
 
 
 <dt><code>IAL</code></dt>
-<dd><p>Index length composition data, an array of dimension <code>nyears, n_bin, nsurvey</code>. 
+<dd><p>Index length composition data, an array of dimension <code>nyears, n_bin, nsurvey</code>.
 Raw numbers will be converted to annual proportions (see slot <code>IAL_ESS</code> to enter sample sizes).</p></dd>
 
 
 <dt><code>IAL_ESS</code></dt>
-<dd><p>Annual sample size (for the multinomial distribution) of the index length comps. 
+<dd><p>Annual sample size (for the multinomial distribution) of the index length comps.
 Same dimension as <code>IAA_ESS</code>.</p></dd>
 
 
 <dt><code>C_eq</code></dt>
 <dd><p>Vector of length <code>nfleet</code> for the equilibrium catch for each fleet in <code>Chist</code> prior to the first year of the operating model.
 Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data. Alternatively,
-if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial depletion) 
+if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial depletion)
 in the first year of the model (see additional arguments in <a href="RCM.html">RCM</a>).</p></dd>
 
 
 <dt><code>C_eq_sd</code></dt>
-<dd><p>- A vector of standard deviations (lognormal distribution) for the equilibrium catches in <code>C_eq</code>.
-Same dimension as <code>C_eq</code>. If not provided, the default is 0.01. Only used if <code>RCM(condition = "catch")</code>.</p></dd>
+<dd><ul><li><p>A vector of standard deviations (lognormal distribution) for the equilibrium catches in <code>C_eq</code>.
+Same dimension as <code>C_eq</code>. If not provided, the default is 0.01. Only used if <code>RCM(condition = "catch")</code>.</p></li>
+</ul></dd>
 
 
 <dt><code>E_eq</code></dt>
@@ -162,7 +164,7 @@ Zero (default) implies unfished conditions in year one. Otherwise, this is used 
 
 
 <dt><code>abs_I</code></dt>
-<dd><p>An integer vector length <code>nsurvey</code> to indicate which indices are in absolute magnitude. Use <code>1</code> to set <code>q = 1</code>, 
+<dd><p>An integer vector length <code>nsurvey</code> to indicate which indices are in absolute magnitude. Use <code>1</code> to set <code>q = 1</code>,
 otherwise use 0 (default) to estimate q.</p></dd>
 
 
@@ -171,12 +173,12 @@ otherwise use 0 (default) to estimate q.</p></dd>
 
 
 <dt><code>age_error</code></dt>
-<dd><p>A square matrix of <code>maxage + 1</code> rows and columns to specify ageing error. The <code>aa</code>-th column assigns a proportion of animals of 
+<dd><p>A square matrix of <code>maxage + 1</code> rows and columns to specify ageing error. The <code>aa</code>-th column assigns a proportion of animals of
 true age <code>aa</code> to observed age <code>a</code> in the <code>a</code>-th row. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).</p></dd>
 
 
 <dt><code>sel_block</code></dt>
-<dd><p>For time-varying fleet selectivity (in time blocks), a integer matrix of <code>nyears</code> rows and <code>nfleet</code> columns to assign a selectivity 
+<dd><p>For time-varying fleet selectivity (in time blocks), a integer matrix of <code>nyears</code> rows and <code>nfleet</code> columns to assign a selectivity
 function to a fleet for certain years. By default, constant selectivity for each individual fleet.
 See the <a href="https://openmse.com/tutorial-rcm-select/" class="external-link">selectivity</a> article for more details.</p></dd>
 
