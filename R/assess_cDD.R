@@ -7,7 +7,7 @@
 #'
 #' @param x An index for the objects in `Data` when running in closed loop simulation.
 #' Otherwise, equals to 1 when running an assessment.
-#' @param Data An object of class \linkS4class{Data}.
+#' @param Data An object of class [Data-class].
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 #' the corresponding index in Data@@AddInd, "B" (or 0) represents total biomass in Data@@Ind, "VB" represents vulnerable biomass in
 #' Data@@VInd, and "SSB" represents spawning stock biomass in Data@@SpInd.
@@ -31,20 +31,20 @@
 #' of the recruitment deviations (thus, treating it as a state-space variable). Otherwise, recruitment deviations are penalized parameters.
 #' @param LWT A named list of likelihood weights. For `LWT$Index`, a vector of likelihood weights for each survey, while
 #' for `LWT$MW` a numeric.
-#' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
+#' @param silent Logical, passed to [TMB::MakeADFun()], whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
 #' @param n_itF Integer, the number of iterations to solve F conditional on the observed catch.
-#' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
+#' @param opt_hess Logical, whether the hessian function will be passed to [stats::nlminb()] during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 #' in convergence rate). Ignored if `integrate = TRUE`.
-#' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
+#' @param n_restart The number of restarts (calls to [stats::nlminb()]) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param control A named list of parameters regarding optimization to be passed to
-#' \code{\link[stats]{nlminb}}.
+#' [stats::nlminb()].
 #' @param inner.control A named list of arguments for optimization of the random effects, which
-#' is passed on to \code{\link[TMB]{newton}} via \code{\link[TMB]{MakeADFun}}.
+#' is passed on to [TMB::newton()] via [TMB::MakeADFun()].
 #' @param ... Additional arguments (not currently used).
-#' @return An object of \code{\linkS4class{Assessment}} containing objects and output
+#' @return An object of [Assessment-class] containing objects and output
 #' from TMB.
 #' @section Priors:
 #' The following priors can be added as a named list, e.g., `prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)`. 
@@ -105,7 +105,7 @@
 #' res <- cDD_SS(Data = MSEtool::Red_snapper, start = list(tau = 0.6))
 #'
 #' summary(res@@SD) # Parameter estimates
-#' @seealso \link{DD_TMB} \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
+#' @seealso [DD_TMB] [plot.Assessment] [summary.Assessment] [retrospective] [profile] [make_MP]
 #' @export
 cDD <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"), rescale = "mean1", MW = FALSE, start = NULL, prior = list(), fix_h = TRUE,
                 dep = 1, LWT = list(), n_itF = 5L, silent = TRUE, opt_hess = FALSE, n_restart = ifelse(opt_hess, 0, 1),

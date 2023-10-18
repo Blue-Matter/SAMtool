@@ -130,12 +130,12 @@ a range of exploitation rate of 0 - 0.99 or instantaneous F from 0 - 2.5 FMSY.
 apical F is provided.
 }}
 
-\item{\code{obj}}{A list with components returned from \code{\link[TMB]{MakeADFun}}.}
+\item{\code{obj}}{A list with components returned from \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 
-\item{\code{opt}}{A list with components from calling \code{\link[stats]{nlminb}} to \code{obj}.}
+\item{\code{opt}}{A list with components from calling \code{\link[stats:nlminb]{stats::nlminb()}} to \code{obj}.}
 
 \item{\code{SD}}{A list (class sdreport) with parameter estimates and their standard errors, obtained from
-\code{\link[TMB]{sdreport}}.}
+\code{\link[TMB:sdreport]{TMB::sdreport()}}.}
 
 \item{\code{TMB_report}}{A list of model output reported from the TMB executable, i.e. \code{obj$report()}, and derived quantities (e.g. MSY).}
 

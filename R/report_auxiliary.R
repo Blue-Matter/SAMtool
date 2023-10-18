@@ -5,7 +5,7 @@
 #' Plot biomass, recruitment, and fishing mortality time series from several . This function can be used to compare outputs among
 #' different assessment models from the same Data object.
 #'
-#' @param ... Objects of class \linkS4class{Assessment}.
+#' @param ... Objects of class [Assessment-class].
 #' @param label A character vector of the models for the legend.
 #' @param color A vector of colors for each assessment model.
 #' @author Q. Huynh
@@ -182,7 +182,7 @@ report <- function(Assessment, retro = NULL, filename = paste0("report_", Assess
 #' and standard deviations are provided.
 #' @author Q. Huynh
 #' @export plot_lognormalvar
-#' @seealso \code{\link{plot_betavar}} \code{\link{plot_steepness}}
+#' @seealso [plot_betavar()] [plot_steepness()]
 #' @examples
 #' mu <- 0.5
 #' stddev <- 0.1
@@ -316,7 +316,7 @@ plot_normalvar <- function(m, sd, label = NULL, color = "black") {
 #' and standard deviations are provided.
 #' @author Q. Huynh
 #' @export plot_betavar
-#' @seealso \code{\link{plot_lognormalvar}} \code{\link{plot_steepness}}
+#' @seealso [plot_lognormalvar()] [plot_steepness()]
 #' @examples
 #' mu <- 0.5
 #' stddev <- 0.1
@@ -385,7 +385,7 @@ plot_betavar <- function(m, sd, label = NULL, is_logit = FALSE, color = "black")
 #' transformed from 0 - 1 to 0.2 - 1.
 #' @author Q. Huynh
 #' @export
-#' @seealso \code{\link{plot_lognormalvar}} \code{\link{plot_betavar}}
+#' @seealso [plot_lognormalvar()] [plot_betavar()]
 #' @examples
 #' mu <- 0.8
 #' stddev <- 0.1
@@ -502,7 +502,7 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
 #' @param fit_color Color of fitted line.
 #' @param label Character string that describes the data to label the y-axis.
 #' @author Q. Huynh
-#' @seealso \code{\link{plot_residuals}}
+#' @seealso [plot_residuals()]
 #' @return A plot of annual observed data and predicted values from a model.
 #' @examples
 #' data(Red_snapper)
@@ -569,7 +569,7 @@ plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.
 #' @param zero_linetype Passes argument `lty` (e.g. solid line = 1, dotted = 2) to `draw_zero`.
 #' @param label Character string that describes the data to label the y-axis.
 #' @author Q. Huynh
-#' @seealso \code{\link{plot_timeseries}}
+#' @seealso [plot_timeseries()]
 #' @return A plot of model residuals by year (optionally, with error bars).
 #' @export 
 plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,

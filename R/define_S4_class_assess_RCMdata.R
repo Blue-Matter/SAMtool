@@ -86,10 +86,10 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' \item `catch_eq` A function that calculates the catch for the next year (after the model terminal year) when an
 #' apical F is provided. 
 #' }
-#' @slot obj A list with components returned from \code{\link[TMB]{MakeADFun}}.
-#' @slot opt A list with components from calling \code{\link[stats]{nlminb}} to `obj`.
+#' @slot obj A list with components returned from [TMB::MakeADFun()].
+#' @slot opt A list with components from calling [stats::nlminb()] to `obj`.
 #' @slot SD A list (class sdreport) with parameter estimates and their standard errors, obtained from
-#' \code{\link[TMB]{sdreport}}.
+#' [TMB::sdreport()].
 #' @slot TMB_report A list of model output reported from the TMB executable, i.e. `obj$report()`, and derived quantities (e.g. MSY).
 #' @slot dependencies A character string of data types required for the assessment.
 #' @examples
@@ -97,7 +97,7 @@ setClassUnion("vectormatrix", members = c("vector", "matrix"))
 #' output <- DD_TMB(Data = MSEtool::SimulatedData)
 #' class(output)
 #' }
-#' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
+#' @seealso [plot.Assessment] [summary.Assessment] [retrospective] [profile] [make_MP]
 #' @author Q. Huynh
 #' @export Assessment
 #' @exportClass Assessment
@@ -140,8 +140,8 @@ setMethod("initialize", "Assessment", function(.Object, ...) {
 #' @name summary.Assessment
 #' @title Summary of Assessment object
 #' @aliases summary,Assessment-method
-#' @description Returns a summary of parameter estimates and output from an \linkS4class{Assessment} object.
-#' @param object An object of class \linkS4class{Assessment}
+#' @description Returns a summary of parameter estimates and output from an [Assessment-class] object.
+#' @param object An object of class [Assessment-class]
 #' @return A list of parameters.
 #' @examples
 #' output <- DD_TMB(Data = MSEtool::SimulatedData)
@@ -159,26 +159,26 @@ setMethod("summary", signature(object = "Assessment"), function(object) {
 #' @name plot.Assessment
 #' @aliases plot,Assessment,missing-method
 #' @title Plot Assessment object
-#' @description Produces HTML file (via markdown) figures of parameter estimates and output from an \linkS4class{Assessment} object.
+#' @description Produces HTML file (via markdown) figures of parameter estimates and output from an [Assessment-class] object.
 #'
-#' @param x An object of class \linkS4class{Assessment}.
-#' @param y An object of class \linkS4class{retro}.
+#' @param x An object of class [Assessment-class].
+#' @param y An object of class [retro-class].
 #' @param filename Character string for the name of the markdown and HTML files.
 #' @param dir The directory in which the markdown and HTML files will be saved.
 #' @param ret_yr If greater than zero, then a retrospective analysis will be performed and results will be reported. The integer here corresponds
 #' to the number of peels (the maximum number of terminal years for which the data are removed).
 #' @param open_file Logical, whether the HTML document is opened after it is rendered.
 #' @param quiet Logical, whether to silence the markdown rendering function.
-#' @param render_args Arguments to pass to \link[rmarkdown]{render}.
+#' @param render_args Arguments to pass to [render][rmarkdown::render].
 #' @param ... Other arguments.
-#' @return Returns invisibly the output from \link[rmarkdown]{render}.
+#' @return Returns invisibly the output from [render][rmarkdown::render].
 #' @examples
 #' output <- DD_TMB(Data = Simulation_1)
 #' 
 #' \donttest{
 #' plot(output)
 #' }
-#' @seealso \link{retrospective}
+#' @seealso [retrospective]
 #' @exportMethod plot
 setMethod("plot", signature(x = "Assessment", y = "missing"),
           function(x, filename = paste0("report_", x@Model), dir = tempdir(), ret_yr = 0L,
@@ -203,7 +203,7 @@ if (getRversion() >= "2.15.1") {
 
 #' Class-`RCMdata`
 #'
-#' An S4 class for the data inputs into \link{RCM}.
+#' An S4 class for the data inputs into [RCM].
 #'
 #' @name RCMdata-class
 #' @docType class
@@ -250,7 +250,7 @@ if (getRversion() >= "2.15.1") {
 #' @slot C_eq Vector of length `nfleet` for the equilibrium catch for each fleet in `Chist` prior to the first year of the operating model.
 #' Zero (default) implies unfished conditions in year one. Otherwise, this is used to estimate depletion in the first year of the data. Alternatively,
 #' if one has a full CAA matrix, one could instead estimate "artificial" rec devs to generate the initial numbers-at-age (and hence initial depletion) 
-#' in the first year of the model (see additional arguments in \link{RCM}).
+#' in the first year of the model (see additional arguments in [RCM]).
 #' @slot C_eq_sd - A vector of standard deviations (lognormal distribution) for the equilibrium catches in `C_eq`.
 #' Same dimension as `C_eq`. If not provided, the default is 0.01. Only used if `RCM(condition = "catch")`.
 #' @slot E_eq The equilibrium effort for each fleet in `Ehist` prior to the first year of the operating model.
@@ -265,7 +265,7 @@ if (getRversion() >= "2.15.1") {
 #' See the [selectivity](https://openmse.com/tutorial-rcm-select/) article for more details.
 #' @slot Misc A list of miscellaneous inputs. Used internally.
 #'
-#' @seealso \link{RCM}
+#' @seealso [RCM]
 #' @author Q. Huynh
 #' @export RCMdata
 #' @exportClass RCMdata

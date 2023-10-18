@@ -124,11 +124,11 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 \item{drop_highF}{Logical, whether to drop fits of the RCM where F = \code{max_F}.}
 
-\item{control}{A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.}
+\item{control}{A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats:nlminb]{stats::nlminb()}}.}
 
 \item{start}{A list of starting values for the TMB model. See details.}
 
-\item{map}{A list of \code{map} argument to TMB models to override defaults. See \link[TMB]{MakeADFun} and details.}
+\item{map}{A list of \code{map} argument to TMB models to override defaults. See \link[TMB:MakeADFun]{MakeADFun} and details.}
 
 \item{ESS}{A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions.
 Not used when data are provided in a \linkS4class{RCMdata} object.}

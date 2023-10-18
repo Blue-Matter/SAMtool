@@ -39,15 +39,15 @@
 #' @param n_itF The number of iterations for solving F in the model (via Newton's method).
 #' @param min_age An integer to specify the smallest age class in the VPA. By default, the youngest age with non-zero CAA in the terminal year is used.
 #' @param max_age An integer to specify the oldest age class in the VPA. By default, the oldest age with non-zero CAA for all years is used.
-#' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
+#' @param silent Logical, passed to [TMB::MakeADFun()], whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
-#' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
+#' @param opt_hess Logical, whether the hessian function will be passed to [stats::nlminb()] during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 #' in convergence rate). Ignored if `integrate = TRUE`.
-#' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
+#' @param n_restart The number of restarts (calls to [stats::nlminb()]) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param control A named list of arguments for optimization to be passed to
-#' \code{\link[stats]{nlminb}}.
+#' [stats::nlminb()].
 #' @param ... Other arguments to be passed.
 #' @details
 #' The VPA is initialized by estimating the terminal F-at-age. Parameter `Fterm` is the apical terminal F if
@@ -63,7 +63,7 @@
 #' \item `Fterm` The terminal year fishing mortality. This is the apical F when `vulnerability = "logistic"` or `"free"`.
 #' \item `Fratio` The ratio of F in the plus-group to the next youngest age. If not provided, a value of 1 is used.
 #' \item `vul_par` Vulnerability parameters in the terminal year. This will be of length 2 vector for `"logistic"` or length 4 for
-#' `"dome"`, see \link{SCA} for further documentation on parameterization. For option `"free"`, this will be a vector of length
+#' `"dome"`, see [SCA] for further documentation on parameterization. For option `"free"`, this will be a vector of length
 #' A-2 where A is the number of age classes in the model. To estimate parameters, vulnerability is initially set to one at half the max age
 #' (and subsequently re-calculated relative to the maximum F experienced in that year). Vulnerability in the plus-group is also constrained
 #' by the Fratio.
@@ -87,7 +87,7 @@
 #' Model description and equations are available on the openMSE 
 #' [website](https://openmse.com/features-assessment-models/4-vpa/).
 #' 
-#' @return An object of class \linkS4class{Assessment}. The F vector is the apical fishing mortality experienced by any
+#' @return An object of class [Assessment-class]. The F vector is the apical fishing mortality experienced by any
 #' age class in a given year. 
 #' @examples
 #' \donttest{

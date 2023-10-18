@@ -1,7 +1,7 @@
 
 #' Age-structured model using fishery length composition
 #' 
-#' A single-fleet assessment that fits to catch, indices of abundance, and fishery length compositions. See \link{SCA} for all details.
+#' A single-fleet assessment that fits to catch, indices of abundance, and fishery length compositions. See [SCA] for all details.
 #' 
 #' @inheritParams SCA
 #' @param CAL_dist Character, the statistical distribution for the likelihood of the catch-at-length.
@@ -46,7 +46,7 @@ class(SCA_CAL) <- "Assessment"
 #' @param M_bounds A numeric vector of length 2 to indicate the M as B/B0 approaches zero and one, respectively.
 #' By default, set to 75% and 125%, respectively, of `Data@@Mort[x]`.
 #' @details
-#' See \link{SCA} for more information on all arguments.
+#' See [SCA] for more information on all arguments.
 #' @references
 #' Forrest, R.E., Holt, K.R., and Kronlund, A.R. 2018. Performance of alternative harvest control rules for two Pacific groundfish
 #' stocks with uncertain natural mortality: Bias, robustness and trade-offs. Fisheries Research 2016: 259-286.
@@ -58,8 +58,8 @@ class(SCA_CAL) <- "Assessment"
 #' res <- SCA_DDM(Data = MSEtool::SimulatedData)
 #' 
 #' @author Q. Huynh
-#' @return An object of class \linkS4class{Assessment}.
-#' @seealso \link{SCA} \link{SCA_RWM} \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
+#' @return An object of class [Assessment-class].
+#' @seealso [SCA] [SCA_RWM] [plot.Assessment] [summary.Assessment] [retrospective] [profile] [make_MP]
 #' @export
 SCA_DDM <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
                     vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),
@@ -84,8 +84,8 @@ class(SCA_DDM) <- "Assess"
 
 #' SCA with random walk in M
 #'
-#' `SCA_RWM` is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age). 
-#' Set the variance (`start$tau_M`) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to \link{SCA}.
+#' `SCA_RWM` is a modification of [SCA] that incorporates a random walk in M in logit space (constant with age). 
+#' Set the variance (`start$tau_M`) to a small value (0.001) in order to fix M for all years, which is functionally equivalent to [SCA].
 #' 
 #' @inheritParams SCA 
 #' @param refyear An expression for the year for which M is used to report MSY and unfished reference points. By default, terminal year. If multiple
@@ -116,10 +116,10 @@ class(SCA_DDM) <- "Assess"
 #' \item `tau_M` The fixed SD of the random walk in M. By default, 0.05. 
 #' }
 #' 
-#' See \link{SCA} for all other information about the structure and setup of the model.
+#' See [SCA] for all other information about the structure and setup of the model.
 #' 
 #' The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are 
-#' calculated and reported in TMB_report of the \linkS4class{Assessment} object.
+#' calculated and reported in TMB_report of the [Assessment-class] object.
 #'
 #' @section Online Documentation:
 #' Model description and equations are available on the openMSE 
@@ -140,8 +140,8 @@ class(SCA_DDM) <- "Assess"
 #' compare_models(res, res2, res3)
 #' }
 #' @author Q. Huynh
-#' @return An object of class \linkS4class{Assessment}.
-#' @seealso \link{SCA} \link{SCA_DDM}
+#' @return An object of class [Assessment-class].
+#' @seealso [SCA] [SCA_DDM]
 #' @export
 SCA_RWM <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
                     vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),

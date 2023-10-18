@@ -1,7 +1,7 @@
 
 #' Class-`project`
 #'
-#' An S4 class for the output from \link{projection}.
+#' An S4 class for the output from [projection].
 #'
 #' @name project-class
 #' @docType class
@@ -17,7 +17,7 @@
 #' @slot Catch A matrix of simulated observed catch over `p_sim` rows and `p_years` columns.
 #' @slot Index An array of simulated observed index of dimension `c(p_sim, p_years, nsurvey)`.
 #' @slot C_at_age An array for catch-at-age with dimension `c(p_sim, p_years, n_age)`.
-#' @seealso \link{projection}
+#' @seealso [projection]
 #' @author Q. Huynh
 #' @export project
 #' @exportClass project
@@ -30,7 +30,7 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 #'
 #' This function takes an assessment model and runs a stochastic projection based on future F or catch.
 #'
-#' @param Assessment An object of class \linkS4class{Assessment}.
+#' @param Assessment An object of class [Assessment-class].
 #' @param constrain Whether to project on future F or catch. By default, projects on F.
 #' @param Ftarget The projection F, either of length 1 for constant F for the entirety of the projection or length p_years.
 #' @param Catch The projection catch, either of length 1 for constant catch for the entirety of the projection or length p_years.
@@ -45,7 +45,7 @@ project <- setClass("project", slots = c(Model = "character", Name = "character"
 #' a matrix of ones indicates no recruitment deviates).
 #' @param max_F The maximum allowable F if the projection is constrained on catch.
 #' @param seed An integer to set the seed for the sampling observation and process error deviates.
-#' @return An object of class \linkS4class{project} that contains future predicted values of F, catch, biomass, recruitment, etc.
+#' @return An object of class [project-class] that contains future predicted values of F, catch, biomass, recruitment, etc.
 #' @examples
 #' \donttest{
 #' myAssess <- SP(Data = swordfish)

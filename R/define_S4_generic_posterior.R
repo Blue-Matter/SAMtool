@@ -7,7 +7,7 @@
 #' and returns a `stanfit` object for diagnostics. Use `RCMstan` to update the RCM and the enclosed operating model
 #' with MCMC samples..
 #'
-#' @param x An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.
+#' @param x An object of class [Assessment-class] or [RCModel-class].
 #' @param ... Additional arguments to pass to `rstan::sampling` via `tmbstan::tmbstan`.
 #' @author Q. Huynh
 #' @return `posterior` returns an object of class `stanfit`. See `class?stanfit`.

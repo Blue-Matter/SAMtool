@@ -46,7 +46,7 @@ simulate(object, ...)
 \item{cores}{The number of CPUs for parallel processing for model re-fitting if \code{refit = TRUE}.}
 }
 \value{
-A \link{sim-class} object returning the original data, simulated data, original parameters, parameters estimated
+A \linkS4class{sim} object returning the original data, simulated data, original parameters, parameters estimated
 from simulated data, and process error used to simulate data.
 then a nested list of model output (\code{opt}, \code{SD}, and \code{report}).
 }

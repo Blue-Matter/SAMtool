@@ -30,7 +30,7 @@ Shortcut2(
 Perfect(x, Data, ...)
 }
 \arguments{
-\item{x}{An index for the objects in \code{Data} when running in \link[MSEtool]{runMSE}.
+\item{x}{An index for the objects in \code{Data} when running in \link[MSEtool:runMSE]{runMSE}.
 Otherwise, equals to 1 When running an assessment interactively.}
 
 \item{Data}{An object of class Data.}
@@ -49,14 +49,14 @@ autocorrelation, and bias (1 = unbiased) for biomass.}
 
 \item{F_err}{Same as B_err. Always used regardless of \code{method} to report F and selectivity for HCR.}
 
-\item{VAR_model}{An object returned by \link[vars]{VAR} to generate emulated assessment error. Used by \code{Shortcut2}.}
+\item{VAR_model}{An object returned by \link[vars:VAR]{VAR} to generate emulated assessment error. Used by \code{Shortcut2}.}
 
 \item{...}{Other arguments (not currently used).}
 
 \item{SCA_args}{Additional arguments to pass to \link{SCA}. Currently, arguments \code{SR} and \code{vulnerability}
 are obtained from the operating model.}
 
-\item{VAR_args}{Additional arguments to pass to \link[vars]{VAR}. By default, argument \code{type = "none"}
+\item{VAR_args}{Additional arguments to pass to \link[vars:VAR]{VAR}. By default, argument \code{type = "none"}
 (stationary time series with mean zero is assumed).}
 }
 \value{
@@ -68,7 +68,7 @@ fishing mortality (with observation error, autocorrelation, and bias) instead of
 be passed onto a harvest control rule (HCR function). \code{Shortcut} is the base function that samples the OM with an error
 distribution. \code{Shortcut2}, the more preferable option, fits \link{SCA} in the last historical year of the operating
 model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
-using \link[vars]{predict.varest}. \code{Perfect} assumes no error in the assessment model and is useful for comparing the behavior of
+using \link[vars:predict]{predict.varest}. \code{Perfect} assumes no error in the assessment model and is useful for comparing the behavior of
 different harvest control rules. To utilize the shortcut method in closed-loop simulation, use \link{make_MP} with these functions as
 the Assessment model. \strong{N.B. the functions do not work with} \code{runMSE(parallel = TRUE)} for MSEtool v3.4.0 and earlier.
 }

@@ -13,7 +13,7 @@
 #' @param selectivity Whether to model "logistic" or "dome" selectivity for the fishery.
 #' @param CAA_multiplier Numeric for data weighting of catch-at-age matrix. If greater than 1, then this is the maximum multinomial sample size
 #' in any year. If less than one, then the multinomial sample size is this fraction of the sample size. 
-#' @param prior A named list for the parameters of any priors to be added to the model. See documentation in \link{SCA}.
+#' @param prior A named list for the parameters of any priors to be added to the model. See documentation in [SCA].
 #' @param LWT A named list (Index, CAA, Catch) of likelihood weights for the data components. For the index, a vector of length survey. For
 #' CAL and Catch, a single value.
 #' @param StockPars Either a string ("Data" or "OM") to indicate whether to grab biological parameters from the Data object,

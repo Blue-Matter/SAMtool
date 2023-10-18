@@ -49,17 +49,17 @@
 #' @param integrate Logical, whether the likelihood of the model integrates over the likelihood
 #' of the recruitment deviations (thus, treating it as a random effects/state-space variable).
 #' Otherwise, recruitment deviations are penalized parameters.
-#' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
+#' @param silent Logical, passed to [TMB::MakeADFun()], whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
-#' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
+#' @param opt_hess Logical, whether the hessian function will be passed to [stats::nlminb()] during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 #' in convergence rate). Ignored if `integrate = TRUE`.
-#' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
+#' @param n_restart The number of restarts (calls to [stats::nlminb()]) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param control A named list of arguments for optimization to be passed to
-#' \code{\link[stats]{nlminb}}.
+#' [stats::nlminb()].
 #' @param inner.control A named list of arguments for optimization of the random effects, which
-#' is passed on to \code{\link[TMB]{newton}}.
+#' is passed on to [TMB::newton()].
 #' @param ... Other arguments to be passed.
 #' 
 #' @section Priors:
@@ -163,8 +163,8 @@
 #' \item `SCA_Pope`: Rec, steep, sigmaR, CV_Ind
 #' }
 #' @author Q. Huynh
-#' @return An object of class \linkS4class{Assessment}.
-#' @seealso \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
+#' @return An object of class [Assessment-class].
+#' @seealso [plot.Assessment] [summary.Assessment] [retrospective] [profile] [make_MP]
 #' @export
 SCA <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"), 
                 vulnerability = c("logistic", "dome"), catch_eq = c("Baranov", "Pope"),

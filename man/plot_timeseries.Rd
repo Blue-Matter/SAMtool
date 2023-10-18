@@ -54,7 +54,7 @@ plot_timeseries(Red_snapper@Year, Red_snapper@Cat[1, ],
 obs_CV = Red_snapper@CV_Cat, label = "Catch")
 }
 \seealso{
-\code{\link{plot_residuals}}
+\code{\link[=plot_residuals]{plot_residuals()}}
 }
 \author{
 Q. Huynh

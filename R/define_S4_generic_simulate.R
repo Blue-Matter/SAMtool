@@ -2,7 +2,7 @@
 
 #' Class-`sim`
 #'
-#' An S4 class that contains output from \link{simulate}.
+#' An S4 class that contains output from [simulate].
 #'
 #' @name sim-class
 #' @docType class
@@ -28,10 +28,10 @@ sim <- setClass("sim", slots = c(Model = "character",
 #' @title Generate simulated data from TMB models in SAMtool
 #' @description A convenient wrapper function (`simulate`) to simulate data (and process error) from the likelihood function.
 #' 
-#' @param object An object of class \linkS4class{Assessment} or \linkS4class{RCModel} containing the fitted model.
+#' @param object An object of class [Assessment-class] or [RCModel-class] containing the fitted model.
 #' @author Q. Huynh
 #' @details Process error, e.g., recruitment deviations, will be re-sampled in the simulation.
-#' @return A \link{sim-class} object returning the original data, simulated data, original parameters, parameters estimated
+#' @return A [sim-class] object returning the original data, simulated data, original parameters, parameters estimated
 #' from simulated data, and process error used to simulate data.
 #' then a nested list of model output (`opt`, `SD`, and `report`).
 #' @export

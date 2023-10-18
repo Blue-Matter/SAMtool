@@ -4,7 +4,7 @@
 #' @description
 #' Function operator that creates a management procedure (MP) by combining an assessment model (function of class `Assess`) with
 #' a harvest control rule (function of class `HCR`). The resulting function can then be tested in closed-loop simulation via 
-#' \code{\link[MSEtool]{runMSE}}. 
+#' [MSEtool::runMSE()]. 
 #' 
 #' \itemize{
 #' \item Use `make_MP` to specify constant TAC between assessments; the frequency of
@@ -48,7 +48,7 @@
 #'                           proj_args = list(process_error = 1))
 #' }
 #'
-#' @seealso \link{HCR_ramp} \link{HCR_MSY} \link{diagnostic} \link{retrospective_AM}
+#' @seealso [HCR_ramp] [HCR_MSY] [diagnostic] [retrospective_AM]
 #' @export
 make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
   diagnostic <- match.arg(diagnostic)
@@ -104,7 +104,7 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
 #'
 #' A suite of model-based management procedures (MPs) included in the package. Additional MPs,
 #' with specific model configurations (e.g., stock-recruit function or fixing certain parameters) or alternative
-#' ramped harvest control rules can be created with \link{make_MP} and the available Assess and HCR objects with constant
+#' ramped harvest control rules can be created with [make_MP] and the available Assess and HCR objects with constant
 #' TAC between assessment years. 
 #'
 #' @name Model-based-MP
@@ -112,7 +112,7 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
 #' @param x A position in the Data object.
 #' @param Data An object of class Data
 #' @param reps Numeric, the number of stochastic replicates for the management advice.
-#' @param diagnostic Character string describing the assessment diagnostic to save, see \link{make_MP}.
+#' @param diagnostic Character string describing the assessment diagnostic to save, see [make_MP].
 #'
 #' @examples
 #' MSEtool::avail("MP", package = "SAMtool")
@@ -120,7 +120,7 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
 #' \donttest{
 #' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_4010"))
 #' }
-#' @return An object of class \linkS4class{Rec} which contains the management recommendation.
+#' @return An object of class [Rec-class] which contains the management recommendation.
 NULL
 
 
@@ -164,7 +164,7 @@ dep_args <- list(fix_h = "Data@steep", fix_sigma = "Data@CV_Ind", fix_tau = "Dat
 
 
 #' @describeIn Model-based-MP A statistical catch-at-age model with a TAC recommendation based on fishing at FMSY,
-#' and default arguments for configuring \link{SCA}.
+#' and default arguments for configuring [SCA].
 #' @export
 SCA_MSY <- make_MP(SCA, HCR_MSY)
 
@@ -180,7 +180,7 @@ SCA_4010 <- make_MP(SCA, HCR40_10)
 
 
 #' @describeIn Model-based-MP A state-space delay difference model with a TAC recommendation based on fishing at FMSY,
-#' and default arguments for configuring \link{DD_SS}.
+#' and default arguments for configuring [DD_SS].
 #' @export
 DDSS_MSY <- make_MP(DD_SS, HCR_MSY)
 
@@ -196,7 +196,7 @@ DDSS_4010 <- make_MP(DD_SS, HCR40_10)
 
 
 #' @describeIn Model-based-MP A surplus production model with a TAC recommendation based on fishing at FMSY,
-#' and default arguments for configuring \link{SP}.
+#' and default arguments for configuring [SP].
 #' @export
 SP_MSY <- make_MP(SP, HCR_MSY)
 
@@ -211,7 +211,7 @@ SP_75MSY <- make_MP(SP, HCR_MSY, MSY_frac = 0.75)
 SP_4010 <- make_MP(SP, HCR40_10)
 
 
-#' @describeIn Model-based-MP Simple stock synthesis (terminal depletion fixed to 0.4 in \link{SSS}) with a TAC recommendation based on fishing at FMSY.
+#' @describeIn Model-based-MP Simple stock synthesis (terminal depletion fixed to 0.4 in [SSS]) with a TAC recommendation based on fishing at FMSY.
 #' @export
 SSS_MSY <- make_MP(SSS, HCR_MSY)
 

@@ -77,10 +77,10 @@ An S4 class for the output from \link{RCM}.
 \item{\code{mean_fit}}{A list of output from fit to mean values of life history parameters in the operating model. The named list consists of:
 
 \itemize{
-\item obj - a list with components returned from \code{\link[TMB]{MakeADFun}}.
-\item opt - a list with components from calling \code{\link[stats]{nlminb}} to \code{obj}.
+\item obj - a list with components returned from \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.
+\item opt - a list with components from calling \code{\link[stats:nlminb]{stats::nlminb()}} to \code{obj}.
 \item SD - a list (class sdreport) with parameter estimates and their standard errors, obtained from
-\code{\link[TMB]{sdreport}}.
+\code{\link[TMB:sdreport]{TMB::sdreport()}}.
 \item report - a list of model output reported from the TMB executable, i.e. \code{obj$report()}. See Misc.
 }}
 

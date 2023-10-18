@@ -10,7 +10,7 @@
 \arguments{
 \item{x}{An object of class \linkS4class{prof} returned by \link{profile}.}
 
-\item{contour_levels}{Integer, passed to \code{nlevels} argument of \link[graphics]{contour}.}
+\item{contour_levels}{Integer, passed to \code{nlevels} argument of \link[graphics:contour]{contour}.}
 
 \item{...}{Miscellaneous. Not used.}
 }

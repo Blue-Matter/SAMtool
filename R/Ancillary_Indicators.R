@@ -130,7 +130,7 @@ plot_crosscorr<-function(indPPD,indData,pp=1,dnam=c("CS","CV","CM","IS","MLS"),r
 
 #' Calculates mahalanobis distance and rejection of the Null operating model
 #'
-#' Calculates mahalanobis distance and rejection of the Null operating model, used by wrapping function \link{PRBcalc}.
+#' Calculates mahalanobis distance and rejection of the Null operating model, used by wrapping function [PRBcalc].
 #'
 #' @param indPPD A 3D array of results arising from running getind on an MSE of the Null operating model (type of data/stat (e.g. mean catches),time period (chunk), simulation)
 #' @param indData A 3D array of results arising from running getind on an MSE of the Alternative operating model (type of data/stat (e.g. mean catches),time period (chunk), simulation)
@@ -216,7 +216,7 @@ Probs<-function(indPPD,indData,alpha=0.05,removedat=FALSE,removethresh=0.05){
 #' @param plotCC Logical, should the PPD cross correlations be plotted?
 #' @param removedat Logical, should data not contributing to the mahalanobis distance be removed?
 #' @param removethresh Positive fraction: the cumulative percentage of removed data (removedat=TRUE) that contribute to the mahalanobis distance
-#' @return A list object with two hierarchies of indexing, first by MP, second has two positions as described in \link{Probs}: (1) mahalanobis distance, (2) a matrix of type 1 error
+#' @return A list object with two hierarchies of indexing, first by MP, second has two positions as described in [Probs]: (1) mahalanobis distance, (2) a matrix of type 1 error
 #' (first row) and statistical power (second row), by time block.
 #' @author T. Carruthers
 #' @references Carruthers, T.R, and Hordyk, A.R. In press. Using management strategy evaluation to establish indicators of changing fisheries.
@@ -304,7 +304,7 @@ mahalanobis_contribution<-function(ind3Data,mu,covr){
 
 #' Plot statistical power of the indicator with increasing time blocks
 #'
-#' @param outlist A list object produced by the function \link{PRBcalc}
+#' @param outlist A list object produced by the function [PRBcalc]
 #' @param res Integer, the resolution (time blocking) for the calculation of PPD
 #' @param maxups Integer, the maximum number of update time blocks to plot
 #' @param MPs Character vector of MP names

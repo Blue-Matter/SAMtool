@@ -44,7 +44,7 @@ stddev <- 0.1
 plot_steepness(mu, stddev)
 }
 \seealso{
-\code{\link{plot_lognormalvar}} \code{\link{plot_betavar}}
+\code{\link[=plot_lognormalvar]{plot_lognormalvar()}} \code{\link[=plot_betavar]{plot_betavar()}}
 }
 \author{
 Q. Huynh

@@ -16,14 +16,15 @@
 #' with MSEtool operating models. An overview of these features is available 
 #' on the [openMSE](https://openmse.com/features-assessment-models/) website.
 #'
-#' The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data. 
+#' The [RCM()] (Rapid Conditioning Model) can be used to condition operating models from real data. 
 #' 
 #' The following articles are available on the openMSE website:
 #' \itemize{
 #' \item [Description of assessment models](https://openmse.com/features-assessment-models/)
 #' \item [General overview of RCM](https://openmse.com/tutorial-rcm/)
 #' }
-#'
+#' 
+#' The function documentation can be viewed [online](https://samtool.openmse.com/reference/index.html).
 #'
 #' @references
 #' Carruthers, T.R., Punt, A.E., Walters, C.J., MacCall, A.,

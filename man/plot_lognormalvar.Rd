@@ -38,7 +38,7 @@ stddev <- 0.1
 plot_lognormalvar(mu, stddev, logtransform = TRUE) # mean of plot should be 1
 }
 \seealso{
-\code{\link{plot_betavar}} \code{\link{plot_steepness}}
+\code{\link[=plot_betavar]{plot_betavar()}} \code{\link[=plot_steepness]{plot_steepness()}}
 }
 \author{
 Q. Huynh

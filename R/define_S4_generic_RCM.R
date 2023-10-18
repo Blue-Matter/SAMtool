@@ -12,9 +12,9 @@
 #' Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.
 #' `check_RCMdata` evaluates whether the inputs in the S4 RCMdata object are correctly formatted.
 #' 
-#' @param OM An object of class \linkS4class{OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
+#' @param OM An object of class [OM-class] that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 #' steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).
-#' @param data Data inputs formatted in a \linkS4class{RCMdata} (preferred) or \linkS4class{Data} object. 
+#' @param data Data inputs formatted in a [RCMdata-class] (preferred) or [Data-class] object. 
 #' Use of a list is deprecated. See Data section below.
 #' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 #' or "effort" (F is proportional to an index series in `data@Ehist`. Can be fleet specific.
@@ -29,7 +29,7 @@
 #' @param comp_like A string indicating the statistical distribution for the composition data, either `"multinomial"` (default), `"lognormal"`, `"mvlogistic"` (multivariate logistic),
 #' `"dirmult1"` (Dirichlet multinomial, linear version), or `"dirmult2"` (saturating version; see Thorson et al. 2017).
 #' @param ESS A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions. 
-#' Not used when data are provided in a \linkS4class{RCMdata} object.
+#' Not used when data are provided in a [RCMdata-class] object.
 #' @param prior A named list for the parameters of any priors to be added to the model. See below.
 #' @param max_F The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update `OM@maxF`. See also `drop_highF`.
 #' @param cores Integer for the number of CPU cores (set greater than 1 for parallel processing).
@@ -37,9 +37,9 @@
 #' @param mean_fit Logical, whether to run an additional with mean values of life history parameters from the OM.
 #' @param drop_nonconv Logical, whether to drop non-converged fits of the RCM, including fits where F = NA.
 #' @param drop_highF Logical, whether to drop fits of the RCM where F = `max_F`.
-#' @param control A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of \code{\link[stats]{nlminb}}.
+#' @param control A named list of arguments (e.g, max. iterations, etc.) for optimization, to be passed to the control argument of [stats::nlminb()].
 #' @param start A list of starting values for the TMB model. See details.
-#' @param map A list of `map` argument to TMB models to override defaults. See \link[TMB]{MakeADFun} and details.
+#' @param map A list of `map` argument to TMB models to override defaults. See [MakeADFun][TMB::MakeADFun] and details.
 #' @param silent Logical to indicate whether informative messages will be reported to console.
 #' @param ... Other arguments to pass in for starting values of parameters and fixing parameters. See details.
 #'
@@ -75,7 +75,7 @@
 #' To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 #' index but the data won't enter the likelihood. See section on likelihood weights.
 #'
-#' @return An object of class \linkS4class{RCModel} (see link for description of output).
+#' @return An object of class [RCModel-class] (see link for description of output).
 #' 
 #' `check_RCMdata` returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
 #' from the OM.
@@ -94,9 +94,9 @@
 #' One of indices, age compositions, or length compositions should be provided in addition to the historical catch or effort. Not all arguments
 #' are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).
 #'
-#' The `data` variable can be an object of class \linkS4class{RCMdata}. See help file for description of inputs.
+#' The `data` variable can be an object of class [RCMdata-class]. See help file for description of inputs.
 #'
-#' Alternatively, the `data` input can be a \linkS4class{Data} S4 object which will retrieve data from the following slots:
+#' Alternatively, the `data` input can be a [Data-class] S4 object which will retrieve data from the following slots:
 #'
 #' \describe{
 #' \item{`Data@@Cat`}{catch series (single fleet with the Data S4 object)}
@@ -214,7 +214,7 @@
 #' By default, all likelihood weights are equal to one if not specified by the user.
 #'
 #' Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
-#' \linkS4class{RCMdata} object. For a list or \linkS4class{Data} object, use the `ESS` argument.
+#' [RCMdata-class] object. For a list or [Data-class] object, use the `ESS` argument.
 #' @author Q. Huynh
 #' @examples 
 #' \donttest{ 
@@ -253,7 +253,7 @@
 #' Hist <- runMSE(out@OM, Hist = TRUE)            
 #' } 
 #' 
-#' @seealso \link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM} \link{posterior}
+#' @seealso [plot.RCModel] [RCModel-class] [compare_RCM] [pcod] [RCM2MOM] [posterior]
 #' @references 
 #' Thorson et al. 2017. Model-based estimates of effective sample size in stock assessment models using the Dirichlet-multinomial distribution.
 #' Fish. Res. 192:84-93. \doi{10.1016/j.fishres.2016.06.005}

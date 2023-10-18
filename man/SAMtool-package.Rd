@@ -17,13 +17,15 @@ assessment models with harvest control rules. Such MPs can be used and tested in
 with MSEtool operating models. An overview of these features is available
 on the \href{https://openmse.com/features-assessment-models/}{openMSE} website.
 
-The \code{\link{RCM}} (Rapid Conditioning Model) can be used to condition operating models from real data.
+The \code{\link[=RCM]{RCM()}} (Rapid Conditioning Model) can be used to condition operating models from real data.
 
 The following articles are available on the openMSE website:
 \itemize{
 \item \href{https://openmse.com/features-assessment-models/}{Description of assessment models}
 \item \href{https://openmse.com/tutorial-rcm/}{General overview of RCM}
 }
+
+The function documentation can be viewed \href{https://samtool.openmse.com/reference/index.html}{online}.
 }
 
 \references{

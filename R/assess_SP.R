@@ -6,9 +6,9 @@
 #' the behavior of ASPIC (Prager 1994). The Fox model, `SP_Fox`, fixes BMSY/K = 0.37 (1/e).
 #' The state-space version, `SP_SS` estimates annual deviates in biomass. An option allows for setting a
 #' prior for the intrinsic rate of increase.
-#' The function for the `spict` model (Pedersen and Berg, 2016) is available in \link[MSEtool]{MSEextra}.
+#' The function for the `spict` model (Pedersen and Berg, 2016) is available in [MSEextra][MSEtool::MSEextra].
 #'
-#' @param x An index for the objects in `Data` when running in \link[MSEtool]{runMSE}.
+#' @param x An index for the objects in `Data` when running in [runMSE][MSEtool::runMSE].
 #' Otherwise, equals to 1 When running an assessment interactively.
 #' @param Data An object of class Data.
 #' @param AddInd A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
@@ -43,17 +43,17 @@
 #' See section on priors below.
 #' @param SR_type If `use_r_prior = TRUE`, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from 
 #' steepness and unfished spawners-per-recruit. Used to develop the r prior.
-#' @param silent Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
+#' @param silent Logical, passed to [TMB::MakeADFun()], whether TMB
 #' will print trace information during optimization. Used for diagnostics for model convergence.
-#' @param opt_hess Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
+#' @param opt_hess Logical, whether the hessian function will be passed to [stats::nlminb()] during optimization
 #' (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 #' in convergence rate). Ignored if `integrate = TRUE`.
-#' @param n_restart The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
+#' @param n_restart The number of restarts (calls to [stats::nlminb()]) in the optimization procedure, so long as the model
 #' hasn't converged. The optimization continues from the parameters from the previous (re)start.
 #' @param control A named list of parameters regarding optimization to be passed to
-#' \code{\link[stats]{nlminb}}.
+#' [stats::nlminb()].
 #' @param inner.control A named list of arguments for optimization of the random effects, which
-#' is passed on to \link[TMB]{newton} via \code{\link[TMB]{MakeADFun}}.
+#' is passed on to [newton][TMB::newton] via [TMB::MakeADFun()].
 #' @param ... For `SP_Fox`, additional arguments to pass to `SP`.
 #' @details
 #' For `start` (optional), a named list of starting values of estimates can be provided for:
@@ -83,7 +83,7 @@
 #' The Euler-Lotka method is modified to multiply the left-hand side of equation 15a by the alpha parameter of the
 #' stock-recruit relationship (Stanley et al. 2009). Natural mortality and steepness are sampled in order to generate
 #' a prior distribution for r. See `vignette("Surplus_production")` for more details.
-#' @return An object of \code{\linkS4class{Assessment}} containing objects and output from TMB.
+#' @return An object of [Assessment-class] containing objects and output from TMB.
 #' @note The model uses the Fletcher (1978) formulation and is parameterized with FMSY and MSY as
 #' leading parameters. The default conditions assume unfished conditions in the first year of the time series
 #' and a symmetric production function (n = 2).
@@ -153,7 +153,7 @@
 #' 
 #' #### Pass MSY prior to the model with mean = 1500, lognormal sd = 0.05
 #' res_prior3 <- SP(Data = SimulatedData, prior = list(MSY = c(1500, 0.05)))
-#' @seealso \link{SP_production} \link{plot.Assessment} \link{summary.Assessment} \link{retrospective} \link{profile} \link{make_MP}
+#' @seealso [SP_production] [plot.Assessment] [summary.Assessment] [retrospective] [profile] [make_MP]
 #' @export
 SP <- function(x = 1, Data, AddInd = "B", rescale = "mean1", start = NULL, prior = list(),
                fix_dep = TRUE, fix_n = TRUE, LWT = NULL,

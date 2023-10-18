@@ -4,8 +4,8 @@
 #' Here, we convert the single-fleet OM to a multi-fleet OM, preserving the multiple fleet structure used in the conditioning model
 #' for projections. This allows for testing management procedures that explicitly specify fleet allocation in the management advice.
 #' 
-#' @param RCModel Output from \link{RCM}, a class \linkS4class{RCModel} object.
-#' @return A class \linkS4class{MOM} object.
+#' @param RCModel Output from [RCM], a class [RCModel-class] object.
+#' @return A class [MOM-class] object.
 #' @author Q. Huynh
 #' @importFrom abind abind
 #' @export

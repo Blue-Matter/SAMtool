@@ -28,7 +28,7 @@
 #' \item `"buffer"` - `I_y` is the most recent index with `b` is specifed by `type_par` (default = 1), and `s` is 
 #' the standard deviation of index residuals from the most recent assessment. 
 #' \item `"mean"` - `I_y` is the mean value of the index over the most recent `type_par` years (default = 3).
-#' \item `"loess"` - `I_y` is the most recent index predicted by a \link[stats]{loess} smoother applied over the entire time series of the index.
+#' \item `"loess"` - `I_y` is the most recent index predicted by a [loess][stats::loess] smoother applied over the entire time series of the index.
 #' Use `type_par` to adjust the `span` parameter (default = 0.75).
 #' \item `"none"` - `I_y` is the most recent index. Index values are not adjusted in the interim procedure.
 #' }
@@ -189,8 +189,8 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
 
 
 #' @rdname make_MP
-#' @param Ftarget An expression that the MP will evaluate to identify the F used in the projection. See \link{projection} and example.
-#' @param proj_args Additional arguments for \link{projection}.
+#' @param Ftarget An expression that the MP will evaluate to identify the F used in the projection. See [projection] and example.
+#' @param proj_args Additional arguments for [projection].
 #' @aliases make_projection_MP
 #' @export
 make_projection_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", assessment_interval = 5, 

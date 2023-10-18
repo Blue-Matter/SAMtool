@@ -10,7 +10,7 @@
 #' @param ncpus Numeric, the number of CPUs to run the Assessment model (will run in parallel if greater than 1).
 #' @param ... Arguments to be passed to `Assess`, e.g., model configurations.
 #'
-#' @return Returns invisibly a list of \linkS4class{Assessment} objects of length `OM@@nsim`. Messages via console.
+#' @return Returns invisibly a list of [Assessment-class] objects of length `OM@@nsim`. Messages via console.
 #' @author Q. Huynh
 #' @examples
 #' \donttest{
@@ -68,19 +68,19 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #' Diagnostic of assessments in MSE: did Assess models converge during MSE?
 #'
 #' Diagnostic check for convergence of Assess models during closed-loop simulation. Use when the MP was 
-#' created with \link{make_MP} with argument `diagnostic = "min"` or `"full"`. 
+#' created with [make_MP] with argument `diagnostic = "min"` or `"full"`. 
 #' This function summarizes and plots the diagnostic information.
 #'
-#' @param MSE An object of class MSE created by \code{\link[MSEtool]{runMSE}}.
+#' @param MSE An object of class MSE created by [MSEtool::runMSE()].
 #' @param MP Optional, a character vector of MPs that use assessment models.
 #' @param gradient_threshold The maximum magnitude (absolute value) desired for the gradient of the likelihood.
 #' @param figure Logical, whether a figure will be drawn.
 #' @param ... Arguments to pass to `diagnostic`.
 #' @return A matrix with diagnostic performance of assessment models in the MSE. If `figure = TRUE`,
 #' a set of figures: traffic light (red/green) plots indicating whether the model converged (defined if a positive-definite
-#' Hessian matrix was obtained), the optimizer reached pre-specified iteration limits (as passed to \code{\link[stats]{nlminb}}),
+#' Hessian matrix was obtained), the optimizer reached pre-specified iteration limits (as passed to [stats::nlminb()]),
 #' and the maximum gradient of the likelihood in each assessment run. Also includes the number of optimization iterations
-#' function evaluations reported by \code{\link[stats]{nlminb}} for each application of the assessment model.
+#' function evaluations reported by [stats::nlminb()] for each application of the assessment model.
 #' @author Q. Huynh
 #' @aliases diagnostic_AM
 #' @examples 
@@ -98,7 +98,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
 #'  }) %>% bind_rows()
 #' }) %>% bind_rows()
 #' }
-#' @seealso \link{retrospective_AM}
+#' @seealso [retrospective_AM]
 #' @export
 diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
   if (!inherits(MSE, "MSE")) stop("No object of class MSE was provided.")

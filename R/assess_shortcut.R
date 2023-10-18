@@ -5,14 +5,14 @@
 #' Functions (class Assessment) that emulate a stock assessment by sampling the operating model biomass, abundance, and 
 #' fishing mortality (with observation error, autocorrelation, and bias) instead of fitting a model. This output can then
 #' be passed onto a harvest control rule (HCR function). `Shortcut` is the base function that samples the OM with an error 
-#' distribution. `Shortcut2`, the more preferable option, fits \link{SCA} in the last historical year of the operating 
+#' distribution. `Shortcut2`, the more preferable option, fits [SCA] in the last historical year of the operating 
 #' model, estimates the error parameters using a vector autoregressive model of the residuals, and then generates model "estimates"
-#' using \link[vars]{predict.varest}. `Perfect` assumes no error in the assessment model and is useful for comparing the behavior of 
-#' different harvest control rules. To utilize the shortcut method in closed-loop simulation, use \link{make_MP} with these functions as 
+#' using [predict.varest][vars::predict.varest]. `Perfect` assumes no error in the assessment model and is useful for comparing the behavior of 
+#' different harvest control rules. To utilize the shortcut method in closed-loop simulation, use [make_MP] with these functions as 
 #' the Assessment model. **N.B. the functions do not work with** `runMSE(parallel = TRUE)` for MSEtool v3.4.0 and earlier.
 #' 
 #' @aliases Perfect
-#' @param x An index for the objects in `Data` when running in \link[MSEtool]{runMSE}.
+#' @param x An index for the objects in `Data` when running in [runMSE][MSEtool::runMSE].
 #' Otherwise, equals to 1 When running an assessment interactively.
 #' @param Data An object of class Data.
 #' @param method Indicates where the error in the OM is located. For "B", OM biomass is directly sampled with error.
@@ -24,7 +24,7 @@
 #' @param N_err Same as B_err, but for abundance when `method = "N"`.
 #' @param R_err Same as B_err, but for recruitment when `method = "RF"`.
 #' @param F_err Same as B_err. Always used regardless of `method` to report F and selectivity for HCR.
-#' @param VAR_model An object returned by \link[vars]{VAR} to generate emulated assessment error. Used by `Shortcut2`. 
+#' @param VAR_model An object returned by [VAR][vars::VAR] to generate emulated assessment error. Used by `Shortcut2`. 
 #' @param ... Other arguments (not currently used).
 #' @author Q. Huynh
 #' @details Currently there is no error in FMSY (frequently the target F in the HCR).
@@ -50,7 +50,7 @@
 #' \donttest{
 #' MSE <- runMSE(testOM, MPs = c("Perfect_4010", "Perfect_6020", "Perfect_8040MSY"))
 #' }
-#' @return An object of class \linkS4class{Assessment}.
+#' @return An object of class [Assessment-class].
 #' @references
 #' Wiedenmann, J., Wilberg, M.J., Sylvia, A., and Miller, T.J. 2015. Autocorrelated error in stock assessment 
 #' estimates: Implications for management strategy evaluation. Fisheries Research 172: 325-334.
@@ -273,9 +273,9 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
 class(Shortcut) <- "Assess"
 
 #' @rdname Shortcut
-#' @param SCA_args Additional arguments to pass to \link{SCA}. Currently, arguments `SR` and `vulnerability`
+#' @param SCA_args Additional arguments to pass to [SCA]. Currently, arguments `SR` and `vulnerability`
 #' are obtained from the operating model.
-#' @param VAR_args Additional arguments to pass to \link[vars]{VAR}. By default, argument `type = "none"` 
+#' @param VAR_args Additional arguments to pass to [VAR][vars::VAR]. By default, argument `type = "none"` 
 #' (stationary time series with mean zero is assumed).
 #' @importFrom vars VAR
 #' @export

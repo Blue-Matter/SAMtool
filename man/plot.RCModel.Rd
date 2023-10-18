@@ -73,12 +73,12 @@ and the RCM output.}
 
 \item{quiet}{Logical, whether to silence the markdown rendering function.}
 
-\item{render_args}{A list of other arguments to pass to \link[rmarkdown]{render}.}
+\item{render_args}{A list of other arguments to pass to \link[rmarkdown:render]{render}.}
 
 \item{...}{For \code{compare_RCM}, multiple RCM objects for comparison.}
 }
 \value{
-Returns invisibly the output from \link[rmarkdown]{render}.
+Returns invisibly the output from \link[rmarkdown:render]{render}.
 }
 \description{
 Produces HTML file (via markdown) figures of parameter estimates and output from an \linkS4class{Assessment} object.

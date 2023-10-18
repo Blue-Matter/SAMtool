@@ -293,7 +293,7 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
 
 
 #' @rdname RCM
-#' @param RCMdata An \linkS4class{RCMdata} object.
+#' @param RCMdata An [RCMdata-class] object.
 #' @export
 check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   

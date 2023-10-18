@@ -63,7 +63,7 @@ A function of class \code{MP}.
 \description{
 Function operator that creates a management procedure (MP) by combining an assessment model (function of class \code{Assess}) with
 a harvest control rule (function of class \code{HCR}). The resulting function can then be tested in closed-loop simulation via
-\code{\link[MSEtool]{runMSE}}.
+\code{\link[MSEtool:runMSE]{MSEtool::runMSE()}}.
 
 \itemize{
 \item Use \code{make_MP} to specify constant TAC between assessments; the frequency of
@@ -93,7 +93,7 @@ where \code{Cref} is the TAC calculated from the most recent assessment, \code{I
 \item \code{"buffer"} - \code{I_y} is the most recent index with \code{b} is specifed by \code{type_par} (default = 1), and \code{s} is
 the standard deviation of index residuals from the most recent assessment.
 \item \code{"mean"} - \code{I_y} is the mean value of the index over the most recent \code{type_par} years (default = 3).
-\item \code{"loess"} - \code{I_y} is the most recent index predicted by a \link[stats]{loess} smoother applied over the entire time series of the index.
+\item \code{"loess"} - \code{I_y} is the most recent index predicted by a \link[stats:loess]{loess} smoother applied over the entire time series of the index.
 Use \code{type_par} to adjust the \code{span} parameter (default = 0.75).
 \item \code{"none"} - \code{I_y} is the most recent index. Index values are not adjusted in the interim procedure.
 }

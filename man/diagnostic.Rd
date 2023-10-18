@@ -10,7 +10,7 @@ diagnostic(MSE, MP, gradient_threshold = 0.1, figure = TRUE)
 diagnostic_AM(...)
 }
 \arguments{
-\item{MSE}{An object of class MSE created by \code{\link[MSEtool]{runMSE}}.}
+\item{MSE}{An object of class MSE created by \code{\link[MSEtool:runMSE]{MSEtool::runMSE()}}.}
 
 \item{MP}{Optional, a character vector of MPs that use assessment models.}
 
@@ -23,9 +23,9 @@ diagnostic_AM(...)
 \value{
 A matrix with diagnostic performance of assessment models in the MSE. If \code{figure = TRUE},
 a set of figures: traffic light (red/green) plots indicating whether the model converged (defined if a positive-definite
-Hessian matrix was obtained), the optimizer reached pre-specified iteration limits (as passed to \code{\link[stats]{nlminb}}),
+Hessian matrix was obtained), the optimizer reached pre-specified iteration limits (as passed to \code{\link[stats:nlminb]{stats::nlminb()}}),
 and the maximum gradient of the likelihood in each assessment run. Also includes the number of optimization iterations
-function evaluations reported by \code{\link[stats]{nlminb}} for each application of the assessment model.
+function evaluations reported by \code{\link[stats:nlminb]{stats::nlminb()}} for each application of the assessment model.
 }
 \description{
 Diagnostic check for convergence of Assess models during closed-loop simulation. Use when the MP was

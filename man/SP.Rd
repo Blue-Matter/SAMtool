@@ -56,7 +56,7 @@ SP_SS(
 SP_Fox(x = 1, Data, ...)
 }
 \arguments{
-\item{x}{An index for the objects in \code{Data} when running in \link[MSEtool]{runMSE}.
+\item{x}{An index for the objects in \code{Data} when running in \link[MSEtool:runMSE]{runMSE}.
 Otherwise, equals to 1 When running an assessment interactively.}
 
 \item{Data}{An object of class Data.}
@@ -95,18 +95,18 @@ See section on priors below.}
 \item{SR_type}{If \code{use_r_prior = TRUE}, the stock-recruit relationship used to calculate the stock-recruit alpha parameter from
 steepness and unfished spawners-per-recruit. Used to develop the r prior.}
 
-\item{silent}{Logical, passed to \code{\link[TMB]{MakeADFun}}, whether TMB
+\item{silent}{Logical, passed to \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}, whether TMB
 will print trace information during optimization. Used for diagnostics for model convergence.}
 
-\item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats]{nlminb}} during optimization
+\item{opt_hess}{Logical, whether the hessian function will be passed to \code{\link[stats:nlminb]{stats::nlminb()}} during optimization
 (this generally reduces the number of iterations to convergence, but is memory and time intensive and does not guarantee an increase
 in convergence rate). Ignored if \code{integrate = TRUE}.}
 
-\item{n_restart}{The number of restarts (calls to \code{\link[stats]{nlminb}}) in the optimization procedure, so long as the model
+\item{n_restart}{The number of restarts (calls to \code{\link[stats:nlminb]{stats::nlminb()}}) in the optimization procedure, so long as the model
 hasn't converged. The optimization continues from the parameters from the previous (re)start.}
 
 \item{control}{A named list of parameters regarding optimization to be passed to
-\code{\link[stats]{nlminb}}.}
+\code{\link[stats:nlminb]{stats::nlminb()}}.}
 
 \item{...}{For \code{SP_Fox}, additional arguments to pass to \code{SP}.}
 
@@ -124,10 +124,10 @@ once index data are available (\code{"index"}).}
 of the biomass deviations (thus, treating it as a state-space variable).}
 
 \item{inner.control}{A named list of arguments for optimization of the random effects, which
-is passed on to \link[TMB]{newton} via \code{\link[TMB]{MakeADFun}}.}
+is passed on to \link[TMB:newton]{newton} via \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \value{
-An object of \code{\linkS4class{Assessment}} containing objects and output from TMB.
+An object of \linkS4class{Assessment} containing objects and output from TMB.
 }
 \description{
 A surplus production model that uses only a time-series of catches and a relative abundance index
@@ -136,7 +136,7 @@ Continuous surplus production and fishing is modeled with sub-annual time steps 
 the behavior of ASPIC (Prager 1994). The Fox model, \code{SP_Fox}, fixes BMSY/K = 0.37 (1/e).
 The state-space version, \code{SP_SS} estimates annual deviates in biomass. An option allows for setting a
 prior for the intrinsic rate of increase.
-The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[MSEtool]{MSEextra}.
+The function for the \code{spict} model (Pedersen and Berg, 2016) is available in \link[MSEtool:MSEextra]{MSEextra}.
 }
 \details{
 For \code{start} (optional), a named list of starting values of estimates can be provided for:

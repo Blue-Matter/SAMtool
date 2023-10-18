@@ -45,7 +45,7 @@ A plot of model residuals by year (optionally, with error bars).
 Plots figure of residuals (or any time series with predicted mean of zero).
 }
 \seealso{
-\code{\link{plot_timeseries}}
+\code{\link[=plot_timeseries]{plot_timeseries()}}
 }
 \author{
 Q. Huynh
