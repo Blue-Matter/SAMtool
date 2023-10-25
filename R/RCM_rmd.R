@@ -34,9 +34,11 @@ rmd_assess_resid2 <- function(year, obs, fit, fig.cap, label = fig.cap) {
   fig.cap2 <- paste0("Index residuals (in log space) for ", fig.cap, ".")
   
   c(paste0("```{r, fig.cap = \"", fig.cap2, "\"}"),
-    paste0("istart <- which(!is.na(", obs, "))[1]"),
-    paste0("istop <- which(!is.na(", obs, ")) %>% max()"),
-    paste0("plot_residuals(", year, "[istart:istop], log(", obs, "[istart:istop]/", fit, "[istart:istop]), label = \"", label, "\")"),
+    paste0("if (!all(is.na(", obs, "))) {"),
+    paste0("  istart <- which(!is.na(", obs, "))[1]"),
+    paste0("  istop <- which(!is.na(", obs, ")) %>% max()"),
+    paste0("  plot_residuals(", year, "[istart:istop], log(", obs, "[istart:istop]/", fit, "[istart:istop]), label = \"", label, "\")"),
+    "}",
     "```\n")
 }
 
@@ -264,8 +266,8 @@ rmd_RCM_index_output <- function(sur, s_name) {
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) index values for ", s_name[sur], ". Error bars indicate 95% confidence intervals for observed values.\"}"),
-           "if (length(RCMdata@I_sd) && any(RCMdata@I_sd > 0, na.rm = TRUE)) {",
-           paste0("  II <- RCMdata@Index[, ", sur, "]"),
+           paste0("II <- RCMdata@Index[, ", sur, "]"),
+           "if (any(II > 0, na.rm = TRUE) && length(RCMdata@I_sd)) {",
            "  ind <- seq(min(which(!is.na(II))), max(which(!is.na(II))), 1)",
            paste0("  err <- exp(log(II) + outer(RCMdata@I_sd[, ", sur, "], c(-1.96, 1.96)))"),
            paste0("  matplot(Year[ind], Ipred[ind, , drop = FALSE], type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, ylim = c(0, 1.1 * max(c(Ipred[ind, ], II[ind], err[ind, ]), na.rm = TRUE)), xlab = \"Year\", ylab = \"", s_name[sur], "\")"),
