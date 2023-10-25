@@ -181,7 +181,7 @@ retrospective_AM <- function(MSE, MP, sim = 1, plot_legend = FALSE) {
       #if (length(MSE@Misc$extended)) {
       #  Hist <- apply(MSE@Hist@TSdata$VBiomass[sim, , ], 1, sum)
       #} else {
-      #  message("Re-run simulations with runMSE(..., extended = TRUE) to plot historical OM vulnerable biomass.")
+      #  message_info("Re-run simulations with runMSE(..., extended = TRUE) to plot historical OM vulnerable biomass.")
       #  Hist <- rep(NA_real_, MSE@nyears)
       #}
       Hist <- rep(NA_real_, MSE@nyears)

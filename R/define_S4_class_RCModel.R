@@ -138,7 +138,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             # Or directly provide a retrospective object (dots$retro)
             dots <- list(...)
             if (!is.null(dots$retrospective) && dots$retrospective) {
-              message("Running retrospective on mean fit object...")
+              message_info("Running retrospective on mean fit object...")
               if (is.null(dots$nyr)) {
                 retro <- retrospective(x)
               } else retro <- retrospective(x, dots$nyr)
@@ -263,7 +263,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             }
             
             if (compare) {
-              message("Getting Hist object from runMSE...")
+              message_info("Getting Hist object from runMSE...")
               Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
               compare_rmd <- rmd_RCM_Hist_compare()
             } else {
@@ -539,16 +539,16 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
             # Generate markdown report
             if (!dir.exists(dir)) {
-              message("Creating directory: \n", dir)
+              message_info("Creating directory: \n", dir)
               dir.create(dir)
             }
             write(rmd, file = file.path(dir, filename_rmd))
 
             # Rendering markdown file
-            message("Rendering markdown file: ", file.path(dir, filename_rmd))
+            message_info("Rendering markdown file: ", file.path(dir, filename_rmd))
+            message_info("See help(plot.RCModel) to adjust report and file directory.")
             output_filename <- do.call(rmarkdown::render, render_args)
             message("Rendered file: ", output_filename)
-            message("See help(plot.RCModel) to adjust report and file directory.")
 
             if (open_file) browseURL(output_filename)
             invisible(output_filename)
@@ -642,7 +642,7 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
 
   #### MSY comparisons
   if (compare) {
-    message("Running runMSE() to get MSY reference points...")
+    message_info("Running runMSE() to get MSY reference points...")
     if (snowfall::sfIsRunning()) {
       Hist <- snowfall::sfClusterApplyLB(dots, function(xx) runMSE(xx@OM, Hist = TRUE, silent = TRUE))
     } else {
@@ -727,13 +727,13 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
 
   # Generate markdown report
   if (!dir.exists(dir)) {
-    message("Creating directory: \n", dir)
+    message_info("Creating directory: \n", dir)
     dir.create(dir)
   }
   write(rmd, file = file.path(dir, filename_rmd))
 
   # Rendering markdown file
-  message("Rendering markdown file: ", file.path(dir, filename_rmd))
+  message_info("Rendering markdown file: ", file.path(dir, filename_rmd))
   output_filename <- do.call(rmarkdown::render, render_args)
   message("Rendered file: ", output_filename)
 

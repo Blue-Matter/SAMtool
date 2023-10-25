@@ -78,8 +78,8 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
   dots_in_HCR <- dots[match(names(formals(eval(.HCR))), names(dots), nomatch = 0)]
   dots_lost <- dots[!names(dots) %in% c(names(formals(eval(.Assess))), names(formals(eval(.HCR))))]
   
-  #if (length(dots_in_Assess)) message("Arguments passed to ", Assess_char, ": ", names(dots_in_Assess) %>% paste0(collapse = ","))
-  #if (length(dots_in_HCR)) message("Arguments passed to ", HCR_char, ": ", names(dots_in_HCR) %>% paste0(collapse = ","))
+  #if (length(dots_in_Assess)) message_info("Arguments passed to ", Assess_char, ": ", names(dots_in_Assess) %>% paste0(collapse = ","))
+  #if (length(dots_in_HCR)) message_info("Arguments passed to ", HCR_char, ": ", names(dots_in_HCR) %>% paste0(collapse = ","))
   if (length(dots_lost)) warning("Unused arguments: ", names(dots_lost) %>% paste0(collapse = ", "))
 
   Assess_call <- as.call(c(.Assess, x = quote(x), Data = quote(Data), dots_in_Assess))

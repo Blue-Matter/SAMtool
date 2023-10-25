@@ -128,7 +128,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1, silent = FALSE) {
   if (any(sim_stan[, 2] > nsim_stan)) stop("There are only ", nsim_stan, " iterations in the stan model.")
   
   # Get samps
-  if (!silent) message("Sampling ", nsim, " iterations for the operating model...")
+  if (!silent) message_info("Sampling ", nsim, " iterations for the operating model...")
   samps <- sapply(1:nsim, function(x) {
     chain <- sim_stan[x, 1]
     sim_out <- sim_stan[x, 2]
@@ -139,7 +139,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1, silent = FALSE) {
   obj <- RCModel@mean_fit$obj
   if (is.null(obj)) stop("No TMB object found in RCModel@mean_fit.")
     
-  if (!silent) message("Re-constructing population model from MCMC parameter samples...")
+  if (!silent) message_info("Re-constructing population model from MCMC parameter samples...")
   
   if (cores > 1 && !snowfall::sfIsRunning()) {
     MSEtool::setup(as.integer(cores))

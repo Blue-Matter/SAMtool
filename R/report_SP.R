@@ -294,7 +294,7 @@ SP_production <- function(depletion, figure = TRUE) {
 
   if (length(depletion) > 1) {
     depletion <- depletion[1]
-    message(paste("Function is not vectorized. Depletion value of", depletion, "is used."))
+    message_oops(paste("Function is not vectorized. Depletion value of", depletion, "is used."))
   }
   if (depletion <= 0 || depletion >= 1) stop(paste("Proposed depletion =", depletion, "but value must be between 0 and 1."))
 

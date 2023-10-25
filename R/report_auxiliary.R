@@ -124,10 +124,10 @@ report <- function(Assessment, retro = NULL, filename = paste0("report_", Assess
   filename_rmd <- paste0(filename, ".Rmd")
 
   if (!dir.exists(dir)) {
-    message("Creating directory: \n", dir)
+    message_info("Creating directory: \n", dir)
     dir.create(dir)
   }
-  message("Writing markdown file: ", file.path(dir, filename_rmd))
+  message_info("Writing markdown file: ", file.path(dir, filename_rmd))
 
   if (Assessment@Model == "SCA2") Assessment@info$data$SR_type <- Assessment@info$SR
   dots <- list(...)
@@ -152,10 +152,10 @@ report <- function(Assessment, retro = NULL, filename = paste0("report_", Assess
   }
   render_args$quiet <- quiet
 
-  message("Rendering markdown file: ", file.path(dir, filename_rmd))
+  message_info("Rendering markdown file: ", file.path(dir, filename_rmd))
+  message_info("See help(plot.Assessment) to adjust report and file directory.")
   output_filename <- do.call(rmarkdown::render, render_args)
   message("Rendered file: ", output_filename)
-  message("See help(plot.Assessment) to adjust report and file directory.")
 
   if (open_file) browseURL(output_filename)
   invisible(output_filename)

@@ -186,7 +186,7 @@ setMethod("plot", signature(x = "Assessment", y = "missing"),
             # Generating retrospective
             if (is.numeric(ret_yr) && ret_yr > 0) {
               ret_yr <- as.integer(ret_yr)
-              message("Running retrospective...")
+              message_info("Running retrospective...")
               ret <- retrospective(x, nyr = ret_yr, figure = FALSE)
             } else ret <- NULL
             report(x, ret, filename = filename, dir = dir, open_file = open_file, quiet = quiet, render_args = render_args, ...)

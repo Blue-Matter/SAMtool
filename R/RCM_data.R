@@ -117,8 +117,8 @@ int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
   if (is.null(s_selectivity)) return(-4)
   
   if (!silent) {
-    if (any(s_selectivity == "logistic")) message("Converting \"logistic\" index selectivity to \"logistic_length\"")
-    if (any(s_selectivity == "dome")) message("Converting \"dome\" index selectivity to \"dome_length\"")
+    if (any(s_selectivity == "logistic")) message_info("Converting \"logistic\" index selectivity to \"logistic_length\"")
+    if (any(s_selectivity == "dome")) message_info("Converting \"dome\" index selectivity to \"dome_length\"")
   }
   s_selectivity[s_selectivity == "logistic"] <- "logistic_length"
   s_selectivity[s_selectivity == "dome"] <- "dome_length"
@@ -144,7 +144,7 @@ int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
   
   if (!silent) {
     nsurvey <- length(s_selectivity)
-    message("Index selectivity setup:")
+    message_info("Index selectivity setup:")
     for(sur in 1:nsurvey) {
       if (s_sel[sur] > 0) {
         sout <- paste("fishery fleet", s_sel[sur])
@@ -158,7 +158,7 @@ int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
                        "-1" = "logistic function (length)",
                        "0" = "dome function (length)")
       }
-      message("Index ", sur, ": ", sout, ifelse(sur == nsurvey, "\n\n", ""))
+      message_info("Index ", sur, ": ", sout, ifelse(sur == nsurvey, "\n\n", ""))
     }
   }
   
@@ -169,8 +169,8 @@ int_s_sel <- function(s_selectivity, nfleet, silent = FALSE) {
 int_sel <- function(selectivity, RCMdata, silent = FALSE) {
   
   if (!silent) {
-    if (any(selectivity == "logistic")) message("Converting \"logistic\" fishery selectivity to \"logistic_length\"")
-    if (any(selectivity == "dome")) message("Converting \"dome\" fishery selectivity to \"dome_length\"")
+    if (any(selectivity == "logistic")) message_info("Converting \"logistic\" fishery selectivity to \"logistic_length\"")
+    if (any(selectivity == "dome")) message_info("Converting \"dome\" fishery selectivity to \"dome_length\"")
   }
   selectivity[selectivity == "logistic"] <- "logistic_length"
   selectivity[selectivity == "dome"] <- "dome_length"
@@ -194,7 +194,7 @@ int_sel <- function(selectivity, RCMdata, silent = FALSE) {
   }
   
   if (!silent && !missing(RCMdata)) {
-    message("Fishery selectivity setup:")
+    message_info("Fishery selectivity setup:")
     Yr <- RCMdata@Misc$CurrentYr - RCMdata@Misc$nyears:1 + 1
     no_blocks <- apply(RCMdata@sel_block, 2, function(x) length(unique(x)) == 1) %>% all()
     for(bb in 1:length(sel)) {
@@ -205,7 +205,7 @@ int_sel <- function(selectivity, RCMdata, silent = FALSE) {
                      "-1" = "logistic function (length)",
                      "0" = "dome function (length)")
       if (no_blocks) {
-        message("Fleet ", bb, ": ", fout, ifelse(bb == length(sel), "\n\n", ""))
+        message_info("Fleet ", bb, ": ", fout, ifelse(bb == length(sel), "\n\n", ""))
       } else {
         fleet <- lapply(1:ncol(RCMdata@sel_block), function(ff) {
           y <- Yr[RCMdata@sel_block[, ff] == bb]
@@ -219,8 +219,8 @@ int_sel <- function(selectivity, RCMdata, silent = FALSE) {
             NULL
           }
         })
-        message("Block ", bb, " (", fout, ") assigned to fishery:\n", do.call(c, fleet) %>% paste(collapse = "\n"),
-                ifelse(bb == length(sel), "\n\n", ""))
+        message_info("Block ", bb, " (", fout, ") assigned to fishery:\n", do.call(c, fleet) %>% paste(collapse = "\n"),
+                     ifelse(bb == length(sel), "\n\n", ""))
       }
     }
   }
@@ -297,7 +297,7 @@ make_LWT <- function(LWT, nfleet, nsurvey) {
 #' @export
 check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   
-  if (!silent) message("\nChecking data...\n")
+  if (!silent) message_info("\nChecking data...\n")
   condition <- match.arg(condition, choices = c("catch", "catch2", "effort"), several.ok = TRUE)
 
   # Preliminary OM check for basics
@@ -602,8 +602,8 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   
   if (any(grepl("catch", RCMdata@Misc$condition)) && any(RCMdata@C_eq > 0)) {
     if (!silent) {
-      message("Equilibrium catch was detected. The corresponding equilibrium F will be estimated for fleets: ", 
-              which(grepl("catch", RCMdata@Misc$condition)) %>% paste0(collapse = " "))
+      message_info("Equilibrium catch was detected. The corresponding equilibrium F will be estimated for fleets: ", 
+                   grep("catch", RCMdata@Misc$condition) %>% paste(collapse = " "))
     }
   }
 
@@ -611,9 +611,9 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   if (any(RCMdata@Misc$condition == "effort")) {
     if (length(RCMdata@E_eq) == 1) RCMdata@E_eq <- rep(RCMdata@E_eq, RCMdata@Misc$nfleet)
     if (length(RCMdata@E_eq) < RCMdata@Misc$nfleet) stop("E_eq needs to be of length nfleet (", RCMdata@Misc$nfleet, ").", call. = FALSE)
-    if (any(RCMdata@E_eq > 0)) {
-      if (!silent) message("Equilibrium effort was detected. The corresponding equilibrium F will be estimated for fleets: ", 
-                           which(grepl("catch", RCMdata@Misc$condition)) %>% paste0(collapse = " "))
+    if (any(RCMdata@E_eq > 0) && !silent) {
+      message_info("Equilibrium effort was detected. The corresponding equilibrium F will be estimated for fleets: ", 
+                   grep("effort", RCMdata@Misc$condition) %>% paste(collapse = " "))
     }
   }
 

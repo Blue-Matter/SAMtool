@@ -35,7 +35,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   # No comp data
   if (!any(RCMdata@CAA > 0, na.rm = TRUE) && !any(RCMdata@CAL > 0, na.rm = TRUE)) {
     fix_sel <- TRUE
-    if (!silent) message("No fishery length or age compositions were provided. Selectivity is fixed to values from OM.\n\n")
+    if (!silent) message_info("No fishery length or age compositions were provided. Selectivity is fixed to values from OM.\n\n")
   } else {
     fix_sel <- FALSE
   }
@@ -75,7 +75,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   # Fit model
   if (all(par_identical_sims)) { # All identical sims detected
       
-    if (!silent) message("All ", nsim, " replicates are identical. Fitting one model...")
+    if (!silent) message_info("All ", nsim, " replicates are identical. Fitting one model...")
     
     mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
@@ -86,7 +86,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     if (mean_fit_output$report$conv) {
       
       if (!is.null(dots$resample) && dots$resample) { # Re-sample covariance matrix
-        message("Sampling covariance matrix for nsim = ", nsim, " replicates...")
+        message_info("Sampling covariance matrix for nsim = ", nsim, " replicates...")
 
         samps <- mvtnorm::rmvnorm(nsim, mean_fit_output$opt$par, mean_fit_output$SD$cov.fixed)
         
@@ -100,9 +100,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
       
     } else {
       warning("Model did not converge. Returning the mean-fit model for evaluation.")
-      if (!is.null(dots$resample) && dots$resample) {
-        warning("Could not sample covariance matrix.")
-      }
+      if (!is.null(dots$resample) && dots$resample) warning("Could not sample covariance matrix.")
       res <- list(mean_fit_output$report) 
     }
     
@@ -111,7 +109,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     
   } else {
     
-    message("Fitting model (", nsim, " simulations) ...")
+    message_info("Fitting model (", nsim, " simulations) ...")
     if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
     
     mod <- pblapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
@@ -121,7 +119,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
                     cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
     
     if (mean_fit) { ### Fit to life history means if mean_fit = TRUE
-      if (!silent) message("Generating additional model fit from mean values of parameters in the operating model...\n")
+      if (!silent) message_info("Generating additional model fit from mean values of parameters in the operating model...\n")
       mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                                  LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
                                  max_F = max_F, integrate = integrate, StockPars = StockPars,
@@ -136,7 +134,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     conv <- vapply(mod, function(x) x[["report"]][["conv"]], logical(1))
     if (!is.null(dots$resample) && dots$resample) {
       
-      if (!silent) message("Sampling covariance matrix once for each replicate...")
+      if (!silent) message_info("Sampling covariance matrix once for each replicate...")
       res <- pblapply(1:nsim, function(x) {
         if (conv[x]) {
           samps <- mvtnorm::rmvnorm(1, mod[[x]]$opt$par, mod[[x]]$SD$cov.fixed, checkSymmetry = FALSE)
@@ -155,8 +153,9 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   if (length(res) == 1) {
     if (highF) warning("Model had F on the upper boundary.\n")
   } else if (sum(highF)) {
-    warning(sum(highF), " out of ", nsim , " model fits had F on the upper boundary (F = ", 
-            max_F, "; ", round(100 * mean(highF), 2), "% of simulations).")
+    msg <- paste0(sum(highF), " out of ", nsim , " model fits had F on the upper boundary (F = ", 
+                  max_F, "; ", round(100 * mean(highF), 2), "% of simulations).")
+    warning(msg)
     if (drop_highF) conv <- conv & !highF
   }
   
@@ -164,17 +163,18 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   if (length(res) == 1) {
     if (NaF) warning("Model had F with NA's")
   } else if (sum(NaF)) {
-    warning(sum(NaF), " out of ", nsim , " iterations (", round(100 * mean(NaF), 2), "%) had F with NA's")
+    msg <- paste0(sum(NaF), " out of ", nsim , " iterations (", round(100 * mean(NaF), 2), "%) had F with NA's")
+    warning(msg)
     if (drop_nonconv) conv <- conv & !NaF
   }
   
   keep <- !logical(OM@nsim) # Keep all simulations
   if (length(res) > 1 && sum(conv) < nsim) {
-    if (!silent) message("Non-converged iteration(s): ", paste(which(!conv), collapse = " "), "\n\n")
+    if (!silent) message_oops("Non-converged iteration(s): ", paste(which(!conv), collapse = " "), "\n\n")
     if (!sum(conv)) {
-      if (!silent) message("Non-converged for all iterations. Returning all for evaluation.\n\n")
+      if (!silent) message_oops("Non-converged for all iterations. Returning all for evaluation.\n\n")
     } else if (drop_nonconv || drop_highF) {
-      if (!silent) message("Non-converged and/or highF iterations will be removed.\n\n")
+      if (!silent) message_info("Non-converged and/or highF iterations will be removed.\n\n")
       keep <- conv
     }
   }
@@ -206,7 +206,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   # Data in cpars
   if (sum(RCMdata@Chist > 0, na.rm = TRUE) || nsurvey > 0) {
     
-    if (!silent) message("Adding some RCMdata inputs into OM@cpars$Data:\n\n")
+    if (!silent) message_info("Adding some RCMdata inputs into OM@cpars$Data:\n\n")
     real_Data <- new("Data")
     real_Data@Year <- (output@OM@CurrentYr - output@OM@nyears + 1):output@OM@CurrentYr
     real_Data@LHYear <- max(real_Data@Year)
@@ -260,7 +260,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
       if (report[[x]]$conv) {
         catch_diff <- report[[x]]$Cpred/RCMdata@Chist - 1
         catch_diff <- catch_diff[, RCMdata@Misc$condition == "catch2"]
-        flag <- max(abs(catch_diff), na.rm = TRUE) > 0.01 | any(is.na(report[[x]]$Cpred))
+        flag <- max(abs(catch_diff), na.rm = TRUE) > 0.01 || any(is.na(report[[x]]$Cpred))
       } else {
         flag <- FALSE
       }
@@ -269,7 +269,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     
     do_catch_check <- vapply(1:length(res), catch_check_fn, logical(1), report = res, RCMdata = RCMdata)
     if (any(do_catch_check)) {
-      flag_ind <- paste(which(do_catch_check), collapse = " ")
+      flag_ind <- paste(grep(TRUE, do_catch_check), collapse = " ")
       if (length(res) > 1) {
         warning("Note: there is predicted catch that deviates from observed catch by more than 1% in simulations: ", flag_ind)
       } else {

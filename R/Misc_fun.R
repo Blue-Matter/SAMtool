@@ -558,6 +558,24 @@ message <- function(...) {
   }
 }
 
+message_info <- function(...) {
+  if (requireNamespace("usethis", quietly = TRUE)) {
+    dots <- list(...)
+    do.call(c, dots) %>% paste0(collapse = "") %>% usethis::ui_info()
+  } else {
+    base::message(...)
+  }
+}
+
+message_oops <- function(...) {
+  if (requireNamespace("usethis", quietly = TRUE)) {
+    dots <- list(...)
+    do.call(c, dots) %>% paste0(collapse = "") %>% usethis::ui_oops()
+  } else {
+    base::message(...)
+  }
+}
+
 warning <- function(...) {
   if (requireNamespace("usethis", quietly = TRUE)) {
     dots <- list(...)

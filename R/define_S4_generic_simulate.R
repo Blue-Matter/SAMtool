@@ -86,7 +86,7 @@ setMethod("simulate", signature(object = "Assessment"),
                                    "VPA" = NULL,
                                    "SCA" = c("log_rec_dev_sim", "log_early_rec_dev_sim", "logit_M_sim", "logit_M_walk_sim")
             )
-            if (process_error && is.null(process_vars)) message("No process error found for this model.")
+            if (process_error && is.null(process_vars)) message_info("No process error found for this model.")
             
             # Do simulation
             val <- lapply(1:nsim, Assess_sim, obj = object@obj, vars = vars, 

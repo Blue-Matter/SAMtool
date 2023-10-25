@@ -48,7 +48,7 @@ getinds<-function(PPD,styr,res=6, tsd= c("Cat","Cat","Cat","Ind","ML"),stat=c("s
   nsim<-dim(PPD@Cat)[1]
   proyears<-dim(PPD@Cat)[2]-styr+1
 
-  if(res>proyears)message(paste0("The temporal resolution for posterior predictive data calculation (",res,") is higher than the number of projected years (",proyears,"). Only one time step of indicators are calculated for ",proyears, " projected years."))
+  if(res>proyears)message_oops(paste0("The temporal resolution for posterior predictive data calculation (",res,") is higher than the number of projected years (",proyears,"). Only one time step of indicators are calculated for ",proyears, " projected years."))
   np<-floor(proyears/res)
 
   ntsd<-length(tsd)
