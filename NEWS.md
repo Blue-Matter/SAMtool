@@ -1,7 +1,7 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
 ## SAMtool 1.6.2
-- Minor `RCM` update to calculate fishery length comp when `CAL_n > 0`.
+- Minor `RCM` updates to calculate fishery length comp when `CAL_n > 0` and protect `plot.RCM` from empty index vectors.
 - Update roxygen doc with markdown.
 
 ## SAMtool 1.6.1 (2023-08-23)

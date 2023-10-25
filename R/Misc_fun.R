@@ -227,39 +227,39 @@ check_det <- function(h, abs_val = 0.1, is_null = TRUE) {
 
 
 get_sdreport <- function(obj, getReportCovariance = FALSE) {
+  old_warn <- options()$warn
+  options(warn = -1)
+  on.exit(options(warn = old_warn))
+  
   par.fixed <- obj$env$last.par.best
   if (is.null(obj$env$random)) {
     h <- obj$he(par.fixed)
     if (any(is.na(h)) || any(is.infinite(h)) || det(h) <= 0) {
       h <- NULL
     } else {
-      res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
-      if (!res$pdHess) h <- NULL
+      res <- sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance)
+      #if (!res$pdHess) h <- NULL
     }
   } else {
     par.fixed <- par.fixed[-obj$env$random] 
     h <- NULL
   }
   
-  if (check_det(h)) {  # If hessian doesn't exist or marginal positive-definite cases, with -0.1 < det(h) <= 0
-    h <- suppressWarnings(optimHess(par.fixed, obj$fn, obj$gr))
-    res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
+  if (is.null(h) || check_det(h)) {  # If hessian doesn't exist or marginal positive-definite cases, with -0.1 < det(h) <= 0
+    h <- optimHess(par.fixed, obj$fn, obj$gr)
+    res <- sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance)
   }
   
   if (check_det(h) && !res$pdHess && requireNamespace("numDeriv", quietly = TRUE)) {
     h <- numDeriv::jacobian(obj$gr, par.fixed)
-    res <- suppressWarnings(sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance))
+    res <- sdreport(obj, par.fixed = par.fixed, hessian.fixed = h, getReportCovariance = getReportCovariance)
   }
   
   if (all(is.na(res$cov.fixed)) && res$pdHess) {
     if (!is.character(try(chol(h), silent = TRUE))) res$cov.fixed <- chol2inv(chol(h))
   }
-
-  obj2 <- MakeADFun(obj$env$data, obj$env$parameters, type = "ADFun", ADreport = TRUE, 
-                    DLL = obj$env$DLL, silent = obj$env$silent)
-  gr <- obj2$gr(obj$env$last.par.best)
   
-  res$env$corr.fixed <- suppressWarnings(cov2cor(res$cov.fixed) %>% round(3)) %>% 
+  res$env$corr.fixed <- cov2cor(res$cov.fixed) %>% round(3) %>% 
     structure(dimnames = list(names(res$par.fixed), names(res$par.fixed)))
   
   return(res)
