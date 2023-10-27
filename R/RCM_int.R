@@ -542,17 +542,21 @@ RCM_sample_future_dev <- function(est_rec_dev, procsd, AC, log_rec_dev, Perr_y, 
 }
 
 process_AddIndType <- function(s_sel, nfleet) {
-  if (s_sel == -4 || s_sel == -2 || s_sel == -1 || s_sel == 0) { # -4 = B,-2 - 0 = custom sel
-    return(1)
-  } else if (s_sel == -3) { # SSB
+  if (s_sel == -3) { # SSB
     return(2)
-  } else { # Fleet
+  } else if (s_sel %in% c(-6, -5, -4, -2, -1, 0)) { # B (see SAMtool::int_s_sel for codes)
+    return(1)
+  } else if (s_sel > 0) { # Fleet
     return(ifelse(nfleet > 1, 1, 3))
+  } else {
+    stop("process_AddIndType() cannot process s_sel code = ", s_sel)
   }
 }
 
 process_AddIndV <- function(sur, Misc, s_sel, n_age, nfleet, nyears) { # Return a matrix of nsim x nages
-  if (s_sel[sur] < -2 || (s_sel[sur] == 1 & nfleet == 1)) { # -4 = B, -3 = SSB, single-fleet VB
+  sel_B_SB <- s_sel[sur] %in% c(-3, -4) # -4 = B, -3 = SSB, coordinate with process_AddIndType() and Data@AddIndType
+  sel_VB <- s_sel[sur] == 1 && nfleet == 1
+  if (sel_B_SB || sel_VB) { single-fleet VB
     out <- matrix(1, length(Misc), n_age)
   } else { # custom sel or multi-fleet
     out <- do.call(rbind, lapply(Misc, function(x) x$ivul[nyears, , sur]))
