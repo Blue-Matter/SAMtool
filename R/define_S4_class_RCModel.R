@@ -273,13 +273,26 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             OM_update <- c(OM_update, compare_rmd)
 
             ####### Output from all simulations {.tabset}
+            sim_summary <- matrix(
+              c(x@OM@nsim, 
+                sapply(x@Misc, getElement, 'conv') %>% mean() %>% round(2) %>% `*`(100), 
+                length(sims))
+            ) %>%
+              structure(dimnames = list(c("Operating model simulations", "RCM converged (%)", "Simulations plotted"),
+                                        "Value")) %>%
+              as.data.frame()
+            
+            all_sims_header <- c("## RCM output {.tabset}\n\n",
+                                 "### Simulations\n", 
+                                 "`r sim_summary`",
+                                 "\n")
             fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
 
             if (any(RCMdata@Index > 0, na.rm = TRUE)) {
               index_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
             } else index_output <- NULL
 
-            all_sims_output <- c(fleet_output, index_output, "### Model predictions\n",
+            all_sims_output <- c(all_sims_header, fleet_output, index_output, "### Model predictions\n",
                                  rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), rmd_log_rec_dev(), 
                                  rmd_RCM_SPR())
 

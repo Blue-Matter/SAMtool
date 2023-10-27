@@ -114,7 +114,6 @@ rmd_RCM_sel <- function(fig.cap = "Operating model selectivity in the last histo
 }
 
 rmd_RCM_fleet_output <- function(ff, f_name) {
-  if (ff == 1) header <- "## RCM output {.tabset}\n" else header <- NULL
   ans <- c(paste("### ", f_name[ff], "\n"),
            paste0("```{r, fig.cap = \"Length selectivity of ", f_name[ff], ".\"}"),
            paste0("bl <- unique(RCMdata@sel_block[, ", ff, "])"),
@@ -233,7 +232,7 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "}",
            "```\n")
   
-  c(header, ans)
+  return(ans)
 }
 
 rmd_RCM_index_output <- function(sur, s_name) {
