@@ -556,7 +556,7 @@ process_AddIndType <- function(s_sel, nfleet) {
 process_AddIndV <- function(sur, Misc, s_sel, n_age, nfleet, nyears) { # Return a matrix of nsim x nages
   sel_B_SB <- s_sel[sur] %in% c(-3, -4) # -4 = B, -3 = SSB, coordinate with process_AddIndType() and Data@AddIndType
   sel_VB <- s_sel[sur] == 1 && nfleet == 1
-  if (sel_B_SB || sel_VB) { single-fleet VB
+  if (sel_B_SB || sel_VB) { # single-fleet VB
     out <- matrix(1, length(Misc), n_age)
   } else { # custom sel or multi-fleet
     out <- do.call(rbind, lapply(Misc, function(x) x$ivul[nyears, , sur]))
