@@ -320,17 +320,19 @@ Type RCM(objective_function<Type> *obj) {
   // Loop over all other years
   for(int y=0;y<n_y;y++) {
     // Calculate this year's fleet F
-    for(int ff=0;ff<nfleet;ff++) {
-      if(condition(ff) == 0) { // catch
-        if(y != yind_F(ff)) {
-          Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff)); // annual F as deviation from F in middle of time series
-          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
+    if(condition(0) == 1) { // all will be catch2
+      F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
+    } else {
+      for(int ff=0;ff<nfleet;ff++) {
+        if(condition(ff) == 0) { // catch
+          if(y != yind_F(ff)) {
+            Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff)); // annual F as deviation from F in middle of time series
+            F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
+          }
+        } else if(condition(ff) == 2) { //effort
+          Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
+          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
         }
-      } else if(condition(ff) == 1) { //catch2
-        F.row(y) = Newton_F(C_hist, N, M, wt, VB, vul, max_F, y, n_age, nfleet, n_itF, penalty);
-      } else { //effort
-        Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
-        F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
       }
     }
     
@@ -340,7 +342,7 @@ Type RCM(objective_function<Type> *obj) {
       if(a>0) E(y) += N(y,a) * exp(-spawn_time_frac * Z(y,a)) * fec(y,a);
     }
     
-    // Calculate this year's recruitment and biomass
+    // Calculate this year's recruitment
     if(y>0) {
       if(SR_type == "BH") {
         R(y) = BH_SR(E(y), h, R0, E0_SR);
@@ -360,10 +362,9 @@ Type RCM(objective_function<Type> *obj) {
       }
       N(y,0) = R(y);
       
-      for(int a=0;a<n_age;a++) {
-        B(y) += N(y,a) * wt(y,a);
-        for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,a,ff) * N(y,a) * wt(y,a);
-      }
+      // Add age-zero to the total biomass (other age classes calculated in previous year)
+      B(y) += N(y,0) * wt(y,0);
+      for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,0,ff) * N(y,0) * wt(y,0);
     }
     
     // Calculate this year's CAA, catch, CAL, mean size, then next year's abundance
@@ -394,6 +395,12 @@ Type RCM(objective_function<Type> *obj) {
     } else { //if(msize_type == "weight") 
       for(int ff=0;ff<nfleet;ff++) MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
     }
+    
+    // Calculate next year's biomass excluding age zero
+    for(int a=1;a<n_age;a++) {
+      B(y+1) += N(y+1,a) * wt(y+1,a);
+      for(int ff=0;ff<nfleet;ff++) VB(y+1,ff) += vul(y+1,a,ff) * N(y+1,a) * wt(y+1,a);
+    }
   }
   
   // Biomass at beginning of n_y + 1
@@ -409,10 +416,8 @@ Type RCM(objective_function<Type> *obj) {
     R(n_y) = MesnilRochet_SR(E(n_y), MRgamma, MRRmax, MRhinge);
   }
   N(n_y,0) = R(n_y);
-  for(int a=0;a<n_age;a++) {
-    B(n_y) += N(n_y,a) * wt(n_y,a);
-    for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,a,ff) * N(n_y,a) * wt(n_y,a);
-  }
+  B(n_y) += N(n_y,0) * wt(n_y,0);
+  for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,0,ff) * N(n_y,0) * wt(n_y,0);
 
   // Calculate for surveys: q, selectivity, and age/length comps
   vector<Type> iLFS(nsurvey);
@@ -518,8 +523,8 @@ Type RCM(objective_function<Type> *obj) {
     }
     
     for(int y=0;y<n_y;y++) {
-      int check1 = (condition(ff) != 2) && (C_hist(y,ff) > 0);
-      int check2 = (condition(ff) == 2) && (E_hist(y,ff) > 0);
+      int check1 = (condition(ff) != 2) && (C_hist(y,ff) > 0); // Check for F > 0
+      int check2 = (condition(ff) == 2) && (E_hist(y,ff) > 0); // Check for F > 0
       if(check1 || check2) {
         
         if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {
