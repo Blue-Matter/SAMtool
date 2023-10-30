@@ -17,7 +17,7 @@
 #' @param data Data inputs formatted in a [RCMdata-class] (preferred) or [Data-class] object. 
 #' Use of a list is deprecated. See Data section below.
 #' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
-#' or "effort" (F is proportional to an index series in `data@Ehist`. Can be fleet specific.
+#' or "effort" (F is proportional to an index series in `data@Ehist`. Can be fleet specific, in which case some combination of "catch" and "effort" are permissible.
 #' @param selectivity A character vector of length nfleet to indicate `"logistic_length"`, `"dome_length"`, `"logistic_age"`, `"dome_age"`, or `"free"` selectivity for each fleet in `Chist`.
 #' If there is time-varying selectivity, this is a character vector of length nsel_block (see Data section below). "free" indicates independent selectivity parameters for each age,
 #' and additional modifications for fixing selectivity parameters will likely be needed. See Additional arguments section.

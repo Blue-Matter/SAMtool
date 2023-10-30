@@ -87,7 +87,7 @@ RCM(OM, data, ...)
 steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).}
 
 \item{condition}{String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
-or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be fleet specific.}
+or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be fleet specific, in which case some combination of "catch" and "effort" are permissible.}
 
 \item{silent}{Logical to indicate whether informative messages will be reported to console.}
 

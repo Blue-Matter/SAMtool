@@ -325,6 +325,10 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     if (RCMdata@Misc$nfleet > 1) {
       if (length(condition) == 1) RCMdata@Misc$condition <- condition <- rep(condition, RCMdata@Misc$nfleet)
       if (length(condition) != RCMdata@Misc$nfleet) stop("Length of condition vector should be equal to ", RCMdata@Misc$nfleet)
+      
+      if (any(condition == "catch2") && !all(condition == "catch2")) {
+        stop("condition must be a combination of either: (1) a combination of \"catch\" and \"effort\" or (2) all \"catch2\"")
+      }
     }
     
     if (all(grepl("catch", condition))) RCMdata@Ehist <- matrix(0, RCMdata@Misc$nyears, RCMdata@Misc$nfleet)

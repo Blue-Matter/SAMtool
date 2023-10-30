@@ -2,8 +2,9 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.6.3
 - Report simulations and convergence rate in `plot(RCModel)` under `RCM_output` tab.
+- Fix issue with F calcs when `RCM(condition = "catch2")`, introduced in version 1.6.0.
 
-## SAMtool 1.6.2
+## SAMtool 1.6.2 (2023-10-26)
 - Minor `RCM` updates to calculate fishery length comp when `CAL_n > 0` and protect `plot.RCM` from empty index vectors.
 - Update roxygen doc with markdown.
 
