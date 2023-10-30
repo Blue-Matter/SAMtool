@@ -551,7 +551,7 @@ par_identical_sims_fn <- function(StockPars, FleetPars, RCMdata, dots) {
 
 RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
   
-  if (any(obj$env$data$condition == 1L)) { # catch2
+  if (any(obj$env$data$condition == 1L)) { # all will be catch2
     
     new_data <- obj$env$data
     new_data$C_hist[] <- 1e-8
@@ -569,7 +569,7 @@ RCM_dynamic_SSB0 <- function(obj, par = obj$env$last.par.best) {
   par[names(par) == "log_F_dev" | names(par) == "log_F_equilibrium"] <- log(1e-8)
   par[names(par) == "log_q_effort"] <- log(1e-8)
   
-  out <- obj$report(par)$E
+  out <- obj2$report(par)$E
   return(out)
 }
 
