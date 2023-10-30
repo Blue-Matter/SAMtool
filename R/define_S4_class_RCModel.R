@@ -688,7 +688,8 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
     SSB_MSY <- rmd_ref_pt <- ""
   }
 
-  all_sims_output <- c("# Summary {.tabset}\n\n", fleet_output, survey_output, "### Model predictions\n",
+  all_sims_output <- c("# Summary {.tabset}\n\n", "## RCM output {.tabset}\n\n", 
+                       fleet_output, survey_output, "### Model predictions\n",
                        rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), SSB_MSY, rmd_log_rec_dev())
 
   #### Likelihoods
