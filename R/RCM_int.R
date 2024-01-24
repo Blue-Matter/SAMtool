@@ -320,7 +320,7 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   OM@cpars$qs <- rep(1, nsim)
   if (!silent) {
     message("Historical F set with OM@cpars$Find and OM@cpars$qs.")
-    message("Annual selectivity set in OM@cpars$V. Projection period uses selectivity of last historical year.")
+    message("Annual selectivity at age set in OM@cpars$V. Projection period uses selectivity of last historical year.")
   }
   
   Eff <- apply(OM@cpars$Find, 2, range)
@@ -329,6 +329,17 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   if (length(OM@EffYears) != nyears) OM@EffYears <- 1:nyears
   if (length(OM@Esd) == 0 && is.null(OM@cpars$Esd)) OM@Esd <- c(0, 0)
   #if (!silent) message("Historical effort trends set in OM@EffLower and OM@EffUpper (N.B. not used).")
+  
+  #if (any(obj_data$CAL_hist > 0, na.rm = TRUE) || (any(obj_data$msize > 0, na.rm = TRUE) & obj_data$msize_type == "length") ||
+  #    any(obj_data$IAL_hist > 0, na.rm = TRUE)) {
+    OM@cpars$CAL_bins <- obj_data$lbin
+    OM@cpars$CAL_binsmid <- obj_data$lbinmid
+    if (!silent) message("RCMdata length bins will be added to OM.")
+    if (!is.null(RCM_val$SLarray)) {
+      OM@cpars$SLarray <- RCM_val$SLarray
+      if (!silent) message("Annual selectivity at length set in OM@cpars$SLarray (used to simulate length data).")
+    }
+  #}
   
   ### Rec devs
   OM@cpars$Perr <- RCM_val$procsd
@@ -392,10 +403,11 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   if (!is.null(StockPars$Wt_age)) OM@cpars$Wt_age <- StockPars$Wt_age
   if (!is.null(StockPars$Mat_age)) OM@cpars$Mat_age <- StockPars$Mat_age
   
-  if (!is.null(StockPars$L50array)) OM@cpars$L50array <- StockPars$L50array
-  if (!is.null(StockPars$L95array)) OM@cpars$L95array <- StockPars$L95array
   if (!is.null(StockPars$ageMarray)) OM@cpars$ageMarray <- StockPars$ageMarray
   if (!is.null(StockPars$age95array)) OM@cpars$age95array <- StockPars$age95array
+  
+  if (!is.null(StockPars$L50array)) OM@cpars$L50array <- StockPars$L50array
+  if (!is.null(StockPars$L95array)) OM@cpars$L95array <- StockPars$L95array
   
   if (!is.null(StockPars$Fec_Age) && !identical(StockPars$Mat_age * StockPars$Wt_age, StockPars$Fec_Age)) {
     OM@cpars$Fec_age <- StockPars$Fec_Age
@@ -414,20 +426,12 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   } else if (!is.null(StockPars$M_ageArray)) {
     OM@cpars$M_ageArray <- StockPars$M_ageArray
   }
-  
-  if (any(obj_data$CAL_hist > 0, na.rm = TRUE) || (any(obj_data$msize > 0, na.rm = TRUE) & obj_data$msize_type == "length") ||
-      any(obj_data$IAL_hist > 0, na.rm = TRUE)) {
-    OM@cpars$CAL_bins <- obj_data$lbin
-    OM@cpars$CAL_binsmid <- obj_data$lbinmid
-    if (!silent) message("RCMdata length bins will be added to OM.")
-  }
+  if (!silent) message("Growth, maturity, natural mortality, and stock recruit parameters from RCM are set in OM@cpars.\n\n")
   
   if (!obj_data$plusgroup) {
     OM@cpars$plusgroup <- 0L
     if (!silent) message("No plus group was used in RCM.")
   }
-  if (!silent) message("Growth, maturity, natural mortality, and stock recruit parameters from RCM are set in OM@cpars.\n\n")
-  
   return(list(OM = OM, RCM_val = RCM_val))
 }
 
@@ -450,12 +454,29 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
   
   expand_V_matrix <- function(x) {
-    y <- matrix(x[nyears, ], proyears, n_age, byrow = TRUE)
+    y <- matrix(x[nyears, ], proyears, ncol(x), byrow = TRUE)
     rbind(x, y)
   }
   
   out$V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(3:1)
   out$Find <- do.call(rbind, apical_F)
+  
+  if (!is.null(report[[1]]$vul_len) && all(!is.na(report[[1]]$vul_len))) {
+    make_SL <- function(x) {
+      apicalF <- x$F
+      apicalF[apicalF < 1e-4] <- 1e-4
+      
+      F_at_length <- lapply(1:ncol(apicalF), function(xx) {
+        sel_block_f <- obj_data$sel_block[1:nyears, xx]
+        apicalF[, xx] * t(x$vul_len[, sel_block_f])
+      }) %>% 
+        simplify2array() %>% 
+        apply(1:2, sum)
+      SL <- apply(F_at_length, 1, function(xx) xx/max(xx)) %>% t() # year x bin
+      return(SL)
+    }
+    out$SLarray <- lapply(report, make_SL) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(3:1)
+  }
   
   out$procsd <- vapply(report, getElement, numeric(1), "tau")
   

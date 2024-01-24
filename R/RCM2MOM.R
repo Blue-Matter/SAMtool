@@ -34,6 +34,44 @@ RCM2MOM <- function(RCModel) {
     Vpro <- array(Vhist[, , dim(Vhist)[3]], c(dim(Vhist)[1:2], RCModel@OM@proyears))
     cp$V <- abind::abind(Vhist, Vpro, along = 3)
     
+    if (!is.null(cp$SLarray)) {
+      SLhist <- sapply(
+        1:MOM@nsim,
+        function(x) {
+          apicalF <- RCModel@Misc[[x]]$F
+          apicalF[apicalF < 1e-4] <- 1e-4
+          
+          FL <- lapply(1:ncol(apicalF), function(xx) {
+            sel_block_f <- RCModel@data@sel_block[, xx]
+            apicalF[, xx] * t(RCModel@Misc[[x]]$vul_len[, sel_block_f])
+          }) %>% 
+            simplify2array() %>% 
+            apply(1:2, sum)
+          SL <- apply(FL, 1, function(xx) xx/max(xx)) %>% t() # year x bin
+          return(SL)
+        },
+        simplify = "array"
+      ) %>%
+        aperm(3:1)
+      SLpro <- array(SLhist[, , dim(SLhist)[3]], c(dim(SLhist)[1:2], RCModel@OM@proyears))
+      cp$SLarray <- abind::abind(SLhist, SLpro, along = 3)
+    }
+    
+    make_SL <- function(x) {
+      apicalF <- x$F
+      apicalF[apicalF < 1e-4] <- 1e-4
+      
+      F_at_length <- lapply(1:ncol(apicalF), function(xx) {
+        sel_block_f <- obj_data@sel_block[, xx]
+        apicalF[, xx] * t(x$vul_len[, sel_block_f])
+      }) %>% 
+        simplify2array() %>% 
+        apply(1:2, sum)
+      SL <- apply(F_at_length, 1, function(xx) xx/max(xx)) %>% t() # year x bin
+      return(SL)
+    }
+    out$SLarray <- lapply(report, make_SL) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(c(3, 1, 2))
+    
     if (!is.null(cp$Data)) {
       if (sum(RCModel@data@Chist[, f] > 0, na.rm = TRUE)) {
         cp$Data@Cat <- matrix(RCModel@data@Chist[, f], 1, RCModel@OM@nyears)
