@@ -392,6 +392,11 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   if (!is.null(StockPars$Wt_age)) OM@cpars$Wt_age <- StockPars$Wt_age
   if (!is.null(StockPars$Mat_age)) OM@cpars$Mat_age <- StockPars$Mat_age
   
+  if (!is.null(StockPars$L50array)) OM@cpars$L50array <- StockPars$L50array
+  if (!is.null(StockPars$L95array)) OM@cpars$L95array <- StockPars$L95array
+  if (!is.null(StockPars$ageMarray)) OM@cpars$ageMarray <- StockPars$ageMarray
+  if (!is.null(StockPars$age95array)) OM@cpars$age95array <- StockPars$age95array
+  
   if (!is.null(StockPars$Fec_Age) && !identical(StockPars$Mat_age * StockPars$Wt_age, StockPars$Fec_Age)) {
     OM@cpars$Fec_age <- StockPars$Fec_Age
   }
