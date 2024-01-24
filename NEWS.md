@@ -2,8 +2,9 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.6.4
 - RCM passes maturity at length parameters to operating model. While RCM uses the corresponding age ogive, the OM will back-calculate to retrieve the length parameters, but may not recover the original values.
+- Plot maturity at length and length-weight relationship in RCM output if fitted to sized data.
 
-## SAMtool 1.6.3
+## SAMtool 1.6.3 (2023-11-18)
 - Under `RCM_output` tab in `plot(RCModel)`, report simulations and convergence rate, and clean up comp plots.
 - Fix issue with F calcs when `RCM(condition = "catch2")`, introduced in version 1.6.0.
 

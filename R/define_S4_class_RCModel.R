@@ -323,7 +323,8 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               anyML <- any(data_mean_fit$msize > 0, na.rm = TRUE) && data_mean_fit$msize_type == "length"
               anyCAL <- any(data_mean_fit$CAL_hist > 0, na.rm = TRUE)
               anyIAL <- any(data_mean_fit$IAL_hist > 0, na.rm = TRUE)
-              if (anyML || anyCAL || anyIAL) {
+              any_size_data <- anyML || anyCAL || anyIAL
+              if (any_size_data) {
                 SD_LAA <- "data_mean_fit$SD_LAA[nyears, ]"
               } else {
                 SD_LAA <- ""
@@ -334,6 +335,12 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 LAA_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$len_age[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Length-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual length-at-age.")
               } else LAA_persp <- NULL
+              
+              if (!is.null(length_bin)) {
+                LW_ <- OM@a * length_bin ^ OM@b
+                LW <- rmd_at_age(age = "length_bin", y_var = "LW_", fig.cap = "Weight-at-length in the last historical year",
+                                 label = "Weight", xlab = "Length")
+              } else LW <- NULL
               
               wt <- rmd_WAA(age = "age", "data_mean_fit$wt[nyears, ]", fig.cap = "Weight-at-age in the last historical year.")
               if (LH_varies_fn(data_mean_fit$wt)) {
@@ -346,6 +353,17 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 mat_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$mat[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Maturity-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual maturity-at-age.")
               } else mat_persp <- NULL
+              
+              if (any_size_data && !is.null(OM@cpars$L50array)) {
+                mat_len_ogive <- local({
+                  L50 <- OM@cpars$L50array[, nyears]
+                  L95 <- OM@cpars$L95array[, nyears]
+                  v <- sapply(1:length(L50), function(x) (length_bin - L50[x])/(L95[x] - L50[x]))
+                  ogive <- 1/(1 + exp(-log(19) * v))
+                  apply(ogive, 1, mean)
+                })
+                mat_len <- rmd_mat(age = "length_bin", "mat_len_ogive", fig.cap = "Maturity-at-length in the last historical year.", xlab = "Length")
+              } else mat_len <- NULL
               
               fec <- rmd_fec(age = "age", "data_mean_fit$fec[nyears, ]", fig.cap = "Fecundity-at-age (product of spawning output and maturity) in the last historical year.")
               if (LH_varies_fn(data_mean_fit$fec)) {
@@ -363,7 +381,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                              zlab = "Natural mortality", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual M-at-age.")
               } else NatM_persp <- NULL
 
-              LH_section <- c(LAA, LAA_persp, wt, wt_persp, mat, mat_persp, fec, fec_persp, NatM, NatM_persp)
+              LH_section <- c(LAA, LAA_persp, LW, wt, wt_persp, mat, mat_persp, mat_len, fec, fec_persp, NatM, NatM_persp)
 
               # Data and fit section
               individual_matrix_fn <- function(i, obs, pred, fig.cap, label, resids = FALSE, condition) {

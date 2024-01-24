@@ -47,9 +47,9 @@ rmd_summary <- function(modname) {
 
 
 ### Life history
-rmd_at_age <- function(age, y_var, fig.cap, label, header = NULL) {
+rmd_at_age <- function(age, y_var, fig.cap, label, header = NULL, xlab = "Age") {
   ans <- c(paste0("```{r, fig.cap=\"", fig.cap, "\"}"),
-           paste0("plot_generic_at_age(", age, ", ", y_var, ", label = \"", label, "\")"),
+           paste0("plot_generic_at_age(", age, ", ", y_var, ", label = \"", label, "\", xlab = \"", xlab, "\")"),
            "```\n")
   if (!is.null(header)) ans <- c(header, ans)
   return(ans)
@@ -89,8 +89,8 @@ rmd_LW <- function(LAA = "info$LH$LAA", WAA = "info$LH$WAA") {
     "```\n")
 }
 
-rmd_mat <- function(age = "1:info$data$n_age - 1", mat = "info$data$mat", fig.cap) {
-  rmd_at_age(age, mat, fig.cap, "Maturity")
+rmd_mat <- function(age = "1:info$data$n_age - 1", mat = "info$data$mat", fig.cap, xlab = "Age") {
+  rmd_at_age(age, mat, fig.cap, "Maturity", xlab = xlab)
 }
 
 rmd_fec <- function(age, fec, fig.cap) {

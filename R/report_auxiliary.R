@@ -976,8 +976,8 @@ plot_SR <- function(Spawners, expectedR, R0 = NULL, S0 = NULL, rec_dev = NULL, t
 }
 
 
-plot_generic_at_age <- function(Age, quantity, label, ymax = 1.1 * max(quantity)) {
-  plot(Age, quantity, ylab = label, typ = "n", ylim = c(0, ymax))
+plot_generic_at_age <- function(Age, quantity, label, ymax = 1.1 * max(quantity), xlab = "Age") {
+  plot(Age, quantity, ylab = label, typ = "n", ylim = c(0, ymax), xlab = xlab)
   abline(h = 0, col = "grey")
   lines(Age, quantity, typ = "o")
 
