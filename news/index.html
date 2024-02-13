@@ -46,9 +46,10 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.4" id="samtool-164">SAMtool 1.6.4<a class="anchor" aria-label="anchor" href="#samtool-164"></a></h2>
-<ul><li>RCM passes maturity at length parameters to operating model. While RCM uses the corresponding age ogive, the OM will back-calculate to retrieve the length parameters, but may not recover the original values.</li>
+<ul><li>RCM passes maturity at length parameters to operating model. While RCM only uses the corresponding age ogive, the OM later will back-calculate to retrieve the length parameters, but may not recover the original values.</li>
 <li>RCM passes selectivity at length to operating model. This is needed to simulate length data in the projection.</li>
 <li>Plot maturity at length and length-weight relationship in RCM output if fitted to sized data.</li>
+<li>Histograms exclude extreme outliers (samples greater than the 95th percentile if the skewness &gt; 3).</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.3" id="samtool-163-2023-11-18">SAMtool 1.6.3 (2023-11-18)<a class="anchor" aria-label="anchor" href="#samtool-163-2023-11-18"></a></h2><p class="text-muted">CRAN release: 2023-11-18</p>
