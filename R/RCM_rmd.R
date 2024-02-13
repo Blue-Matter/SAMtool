@@ -193,6 +193,7 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "if (!all(is.na(MLpred))) {",
            "  ylim <- c(0.9, 1.1) * range(c(MLpred, MLobs), na.rm = TRUE)",
            "  matplot(Year, MLpred, type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, xlab = \"Year\", ylab = \"Mean length\", ylim = ylim)",
+           "  lines(Year, MLobs, col = \"black\", typ = \"o\")",
            "  if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col, lty = scenario$lty, lwd = scenario$lwd)",
            "}",
            "```\n",
