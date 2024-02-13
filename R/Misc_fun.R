@@ -58,7 +58,7 @@ hist.numeric <- function(x, ...) {
     } else {
       legend_skew1 <- NULL
     }
-    if (skewness < 3) {
+    if (skewness < -3) {
       min_x_plot <- quantile(x, 0.05)
       x <- x[x >= min_x_plot]
       legend_skew2 <- paste0(round(100 * mean(min_x_plot/n)), "% < ", round(min_x_plot, 2))
