@@ -1,9 +1,10 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
 ## SAMtool 1.6.4
-- RCM passes maturity at length parameters to operating model. While RCM uses the corresponding age ogive, the OM will back-calculate to retrieve the length parameters, but may not recover the original values.
+- RCM passes maturity at length parameters to operating model. While RCM only uses the corresponding age ogive, the OM later will back-calculate to retrieve the length parameters, but may not recover the original values.
 - RCM passes selectivity at length to operating model. This is needed to simulate length data in the projection.
 - Plot maturity at length and length-weight relationship in RCM output if fitted to sized data.
+- Histograms exclude extreme outliers (samples greater than the 95th percentile if the skewness > 3).
 
 ## SAMtool 1.6.3 (2023-11-18)
 - Under `RCM_output` tab in `plot(RCModel)`, report simulations and convergence rate, and clean up comp plots.
