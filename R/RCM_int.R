@@ -453,29 +453,15 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   F_matrix <- lapply(report, make_F)
   apical_F <- lapply(F_matrix, function(x) apply(x, 1, max))
   
-  expand_V_matrix <- function(x) {
-    y <- matrix(x[nyears, ], proyears, ncol(x), byrow = TRUE)
-    rbind(x, y)
-  }
-  
-  out$V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(3:1)
+  out$V <- Map("/", e1 = F_matrix, e2 = apical_F) %>% 
+    lapply(expand_V_matrix, nyears = nyears, proyears = proyears) %>% 
+    simplify2array() %>% aperm(3:1)
   out$Find <- do.call(rbind, apical_F)
   
   if (!is.null(report[[1]]$vul_len) && all(!is.na(report[[1]]$vul_len))) {
-    make_SL <- function(x) {
-      apicalF <- x$F
-      apicalF[apicalF < 1e-4] <- 1e-4
-      
-      F_at_length <- lapply(1:ncol(apicalF), function(xx) {
-        sel_block_f <- obj_data$sel_block[1:nyears, xx]
-        apicalF[, xx] * t(x$vul_len[, sel_block_f])
-      }) %>% 
-        simplify2array() %>% 
-        apply(1:2, sum)
-      SL <- apply(F_at_length, 1, function(xx) xx/max(xx)) %>% t() # year x bin
-      return(SL)
-    }
-    out$SLarray <- lapply(report, make_SL) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(3:1)
+    out$SLarray <- lapply(report, make_SL, sel_block = obj_data$sel_block[1:nyears, , drop = FALSE]) %>% 
+      lapply(expand_V_matrix, nyears = nyears, proyears = proyears) %>% 
+      simplify2array() %>% aperm(3:1)
   }
   
   out$procsd <- vapply(report, getElement, numeric(1), "tau")
@@ -870,4 +856,24 @@ RCM_nll_profile_summary <- function(x) { # Summary table of RCM likelihoods for 
   
   c(nll$value, x[[1]][c(2, 5, 6), 1]) %>% 
     structure(names = paste(nll$variable, nll$Data) %>% c("Recruitment Deviations", "Penalty", "Prior"))
+}
+
+
+expand_V_matrix <- function(x, nyears, proyears) {
+  y <- matrix(x[nyears, ], proyears, ncol(x), byrow = TRUE)
+  rbind(x, y)
+}
+
+make_SL <- function(x, sel_block) {
+  apicalF <- x$F
+  apicalF[apicalF < 1e-4] <- 1e-4
+  
+  F_at_length <- lapply(1:ncol(apicalF), function(xx) {
+    sel_block_f <- sel_block[, xx]
+    apicalF[, xx] * t(x$vul_len[, sel_block_f])
+  }) %>% 
+    simplify2array() %>% 
+    apply(1:2, sum)
+  SL <- apply(F_at_length, 1, function(xx) xx/max(xx)) %>% t() # year x bin
+  return(SL)
 }

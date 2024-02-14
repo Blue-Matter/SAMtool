@@ -57,20 +57,9 @@ RCM2MOM <- function(RCModel) {
       cp$SLarray <- abind::abind(SLhist, SLpro, along = 3)
     }
     
-    make_SL <- function(x) {
-      apicalF <- x$F
-      apicalF[apicalF < 1e-4] <- 1e-4
-      
-      F_at_length <- lapply(1:ncol(apicalF), function(xx) {
-        sel_block_f <- obj_data@sel_block[, xx]
-        apicalF[, xx] * t(x$vul_len[, sel_block_f])
-      }) %>% 
-        simplify2array() %>% 
-        apply(1:2, sum)
-      SL <- apply(F_at_length, 1, function(xx) xx/max(xx)) %>% t() # year x bin
-      return(SL)
-    }
-    out$SLarray <- lapply(report, make_SL) %>% lapply(expand_V_matrix) %>% simplify2array() %>% aperm(c(3, 1, 2))
+    out$SLarray <- lapply(report, make_SL, sel_block = RCModel@data@sel_block) %>% 
+      lapply(expand_V_matrix, nyears = RCModel@OM@nyears, proyears = RCModel@OM@proyears) %>% 
+      simplify2array() %>% aperm(c(3, 1, 2))
     
     if (!is.null(cp$Data)) {
       if (sum(RCModel@data@Chist[, f] > 0, na.rm = TRUE)) {
