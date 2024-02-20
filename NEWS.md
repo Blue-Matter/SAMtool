@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.6.5
+- Update `RCM2MOM`.
+
 ## SAMtool 1.6.4
 - RCM passes maturity at length parameters to operating model. While RCM only uses the corresponding age ogive, the OM later will back-calculate to retrieve the length parameters, but may not recover the original values.
 - RCM passes selectivity at length to operating model. This is needed to simulate length data in the projection.

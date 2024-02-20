@@ -7,6 +7,19 @@
 #' @param RCModel Output from [RCM], a class [RCModel-class] object.
 #' @return A class [MOM-class] object.
 #' @author Q. Huynh
+#' @examples
+#' data(pcod) 
+#' mat_ogive <- pcod$OM@cpars$Mat_age[1, , 1]
+#' OM <- MSEtool::SubCpars(pcod$OM, 1:3)
+#' out <- RCM(OM = pcod$OM, data = pcod$data, 
+#'            condition = "catch", mean_fit = TRUE,
+#'            selectivity = "free", s_selectivity = rep("SSB", ncol(pcod$data@Index)),
+#'            start = list(vul_par = matrix(mat_ogive, length(mat_ogive), 1)),
+#'            map = list(vul_par = matrix(NA, length(mat_ogive), 1),
+#'                       log_early_rec_dev = rep(1, pcod$OM@maxage)),
+#'            prior = pcod$prior)
+#' MOM <- RCM2MOM(out)
+#' 
 #' @importFrom abind abind
 #' @export
 RCM2MOM <- function(RCModel) {
@@ -24,7 +37,7 @@ RCM2MOM <- function(RCModel) {
     
     F_age <- sapply(
       1:MOM@nsim, 
-      function(x) RCModel@Misc[[x]]$F[, f] * RCModel@Misc[[x]]$vul[1:RCModel@OM@nyears, , f],
+      function(x) report[[x]]$F[, f] * report[[x]]$vul[1:RCModel@OM@nyears, , f],
       simplify = "array"
     ) %>% 
       aperm(3:1)
@@ -32,34 +45,14 @@ RCM2MOM <- function(RCModel) {
     cp$Find <- apply(F_age, c(1, 3), max)
     Vhist <- apply(F_age, c(1, 3), function(x) x/max(x))
     Vpro <- array(Vhist[, , dim(Vhist)[3]], c(dim(Vhist)[1:2], RCModel@OM@proyears))
-    cp$V <- abind::abind(Vhist, Vpro, along = 3)
+    cp$V <- abind::abind(Vhist, Vpro, along = 3) %>%
+      aperm(c(2, 1, 3))
     
     if (!is.null(cp$SLarray)) {
-      SLhist <- sapply(
-        1:MOM@nsim,
-        function(x) {
-          apicalF <- RCModel@Misc[[x]]$F
-          apicalF[apicalF < 1e-4] <- 1e-4
-          
-          FL <- lapply(1:ncol(apicalF), function(xx) {
-            sel_block_f <- RCModel@data@sel_block[, xx]
-            apicalF[, xx] * t(RCModel@Misc[[x]]$vul_len[, sel_block_f])
-          }) %>% 
-            simplify2array() %>% 
-            apply(1:2, sum)
-          SL <- apply(FL, 1, function(xx) xx/max(xx)) %>% t() # year x bin
-          return(SL)
-        },
-        simplify = "array"
-      ) %>%
-        aperm(3:1)
-      SLpro <- array(SLhist[, , dim(SLhist)[3]], c(dim(SLhist)[1:2], RCModel@OM@proyears))
-      cp$SLarray <- abind::abind(SLhist, SLpro, along = 3)
+      cp$SLarray <- lapply(report, make_SL, sel_block = RCModel@data@sel_block) %>% 
+        lapply(expand_V_matrix, nyears = RCModel@OM@nyears, proyears = RCModel@OM@proyears) %>% 
+        simplify2array() %>% aperm(c(3, 1, 2))
     }
-    
-    out$SLarray <- lapply(report, make_SL, sel_block = RCModel@data@sel_block) %>% 
-      lapply(expand_V_matrix, nyears = RCModel@OM@nyears, proyears = RCModel@OM@proyears) %>% 
-      simplify2array() %>% aperm(c(3, 1, 2))
     
     if (!is.null(cp$Data)) {
       if (sum(RCModel@data@Chist[, f] > 0, na.rm = TRUE)) {
@@ -93,10 +86,14 @@ RCM2MOM <- function(RCModel) {
   MOM@Obs <- list(lapply(1:nf, function(f) SubOM(RCModel@OM, "Obs")))
   MOM@Imps <- list(lapply(1:nf, function(f) SubOM(RCModel@OM, "Imp")))
   
-  CatchFrac <- sapply(1:MOM@nsim, function(x) {
-    cvec <- RCModel@Misc[[x]]$Cpred
-    cvec[nrow(cvec), ]/sum(cvec[nrow(cvec), ])
-  }) %>% t()
+  if (nf > 1) {
+    CatchFrac <- sapply(1:MOM@nsim, function(x) {
+      cvec <- report[[x]]$Cpred
+      cvec[nrow(cvec), ]/sum(cvec[nrow(cvec), ])
+    }) %>% t()
+  } else {
+    CatchFrac <- matrix(1, MOM@nsim, 1)
+  }
   
   MOM@CatchFrac <- list(CatchFrac)
   
