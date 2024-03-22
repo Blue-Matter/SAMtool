@@ -159,7 +159,7 @@
 #' @section Optional Data:
 #' \itemize{
 #' \item `SCA`: Rec, steep, sigmaR, CV_Ind, CV_Cat
-#' \item `SC2`: Rec, steep, CV_Ind, CV_Cat
+#' \item `SCA2`: Rec, steep, CV_Ind, CV_Cat
 #' \item `SCA_Pope`: Rec, steep, sigmaR, CV_Ind
 #' }
 #' @author Q. Huynh

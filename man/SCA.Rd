@@ -272,7 +272,7 @@ Model description and equations are available on the openMSE
 
 \itemize{
 \item \code{SCA}: Rec, steep, sigmaR, CV_Ind, CV_Cat
-\item \code{SC2}: Rec, steep, CV_Ind, CV_Cat
+\item \code{SCA2}: Rec, steep, CV_Ind, CV_Cat
 \item \code{SCA_Pope}: Rec, steep, sigmaR, CV_Ind
 }
 }
