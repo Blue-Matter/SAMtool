@@ -134,7 +134,10 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     conv <- vapply(mod, function(x) x[["report"]][["conv"]], logical(1))
     if (!is.null(dots$resample) && dots$resample) {
       
-      if (!silent) message_info("Sampling covariance matrix once for each replicate...")
+      if (!silent) {
+        message_info("Sampling covariance matrix once for each replicate...")
+        if (any(!conv)) message_info("(will not sample non-converged simulations)")
+      }
       res <- pblapply(1:nsim, function(x) {
         if (conv[x]) {
           samps <- mvtnorm::rmvnorm(1, mod[[x]]$opt$par, mod[[x]]$SD$cov.fixed, checkSymmetry = FALSE)
