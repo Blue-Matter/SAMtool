@@ -2,6 +2,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.6.5
 - Update `RCM2MOM`.
+- Update RCM report for non-converged simulations.
 
 ## SAMtool 1.6.4
 - RCM passes maturity at length parameters to operating model. While RCM only uses the corresponding age ogive, the OM later will back-calculate to retrieve the length parameters, but may not recover the original values.

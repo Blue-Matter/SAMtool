@@ -146,17 +146,6 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               retro <- dots$retro
             }
 
-            # Update scenario
-            if (is.null(scenario$col)) {
-              scenario$col <- "red"
-              scenario$col2 <- "black"
-            } else {
-              scenario$col2 <- scenario$col
-            }
-
-            if (is.null(scenario$lwd)) scenario$lwd <- 1
-            if (is.null(scenario$lty)) scenario$lty <- 1
-
             ####### Function arguments for rmarkdown::render
             filename_rmd <- paste0(filename, ".Rmd")
 
@@ -181,6 +170,27 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             } else {
               report_list <- x@Misc[sims]
             }
+            
+            # Update scenario
+            if (is.null(scenario$col)) {
+              
+              if (any(!x@conv)) {
+                scenario$names <- c("Converged", "Not converged")
+                scenario$col_legend <- c("black", "red")       # Colours by factor
+                scenario$col <- sapply(1:length(x@Misc), function(xx) {
+                  ifelse(xx %in% sims & x@conv[xx], "black", "red") # Vector of colours by simulation
+                })
+              } else {
+                scenario$col <- "red" <- scenario$col_legend <- "black"
+              }
+              
+            } else {
+              scenario$col_legend <- scenario$col
+            }
+            
+            if (is.null(scenario$lwd)) scenario$lwd <- 1
+            if (is.null(scenario$lty)) scenario$lty <- 1
+            
 
             nsim <- OM@nsim
             RCMdata <- x@data
@@ -602,7 +612,7 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   # Update scenario
   if (is.null(scenario$names)) scenario$names <- as.character(substitute(list(...)))[-1]
   if (is.null(scenario$col)) scenario$col <- gplots::rich.colors(length(dots))
-  scenario$col2 <- scenario$col
+  scenario$col_legend <- scenario$col
 
   if (is.null(scenario$lwd)) scenario$lwd <- 1
   if (is.null(scenario$lty)) scenario$lty <- 1
@@ -685,9 +695,9 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
                  "SSBMSY <- vapply(Hist, function(x) mean(x@Ref$ReferencePoints$SSBMSY), numeric(1))",
                  "SSB_SSBMSY <- t(SSB/SSBMSY)",
                  "matplot(Year, SSB_SSBMSY, typ = \"n\", xlab = \"Year\", ylab = expression(SSB/SSB[MSY]), ylim = c(0, 1.1 * max(SSB_SSBMSY)))",
-                 "matlines(Year, SSB_SSBMSY, col = scenario$col2)",
+                 "matlines(Year, SSB_SSBMSY, col = scenario$col)",
                  "abline(h = c(0, MSY_ref), col = \"grey\")",
-                 "if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col2, lty = scenario$lty)",
+                 "if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col_legend, lty = scenario$lty)",
                  "```\n")
 
     ref_pt_fn <- function(xx) c(mean(xx@Ref$ReferencePoints$FMSY), mean(xx@Ref$ReferencePoints$MSY), mean(xx@Ref$ReferencePoints$SSBMSY_SSB0))
