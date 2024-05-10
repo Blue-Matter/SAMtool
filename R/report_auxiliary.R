@@ -809,7 +809,12 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
       mu[i] <- weighted.mean(data_val, obs[i, ], na.rm = TRUE)
       if (!is.null(fit)) mupred[i] <- weighted.mean(data_val, fit[i, ], na.rm = TRUE)
     }
-    ind2 <- (which(!is.na(mu) & mu > 0)[1]):length(mu)
+    ystart <- which(!is.na(mu) & mu > 0)
+    if (length(ystart)) {
+      ind2 <- seq(ystart[1], length(mu))
+    } else {
+      ind2 <- ind
+    }
     plot(Year[ind2], mu[ind2], xlab = "Year", ylab = paste0("Mean ", data_type), typ = "o")
     if (!is.null(fit)) lines(Year[ind2], mupred[ind2], lwd = fit_linewidth, col = fit_color)
 
