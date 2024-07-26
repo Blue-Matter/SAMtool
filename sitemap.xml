@@ -1,204 +1,70 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://samtool.openmse.com/404.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/index.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/Assessment-class.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/DD_TMB.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/HCR_FB.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/HCR_MSY.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/HCR_escapement.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/HCR_fixedF.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/HCR_ramp.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/HCR_segment.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/HCRlin.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/Model-based-MP.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/PRBcalc.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/Probs.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/RCM.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/RCM2MOM.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/RCM_assess.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/RCMdata-class.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/RCModel-class.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SAMtool-package.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SCA.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SCA_CAL.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SCA_DDM.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SCA_RWM.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SP.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SP_production.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/SSS.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/Shortcut.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/TAC_MSY.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/VPA.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/cDD.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/compare_models.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/diagnostic.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/getinds.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/mahplot.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/make_MP.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/pcod.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot.Assessment.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot.RCModel.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot.prof.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot.retro.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_SR.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_betavar.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_composition.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_crosscorr.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_lognormalvar.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_residuals.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_steepness.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/plot_timeseries.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/posterior.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/prelim_AM.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/prof-class.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/profile.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/project-class.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/projection.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/retro-class.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/retrospective.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/retrospective_AM.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/sim-class.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/simulate.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/summary.Assessment.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/swordfish.html</loc>
-  </url>
-  <url>
-    <loc>https://samtool.openmse.com/reference/userguide.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://samtool.openmse.com/404.html</loc></url>
+<url><loc>https://samtool.openmse.com/LICENSE.html</loc></url>
+<url><loc>https://samtool.openmse.com/authors.html</loc></url>
+<url><loc>https://samtool.openmse.com/index.html</loc></url>
+<url><loc>https://samtool.openmse.com/news/index.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/Assessment-class.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/DD_TMB.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/HCR_FB.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/HCR_MSY.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/HCR_escapement.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/HCR_fixedF.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/HCR_ramp.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/HCR_segment.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/HCRlin.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/Model-based-MP.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/PRBcalc.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/Probs.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/RCM.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/RCM2MOM.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/RCM_assess.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/RCMdata-class.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/RCModel-class.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SAMtool-package.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SCA.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SCA_CAL.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SCA_DDM.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SCA_RWM.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SP.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SP_production.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/SSS.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/Shortcut.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/TAC_MSY.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/VPA.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/cDD.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/compare_models.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/diagnostic.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/getinds.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/index.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/mahplot.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/make_MP.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/pcod.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot.Assessment.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot.RCModel.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot.prof.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot.retro.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_SR.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_betavar.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_composition.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_crosscorr.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_lognormalvar.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_residuals.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_steepness.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/plot_timeseries.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/posterior.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/prelim_AM.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/prof-class.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/profile.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/project-class.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/projection.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/retro-class.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/retrospective.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/retrospective_AM.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/sim-class.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/simulate.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/summary.Assessment.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/swordfish.html</loc></url>
+<url><loc>https://samtool.openmse.com/reference/userguide.html</loc></url>
 </urlset>
+
