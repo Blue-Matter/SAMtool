@@ -141,7 +141,7 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
 
 
 <dt id="arg-om">OM<a class="anchor" aria-label="anchor" href="#arg-om"></a></dt>
-<dd><p>An object of class OM that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
+<dd><p>An object of class <a href="https://rdrr.io/pkg/MSEtool/man/OM-class.html" class="external-link">MSEtool::OM</a> that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).</p></dd>
 
 
@@ -155,7 +155,7 @@ or "effort" (F is proportional to an index series in <code>data@Ehist</code>. Ca
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>Data inputs formatted in a <a href="RCMdata-class.html">RCMdata</a> (preferred) or Data object.
+<dd><p>Data inputs formatted in a <a href="RCMdata-class.html">RCMdata</a> (preferred) or <a href="https://rdrr.io/pkg/MSEtool/man/Data-class.html" class="external-link">MSEtool::Data</a> object.
 Use of a list is deprecated. See Data section below.</p></dd>
 
 
@@ -290,7 +290,7 @@ for the SD (in log space). Use <code>NA</code> in rows corresponding to indices 
 <p>One of indices, age compositions, or length compositions should be provided in addition to the historical catch or effort. Not all arguments
 are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).</p>
 <p>The <code>data</code> variable can be an object of class <a href="RCMdata-class.html">RCMdata</a>. See help file for description of inputs.</p>
-<p>Alternatively, the <code>data</code> input can be a Data S4 object which will retrieve data from the following slots:</p>
+<p>Alternatively, the <code>data</code> input can be a <a href="https://rdrr.io/pkg/MSEtool/man/Data-class.html" class="external-link">MSEtool::Data</a> S4 object which will retrieve data from the following slots:</p>
 <dl><dt><code>Data@Cat</code></dt>
 <dd><p>catch series (single fleet with the Data S4 object)</p></dd>
 
@@ -491,7 +491,7 @@ where individual parameters are independent of other indices. Use <code>RCMdata@
 <li><p><code>Index, IAA, IAL</code>: A vector of length nsurvey for each.</p></li>
 </ul><p>By default, all likelihood weights are equal to one if not specified by the user.</p>
 <p>Annual multinomial sample sizes for the age and length comps can now be provided directly in the
-<a href="RCMdata-class.html">RCMdata</a> object. For a list or Data object, use the <code>ESS</code> argument.</p>
+<a href="RCMdata-class.html">RCMdata</a> object. For a list or <a href="https://rdrr.io/pkg/MSEtool/man/Data-class.html" class="external-link">MSEtool::Data</a> object, use the <code>ESS</code> argument.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -572,9 +572,9 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpFqEWDG/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpcASqAI/RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> See help(plot.RCModel) to adjust report and file directory.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpFqEWDG/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpcASqAI/RCM.html</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span></span>
 <span class="r-in"><span><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span></span>
@@ -638,8 +638,8 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpFqEWDG/compare_RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpFqEWDG/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpcASqAI/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpcASqAI/compare_RCM.html</span>
 <span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>
