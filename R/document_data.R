@@ -2,7 +2,7 @@
 #'
 #' An S4 object containing catch and index time series for North Atlantic swordfish.
 #'
-#' @format An object of class [Data-class].
+#' @format An object of class [MSEtool::Data-class].
 #' @source ASPIC Software at https://www.mhprager.com/aspic.html
 #'
 #' @examples
@@ -15,7 +15,7 @@
 #' A list containing an operating model, data set, and priors for updating the operating model
 #' using the conditioning model [RCM].
 #'
-#' @format A list containing an object of class [OM-class], [RCMdata-class], and a list of priors
+#' @format A list containing an object of class [MSEtool::OM-class], [RCMdata-class], and a list of priors
 #' for index catchability.
 #' 
 #' @references

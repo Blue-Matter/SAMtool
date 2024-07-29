@@ -38,6 +38,16 @@ H.F., Walters, C., McAllister, M.K., Hillary, R., Levontin, P., Kitakado,
 T., Davies, C.R. Performance review of simple management procedures. ICES
 Journal of Marine Science. 73: 464-482.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://openmse.com}
+  \item \url{https://samtool.openmse.com}
+  \item \url{https://github.com/Blue-Matter/SAMtool}
+  \item Report bugs at \url{https://github.com/Blue-Matter/SAMtool/issues}
+}
+
+}
 \author{
 Quang Huynh \email{quang@bluematterscience.com}
 

@@ -53,7 +53,7 @@ cDD_SS(
 \item{x}{An index for the objects in \code{Data} when running in closed loop simulation.
 Otherwise, equals to 1 when running an assessment.}
 
-\item{Data}{An object of class \linkS4class{Data}.}
+\item{Data}{An object of class \link[MSEtool:Data-class]{MSEtool::Data}.}
 
 \item{AddInd}{A vector of integers or character strings indicating the indices to be used in the model. Integers assign the index to
 the corresponding index in Data@AddInd, "B" (or 0) represents total biomass in Data@Ind, "VB" represents vulnerable biomass in

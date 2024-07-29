@@ -36,4 +36,4 @@
 #' T., Davies, C.R. Performance review of simple management procedures. ICES
 #' Journal of Marine Science. 73: 464-482.
 #' @keywords  management strategy evaluation fisheries
-NULL
+"_PACKAGE"

@@ -5,7 +5,7 @@
 \alias{pcod}
 \title{Pacific cod in Area 5ABCD (Hecate Strait and Queen Charlotte Sound), British Columbia, Canada}
 \format{
-A list containing an object of class \linkS4class{OM}, \linkS4class{RCMdata}, and a list of priors
+A list containing an object of class \link[MSEtool:OM-class]{MSEtool::OM}, \linkS4class{RCMdata}, and a list of priors
 for index catchability.
 }
 \usage{

@@ -10,7 +10,7 @@ RCM2MOM(RCModel)
 \item{RCModel}{Output from \link{RCM}, a class \linkS4class{RCModel} object.}
 }
 \value{
-A class \linkS4class{MOM} object.
+A class \link[MSEtool:MOM-class]{MSEtool::MOM} object.
 }
 \description{
 The RCM (Rapid Conditioning Model) returns a single-fleet operating model, implying constant effort among fleets for projections.

@@ -5,7 +5,7 @@
 #' for projections. This allows for testing management procedures that explicitly specify fleet allocation in the management advice.
 #' 
 #' @param RCModel Output from [RCM], a class [RCModel-class] object.
-#' @return A class [MOM-class] object.
+#' @return A class [MSEtool::MOM-class] object.
 #' @author Q. Huynh
 #' @examples
 #' data(pcod) 

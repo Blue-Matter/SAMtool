@@ -11,7 +11,7 @@ An S4 class for the output from \link{RCM}.
 \section{Slots}{
 
 \describe{
-\item{\code{OM}}{An updated operating model, class \linkS4class{OM}.}
+\item{\code{OM}}{An updated operating model, class \link[MSEtool:OM-class]{MSEtool::OM}.}
 
 \item{\code{SSB}}{A matrix of estimated spawning biomass with \code{OM@nsim} rows and \code{OM@nyears+1} columns.}
 

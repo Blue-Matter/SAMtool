@@ -83,7 +83,7 @@ RCM(OM, data, ...)
 \arguments{
 \item{RCMdata}{An \linkS4class{RCMdata} object.}
 
-\item{OM}{An object of class \linkS4class{OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
+\item{OM}{An object of class \link[MSEtool:OM-class]{MSEtool::OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).}
 
 \item{condition}{String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
@@ -91,7 +91,7 @@ or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be f
 
 \item{silent}{Logical to indicate whether informative messages will be reported to console.}
 
-\item{data}{Data inputs formatted in a \linkS4class{RCMdata} (preferred) or \linkS4class{Data} object.
+\item{data}{Data inputs formatted in a \linkS4class{RCMdata} (preferred) or \link[MSEtool:Data-class]{MSEtool::Data} object.
 Use of a list is deprecated. See Data section below.}
 
 \item{...}{Other arguments to pass in for starting values of parameters and fixing parameters. See details.}
@@ -201,7 +201,7 @@ are needed to run the model (some have defaults, while others are ignored if not
 
 The \code{data} variable can be an object of class \linkS4class{RCMdata}. See help file for description of inputs.
 
-Alternatively, the \code{data} input can be a \linkS4class{Data} S4 object which will retrieve data from the following slots:
+Alternatively, the \code{data} input can be a \link[MSEtool:Data-class]{MSEtool::Data} S4 object which will retrieve data from the following slots:
 
 \describe{
 \item{\code{Data@Cat}}{catch series (single fleet with the Data S4 object)}
@@ -329,7 +329,7 @@ where individual parameters are independent of other indices. Use \code{RCMdata@
 By default, all likelihood weights are equal to one if not specified by the user.
 
 Annual multinomial sample sizes for the age and length comps can now be provided directly in the
-\linkS4class{RCMdata} object. For a list or \linkS4class{Data} object, use the \code{ESS} argument.
+\linkS4class{RCMdata} object. For a list or \link[MSEtool:Data-class]{MSEtool::Data} object, use the \code{ESS} argument.
 }
 
 \examples{

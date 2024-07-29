@@ -120,7 +120,7 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
 #' \donttest{
 #' myMSE <- MSEtool::runMSE(MSEtool::testOM, MPs = c("FMSYref", "SCA_4010"))
 #' }
-#' @return An object of class [Rec-class] which contains the management recommendation.
+#' @return An object of class [MSEtool::Rec-class] which contains the management recommendation.
 NULL
 
 

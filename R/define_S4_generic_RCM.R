@@ -12,9 +12,9 @@
 #' Either a full catch (conditioned on catch) or effort (conditioned on effort) time series is needed but missing data (as NAs) are allowed for all other data types.
 #' `check_RCMdata` evaluates whether the inputs in the S4 RCMdata object are correctly formatted.
 #' 
-#' @param OM An object of class [OM-class] that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
+#' @param OM An object of class [MSEtool::OM-class] that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 #' steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).
-#' @param data Data inputs formatted in a [RCMdata-class] (preferred) or [Data-class] object. 
+#' @param data Data inputs formatted in a [RCMdata-class] (preferred) or [MSEtool::Data-class] object. 
 #' Use of a list is deprecated. See Data section below.
 #' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 #' or "effort" (F is proportional to an index series in `data@Ehist`. Can be fleet specific, in which case some combination of "catch" and "effort" are permissible.
@@ -96,7 +96,7 @@
 #'
 #' The `data` variable can be an object of class [RCMdata-class]. See help file for description of inputs.
 #'
-#' Alternatively, the `data` input can be a [Data-class] S4 object which will retrieve data from the following slots:
+#' Alternatively, the `data` input can be a [MSEtool::Data-class] S4 object which will retrieve data from the following slots:
 #'
 #' \describe{
 #' \item{`Data@@Cat`}{catch series (single fleet with the Data S4 object)}
@@ -214,7 +214,7 @@
 #' By default, all likelihood weights are equal to one if not specified by the user.
 #'
 #' Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
-#' [RCMdata-class] object. For a list or [Data-class] object, use the `ESS` argument.
+#' [RCMdata-class] object. For a list or [MSEtool::Data-class] object, use the `ESS` argument.
 #' @author Q. Huynh
 #' @examples 
 #' \donttest{ 

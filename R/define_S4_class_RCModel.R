@@ -6,7 +6,7 @@
 #' @name RCModel-class
 #' @docType class
 #'
-#' @slot OM An updated operating model, class [OM-class].
+#' @slot OM An updated operating model, class [MSEtool::OM-class].
 #' @slot SSB A matrix of estimated spawning biomass with `OM@@nsim` rows and `OM@@nyears+1` columns.
 #' @slot NAA An array for the predicted numbers at age with dimension `OM@@nsim`, `OM@@nyears+1`, and `OM@@maxage+1`.
 #' @slot CAA An array for the predicted catch at age with dimension `OM@@nsim`, `OM@@nyears`, `OM@@maxage`, and nfleet.

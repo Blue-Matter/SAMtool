@@ -17,7 +17,7 @@ FMSY or UMSY and vulnerable biomass in terminal year.}
 \item{...}{Miscellaneous arguments.}
 }
 \value{
-An object of class \linkS4class{Rec} with the TAC recommendation.
+An object of class \link[MSEtool:Rec-class]{MSEtool::Rec} with the TAC recommendation.
 }
 \description{
 A simple control rule that specifies the total allowable catch (TAC) as a function of the abundance of the first

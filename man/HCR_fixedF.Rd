@@ -14,7 +14,7 @@ HCR_fixedF(Assessment, reps = 1, Ftarget = 0.1)
 \item{Ftarget}{The value of F.}
 }
 \value{
-An object of class \linkS4class{Rec} with the TAC recommendation.
+An object of class \link[MSEtool:Rec-class]{MSEtool::Rec} with the TAC recommendation.
 }
 \description{
 A simple control rule that explicitly specifies the target apical F independent of any model.

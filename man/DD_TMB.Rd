@@ -55,7 +55,7 @@ DD_SS(
 \item{x}{An index for the objects in \code{Data} when running in closed loop simulation.
 Otherwise, equals to 1 when running an assessment.}
 
-\item{Data}{An object of class \linkS4class{Data}.}
+\item{Data}{An object of class \link[MSEtool:Data-class]{MSEtool::Data}.}
 
 \item{condition}{A string to indicate whether to condition the model on catch or effort (ratio of catch and index).}
 

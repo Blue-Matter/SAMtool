@@ -38,7 +38,7 @@ See below.}
 \item{...}{Miscellaneous arguments.}
 }
 \value{
-An object of class \linkS4class{Rec} with the TAC recommendation.
+An object of class \link[MSEtool:Rec-class]{MSEtool::Rec} with the TAC recommendation.
 }
 \description{
 A linear segmented output control rule where the target F (used for the TAC recommendation)

@@ -17,7 +17,7 @@
 #' @param SPR_OCP The value of spawning potential ratio for the OCP if `OCP_type = "F_FSPR"`. By default, 0.4 (F40%).
 #' @param SPR_targ The target value of spawning potential ratio if `Ftarget_type = "FSPR"`. By default, 0.4 (F40%). 
 #' @param ... Miscellaneous arguments.
-#' @return An object of class [Rec-class] with the TAC recommendation.
+#' @return An object of class [MSEtool::Rec-class] with the TAC recommendation.
 #' @author Q. Huynh
 #' @details 
 #' 
@@ -210,7 +210,7 @@ class(HCR_segment) <- "HCR"
 #' @inherit HCR_segment details
 #' @describeIn HCR_ramp Generic ramped-HCR function where user specifies OCP and corresponding limit and target
 #' points, as well as minimum and maximum relative F target.
-#' @return An object of class [Rec-class] with the TAC recommendation.
+#' @return An object of class [MSEtool::Rec-class] with the TAC recommendation.
 #' @author Q. Huynh & T. Carruthers
 #' @references
 #' Deroba, J.J. and Bence, J.R. 2008. A review of harvest policies: Understanding relative
@@ -313,7 +313,7 @@ class(HCR80_40MSY) <- "HCR"
 #' @details 
 #' The catch advice is calculated using the catch equation of the corresponding
 #' assessment. See `Assessment@forecast$catch_eq`, a function that returns the catch advice for a specified `Ftarget`.
-#' @return An object of class [Rec-class] with the TAC recommendation.
+#' @return An object of class [MSEtool::Rec-class] with the TAC recommendation.
 #' @author Q. Huynh
 #' @references
 #' Punt, A. E, Dorn, M. W., and Haltuch, M. A. 2008. Evaluation of threshold management strategies
@@ -351,7 +351,7 @@ class(HCR_MSY) <- "HCR"
 #' @param Ftarget_type The type of F used for the target fishing mortality rate.
 #' @param relF_max The relative value of Ftarget if `OCP > OCP_treshold`.
 #' @param ... Miscellaneous arguments.
-#' @return An object of class [Rec-class] with the TAC recommendation.
+#' @return An object of class [MSEtool::Rec-class] with the TAC recommendation.
 #' @author Q. Huynh
 #' @inherit HCR_MSY details 
 #' @references
@@ -388,7 +388,7 @@ class(HCR_escapement) <- "HCR"
 #' @param Assessment An object of class [Assessment-class] with estimates of next year's abundance or biomass.
 #' @param reps The number of replicates of the TAC recommendation (not used).
 #' @param Ftarget The value of F.
-#' @return An object of class [Rec-class] with the TAC recommendation.
+#' @return An object of class [MSEtool::Rec-class] with the TAC recommendation.
 #' @author Q. Huynh
 #' @seealso [make_MP] [HCR_ramp]#' 
 #' @inherit HCR_MSY details 

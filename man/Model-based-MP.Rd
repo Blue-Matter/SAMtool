@@ -52,7 +52,7 @@ SSS_4010(x, Data, reps = 1, diagnostic = "min")
 \item{diagnostic}{Character string describing the assessment diagnostic to save, see \link{make_MP}.}
 }
 \value{
-An object of class \linkS4class{Rec} which contains the management recommendation.
+An object of class \link[MSEtool:Rec-class]{MSEtool::Rec} which contains the management recommendation.
 }
 \description{
 A suite of model-based management procedures (MPs) included in the package. Additional MPs,

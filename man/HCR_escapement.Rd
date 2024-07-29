@@ -34,7 +34,7 @@ For F-based OCPs, the terminal year fishing mortality relative F01 or Fmax (usin
 \item{...}{Miscellaneous arguments.}
 }
 \value{
-An object of class \linkS4class{Rec} with the TAC recommendation.
+An object of class \link[MSEtool:Rec-class]{MSEtool::Rec} with the TAC recommendation.
 }
 \description{
 A simple control rule that allows fishing when the operational control point (OCP) is above some threshold.
