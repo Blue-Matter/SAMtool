@@ -668,7 +668,7 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     if (dim(RCMdata@IAL)[1] != RCMdata@Misc$nyears) {
       stop("Number of IAL rows (", dim(RCMdata@IAL)[1], ") does not equal nyears (", RCMdata@Misc$nyears, "). NAs are acceptable.", call. = FALSE)
     }
-    if (!silent) message(dim(RCMdata@IAL)[2], " length bins detected in CAL.")
+    if (!silent) message(dim(RCMdata@IAL)[2], " length bins detected in IAL.")
     if (dim(RCMdata@IAL)[3] != RCMdata@Misc$nsurvey) {
       stop("Number of IAL slices (", dim(RCMdata@IAL)[3], ") does not equal nsurvey (", RCMdata@Misc$nsurvey, "). NAs are acceptable.", call. = FALSE)
     }
