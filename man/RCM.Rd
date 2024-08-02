@@ -277,6 +277,8 @@ For \code{RCM}, additional arguments can be passed to the model via \code{...}:
 this is overridden by the \code{map} argument.}
 \item{\code{resample}}{Logical, whether the OM conditioning parameters (recruitment, fishing mortality, SSB, selectivity, etc.) are obtained by sampling the Hessian matrix from
 a single model fit. By default FALSE. This feature requires identical biological parameters among simulations.}
+\item{\code{bc_recdev}}{Vector of length nyears. An additional adjustment to the bias correction of the recruitment deviations (if estimated).
+bias correction from logspace to normal space is \code{exp(log_rec_dev[y] - 0.5 * bc_recdev[y] * sigmaR^2)}. Default is 1.}
 }
 }
 

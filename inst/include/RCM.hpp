@@ -91,6 +91,7 @@ Type RCM(objective_function<Type> *obj) {
   DATA_INTEGER(sim_process_error); // Whether to simulate process error (when using the TMB SIMULATE module) 
   DATA_SCALAR(spawn_time_frac);    // Fraction of year when spawning occurs for calculating spawning biomass
   DATA_IVECTOR(est_q);             // Whether to estimate index q (TRUE), otherwise solved analytically (FALSE)
+  DATA_VECTOR(pbc_recdev);          // Proportion of bias correction to apply to log_rec_dev
   
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
@@ -283,10 +284,10 @@ Type RCM(objective_function<Type> *obj) {
   
   R(0) = R_eq;
   if(est_rec_dev(0)) {
-    Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * tau * tau);
+    Rec_dev(0) = exp(log_rec_dev(0) - 0.5 * pbc_recdev(0) * tau * tau);
     SIMULATE if(sim_process_error) {
       log_rec_dev_sim(0) = rnorm(log_rec_dev(0), tau);
-      Rec_dev(0) = exp(log_rec_dev_sim(0) - 0.5 * tau * tau);
+      Rec_dev(0) = exp(log_rec_dev_sim(0) - 0.5 * pbc_recdev(0) * tau * tau);
     }
     R(0) *= Rec_dev(0);
   }
@@ -353,10 +354,10 @@ Type RCM(objective_function<Type> *obj) {
       }
       
       if(est_rec_dev(y)) {
-        Rec_dev(y) = exp(log_rec_dev(y) - 0.5 * tau * tau);
+        Rec_dev(y) = exp(log_rec_dev(y) - 0.5 * pbc_recdev(y) * tau * tau);
         SIMULATE if(sim_process_error) {
           log_rec_dev_sim(y) = rnorm(log_rec_dev(y), tau);
-          Rec_dev(y) = exp(log_rec_dev_sim(y) - 0.5 * tau * tau);
+          Rec_dev(y) = exp(log_rec_dev_sim(y) - 0.5 * pbc_recdev(y) * tau * tau);
         }
         R(y) *= Rec_dev(y);
       }

@@ -168,6 +168,8 @@
 #' this is overridden by the `map` argument.}
 #' \item{`resample`}{Logical, whether the OM conditioning parameters (recruitment, fishing mortality, SSB, selectivity, etc.) are obtained by sampling the Hessian matrix from
 #' a single model fit. By default FALSE. This feature requires identical biological parameters among simulations.}
+#' \item{`pbc_recdev`}{Vector of length nyears. Proportion of the bias correction to apply annually to the recruitment deviations (if estimated). 
+#' The bias correction from logspace to normal space is `exp(log_rec_dev[y] - 0.5 * pbc_recdev[y] * sigmaR^2)`. Default proportion is 1.}
 #' }
 #' 
 #' @section start:
