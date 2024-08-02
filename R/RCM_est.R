@@ -626,25 +626,18 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
   }
   report$R0_annual <- report$E0/report$EPR0
   
-  # Need to adjust for spawn_time_frac!
   report$N0 <- apply(report$NPR_unfished * report$R0_annual, 1, sum)
   report$B0 <- apply(report$NPR_unfished * report$R0_annual * data$wt[1:data$n_y, ], 1, sum)
 
   lmid <- obj$env$data$lbinmid
   nlbin <- length(lmid)
   
-  #if (age_only_model) {
-  #  report$vul_len <- matrix(NA_real_, nlbin, data$nsel_block)
-  #  report$ivul_len <- matrix(NA_real_, nlbin, dim(report$ivul)[3])
-  #  
-  #  report$MLpred <- array(NA_real_, dim(report$F))
-  #  report$CALpred <- array(NA_real_, dim(report$CALpred))
-  #  report$IALpred <- array(NA_real_, dim(report$IALpred))
-  #} else {
-  #  report$vul_len <- get_vul_len(report, data$vul_type, lmid, data$Linf)
-  #  report$ivul_len <- get_ivul_len(report, data$ivul_type, lmid, data$Linf)
-  #}
-  if (dynamic_SSB0) report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
+  spawn_time_frac <- data$spawn_time_frac
+  if (spawn_time_frac > 0) report$E[length(report$E)] <- NA
+  if (dynamic_SSB0) {
+    report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
+    if (spawn_time_frac > 0) report$dynamic_SSB0[length(report$dynamic_SSB0)] <- NA
+  }
   
   if (data$comp_like == "mvlogistic") {
     

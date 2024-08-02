@@ -404,17 +404,17 @@ Type RCM(objective_function<Type> *obj) {
     }
   }
   
-  // Biomass at beginning of n_y + 1
-  for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * fec(n_y,a);
-  
   if(spawn_time_frac > 0) { // Should work properly since spawn_time_frac is identified as DATA_SCALAR
     R(n_y) = R(n_y-1);
-  } else if(SR_type == "BH") {
-    R(n_y) = BH_SR(E(n_y), h, R0, E0_SR);
-  } else if(SR_type == "Ricker") {
-    R(n_y) = Ricker_SR(E(n_y), h, R0, E0_SR);
-  } else { // Mesnil-Rochet
-    R(n_y) = MesnilRochet_SR(E(n_y), MRgamma, MRRmax, MRhinge);
+  } else {
+    if(SR_type == "BH") {
+      R(n_y) = BH_SR(E(n_y), h, R0, E0_SR);
+    } else if(SR_type == "Ricker") {
+      R(n_y) = Ricker_SR(E(n_y), h, R0, E0_SR);
+    } else { // Mesnil-Rochet
+      R(n_y) = MesnilRochet_SR(E(n_y), MRgamma, MRRmax, MRhinge);
+    }
+    for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * fec(n_y,a);
   }
   N(n_y,0) = R(n_y);
   B(n_y) += N(n_y,0) * wt(n_y,0);
