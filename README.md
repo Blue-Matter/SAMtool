@@ -7,7 +7,10 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/SAMtool)](https://CRAN.R-project.org/package=SAMtool)
-[![R-CMD-check](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check)
+[![R build
+status](https://github.com/Blue-Matter/SAMtool/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions)
+[![](https://img.shields.io/badge/devel%20version-1.7.0-blue.svg)](https://github.com/Blue-Matter/SAMtool)
+[![R-CMD-check](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The Stock Assessment Methods toolkit (`SAMtool`) is a collection of
@@ -19,18 +22,19 @@ and data-rich fisheries.
 SAMtool is part of the `openMSE` collection of packages.
 
 You can learn more about the `openMSE` packages at the [openMSE
-documentation site](https://openmse.com).
+documentation site](https://openMSE.com).
 
 ## Installation
 
 You can install the released version of SAMtool from
-[CRAN](https://CRAN.R-project.org/package=SAMtool) with:
+[CRAN](https://CRAN.R-project.org) with:
 
 ``` r
 install.packages("SAMtool")
 ```
 
-And the development version from [GitHub](https://github.com/Blue-Matter/SAMtool) with:
+And the development version from
+[GitHub](https://github.com/Blue-Matter/SAMtool) with:
 
 ``` r
 # install.packages("remotes")

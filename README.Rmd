@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/SAMtool)](https://CRAN.R-project.org/package=SAMtool)
 [![R build status](https://github.com/Blue-Matter/SAMtool/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions)
 `r badge_devel("Blue-Matter/SAMtool", "blue")`
-[![R-CMD-check](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check)
+[![R-CMD-check](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The Stock Assessment Methods toolkit (`SAMtool`) is a collection of assessment methods and management procedures that have been developed for more data-intensive applications. This package includes the Rapid Conditioning Model for conditioning operating models in data-moderate and data-rich fisheries. 
