@@ -7,8 +7,7 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/SAMtool)](https://CRAN.R-project.org/package=SAMtool)
-[![R build
-status](https://github.com/Blue-Matter/SAMtool/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions)
+[![R-CMD-check](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check/badge.svg)](https://github.com/Blue-Matter/SAMtool/actions/workflows/R-CMD-check)
 <!-- badges: end -->
 
 The Stock Assessment Methods toolkit (`SAMtool`) is a collection of
