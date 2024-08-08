@@ -156,7 +156,12 @@ otherwise use 0 (default) to estimate q.</p></dd>
 
 
 <dt><code>I_units</code></dt>
-<dd><p>An integer vector to indicate whether indices are biomass based (1) or abundance-based (0). By default, all are biomass-based.</p></dd>
+<dd><p>An integer vector of length <code>nsurvey</code> to indicate whether indices are biomass based (1) or abundance-based (0). By default, all are biomass-based.</p></dd>
+
+
+<dt><code>I_delta</code></dt>
+<dd><p>A vector of length <code>nsurvey</code> to indicate the timing of the indices within each time step (0-1, for example 0.5 is the midpoint of the year). By default, zero is used.
+Use -1 if the survey operates continuously, the availability would be <code>N * (1 - exp(-Z))/Z</code>.</p></dd>
 
 
 <dt><code>age_error</code></dt>
