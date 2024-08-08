@@ -148,7 +148,10 @@ RCM_assess <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker"),
   FleetPars$L5_y <- FleetPars$LFS_y - 1
   FleetPars$Vmaxlen_y <- ifelse(is.null(Data@Vmaxlen[x]), 0.5, Data@Vmaxlen[x]) %>% array(c(1, nyears+1))
   
-  RCM_out <- RCM_est(x = 1, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel, LWT = LWT,
+  RCMdata@Misc$maxage <- Data@MaxAge
+  RCM_check <- check_RCMdata(RCMdata, silent = TRUE)
+  
+  RCM_out <- RCM_est(x = 1, RCMdata = RCM_check[[1]], selectivity = sel, s_selectivity = s_sel, LWT = LWT,
                      comp_like = "multinomial", prior = prior, StockPars = StockPars_out,
                      FleetPars = FleetPars, mean_fit = FALSE)
   obj <- RCM_out$obj

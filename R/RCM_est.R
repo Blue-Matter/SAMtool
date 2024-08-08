@@ -163,6 +163,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    ivul_type = s_selectivity, 
                    abs_I = RCMdata@abs_I, 
                    I_units = as.integer(RCMdata@I_units), 
+                   I_delta = if (.hasSlot(RCMdata, "I_delta")) RCMdata@I_delta else rep(0, nsurvey), 
                    age_error = RCMdata@age_error,
                    SR_type = SR_type, 
                    LWT_fleet = LWT_fleet, LWT_index = LWT_index, 

@@ -736,7 +736,7 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   # Absolute survey
   if (RCMdata@Misc$nsurvey > 0) {
     if (!length(RCMdata@abs_I)) RCMdata@abs_I <- rep(0L, RCMdata@Misc$nsurvey)
-    if (length(RCMdata@abs_I) < RCMdata@Misc$nsurvey) stop("abs_I should be of length", RCMdata@Misc$nsurvey, call. = FALSE)
+    if (length(RCMdata@abs_I) != RCMdata@Misc$nsurvey) stop("abs_I should be length ", RCMdata@Misc$nsurvey, call. = FALSE)
   } else {
     RCMdata@abs_I <- 0L
   }
@@ -744,9 +744,20 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   # Index units - biomass/abundance
   if (RCMdata@Misc$nsurvey > 0) {
     if (!length(RCMdata@I_units)) RCMdata@I_units <- rep(1L, RCMdata@Misc$nsurvey)
-    if (length(RCMdata@I_units) < RCMdata@Misc$nsurvey) stop("I_units should be of length", RCMdata@Misc$nsurvey, call. = FALSE)
+    if (length(RCMdata@I_units) != RCMdata@Misc$nsurvey) stop("I_units should be length ", RCMdata@Misc$nsurvey, call. = FALSE)
   } else {
     RCMdata@I_units <- 1L
+  }
+  
+  # Index timing
+  if (.hasSlot(RCMdata, "I_delta")) {
+    if (RCMdata@Misc$nsurvey > 0) {
+      if (!length(RCMdata@I_delta)) RCMdata@I_delta <- rep(0, RCMdata@Misc$nsurvey)
+      if (length(RCMdata@I_delta) != RCMdata@Misc$nsurvey) stop("I_delta should be length ", RCMdata@Misc$nsurvey, call. = FALSE)
+      if (any(RCMdata@I_delta > 1)) stop("I_delta should be between 0-1 (or -1 for a continuous survey)", call. = FALSE)
+    } else {
+      RCMdata@I_delta <- 0
+    }
   }
 
   # Ageing error
