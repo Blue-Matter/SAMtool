@@ -8,6 +8,7 @@
 #' @return A class [MSEtool::MOM-class] object.
 #' @author Q. Huynh
 #' @examples
+#' \donttest{
 #' data(pcod) 
 #' mat_ogive <- pcod$OM@cpars$Mat_age[1, , 1]
 #' OM <- MSEtool::SubCpars(pcod$OM, 1:3)
@@ -19,6 +20,7 @@
 #'                       log_early_rec_dev = rep(1, pcod$OM@maxage)),
 #'            prior = pcod$prior)
 #' MOM <- RCM2MOM(out)
+#' }
 #' 
 #' @importFrom abind abind
 #' @export

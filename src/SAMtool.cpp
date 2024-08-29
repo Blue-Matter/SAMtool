@@ -18,8 +18,6 @@ Type objective_function<Type>::operator() ()
     return cDD(this);
   } else if(model == "RCM") {
     return RCM(this);
-  } else {
-    error("No model found.");
   }
   return 0;
 }

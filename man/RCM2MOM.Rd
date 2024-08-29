@@ -18,6 +18,7 @@ Here, we convert the single-fleet OM to a multi-fleet OM, preserving the multipl
 for projections. This allows for testing management procedures that explicitly specify fleet allocation in the management advice.
 }
 \examples{
+\donttest{
 data(pcod) 
 mat_ogive <- pcod$OM@cpars$Mat_age[1, , 1]
 OM <- MSEtool::SubCpars(pcod$OM, 1:3)
@@ -29,6 +30,7 @@ out <- RCM(OM = pcod$OM, data = pcod$data,
                       log_early_rec_dev = rep(1, pcod$OM@maxage)),
            prior = pcod$prior)
 MOM <- RCM2MOM(out)
+}
 
 }
 \author{
