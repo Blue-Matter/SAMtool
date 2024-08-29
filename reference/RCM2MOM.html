@@ -66,7 +66,8 @@ for projections. This allows for testing management procedures that explicitly s
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">)</span> </span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">)</span> </span></span>
 <span class="r-in"><span><span class="va">mat_ogive</span> <span class="op">&lt;-</span> <span class="va">pcod</span><span class="op">$</span><span class="va">OM</span><span class="op">@</span><span class="va">cpars</span><span class="op">$</span><span class="va">Mat_age</span><span class="op">[</span><span class="fl">1</span>, , <span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MSEtool/man/SubCpars.html" class="external-link">SubCpars</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">OM</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Removing simulations:  4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48</span>
@@ -126,6 +127,7 @@ for projections. This allows for testing management procedures that explicitly s
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span><span class="va">MOM</span> <span class="op">&lt;-</span> <span class="fu">RCM2MOM</span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
