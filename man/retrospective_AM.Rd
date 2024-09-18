@@ -43,8 +43,12 @@ retrospective_AM(myMSE, MP = "SP_40_10", sim = 1)
 library(dplyr)
 assess_estimates <- lapply(1:myMSE@nMPs, function(m) {
   lapply(1:myMSE@nsim, function(x) {
-    myMSE@PPD[[m]]@Misc[[x]]$Assessment_report \%>\% 
-      mutate(MP = myMSE@MPs[m], Simulation = x)
+    report <- myMSE@PPD[[m]]@Misc[[x]]$Assessment_report
+    if (is.null(report)) {
+      return(data.frame())
+    } else {
+      mutate(report, MP = myMSE@MPs[m], Simulation = x)
+    }
   }) \%>\% bind_rows()
 }) \%>\% bind_rows()
 }
