@@ -24,6 +24,8 @@ Type SCA(objective_function<Type> *obj) {
   DATA_VECTOR(CAA_n);     // Annual samples in CAA
   DATA_MATRIX(CAL_hist);  // Catch-at-length proportions
   DATA_VECTOR(CAL_n);     // Annual samples in CAL
+  DATA_ARRAY(IAA_hist);   // Index-at-age proportions
+  DATA_MATRIX(IAA_n);     // Annual samples in IAA
   
   DATA_VECTOR(LWT);       // Vector of likelihood weights length nsurvey + 3 (nsurvey indices, then CAA, CAL, catch)
   
@@ -329,7 +331,7 @@ Type SCA(objective_function<Type> *obj) {
   // Calculate nuisance parameters and likelihood
   // Ipred updated in calc_q function
   vector<Type> q(nsurvey);
-  array<Type> IAA(n_y, n_age, nsurvey);
+  array<Type> IAApred(n_y, n_age, nsurvey);
   //array<Type> IAL(n_y, n_bin, nsurvey);
   matrix<Type> IN(n_y, nsurvey);
   matrix<Type> Itot(n_y, nsurvey);
@@ -341,13 +343,13 @@ Type SCA(objective_function<Type> *obj) {
     for(int y=0;y<n_y;y++) {
       for(int a=0;a<n_age;a++) {
         if(I_vul.col(sur).sum() > 0) {
-          IAA(y,a,sur) = I_vul(a,sur) * N(y,a);
+          IAApred(y,a,sur) = I_vul(a,sur) * N(y,a);
         } else {
-          IAA(y,a,sur) = vul(a) * N(y,a);
+          IAApred(y,a,sur) = vul(a) * N(y,a);
         }
-        IN(y,sur) += IAA(y,a,sur);
-        if(I_units(sur)) Itot(y,sur) += IAA(y,a,sur) * weight(a); // Biomass vulnerable to survey
-        //if(CAL_n.sum() > 0) for(int len=0;len<n_bin;len++) IAL(y,len,sur) += IAA(y,a,sur) * PLA(a,len);
+        IN(y,sur) += IAApred(y,a,sur);
+        if(I_units(sur)) Itot(y,sur) += IAApred(y,a,sur) * weight(a); // Biomass vulnerable to survey
+        //if(CAL_n.sum() > 0) for(int len=0;len<n_bin;len++) IAL(y,len,sur) += IAApred(y,a,sur) * PLA(a,len);
       }
     }
     if(!I_units(sur)) Itot.col(sur) = IN.col(sur); // Abundance vulnerable to survey
@@ -362,6 +364,21 @@ Type SCA(objective_function<Type> *obj) {
         nll_comp(sur) -= LWT(sur) * dnorm(log(I_hist(y,sur)), log(Ipred(y,sur)), I_sd(y,sur), true);
         SIMULATE {
           I_hist(y,sur) = exp(rnorm(log(Ipred(y,sur)), I_sd(y,sur)));
+        }
+      }
+      
+      if(IAA_n(y,sur) > 0) {
+        vector<Type> loglike_IAAobs(n_age);
+        vector<Type> loglike_IAApred(n_age);
+        for(int a=0;a<n_age;a++) {
+          loglike_IAApred(a) = IAApred(y,a,sur)/IN(y,sur);
+          loglike_IAAobs(a) = IAA_hist(y,a,sur);
+        }
+        if(comp_dist == "multinomial") {
+          loglike_IAAobs *= CAA_n(y);
+          nll_comp(nsurvey) -= LWT(nsurvey) * dmultinom_(loglike_IAAobs, loglike_IAApred, true);
+        } else {
+          nll_comp(nsurvey) -= LWT(nsurvey) * dlnorm_comp(loglike_IAAobs, loglike_IAApred);
         }
       }
     }
@@ -466,6 +483,7 @@ Type SCA(objective_function<Type> *obj) {
   REPORT(Cpred);
   REPORT(CAApred);
   if(CAL_n.sum() > 0) REPORT(CALpred);
+  if(IAA_n.sum() > 0) REPORT(IAApred);
   REPORT(Ipred);
   REPORT(R);
   REPORT(R_early);

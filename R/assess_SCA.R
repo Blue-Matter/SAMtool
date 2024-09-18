@@ -60,7 +60,9 @@
 #' [stats::nlminb()].
 #' @param inner.control A named list of arguments for optimization of the random effects, which
 #' is passed on to [TMB::newton()].
-#' @param ... Other arguments to be passed.
+#' @param ... Other arguments to be passed, including `yind` (an expression for the vector of years to include in the model, useful for debugging for data lags),
+#' `M_at_age` (set to TRUE to specify a matrix of M by year and age from the operating model and the bias parameter), 
+#' `IAA_hist` (an array of index age proportions by year, age, survey), and `IAA_n` (a matrix of multinomial sample size by year and survey).
 #' 
 #' @section Priors:
 #' The following priors can be added as a named list, e.g., `prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)`. 
@@ -430,6 +432,7 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                I_sd = I_sd, I_units = I_units, I_vul = I_vul, abs_I = rep(0, nsurvey), nsurvey = nsurvey, 
                CAA_hist = apply(CAA_hist, 1, tiny_comp) %>% t(), CAA_n = CAA_n_rescale, 
                CAL_hist = apply(CAL_hist, 1, tiny_comp) %>% t(), CAL_n = CAL_n_rescale,
+               IAA_hist = array(0, c(n_y, n_age, nsurvey)), IAA_n = matrix(0, n_y, nsurvey),
                LWT = c(LWT$Index, LWT$CAA, LWT$CAL, LWT$Catch),
                n_y = n_y, n_age = n_age, n_bin = ncol(PLA), 
                M_data = 1,
@@ -440,6 +443,10 @@ SCA_ <- function(x = 1, Data, AddInd = "B", SR = c("BH", "Ricker", "none"),
                sim_process_error = 0L)
   if (any(names(dots) == "M_at_age") && dots$M_at_age) data$M_data <- M
   if (data$n_bin == 1) data$CAL_hist <- t(data$CAL_hist)
+  if (!is.null(dots$IAA_hist)) {
+    data$IAA_hist[] <- dots$IAA_hist
+    if (!is.null(dots$IAA_n)) data$IAA_n[] <- dots$IAA_n
+  }
   
   # Starting values
   params <- list()

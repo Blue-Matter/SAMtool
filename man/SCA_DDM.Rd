@@ -113,7 +113,9 @@ hasn't converged. The optimization continues from the parameters from the previo
 \item{inner.control}{A named list of arguments for optimization of the random effects, which
 is passed on to \code{\link[TMB:newton]{TMB::newton()}}.}
 
-\item{...}{Other arguments to be passed.}
+\item{...}{Other arguments to be passed, including \code{yind} (an expression for the vector of years to include in the model, useful for debugging for data lags),
+\code{M_at_age} (set to TRUE to specify a matrix of M by year and age from the operating model and the bias parameter),
+\code{IAA_hist} (an array of index age proportions by year, age, survey), and \code{IAA_n} (a matrix of multinomial sample size by year and survey).}
 }
 \value{
 An object of class \linkS4class{Assessment}.
