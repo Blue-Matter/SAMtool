@@ -19,7 +19,7 @@ catch, and Pope's approximation is used to calculate the annual exploitation rat
 
     <a class="navbar-brand me-2" href="../index.html">SAMtool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -269,7 +269,9 @@ is passed on to <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="e
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Other arguments to be passed.</p></dd>
+<dd><p>Other arguments to be passed, including <code>yind</code> (an expression for the vector of years to include in the model, useful for debugging for data lags),
+<code>M_at_age</code> (set to TRUE to specify a matrix of M by year and age from the operating model and the bias parameter),
+<code>IAA_hist</code> (an array of index age proportions by year, age, survey), and <code>IAA_n</code> (a matrix of multinomial sample size by year and survey).</p></dd>
 
 
 <dt id="arg-common-dev">common_dev<a class="anchor" aria-label="anchor" href="#arg-common-dev"></a></dt>
@@ -382,11 +384,11 @@ Research 48:967-980.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SCA</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">SCA2</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SCA</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">SCA2</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Downweight the index</span></span></span>
-<span class="r-in"><span><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu">SCA</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span>, LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Index <span class="op">=</span> <span class="fl">0.1</span>, CAA <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu">SCA</span><span class="op">(</span>Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/SimulatedData.html" class="external-link">SimulatedData</a></span>, LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Index <span class="op">=</span> <span class="fl">0.1</span>, CAA <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="compare_models.html">compare_models</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">res2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="SCA-1.png" alt="" width="700" height="433"></span>
@@ -401,7 +403,7 @@ Research 48:967-980.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

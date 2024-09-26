@@ -19,7 +19,7 @@ The function for the spict model (Pedersen and Berg, 2016) is available in MSEex
 
     <a class="navbar-brand me-2" href="../index.html">SAMtool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,7 @@ Continuous surplus production and fishing is modeled with sub-annual time steps 
 the behavior of ASPIC (Prager 1994). The Fox model, <code>SP_Fox</code>, fixes BMSY/K = 0.37 (1/e).
 The state-space version, <code>SP_SS</code> estimates annual deviates in biomass. An option allows for setting a
 prior for the intrinsic rate of increase.
-The function for the <code>spict</code> model (Pedersen and Berg, 2016) is available in <a href="https://rdrr.io/pkg/MSEtool/man/MSEextra.html" class="external-link">MSEextra</a>.</p>
+The function for the <code>spict</code> model (Pedersen and Berg, 2016) is available in <a href="https://msetool.openmse.com/reference/MSEextra.html" class="external-link">MSEextra</a>.</p>
     </div>
 
     <div class="section level2">
@@ -111,7 +111,7 @@ The function for the <code>spict</code> model (Pedersen and Berg, 2016) is avail
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An index for the objects in <code>Data</code> when running in <a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a>.
+<dd><p>An index for the objects in <code>Data</code> when running in <a href="https://msetool.openmse.com/reference/runMSE.html" class="external-link">runMSE</a>.
 Otherwise, equals to 1 When running an assessment interactively.</p></dd>
 
 
@@ -317,10 +317,10 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Writing markdown file: /tmp/Rtmpd62BLO/report_SP.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/Rtmpd62BLO/report_SP.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Writing markdown file: /tmp/RtmpjrJsij/report_SP.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpjrJsij/report_SP.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> See help(plot.Assessment) to adjust report and file directory.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/Rtmpd62BLO/report_SP.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpjrJsij/report_SP.html</span>
 <span class="r-in"><span><span class="fu"><a href="profile.html">profile</a></span><span class="op">(</span><span class="va">res</span>, FMSY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.4</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="SP-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An object of class "prof"</span>
@@ -375,6 +375,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-plt img"><img src="SP-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-4.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="SP-5.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="SP-6.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   Mohn's rho</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fishing mortality      0.129</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> F/F[MSY]              -0.145</span>
@@ -388,11 +389,10 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_SS</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Writing markdown file: /tmp/Rtmpd62BLO/report_SP_SS.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/Rtmpd62BLO/report_SP_SS.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Writing markdown file: /tmp/RtmpjrJsij/report_SP_SS.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpjrJsij/report_SP_SS.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> See help(plot.Assessment) to adjust report and file directory.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/Rtmpd62BLO/report_SP_SS.html</span>
-<span class="r-plt img"><img src="SP-6.png" alt="" width="700" height="433"></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpjrJsij/report_SP_SS.html</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#### Fox model</span></span></span>
@@ -418,7 +418,7 @@ paucispinis) in British Columbia waters. DFO Can. Sci. Advis. Sec. Res. Doc. 200
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

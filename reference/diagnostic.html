@@ -11,7 +11,7 @@ This function summarizes and plots the diagnostic information.'><meta property="
 
     <a class="navbar-brand me-2" href="../index.html">SAMtool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@ This function summarizes and plots the diagnostic information.</p>
 
 
 <dl><dt id="arg-mse">MSE<a class="anchor" aria-label="anchor" href="#arg-mse"></a></dt>
-<dd><p>An object of class MSE created by <code><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">MSEtool::runMSE()</a></code>.</p></dd>
+<dd><p>An object of class MSE created by <code><a href="https://msetool.openmse.com/reference/runMSE.html" class="external-link">MSEtool::runMSE()</a></code>.</p></dd>
 
 
 <dt id="arg-mp">MP<a class="anchor" aria-label="anchor" href="#arg-mp"></a></dt>
@@ -93,9 +93,8 @@ function evaluations reported by <code><a href="https://rdrr.io/r/stats/nlminb.h
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html" class="external-link">testOM</a></span>; <span class="va">OM</span><span class="op">@</span><span class="va">proyears</span> <span class="op">&lt;-</span> <span class="fl">20</span></span></span>
+<span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/OM-class-objects.html" class="external-link">testOM</a></span>; <span class="va">OM</span><span class="op">@</span><span class="va">proyears</span> <span class="op">&lt;-</span> <span class="fl">20</span></span></span>
 <span class="r-in"><span><span class="va">myMSE</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">OM</span>, MPs <span class="op">=</span> <span class="st">"SCA_4010"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking MPs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loading operating model</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Optimizing for user-specified movement</span>
@@ -108,7 +107,7 @@ function evaluations reported by <code><a href="https://rdrr.io/r/stats/nlminb.h
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Simulating observed data</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Running forward projections</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 / 1  Running MSE for SCA_4010 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   |===                                               | 5 % ~22s            |======                                            | 11% ~10s            |========                                          | 16% ~07s            |===========                                       | 21% ~05s            |==============                                    | 26% ~07s            |================                                  | 32% ~06s            |===================                               | 37% ~04s            |======================                            | 42% ~04s            |========================                          | 47% ~04s            |===========================                       | 53% ~04s            |=============================                     | 58% ~03s            |================================                  | 63% ~02s            |===================================               | 68% ~03s            |=====================================             | 74% ~02s            |========================================          | 79% ~02s            |===========================================       | 84% ~01s            |=============================================     | 89% ~01s            |================================================  | 95% ~00s            |==================================================| 100% elapsed=08s  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   |===                                               | 5 % ~21s            |======                                            | 11% ~10s            |========                                          | 16% ~06s            |===========                                       | 21% ~05s            |==============                                    | 26% ~07s            |================                                  | 32% ~05s            |===================                               | 37% ~04s            |======================                            | 42% ~03s            |========================                          | 47% ~04s            |===========================                       | 53% ~03s            |=============================                     | 58% ~03s            |================================                  | 63% ~02s            |===================================               | 68% ~03s            |=====================================             | 74% ~02s            |========================================          | 79% ~02s            |===========================================       | 84% ~01s            |=============================================     | 89% ~01s            |================================================  | 95% ~00s            |==================================================| 100% elapsed=08s  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu">diagnostic</span><span class="op">(</span><span class="va">myMSE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Creating plots for MP:</span>
@@ -149,7 +148,7 @@ function evaluations reported by <code><a href="https://rdrr.io/r/stats/nlminb.h
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

@@ -9,7 +9,7 @@ are plotted over the course of the MSE are plotted against the operating model (
 
     <a class="navbar-brand me-2" href="../index.html">SAMtool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,7 @@ are plotted over the course of the MSE are plotted against the operating model (
 
 
 <dl><dt id="arg-mse">MSE<a class="anchor" aria-label="anchor" href="#arg-mse"></a></dt>
-<dd><p>An object of class <a href="https://rdrr.io/pkg/MSEtool/man/MSE-class.html" class="external-link">MSEtool::MSE</a>.</p></dd>
+<dd><p>An object of class <a href="https://msetool.openmse.com/reference/MSE-class.html" class="external-link">MSEtool::MSE</a>.</p></dd>
 
 
 <dt id="arg-mp">MP<a class="anchor" aria-label="anchor" href="#arg-mp"></a></dt>
@@ -93,22 +93,37 @@ may not be indicative of general assessment behavior and performance overall.</p
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">SP_40_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_MP.html">make_MP</a></span><span class="op">(</span><span class="va">SP</span>, <span class="va">HCR_MSY</span>, diagnostic <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html" class="external-link">testOM</a></span>; <span class="va">OM</span><span class="op">@</span><span class="va">proyears</span> <span class="op">&lt;-</span> <span class="fl">20</span></span></span>
-<span class="r-in"><span><span class="va">myMSE</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">runMSE</a></span><span class="op">(</span>OM <span class="op">=</span> <span class="va">OM</span>, MPs <span class="op">=</span> <span class="st">"SP_40_10"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking MPs</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Some MPs are not a functions of class `MP`: SP_40_10</span>
+<span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/OM-class-objects.html" class="external-link">testOM</a></span>; <span class="va">OM</span><span class="op">@</span><span class="va">proyears</span> <span class="op">&lt;-</span> <span class="fl">20</span></span></span>
+<span class="r-in"><span><span class="va">myMSE</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://msetool.openmse.com/reference/runMSE.html" class="external-link">runMSE</a></span><span class="op">(</span>OM <span class="op">=</span> <span class="va">OM</span>, MPs <span class="op">=</span> <span class="st">"SP_40_10"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loading operating model</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Optimizing for user-specified movement</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating MSY reference points for each year</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Optimizing for user-specified depletion in last historical year</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating historical stock and fishing dynamics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating per-recruit reference points</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating B-low reference points</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating reference yield - best fixed F strategy</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Simulating observed data</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Running forward projections</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 / 1  Running MSE for SP_40_10 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   |===                                               | 5 % ~02s            |======                                            | 11% ~01s            |========                                          | 16% ~01s            |===========                                       | 21% ~01s            |==============                                    | 26% ~01s            |================                                  | 32% ~01s            |===================                               | 37% ~01s            |======================                            | 42% ~00s            |========================                          | 47% ~01s            |===========================                       | 53% ~00s            |=============================                     | 58% ~00s            |================================                  | 63% ~00s            |===================================               | 68% ~00s            |=====================================             | 74% ~00s            |========================================          | 79% ~00s            |===========================================       | 84% ~00s            |=============================================     | 89% ~00s            |================================================  | 95% ~00s            |==================================================| 100% elapsed=01s  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu">retrospective_AM</span><span class="op">(</span><span class="va">myMSE</span>, MP <span class="op">=</span> <span class="st">"SP_40_10"</span>, sim <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'myMSE' not found</span>
+<span class="r-plt img"><img src="retrospective_AM-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># How to get all the estimates</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">assess_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">myMSE</span><span class="op">@</span><span class="va">nMPs</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">myMSE</span><span class="op">@</span><span class="va">nsim</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">myMSE</span><span class="op">@</span><span class="va">PPD</span><span class="op">[[</span><span class="va">m</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">Misc</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Assessment_report</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span></span>
-<span class="r-in"><span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>MP <span class="op">=</span> <span class="va">myMSE</span><span class="op">@</span><span class="va">MPs</span><span class="op">[</span><span class="va">m</span><span class="op">]</span>, Simulation <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">report</span> <span class="op">&lt;-</span> <span class="va">myMSE</span><span class="op">@</span><span class="va">PPD</span><span class="op">[[</span><span class="va">m</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">Misc</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Assessment_report</span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">report</span>, MP <span class="op">=</span> <span class="va">myMSE</span><span class="op">@</span><span class="va">MPs</span><span class="op">[</span><span class="va">m</span><span class="op">]</span>, Simulation <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'myMSE' not found</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
@@ -121,7 +136,7 @@ may not be indicative of general assessment behavior and performance overall.</p
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

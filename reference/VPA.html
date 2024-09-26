@@ -11,7 +11,7 @@ are then calculated from the VPA output."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">SAMtool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -227,12 +227,12 @@ model fits, and worth evaluating in closed-loop simulation.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/OM-class-objects.html" class="external-link">testOM</a></span></span></span>
+<span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/OM-class-objects.html" class="external-link">testOM</a></span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate logistic normal age comps with CV = 0.1</span></span></span>
 <span class="r-in"><span><span class="co"># (set CAA_ESS &lt; 1, which is interpreted as a CV)</span></span></span>
 <span class="r-in"><span><span class="va">OM</span><span class="op">@</span><span class="va">CAA_ESS</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span> </span></span>
-<span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MSEtool/man/runMSE.html" class="external-link">Simulate</a></span><span class="op">(</span><span class="va">OM</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="fu"><a href="https://msetool.openmse.com/reference/runMSE.html" class="external-link">Simulate</a></span><span class="op">(</span><span class="va">OM</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># VPA max age is 15 (Hist@Data@MaxAge)</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">VPA</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">2</span>, Data <span class="op">=</span> <span class="va">Hist</span><span class="op">@</span><span class="va">Data</span>, vulnerability <span class="op">=</span> <span class="st">"dome"</span><span class="op">)</span></span></span>
@@ -254,7 +254,7 @@ model fits, and worth evaluating in closed-loop simulation.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

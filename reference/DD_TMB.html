@@ -13,7 +13,7 @@ In the state-space version DD_SS, recruitment deviations from the stock-recruit 
 
     <a class="navbar-brand me-2" href="../index.html">SAMtool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,7 +104,7 @@ Otherwise, equals to 1 when running an assessment.</p></dd>
 
 
 <dt id="arg-data">Data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>An object of class <a href="https://rdrr.io/pkg/MSEtool/man/Data-class.html" class="external-link">MSEtool::Data</a>.</p></dd>
+<dd><p>An object of class <a href="https://msetool.openmse.com/reference/Data-class.html" class="external-link">MSEtool::Data</a>.</p></dd>
 
 
 <dt id="arg-condition">condition<a class="anchor" aria-label="anchor" href="#arg-condition"></a></dt>
@@ -291,11 +291,11 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co">#### Observation-error delay difference model</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/SimulatedData.html" class="external-link">SimulatedData</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Provide starting values</span></span></span>
 <span class="r-in"><span><span class="va">start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="va">start</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_TMB</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="va">start</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">@</span><span class="va">SD</span><span class="op">)</span> <span class="co"># Parameter estimates</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                Estimate   Std. Error</span>
@@ -308,7 +308,7 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">### State-space version</span></span></span>
 <span class="r-in"><span><span class="co">### Set recruitment variability SD = 0.3 (since fix_tau = TRUE)</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_SS</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MSEtool/man/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tau <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">DD_SS</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">3</span>, Data <span class="op">=</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/SimulatedData.html" class="external-link">SimulatedData</a></span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tau <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
@@ -321,7 +321,7 @@ Dynamics and Uncertainty. Chapman and Hall, New York.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>
