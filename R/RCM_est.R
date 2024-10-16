@@ -292,7 +292,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     if (nrow(map$vul_par) != n_age) stop("map$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
     
     if (vul_transform) {
-      test <- start$vul_par[, selectivity == -2] %in% c(0, 1)
+      test <- start$vul_par[, selectivity == -2] >= 0 & start$vul_par[, selectivity == -2] <= 1
       if (any(!test)) stop("There are free selectivity parameters in start$vul_par that are less than zero or greater than one.")
       test_est <- !is.na(map$vul_par[, selectivity == -2])
       test_fix <- test & !test_est
@@ -356,7 +356,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
     if (nrow(map$ivul_par) != n_age) stop("map$ivul_par needs to be a matrix with ", n_age, " (maxage + 1) rows.")
     
     if (vul_transform) {
-      test <- start$ivul_par[, s_selectivity == -2] %in% c(0, 1) 
+      test <- start$ivul_par[, s_selectivity == -2] >= 0 & start$ivul_par[, s_selectivity == -2] <= 1
       
       if (any(!test)) stop("There are free selectivity parameters in start$ivul_par that are less than zero or greater than one.")
       
