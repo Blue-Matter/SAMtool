@@ -170,7 +170,6 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             } else {
               report_list <- x@Misc[sims]
             }
-            
             # Update scenario
             if (is.null(scenario$col)) {
               
@@ -181,7 +180,8 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                   ifelse(xx %in% sims & x@conv[xx], "black", "red") # Vector of colours by simulation
                 })
               } else {
-                scenario$col <- "red" <- scenario$col_legend <- "black"
+                scenario$col <- "red"
+                scenario$col_legend <- "black"
               }
               
             } else {
