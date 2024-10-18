@@ -394,43 +394,6 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               LH_section <- c(LAA, LAA_persp, LW, wt, wt_persp, mat, mat_persp, mat_len, fec, fec_persp, NatM, NatM_persp)
 
               # Data and fit section
-              individual_matrix_fn <- function(i, obs, pred, fig.cap, label, resids = FALSE, condition) {
-                if (resids) {
-                  rmd_assess_resid2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
-                                    fig.cap = paste(fig.cap, i), label = label[i])
-                } else {
-                  rmd_assess_fit2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
-                                  fig.cap = paste(fig.cap, i), label = label[i], 
-                                  match = if(missing(condition)) FALSE else condition[i] == "catch2")
-                }
-              }
-              individual_array_fn <- function(i, obs, pred, N, comps = c("age", "length"), label, bubble_adj, plot_mean = TRUE) {
-                comps <- match.arg(comps)
-                
-                obs_ch <- paste0(obs, "[, , ", i, "]")
-                pred_ch <- paste0(pred, "[, , ", i, "]")
-                N_ch <- paste0(N, "[, ", i, "]")
-                
-                fig.cap <- list(
-                  annual = paste0("Observed (black) and predicted (red) ", comps, " composition from ", label[i], "."),
-                  bubble_residuals = paste0("Multinomial Pearson residuals (bubbles) for ", comps, " composition from ", label[i], "."),
-                  heat_residuals = paste0("Multinomial Pearson residuals (colored tiles) for ", comps, " composition from ", label[i], "."),
-                  mean = paste0("Observed (black) and predicted (red) mean ", comps, " from the composition data for ", 
-                                label[i], ".")
-                )
-                
-                if (comps == "age") {
-                  rr <- lapply(names(fig.cap), function(j) {
-                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, ages = "age", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
-                  })
-                } else {
-                  rr <- lapply(names(fig.cap), function(j) {
-                    rmd_fit_comps("Year", obs_ch, pred_ch, type = j, CAL_bins = "RCMdata@Misc$lbinmid", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
-                  })
-                }
-                do.call(c, rr)
-              }
-
               if (any(RCMdata@Chist > 0, na.rm = TRUE)) {
                 C_matplot <- rmd_matplot(x = "Year", y = "RCMdata@Chist", col = "rich.colors(nfleet)",
                                          xlab = "Year", ylab = "Catch", legend.lab = "f_name",
@@ -455,7 +418,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (any(RCMdata@Index > 0, na.rm = TRUE)) {
                 I_plots <- c("#### Index \n",
                              lapply(1:nsurvey, individual_matrix_fn, obs = "RCMdata@Index", pred = "report$Ipred",
-                                    fig.cap = "index from survey", label = s_name),
+                                    std = "RCMdata@I_sd", fig.cap = "index from survey", label = s_name),
                              lapply(1:nsurvey, individual_matrix_fn, obs = "RCMdata@Index", pred = "report$Ipred",
                                     fig.cap = "index from survey", label = paste(s_name, "Residuals"), resids = TRUE))
               } else I_plots <- NULL

@@ -18,29 +18,6 @@ rmd_matplot <- function(x, y, col, xlab, ylab, legend.lab, type = "l", lty = 1, 
   return(ans)
 }
 
-# For RCM function
-rmd_assess_fit2 <- function(year, obs, fit, fig.cap, label = fig.cap, match = FALSE) {
-  fig.cap2 <- paste0("Observed (black) and predicted (red) ", fig.cap, ".")
-  if (match) fig.cap2 <- paste(fig.cap2, "Predicted", fig.cap, "should match observed in this model.")
-  
-  c(paste0("```{r, fig.cap = \"", fig.cap2, "\"}"),
-    paste0("plot_timeseries(", year, ", ", obs, ", ", fit, ", label = \"", label, "\")"),
-    "```\n")
-}
-
-# For RCM function
-rmd_assess_resid2 <- function(year, obs, fit, fig.cap, label = fig.cap) {
-  fig.cap2 <- paste0("Index residuals (in log space) for ", fig.cap, ".")
-  
-  c(paste0("```{r, fig.cap = \"", fig.cap2, "\"}"),
-    paste0("if (!all(is.na(", obs, "))) {"),
-    paste0("  istart <- which(!is.na(", obs, "))[1]"),
-    paste0("  istop <- which(!is.na(", obs, ")) %>% max()"),
-    paste0("  plot_residuals(", year, "[istart:istop], log(", obs, "[istart:istop]/", fit, "[istart:istop]), label = \"", label, "\")"),
-    "}",
-    "```\n")
-}
-
 rmd_fit_comps <- function(year, obs, fit, type = c("bubble_data", "annual", "bubble_residuals", "mean", "heat_residuals"), 
                           ages = "NULL", CAL_bins = "NULL", N = "NULL", fig.cap,
                           bubble_adj = "1.5") {
@@ -539,6 +516,81 @@ rmd_RCM_Hist_compare <- function() {
     "abline(h = 0, col = \"grey\")",
     "matlines(Year, Catch_difference, col = \"black\")",
     "```\n")
+}
+
+
+# Plots catch/index for each column of a matrix using lapply
+individual_matrix_fn <- function(i, obs, pred, std, fig.cap, label, resids = FALSE, condition) {
+  
+  if (resids) {
+    
+    rmd_assess_resid2 <- function(year, obs, fit, fig.cap, label = fig.cap) {
+      fig.cap2 <- paste0("Index residuals (in log space) for ", fig.cap, ".")
+      
+      c(paste0("```{r, fig.cap = \"", fig.cap2, "\"}"),
+        paste0("if (!all(is.na(", obs, "))) {"),
+        paste0("  istart <- which(!is.na(", obs, "))[1]"),
+        paste0("  istop <- which(!is.na(", obs, ")) %>% max()"),
+        paste0("  plot_residuals(", year, "[istart:istop], log(", obs, "[istart:istop]/", fit, "[istart:istop]), label = \"", label, "\")"),
+        "}",
+        "```\n")
+    }
+    
+    rmd_assess_resid2("Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"),
+                      fig.cap = paste(fig.cap, i), label = label[i])
+    
+  } else {
+    
+    rmd_assess_fit2 <- function(year, obs, fit, std, fig.cap, label = fig.cap, match = FALSE) {
+      fig.cap2 <- paste0("Observed (black) and predicted (red) ", fig.cap, ".")
+      if (match) fig.cap2 <- paste(fig.cap2, "Predicted", fig.cap, "should match observed in this model.")
+      
+      c(paste0("```{r, fig.cap = \"", fig.cap2, "\"}"),
+        paste0("plot_timeseries(", year, ", ", obs, ", ", fit, ", ", std, ", label = \"", label, "\")"),
+        "```\n")
+    }
+    
+    if (missing(std)) {
+      std_ch <- "NULL"
+    } else {
+      std_ch <- paste0(std, "[, ", i, "]")
+    }
+    
+    rmd_assess_fit2(
+      "Year", paste0(obs, "[, ", i, "]"), paste0(pred, "[, ", i, "]"), std_ch,
+      fig.cap = paste(fig.cap, i), label = label[i], 
+      match = if(missing(condition)) FALSE else condition[i] == "catch2"
+    )
+    
+  }
+}
+
+# Plots comp for each slice of an array using lapply
+individual_array_fn <- function(i, obs, pred, N, comps = c("age", "length"), label, bubble_adj, plot_mean = TRUE) {
+  comps <- match.arg(comps)
+  
+  obs_ch <- paste0(obs, "[, , ", i, "]")
+  pred_ch <- paste0(pred, "[, , ", i, "]")
+  N_ch <- paste0(N, "[, ", i, "]")
+  
+  fig.cap <- list(
+    annual = paste0("Observed (black) and predicted (red) ", comps, " composition from ", label[i], "."),
+    bubble_residuals = paste0("Multinomial Pearson residuals (bubbles) for ", comps, " composition from ", label[i], "."),
+    heat_residuals = paste0("Multinomial Pearson residuals (colored tiles) for ", comps, " composition from ", label[i], "."),
+    mean = paste0("Observed (black) and predicted (red) mean ", comps, " from the composition data for ", 
+                  label[i], ".")
+  )
+  
+  if (comps == "age") {
+    rr <- lapply(names(fig.cap), function(j) {
+      rmd_fit_comps("Year", obs_ch, pred_ch, type = j, ages = "age", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
+    })
+  } else {
+    rr <- lapply(names(fig.cap), function(j) {
+      rmd_fit_comps("Year", obs_ch, pred_ch, type = j, CAL_bins = "RCMdata@Misc$lbinmid", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
+    })
+  }
+  do.call(c, rr)
 }
 
 plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = NULL, annual_ylab = "Frequency",
