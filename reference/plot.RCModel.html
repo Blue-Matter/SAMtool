@@ -55,6 +55,7 @@ assuming the same model structure, i.e., identical matrix and array dimensions a
 <span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  sims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">x</span><span class="op">@</span><span class="va">OM</span><span class="op">@</span><span class="va">nsim</span>,</span>
 <span>  Year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  Age <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  f_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  s_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  MSY_ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -73,6 +74,7 @@ assuming the same model structure, i.e., identical matrix and array dimensions a
 <span>  filename <span class="op">=</span> <span class="st">"compare_RCM"</span>,</span>
 <span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  Age <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  f_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  s_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  MSY_ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -111,7 +113,11 @@ and the RCM output.</p></dd>
 
 
 <dt id="arg-year">Year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
-<dd><p>Optional, a vector of years for the historical period for plotting.</p></dd>
+<dd><p>Optional, a vector of years for the historical period for plotting. Useful if seasonal time steps are used.</p></dd>
+
+
+<dt id="arg-age">Age<a class="anchor" aria-label="anchor" href="#arg-age"></a></dt>
+<dd><p>Optional, a vector of ages for plotting. Useful if seasonal time steps are used.</p></dd>
 
 
 <dt id="arg-f-name">f_name<a class="anchor" aria-label="anchor" href="#arg-f-name"></a></dt>
