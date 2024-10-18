@@ -113,7 +113,8 @@ setMethod("initialize", "RCModel", function(.Object, ...) {
 #' @param filename Character string for the name of the markdown and HTML files.
 #' @param dir The directory in which the markdown and HTML files will be saved.
 #' @param sims A logical vector of length `x@@OM@@nsim` or a numeric vector indicating which simulations to keep.
-#' @param Year Optional, a vector of years for the historical period for plotting.
+#' @param Year Optional, a vector of years for the historical period for plotting. Useful if seasonal time steps are used.
+#' @param Age Optional, a vector of ages for plotting. Useful if seasonal time steps are used.
 #' @param f_name Character vector for fleet names.
 #' @param s_name Character vector for survey names.
 #' @param MSY_ref A numeric vector for reference horizontal lines for B/BMSY plots.
@@ -130,7 +131,7 @@ setMethod("initialize", "RCModel", function(.Object, ...) {
 #' @seealso [RCModel-class] [RCM]
 #' @exportMethod plot
 setMethod("plot", signature(x = "RCModel", y = "missing"),
-          function(x, compare = FALSE, filename = "RCM", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL,
+          function(x, compare = FALSE, filename = "RCM", dir = tempdir(), sims = 1:x@OM@nsim, Year = NULL, Age = NULL,
                    f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 1.5, scenario = list(), title = NULL,
                    open_file = TRUE, quiet = TRUE, render_args, ...) {
 
@@ -197,7 +198,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             stopifnot(inherits(RCMdata, "RCMdata"))
 
             max_age <- OM@maxage
-            age <- 0:max_age
+            if (is.null(Age)) Age <- 0:max_age
             nyears <- OM@nyears
             proyears <- OM@proyears
             if (is.null(Year)) Year <- (OM@CurrentYr - nyears + 1):OM@CurrentYr
@@ -339,10 +340,10 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               } else {
                 SD_LAA <- ""
               }
-              LAA <- rmd_LAA(age = "age", LAA = "data_mean_fit$len_age[nyears, ]", header = "### Life History\n", 
+              LAA <- rmd_LAA(age = "Age", LAA = "data_mean_fit$len_age[nyears, ]", header = "### Life History\n", 
                              SD_LAA = SD_LAA, fig.cap = "Length-at-age in the last historical year.")
               if (LH_varies_fn(data_mean_fit$len_age)) {
-                LAA_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$len_age[1:nyears, ]", xlab = "Year", ylab = "Age",
+                LAA_persp <- rmd_persp_plot(x = "Year", y = "Age", z = "data_mean_fit$len_age[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Length-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual length-at-age.")
               } else LAA_persp <- NULL
               
@@ -352,15 +353,15 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                  label = "Weight", xlab = "Length")
               } else LW <- NULL
               
-              wt <- rmd_WAA(age = "age", "data_mean_fit$wt[nyears, ]", fig.cap = "Weight-at-age in the last historical year.")
+              wt <- rmd_WAA(age = "Age", "data_mean_fit$wt[nyears, ]", fig.cap = "Weight-at-age in the last historical year.")
               if (LH_varies_fn(data_mean_fit$wt)) {
-                wt_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$wt[1:nyears, ]", xlab = "Year", ylab = "Age",
+                wt_persp <- rmd_persp_plot(x = "Year", y = "Age", z = "data_mean_fit$wt[1:nyears, ]", xlab = "Year", ylab = "Age",
                                            zlab = "Weight-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual weight-at-age.")
               } else wt_persp <- NULL
 
-              mat <- rmd_mat(age = "age", "data_mean_fit$mat[nyears, ]", fig.cap = "Maturity-at-age in the last historical year.")
+              mat <- rmd_mat(age = "Age", "data_mean_fit$mat[nyears, ]", fig.cap = "Maturity-at-age in the last historical year.")
               if (LH_varies_fn(data_mean_fit$mat)) {
-                mat_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$mat[1:nyears, ]", xlab = "Year", ylab = "Age",
+                mat_persp <- rmd_persp_plot(x = "Year", y = "Age", z = "data_mean_fit$mat[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Maturity-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual maturity-at-age.")
               } else mat_persp <- NULL
               
@@ -375,19 +376,19 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 mat_len <- rmd_mat(age = "length_bin", "mat_len_ogive", fig.cap = "Maturity-at-length in the last historical year.", xlab = "Length")
               } else mat_len <- NULL
               
-              fec <- rmd_fec(age = "age", "data_mean_fit$fec[nyears, ]", fig.cap = "Fecundity-at-age (product of spawning output and maturity) in the last historical year.")
+              fec <- rmd_fec(age = "Age", "data_mean_fit$fec[nyears, ]", fig.cap = "Fecundity-at-age (product of spawning output and maturity) in the last historical year.")
               if (LH_varies_fn(data_mean_fit$fec)) {
-                fec_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$fec[1:nyears, ]", xlab = "Year", ylab = "Age",
+                fec_persp <- rmd_persp_plot(x = "Year", y = "Age", z = "data_mean_fit$fec[1:nyears, ]", xlab = "Year", ylab = "Age",
                                             zlab = "Fecundity-at-age", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual fecundity-at-age.")
               } else fec_persp <- NULL
 
               if (data_mean_fit$use_prior[3]) {
-                NatM <- rmd_at_age(age = "age", "rep(report$Mest, length(age))", fig.cap = "Natural mortality (time constant).", label = "Natural mortality")
+                NatM <- rmd_at_age(age = "Age", "rep(report$Mest, length(Age))", fig.cap = "Natural mortality (time constant).", label = "Natural mortality")
               } else {
-                NatM <- rmd_at_age(age = "age", "data_mean_fit$M[nyears, ]", fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
+                NatM <- rmd_at_age(age = "Age", "data_mean_fit$M[nyears, ]", fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
               }
               if (!data_mean_fit$use_prior[3] && LH_varies_fn(data_mean_fit$M)) {
-                NatM_persp <- rmd_persp_plot(x = "Year", y = "age", z = "data_mean_fit$M[1:nyears, ]", xlab = "Year", ylab = "Age",
+                NatM_persp <- rmd_persp_plot(x = "Year", y = "Age", z = "data_mean_fit$M[1:nyears, ]", xlab = "Year", ylab = "Age",
                                              zlab = "Natural mortality", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual M-at-age.")
               } else NatM_persp <- NULL
 
@@ -426,7 +427,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (any(RCMdata@CAA > 0, na.rm = TRUE)) {
                 CAA_plots <- c("#### Age comps \n",
                                lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAA", pred = "report$CAApred", 
-                                      N = "RCMdata@CAA_ESS", comps = "age", label = f_name, bubble_adj = as.character(bubble_adj)))
+                                      N = "RCMdata@CAA_ESS", comps = "Age", label = f_name, bubble_adj = as.character(bubble_adj)))
               } else CAA_plots <- NULL
 
               if (any(RCMdata@CAL > 0, na.rm = TRUE)) {
@@ -450,7 +451,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (any(RCMdata@IAA > 0, na.rm = TRUE)) {
                 IAA_plots <- c("#### Index age comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", 
-                                        N = "RCMdata@IAA_ESS", comps = "age", label = s_name, bubble_adj = as.character(bubble_adj)))
+                                        N = "RCMdata@IAA_ESS", comps = "Age", label = s_name, bubble_adj = as.character(bubble_adj)))
               } else IAA_plots <- NULL
 
               if (any(RCMdata@IAL > 0, na.rm = TRUE)) {
@@ -462,7 +463,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               data_section <- c(C_matplot, C_plots, E_matplot, I_plots, CAA_plots, CAL_plots, MS_plots, IAA_plots, IAL_plots)
 
               # Model output
-              sel_matplot <- rmd_matplot(x = "age", y = "matrix(report$vul[nyears, , ], max_age + 1, nfleet)", col = "rich.colors(nfleet)",
+              sel_matplot <- rmd_matplot(x = "Age", y = "matrix(report$vul[nyears, , ], max_age + 1, nfleet)", col = "rich.colors(nfleet)",
                                          xlab = "Age", ylab = "Selectivity", legend.lab = "f_name",
                                          fig.cap = "Terminal year selectivity by fleet.", header = "### Output \n")
 
@@ -481,9 +482,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                 SSB_SSB0_plot <- rmd_SSB_SSB0(FALSE, "structure(report$E/report$E0_SR, names = Yearplusone)")
               }
 
-              N_bubble <- rmd_bubble("Yearplusone", "report$N", ages = "age", fig.cap = "Predicted abundance-at-age.", 
+              N_bubble <- rmd_bubble("Yearplusone", "report$N", ages = "Age", fig.cap = "Predicted abundance-at-age.", 
                                      bubble_adj = as.character(bubble_adj))
-              CAA_bubble <- rmd_bubble("Year", "apply(report$CAApred, 1:2, sum)", ages = "age",
+              CAA_bubble <- rmd_bubble("Year", "apply(report$CAApred, 1:2, sum)", ages = "Age",
                                        fig.cap = "Predicted catch-at-age (summed over all fleets).", 
                                        bubble_adj = as.character(bubble_adj))
 
@@ -564,7 +565,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
 #' @rdname plot.RCModel
 #' @export
-compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = tempdir(), Year = NULL,
+compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = tempdir(), Year = NULL, Age = NULL,
                         f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 1.5, scenario = list(), title = NULL,
                         open_file = TRUE, quiet = TRUE, render_args) {
 
@@ -605,7 +606,7 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   RCMdata <- dots[[1]]@data
 
   max_age <- dots[[1]]@OM@maxage
-  age <- 0:max_age
+  if (is.null(Age)) Age <- 0:max_age
   nyears <- dots[[1]]@OM@nyears
   if (is.null(Year)) Year <- (dots[[1]]@OM@CurrentYr - nyears + 1):dots[[1]]@OM@CurrentYr
   Yearplusone <- c(Year, max(Year) + 1)

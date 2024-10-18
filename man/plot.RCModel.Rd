@@ -13,6 +13,7 @@
   dir = tempdir(),
   sims = 1:x@OM@nsim,
   Year = NULL,
+  Age = NULL,
   f_name = NULL,
   s_name = NULL,
   MSY_ref = c(0.5, 1),
@@ -31,6 +32,7 @@ compare_RCM(
   filename = "compare_RCM",
   dir = tempdir(),
   Year = NULL,
+  Age = NULL,
   f_name = NULL,
   s_name = NULL,
   MSY_ref = c(0.5, 1),
@@ -54,7 +56,9 @@ and the RCM output.}
 
 \item{sims}{A logical vector of length \code{x@OM@nsim} or a numeric vector indicating which simulations to keep.}
 
-\item{Year}{Optional, a vector of years for the historical period for plotting.}
+\item{Year}{Optional, a vector of years for the historical period for plotting. Useful if seasonal time steps are used.}
+
+\item{Age}{Optional, a vector of ages for plotting. Useful if seasonal time steps are used.}
 
 \item{f_name}{Character vector for fleet names.}
 

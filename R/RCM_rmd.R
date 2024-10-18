@@ -81,7 +81,7 @@ rmd_RCM_sel <- function(fig.cap = "Operating model selectivity in the last histo
   c(paste0("```{r, fig.cap = \"", fig.cap, "\"}"),
     "vul <- sapply(report_list, getElement, \"vul_len\")",
     "if (nsim == 1) V_plot <- matrix(OM@cpars$V[, , nyears], 1, byrow = TRUE) else V_plot <- OM@cpars$V[, , nyears]",
-    "matplot(age, t(V_plot), type = \"l\", col = \"black\", xlab = \"Age\", ylab = \"Selectivity\", ylim = c(0, 1.1), zero_line = TRUE)",
+    "matplot(Age, t(V_plot), type = \"l\", col = \"black\", xlab = \"Age\", ylab = \"Selectivity\", ylim = c(0, 1.1), zero_line = TRUE)",
     "```\n")
 }
 
@@ -112,14 +112,14 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Age-based selectivity of ", f_name[ff], ".\"}"),
-           paste0("matplot(age, age, type = \"n\", xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of ", f_name[ff], "\", zero_line = TRUE)"),
+           paste0("matplot(Age, Age, type = \"n\", xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of ", f_name[ff], "\", zero_line = TRUE)"),
            "",
            "for(bb in 1:length(bl)) {",
            paste0("  vul_bb_age <- do.call(rbind, lapply(report_list, function(x) x$vul[RCMdata@sel_block[, ", ff, "] == bl[bb], , ", ff, "])) %>% t()"),
            "  if (length(bl) > 1) {", 
-           "    matlines(age, vul_bb_age, type = \"l\", col = bl_col[bb], lty = scenario$lty, lwd = scenario$lwd)",
+           "    matlines(Age, vul_bb_age, type = \"l\", col = bl_col[bb], lty = scenario$lty, lwd = scenario$lwd)",
            "  } else {",
-           "    matlines(age, vul_bb_age, type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd)",
+           "    matlines(Age, vul_bb_age, type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd)",
            "  }",
            "}",
            "if (length(bl) > 1) {",
@@ -150,8 +150,8 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) mean ages from ", f_name[ff], ".\"}"),
-           paste0("MApred <- sapply(report_list, function(x) x$CAApred[, , ", ff, "] %*% age/x$CN[, ", ff, "])"),
-           paste0("MAobs <- (RCMdata@CAA[, , ", ff, "] %*% age)/rowSums(RCMdata@CAA[, , ", ff, "], na.rm = TRUE)"),
+           paste0("MApred <- sapply(report_list, function(x) x$CAApred[, , ", ff, "] %*% Age/x$CN[, ", ff, "])"),
+           paste0("MAobs <- (RCMdata@CAA[, , ", ff, "] %*% Age)/rowSums(RCMdata@CAA[, , ", ff, "], na.rm = TRUE)"),
            "ylim <- c(0.9, 1.1) * range(c(MApred, MAobs), na.rm = TRUE)",
            "matplot(Year, MApred, type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, xlab = \"Year\", ylab = \"Mean age\", ylim = ylim)",
            paste0("if (any(RCMdata@CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
@@ -194,12 +194,12 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", f_name[ff], ".\"}"),
            paste0("if (any(RCMdata@CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
            paste0("if (nsim == 1) CAA_plot <- array(x@CAA[, , , ", ff, "], c(1, nyears, max_age + 1)) else CAA_plot <- x@CAA[, , , ", ff, "]"),
-           paste0("plot_composition_RCM(Year, CAA_plot, RCMdata@CAA[, , ", ff, "], N = round(RCMdata@CAA_ESS[, ", ff, "], 1), ages = age, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, CAA_plot, RCMdata@CAA[, , ", ff, "], N = round(RCMdata@CAA_ESS[, ", ff, "], 1), ages = Age, dat_col = scenario$col)"),
            "}",
            "```\n",
            paste0("```{r, fig.cap = \"Predicted age composition from ", f_name[ff], ".\"}"),
            paste0("if (any(RCMdata@CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
-           paste0("plot_composition_RCM(Year, CAA_plot, ages = age, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, CAA_plot, ages = Age, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
@@ -227,7 +227,7 @@ rmd_RCM_index_output <- function(sur, s_name) {
            paste0("```{r, fig.cap = \"Age-based selectivity of ", s_name[sur], " in last historical year.\"}"),
            "if (!is.null(report_list[[1]]$ivul)) {",
            paste0("ivul_ff_age <- sapply(report_list, function(x) x$ivul[nyears, , ", sur, "])"),
-           paste0("matplot(age, ivul_ff_age, type = \"l\", col = scenario$col, xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of ", s_name[sur], "\", zero_line = TRUE)"),
+           paste0("matplot(Age, ivul_ff_age, type = \"l\", col = scenario$col, xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of ", s_name[sur], "\", zero_line = TRUE)"),
            "if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col_legend, lty = scenario$lty, lwd = scenario$lwd)",
            "}",
            "```\n",
@@ -257,8 +257,8 @@ rmd_RCM_index_output <- function(sur, s_name) {
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) mean ages from ", s_name[sur], ".\"}"),
            paste0("if (length(RCMdata@IAA) && any(RCMdata@IAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
-           paste0("MApred <- sapply(report_list, function(x) x$IAApred[, , ", sur, "] %*% age/rowSums(x$IAApred[, , ", sur, "]))"),
-           paste0("MAobs <- (RCMdata@IAA[, , ", sur, "] %*% age)/rowSums(RCMdata@IAA[, , ", sur, "], na.rm = TRUE)"),
+           paste0("MApred <- sapply(report_list, function(x) x$IAApred[, , ", sur, "] %*% Age/rowSums(x$IAApred[, , ", sur, "]))"),
+           paste0("MAobs <- (RCMdata@IAA[, , ", sur, "] %*% Age)/rowSums(RCMdata@IAA[, , ", sur, "], na.rm = TRUE)"),
            "ylim <- c(0.9, 1.1) * range(c(MApred, MAobs), na.rm = TRUE)",
            "matplot(Year, MApred, type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd, xlab = \"Year\", ylab = \"Mean age\", ylim = ylim)",
            paste0("if (any(RCMdata@IAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
@@ -284,7 +284,7 @@ rmd_RCM_index_output <- function(sur, s_name) {
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", s_name[sur], ".\"}"),
            paste0("if (length(RCMdata@IAA) && any(RCMdata@IAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
            paste0("pred_IAA <- sapply(report_list, function(x) x$IAA[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_RCM(Year, pred_IAA, RCMdata@IAA[, , ", sur, "], N = round(RCMdata@IAA_ESS[, ", sur, "], 1), ages = age, dat_col = scenario$col)"),
+           paste0("plot_composition_RCM(Year, pred_IAA, RCMdata@IAA[, , ", sur, "], N = round(RCMdata@IAA_ESS[, ", sur, "], 1), ages = Age, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
@@ -583,7 +583,7 @@ individual_array_fn <- function(i, obs, pred, N, comps = c("age", "length"), lab
   
   if (comps == "age") {
     rr <- lapply(names(fig.cap), function(j) {
-      rmd_fit_comps("Year", obs_ch, pred_ch, type = j, ages = "age", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
+      rmd_fit_comps("Year", obs_ch, pred_ch, type = j, ages = "Age", N = N_ch, fig.cap = fig.cap[[j]], bubble_adj = bubble_adj)
     })
   } else {
     rr <- lapply(names(fig.cap), function(j) {
