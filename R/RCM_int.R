@@ -470,7 +470,7 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   out$procsd <- vapply(report, getElement, numeric(1), "tau")
   
   make_Perr <- function(x, obj_data) {
-    bias_corr <- ifelse(obj_data$est_rec_dev, exp(-0.5 * x$tau^2), 1)
+    bias_corr <- ifelse(obj_data$est_rec_dev, exp(-0.5 * obj_data$pbc_recdev * x$tau^2), 1)
     res <- exp(x$log_rec_dev) * bias_corr
     res[1] <- res[1] * x$R_eq/x$R0
     return(res)

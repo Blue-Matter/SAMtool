@@ -2,6 +2,9 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 
 ## SAMtool 1.8.0
 - Update error check for free selectivity parameters in RCM.
+- Clean up RCM reporting of data fits (introduced in 1.6.5)
+- Plot index SD in RCM
+- Adjust rec devs for partial bias correction when converting RCM to OM (introduced in 1.7.0)
 
 ## SAMtool 1.7.0
 - Add argument to adjust annual recruitment deviation bias correction in `RCM` in argument `pbc_recdev`. The bias correction from logspace to normal space is `exp(log_rec_dev[y] - 0.5 * bc_recdev[y] * sigmaR^2)` if the year-specific rec dev is estimated.
