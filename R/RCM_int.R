@@ -867,11 +867,11 @@ expand_V_matrix <- function(x, nyears, proyears) {
   rbind(x, y)
 }
 
-make_SL <- function(x, sel_block) {
+make_SL <- function(x, sel_block, f = 1:ncol(x$F)) {
   apicalF <- x$F
   apicalF[apicalF < 1e-4] <- 1e-4
   
-  F_at_length <- lapply(1:ncol(apicalF), function(xx) {
+  F_at_length <- lapply(f, function(xx) {
     sel_block_f <- sel_block[, xx]
     apicalF[, xx] * t(x$vul_len[, sel_block_f])
   }) %>% 
