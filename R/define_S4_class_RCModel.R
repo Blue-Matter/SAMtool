@@ -174,7 +174,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             } else {
               report_list_all <- x@Misc
             }
-            if (length(report_list) > 1) report_list <- report_list_all[sims]
+            if (length(report_list_all) > 1) report_list <- report_list_all[sims]
             
             # Update scenario
             if (is.null(scenario$col)) {
@@ -432,7 +432,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (any(RCMdata@CAA > 0, na.rm = TRUE)) {
                 CAA_plots <- c("#### Age comps \n",
                                lapply(1:nfleet, individual_array_fn, obs = "RCMdata@CAA", pred = "report$CAApred", 
-                                      N = "RCMdata@CAA_ESS", comps = "Age", label = f_name, bubble_adj = as.character(bubble_adj)))
+                                      N = "RCMdata@CAA_ESS", comps = "age", label = f_name, bubble_adj = as.character(bubble_adj)))
               } else CAA_plots <- NULL
 
               if (any(RCMdata@CAL > 0, na.rm = TRUE)) {
@@ -456,7 +456,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (any(RCMdata@IAA > 0, na.rm = TRUE)) {
                 IAA_plots <- c("#### Index age comps \n",
                                  lapply(1:nsurvey, individual_array_fn, obs = "RCMdata@IAA", pred = "report$IAApred", 
-                                        N = "RCMdata@IAA_ESS", comps = "Age", label = s_name, bubble_adj = as.character(bubble_adj)))
+                                        N = "RCMdata@IAA_ESS", comps = "age", label = s_name, bubble_adj = as.character(bubble_adj)))
               } else IAA_plots <- NULL
 
               if (any(RCMdata@IAL > 0, na.rm = TRUE)) {

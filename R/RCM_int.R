@@ -245,7 +245,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
       
       # Cannot accommodate indices mirrored to fleet when nfleet > 1 and fleet has time-varying sel
       real_Data@AddIndType <- vapply(s_sel, process_AddIndType, numeric(1), nfleet = nfleet)
-      real_Data@AddIndV <- lapply(1:nsurvey, process_AddIndV, Misc = output@report, s_sel = s_sel,
+      real_Data@AddIndV <- lapply(1:nsurvey, process_AddIndV, report = output@report, s_sel = s_sel,
                                   n_age = maxage + 1, nfleet = nfleet, nyears = nyears) %>%
         simplify2array() %>% aperm(c(1, 3, 2))
       real_Data@AddIunits <- RCMdata@I_units
