@@ -32,7 +32,11 @@ RCM2MOM <- function(RCModel) {
   slot_intersect <- intersect(slotNames("MOM"), slotNames("OM"))
   for(i in slot_intersect) slot(MOM, i) <- slot(RCModel@OM, i)
   
-  report <- RCModel@Misc
+  if (.hasSlot(RCModel, "report")) {
+    report <- RCModel@report
+  } else {
+    report <- RCModel@Misc
+  }
   if (length(report) == 1) report <- lapply(1:MOM@nsim, function(...) RCModel@Misc[[1]])
   cpars <- lapply(1:nf, function(f) {
     cp <- RCModel@OM@cpars

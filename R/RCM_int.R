@@ -199,10 +199,10 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   if (!is.null(newOM$RCM_val$CAL)) output@CAL = newOM$RCM_val$CAL[keep, , , , drop = FALSE] 
   
   if (length(res) > 1) {
-    output@Misc <- res[keep]
+    output@report <- res[keep]
     output@config <- list(drop_sim = which(!keep))
   } else {
-    output@Misc <- res
+    output@report <- res
     output@config <- list(drop_sim = integer(0))
   }
   
@@ -245,7 +245,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
       
       # Cannot accommodate indices mirrored to fleet when nfleet > 1 and fleet has time-varying sel
       real_Data@AddIndType <- vapply(s_sel, process_AddIndType, numeric(1), nfleet = nfleet)
-      real_Data@AddIndV <- lapply(1:nsurvey, process_AddIndV, Misc = output@Misc, s_sel = s_sel,
+      real_Data@AddIndV <- lapply(1:nsurvey, process_AddIndV, Misc = output@report, s_sel = s_sel,
                                   n_age = maxage + 1, nfleet = nfleet, nyears = nyears) %>%
         simplify2array() %>% aperm(c(1, 3, 2))
       real_Data@AddIunits <- RCMdata@I_units
@@ -568,13 +568,13 @@ process_AddIndType <- function(s_sel, nfleet) {
   }
 }
 
-process_AddIndV <- function(sur, Misc, s_sel, n_age, nfleet, nyears) { # Return a matrix of nsim x nages
+process_AddIndV <- function(sur, report, s_sel, n_age, nfleet, nyears) { # Return a matrix of nsim x nages
   sel_B_SB <- s_sel[sur] %in% c(-3, -4) # -4 = B, -3 = SSB, coordinate with process_AddIndType() and Data@AddIndType
   sel_VB <- s_sel[sur] == 1 && nfleet == 1
   if (sel_B_SB || sel_VB) { # single-fleet VB
-    out <- matrix(1, length(Misc), n_age)
+    out <- matrix(1, length(report), n_age)
   } else { # custom sel or multi-fleet
-    out <- do.call(rbind, lapply(Misc, function(x) x$ivul[nyears, , sur]))
+    out <- do.call(rbind, lapply(report, function(x) x$ivul[nyears, , sur]))
   }
   return(out)
 }

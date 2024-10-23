@@ -23,7 +23,7 @@ An S4 class for the output from \link{RCM}.
 
 \item{\code{conv}}{A logical vector of length \code{OM@nsim} indicating convergence of the RCM in the i-th simulation.}
 
-\item{\code{Misc}}{A list of length \code{OM@nsim} with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:
+\item{\code{report}}{A list of length \code{OM@nsim} with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:
 
 \itemize{
 \item B - total biomass - vector of length nyears+1
@@ -90,6 +90,8 @@ An S4 class for the output from \link{RCM}.
 \itemize{
 \item drop_sim - a vector of simulations that were dropped for the output
 }}
+
+\item{\code{Misc}}{Slot for miscellaneous information for the user. Currently unused.}
 }}
 
 \seealso{

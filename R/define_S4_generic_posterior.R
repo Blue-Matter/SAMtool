@@ -167,7 +167,7 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1, silent = FALSE) {
   RCModel@CAA <- newOM$RCM_val$CAA
   if (!is.null(newOM$RCM_val$CAL)) RCModel@CAL <- newOM$RCM_val$CAL
   RCModel@conv <- rep(TRUE, nsim)
-  RCModel@Misc <- res
+  RCModel@report <- res
   RCModel@config$drop_sim <- integer(0)
   
   if (!silent) message("Finished.")

@@ -12,7 +12,7 @@
 #' @slot CAA An array for the predicted catch at age with dimension `OM@@nsim`, `OM@@nyears`, `OM@@maxage`, and nfleet.
 #' @slot CAL An array for the predicted catch at length with dimension `OM@@nsim`, `OM@@nyears`, length bins, and nfleet.
 #' @slot conv A logical vector of length `OM@@nsim` indicating convergence of the RCM in the i-th simulation.
-#' @slot Misc A list of length `OM@@nsim` with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:
+#' @slot report A list of length `OM@@nsim` with more output from the fitted RCM. Within each simulation, a named list containing items of interest include:
 #'
 #' \itemize{
 #' \item B - total biomass - vector of length nyears+1
@@ -77,15 +77,18 @@
 #' \itemize{
 #' \item drop_sim - a vector of simulations that were dropped for the output
 #' }
+#' @slot Misc Slot for miscellaneous information for the user. Currently unused.
 #'
 #' @seealso [plot.RCModel] [RCM]
 #' @author Q. Huynh
 #' @export RCModel
 #' @exportClass RCModel
-RCModel <- setClass("RCModel", slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
-                                         CAA = "array", CAL = "array", conv = "logical", Misc = "list", mean_fit = "list",
-                                         data = "ANY", config = "ANY"))
-
+RCModel <- setClass(
+  "RCModel", 
+  slots = c(OM = "ANY", SSB = "matrix", NAA = "array",
+            CAA = "array", CAL = "array", conv = "logical", report = "list", mean_fit = "list",
+            data = "ANY", config = "ANY", Misc = "ANY")
+)
 
 setMethod("initialize", "RCModel", function(.Object, ...) {
   dots <- list(...)
@@ -166,18 +169,20 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
             ####### Assign variables
             OM <- MSEtool::SubCpars(x@OM, sims)
-            if (length(x@Misc) == 1) {
-              report_list <- x@Misc
+            if (.hasSlot(x, "report")) {
+              report_list_all <- x@report
             } else {
-              report_list <- x@Misc[sims]
+              report_list_all <- x@Misc
             }
+            if (length(report_list) > 1) report_list <- report_list_all[sims]
+            
             # Update scenario
             if (is.null(scenario$col)) {
               
               if (any(!x@conv)) {
                 scenario$names <- c("Converged", "Not converged")
                 scenario$col_legend <- c("black", "red")       # Colours by factor
-                scenario$col <- sapply(1:length(x@Misc), function(xx) {
+                scenario$col <- sapply(1:length(report_list_all), function(xx) {
                   ifelse(xx %in% sims & x@conv[xx], "black", "red") # Vector of colours by simulation
                 })
               } else {
@@ -286,7 +291,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             ####### Output from all simulations {.tabset}
             sim_summary <- matrix(
               c(x@OM@nsim, 
-                sapply(x@Misc, getElement, 'conv') %>% mean() %>% round(2) %>% `*`(100), 
+                sapply(report_list_all, getElement, 'conv') %>% mean() %>% round(2) %>% `*`(100), 
                 length(sims))
             ) %>%
               structure(dimnames = list(c("Operating model simulations", "RCM converged (%)", "Simulations plotted"),
