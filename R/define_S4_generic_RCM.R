@@ -13,7 +13,8 @@
 #' `check_RCMdata` evaluates whether the inputs in the S4 RCMdata object are correctly formatted.
 #' 
 #' @param OM An object of class [MSEtool::OM-class] that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
-#' steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).
+#' steepness, maturity parameters (L50 and L50_95), and standard deviation of recruitment variability (Perr).
+#' Alternatively, provide a named list of biological inputs, see "StockPars" section below.
 #' @param data Data inputs formatted in a [RCMdata-class] (preferred) or [MSEtool::Data-class] object. 
 #' Use of a list is deprecated. See Data section below.
 #' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
@@ -43,6 +44,16 @@
 #' @param silent Logical to indicate whether informative messages will be reported to console.
 #' @param ... Other arguments to pass in for starting values of parameters and fixing parameters. See details.
 #'
+#' @section Online Documentation:
+#' Several articles are available for RCM:
+#'
+#' \itemize{
+#' \item [General overview of approach](https://openmse.com/tutorial-rcm/)
+#' \item [Mathematical description](https://openmse.com/tutorial-rcm-eq/)
+#' \item [Setup of selectivity settings and index catchability](https://openmse.com/tutorial-rcm-select/) (useful for more data-rich cases)
+#' \item [Description of priors](https://openmse.com/features-assessment-models/5-priors/)
+#' }
+#' 
 #' @section Priors:
 #' The following priors can be added as a named list, e.g., `prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)`. 
 #' For each parameter below, provide a vector of values as described:
@@ -80,16 +91,6 @@
 #' `check_RCMdata` returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
 #' from the OM.
 #'
-#' @section Online Documentation:
-#' Several articles are available for RCM:
-#'
-#' \itemize{
-#' \item [General overview of approach](https://openmse.com/tutorial-rcm/)
-#' \item [Mathematical description](https://openmse.com/tutorial-rcm-eq/)
-#' \item [Setup of selectivity settings and index catchability](https://openmse.com/tutorial-rcm-select/) (useful for more data-rich cases)
-#' \item [Description of priors](https://openmse.com/features-assessment-models/5-priors/)
-#' }
-#'
 #' @section Data:
 #' One of indices, age compositions, or length compositions should be provided in addition to the historical catch or effort. Not all arguments
 #' are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).
@@ -113,7 +114,7 @@
 #'
 #' There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., `RCM(OM, Data, C_eq = C_eq, ...)`.
 #' 
-#' @section Data list:
+#' @section Data list (deprecated):
 #' Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:
 #' 
 #' \describe{
@@ -158,6 +159,27 @@
 #' \item{`sel_block`}{Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of `nyears` rows and `nfleet` columns 
 #' to assigns a selectivity function to a fleet for certain years.}
 #' }
+#' 
+#' @section StockPars:
+#' When an operating model is provided, the RCM function will generally fit to each simulation of biological parameters.
+#' 
+#' Alternatively for a single fit to data independent of any operating model, provide a named list containing the following
+#' (naming conventions follow internal operating model variables):
+#' 
+#' - `SRrel` Integer, stock-recruit function (1 = Beverton-Holt, 2 = Ricker, 3 = Mesnil-Rochet hockey stick)
+#' - `R0` Numeric, starting value for unfished recruitment parameter
+#' - `M_ageArray` Matrix `[maxage+1, nyears]` for natural mortality
+#' - `Len_age` Matrix `[maxage+1, nyears + 1]` for length at age
+#' - `Linf` Numeric. Asymptotic length. Only used for the upper bound for the size of full selectivity (if selectivity functions are length-based)
+#' - `LatASD` Matrix `[maxage+1, nyears + 1]` for the standard deviation in length at age
+#' - `Wt_age` Matrix `[maxage+1, nyears + 1]` for stock weight at age
+#' - `Mat_age` Matrix `[maxage+1, nyears + 1]` for maturity at age
+#' - `Fec_Age` Matrix `[maxage+1, nyears + 1]` for fecundity at age. Frequently the product of maturity and weight at age
+#' - `ageMarray` Numeric, age of 50 percent maturity. Used to average the initial years for the unfished replacement line of the
+#' stock recruit relationship and steepness/R0. Irrelevant if fecundity and natural mortality are not time-varying (set to 1).
+#' - `spawn_time_frac` Numeric, fraction of the year when spawning occurs
+#' - `hs` Numeric, steepness of the stock recruit relationship
+#' - `procsd` Numeric, lognormal recruitment deviation standard deviation
 #'  
 #' @section Additional arguments:
 #' For `RCM`, additional arguments can be passed to the model via `...`:
@@ -217,6 +239,7 @@
 #'
 #' Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
 #' [RCMdata-class] object. For a list or [MSEtool::Data-class] object, use the `ESS` argument.
+#' 
 #' @author Q. Huynh
 #' @examples 
 #' \donttest{ 
@@ -482,3 +505,20 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
             ####### Done.
             return(output)
           })
+
+
+#' @rdname RCM
+#' @export
+setMethod("RCM", signature(OM = "list", data = "RCMdata"),
+          function(OM, data, condition = "catch", selectivity = "logistic", s_selectivity = NULL, LWT = list(),
+                   comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
+                   max_F = 3, integrate = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), 
+                   start = list(), map = list(), silent = FALSE, ...) {
+            RCM_single_fit(
+              StockPars = OM, RCMdata = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
+              comp_like = comp_like, prior = prior, max_F = max_F, integrate = integrate, 
+              control = control, start = start, map = map, silent = silent, 
+              ...
+            )
+          })
+

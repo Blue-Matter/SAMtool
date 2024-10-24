@@ -6,6 +6,7 @@
 \alias{RCM,OM,list-method}
 \alias{RCM,OM,Data-method}
 \alias{RCM,OM,RCMdata-method}
+\alias{RCM,list,RCMdata-method}
 \title{Rapid Conditioning Model (RCM)}
 \usage{
 check_RCMdata(RCMdata, OM, condition = "catch", silent = FALSE)
@@ -79,12 +80,31 @@ RCM(OM, data, ...)
   silent = FALSE,
   ...
 )
+
+\S4method{RCM}{list,RCMdata}(
+  OM,
+  data,
+  condition = "catch",
+  selectivity = "logistic",
+  s_selectivity = NULL,
+  LWT = list(),
+  comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"),
+  prior = list(),
+  max_F = 3,
+  integrate = FALSE,
+  control = list(iter.max = 2e+05, eval.max = 4e+05),
+  start = list(),
+  map = list(),
+  silent = FALSE,
+  ...
+)
 }
 \arguments{
 \item{RCMdata}{An \linkS4class{RCMdata} object.}
 
 \item{OM}{An object of class \link[MSEtool:OM-class]{MSEtool::OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
-steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).}
+steepness, maturity parameters (L50 and L50_95), and standard deviation of recruitment variability (Perr).
+Alternatively, provide a named list of biological inputs, see "StockPars" section below.}
 
 \item{condition}{String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be fleet specific, in which case some combination of "catch" and "effort" are permissible.}
@@ -164,6 +184,18 @@ The easiest way to turn off time-varying growth/M is by setting: \code{OM@Msd <-
 To play with alternative fits by excluding indices, for example, or other optional data, set the corresponding likelihood weight to zero. The model will still generate the inferred
 index but the data won't enter the likelihood. See section on likelihood weights.
 }
+\section{Online Documentation}{
+
+Several articles are available for RCM:
+
+\itemize{
+\item \href{https://openmse.com/tutorial-rcm/}{General overview of approach}
+\item \href{https://openmse.com/tutorial-rcm-eq/}{Mathematical description}
+\item \href{https://openmse.com/tutorial-rcm-select/}{Setup of selectivity settings and index catchability} (useful for more data-rich cases)
+\item \href{https://openmse.com/features-assessment-models/5-priors/}{Description of priors}
+}
+}
+
 \section{Priors}{
 
 The following priors can be added as a named list, e.g., \verb{prior = list(M = c(0.25, 0.15), h = c(0.7, 0.1)}.
@@ -180,18 +212,6 @@ while Ricker steepness uses a normal distribution.}
 for the SD (in log space). Use \code{NA} in rows corresponding to indices without priors.}
 }
 See online documentation for more details.
-}
-
-\section{Online Documentation}{
-
-Several articles are available for RCM:
-
-\itemize{
-\item \href{https://openmse.com/tutorial-rcm/}{General overview of approach}
-\item \href{https://openmse.com/tutorial-rcm-eq/}{Mathematical description}
-\item \href{https://openmse.com/tutorial-rcm-select/}{Setup of selectivity settings and index catchability} (useful for more data-rich cases)
-\item \href{https://openmse.com/features-assessment-models/5-priors/}{Description of priors}
-}
 }
 
 \section{Data}{
@@ -219,7 +239,7 @@ selectivity and units (i.e., biomass or abundance).}
 There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., \code{RCM(OM, Data, C_eq = C_eq, ...)}.
 }
 
-\section{Data list}{
+\section{Data list (deprecated)}{
 
 Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:
 
@@ -264,6 +284,30 @@ assigns a proportion of the true age in the a-th row to observed age. Thus, all 
 Default is an identity matrix (no ageing error).}
 \item{\code{sel_block}}{Optional, for time-varying fleet selectivity (in time blocks), a integer matrix of \code{nyears} rows and \code{nfleet} columns
 to assigns a selectivity function to a fleet for certain years.}
+}
+}
+
+\section{StockPars}{
+
+When an operating model is provided, the RCM function will generally fit to each simulation of biological parameters.
+
+Alternatively for a single fit to data independent of any operating model, provide a named list containing the following
+(naming conventions follow internal operating model variables):
+\itemize{
+\item \code{SRrel} Integer, stock-recruit function (1 = Beverton-Holt, 2 = Ricker, 3 = Mesnil-Rochet hockey stick)
+\item \code{R0} Numeric, starting value for unfished recruitment parameter
+\item \code{M_ageArray} Matrix \verb{[maxage+1, nyears]} for natural mortality
+\item \code{Len_age} Matrix \verb{[maxage+1, nyears + 1]} for length at age
+\item \code{Linf} Numeric. Asymptotic length. Only used for the upper bound for the size of full selectivity (if selectivity functions are length-based)
+\item \code{LatASD} Matrix \verb{[maxage+1, nyears + 1]} for the standard deviation in length at age
+\item \code{Wt_age} Matrix \verb{[maxage+1, nyears + 1]} for stock weight at age
+\item \code{Mat_age} Matrix \verb{[maxage+1, nyears + 1]} for maturity at age
+\item \code{Fec_Age} Matrix \verb{[maxage+1, nyears + 1]} for fecundity at age. Frequently the product of maturity and weight at age
+\item \code{ageMarray} Numeric, age of 50 percent maturity. Used to average the initial years for the unfished replacement line of the
+stock recruit relationship and steepness/R0. Irrelevant if fecundity and natural mortality are not time-varying (set to 1).
+\item \code{spawn_time_frac} Numeric, fraction of the year when spawning occurs
+\item \code{hs} Numeric, steepness of the stock recruit relationship
+\item \code{procsd} Numeric, lognormal recruitment deviation standard deviation
 }
 }
 

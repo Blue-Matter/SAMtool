@@ -7,6 +7,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Adjust rec devs for partial bias correction when converting RCM to OM (introduced in 1.7.0)
 - Fix dimension of SLarray in `RCM2MOM` (introduced in 1.6.5)
 - Move RCM reporting from slot `@Misc` to new slot `@report`. `@Misc` is now available for users to record information from OM building depending on the case study.
+- RCM can fit to list of biological inputs `StockPars` instead of an operating model with `RCM(StockPars, RCMdata)`. See `StockPars` section in `help("RCM")`.
 
 ## SAMtool 1.7.0
 - Add argument to adjust annual recruitment deviation bias correction in `RCM` in argument `pbc_recdev`. The bias correction from logspace to normal space is `exp(log_rec_dev[y] - 0.5 * bc_recdev[y] * sigmaR^2)` if the year-specific rec dev is estimated.

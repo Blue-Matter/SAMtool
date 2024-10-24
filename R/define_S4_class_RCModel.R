@@ -168,45 +168,55 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
             if (is.null(render_args$quiet)) render_args$quiet <- quiet
 
             ####### Assign variables
-            OM <- MSEtool::SubCpars(x@OM, sims)
-            if (.hasSlot(x, "report")) {
-              report_list_all <- x@report
-            } else {
-              report_list_all <- x@Misc
-            }
-            if (length(report_list_all) > 1) report_list <- report_list_all[sims]
-            
-            # Update scenario
-            if (is.null(scenario$col)) {
-              
-              if (any(!x@conv)) {
-                scenario$names <- c("Converged", "Not converged")
-                scenario$col_legend <- c("black", "red")       # Colours by factor
-                scenario$col <- sapply(1:length(report_list_all), function(xx) {
-                  ifelse(xx %in% sims & x@conv[xx], "black", "red") # Vector of colours by simulation
-                })
-              } else {
-                scenario$col <- "red"
-                scenario$col_legend <- "black"
-              }
-              
-            } else {
-              scenario$col_legend <- scenario$col
-            }
-            
-            if (is.null(scenario$lwd)) scenario$lwd <- 1
-            if (is.null(scenario$lty)) scenario$lty <- 1
-            
-
-            nsim <- OM@nsim
             RCMdata <- x@data
             stopifnot(inherits(RCMdata, "RCMdata"))
-
-            max_age <- OM@maxage
+            
+            OM_exists <- length(x@OM@cpars) > 0
+            
+            if (OM_exists) {
+              OM <- MSEtool::SubCpars(x@OM, sims)
+              if (.hasSlot(x, "report")) {
+                report_list_all <- x@report
+              } else {
+                report_list_all <- x@Misc
+              }
+              if (length(report_list_all) > 1) report_list <- report_list_all[sims]
+              
+              # Update scenario
+              if (is.null(scenario$col)) {
+                
+                if (any(!x@conv)) {
+                  scenario$names <- c("Converged", "Not converged")
+                  scenario$col_legend <- c("black", "red")       # Colours by factor
+                  scenario$col <- sapply(1:length(report_list_all), function(xx) {
+                    ifelse(xx %in% sims & x@conv[xx], "black", "red") # Vector of colours by simulation
+                  })
+                } else {
+                  scenario$col <- "red"
+                  scenario$col_legend <- "black"
+                }
+                
+              } else {
+                scenario$col_legend <- scenario$col
+              }
+              
+              if (is.null(scenario$lwd)) scenario$lwd <- 1
+              if (is.null(scenario$lty)) scenario$lty <- 1
+              
+              nsim <- OM@nsim
+              max_age <- OM@maxage
+              nyears <- OM@nyears
+              proyears <- OM@proyears
+              if (is.null(Year)) Year <- (OM@CurrentYr - nyears + 1):OM@CurrentYr
+            } else {
+              OM <- x@OM
+              max_age <- RCMdata@Misc$maxage
+              nyears <- RCMdata@Misc$nyears
+              proyears <- 0
+              if (is.null(Year)) Year <- 1:nyears
+            }
+            
             if (is.null(Age)) Age <- 0:max_age
-            nyears <- OM@nyears
-            proyears <- OM@proyears
-            if (is.null(Year)) Year <- (OM@CurrentYr - nyears + 1):OM@CurrentYr
             Yearplusone <- c(Year, max(Year) + 1)
 
             nfleet <- RCMdata@Misc$nfleet
@@ -243,90 +253,95 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                         "```\n")
 
             ####### Updated OM
-            OM_update <- c("# Summary {.tabset}\n",
-                           "## Operating model {.tabset}\n",
-                           "### Updated parameters\n", 
-                           rmd_RCM_R0(), rmd_RCM_D(), rmd_RCM_Perr(), rmd_RCM_Find(), rmd_RCM_sel())
-            
-            vary_R0 <- !is.null(OM@cpars$R0) && length(unique(OM@cpars$R0)) > 1 
-            vary_D <- !is.null(OM@cpars$D) && length(unique(OM@cpars$R0)) > 1
-            vary_hs <- !is.null(OM@cpars$hs) && length(unique(OM@cpars$hs)) > 1
-            vary_Mest <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1 # Only plot there is a prior
-            
-            if (sum(vary_R0, vary_D, vary_hs, vary_Mest) > 1) {
-              vars <- c("R0", "D", "hs", "Mest")
-              var_labs <- c(R0 = "expression(R[0])", D = "\"Depletion\"", hs = "\"Steepness\"", Mest = "\"Natural mortality\"")
-              var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", Mest = "natural mortality")
+            if (OM_exists) {
+              OM_update <- c("# Summary {.tabset}\n",
+                             "## Operating model {.tabset}\n",
+                             "### Updated parameters\n", 
+                             rmd_RCM_R0(), rmd_RCM_D(), rmd_RCM_Perr(), rmd_RCM_Find(), rmd_RCM_sel())
               
-              if (vary_Mest) OM@cpars[["Mest"]] <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
+              vary_R0 <- !is.null(OM@cpars$R0) && length(unique(OM@cpars$R0)) > 1 
+              vary_D <- !is.null(OM@cpars$D) && length(unique(OM@cpars$R0)) > 1
+              vary_hs <- !is.null(OM@cpars$hs) && length(unique(OM@cpars$hs)) > 1
+              vary_Mest <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1 # Only plot there is a prior
               
-              corr_series <- lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])) %>%
-                bind_rows()
-              corr_rmd <- lapply(1:nrow(corr_series), function(i) {
-                x <- corr_series$x[i]
-                y <- corr_series$y[i]
-                if (eval(as.symbol(paste0("vary_", x))) && eval(as.symbol(paste0("vary_", y)))) { 
-                  rmd_corr(paste0("OM@cpars[[\"", x, "\"]]"), paste0("OM@cpars[[\"", y, "\"]]"), 
-                           var_labs[x], var_labs[y], 
-                           paste0("Correlation between ", var_names[x], " and ", var_names[y], " in operating model.")
-                  )
-                } else {
-                  ""
-                }
-              })
+              if (sum(vary_R0, vary_D, vary_hs, vary_Mest) > 1) {
+                vars <- c("R0", "D", "hs", "Mest")
+                var_labs <- c(R0 = "expression(R[0])", D = "\"Depletion\"", hs = "\"Steepness\"", Mest = "\"Natural mortality\"")
+                var_names <- c(R0 = "unfished recruitment", D = "depletion", hs = "steepness", Mest = "natural mortality")
+                
+                if (vary_Mest) OM@cpars[["Mest"]] <- vapply(report_list, getElement, numeric(1), "Mest") # For plotting only
+                
+                corr_series <- lapply(1:3, function(i) data.frame(x = vars[i], y = vars[(i+1):4])) %>%
+                  bind_rows()
+                corr_rmd <- lapply(1:nrow(corr_series), function(i) {
+                  x <- corr_series$x[i]
+                  y <- corr_series$y[i]
+                  if (eval(as.symbol(paste0("vary_", x))) && eval(as.symbol(paste0("vary_", y)))) { 
+                    rmd_corr(paste0("OM@cpars[[\"", x, "\"]]"), paste0("OM@cpars[[\"", y, "\"]]"), 
+                             var_labs[x], var_labs[y], 
+                             paste0("Correlation between ", var_names[x], " and ", var_names[y], " in operating model.")
+                    )
+                  } else {
+                    ""
+                  }
+                })
+                
+                OM_update <- c(OM_update, "### Parameter correlations\n", do.call(c, corr_rmd))
+              }
               
-              OM_update <- c(OM_update, "### Parameter correlations\n", do.call(c, corr_rmd))
-            }
-            
-            if (compare) {
-              message_info("Getting Hist object from runMSE...")
-              Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
-              compare_rmd <- rmd_RCM_Hist_compare()
+              if (compare) {
+                message_info("Getting Hist object from runMSE...")
+                Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
+                compare_rmd <- rmd_RCM_Hist_compare()
+              } else {
+                compare_rmd <- c("### RCM-OM comparison\n",
+                                 "Re-run `plot()` function with argument `compare = TRUE`.\n\n")
+              }
+              OM_update <- c(OM_update, compare_rmd)
+              
+              ####### Output from all simulations {.tabset}
+              sim_summary <- matrix(
+                c(x@OM@nsim, 
+                  sapply(report_list_all, getElement, 'conv') %>% mean() %>% round(2) %>% `*`(100), 
+                  length(sims))
+              ) %>%
+                structure(dimnames = list(c("Operating model simulations", "RCM converged (%)", "Simulations plotted"),
+                                          "Value")) %>%
+                as.data.frame()
+              
+              all_sims_header <- c("## RCM output {.tabset}\n\n",
+                                   "### Simulations\n", 
+                                   "`r sim_summary`",
+                                   "\n")
+              fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
+              
+              if (any(RCMdata@Index > 0, na.rm = TRUE)) {
+                index_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
+              } else index_output <- NULL
+              
+              all_sims_output <- c(all_sims_header, fleet_output, index_output, "### Model predictions\n",
+                                   rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), rmd_log_rec_dev(), 
+                                   rmd_RCM_SPR())
             } else {
-              compare_rmd <- c("### RCM-OM comparison\n",
-                               "Re-run `plot()` function with argument `compare = TRUE`.\n\n")
+              OM_update <- "# Summary {.tabset}\n"
+              all_sims_output <- NULL
             }
-            OM_update <- c(OM_update, compare_rmd)
-
-            ####### Output from all simulations {.tabset}
-            sim_summary <- matrix(
-              c(x@OM@nsim, 
-                sapply(report_list_all, getElement, 'conv') %>% mean() %>% round(2) %>% `*`(100), 
-                length(sims))
-            ) %>%
-              structure(dimnames = list(c("Operating model simulations", "RCM converged (%)", "Simulations plotted"),
-                                        "Value")) %>%
-              as.data.frame()
-            
-            all_sims_header <- c("## RCM output {.tabset}\n\n",
-                                 "### Simulations\n", 
-                                 "`r sim_summary`",
-                                 "\n")
-            fleet_output <- lapply(1:nfleet, rmd_RCM_fleet_output, f_name = f_name)
-
-            if (any(RCMdata@Index > 0, na.rm = TRUE)) {
-              index_output <- lapply(1:nsurvey, rmd_RCM_index_output, s_name = s_name)
-            } else index_output <- NULL
-
-            all_sims_output <- c(all_sims_header, fleet_output, index_output, "### Model predictions\n",
-                                 rmd_RCM_initD(), rmd_RCM_R_output(), rmd_RCM_SSB_output(), rmd_log_rec_dev(), 
-                                 rmd_RCM_SPR())
 
             ####### Fit to mean inputs from operating model
             # Generate summary table (parameter estimates)
-
             if (length(x@mean_fit)) {
+              fit_tab <- ifelse(OM_exists, "## Fit to mean parameters of the OM {.tabset}\n", "## Fit {.tabset}\n")
               report <- x@mean_fit$report
               conv <- report$conv
               data_mean_fit <- x@mean_fit$obj$env$data
               SD <- x@mean_fit$SD
 
               if (render_args$output_format == "html_document") {
-                sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
+                sumry <- c(fit_tab,
                            "### RCM Estimates\n",
                            "`r sdreport_int(SD) %>% signif(3) %>% as.data.frame()`\n\n")
               } else {
-                sumry <- c("## Fit to mean parameters of the OM {.tabset}\n",
+                sumry <- c(fit_tab,
                            "### RCM Estimates\n",
                            "`r sdreport_int(SD) %>% signif(3) %>% as.data.frame() %>% knitr::kable(format = \"markdown\")`\n\n")
               }
