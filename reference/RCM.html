@@ -129,6 +129,25 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
 <span>  map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'list,RCMdata'</span></span>
+<span><span class="fu">RCM</span><span class="op">(</span></span>
+<span>  <span class="va">OM</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"catch"</span>,</span>
+<span>  selectivity <span class="op">=</span> <span class="st">"logistic"</span>,</span>
+<span>  s_selectivity <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LWT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  comp_like <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinomial"</span>, <span class="st">"lognormal"</span>, <span class="st">"mvlogistic"</span>, <span class="st">"dirmult1"</span>, <span class="st">"dirmult2"</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  max_F <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iter.max <span class="op">=</span> <span class="fl">2e+05</span>, eval.max <span class="op">=</span> <span class="fl">4e+05</span><span class="op">)</span>,</span>
+<span>  start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -142,7 +161,8 @@ Either a full catch (conditioned on catch) or effort (conditioned on effort) tim
 
 <dt id="arg-om">OM<a class="anchor" aria-label="anchor" href="#arg-om"></a></dt>
 <dd><p>An object of class <a href="https://msetool.openmse.com/reference/OM-class.html" class="external-link">MSEtool::OM</a> that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
-steepness, maturity parameters (L50 and L50_95), standard deviation of recruitment variability (Perr), as well as index uncertainty (Iobs).</p></dd>
+steepness, maturity parameters (L50 and L50_95), and standard deviation of recruitment variability (Perr).
+Alternatively, provide a named list of biological inputs, see "StockPars" section below.</p></dd>
 
 
 <dt id="arg-condition">condition<a class="anchor" aria-label="anchor" href="#arg-condition"></a></dt>
@@ -249,6 +269,16 @@ Non-stationary productivity creates ambiguity in the calculation and interpretat
 index but the data won't enter the likelihood. See section on likelihood weights.</p>
     </div>
     <div class="section level2">
+    <h2 id="online-documentation">Online Documentation<a class="anchor" aria-label="anchor" href="#online-documentation"></a></h2>
+
+
+<p>Several articles are available for RCM:</p>
+<ul><li><p><a href="https://openmse.com/tutorial-rcm/" class="external-link">General overview of approach</a></p></li>
+<li><p><a href="https://openmse.com/tutorial-rcm-eq/" class="external-link">Mathematical description</a></p></li>
+<li><p><a href="https://openmse.com/tutorial-rcm-select/" class="external-link">Setup of selectivity settings and index catchability</a> (useful for more data-rich cases)</p></li>
+<li><p><a href="https://openmse.com/features-assessment-models/5-priors/" class="external-link">Description of priors</a></p></li>
+</ul></div>
+    <div class="section level2">
     <h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a></h2>
 
 
@@ -273,16 +303,6 @@ for the SD (in log space). Use <code>NA</code> in rows corresponding to indices 
 
 </dl><p>See online documentation for more details.</p>
     </div>
-    <div class="section level2">
-    <h2 id="online-documentation">Online Documentation<a class="anchor" aria-label="anchor" href="#online-documentation"></a></h2>
-
-
-<p>Several articles are available for RCM:</p>
-<ul><li><p><a href="https://openmse.com/tutorial-rcm/" class="external-link">General overview of approach</a></p></li>
-<li><p><a href="https://openmse.com/tutorial-rcm-eq/" class="external-link">Mathematical description</a></p></li>
-<li><p><a href="https://openmse.com/tutorial-rcm-select/" class="external-link">Setup of selectivity settings and index catchability</a> (useful for more data-rich cases)</p></li>
-<li><p><a href="https://openmse.com/features-assessment-models/5-priors/" class="external-link">Description of priors</a></p></li>
-</ul></div>
     <div class="section level2">
     <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
@@ -321,7 +341,7 @@ selectivity and units (i.e., biomass or abundance).</p></dd>
 </dl><p>There is no slot in the Data S4 object for the equilibrium catch/effort. These can be passed directly in the function call, i.e., <code>RCM(OM, Data, C_eq = C_eq, ...)</code>.</p>
     </div>
     <div class="section level2">
-    <h2 id="data-list">Data list<a class="anchor" aria-label="anchor" href="#data-list"></a></h2>
+    <h2 id="data-list-deprecated-">Data list (deprecated)<a class="anchor" aria-label="anchor" href="#data-list-deprecated-"></a></h2>
 
 
 <p>Use of a list is deprecated. For backwards compatibility, here is the list of supported entries:</p>
@@ -409,6 +429,27 @@ to assigns a selectivity function to a fleet for certain years.</p></dd>
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="stockpars">StockPars<a class="anchor" aria-label="anchor" href="#stockpars"></a></h2>
+
+
+<p>When an operating model is provided, the RCM function will generally fit to each simulation of biological parameters.</p>
+<p>Alternatively for a single fit to data independent of any operating model, provide a named list containing the following
+(naming conventions follow internal operating model variables):</p><ul><li><p><code>SRrel</code> Integer, stock-recruit function (1 = Beverton-Holt, 2 = Ricker, 3 = Mesnil-Rochet hockey stick)</p></li>
+<li><p><code>R0</code> Numeric, starting value for unfished recruitment parameter</p></li>
+<li><p><code>M_ageArray</code> Matrix <code>[maxage+1, nyears]</code> for natural mortality</p></li>
+<li><p><code>Len_age</code> Matrix <code>[maxage+1, nyears + 1]</code> for length at age</p></li>
+<li><p><code>Linf</code> Numeric. Asymptotic length. Only used for the upper bound for the size of full selectivity (if selectivity functions are length-based)</p></li>
+<li><p><code>LatASD</code> Matrix <code>[maxage+1, nyears + 1]</code> for the standard deviation in length at age</p></li>
+<li><p><code>Wt_age</code> Matrix <code>[maxage+1, nyears + 1]</code> for stock weight at age</p></li>
+<li><p><code>Mat_age</code> Matrix <code>[maxage+1, nyears + 1]</code> for maturity at age</p></li>
+<li><p><code>Fec_Age</code> Matrix <code>[maxage+1, nyears + 1]</code> for fecundity at age. Frequently the product of maturity and weight at age</p></li>
+<li><p><code>ageMarray</code> Numeric, age of 50 percent maturity. Used to average the initial years for the unfished replacement line of the
+stock recruit relationship and steepness/R0. Irrelevant if fecundity and natural mortality are not time-varying (set to 1).</p></li>
+<li><p><code>spawn_time_frac</code> Numeric, fraction of the year when spawning occurs</p></li>
+<li><p><code>hs</code> Numeric, steepness of the stock recruit relationship</p></li>
+<li><p><code>procsd</code> Numeric, lognormal recruitment deviation standard deviation</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="additional-arguments">Additional arguments<a class="anchor" aria-label="anchor" href="#additional-arguments"></a></h2>
 
@@ -576,9 +617,9 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpYGWIlf/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpxLwnw4/RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> See help(plot.RCModel) to adjust report and file directory.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpYGWIlf/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpxLwnw4/RCM.html</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span></span>
 <span class="r-in"><span><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span></span>
@@ -642,8 +683,8 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpYGWIlf/compare_RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpYGWIlf/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpxLwnw4/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpxLwnw4/compare_RCM.html</span>
 <span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>
