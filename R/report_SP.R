@@ -243,6 +243,9 @@ plot_yield_SP <- function(data = NULL, report, fmsy, msy, xaxis = c("F", "Biomas
 
   Biomass <- BKratio * K
   F.vector <- Yield/Biomass
+  
+  if (missing(fmsy)) fmsy <- F.vector[which.max(Yield)[1]]
+  if (missing(msy)) msy <- max(Yield)
 
   if (relative_yaxis) {
     Yield <- Yield/max(Yield)

@@ -355,6 +355,9 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   
   BMSY <- report$EMSY
   B0 <- report$E0
+  
+  if (missing(fmsy)) fmsy <- F.vector[which.max(Yield)[1]]
+  if (missing(msy)) msy <- max(Yield)
 
   if (xaxis == "F") {
     plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing Mortality",
@@ -402,6 +405,9 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   
   BMSY <- report$EMSY
   B0 <- report$E0
+  
+  if (missing(umsy)) umsy <- u.vector[which.max(Yield)[1]]
+  if (missing(msy)) msy <- max(Yield)
   
   if (xaxis == "U") {
     plot(u.vector[ind], Yield[ind], typ = 'l', xlab = "Exploitation rate (U)",

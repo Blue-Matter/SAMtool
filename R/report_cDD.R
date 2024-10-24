@@ -305,6 +305,9 @@ plot_yield_cDD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   Yield <- vapply(yield, getElement, numeric(1), "Yield")
   R <- vapply(yield, getElement, numeric(1), "R")
   ind <- R >= 0
+  
+  if (missing(fmsy)) fmsy <- F.vector[which.max(Yield)[1]]
+  if (missing(msy)) msy <- max(Yield)
 
   if (xaxis == "F") {
     plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing Mortality", ylab = "Equilibrium yield")
