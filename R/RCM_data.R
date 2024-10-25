@@ -694,7 +694,11 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
     if (!is.null(StockPars)) {
       RCMdata@Misc$lbin <- StockPars$CAL_bins
       RCMdata@Misc$lbinmid <- StockPars$CAL_binsmid
+    } else {
+      RCMdata@Misc$lbin <- c(0, 1)
+      RCMdata@Misc$lbinmid <- c(0, 0.5)
     }
+    
     RCMdata@Misc$nlbin <- length(RCMdata@Misc$lbinmid)
     RCMdata@CAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, RCMdata@Misc$nfleet))
     RCMdata@IAL <- array(0, c(RCMdata@Misc$nyears, RCMdata@Misc$nlbin, ncol(RCMdata@Index)))
