@@ -73,6 +73,7 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
   nyears <- RCMdata@Misc$nyears
   nfleet <- RCMdata@Misc$nfleet
   nsurvey <- RCMdata@Misc$nsurvey
+  if (is.null(RCMdata@Misc$CurrentYr)) RCMdata@Misc$CurrentYr <- nyears
   
   StockPars <- check_StockPars(StockPars, maxage = maxage, nyears = nyears)
   
