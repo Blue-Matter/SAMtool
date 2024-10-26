@@ -756,11 +756,23 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
   # Index timing
   if (.hasSlot(RCMdata, "I_delta")) {
     if (RCMdata@Misc$nsurvey > 0) {
-      if (!length(RCMdata@I_delta)) RCMdata@I_delta <- rep(0, RCMdata@Misc$nsurvey)
-      if (length(RCMdata@I_delta) != RCMdata@Misc$nsurvey) stop("I_delta should be length ", RCMdata@Misc$nsurvey, call. = FALSE)
+      
+      if (!is.matrix(RCMdata@I_delta)) {
+        if (!length(RCMdata@I_delta)) RCMdata@I_delta <- rep(0, RCMdata@Misc$nsurvey)
+        if (length(RCMdata@I_delta) != RCMdata@Misc$nsurvey) stop("I_delta should be length ", RCMdata@Misc$nsurvey, call. = FALSE)
+        RCMdata@I_delta <- matrix(RCMdata@I_delta, RCMdata@Misc$nyears, RCMdata@Misc$nsurvey, byrow = TRUE)
+      }
+      RCMdata@I_delta <- matrix(RCMdata@I_delta, RCMdata@Misc$nyears, RCMdata@Misc$nsurvey, byrow = TRUE)
+      if (nrow(RCMdata@I_delta) != RCMdata@Misc$nyears) {
+        stop(paste("I_delta should be a matrix of", RCMdata@Misc$nyears, "rows."), call. = FALSE)
+      }
+      if (ncol(RCMdata@I_delta) != RCMdata@Misc$nsurvey) {
+        stop(paste("I_delta should be a matrix of", RCMdata@Misc$nsurvey, "columns."), call. = FALSE)
+      }
+      
       if (any(RCMdata@I_delta > 1)) stop("I_delta should be between 0-1 (or -1 for a continuous survey)", call. = FALSE)
     } else {
-      RCMdata@I_delta <- 0
+      RCMdata@I_delta <- matrix(0, RCMdata@Misc$nyears, 1)
     }
   }
 

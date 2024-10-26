@@ -61,7 +61,7 @@ Type RCM(objective_function<Type> *obj) {
   DATA_IVECTOR(ivul_type); // Same but for surveys, but can also mirror to B (-4), SSB (-3), or fleet (>0)
   DATA_IVECTOR(abs_I);    // Boolean, whether index is an absolute (fix q = 1) or relative terms (estimate q)
   DATA_IVECTOR(I_units);  // Boolean, whether index is biomass based (= 1) or abundance-based (0)
-  DATA_VECTOR(I_delta);   // Numeric, timing of survey within year (0-1, -1 for mean abundance with (1 - exp(-Z))/Z
+  DATA_MATRIX(I_delta);   // Numeric, timing of survey within year (0-1, -1 for mean abundance with (1 - exp(-Z))/Z
 
   DATA_MATRIX(age_error); // Ageing error matrix
 
@@ -447,10 +447,10 @@ Type RCM(objective_function<Type> *obj) {
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
       for(int a=0;a<n_age;a++) {
-        if (I_delta(sur) < 0) {
+        if (I_delta(y,sur) < 0) {
           IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a) * (1 - exp(-Z(y,a)))/Z(y,a);
         } else {
-          IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a) * exp(-I_delta(sur) * Z(y,a));
+          IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a) * exp(-I_delta(y,sur) * Z(y,a));
         }
         
         IN(y,sur) += IAAtrue(y,a,sur);

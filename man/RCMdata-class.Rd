@@ -88,7 +88,7 @@ otherwise use 0 (default) to estimate q.}
 \item{\code{I_units}}{An integer vector of length \code{nsurvey} to indicate whether indices are biomass based (1) or abundance-based (0). By default, all are biomass-based.}
 
 \item{\code{I_delta}}{A vector of length \code{nsurvey} to indicate the timing of the indices within each time step (0-1, for example 0.5 is the midpoint of the year). By default, zero is used.
-Use -1 if the survey operates continuously, the availability would be \code{N * (1 - exp(-Z))/Z}.}
+Can also be a matrix by \verb{nyears, nsurvey}. Use -1 if the survey operates continuously, the availability would be \code{N * (1 - exp(-Z))/Z}.}
 
 \item{\code{age_error}}{A square matrix of \code{maxage + 1} rows and columns to specify ageing error. The \code{aa}-th column assigns a proportion of animals of
 true age \code{aa} to observed age \code{a} in the \code{a}-th row. Thus, all rows should sum to 1. Default is an identity matrix (no ageing error).}
