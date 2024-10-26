@@ -1,7 +1,7 @@
 Package: SAMtool
 Type: Package
 Title: Stock Assessment Methods Toolkit
-Version: 1.8.0
+Version: 1.8.9998
 Authors@R: c(person("Quang", "Huynh", email = "quang@bluematterscience.com", role = c("aut", "cre")), 
   person("Tom", "Carruthers", email = "tom@bluematterscience.com", role = "aut"),
   person("Adrian", "Hordyk", email = "adrian@bluematterscience.com", role = "aut"))

@@ -616,6 +616,12 @@ Type RCM(objective_function<Type> *obj) {
       }
     }
   }
+  
+  // Penalty for the fishing mortality in the first two years of the model for southern sardine 
+  Type mean_log_F = 0;
+  for(int y=0;y<n_y;y++) mean_log_F += log(F(y,0))/n_y;
+  penalty += 1000 * (pow(log(F(0,0)) - mean_log_F, 2) + pow(log(F(1,0)) - mean_log_F, 2));
+  
   Type nll = nll_fleet.sum() + nll_index.sum();
   nll += nll_log_rec_dev + penalty + prior;
 

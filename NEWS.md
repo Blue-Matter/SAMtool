@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.8.9998
+- Bespoke modification for Southern Sardine MSE: RCM model has a penalty in the objective function such that the F in the first two years is equal to the time series mean.
+
 ## SAMtool 1.8.0
 - Update error check for free selectivity parameters in RCM.
 - Clean up RCM reporting of data fits (introduced in 1.6.5)
