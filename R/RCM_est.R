@@ -179,8 +179,9 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
                    sim_process_error = 0L,
                    spawn_time_frac = ifelse(is.null(StockPars$spawn_time_frac), 0, StockPars$spawn_time_frac[x]),
                    est_q = ifelse(is.na(map$log_q), 0L, 1L),
-                   pbc_recdev = if (is.null(dots$pbc_recdev)) rep(1, nyears) else dots$pbc_recdev)
-                   
+                   pbc_recdev = if (is.null(dots$pbc_recdev)) rep(1, nyears) else dots$pbc_recdev,
+                   pbc_early_recdev = if (is.null(dots$pbc_early_recdev)) rep(1, nyears) else dots$pbc_early_recdev)
+  
   TMB_data$est_vul <- ifelse(is.na(map$vul_par) | duplicated(map$vul_par), 0, 1) %>%
     matrix(length(map$vul_par)/RCMdata@Misc$nsel_block, RCMdata@Misc$nsel_block)
   TMB_data$est_ivul <- ifelse(is.na(map$ivul_par) | duplicated(map$ivul_par), 0, 1) %>%

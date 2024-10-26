@@ -482,7 +482,7 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
     NPR_unfished <- calc_NPR(exp(-M), length(M), obj_data$plusgroup)
     #NPR_unfished <- x$NPR_unfished[1, ]
     res <- x$R_eq * x$NPR_equilibrium / x$R0 / NPR_unfished
-    bias_corr <- ifelse(obj_data$est_early_rec_dev, exp(-0.5 * x$tau^2), 1)
+    bias_corr <- ifelse(obj_data$est_early_rec_dev, exp(-0.5 * obj_data$pbc_earlyrecdev * x$tau^2), 1)
     early_dev <- exp(x$log_early_rec_dev) * bias_corr
     out <- res[-1] * early_dev
     return(rev(out))

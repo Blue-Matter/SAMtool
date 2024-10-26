@@ -93,6 +93,7 @@ Type RCM(objective_function<Type> *obj) {
   DATA_SCALAR(spawn_time_frac);    // Fraction of year when spawning occurs for calculating spawning biomass
   DATA_IVECTOR(est_q);             // Whether to estimate index q (TRUE), otherwise solved analytically (FALSE)
   DATA_VECTOR(pbc_recdev);          // Proportion of bias correction to apply to log_rec_dev
+  DATA_VECTOR(pbc_early_recdev);    // Proportion of bias correction to apply to log_early_rec_dev
   
   PARAMETER(R0x);                       // Unfished recruitment
   PARAMETER(transformed_h);             // Steepness
@@ -299,10 +300,10 @@ Type RCM(objective_function<Type> *obj) {
     } else {
       R_early(a-1) = R_eq;
       if(est_early_rec_dev(a-1)) {
-        Rec_dev_early(a-1) = exp(log_early_rec_dev(a-1) - 0.5 * tau * tau);
+        Rec_dev_early(a-1) = exp(log_early_rec_dev(a-1) - 0.5 * pbc_early_recdev(a-1) * tau * tau);
         SIMULATE if(sim_process_error) {
           log_early_rec_dev_sim(a-1) = rnorm(log_early_rec_dev(a-1), tau);
-          Rec_dev_early(a-1) = exp(log_early_rec_dev_sim(a-1) - 0.5 * tau * tau);
+          Rec_dev_early(a-1) = exp(log_early_rec_dev_sim(a-1) - 0.5 * pbc_early_recdev(a-1) * tau * tau);
         }
         R_early(a-1) *= Rec_dev_early(a-1);
       }
@@ -613,6 +614,11 @@ Type RCM(objective_function<Type> *obj) {
       }
     }
   }
+  
+  // Penalty for the fishing mortality in the first two years of the model for southern sardine 
+  Type mean_log_F = 0;
+  for(int y=0;y<n_y;y++) mean_log_F += log(F(y,0))/n_y;
+  penalty += 1000 * (pow(log(F(0,0)) - mean_log_F, 2) + pow(log(F(1,0)) - mean_log_F, 2));
 
   Type nll = nll_fleet.sum() + nll_index.sum();
   nll += nll_log_rec_dev + penalty + prior;
