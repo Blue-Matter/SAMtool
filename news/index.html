@@ -40,10 +40,11 @@
 <li>Fix dimension of SLarray in <code>RCM2MOM</code> (introduced in 1.6.5)</li>
 <li>Move RCM reporting from slot <code>@Misc</code> to new slot <code>@report</code>. <code>@Misc</code> is now available for users to record information from OM building depending on the case study.</li>
 <li>RCM can fit to list of biological inputs <code>StockPars</code> instead of an operating model with <code>RCM(StockPars, RCMdata)</code>. See <code>StockPars</code> section in <code><a href="../reference/RCM.html">help("RCM")</a></code>.</li>
+<li>Add partial bias correction to the initial abundance at age vector in <code>RCM</code> with argument <code>pbc_early_recdev</code>. The bias correction from logspace to normal space is <code>exp(log_early_rec_dev[a] - 0.5 * pbc_recdev[a] * sigmaR^2)</code> if the year-specific rec dev is estimated.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.7.0" id="samtool-170">SAMtool 1.7.0<a class="anchor" aria-label="anchor" href="#samtool-170"></a></h2><p class="text-muted">CRAN release: 2024-08-29</p>
-<ul><li>Add argument to adjust annual recruitment deviation bias correction in <code>RCM</code> in argument <code>pbc_recdev</code>. The bias correction from logspace to normal space is <code>exp(log_rec_dev[y] - 0.5 * bc_recdev[y] * sigmaR^2)</code> if the year-specific rec dev is estimated.</li>
+<ul><li>Add argument to adjust annual recruitment deviation bias correction in <code>RCM</code> in argument <code>pbc_recdev</code>. The bias correction from logspace to normal space is <code>exp(log_rec_dev[y] - 0.5 * pbc_recdev[y] * sigmaR^2)</code> if the year-specific rec dev is estimated.</li>
 <li>Add <code>RCMdata@I_delta</code> slot to specify survey timing (0-1) within year. Default assumption is zero is used which is consistent with previous versions.</li>
 </ul></div>
     <div class="section level2">
