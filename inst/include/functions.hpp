@@ -300,11 +300,11 @@ Type MesnilRochet_SR(Type x, Type gamma, Type Rmax, Type Shinge, int Sp = 1) {
 
 // This is the Newton solver for the fleet-specific F in year y given the observed catches.
 // Let vector x = log(F_y,f)
-// Then g(x) = Cpred - Cobs = sum_a v_y,a,f F_y,f / Z_y,a * (1 - exp(-Z_y,a)) * N_y,a * wt_y,a - Cobs
+// Then g(x) = Cpred - Cobs = sum_a v_y,a,f F_y,f / Z_y,a * (1 - exp(-Z_y,a)) * N_y,a * wt_y,a,f - Cobs
 // g'(x) = sum_a v * N * w * deriv where deriv is defined in the code below
 // We iteratively solve for x where x_next = x_previous - g(x)/g'(x)
 template<class Type>
-vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matrix<Type> wt, matrix<Type> VB_out, array<Type> vul,
+vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, array<Type> C_wt, matrix<Type> VB_out, array<Type> vul,
                       Type max_F, int y, int max_age, int nfleet, int n_itF, Type &penalty) {
 
   vector<Type> F_out(nfleet);
@@ -326,7 +326,7 @@ vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, matri
       F_loop(ff) = exp(x_loop(ff));
       VB.col(ff) = N.row(y);
       for(int a=0;a<max_age;a++) {
-        VB(a,ff) *= vul(y,a,ff) * wt(y,a);
+        VB(a,ff) *= vul(y,a,ff) * C_wt(y,a,ff);
         Z(a) += vul(y,a,ff) * F_loop(ff);
       }
     }

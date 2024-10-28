@@ -132,55 +132,70 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
   if (is.null(dots$n_itF)) n_itF <- 3L else n_itF <- dots$n_itF
   if (is.null(dots$plusgroup)) plusgroup <- 1L else plusgroup <- as.integer(dots$plusgroup)
   
-  TMB_data <- list(model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, 
-                   sigma_C = RCMdata@C_sd, sigma_Ceq = RCMdata@C_eq_sd, 
-                   E_hist = E_hist, E_eq = E_eq,
-                   condition = sapply(RCMdata@Misc$condition, switch, "catch" = 0, "catch2" = 1, "effort" = 2) %>% as.integer(), 
-                   nll_C = as.integer(any(RCMdata@Misc$condition != "catch2")),
-                   I_hist = RCMdata@Index, sigma_I = RCMdata@I_sd, 
-                   CAA_hist = RCMdata@CAA, CAA_n = RCMdata@CAA_ESS,
-                   CAL_hist = RCMdata@CAL, CAL_n = RCMdata@CAL_ESS,
-                   IAA_hist = RCMdata@IAA, IAA_n = RCMdata@IAA_ESS,
-                   IAL_hist = RCMdata@IAL, IAL_n = RCMdata@IAL_ESS,
-                   lbin = RCMdata@Misc$lbin, lbinmid = RCMdata@Misc$lbinmid, 
-                   msize = RCMdata@MS, msize_type = RCMdata@MS_type,
-                   sel_block = rbind(RCMdata@sel_block, RCMdata@sel_block[nyears, ]), 
-                   nsel_block = RCMdata@Misc$nsel_block,
-                   n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
-                   M_data = if (prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
-                   len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
-                   Linf = StockPars$Linf[x],
-                   SD_LAA = t(StockPars$LatASD[x, , 1:(nyears+1)]), 
-                   wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
-                   mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]),
-                   #mat = if (any(s_selectivity == -3L)) t(StockPars$Mat_age[x, , 1:(nyears+1)]) else matrix(1, 1, 1),
-                   fec = if (is.null(StockPars$Fec_Age)) {
-                     t(StockPars$Wt_age[x, , 1:(nyears+1)] * StockPars$Mat_age[x, , 1:(nyears+1)])
-                   } else {
-                     t(StockPars$Fec_Age[x, , 1:(nyears+1)])
-                   },
-                   vul_type = selectivity,
-                   ivul_type = s_selectivity, 
-                   abs_I = RCMdata@abs_I, 
-                   I_units = as.integer(RCMdata@I_units), 
-                   I_delta = if (.hasSlot(RCMdata, "I_delta")) RCMdata@I_delta else matrix(0, nyears, nsurvey), 
-                   age_error = RCMdata@age_error,
-                   SR_type = SR_type, 
-                   LWT_fleet = LWT_fleet, LWT_index = LWT_index, 
-                   comp_like = comp_like,
-                   max_F = max_F, 
-                   rescale = dots$rescale, 
-                   ageM = min(nyears, ceiling(StockPars$ageMarray[x, 1])),
-                   yind_F = as.integer(rep(0.5 * nyears, nfleet)), 
-                   n_itF = n_itF, plusgroup = plusgroup,
-                   use_prior = prior$use_prior, 
-                   prior_dist = prior$pr_matrix, 
-                   nll_gr = 0L,
-                   sim_process_error = 0L,
-                   spawn_time_frac = ifelse(is.null(StockPars$spawn_time_frac), 0, StockPars$spawn_time_frac[x]),
-                   est_q = ifelse(is.na(map$log_q), 0L, 1L),
-                   pbc_recdev = if (is.null(dots$pbc_recdev)) rep(1, nyears) else dots$pbc_recdev,
-                   pbc_early_recdev = if (is.null(dots$pbc_early_recdev)) rep(1, nyears) else dots$pbc_early_recdev)
+  if (.hasSlot(RCMdata, "C_wt") && length(RCMdata@C_wt)) {
+    C_wt <- RCMdata@C_wt
+  } else {
+    C_wt <- sapply(1:nfleet, function(...) t(StockPars$Wt_age[x, , 1:(nyears+1)]), simplify = "array")
+  }
+  
+  if (.hasSlot(RCMdata, "I_wt") && length(RCMdata@I_wt)) {
+    I_wt <- RCMdata@I_wt
+  } else {
+    I_wt <- sapply(1:nsurvey, function(...) t(StockPars$Wt_age[x, , 1:(nyears+1)]), simplify = "array")
+  }
+  
+  TMB_data <- list(
+    model = "RCM", C_hist = C_hist, C_eq = RCMdata@C_eq, C_wt = C_wt,
+    sigma_C = RCMdata@C_sd, sigma_Ceq = RCMdata@C_eq_sd, 
+    E_hist = E_hist, E_eq = E_eq,
+    condition = sapply(RCMdata@Misc$condition, switch, "catch" = 0, "catch2" = 1, "effort" = 2) %>% as.integer(), 
+    nll_C = as.integer(any(RCMdata@Misc$condition != "catch2")),
+    I_hist = RCMdata@Index, I_wt = I_wt,
+    sigma_I = RCMdata@I_sd, 
+    CAA_hist = RCMdata@CAA, CAA_n = RCMdata@CAA_ESS,
+    CAL_hist = RCMdata@CAL, CAL_n = RCMdata@CAL_ESS,
+    IAA_hist = RCMdata@IAA, IAA_n = RCMdata@IAA_ESS,
+    IAL_hist = RCMdata@IAL, IAL_n = RCMdata@IAL_ESS,
+    lbin = RCMdata@Misc$lbin, lbinmid = RCMdata@Misc$lbinmid, 
+    msize = RCMdata@MS, msize_type = RCMdata@MS_type,
+    sel_block = rbind(RCMdata@sel_block, RCMdata@sel_block[nyears, ]), 
+    nsel_block = RCMdata@Misc$nsel_block,
+    n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
+    M_data = if (prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
+    len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
+    Linf = StockPars$Linf[x],
+    SD_LAA = t(StockPars$LatASD[x, , 1:(nyears+1)]), 
+    wt = t(StockPars$Wt_age[x, , 1:(nyears+1)]),
+    mat = t(StockPars$Mat_age[x, , 1:(nyears+1)]),
+    #mat = if (any(s_selectivity == -3L)) t(StockPars$Mat_age[x, , 1:(nyears+1)]) else matrix(1, 1, 1),
+    fec = if (is.null(StockPars$Fec_Age)) {
+      t(StockPars$Wt_age[x, , 1:(nyears+1)] * StockPars$Mat_age[x, , 1:(nyears+1)])
+    } else {
+      t(StockPars$Fec_Age[x, , 1:(nyears+1)])
+    },
+    vul_type = selectivity,
+    ivul_type = s_selectivity, 
+    abs_I = RCMdata@abs_I, 
+    I_units = as.integer(RCMdata@I_units), 
+    I_delta = if (.hasSlot(RCMdata, "I_delta")) RCMdata@I_delta else matrix(0, nyears, nsurvey), 
+    age_error = RCMdata@age_error,
+    SR_type = SR_type, 
+    LWT_fleet = LWT_fleet, LWT_index = LWT_index, 
+    comp_like = comp_like,
+    max_F = max_F, 
+    rescale = dots$rescale, 
+    ageM = min(nyears, ceiling(StockPars$ageMarray[x, 1])),
+    yind_F = as.integer(rep(0.5 * nyears, nfleet)), 
+    n_itF = n_itF, plusgroup = plusgroup,
+    use_prior = prior$use_prior, 
+    prior_dist = prior$pr_matrix, 
+    nll_gr = 0L,
+    sim_process_error = 0L,
+    spawn_time_frac = ifelse(is.null(StockPars$spawn_time_frac), 0, StockPars$spawn_time_frac[x]),
+    est_q = ifelse(is.na(map$log_q), 0L, 1L),
+    pbc_recdev = if (is.null(dots$pbc_recdev)) rep(1, nyears) else dots$pbc_recdev,
+    pbc_early_recdev = if (is.null(dots$pbc_early_recdev)) rep(1, nyears) else dots$pbc_early_recdev
+  )
   
   TMB_data$est_vul <- ifelse(is.na(map$vul_par) | duplicated(map$vul_par), 0, 1) %>%
     matrix(length(map$vul_par)/RCMdata@Misc$nsel_block, RCMdata@Misc$nsel_block)

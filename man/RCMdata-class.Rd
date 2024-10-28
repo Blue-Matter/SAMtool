@@ -21,6 +21,8 @@ If not provided, the default is 0.01. Not used if \code{RCM(condition = "catch2"
 \item{\code{Ehist}}{A vector of historical effort, should be of length \code{OM@nyears}, or if there are multiple fleets:
 a matrix of \code{OM@nyears} rows and \code{nfleet} columns. See also slot \code{E_eq}).}
 
+\item{\code{C_wt}}{Optional weight at age for the catch \code{Chist}. Array with dimension \verb{[OM@nyears+1, OM@maxage+1, nfleet]}.}
+
 \item{\code{CAA}}{Fishery age composition matrix with \code{nyears} rows and \code{OM@maxage+1} columns, or if multiple fleets:
 an array with dimension: \verb{nyears, OM@maxage+1, nfleet}. Enter \code{NA} for years without any data.
 Raw numbers will be converted to annual proportions (see slot \code{CAA_ESS} for sample sizes).}
@@ -56,6 +58,8 @@ a matrix of \code{OM@nyears} rows and \code{nsurvey} columns.}
 
 \item{\code{I_sd}}{A vector or matrix of standard deviations (lognormal distribution) for the indices corresponding to the entries in \code{Index}.
 Same dimension as \code{Index}. If not provided, this function will use values from \code{OM@Iobs}.}
+
+\item{\code{I_wt}}{Optional weight at age for the index \code{Index}. Array with dimension \verb{[OM@nyears, OM@maxage+1, nsurvey]}.}
 
 \item{\code{IAA}}{Index age composition data, an array of dimension \verb{nyears, maxage+1, nsurvey}.
 Raw numbers will be converted to annual proportions (see \code{IAA_ESS} for sample sizes).}
