@@ -323,7 +323,6 @@ this is overridden by the \code{map} argument.}
 a single model fit. By default FALSE. This feature requires identical biological parameters among simulations.}
 \item{\code{pbc_recdev}}{Vector of length nyears. Proportion of the bias correction to apply annually to the recruitment deviations (if estimated).
 The bias correction from logspace to normal space is \code{exp(log_rec_dev[y] - 0.5 * pbc_recdev[y] * sigmaR^2)}. Default proportion is 1.}
-}
 \item{\code{pbc_earlyrecdev}}{Vector of length maxage. Proportion of the bias correction to apply to the abundance deviations in the first year of the model (if estimated).
 The bias correction from logspace to normal space is \code{exp(log_early_rec_dev[a] - 0.5 * pbc_recdev[a] * sigmaR^2)}. Default proportion is 1.}
 }
