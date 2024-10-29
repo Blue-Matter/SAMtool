@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.8.9998
+- Bespoke modification for Southern Hake MSE: RCM model has selectivity parameters parameterized in log-space. Priors are hard coded in to the TMB function.
+
 ## SAMtool 1.8.0
 - Update error check for free selectivity parameters in RCM.
 - Clean up RCM reporting of data fits (introduced in 1.6.5)
