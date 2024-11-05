@@ -621,9 +621,9 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Historical indices added to OM@cpars$Data@AddInd.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Complete.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">out</span>, s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpbOmuFx/RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpM5OvwM/RCM.Rmd</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> See help(plot.RCModel) to adjust report and file directory.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpbOmuFx/RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpM5OvwM/RCM.html</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alternative OM with age-3 maturity and selectivity instead.</span></span></span>
 <span class="r-in"><span><span class="va">out_age3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span></span>
@@ -687,8 +687,8 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span><span class="fu"><a href="plot.RCModel.html">compare_RCM</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out_age3</span>, scenario <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Age-2 maturity"</span>, <span class="st">"Age-3 maturity"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>            s_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pcod</span><span class="op">$</span><span class="va">data</span><span class="op">@</span><span class="va">Index</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpbOmuFx/compare_RCM.Rmd</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpbOmuFx/compare_RCM.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Rendering markdown file: /tmp/RtmpM5OvwM/compare_RCM.Rmd</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rendered file: /tmp/RtmpM5OvwM/compare_RCM.html</span>
 <span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="va">Hist</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">out</span><span class="op">@</span><span class="va">OM</span>, Hist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>            </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>
@@ -731,7 +731,26 @@ Fish. Res. 192:84-93. <a href="https://doi.org/10.1016/j.fishres.2016.06.005" cl
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating historical stock and fishing dynamics</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating per-recruit reference points</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating B-low reference points</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (SSBstore[nyears] &gt; (0.8 * SSBMSYc)) pen &lt;- (SSBstore[nyears] -     (0.8 * SSBMSYc))^2:</span> missing value where TRUE/FALSE needed</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating reference yield - best fixed F strategy</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Simulating observed data</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating Simulated Data with Real Data from `OM@cpars$Data`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Using `OM@cpars$Data@LenCV` (0.1)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Updating Simulated Catch from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating Catch bias from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating Catch variability from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating catch observation error from `OM@cpars$Data@Cat`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Adding Additional Indices to Simulated Data from `OM@cpars$Data@AddInd`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> cpars$AddIbeta detected. Not updating beta for additional indices</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Updating observation variability (AddIerr) for additional indices from real data</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index 1 - spawning stock (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index 2 - spawning stock (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index 3 - spawning stock (biomass)</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>An error occurred in calculating statistical properties of fit to Additional Index 3 (possibly because there was only one observed data point). </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Using the index observation error for slot `Ind` from `Obs` object (or possibly conditioned if `cpars$Data@Ind` was provided).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use `cpars$AddIerr` to manually set the observation error.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index 4 - spawning stock (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Additional index 5 - spawning stock (biomass)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Returning historical simulations</span>
 <span class="r-in"><span><span class="co"># } </span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
