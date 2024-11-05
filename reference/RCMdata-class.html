@@ -57,6 +57,10 @@ If not provided, the default is 0.01. Not used if <code>RCM(condition = "catch2"
 a matrix of <code>OM@nyears</code> rows and <code>nfleet</code> columns. See also slot <code>E_eq</code>).</p></dd>
 
 
+<dt><code>C_wt</code></dt>
+<dd><p>Optional weight at age for the catch <code>Chist</code>. Array with dimension <code>[OM@nyears+1, OM@maxage+1, nfleet]</code>.</p></dd>
+
+
 <dt><code>CAA</code></dt>
 <dd><p>Fishery age composition matrix with <code>nyears</code> rows and <code>OM@maxage+1</code> columns, or if multiple fleets:
 an array with dimension: <code>nyears, OM@maxage+1, nfleet</code>. Enter <code>NA</code> for years without any data.
@@ -112,6 +116,10 @@ a matrix of <code>OM@nyears</code> rows and <code>nsurvey</code> columns.</p></d
 Same dimension as <code>Index</code>. If not provided, this function will use values from <code>OM@Iobs</code>.</p></dd>
 
 
+<dt><code>I_wt</code></dt>
+<dd><p>Optional weight at age for the index <code>Index</code>. Array with dimension <code>[OM@nyears, OM@maxage+1, nsurvey]</code>.</p></dd>
+
+
 <dt><code>IAA</code></dt>
 <dd><p>Index age composition data, an array of dimension <code>nyears, maxage+1, nsurvey</code>.
 Raw numbers will be converted to annual proportions (see <code>IAA_ESS</code> for sample sizes).</p></dd>
@@ -161,7 +169,7 @@ otherwise use 0 (default) to estimate q.</p></dd>
 
 <dt><code>I_delta</code></dt>
 <dd><p>A vector of length <code>nsurvey</code> to indicate the timing of the indices within each time step (0-1, for example 0.5 is the midpoint of the year). By default, zero is used.
-Use -1 if the survey operates continuously, the availability would be <code>N * (1 - exp(-Z))/Z</code>.</p></dd>
+Can also be a matrix by <code>nyears, nsurvey</code>. Use -1 if the survey operates continuously, the availability would be <code>N * (1 - exp(-Z))/Z</code>.</p></dd>
 
 
 <dt><code>age_error</code></dt>
