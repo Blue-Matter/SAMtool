@@ -115,7 +115,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
     t(Hist$StockPars$M_ageArray[x, , 1:n_y]), 
     plusgroup = unique(Hist$StockPars$plusgroup)
   )
-  Fapical <- F_age %>% apply(1, max)
+  Fapical <- apply(F_age, 1, max)
   R <- N[1, ]
   
   if (!missing(VAR_model) && year_p > 1) {
@@ -214,7 +214,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   if (exists("R_out", inherits = FALSE)) {
     Assessment@R <- structure(R_out, names = Year_plusone)
   } else {
-    Assessment@R <- structure(Assessment@N_at_age[, 1], names = Year_plusone)
+    #Assessment@R <- structure(Assessment@N_at_age[, 1], names = Year_plusone)
   }
   
   if (missing(VAR_model)) {
@@ -258,7 +258,7 @@ Shortcut <- function(x = 1, Data, method = c("B", "N", "RF"), B_err = c(0.3, 0.7
   }
   
   F_SPR <- Data@Misc$ReferencePoints$ByYear$F_SPR[x, , n_y + 1] %>% rev()
-  SPR <- F_SPR %>% names() %>% substr(3,4) %>% as.numeric()
+  SPR <- names(F_SPR) %>% substr(3,4) %>% as.numeric()
   SPR <- SPR/100
   if (all(F_SPR != 0)) {
     F_SPR <- c(0, F_SPR) 
