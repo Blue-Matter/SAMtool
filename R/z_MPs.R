@@ -84,6 +84,11 @@ make_MP <- function(.Assess, .HCR, diagnostic = c("min", "full", "none"), ...) {
 
   Assess_call <- as.call(c(.Assess, x = quote(x), Data = quote(Data), dots_in_Assess))
   HCR_call <- as.call(c(.HCR, Assessment = quote(do_Assessment), reps = quote(reps), dots_in_HCR))
+  
+  # For example: SAMtool::Shortcut gets converted to: c("::", "SAMtool", "Shortcut")
+  if ("::" %in% Assess_char) {
+    Assess_char <- Assess_char[length(Assess_char)]
+  }
 
   MP_body <- bquote({
     dependencies <- .(get_dependencies(Assess_char, dots))
