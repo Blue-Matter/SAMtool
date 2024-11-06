@@ -29,6 +29,19 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   nfleet <- RCMdata@Misc$nfleet
   nsurvey <- RCMdata@Misc$nsurvey
   
+  if (!silent) {
+    message("Passing user arguments (LWT, map, start, prior, etc.) to RCMdata@Misc..")
+  }
+  RCMdata@Misc$LWT <- make_LWT(LWT, nfleet, nsurvey)
+  RCMdata@Misc$map <- map
+  RCMdata@Misc$start <- start
+  RCMdata@Misc$prior <- prior
+  RCMdata@Misc$selectivity <- selectivity
+  RCMdata@Misc$s_selectivity <- s_selectivity
+  RCMdata@Misc$comp_like <- comp_like
+  RCMdata@Misc$max_F <- max_F
+  if (length(dots)) RCMdata@Misc <- c(RCMdata@Misc, dots)
+  
   OM@maxF <- max_F
   if (!silent) message("Maximum F in RCM will be ", max_F, ". OM@maxF is also updated.\n\n")
   
@@ -55,9 +68,6 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     s_sel <- int_s_sel(NULL, silent = silent)
   }
   
-  # Likelihood weights
-  RCMdata@Misc$LWT <- make_LWT(LWT, nfleet, nsurvey)
-  
   # SR
   if (!silent) {
     message(switch(OM@SRrel,
@@ -67,7 +77,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   }
   
   # Generate priors
-  prior <- make_prior(prior, nsurvey, OM@SRrel, dots, msg = !silent)
+  prior_rcm <- make_prior(prior, nsurvey, OM@SRrel, dots, msg = !silent)
   
   # Test for identical sims
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, RCMdata, dots)
@@ -78,7 +88,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     if (!silent) message_info("All ", nsim, " replicates are identical. Fitting one model...")
     
     mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                               LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
+                               LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior_rcm, 
                                max_F = max_F, integrate = integrate, StockPars = StockPars,
                                FleetPars = FleetPars, mean_fit = TRUE, control = control,
                                start = start, map = map, dots = dots)
@@ -113,7 +123,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
     
     mod <- pblapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                    LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
+                    LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior_rcm, 
                     max_F = max_F, integrate = integrate, StockPars = StockPars,
                     FleetPars = FleetPars, control = control, start = start, map = map, dots = dots,
                     cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
@@ -121,7 +131,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     if (mean_fit) { ### Fit to life history means if mean_fit = TRUE
       if (!silent) message_info("Generating additional model fit from mean values of parameters in the operating model...\n")
       mean_fit_output <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                                 LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
+                                 LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior_rcm, 
                                  max_F = max_F, integrate = integrate, StockPars = StockPars,
                                  FleetPars = FleetPars, mean_fit = TRUE, control = control, 
                                  start = start, map = map, dots = dots)
@@ -184,10 +194,9 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   
   ### Get parameters to update OM
   obj_data <- mod[[1]]$obj$env$data
-  newOM <- RCM_update_OM(OM, res, StockPars, obj_data, maxage, nyears, proyears, nsim, prior, silent)
+  newOM <- RCM_update_OM(OM, res, StockPars, obj_data, maxage, nyears, proyears, nsim, prior_rcm, silent)
   
   ### Output S4 object
-  RCMdata@Misc$prior <- prior
   output <- new("RCModel", 
                 OM = MSEtool::SubCpars(newOM$OM, keep), 
                 SSB = newOM$RCM_val$SSB[keep, , drop = FALSE], 

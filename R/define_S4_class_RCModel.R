@@ -262,7 +262,13 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               vary_R0 <- !is.null(OM@cpars$R0) && length(unique(OM@cpars$R0)) > 1 
               vary_D <- !is.null(OM@cpars$D) && length(unique(OM@cpars$R0)) > 1
               vary_hs <- !is.null(OM@cpars$hs) && length(unique(OM@cpars$hs)) > 1
-              vary_Mest <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1 # Only plot there is a prior
+              
+              # Only plot there is a prior on M
+              if (!is.null(RCMdata@Misc$prior$use_prior)) {
+                vary_Mest <- RCMdata@Misc$prior$use_prior[3] && length(report_list) > 1
+              } else {
+                vary_Mest <- !is.null(RCMdata@Misc$prior$M) && length(report_list) > 1
+              }
               
               if (sum(vary_R0, vary_D, vary_hs, vary_Mest) > 1) {
                 vars <- c("R0", "D", "hs", "Mest")

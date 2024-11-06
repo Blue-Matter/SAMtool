@@ -73,7 +73,24 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
   nyears <- RCMdata@Misc$nyears
   nfleet <- RCMdata@Misc$nfleet
   nsurvey <- RCMdata@Misc$nsurvey
-  if (is.null(RCMdata@Misc$CurrentYr)) RCMdata@Misc$CurrentYr <- nyears
+  if (is.null(RCMdata@Misc$CurrentYr)) {
+    if (!silent) message("Specify the last historical year in RCMdata@Misc$CurrentYr.")
+    RCMdata@Misc$CurrentYr <- nyears
+  }
+  
+  if (!silent) {
+    message("Passing user arguments (LWT, map, start, prior, etc.) to RCMdata@Misc..")
+  }
+  RCMdata@Misc$LWT <- make_LWT(LWT, nfleet, nsurvey)
+  RCMdata@Misc$map <- map
+  RCMdata@Misc$start <- start
+  RCMdata@Misc$prior <- prior
+  RCMdata@Misc$StockPars <- StockPars
+  RCMdata@Misc$selectivity <- selectivity
+  RCMdata@Misc$s_selectivity <- s_selectivity
+  RCMdata@Misc$comp_like <- comp_like
+  RCMdata@Misc$max_F <- max_F
+  if (length(dots)) RCMdata@Misc <- c(RCMdata@Misc, dots)
   
   StockPars <- check_StockPars(StockPars, maxage = maxage, nyears = nyears)
   
@@ -116,8 +133,6 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
     s_sel <- int_s_sel(NULL, silent = silent)
   }
   
-  # Likelihood weights
-  RCMdata@Misc$LWT <- make_LWT(LWT, nfleet, nsurvey)
   
   # SR
   if (!silent) {
@@ -128,11 +143,11 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
   }
   
   # Generate priors
-  prior <- make_prior(prior, nsurvey, StockPars$SRrel[1], dots, msg = !silent)
+  prior_rcm <- make_prior(prior, nsurvey, StockPars$SRrel[1], dots, msg = !silent)
   
   # Fit
   fit <- RCM_est(RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                 LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior, 
+                 LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior_rcm, 
                  max_F = max_F, integrate = integrate, StockPars = StockPars,
                  FleetPars = FleetPars, mean_fit = FALSE, control = control,
                  start = start, map = map, dots = dots)
@@ -145,7 +160,6 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
   if (NaF) warning("Model had F with NA's")
   
   ### Output S4 object
-  RCMdata@Misc$prior <- prior
   output <- new("RCModel", 
                 OM = new("OM"), 
                 SSB = matrix(fit$report$E, 1, nyears+1), 
