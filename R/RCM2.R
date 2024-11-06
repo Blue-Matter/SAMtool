@@ -57,7 +57,7 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
   if (length(RCMdata@CAA)) {
     if (is.matrix(RCMdata@CAA)) {
       maxage <- ncol(RCMdata@CAA) - 1
-    } else if (is.array(RCM)) {
+    } else if (is.array(RCMdata@CAA)) {
       maxage <- dim(RCMdata@CAA)[2] - 1 
     }
     RCMdata@Misc$maxage <- maxage
