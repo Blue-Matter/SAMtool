@@ -193,20 +193,18 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", f_name[ff], ".\"}"),
            paste0("if (any(RCMdata@CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
-           paste0("if (nsim == 1) CAA_plot <- array(x@CAA[, , , ", ff, "], c(1, nyears, max_age + 1)) else CAA_plot <- x@CAA[, , , ", ff, "]"),
-           paste0("plot_composition_RCM(Year, CAA_plot, RCMdata@CAA[, , ", ff, "], N = round(RCMdata@CAA_ESS[, ", ff, "], 1), ages = Age, dat_col = scenario$col)"),
+           paste0("  plot_composition_RCM(Year, x@CAA[, , , ", ff, "], RCMdata@CAA[, , ", ff, "], N = round(RCMdata@CAA_ESS[, ", ff, "], 1), ages = Age, dat_col = scenario$col)"),
            "}",
            "```\n",
            paste0("```{r, fig.cap = \"Predicted age composition from ", f_name[ff], ".\"}"),
            paste0("if (any(RCMdata@CAA[, , ", ff, "] > 0, na.rm = TRUE)) {"),
-           paste0("plot_composition_RCM(Year, CAA_plot, ages = Age, dat_col = scenario$col)"),
+           paste0("  plot_composition_RCM(Year, x@CAA[, , , ", ff, "], ages = Age, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) length composition from ", f_name[ff], ".\"}"),
            paste0("if (any(RCMdata@CAL[, , ", ff, "] > 0, na.rm = TRUE)) {"),
-           paste0("if (nsim == 1) CAL_plot <- array(x@CAL[, , , ", ff, "], c(1, nyears, RCMdata@Misc$nlbin)) else CAL_plot <- x@CAL[, , , ", ff, "]"),
-           paste0("plot_composition_RCM(Year, fit = CAL_plot, dat = RCMdata@CAL[, , ", ff, "], N = round(RCMdata@CAL_ESS[, ", ff, "], 1), CAL_bins = length_bin, dat_col = scenario$col)"),
+           paste0("  plot_composition_RCM(Year, fit = CAL_plot <- x@CAL[, , , ", ff, "], dat = RCMdata@CAL[, , ", ff, "], N = round(RCMdata@CAL_ESS[, ", ff, "], 1), CAL_bins = length_bin, dat_col = scenario$col)"),
            "}",
            "```\n")
   
@@ -283,15 +281,15 @@ rmd_RCM_index_output <- function(sur, s_name) {
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) age composition from ", s_name[sur], ".\"}"),
            paste0("if (length(RCMdata@IAA) && any(RCMdata@IAA[, , ", sur, "] > 0, na.rm = TRUE)) {"),
-           paste0("pred_IAA <- sapply(report_list, function(x) x$IAA[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_RCM(Year, pred_IAA, RCMdata@IAA[, , ", sur, "], N = round(RCMdata@IAA_ESS[, ", sur, "], 1), ages = Age, dat_col = scenario$col)"),
+           paste0("  pred_IAA <- sapply(report_list, function(x) x$IAA[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
+           paste0("  plot_composition_RCM(Year, pred_IAA, RCMdata@IAA[, , ", sur, "], N = round(RCMdata@IAA_ESS[, ", sur, "], 1), ages = Age, dat_col = scenario$col)"),
            "}",
            "```\n",
            "",
            paste0("```{r, fig.cap = \"Observed (black) and predicted (red) length composition from ", s_name[sur], ".\"}"),
            paste0("if (length(RCMdata@IAL) && any(RCMdata@IAL[, , ", sur, "] > 0, na.rm = TRUE)) {"),
-           paste0("pred_IAL <- sapply(report_list, function(x) x$IAL[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
-           paste0("plot_composition_RCM(Year, pred_IAL, RCMdata@IAL[, , ", sur, "], N = round(RCMdata@IAL_ESS[, ", sur, "], 1), CAL_bins = length_bin, dat_col = scenario$col)"),
+           paste0("  pred_IAL <- sapply(report_list, function(x) x$IAL[, , ", sur, "], simplify = \"array\") %>% aperm(perm = c(3, 1, 2))"),
+           paste0("  plot_composition_RCM(Year, pred_IAL, RCMdata@IAL[, , ", sur, "], N = round(RCMdata@IAL_ESS[, ", sur, "], 1), CAL_bins = length_bin, dat_col = scenario$col)"),
            "}",
            "```\n"
   )
@@ -600,6 +598,8 @@ plot_composition_RCM <- function(Year, fit, dat = NULL, CAL_bins = NULL, ages = 
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
   par(mfcol = c(4, 4), mar = rep(0, 4), oma = c(5.1, 5.1, 2.1, 2.1))
+  
+  if (is.matrix(fit)) fit <- array(fit, c(1, dim(fit)))
   
   annual_yscale <- match.arg(annual_yscale)
   if (is.null(CAL_bins)) data_type <- "age" else data_type <- "length"

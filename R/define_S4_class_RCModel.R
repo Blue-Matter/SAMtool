@@ -600,10 +600,15 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   if (!test) stop("Objects provided are not of class RCModel.", call. = FALSE)
   
   # Update scenario
-  if (is.null(scenario$names)) scenario$names <- as.character(substitute(list(...)))[-1]
+  if (is.null(scenario$names)) {
+    sc_names <- as.character(substitute(list(...)))[-1]
+    sc_nchar <- sapply(sc_names, nchar) %>% as.numeric()
+    if (all(sc_nchar > 100)) sc_names <- paste("Model", 1:length(dots))
+    scenario$names <- sc_names
+  }
   if (is.null(scenario$col)) scenario$col <- gplots::rich.colors(length(dots))
   scenario$col_legend <- scenario$col
-
+  
   if (is.null(scenario$lwd)) scenario$lwd <- 1
   if (is.null(scenario$lty)) scenario$lty <- 1
 
@@ -630,12 +635,22 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
 
   nsim <- length(report_list)
   RCMdata <- dots[[1]]@data
-
-  max_age <- dots[[1]]@OM@maxage
-  if (is.null(Age)) Age <- 0:max_age
-  nyears <- dots[[1]]@OM@nyears
-  if (is.null(Year)) Year <- (dots[[1]]@OM@CurrentYr - nyears + 1):dots[[1]]@OM@CurrentYr
+  
+  if (is.null(Age)) {
+    max_age <- dots[[1]]@OM@maxage
+    if (!length(max_age)) stop("OM@maxage not found. Specify age classes in 'Age' argument.")
+    Age <- 0:max_age
+  }
+  if (is.null(Year)) {
+    nyears <- dots[[1]]@OM@nyears
+    CurrentYr <- dots[[1]]@OM@CurrentYr 
+    if (!length(nyears) || !length(CurrentYr)) {
+      stop("OM@nyears and OM@CurrentYr not found. Specify year vector in 'Year' argument.")
+    }
+    Year <- seq(CurrentYr - nyears + 1, CurrentYr)
+  }
   Yearplusone <- c(Year, max(Year) + 1)
+  nyears <- length(Year)
 
   nfleet <- vapply(dots, function(xx) xx@data@Misc$nfleet, numeric(1)) %>% unique()
   nsurvey <- vapply(dots, function(xx) xx@data@Misc$nsurvey, numeric(1)) %>% unique()

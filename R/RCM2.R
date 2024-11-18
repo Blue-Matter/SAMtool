@@ -169,6 +169,10 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
                 conv = conv, 
                 data = RCMdata)
   
+  if (!is.null(fit$report$CALpred)) {
+    output@CAL <- array(fit$report$CALpred, c(1, dim(fit$report$CALpred)))
+  }
+  
   if (any(RCMdata@Misc$condition == "catch2")) {
     catch_check_fn <- function(x, report, RCMdata) {
       if (report[[x]]$conv) {
