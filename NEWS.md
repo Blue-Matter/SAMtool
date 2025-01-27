@@ -1,7 +1,7 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
 ## SAMtool 1.8.1
-- Update `compare_RCM`
+- Update markdown reporting and `compare_RCM` when fitting to StockPars list.
 
 ## SAMtool 1.8.0
 - Update error check for free selectivity parameters in RCM.

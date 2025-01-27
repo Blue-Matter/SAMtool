@@ -491,11 +491,37 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               # Model output
               sel_matplot <- rmd_matplot(x = "Age", y = "matrix(report$vul[nyears, , ], max_age + 1, nfleet)", col = "rich.colors(nfleet)",
                                          xlab = "Age", ylab = "Selectivity", legend.lab = "f_name",
-                                         fig.cap = "Terminal year selectivity by fleet.", header = "### Output \n")
+                                         fig.cap = "Terminal year selectivity by fleet.", header = "### Output {.tabset}\n\n#### Fishery\n")
+              
+              # Plot all selectivity patterns
+              if (max(RCMdata@sel_block) > nfleet) {
+                sel_plot_fleet <- lapply(1:nfleet, rmd_RCM_sel_singlefit, f_name = f_name)
+                sel_plot_fleet <- do.call(c, sel_plot_fleet)
+              } else {
+                sel_plot_fleet <- NULL
+              }
 
               F_matplot <- rmd_matplot(x = "Year", y = "report$F", col = "rich.colors(nfleet)",
                                        xlab = "Year", ylab = "Fishing Mortality (F)", legend.lab = "f_name",
                                        fig.cap = "Time series of fishing mortality by fleet.")
+              
+              # Survey selectivity
+              if (any(RCMdata@Index > 0, na.rm = TRUE)) {
+                
+                sel_plot_survey <- c(
+                  "#### Survey\n",
+                  rmd_matplot(
+                    x = "Age", 
+                    y = "matrix(report$ivul[nyears, , ], max_age + 1, nsurvey)", 
+                    col = "rich.colors(nsurvey)",
+                    xlab = "Age", ylab = "Index selectivity", legend.lab = "s_name",
+                    fig.cap = "Index selectivity at age."
+                  )
+                )
+                
+              } else {
+                sel_plot_survey <- NULL
+              }
 
               if (length(unique(report$E0)) > 1) {
                 SSB0_eq_plot <- rmd_assess_timeseries("structure(report$E0, names = Year)", 
@@ -519,7 +545,9 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
                                          fig.cap = "Predicted catch-at-length (summed over all fleets).", bubble_adj = as.character(bubble_adj))
               } else CAL_bubble <- NULL
 
-              ts_output <- c(sel_matplot, F_matplot, rmd_SSB("structure(report$E, names = Yearplusone)"), 
+              ts_output <- c(sel_matplot, sel_plot_fleet, F_matplot, sel_plot_survey,
+                             "#### Abundance\n",
+                             rmd_SSB("structure(report$E, names = Yearplusone)"), 
                              SSB0_eq_plot, SSB_SSB0_plot, 
                              rmd_dynamic_SSB0("structure(report$dynamic_SSB0, names = Yearplusone)"), 
                              rmd_R("structure(report$R, names = Yearplusone)"), 

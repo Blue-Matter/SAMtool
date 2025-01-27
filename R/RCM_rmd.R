@@ -12,7 +12,7 @@ rmd_matplot <- function(x, y, col, xlab, ylab, legend.lab, type = "l", lty = 1, 
            paste0("yy <- ", y),
            paste0("matplot(", x, ", ", y, ", type = \"", type, "\", lty = ", lty, ", col = ", col,
                   ", ylim = c(0, 1.1 * max(yy, na.rm = TRUE)), xlab = \"", xlab, "\", ylab = \"", ylab, "\", zero_line = TRUE)"),
-           paste0("if (ncol(yy) > 1) legend(\"topleft\", ", legend.lab, ", text.col = ", col, ")"),
+           paste0("if (ncol(yy) > 1) legend(\"topleft\", ", legend.lab, ", text.col = ", col, ", bty = \"n\")"),
            "```\n")
   if (!is.null(header)) ans <- c(header, ans)
   return(ans)
@@ -64,7 +64,7 @@ rmd_RCM_Perr <- function(fig.cap = "Historical recruitment deviations among simu
     "matlines(Year, t(Perr), type = \"l\", col = \"black\")",
     "lines(max(Year) + 1:proyears, apply(Perr_future, 2, mean), col = \"red\")",
     "lines(max(Year) + 1:proyears, apply(Perr_future, 2, median), lty = 2)",
-    "legend(\"topleft\", c(\"Mean\", \"Median\"), col = c(\"red\", \"black\"), lty = c(1, 2))",
+    "legend(\"topleft\", c(\"Mean\", \"Median\"), col = c(\"red\", \"black\"), lty = c(1, 2), bty = \"n\")",
     "```\n",
     "```{r, fig.cap = \"Histogram of recruitment autocorrelation.\"}",
     "if (!is.null(OM@cpars$AC)) hist(OM@cpars$AC, main = \"\", xlab = \"Recruitment Autocorrelation\")",
@@ -85,6 +85,40 @@ rmd_RCM_sel <- function(fig.cap = "Operating model selectivity in the last histo
     "```\n")
 }
 
+rmd_RCM_sel_singlefit <- function(ff, f_name) {
+  ans <- c(paste0("```{r, fig.cap = \"Length selectivity of ", f_name[ff], ".\"}"),
+           paste0("bl <- unique(RCMdata@sel_block[, ", ff, "])"),
+           "vul_bb <- list()",
+           "bl_col <- gplots::rich.colors(length(bl))",
+           "Year_legend <- character(length(bl))",
+           "for(bb in 1:length(bl)) {",
+           "  vul_bb[[bb]] <- sapply(list(report), function(x) if (!is.null(x$vul_len)) x$vul_len[, bl[bb]] else NA)",
+           paste0("  Year_legend[bb] <- Year[RCMdata@sel_block[, ", ff, "] == bl[bb]] %>% range() %>% paste(collapse = \"-\")"),
+           "}",
+           "test <- vapply(vul_bb, function(x) all(!is.na(x)) && sum(x), logical(1))",
+           "if (any(test)) {",
+           paste0("  matplot(RCMdata@Misc$lbinmid, RCMdata@Misc$lbinmid, type = \"n\", xlab = \"Length\", ylim = c(0, 1), ylab = \"Selectivity of ", f_name[ff], "\", zero_line = TRUE)"),
+           "  for(bb in 1:length(bl)) {",
+           "    if (test[bb]) matlines(RCMdata@Misc$lbinmid, vul_bb[[bb]], type = \"l\", col = bl_col[bb])",
+           "  }",
+           "  legend(\"topright\", Year_legend, col = bl_col, lwd = 1, bty = \"n\")",
+           "}",
+           "```\n",
+           "",
+           paste0("```{r, fig.cap = \"Age-based selectivity of ", f_name[ff], ".\"}"),
+           paste0("matplot(Age, Age, type = \"n\", xlab = \"Age\", ylim = c(0, 1), ylab = \"Selectivity of ", f_name[ff], "\", zero_line = TRUE)"),
+           "",
+           "for(bb in 1:length(bl)) {",
+           paste0("  vul_bb_age <- do.call(rbind, lapply(list(report), function(x) x$vul[RCMdata@sel_block[, ", ff, "] == bl[bb], , ", ff, "])) %>% t()"),
+           "  matlines(Age, vul_bb_age, type = \"l\", col = bl_col[bb])",
+           "}",
+           "legend(\"topleft\", Year_legend, col = bl_col, lwd = 1, bty = \"n\")",
+           "```\n",
+           "")
+  
+  return(ans)
+}
+
 rmd_RCM_fleet_output <- function(ff, f_name) {
   ans <- c(paste("### ", f_name[ff], "\n"),
            paste0("```{r, fig.cap = \"Length selectivity of ", f_name[ff], ".\"}"),
@@ -103,10 +137,10 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "    for(bb in 1:length(bl)) {",
            "      if (test[bb]) matlines(RCMdata@Misc$lbinmid, vul_bb[[bb]], type = \"l\", col = bl_col[bb], lty = scenario$lty, lwd = scenario$lwd)",
            "    }",
-           "    legend(\"topright\", Year_legend, col = bl_col, lwd = 1)",
+           "    legend(\"topright\", Year_legend, col = bl_col, lwd = 1, bty = \"n\")",
            "  } else {",
            "    matlines(RCMdata@Misc$lbinmid, vul_bb[[1]], type = \"l\", col = scenario$col, lty = scenario$lty, lwd = scenario$lwd)",
-           "    if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col_legend, lty = scenario$lty, lwd = scenario$lwd)",
+           "    if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col_legend, lty = scenario$lty, lwd = scenario$lwd, bty = \"n\")",
            "  }",
            "}",
            "```\n",
@@ -123,9 +157,9 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            "  }",
            "}",
            "if (length(bl) > 1) {",
-           "  legend(\"topleft\", Year_legend, col = bl_col, lwd = 1)",
+           "  legend(\"topleft\", Year_legend, col = bl_col, lwd = 1, bty = \"n\")",
            "} else if (!is.null(scenario$names)) {",
-           "  legend(\"topleft\", scenario$names, col = scenario$col_legend, lty = scenario$lty, lwd = scenario$lwd)",
+           "  legend(\"topleft\", scenario$names, col = scenario$col_legend, lty = scenario$lty, lwd = scenario$lwd, bty = \"n\")",
            "}",
            "```\n",
            "",
@@ -360,7 +394,7 @@ rmd_RCM_SPR2 <- function() {
   c("```{r, fig.cap = \"Annual spawning potential ratio (SPR). Equilibrium SPR is calculated from the F-at-age in the corresponding year, while dynamic SPR is calculated from the cumulative survival of cohorts.\"}",
     "plot(Year, report$SPR_eq, typ = \"o\", lty = 3, ylim = c(0, 1), xlab = \"Year\", ylab = \"Spawning potential ratio\", zero_line = TRUE)",
     "lines(Year, report$SPR_dyn, typ = \"o\", pch = 16)",
-    "legend(\"bottomleft\", c(\"Equilibrium SPR\", \"Dynamic SPR\"), lty = c(3, 1), pch = c(1, 16))",
+    "legend(\"bottomleft\", c(\"Equilibrium SPR\", \"Dynamic SPR\"), lty = c(3, 1), pch = c(1, 16), bty = \"n\")",
     "```\n")
 }
 
