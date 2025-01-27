@@ -83,6 +83,17 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, RCMdata, dots)
   
   # Fit model
+  if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
+  if (!silent) {
+    .lapply <- pbapply::pblapply
+    # Argument to pass parallel cluster (if running)
+    formals(.lapply)$cl <- substitute(if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+  } else if (snowfall::sfIsRunning()) {
+    .lapply <- snowfall::sfLapply
+  } else {
+    .lapply <- base::lapply
+  }
+  
   if (all(par_identical_sims)) { # All identical sims detected
       
     if (!silent) message_info("All ", nsim, " replicates are identical. Fitting one model...")
@@ -96,13 +107,12 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     if (mean_fit_output$report$conv) {
       
       if (!is.null(dots$resample) && dots$resample) { # Re-sample covariance matrix
-        message_info("Sampling covariance matrix for nsim = ", nsim, " replicates...")
+        if (!silent) message_info("Sampling covariance matrix for nsim = ", nsim, " replicates...")
 
         samps <- mvtnorm::rmvnorm(nsim, mean_fit_output$opt$par, mean_fit_output$SD$cov.fixed)
         
-        if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-        res <- pblapply(1:nsim, RCM_report_samps, samps = samps, obj = mean_fit_output$obj, conv = mean_fit_output$report$conv,
-                        cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+        res <- .lapply(1:nsim, RCM_report_samps, samps = samps, 
+                       obj = mean_fit_output$obj, conv = mean_fit_output$report$conv)
       } else {
         if (!silent) message("Model converged and will be replicated for all simulations.")
         res <- list(mean_fit_output$report) 
@@ -118,15 +128,12 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     conv <- rep(mean_fit_output$report$conv, nsim)
     
   } else {
+    if (!silent) message_info("Fitting model (", nsim, " simulations) ...")
     
-    message_info("Fitting model (", nsim, " simulations) ...")
-    if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
-    
-    mod <- pblapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
-                    LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior_rcm, 
-                    max_F = max_F, integrate = integrate, StockPars = StockPars,
-                    FleetPars = FleetPars, control = control, start = start, map = map, dots = dots,
-                    cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+    mod <- .lapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
+                   LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior_rcm, 
+                   max_F = max_F, integrate = integrate, StockPars = StockPars,
+                   FleetPars = FleetPars, control = control, start = start, map = map, dots = dots)
     
     if (mean_fit) { ### Fit to life history means if mean_fit = TRUE
       if (!silent) message_info("Generating additional model fit from mean values of parameters in the operating model...\n")
@@ -148,14 +155,14 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
         message_info("Sampling covariance matrix once for each replicate...")
         if (any(!conv)) message_info("(will not sample non-converged simulations)")
       }
-      res <- pblapply(1:nsim, function(x) {
+      res <- .lapply(1:nsim, function(x) {
         if (conv[x]) {
           samps <- mvtnorm::rmvnorm(1, mod[[x]]$opt$par, mod[[x]]$SD$cov.fixed, checkSymmetry = FALSE)
           RCM_report_samps(1, samps = samps, obj = mod[[x]]$obj, conv = conv[x])
         } else {
           mod[[x]][["report"]]
-        } 
-      }, cl = NULL)
+        }
+      })
       
     } else {
       res <- lapply(mod, getElement, "report")
