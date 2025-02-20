@@ -136,10 +136,17 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
     for(int y=0;y<n_y;y++) {
       int vul_ind = sel_block(y,ff) - 1;
       if(vul_type(vul_ind) == 0 || vul_type(vul_ind) == -1) { // Convert length sel to age sel
+        vector<Type> vul_age(n_age); // Ensure max(vul) = 1
+        vul_age.setZero();
         for(int a=0;a<n_age;a++) {
-          for(int j=0;j<nlbin;j++) vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,vul_ind);
+          for(int j=0;j<nlbin;j++) vul_age(a) += PLA(y)(a,j) * vul_len(j,vul_ind);
         }
+        
+        Type max_vul = max(vul_age);
+        for(int a=0;a<n_age;a++) vul(y,a,ff) = vul_age(a)/max_vul;
       } else if(vul_type(vul_ind) == -5 || vul_type(vul_ind) == -6) {  // Dome or logistic, age
+        vector<Type> vul_age(n_age); // Ensure max(vul) = 1
+        
         for(int a=0;a<n_age;a++) { // Calculate age-based sel
           Type aa = Type(a);
           Type lo = pow(2, -((aa - LFS(vul_ind))/sls(vul_ind) * (aa - LFS(vul_ind))/sls(vul_ind)));
@@ -149,8 +156,11 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
           } else {
             hi = pow(2, -((aa - LFS(vul_ind))/srs(vul_ind) * (aa - LFS(vul_ind))/srs(vul_ind)));
           }
-          vul(y,a,ff) = CppAD::CondExpLt(aa, LFS(vul_ind), lo, hi);
+          vul_age(a) = CppAD::CondExpLt(aa, LFS(vul_ind), lo, hi);
         }
+        
+        Type max_vul = max(vul_age);
+        for(int a=0;a<n_age;a++) vul(y,a,ff) = vul_age(a)/max_vul;
       } else { //if(vul_type(vul_ind) == -2) { // Free parameters
         for(int a=0;a<n_age;a++) vul(y,a,ff) = invlogit(vul_par(a, vul_ind));
       } //else { // Age-specific index - superseded by free parameters long ago
@@ -236,14 +246,19 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
             hi = pow(2, -((lbinmid(j) - LFS(ff))/srs(ff) * (lbinmid(j) - LFS(ff))/srs(ff)));
           }
           vul_len(j,ff) = CppAD::CondExpLt(lbinmid(j), LFS(ff), lo, hi);
-          
-          for(int y=0;y<n_y;y++) {
-            for(int a=0;a<n_age;a++) {
-              vul(y,a,ff) += PLA(y)(a,j) * vul_len(j,ff);
-            }
+        }
+        for(int y=0;y<n_y;y++) { // Ensure max(vul) = 1
+          vector<Type> vul_age(n_age);
+          vul_age.setZero();
+          for(int a=0;a<n_age;a++) {
+            for(int j=0;j<nlbin;j++) vul_age(a) += PLA(y)(a,j) * vul_len(j,ff);
           }
+          Type max_vul = max(vul_age);
+          for(int a=0;a<n_age;a++) vul(y,a,ff) = vul_age(a)/max_vul;
         }
       } else { // Calculate age-based sel
+        vector<Type> vul_age(n_age);
+        
         for(int a=0;a<n_age;a++) {
           Type aa = Type(a);
           Type lo = pow(2, -((aa - LFS(ff))/sls(ff) * (aa - LFS(ff))/sls(ff)));
@@ -253,8 +268,12 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
           } else {
             hi = pow(2, -((aa - LFS(ff))/srs(ff) * (aa - LFS(ff))/srs(ff)));
           }
-          Type vul_a = CppAD::CondExpLt(aa, LFS(ff), lo, hi);
-          for(int y=0;y<n_y;y++) vul(y,a,ff) = vul_a;
+          vul_age(a) = CppAD::CondExpLt(aa, LFS(ff), lo, hi);
+        }
+        Type max_vul = max(vul_age);
+        
+        for(int y=0;y<n_y;y++) {
+          for(int a=0;a<n_age;a++) vul(y,a,ff) = vul_age(a)/max_vul;
         }
       }
     }
