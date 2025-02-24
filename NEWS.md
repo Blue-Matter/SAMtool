@@ -3,6 +3,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 ## SAMtool 1.8.1
 - Update markdown reporting and `compare_RCM` when fitting to StockPars list.
 - `RCM` rescales selectivity to maximum of 1 when converting from length to age units
+- `diagnostic` uses `match()` instead of `grep()` to find the correct MP. `grep` can return more than one match.
 
 ## SAMtool 1.8.0
 - Update error check for free selectivity parameters in RCM.

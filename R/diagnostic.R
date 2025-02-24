@@ -128,7 +128,7 @@ diagnostic <- function(MSE, MP, gradient_threshold = 0.1, figure = TRUE) {
   message(paste0("Creating plots for MP:\n", paste(MPs, collapse = "\n")))
   res_mat <- matrix(NA, ncol = length(MPs), nrow = 5)
   for(i in 1:length(MPs)) {
-    objects <- MSE@PPD[[grep(MPs[i], MSE@MPs)]]
+    objects <- MSE@PPD[[match(MPs[i], MSE@MPs)]]
     diagnostic <- lapply(objects@Misc[1:MSE@nsim], getElement, "diagnostic")
 
     if (!is.null(diagnostic)) {
