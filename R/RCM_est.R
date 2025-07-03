@@ -537,9 +537,12 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
 
 par_identical_sims_fn <- function(StockPars, FleetPars, RCMdata, dots) {
   vector_fn <- function(x) sum(mean(x) - x) == 0
+  CloseToSame <- function(x,y) {
+    diff(x/y) |> abs() |> max() < 0.001
+  }
   array_fn <- function(x) {
     x_mean <- apply(x, 2:length(dim(x)), mean)
-    all(apply(x, 1, identical, x_mean))
+    all(apply(x, 1, CloseToSame, x_mean))
   }
   run_test <- function(x) if (is.null(dim(x))) vector_fn(x) else array_fn(x)
   
@@ -549,6 +552,11 @@ par_identical_sims_fn <- function(StockPars, FleetPars, RCMdata, dots) {
     StockPars_subset <- c(StockPars_subset, StockPars["LenCV"])
   }
   S_test <- vapply(StockPars_subset, run_test, logical(1))
+  
+  x <- StockPars_subset$Len_age
+  
+  run_test(StockPars_subset$Len_age)
+  run_test(StockPars_subset$Wt_age)
   
   if (RCMdata@Misc$nfleet == 1 && !any(RCMdata@CAL > 0, na.rm = TRUE) && !any(RCMdata@CAA > 0, na.rm = TRUE)) {
     FleetPars_subset <- FleetPars[c("L5_y", "LFS_y", "Vmaxlen_y")]
