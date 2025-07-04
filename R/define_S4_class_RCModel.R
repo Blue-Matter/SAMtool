@@ -180,7 +180,11 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               } else {
                 report_list_all <- x@Misc
               }
-              if (length(report_list_all) > 1) report_list <- report_list_all[sims]
+              if (length(report_list_all) > 1) {
+                report_list <- report_list_all[sims]
+              } else {
+                report_list <- report_list_all
+              }
               
               # Update scenario
               if (is.null(scenario$col)) {
