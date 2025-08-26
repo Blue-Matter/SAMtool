@@ -1,5 +1,9 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.8.2
+- RCM check for identical simulations has more leeway, ensuring values of parameters don't deviate by more than 0.01% of mean
+- Fix RCM bug where the initial N-at-age only used the M value in simulation 1 when constructing values of `OM@cpars$Perr_y`
+
 ## SAMtool 1.8.1
 - Update markdown reporting and `compare_RCM` when fitting to StockPars list.
 - `RCM` rescales selectivity to maximum of 1 when converting from length to age units
@@ -13,7 +17,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 - Fix dimension of SLarray in `RCM2MOM` (introduced in 1.6.5)
 - Move RCM reporting from slot `@Misc` to new slot `@report`. `@Misc` is now available for users to record information from OM building depending on the case study.
 - RCM can fit to list of biological inputs `StockPars` instead of an operating model with `RCM(StockPars, RCMdata)`. See `StockPars` section in `help("RCM")`.
-- Add partial bias correction to the initial abundance at age vector in `RCM` with argument `pbc_early_recdev`. The bias correction from logspace to normal space is `exp(log_early_rec_dev[a] - 0.5 * pbc_recdev[a] * sigmaR^2)` if the year-specific rec dev is estimated.
+- Add partial bias correction to the initial abundance at age vector in `RCM` with argument `pbc_earlyrecdev`. The bias correction from logspace to normal space is `exp(log_early_rec_dev[a] - 0.5 * pbc_earlyrecdev[a] * sigmaR^2)` if the year-specific rec dev is estimated.
 - `RCMdata@I_delta` (survey timing within time step) can now be a matrix by year and survey.
 - Fix typo in `Shortcut` function
 

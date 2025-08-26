@@ -493,9 +493,13 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
   }
   out$Perr <- vapply(report, make_Perr, numeric(nyears), obj_data = obj_data) %>% t()
   
-  make_early_Perr <- function(x, obj_data) {
-    M <- if (is.null(x$Mest)) obj_data$M_data[1, ] else rep(x$Mest, n_age)
-    NPR_unfished <- calc_NPR(exp(-M), length(M), obj_data$plusgroup)
+  make_early_Perr <- function(x, plusgroup) {
+    M <- if (is.null(x$Mest)) {
+      x$Z[1, ] - x$F_at_age[1, ]
+    } else {
+      rep(x$Mest, n_age)
+    }
+    NPR_unfished <- calc_NPR(exp(-M), length(M), plusgroup)
     #NPR_unfished <- x$NPR_unfished[1, ]
     res <- x$R_eq * x$NPR_equilibrium / x$R0 / NPR_unfished
     bias_corr <- ifelse(obj_data$est_early_rec_dev, exp(-0.5 * obj_data$pbc_early_recdev * x$tau^2), 1)
@@ -503,7 +507,7 @@ RCM_update_OM <- function(OM, report, StockPars = NULL, obj_data, maxage, nyears
     out <- res[-1] * early_dev
     return(rev(out))
   }
-  out$early_Perr <- vapply(report, make_early_Perr, numeric(maxage), obj_data = obj_data) %>% t()
+  out$early_Perr <- vapply(report, make_early_Perr, numeric(maxage), plusgroup = obj_data$plusgroup) %>% t()
   
   out$log_rec_dev <- vapply(report, getElement, numeric(nyears), "log_rec_dev") %>% t()
 

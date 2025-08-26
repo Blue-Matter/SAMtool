@@ -553,11 +553,6 @@ par_identical_sims_fn <- function(StockPars, FleetPars, RCMdata, dots) {
   }
   S_test <- vapply(StockPars_subset, run_test, logical(1))
   
-  x <- StockPars_subset$Len_age
-  
-  run_test(StockPars_subset$Len_age)
-  run_test(StockPars_subset$Wt_age)
-  
   if (RCMdata@Misc$nfleet == 1 && !any(RCMdata@CAL > 0, na.rm = TRUE) && !any(RCMdata@CAA > 0, na.rm = TRUE)) {
     FleetPars_subset <- FleetPars[c("L5_y", "LFS_y", "Vmaxlen_y")]
     FleetPars_subset <- lapply(FleetPars_subset, function(x) x[, RCMdata@Misc$nyears])
