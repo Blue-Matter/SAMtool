@@ -194,7 +194,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     spawn_time_frac = ifelse(is.null(StockPars$spawn_time_frac), 0, StockPars$spawn_time_frac[x]),
     est_q = ifelse(is.na(map$log_q), 0L, 1L),
     pbc_recdev = if (is.null(dots$pbc_recdev)) rep(1, nyears) else dots$pbc_recdev,
-    pbc_early_recdev = if (is.null(dots$pbc_early_recdev)) rep(1, nyears) else dots$pbc_early_recdev
+    pbc_early_recdev = if (is.null(dots$pbc_earlyrecdev)) rep(1, n_age-1) else dots$pbc_earlyrecdev
   )
   
   TMB_data$est_vul <- ifelse(is.na(map$vul_par) | duplicated(map$vul_par), 0, 1) %>%
