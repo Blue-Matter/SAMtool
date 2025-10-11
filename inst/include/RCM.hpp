@@ -142,6 +142,8 @@ Type RCM(objective_function<Type> *obj) {
   
   // Annual probability of length-at-age (PLA) - do check if needed
   vector<matrix<Type> > PLA(n_y+1);
+  vector<matrix<Type> > PLAvul_y(nfleet);
+  vector<matrix<Type> > PLAivul_y(nsurvey);
   
   int do_len = 0;
   if(CAL_n.sum() > 0 || IAL_n.sum() > 0 || (msize_type == "length" && !R_IsNA(asDouble(msize.sum())))) do_len += 1;
@@ -373,6 +375,14 @@ Type RCM(objective_function<Type> *obj) {
     }
     
     // Calculate this year's CAA, catch, CAL, mean size, then next year's abundance
+    for (int ff=0;ff<nfleet;ff++) {
+      bool has_len = CAL_hist.col(ff).sum() > 0 || (msize_type == "length" && msize.col(ff).sum() > 0);
+      if (has_len) {
+        int b = sel_block(y,ff) - 1;
+        bool len_sel = vul_type(b) == 0 || vul_type(b) == - 1;
+        PLAvul_y(ff) = generate_PLAvul(PLA(y), vul_len, b, n_age, nlbin, len_sel);
+      }
+    }
     for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
@@ -381,10 +391,10 @@ Type RCM(objective_function<Type> *obj) {
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
         
         if (CAL_n.col(ff).sum() > 0 || CAL_hist.col(ff).sum() > 0) {
-          for(int len=0;len<nlbin;len++) CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len);
+          for(int len=0;len<nlbin;len++) CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLAvul_y(ff)(a,len);
         }
         if (msize_type == "length" && !R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
-          for(int len=0;len<nlbin;len++) MLpred(y,ff) += CAAtrue(y,a,ff) * PLA(y)(a,len) * lbinmid(len);
+          for(int len=0;len<nlbin;len++) MLpred(y,ff) += CAAtrue(y,a,ff) * PLAvul_y(ff)(a,len) * lbinmid(len);
         }
       }
       
@@ -447,7 +457,20 @@ Type RCM(objective_function<Type> *obj) {
                                mat, vul, ivul_len, prior, est_ivul);
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
+    bool has_IAL = IAL_hist.col(sur).sum() > 0;
+    bool len_sel = ivul_type(sur) == 0 || ivul_type(sur) == -1;
+    bool fleet_sel = ivul_type(sur) > 0;
     for(int y=0;y<n_y;y++) {
+      if (has_IAL) {
+        if (fleet_sel) {
+          int b = sel_block(y,ivul_type(sur)-1) - 1;
+          int do_calc = vul_type(b) == 0 || vul_type(b) == -1;
+          PLAivul_y(sur) = generate_PLAvul(PLA(y), vul_len, b, n_age, nlbin, do_calc);
+        } else {
+          PLAivul_y(sur) = generate_PLAvul(PLA(y), ivul_len, sur, n_age, nlbin, len_sel);
+        }
+      }
+        
       for(int a=0;a<n_age;a++) {
         if (I_delta(y,sur) < 0) {
           IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a) * (1 - exp(-Z(y,a)))/Z(y,a);
@@ -460,8 +483,8 @@ Type RCM(objective_function<Type> *obj) {
         for(int aa=0;aa<n_age;aa++) IAApred(y,aa,sur) += IAAtrue(y,a,sur) * age_error(a,aa);
 
         if(I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * I_wt(y,a,sur); // Biomass vulnerable to survey
-        if(IAL_n.col(sur).sum() > 0) { // Predict survey length comps if there are data
-          for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLA(y)(a,len);
+        if(has_IAL) { // Predict survey length comps if there are data
+          for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLAivul_y(sur)(a,len);
         }
       }
     }
@@ -739,6 +762,10 @@ Type RCM(objective_function<Type> *obj) {
     REPORT(log_rec_dev_sim);
     REPORT(log_early_rec_dev_sim);
   }
+  
+  //REPORT(PLA);
+  //REPORT(PLAvul_y);
+  //REPORT(PLAivul_y);
 
   return nll;
 }

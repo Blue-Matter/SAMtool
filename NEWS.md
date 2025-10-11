@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.9.0
+- In RCM, adjust length-at-age probability by length selectivity function for prediction of length composition prediction. 
+
 ## SAMtool 1.8.2
 - RCM check for identical simulations has more leeway, ensuring values of parameters don't deviate by more than 0.01% of mean
 - Fix RCM bug where the initial N-at-age only used the M value in simulation 1 when constructing values of `OM@cpars$Perr_y`
