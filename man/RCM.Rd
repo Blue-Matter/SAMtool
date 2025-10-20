@@ -328,7 +328,7 @@ The bias correction from logspace to normal space is \code{exp(log_early_rec_dev
 }
 }
 
-\section{start}{
+\section{start list}{
 
 Starting values can be specified in a named list for the following:
 
@@ -347,7 +347,7 @@ the row specifies the selectivity at age.}
 }
 }
 
-\section{map}{
+\section{map list}{
 
 Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
 vector or matrix in the map argument will be the same dimension as in the start entry. If an entry is \code{NA}, the corresponding parameter is fixed in the model to the starting

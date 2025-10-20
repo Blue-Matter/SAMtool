@@ -20,11 +20,10 @@
 #' or operating model. Alternatively, a named list to provide custom parameters for the assessment.
 #' @param ... Additional arguments (to be added).
 #' 
-#' @section Data:
-#' Currently uses catch, CAA, and indices of abundance in the corresponding slots in the Data object.
+#' @details 
+#' *Data* object: the function currently uses catch, CAA, and indices of abundance in the corresponding slots in the Data object.
 #' 
-#' @section StockPars:
-#' Biological parameters can be used from the (1) Data object, (2) operating model, or (3) provided directly in the
+#' *StockPars* input: biological parameters can be used from (1) Data object, (2) operating model, or (3) provided directly in the
 #' `StockPars` argument.
 #' 
 #' Options 2 and 3 allow for time-varying growth, maturity, and natural mortality. Natural mortality can also be age-varying.

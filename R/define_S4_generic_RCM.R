@@ -196,7 +196,7 @@
 #' The bias correction from logspace to normal space is `exp(log_early_rec_dev[a] - 0.5 * pbc_recdev[a] * sigmaR^2)`. Default proportion is 1.}
 #' }
 #' 
-#' @section start:
+#' @section start list:
 #' Starting values can be specified in a named list for the following:
 #' 
 #' \describe{
@@ -213,7 +213,7 @@
 #' \item{`q`}{A numeric vector of length nsurvey for index catchability. See [online article](https://openmse.com/tutorial-rcm-select/) for more information.}
 #' }
 #' 
-#' @section map:
+#' @section map list:
 #' Parameters can be fixed with the map argument (also a named list, corresponding to the start list). Each
 #' vector or matrix in the map argument will be the same dimension as in the start entry. If an entry is `NA`, the corresponding parameter is fixed in the model to the starting
 #' value. Otherwise, an integer for each independent parameter, i.e., shared or mirrored parameters get the same integer entry.

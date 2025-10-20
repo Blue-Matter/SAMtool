@@ -47,14 +47,10 @@ or operating model. Alternatively, a named list to provide custom parameters for
 In beta testing. A function that uses RCM as an assessment function for use in MPs. More function arguments will be added
 to tinker with model settings and data inputs.
 }
-\section{Data}{
+\details{
+\emph{Data} object: the function currently uses catch, CAA, and indices of abundance in the corresponding slots in the Data object.
 
-Currently uses catch, CAA, and indices of abundance in the corresponding slots in the Data object.
-}
-
-\section{StockPars}{
-
-Biological parameters can be used from the (1) Data object, (2) operating model, or (3) provided directly in the
+\emph{StockPars} input: biological parameters can be used from (1) Data object, (2) operating model, or (3) provided directly in the
 \code{StockPars} argument.
 
 Options 2 and 3 allow for time-varying growth, maturity, and natural mortality. Natural mortality can also be age-varying.
@@ -68,7 +64,6 @@ Options 2 and 3 allow for time-varying growth, maturity, and natural mortality. 
 \item \code{M_ageArray} - annual natural mortality, array \verb{[sim, ages, year]}
 }
 }
-
 \examples{
  
 r <- RCM_assess(Data = SimulatedData)
