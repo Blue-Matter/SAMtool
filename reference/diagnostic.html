@@ -32,7 +32,7 @@ This function summarizes and plots the diagnostic information.'><meta property="
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Diagnostic of assessments in MSE: did Assess models converge during MSE?</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Blue-Matter/SAMtool/blob/master/R/diagnostic.R" class="external-link"><code>R/diagnostic.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Blue-Matter/SAMtool/blob/1.9.0/R/diagnostic.R" class="external-link"><code>R/diagnostic.R</code></a></small>
       <div class="d-none name"><code>diagnostic.Rd</code></div>
     </div>
 
@@ -95,30 +95,29 @@ function evaluations reported by <code><a href="https://rdrr.io/r/stats/nlminb.h
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">OM</span> <span class="op">&lt;-</span> <span class="fu">MSEtool</span><span class="fu">::</span><span class="va"><a href="https://msetool.openmse.com/reference/OM-class-objects.html" class="external-link">testOM</a></span>; <span class="va">OM</span><span class="op">@</span><span class="va">proyears</span> <span class="op">&lt;-</span> <span class="fl">20</span></span></span>
 <span class="r-in"><span><span class="va">myMSE</span> <span class="op">&lt;-</span> <span class="fu">runMSE</span><span class="op">(</span><span class="va">OM</span>, MPs <span class="op">=</span> <span class="st">"SCA_4010"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">ℹ</span> Checking OM for completeness</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Loading operating model</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Optimizing for user-specified movement</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating MSY reference points for each year</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Optimizing for user-specified depletion in last historical year</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating historical stock and fishing dynamics</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating per-recruit reference points</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating B-low reference points</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Calculating reference yield - best fixed F strategy</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Simulating observed data</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Loading operating model</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Calculating MSY reference points for each year</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Optimizing for user-specified depletion in last historical year</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Calculating historical stock and fishing dynamics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Calculating per-recruit reference points</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Calculating B-low reference points</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Calculating reference yield - best fixed F strategy</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → Simulating observed data</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Running forward projections</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> 1 / 1  Running MSE for SCA_4010 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   |===                                               | 5 % ~21s            |======                                            | 11% ~10s            |========                                          | 16% ~06s            |===========                                       | 21% ~04s            |==============                                    | 26% ~07s            |================                                  | 32% ~05s            |===================                               | 37% ~04s            |======================                            | 42% ~03s            |========================                          | 47% ~04s            |===========================                       | 53% ~04s            |=============================                     | 58% ~03s            |================================                  | 63% ~02s            |===================================               | 68% ~03s            |=====================================             | 74% ~02s            |========================================          | 79% ~02s            |===========================================       | 84% ~01s            |=============================================     | 89% ~01s            |================================================  | 95% ~00s            |==================================================| 100% elapsed=08s  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → 1/1 Running MSE for: <span style="color: #0000BB;">"SCA_4010"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   |===                                               | 5 % ~21s            |======                                            | 11% ~10s            |========                                          | 16% ~06s            |===========                                       | 21% ~04s            |==============                                    | 26% ~07s            |================                                  | 32% ~05s            |===================                               | 37% ~04s            |======================                            | 42% ~04s            |========================                          | 47% ~04s            |===========================                       | 53% ~04s            |=============================                     | 58% ~03s            |================================                  | 63% ~02s            |===================================               | 68% ~03s            |=====================================             | 74% ~02s            |========================================          | 79% ~02s            |===========================================       | 84% ~01s            |=============================================     | 89% ~01s            |================================================  | 95% ~00s            |==================================================| 100% elapsed=08s  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu">diagnostic</span><span class="op">(</span><span class="va">myMSE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Creating plots for MP:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   SCA_4010</span>
 <span class="r-plt img"><img src="diagnostic-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                   SCA_4010</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Percent positive-definite Hessian   100.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Percent iteration limit reached       0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Percent max. gradient &lt; 0.1          66.67</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Median iterations                   754.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Median function evaluations        1136.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Percent positive-definite Hessian      100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Percent iteration limit reached          0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Percent max. gradient &lt; 0.1            100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Median iterations                      777</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Median function evaluations           1130</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># How to get all the reporting</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
