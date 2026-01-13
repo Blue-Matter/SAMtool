@@ -1,0 +1,171 @@
+# Package index
+
+## Rapid Conditioning Model
+
+A population model intended for conditioning operating models from
+data-sparse to data-rich applications.
+
+- [`check_RCMdata()`](https://samtool.openmse.com/reference/RCM.md)
+  [`RCM()`](https://samtool.openmse.com/reference/RCM.md) : Rapid
+  Conditioning Model (RCM)
+- [`RCM2MOM()`](https://samtool.openmse.com/reference/RCM2MOM.md) :
+  Convert RCM to a multi-fleet operating model (MOM)
+
+## Management procedures
+
+Make a management procedure from an assessment and control rule or use a
+suite of pre-made MPs.
+
+- [`make_interim_MP()`](https://samtool.openmse.com/reference/make_MP.md)
+  [`make_projection_MP()`](https://samtool.openmse.com/reference/make_MP.md)
+  [`make_MP()`](https://samtool.openmse.com/reference/make_MP.md) : Make
+  a custom management procedure (MP)
+- [`SCA_MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SCA_75MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SCA_4010()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`DDSS_MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`DDSS_75MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`DDSS_4010()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SP_MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SP_75MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SP_4010()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SSS_MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SSS_75MSY()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  [`SSS_4010()`](https://samtool.openmse.com/reference/Model-based-MP.md)
+  : Model-based management procedures
+
+## Population models
+
+Assessment models that can be fitted with a Data object for closed-loop
+simulation.
+
+- [`cDD()`](https://samtool.openmse.com/reference/cDD.md)
+  [`cDD_SS()`](https://samtool.openmse.com/reference/cDD.md) :
+  Continuous Delay-differential assessment model
+- [`DD_TMB()`](https://samtool.openmse.com/reference/DD_TMB.md)
+  [`DD_SS()`](https://samtool.openmse.com/reference/DD_TMB.md) : Delay -
+  Difference Stock Assessment in TMB
+- [`SCA()`](https://samtool.openmse.com/reference/SCA.md)
+  [`SCA2()`](https://samtool.openmse.com/reference/SCA.md)
+  [`SCA_Pope()`](https://samtool.openmse.com/reference/SCA.md) :
+  Statistical catch-at-age (SCA) model
+- [`SCA_CAL()`](https://samtool.openmse.com/reference/SCA_CAL.md) :
+  Age-structured model using fishery length composition
+- [`SCA_DDM()`](https://samtool.openmse.com/reference/SCA_DDM.md) : SCA
+  models with time-varying natural mortality
+- [`SCA_RWM()`](https://samtool.openmse.com/reference/SCA_RWM.md) : SCA
+  with random walk in M
+- [`SP()`](https://samtool.openmse.com/reference/SP.md)
+  [`SP_SS()`](https://samtool.openmse.com/reference/SP.md)
+  [`SP_Fox()`](https://samtool.openmse.com/reference/SP.md) : Surplus
+  production model with FMSY and MSY as leading parameters
+- [`RCM_assess()`](https://samtool.openmse.com/reference/RCM_assess.md)
+  : The rapid conditioning model as an assessment function
+- [`SSS()`](https://samtool.openmse.com/reference/SSS.md) : Simple Stock
+  Synthesis
+- [`Shortcut()`](https://samtool.openmse.com/reference/Shortcut.md)
+  [`Shortcut2()`](https://samtool.openmse.com/reference/Shortcut.md)
+  [`Perfect()`](https://samtool.openmse.com/reference/Shortcut.md) :
+  Assessment emulator as a shortcut to model fitting in closed-loop
+  simulation
+- [`VPA()`](https://samtool.openmse.com/reference/VPA.md) : Virtual
+  population analysis (VPA)
+- [`projection()`](https://samtool.openmse.com/reference/projection.md)
+  : Projections for assessment models
+
+## Harvest control rules
+
+Functions to pair with an assessment model to create a catch-based
+managment procedure.
+
+- [`HCR_MSY()`](https://samtool.openmse.com/reference/HCR_MSY.md) :
+  Harvest control rule to fish at some fraction of maximum sustainable
+  yield
+- [`HCR_escapement()`](https://samtool.openmse.com/reference/HCR_escapement.md)
+  : Fixed escapement harvest control rule
+- [`HCR_fixedF()`](https://samtool.openmse.com/reference/HCR_fixedF.md)
+  : Simple fixed F harvest control rule
+- [`HCR_segment()`](https://samtool.openmse.com/reference/HCR_segment.md)
+  : Segmented harvest control rules
+- [`HCR_ramp()`](https://samtool.openmse.com/reference/HCR_ramp.md)
+  [`HCR40_10()`](https://samtool.openmse.com/reference/HCR_ramp.md)
+  [`HCR60_20()`](https://samtool.openmse.com/reference/HCR_ramp.md)
+  [`HCR80_40MSY()`](https://samtool.openmse.com/reference/HCR_ramp.md) :
+  Linearly ramped harvest control rules
+
+## Utility functions
+
+Functions to evaluate behavior of assessment models.
+
+- [`compare_models()`](https://samtool.openmse.com/reference/compare_models.md)
+  : Compare output from several assessment models
+- [`diagnostic()`](https://samtool.openmse.com/reference/diagnostic.md)
+  [`diagnostic_AM()`](https://samtool.openmse.com/reference/diagnostic.md)
+  : Diagnostic of assessments in MSE: did Assess models converge during
+  MSE?
+- [`posterior()`](https://samtool.openmse.com/reference/posterior.md)
+  [`RCMstan()`](https://samtool.openmse.com/reference/posterior.md) :
+  Sample posterior of TMB models in SAMtool
+- [`prelim_AM()`](https://samtool.openmse.com/reference/prelim_AM.md) :
+  Preliminary Assessments in MSE
+- [`profile(`*`<Assessment>`*`)`](https://samtool.openmse.com/reference/profile.md)
+  [`profile(`*`<RCModel>`*`)`](https://samtool.openmse.com/reference/profile.md)
+  : Profile likelihood of assessment models
+- [`simulate()`](https://samtool.openmse.com/reference/simulate.md) :
+  Generate simulated data from TMB models in SAMtool
+- [`retrospective()`](https://samtool.openmse.com/reference/retrospective.md)
+  : Retrospective analysis of assessment models
+- [`retrospective_AM()`](https://samtool.openmse.com/reference/retrospective_AM.md)
+  : retrospective_AM (retrospective of Assessment model in MSE)
+
+## Plotting functions
+
+Generate summary and figures of assessment output.
+
+- [`summary(`*`<Assessment>`*`)`](https://samtool.openmse.com/reference/summary.Assessment.md)
+  : Summary of Assessment object
+- [`plot(`*`<RCModel>`*`,`*`<missing>`*`)`](https://samtool.openmse.com/reference/plot.RCModel.md)
+  [`compare_RCM()`](https://samtool.openmse.com/reference/plot.RCModel.md)
+  : Plot RCM scope output
+- [`plot(`*`<Assessment>`*`,`*`<missing>`*`)`](https://samtool.openmse.com/reference/plot.Assessment.md)
+  [`plot(`*`<Assessment>`*`,`*`<retro>`*`)`](https://samtool.openmse.com/reference/plot.Assessment.md)
+  : Plot Assessment object
+- [`plot(`*`<prof>`*`,`*`<missing>`*`)`](https://samtool.openmse.com/reference/plot.prof.md)
+  : Plot profile object
+- [`plot(`*`<retro>`*`,`*`<missing>`*`)`](https://samtool.openmse.com/reference/plot.retro.md)
+  [`summary(`*`<retro>`*`)`](https://samtool.openmse.com/reference/plot.retro.md)
+  : Methods for retro object
+- [`plot_SR()`](https://samtool.openmse.com/reference/plot_SR.md) : Plot
+  stock-recruitment function
+- [`plot_betavar()`](https://samtool.openmse.com/reference/plot_betavar.md)
+  : Plots a beta variable
+- [`plot_composition()`](https://samtool.openmse.com/reference/plot_composition.md)
+  : Plot composition data
+- [`plot_lognormalvar()`](https://samtool.openmse.com/reference/plot_lognormalvar.md)
+  : Plots a lognormal variable
+- [`plot_residuals()`](https://samtool.openmse.com/reference/plot_residuals.md)
+  : Plot residuals
+- [`plot_steepness()`](https://samtool.openmse.com/reference/plot_steepness.md)
+  : Plots probability distribution function of stock-recruit steepness
+- [`plot_timeseries()`](https://samtool.openmse.com/reference/plot_timeseries.md)
+  : Plot time series of data
+
+## Data indicators
+
+Calculate the statistical power of data indicators, generated in
+closed-loop simulation, to detect differences between operating models
+([Carruthers and Hordyk 2018](https://doi.org/10.1139/cjfas-2018-0223)).
+
+- [`PRBcalc()`](https://samtool.openmse.com/reference/PRBcalc.md) :
+  Calculate mahalanobis distance (null and alternative MSEs) and
+  statistical power for all MPs in an MSE
+- [`Probs()`](https://samtool.openmse.com/reference/Probs.md) :
+  Calculates mahalanobis distance and rejection of the Null operating
+  model
+- [`getinds()`](https://samtool.openmse.com/reference/getinds.md) :
+  Characterize posterior predictive data
+- [`mahplot()`](https://samtool.openmse.com/reference/mahplot.md) : Plot
+  statistical power of the indicator with increasing time blocks
+- [`plot_crosscorr()`](https://samtool.openmse.com/reference/plot_crosscorr.md)
+  : Produce a cross-correlation plot of the derived data arising from
+  getinds(MSE_object)
