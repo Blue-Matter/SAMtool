@@ -457,7 +457,7 @@ Type RCM(objective_function<Type> *obj) {
                                mat, vul, ivul_len, prior, est_ivul);
   vector<Type> q(nsurvey);
   for(int sur=0;sur<nsurvey;sur++) {
-    bool has_IAL = IAL_hist.col(sur).sum() > 0;
+    bool has_IAL = IAL_n.col(sur).sum() > 0;
     bool len_sel = ivul_type(sur) == 0 || ivul_type(sur) == -1;
     bool fleet_sel = ivul_type(sur) > 0;
     for(int y=0;y<n_y;y++) {
