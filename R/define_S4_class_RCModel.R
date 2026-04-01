@@ -415,10 +415,10 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               if (data_mean_fit$use_prior[3]) {
                 NatM <- rmd_at_age(age = "Age", "rep(report$Mest, length(Age))", fig.cap = "Natural mortality (time constant).", label = "Natural mortality")
               } else {
-                NatM <- rmd_at_age(age = "Age", "data_mean_fit$M[nyears, ]", fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
+                NatM <- rmd_at_age(age = "Age", "data_mean_fit$M_data[nyears, ]", fig.cap = "Natural mortality in last historical year.", label = "Natural mortality")
               }
-              if (!data_mean_fit$use_prior[3] && LH_varies_fn(data_mean_fit$M)) {
-                NatM_persp <- rmd_persp_plot(x = "Year", y = "Age", z = "data_mean_fit$M[1:nyears, ]", xlab = "Year", ylab = "Age",
+              if (!data_mean_fit$use_prior[3] && LH_varies_fn(data_mean_fit$M_data)) {
+                NatM_persp <- rmd_persp_plot(x = "Year", y = "Age", z = "data_mean_fit$M_data[1:nyears, ]", xlab = "Year", ylab = "Age",
                                              zlab = "Natural mortality", phi = 35, theta = 45, expand = 0.55, fig.cap = "Annual M-at-age.")
               } else NatM_persp <- NULL
 
