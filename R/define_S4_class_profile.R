@@ -66,7 +66,7 @@ setMethod("plot", signature(x = "prof", y = "missing"),
               profile_par <- x@Par
               x.plot <- getElement(x@grid, profile_par)
               y.plot <- getElement(x@grid, "nll") - min(getElement(x@grid, "nll"), na.rm = TRUE)
-              plot(x.plot, y.plot, xlab = profile_par, ylab = "Change in neg. log-likelihood", typ = "n")
+              plot(x.plot, y.plot, xlab = profile_par, ylab = "Change in neg. log-likelihood", type = "n")
               abline(h = 0, col = "grey")
               lines(x.plot, y.plot)
               points(x.plot, y.plot, pch = 16)

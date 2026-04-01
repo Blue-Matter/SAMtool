@@ -360,7 +360,7 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   if (missing(msy)) msy <- max(Yield)
 
   if (xaxis == "F") {
-    plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing Mortality",
+    plot(F.vector[ind], Yield[ind], type = 'l', xlab = "Fishing Mortality",
          ylab = "Equilibrium yield")
     segments(x0 = fmsy, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = fmsy, lty = 2)
@@ -368,7 +368,7 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   }
 
   if (xaxis == "Biomass") {
-    plot(Biomass[ind], Yield[ind], typ = 'l', xlab = "Spawning Stock Biomass",
+    plot(Biomass[ind], Yield[ind], type = 'l', xlab = "Spawning Stock Biomass",
          ylab = "Equilibrium yield")
     segments(x0 = BMSY, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = BMSY, lty = 2)
@@ -376,7 +376,7 @@ plot_yield_SCA <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "D
   }
 
   if (xaxis == "Depletion") {
-    plot(Biomass[ind]/B0, Yield[ind], typ = 'l',
+    plot(Biomass[ind]/B0, Yield[ind], type = 'l',
          xlab = expression(SSB/SSB[0]), ylab = "Equilibrium yield")
     segments(x0 = BMSY/B0, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = BMSY/B0, lty = 2)
@@ -410,7 +410,7 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   if (missing(msy)) msy <- max(Yield)
   
   if (xaxis == "U") {
-    plot(u.vector[ind], Yield[ind], typ = 'l', xlab = "Exploitation rate (U)",
+    plot(u.vector[ind], Yield[ind], type = 'l', xlab = "Exploitation rate (U)",
          ylab = "Equilibrium yield")
     segments(x0 = umsy, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = umsy, lty = 2)
@@ -418,7 +418,7 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   }
   
   if (xaxis == "Biomass") {
-    plot(Biomass[ind], Yield[ind], typ = 'l', xlab = "Spawning Stock Biomass",
+    plot(Biomass[ind], Yield[ind], type = 'l', xlab = "Spawning Stock Biomass",
          ylab = "Equilibrium yield")
     segments(x0 = BMSY, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = BMSY, lty = 2)
@@ -426,7 +426,7 @@ plot_yield_SCA_Pope <- function(data, report, umsy, msy, xaxis = c("U", "Biomass
   }
   
   if (xaxis == "Depletion") {
-    plot(Biomass[ind]/B0, Yield[ind], typ = 'l',
+    plot(Biomass[ind]/B0, Yield[ind], type = 'l',
          xlab = expression(SSB/SSB[0]), ylab = "Equilibrium yield")
     segments(x0 = BMSY/B0, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = BMSY/B0, lty = 2)

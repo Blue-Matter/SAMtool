@@ -731,7 +731,7 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
                  "SSB <- do.call(rbind, lapply(report_list, function(x) x$E[1:nyears]))",
                  "SSBMSY <- vapply(Hist, function(x) mean(x@Ref$ReferencePoints$SSBMSY), numeric(1))",
                  "SSB_SSBMSY <- t(SSB/SSBMSY)",
-                 "matplot(Year, SSB_SSBMSY, typ = \"n\", xlab = \"Year\", ylab = expression(SSB/SSB[MSY]), ylim = c(0, 1.1 * max(SSB_SSBMSY)))",
+                 "matplot(Year, SSB_SSBMSY, type = \"n\", xlab = \"Year\", ylab = expression(SSB/SSB[MSY]), ylim = c(0, 1.1 * max(SSB_SSBMSY)))",
                  "matlines(Year, SSB_SSBMSY, col = scenario$col)",
                  "abline(h = c(0, MSY_ref), col = \"grey\")",
                  "if (!is.null(scenario$names)) legend(\"topleft\", scenario$names, col = scenario$col_legend, lty = scenario$lty)",

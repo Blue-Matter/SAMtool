@@ -284,7 +284,7 @@ plot_yield_DD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "De
   if (missing(msy)) msy <- max(Yield)
 
   if (xaxis == "F") {
-    plot(F.vector[ind], Yield[ind], typ = 'l', xlab = "Fishing mortality",
+    plot(F.vector[ind], Yield[ind], type = 'l', xlab = "Fishing mortality",
          ylab = "Equilibrium yield")
     segments(x0 = fmsy, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = fmsy, lty = 2)
@@ -292,7 +292,7 @@ plot_yield_DD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "De
   }
 
   if (xaxis == "Biomass") {
-    plot(Biomass[ind], Yield[ind], typ = 'l', xlab = "Biomass",
+    plot(Biomass[ind], Yield[ind], type = 'l', xlab = "Biomass",
          ylab = "Equilibrium yield")
     segments(x0 = report$BMSY, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = report$BMSY, lty = 2)
@@ -300,7 +300,7 @@ plot_yield_DD <- function(data, report, fmsy, msy, xaxis = c("F", "Biomass", "De
   }
 
   if (xaxis == "Depletion") {
-    plot(Biomass[ind]/report$B0, Yield[ind], typ = 'l',
+    plot(Biomass[ind]/report$B0, Yield[ind], type = 'l',
          xlab = expression(B/B[0]), ylab = "Equilibrium yield")
     segments(x0 = report$BMSY/report$B0, y0 = 0, y1 = msy, lty = 2)
     segments(x0 = 0, y0 = msy, x1 = report$BMSY/report$B0, lty = 2)

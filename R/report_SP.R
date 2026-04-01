@@ -253,21 +253,21 @@ plot_yield_SP <- function(data = NULL, report, fmsy, msy, xaxis = c("F", "Biomas
   } else ylab <- "Equilibrium Yield"
 
   if (xaxis == "F") {
-    plot(F.vector, Yield, typ = 'l', xlab = "Fishing Mortality F", ylab = ylab)
+    plot(F.vector, Yield, type = 'l', xlab = "Fishing Mortality F", ylab = ylab)
     segments(x0 = fmsy, y0 = 0, y1 = max(Yield), lty = 2)
     segments(x0 = 0, y0 = max(Yield), x1 = fmsy, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
   if (xaxis == "Biomass") {
-    plot(Biomass, Yield, typ = 'l', xlab = "Biomass", ylab = ylab)
+    plot(Biomass, Yield, type = 'l', xlab = "Biomass", ylab = ylab)
     segments(x0 = BMSY, y0 = 0, y1 = max(Yield), lty = 2)
     segments(x0 = 0, y0 = max(Yield), x1 = BMSY, lty = 2)
     abline(h = 0, col = 'grey')
   }
 
   if (xaxis == "Depletion") {
-    plot(BKratio, Yield, typ = 'l', xlab = expression(B/B[0]), ylab = ylab)
+    plot(BKratio, Yield, type = 'l', xlab = expression(B/B[0]), ylab = ylab)
     segments(x0 = BMSY/K, y0 = 0, y1 = max(Yield), lty = 2)
     segments(x0 = 0, y0 = max(Yield), x1 = BMSY/K, lty = 2)
     abline(h = 0, col = 'grey')

@@ -271,7 +271,7 @@ plot_iter <- function(x, Year, plot_type = c('line', 'hist'),
     mtext(lab)
     
     lapply(1:nsim, function(i) {
-      points(Year[[i]], x[[i]], col = color.vec[i], typ = 'l')
+      points(Year[[i]], x[[i]], col = color.vec[i], type = 'l')
       text(Year[[i]], x[[i]], labels = i, col = color.vec[i])
     })
   }

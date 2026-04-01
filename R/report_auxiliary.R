@@ -217,7 +217,7 @@ plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color =
     if (all(true.m < 0)) {
       support <- -1 * support
       xlim_truncated <- range(pretty(support))
-      plot(support, dist[, 1], typ = 'l', xlab = label,
+      plot(support, dist[, 1], type = 'l', xlab = label,
            ylab = 'Probability density function', xlim = xlim_truncated,
            ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
       if (ncurve > 1) {
@@ -226,7 +226,7 @@ plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color =
     }
     if (all(true.m > 0)) {
       xlim_truncated <- range(pretty(support))
-      plot(support, dist[, 1], typ = 'l', xlab = label,
+      plot(support, dist[, 1], type = 'l', xlab = label,
            ylab = 'Probability density function', xlim = xlim_truncated,
            ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
       if (ncurve > 1) {
@@ -259,7 +259,7 @@ plot_lognormalvar <- function(m, sd, label = NULL, logtransform = FALSE, color =
 
     xlim_truncated <- range(pretty(support), finite = TRUE, na.rm = TRUE)
 
-    plot(support, dist[, 1], typ = 'l', xlab = label, xlim = xlim_truncated,
+    plot(support, dist[, 1], type = 'l', xlab = label, xlim = xlim_truncated,
          ylab = 'Probability density function',
          ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
     if (ncurve > 1) {
@@ -289,7 +289,7 @@ plot_normalvar <- function(m, sd, label = NULL, color = "black") {
   dist <- as.matrix(dist[ind.tails, ])
 
   xlim_truncated <- range(pretty(support))
-  plot(support, dist[, 1], typ = 'l', xlab = label, ylab = 'Probability density function',
+  plot(support, dist[, 1], type = 'l', xlab = label, ylab = 'Probability density function',
        xlim = xlim_truncated, ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
   if (ncurve > 1) {
     for(i in 2:ncurve) lines(support, dist[, i], col = color[i])
@@ -355,7 +355,7 @@ plot_betavar <- function(m, sd, label = NULL, is_logit = FALSE, color = "black")
   dist <- as.matrix(dist[ind.tails, ])
   xlim_truncated <- range(pretty(support), finite = TRUE)
 
-  plot(support, dist[, 1], typ = 'l', xlab = label, ylab = 'Probability density function',
+  plot(support, dist[, 1], type = 'l', xlab = label, ylab = 'Probability density function',
        xlim = xlim_truncated, ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
   if (ncurve > 1) {
     for(i in 2:ncurve) lines(support, dist[, i], col = color[i])
@@ -469,7 +469,7 @@ plot_steepness <- function(m, sd, is_transform = FALSE, SR = c("BH", "Ricker"), 
     }
   }
 
-  plot(support, dist[, 1], typ = 'l', xlab = 'Steepness (h)',
+  plot(support, dist[, 1], type = 'l', xlab = 'Steepness (h)',
        ylab = 'Probability density function', xlim = range(pretty(support)),
        ylim = c(0, 1.1 * max(dist, na.rm = TRUE)), col = color[1])
   if (ncurve > 1) {
@@ -517,11 +517,11 @@ plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.
   if (is.null(obs_CV)) {
     y.max <- max(c(obs, fit), na.rm = TRUE)
     if (is.null(obs_ind_blue)) {
-      plot(Year, obs, typ = 'o', ylab = label, ylim = c(0, 1.1 * y.max))
+      plot(Year, obs, type = 'o', ylab = label, ylim = c(0, 1.1 * y.max))
     } else {
-      plot(Year, obs, typ = 'n', ylab = label, ylim = c(0, 1.1 * y.max))
-      lines(Year[-obs_ind_blue], obs[-obs_ind_blue], typ = 'o')
-      lines(Year[obs_ind_blue], obs[obs_ind_blue], typ = 'o', col = "blue")
+      plot(Year, obs, type = 'n', ylab = label, ylim = c(0, 1.1 * y.max))
+      lines(Year[-obs_ind_blue], obs[-obs_ind_blue], type = 'o')
+      lines(Year[obs_ind_blue], obs[obs_ind_blue], type = 'o', col = "blue")
     }
   }
 
@@ -535,15 +535,15 @@ plot_timeseries <- function(Year, obs, fit = NULL, obs_CV = NULL, obs_CV_CI = 0.
     y.max <- max(c(obs_lower, obs_upper, obs, fit), na.rm = TRUE)
 
     if (is.null(obs_ind_blue)) {
-      plot(Year, obs, typ = 'o', ylab = label, ylim = c(0, 1.1 * y.max))
+      plot(Year, obs, type = 'o', ylab = label, ylim = c(0, 1.1 * y.max))
       arrows(Year, obs_lower, Year, obs_upper, length = 0.025, angle = 90, code = 3)
     } else {
-      plot(Year, obs, typ = 'n', ylab = label, ylim = c(0, 1.1 * y.max))
-      lines(Year[-obs_ind_blue], obs[-obs_ind_blue], typ = 'o')
+      plot(Year, obs, type = 'n', ylab = label, ylim = c(0, 1.1 * y.max))
+      lines(Year[-obs_ind_blue], obs[-obs_ind_blue], type = 'o')
       arrows(Year[-obs_ind_blue], obs_lower[-obs_ind_blue], Year[-obs_ind_blue],
              obs_upper[-obs_ind_blue], length = 0.025, angle = 90, code = 3, col = "grey30")
 
-      lines(Year[obs_ind_blue], obs[obs_ind_blue], typ = 'o', col = "blue")
+      lines(Year[obs_ind_blue], obs[obs_ind_blue], type = 'o', col = "blue")
       arrows(Year[obs_ind_blue], obs_lower[obs_ind_blue], Year[obs_ind_blue],
              obs_upper[obs_ind_blue], length = 0.025, angle = 90, code = 3, col = "blue")
     }
@@ -580,11 +580,11 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
     res.lim <- max(abs(res), na.rm = TRUE)
     if (!res.lim || is.infinite(res.lim)) res.lim <- 1
     if (is.null(res_ind_blue) || all(!res_ind_blue)) {
-      plot(Year, res, typ = 'o', ylab = label, ylim = c(-res.lim, res.lim))
+      plot(Year, res, type = 'o', ylab = label, ylim = c(-res.lim, res.lim))
     } else {
-      plot(Year, res, typ = 'n', ylab = label, ylim = c(-res.lim, res.lim))
-      lines(Year[-res_ind_blue], res[-res_ind_blue], typ = 'o')
-      lines(Year[res_ind_blue], res[res_ind_blue], typ = 'o', col = "blue")
+      plot(Year, res, type = 'n', ylab = label, ylim = c(-res.lim, res.lim))
+      lines(Year[-res_ind_blue], res[-res_ind_blue], type = 'o')
+      lines(Year[res_ind_blue], res[res_ind_blue], type = 'o', col = "blue")
     }
   }
 
@@ -595,16 +595,16 @@ plot_residuals <- function(Year, res, res_sd = NULL, res_sd_CI = 0.95,
     res.lim <- max(abs(c(res_lower, res_upper, res)), na.rm = TRUE)
 
     if (is.null(res_ind_blue) || all(!res_ind_blue)) {
-      plot(Year, res, typ = 'o', ylab = label, ylim = c(-res.lim, res.lim))
+      plot(Year, res, type = 'o', ylab = label, ylim = c(-res.lim, res.lim))
       arrows(Year, res_lower, Year, res_upper, length = 0.025, angle = 90,
              code = 3, col = 'grey30')
     } else {
-      plot(Year, res, typ = 'n', ylab = label, ylim = c(-res.lim, res.lim))
-      lines(Year[-res_ind_blue], res[-res_ind_blue], typ = 'o')
+      plot(Year, res, type = 'n', ylab = label, ylim = c(-res.lim, res.lim))
+      lines(Year[-res_ind_blue], res[-res_ind_blue], type = 'o')
       arrows(Year[-res_ind_blue], res_lower[-res_ind_blue], Year[-res_ind_blue],
              res_upper[-res_ind_blue], length = 0.025, angle = 90, code = 3, col = 'grey30')
 
-      lines(Year[res_ind_blue], res[res_ind_blue], typ = 'o', col = "blue")
+      lines(Year[res_ind_blue], res[res_ind_blue], type = 'o', col = "blue")
       arrows(Year[res_ind_blue], res_lower[res_ind_blue], Year[res_ind_blue],
              res_upper[res_ind_blue], length = 0.025, angle = 90, code = 3, col = 'blue')
     }
@@ -734,7 +734,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     data_mat <- matrix(data_val, ncol = ncol(obs), nrow = nrow(obs), byrow = TRUE)
     
     bubble_size <- bubble_adj * sqrt(pmin(obs * 3 / n2, 3))
-    plot(NULL, NULL, typ = 'n', xlim = range(Year), xlab = "Year",
+    plot(NULL, NULL, type = 'n', xlim = range(Year), xlab = "Year",
          ylim = range(data_val), ylab = data_lab)
     points(Year_mat, data_mat, cex = bubble_size, pch = 21, bg = "white", col = "black")
     
@@ -759,7 +759,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     data_mat <- matrix(data_val, ncol = ncol(resid), nrow = nrow(resid), byrow = TRUE)
     
     if (!grepl("hist", plot_type)) {
-      plot(NULL, NULL, typ = 'n', xlim = range(Year), xlab = "Year", ylim = c(1, 1.1) * range(data_val), ylab = data_lab)
+      plot(NULL, NULL, type = 'n', xlim = range(Year), xlab = "Year", ylim = c(1, 1.1) * range(data_val), ylab = data_lab)
       if (data_type == "age") {
         lapply(pretty(c(min(Year) - max(data_val), max(Year))), function(x) abline(a = -x, b = 1, col = "gray50", lty = "dotted"))
       }
@@ -815,7 +815,7 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
     } else {
       ind2 <- ind
     }
-    plot(Year[ind2], mu[ind2], xlab = "Year", ylab = paste0("Mean ", data_type), typ = "o")
+    plot(Year[ind2], mu[ind2], xlab = "Year", ylab = paste0("Mean ", data_type), type = "o")
     if (!is.null(fit)) lines(Year[ind2], mupred[ind2], lwd = fit_linewidth, col = fit_color)
 
     return(invisible(mu))
@@ -846,9 +846,9 @@ plot_composition <- function(Year = 1:nrow(obs), obs, fit = NULL,
       yaxt <- ifelse(i %% 16 %in% c(1:4), "s", "n") # TRUE = first column
       xaxt <- ifelse(i < length(Year) & i %% 4 %in% c(1:3), "n", "s") # TRUE = first three rows
 
-      plot(data_val, obs_prob[i, ], typ = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
+      plot(data_val, obs_prob[i, ], type = "n", ylim = ylim, yaxp = yaxp, xaxt = xaxt, yaxt = yaxt, las = las)
       abline(h = 0, col = "grey")
-      lines(data_val, obs_prob[i, ], typ = "o")
+      lines(data_val, obs_prob[i, ], type = "o")
       if (!is.null(fit)) lines(data_val, fit_prob[i, ], lwd = fit_linewidth, col = fit_color)
       legend("topright", legend = c(Year[i], ifelse(is.null(N), "", paste0("N = ", N[i]))), bty = "n", xjust = 1)
 
@@ -878,7 +878,7 @@ plot_surplus_production <- function(B, B0 = NULL, C, yield_fn = NULL, arrow_size
 
   xlim <- c(0, max(B))
   ylim <- c(min(0, min(SP_now)), max(SP_now))
-  plot(B_now, SP_now, typ = "n", xlab = xlab, xlim = xlim, ylim = ylim,
+  plot(B_now, SP_now, type = "n", xlab = xlab, xlim = xlim, ylim = ylim,
        ylab = "Surplus production")
   if (!is.null(yield_fn)) {
     if (!is.null(B0)) lines(yield_fn$B_B0, yield_fn$Yield) else {
@@ -899,7 +899,7 @@ plot_Kobe <- function(biomass, exploit, arrow_size = 0.07, color = TRUE, xlab = 
 
   x.max <- max(biomass, 1)
   y.max <- max(exploit, 1)
-  plot(NULL, NULL, typ = "n", xlab = xlab, ylab = ylab, xlim = c(0, max(1.1, 1.1 * x.max)), ylim = c(0, max(1.1, 1.1 * y.max)))
+  plot(NULL, NULL, type = "n", xlab = xlab, ylab = ylab, xlim = c(0, max(1.1, 1.1 * x.max)), ylim = c(0, max(1.1, 1.1 * y.max)))
   if (color) {
     # Colors from https://www.rapidtables.com/web/color/html-color-codes.html
     green <- "#228B22"    #forestgreen
@@ -954,7 +954,7 @@ plot_SR <- function(Spawners, expectedR, R0 = NULL, S0 = NULL, rec_dev = NULL, t
     else R.max <- y_zoom * max(expectedR)
   }
   S.max <- max(c(Spawners, S0))
-  plot(Spawners[order(Spawners)], expectedR[order(Spawners)], typ = "l", xlim = c(0, 1.1 * S.max), ylim = c(0, 1.1 * R.max),
+  plot(Spawners[order(Spawners)], expectedR[order(Spawners)], type = "l", xlim = c(0, 1.1 * S.max), ylim = c(0, 1.1 * R.max),
        xlab = "Spawning Stock Biomass (SSB)", lwd = ifelse(is.null(rec_dev), 1, 3), ylab = ylab)
   if (trajectory) {
     n.arrows <- length(Spawners)
@@ -982,9 +982,9 @@ plot_SR <- function(Spawners, expectedR, R0 = NULL, S0 = NULL, rec_dev = NULL, t
 
 
 plot_generic_at_age <- function(Age, quantity, label, ymax = 1.1 * max(quantity), xlab = "Age") {
-  plot(Age, quantity, ylab = label, typ = "n", ylim = c(0, ymax), xlab = xlab)
+  plot(Age, quantity, ylab = label, type = "n", ylim = c(0, ymax), xlab = xlab)
   abline(h = 0, col = "grey")
-  lines(Age, quantity, typ = "o")
+  lines(Age, quantity, type = "o")
 
   invisible()
 
