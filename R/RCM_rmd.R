@@ -200,7 +200,7 @@ rmd_RCM_fleet_output <- function(ff, f_name) {
            paste0("  MLpred <- sapply(report_list, function(x) x$MLpred[, ", ff, "])"),
            paste0("} else if (any(RCMdata@CAL[, , ", ff, "] > 0, na.rm = TRUE)) {"),
            paste0("  MLobs <- (RCMdata@CAL[, , ", ff, "] %*% RCMdata@Misc$lbinmid)/rowSums(RCMdata@CAL[, , ", ff, "], na.rm = TRUE)"),
-           paste0("  MLpred <- sapply(report_list, function(x) (x$CALpred[, , ", ff, "] %*% RCMdata@Misc$lbinmid)/rowSums(x$CAL[, , ", ff, "], na.rm = TRUE))"),
+           paste0("  MLpred <- sapply(report_list, function(x) (x$CALpred[, , ", ff, "] %*% RCMdata@Misc$lbinmid)/rowSums(x$CALpred[, , ", ff, "], na.rm = TRUE))"),
            "} else {",
            " MLobs <- MLpred <- NA",
            "}",
