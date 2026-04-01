@@ -78,7 +78,7 @@ Type RCM(objective_function<Type> *obj) {
 
   DATA_IVECTOR(yind_F);   // When condition(ff) = "catch", the year in F's are estimated and all other F parameters are deviations from this F
   DATA_INTEGER(n_itF);    // When condition(ff) = "catch2", the number of iterations for Newton-Raphson method to solve for F
-  DATA_INTEGER(plusgroup) // Boolean, whether the maximum age in the plusgroup is modeled.
+  DATA_INTEGER(plusgroup); // Boolean, whether the maximum age in the plusgroup is modeled.
   
   DATA_IVECTOR(use_prior); // Boolean vector, whether to set a prior for R0, h, M, q (length of 3 + nsurvey)
   DATA_MATRIX(prior_dist); // Distribution of priors for R0, h, M, q (rows), columns indicate parameters of distribution calculated in R (see RCM_prior fn)
@@ -140,17 +140,46 @@ Type RCM(objective_function<Type> *obj) {
   Type penalty = 0;
   Type prior = 0;
   
+  // Check for length data for each fleet before population dynamics loop
+  vector<int> has_CAL(nfleet);
+  vector<int> has_mlen(nfleet);
+  vector<int> has_mw(nfleet);
+  has_mlen.setZero();
+  has_CAL.setZero();
+  has_mw.setZero();
+  for (int y=0;y<n_y;y++) {
+    for (int ff=0;ff<nfleet;ff++) {
+      if (!CppAD::isnan(CAL_hist(y,0,ff))) has_CAL(ff) += 1;
+      if (!CppAD::isnan(msize(y,ff))) {
+        if (msize_type == "length") {
+          has_mlen(ff) += 1;
+        } else {
+          has_mw(ff) += 1;
+        }
+      }
+    }
+  }
+  
+  // Check for length selectivity and length data in indices of abundance
+  vector<int> has_IAL(nsurvey);
+  vector<int> len_isel(nsurvey);
+  vector<int> fleet_sel(nsurvey); // Does survey mirror fleet selectivity?
+  has_IAL.setZero();
+  len_isel.setZero();
+  fleet_sel.setZero();
+  for (int sur=0;sur<nsurvey;sur++) {
+    len_isel(sur) = ivul_type(sur) == 0 || ivul_type(sur) == -1;
+    fleet_sel(sur) = ivul_type(sur) > 0;
+    for (int y=0;y<n_y;y++) {
+      if (!CppAD::isnan(IAL_hist(y,0,sur))) has_IAL(sur) += 1;
+    }
+  }
+  
   // Annual probability of length-at-age (PLA) - do check if needed
   vector<matrix<Type> > PLA(n_y+1);
   vector<matrix<Type> > PLAvul_y(nfleet);
   vector<matrix<Type> > PLAivul_y(nsurvey);
-  
-  int do_len = 0;
-  if(CAL_n.sum() > 0 || IAL_n.sum() > 0 || (msize_type == "length" && !R_IsNA(asDouble(msize.sum())))) do_len += 1;
-  for(int ff=0;ff<nfleet;ff++) if(vul_type(ff) == 0 || vul_type(ff) == -1) do_len += 1;
-  for(int sur=0;sur<nsurvey;sur++) if(ivul_type(sur) == 0 || ivul_type(sur) == -1) do_len += 1;
-  
-  if (do_len > 0) {
+  if (has_CAL.sum() > 0 || has_mlen.sum() > 0 || has_IAL.sum() > 0) {
     for(int y=0;y<=n_y;y++) PLA(y) = generate_PLA(lbin, len_age, SD_LAA, n_age, nlbin, y);
   }
   
@@ -374,15 +403,18 @@ Type RCM(objective_function<Type> *obj) {
       for(int ff=0;ff<nfleet;ff++) VB(y,ff) += vul(y,0,ff) * N(y,0) * C_wt(y,0,ff);
     }
     
-    // Calculate this year's CAA, catch, CAL, mean size, then next year's abundance
+    // Check for length selectivity
+    // If TRUE, adjusts PLA (probability length at age) with length selectivity function
+    // If FALSE, returns original PLA
     for (int ff=0;ff<nfleet;ff++) {
-      bool has_len = CAL_hist.col(ff).sum() > 0 || (msize_type == "length" && msize.col(ff).sum() > 0);
-      if (has_len) {
+      if (has_CAL(ff) || has_mlen(ff)) {
         int b = sel_block(y,ff) - 1;
-        bool len_sel = vul_type(b) == 0 || vul_type(b) == - 1;
+        bool len_sel = vul_type(b) == 0 || vul_type(b) == -1;
         PLAvul_y(ff) = generate_PLAvul(PLA(y), vul_len, b, n_age, nlbin, len_sel);
       }
     }
+    
+    // Calculate this year's CAA, catch, CAL, mean size, then next year's abundance
     for(int a=0;a<n_age;a++) {
       for(int ff=0;ff<nfleet;ff++) {
         CAAtrue(y,a,ff) = vul(y,a,ff) * F(y,ff) * N(y,a) * (1 - exp(-Z(y,a))) / Z(y,a);
@@ -390,10 +422,10 @@ Type RCM(objective_function<Type> *obj) {
         Cpred(y,ff) += CAAtrue(y,a,ff) * C_wt(y,a,ff);
         for(int aa=0;aa<n_age;aa++) CAApred(y,aa,ff) += CAAtrue(y,a,ff) * age_error(a,aa); // a = true, aa = observed ages
         
-        if (CAL_n.col(ff).sum() > 0 || CAL_hist.col(ff).sum() > 0) {
+        if (has_CAL(ff)) {
           for(int len=0;len<nlbin;len++) CALpred(y,len,ff) += CAAtrue(y,a,ff) * PLAvul_y(ff)(a,len);
         }
-        if (msize_type == "length" && !R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
+        if (has_mlen(ff)) {
           for(int len=0;len<nlbin;len++) MLpred(y,ff) += CAAtrue(y,a,ff) * PLAvul_y(ff)(a,len) * lbinmid(len);
         }
       }
@@ -401,14 +433,15 @@ Type RCM(objective_function<Type> *obj) {
       if(a<n_age-1) N(y+1,a+1) = N(y,a) * exp(-Z(y,a));
       if(plusgroup && a==n_age-1) N(y+1,a) += N(y,a) * exp(-Z(y,a));
     }
-    if (msize_type == "length") {
+    
+    if (has_mlen.sum() > 0 || has_mw.sum() > 0) {
       for(int ff=0;ff<nfleet;ff++) {
-        if (!R_IsNA(asDouble(msize.col(ff).sum())) && msize.col(ff).sum() > 0) {
+        if (has_mlen(ff)) {
           MLpred(y,ff) /= CN(y,ff);
+        } else if (has_mw(ff)) {
+          MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
         }
       }
-    } else { //if(msize_type == "weight") 
-      for(int ff=0;ff<nfleet;ff++) MWpred(y,ff) = Cpred(y,ff)/CN(y,ff);
     }
     
     // Calculate next year's biomass excluding age zero
@@ -456,22 +489,20 @@ Type RCM(objective_function<Type> *obj) {
   array<Type> ivul = calc_ivul(ivul_par, ivul_type, lbinmid, n_y, n_age, PLA, iLFS, iL5, iVmaxlen, Linf, 
                                mat, vul, ivul_len, prior, est_ivul);
   vector<Type> q(nsurvey);
-  for(int sur=0;sur<nsurvey;sur++) {
-    bool has_IAL = IAL_n.col(sur).sum() > 0;
-    bool len_sel = ivul_type(sur) == 0 || ivul_type(sur) == -1;
-    bool fleet_sel = ivul_type(sur) > 0;
-    for(int y=0;y<n_y;y++) {
-      if (has_IAL) {
-        if (fleet_sel) {
+  
+  for (int sur=0;sur<nsurvey;sur++) {
+    for (int y=0;y<n_y;y++) {
+      if (has_IAL(sur)) {
+        if (fleet_sel(sur)) {
           int b = sel_block(y,ivul_type(sur)-1) - 1;
           int do_calc = vul_type(b) == 0 || vul_type(b) == -1;
           PLAivul_y(sur) = generate_PLAvul(PLA(y), vul_len, b, n_age, nlbin, do_calc);
         } else {
-          PLAivul_y(sur) = generate_PLAvul(PLA(y), ivul_len, sur, n_age, nlbin, len_sel);
+          PLAivul_y(sur) = generate_PLAvul(PLA(y), ivul_len, sur, n_age, nlbin, len_isel(sur));
         }
       }
         
-      for(int a=0;a<n_age;a++) {
+      for (int a=0;a<n_age;a++) {
         if (I_delta(y,sur) < 0) {
           IAAtrue(y,a,sur) = ivul(y,a,sur) * N(y,a) * (1 - exp(-Z(y,a)))/Z(y,a);
         } else {
@@ -480,11 +511,11 @@ Type RCM(objective_function<Type> *obj) {
         
         IN(y,sur) += IAAtrue(y,a,sur);
 
-        for(int aa=0;aa<n_age;aa++) IAApred(y,aa,sur) += IAAtrue(y,a,sur) * age_error(a,aa);
+        for (int aa=0;aa<n_age;aa++) IAApred(y,aa,sur) += IAAtrue(y,a,sur) * age_error(a,aa);
 
-        if(I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * I_wt(y,a,sur); // Biomass vulnerable to survey
-        if(has_IAL) { // Predict survey length comps if there are data
-          for(int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLAivul_y(sur)(a,len);
+        if (I_units(sur)) Itot(y,sur) += IAAtrue(y,a,sur) * I_wt(y,a,sur); // Biomass vulnerable to survey
+        if (has_IAL(sur)) { // Predict survey length comps if there are data
+          for (int len=0;len<nlbin;len++) IALpred(y,len,sur) += IAAtrue(y,a,sur) * PLAivul_y(sur)(a,len);
         }
       }
     }
@@ -514,14 +545,14 @@ Type RCM(objective_function<Type> *obj) {
 
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
-      if(LWT_index(sur,0) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
+      if(LWT_index(sur,0) > 0 && !CppAD::isnan(I_hist(y,sur))) {
         nll_index(y,sur,0) -= LWT_index(sur,0) * dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), sigma_I(y,sur), true);
         SIMULATE {
           I_hist(y,sur) = exp(rnorm(log(Ipred(y,sur)), sigma_I(y,sur)));
         }
       }
       
-      if(LWT_index(sur,1) > 0 && !R_IsNA(asDouble(IAA_n(y,sur))) && IAA_n(y,sur) > 0) {
+      if(LWT_index(sur,1) > 0 && !CppAD::isnan(IAA_n(y,sur)) && IAA_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
           nll_index(y,sur,1) -= LWT_index(sur,1) * comp_multinom(IAA_hist, IAApred, IN, IAA_n, y, n_age, sur);
         } else if(comp_like == "lognormal") {
@@ -533,7 +564,7 @@ Type RCM(objective_function<Type> *obj) {
         }
       }
       
-      if(LWT_index(sur,2) > 0 && !R_IsNA(asDouble(IAL_n(y,sur))) && IAL_n(y,sur) > 0) {
+      if(LWT_index(sur,2) > 0 && !CppAD::isnan(IAL_n(y,sur)) && IAL_n(y,sur) > 0) {
         if(comp_like == "multinomial") {
           nll_index(y,sur,2) -= LWT_index(sur,2) * comp_multinom(IAL_hist, IALpred, IN, IAL_n, y, nlbin, sur);
         } else if(comp_like == "lognormal") {
@@ -560,19 +591,19 @@ Type RCM(objective_function<Type> *obj) {
       int check2 = (condition(ff) == 2) && (E_hist(y,ff) > 0); // Check for F > 0
       if(check1 || check2) {
         
-        if(nll_C && LWT_fleet(ff,0) > 0 && !R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {
+        if(nll_C && LWT_fleet(ff,0) > 0 && !CppAD::isnan(C_hist(y,ff)) && C_hist(y,ff) > 0) {
           nll_fleet(y,ff,0) -= LWT_fleet(ff,0) * dnorm_(log(C_hist(y,ff)), log(Cpred(y,ff)), sigma_C(y,ff), true);
           
           SIMULATE {
             C_hist(y,ff) = exp(rnorm(log(Cpred(y,ff)), sigma_C(y,ff)));
           }
-        } else if(!R_IsNA(asDouble(C_hist(y,ff))) && C_hist(y,ff) > 0) {
+        } else if(!CppAD::isnan(C_hist(y,ff)) && C_hist(y,ff) > 0) {
           SIMULATE {
             C_hist(y,ff) = Cpred(y,ff);
           }
         }
         
-        if(LWT_fleet(ff,2) > 0 && !R_IsNA(asDouble(CAA_n(y,ff))) && CAA_n(y,ff) > 0) {
+        if(LWT_fleet(ff,2) > 0 && !CppAD::isnan(CAA_n(y,ff)) && CAA_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
             nll_fleet(y,ff,2) -= LWT_fleet(ff,2) * comp_multinom(CAA_hist, CAApred, CN, CAA_n, y, n_age, ff);
           } else if(comp_like == "lognormal") {
@@ -584,7 +615,7 @@ Type RCM(objective_function<Type> *obj) {
           }
         }
         
-        if(LWT_fleet(ff,3) > 0 && !R_IsNA(asDouble(CAL_n(y,ff))) && CAL_n(y,ff) > 0) {
+        if(LWT_fleet(ff,3) > 0 && !CppAD::isnan(CAL_n(y,ff)) && CAL_n(y,ff) > 0) {
           if(comp_like == "multinomial") {
             nll_fleet(y,ff,3) -= LWT_fleet(ff,3) * comp_multinom(CAL_hist, CALpred, CN, CAL_n, y, nlbin, ff);
           } else if(comp_like == "lognormal") {
@@ -596,7 +627,7 @@ Type RCM(objective_function<Type> *obj) {
           }
         }
 
-        if(LWT_fleet(ff,4) > 0 && !R_IsNA(asDouble(msize(y,ff))) && msize(y,ff) > 0) {
+        if(LWT_fleet(ff,4) > 0 && !CppAD::isnan(msize(y,ff)) && msize(y,ff) > 0) {
           if(msize_type == "length") {
             nll_fleet(y,ff,4) -= LWT_fleet(ff,4) * dnorm_(msize(y,ff), MLpred(y,ff), CV_msize(ff) * msize(y,ff), true);
             SIMULATE {

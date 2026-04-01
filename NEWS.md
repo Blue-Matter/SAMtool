@@ -1,5 +1,8 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.9.2 
+- Revision of NA check for CAL and IAL check in RCM (continuing updates from 1.9.0-1)
+
 ## SAMtool 1.9.1
 - Minor update for RCM - uses `IAL_n` (multinomial sample size) to search for index length composition data to make predictions (cannot have NAs in `IAL_n`. Previously, NA's in length composition `IAL_hist` caused issues introduced in 1.9.0. 
 
