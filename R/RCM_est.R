@@ -653,7 +653,9 @@ RCM_posthoc_adjust <- function(report, obj, par = obj$env$last.par.best, dynamic
   nlbin <- length(lmid)
   
   spawn_time_frac <- data$spawn_time_frac
-  if (spawn_time_frac > 0) report$E[length(report$E)] <- NA
+  if (spawn_time_frac > 0) {
+    report$E[length(report$E)] <- report$R[length(report$R)] <- NA
+  }
   if (dynamic_SSB0) {
     report$dynamic_SSB0 <- RCM_dynamic_SSB0(obj, par)
     if (spawn_time_frac > 0) report$dynamic_SSB0[length(report$dynamic_SSB0)] <- NA

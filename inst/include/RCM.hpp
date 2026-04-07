@@ -451,9 +451,10 @@ Type RCM(objective_function<Type> *obj) {
     }
   }
   
-  if(spawn_time_frac > 0) { // Should work properly since spawn_time_frac is identified as DATA_SCALAR
-    R(n_y) = R(n_y-1);
-  } else {
+  // Terminal year + 1 recruitment calculations
+  if(spawn_time_frac == 0) { // Should work properly since spawn_time_frac is identified as DATA_SCALAR
+    for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * fec(n_y,a);
+    
     if(SR_type == "BH") {
       R(n_y) = BH_SR(E(n_y), h, R0, E0_SR);
     } else if(SR_type == "Ricker") {
@@ -461,12 +462,13 @@ Type RCM(objective_function<Type> *obj) {
     } else { // Mesnil-Rochet
       R(n_y) = MesnilRochet_SR(E(n_y), MRgamma, MRRmax, MRhinge);
     }
-    for(int a=1;a<n_age;a++) E(n_y) += N(n_y,a) * fec(n_y,a);
+    N(n_y,0) = R(n_y);
+    
+    // Add age-zero to the total biomass (other age classes calculated in previous year loop)
+    B(n_y) += N(n_y,0) * wt(n_y,0);
+    for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,0,ff) * N(n_y,0) * C_wt(n_y,0,ff);
   }
-  N(n_y,0) = R(n_y);
-  B(n_y) += N(n_y,0) * wt(n_y,0);
-  for(int ff=0;ff<nfleet;ff++) VB(n_y,ff) += vul(n_y,0,ff) * N(n_y,0) * C_wt(n_y,0,ff);
-
+  
   // Calculate for surveys: q, selectivity, and age/length comps
   vector<Type> iLFS(nsurvey);
   vector<Type> iL5(nsurvey);
