@@ -3,6 +3,7 @@ The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-
 ## SAMtool 1.10.0
 - Minor update for RCM - uses `IAL_n` (multinomial sample size) to search for index length composition data to make predictions (cannot have NAs in `IAL_n`. Previously, NA's in length composition `IAL_hist` caused issues introduced in 1.9.0. 
 - RCM reports recruitment of NA (rather than zero) in first projection year if `spawn_time_frac > 0` (spawn timing in middle of time step).
+- Add argument to allow Mohn's rho calculation with `na.rm = TRUE`, e.g., `summary(ret, na.rm = TRUE)`.
 
 ## SAMtool 1.9.0
 - In RCM, adjust length-at-age probability by length selectivity function for prediction of length composition prediction. 

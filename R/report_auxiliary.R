@@ -997,9 +997,9 @@ plot_ogive <- function(Age, ogive, label = "Selectivity") {
 }
 
 
-calculate_Mohn_rho <- function(ts, est = NULL, ts_lab, est_lab = NULL) {
-  rho_ts <- apply(ts, 3, Mohn_rho)
-  rho_est <- if (!is.null(est)) apply(est, 2, Mohn_rho, type = "est") else NULL
+calculate_Mohn_rho <- function(ts, est = NULL, ts_lab, est_lab = NULL, na.rm = FALSE) {
+  rho_ts <- apply(ts, 3, Mohn_rho, na.rm = na.rm)
+  rho_est <- if (!is.null(est)) apply(est, 2, Mohn_rho, type = "est", na.rm = na.rm) else NULL
 
   ans <- matrix(c(rho_ts, rho_est), ncol = 1)
   dimnames(ans) <- list(c(ts_lab, est_lab), "Mohn's rho")
@@ -1007,15 +1007,16 @@ calculate_Mohn_rho <- function(ts, est = NULL, ts_lab, est_lab = NULL) {
 }
 
 
-Mohn_rho <- function(x, type = c("ts", "est")) {
+Mohn_rho <- function(x, type = c("ts", "est"), na.rm = FALSE) {
   type <- match.arg(type)
   if (type == "ts") { # let x be a matrix of nrow = n_peel + 1 and ncol = nyear + 1
     terminal_ind <- apply(x[-1, , drop = FALSE], 1, function(y) sum(!is.na(y)))
+    terminal_ind[!terminal_ind] <- ncol(x)
     n_peel <- length(terminal_ind)
     rho <- diag(x[1:n_peel + 1, terminal_ind, drop = FALSE])/x[1, terminal_ind] - 1
   } else { # let x be a vector of length n_peel + 1
     n_peel <- length(x) - 1
     rho <- x[1:n_peel + 1]/x[1] - 1
   }
-  return(mean(rho))
+  return(mean(rho, na.rm = na.rm))
 }

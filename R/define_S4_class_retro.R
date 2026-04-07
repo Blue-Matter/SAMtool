@@ -136,7 +136,10 @@ setMethod("plot", signature(x = "retro", y = "missing"),
 
 #' @rdname plot.retro
 #' @aliases summary.retro summary,retro-method
+#' @param na.rm Logical, whether NA values should be excluded from Mohn's rho calculation
 #' @exportMethod summary
-setMethod("summary", signature(object = "retro"), function(object) calculate_Mohn_rho(object@TS, ts_lab = attr(object, "TS_lab")))
+setMethod("summary", signature(object = "retro"), function(object, na.rm = FALSE) {
+  calculate_Mohn_rho(object@TS, ts_lab = attr(object, "TS_lab"), na.rm = na.rm)
+})
 
 setMethod("show", signature(object = "retro"), function(object) print(summary(object)))
