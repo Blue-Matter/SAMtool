@@ -35,7 +35,9 @@ sim <- setClass("sim", slots = c(Model = "character",
 #' from simulated data, and process error used to simulate data.
 #' then a nested list of model output (`opt`, `SD`, and `report`).
 #' @export
-setGeneric("simulate", function(object, ...) standardGeneric("simulate"))
+#' @importFrom stats simulate
+NULL
+#setGeneric("simulate", function(object, ...) standardGeneric("simulate"))
 
 
 

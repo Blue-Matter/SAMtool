@@ -9,7 +9,7 @@
 \usage{
 \S4method{plot}{retro,missing}(x, color = NULL)
 
-\S4method{summary}{retro}(object)
+\S4method{summary}{retro}(object, na.rm = FALSE)
 }
 \arguments{
 \item{x}{An object of class \linkS4class{retro}.}
@@ -17,6 +17,8 @@
 \item{color}{An optional character vector of colors for plotting.}
 
 \item{object}{An object of class \linkS4class{retro}.}
+
+\item{na.rm}{Logical, whether NA values should be excluded from Mohn's rho calculation}
 }
 \value{
 A series of plots showing retrospective patterns in fishing mortality, spawning biomass, recruitment, etc.

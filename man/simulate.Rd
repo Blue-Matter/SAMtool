@@ -8,8 +8,6 @@
 \alias{simulate.RCModel}
 \title{Generate simulated data from TMB models in SAMtool}
 \usage{
-simulate(object, ...)
-
 \S4method{simulate}{Assessment}(
   object,
   nsim = 1,
@@ -33,8 +31,6 @@ simulate(object, ...)
 \arguments{
 \item{object}{An object of class \linkS4class{Assessment} or \linkS4class{RCModel} containing the fitted model.}
 
-\item{...}{Additional arguments}
-
 \item{nsim}{Number of simulations}
 
 \item{seed}{Used for the random number generator}
@@ -44,6 +40,8 @@ simulate(object, ...)
 \item{refit}{Logical, whether to re-fit the model for each simulated dataset.}
 
 \item{cores}{The number of CPUs for parallel processing for model re-fitting if \code{refit = TRUE}.}
+
+\item{...}{Additional arguments}
 }
 \value{
 A \linkS4class{sim} object returning the original data, simulated data, original parameters, parameters estimated
