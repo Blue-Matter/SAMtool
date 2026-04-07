@@ -103,7 +103,7 @@ Type SP(objective_function<Type> *obj) {
 
   for(int sur=0;sur<I_hist.cols();sur++) {
     for(int y=0;y<ny;y++) {
-      if(I_lambda(sur) > 0 && !R_IsNA(asDouble(I_hist(y,sur)))) {
+      if(I_lambda(sur) > 0 && !CppAD::isnan(I_hist(y,sur))) {
         if(fix_sigma) {
           nll_comp(sur) -= dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), I_sd(y,sur), true);
           SIMULATE {

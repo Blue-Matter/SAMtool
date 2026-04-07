@@ -159,7 +159,7 @@ Type cDD(objective_function<Type> *obj) {
 
   for(int sur=0;sur<nsurvey;sur++) {
     for(int tt=0;tt<ny;tt++) {
-      if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(tt,sur)))) {
+      if(LWT(sur) > 0 && !CppAD::isnan(I_hist(tt,sur))) {
         if(fix_sigma) {
           nll_comp(sur) -= dnorm_(log(I_hist(tt,sur)), log(Ipred(tt,sur)), I_sd(tt,sur), true);
           
@@ -180,7 +180,7 @@ Type cDD(objective_function<Type> *obj) {
   }
   
   for(int tt=0;tt<ny;tt++) {
-    if(LWT(nsurvey) > 0 && !R_IsNA(asDouble(MW_hist(tt)))) {
+    if(LWT(nsurvey) > 0 && !CppAD::isnan(MW_hist(tt))) {
       nll_comp(nsurvey) -= dnorm(log(MW_hist(tt)), log(MWpred(tt)), sigma_W, true);
       
       SIMULATE {

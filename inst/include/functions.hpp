@@ -113,7 +113,7 @@ Type calc_sigma(vector<Type> I_y, vector<Type> Ipred_y) {
   Type n_y = 0.;
 
   for(int y=0;y<I_y.size();y++) {
-    if(!R_IsNA(asDouble(I_y(y))) && I_y(y)>0) {
+    if(!CppAD::isnan(I_y(y)) && I_y(y)>0) {
       sum_square += (log(I_y(y)/Ipred_y(y))) * (log(I_y(y)/Ipred_y(y)));
       n_y += 1.;
     }
@@ -142,7 +142,7 @@ Type calc_q(vector<Type> I_y, vector<Type> B_y) {
   Type n_y = 0.;
 
   for(int y=0;y<I_y.size();y++) {
-    if(!R_IsNA(asDouble(I_y(y))) && I_y(y)>0) {
+    if(!CppAD::isnan(I_y(y)) && I_y(y)>0) {
       num += log(I_y(y)/B_y(y));
       n_y += 1.;
     }

@@ -141,7 +141,7 @@ Type VPA(objective_function<Type> *obj) {
   nll_comp.setZero();
   for(int sur=0;sur<nsurvey;sur++) {
     for(int y=0;y<n_y;y++) {
-      if(LWT(sur) > 0 && !R_IsNA(asDouble(I_hist(y,sur))) && I_hist(y,sur) > 0) {
+      if(LWT(sur) > 0 && !CppAD::isnan(I_hist(y,sur)) && I_hist(y,sur) > 0) {
         nll_comp(sur) -= dnorm_(log(I_hist(y,sur)), log(Ipred(y,sur)), I_sd(y,sur), true);
         SIMULATE {
           I_hist(y,sur) = exp(rnorm(log(Ipred(y,sur)), I_sd(y,sur)));
