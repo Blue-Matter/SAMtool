@@ -111,8 +111,9 @@ Functions to evaluate behavior of assessment models.
 - [`profile(`*`<Assessment>`*`)`](https://samtool.openmse.com/reference/profile.md)
   [`profile(`*`<RCModel>`*`)`](https://samtool.openmse.com/reference/profile.md)
   : Profile likelihood of assessment models
-- [`simulate()`](https://samtool.openmse.com/reference/simulate.md) :
-  Generate simulated data from TMB models in SAMtool
+- [`simulate(`*`<Assessment>`*`)`](https://samtool.openmse.com/reference/simulate.md)
+  [`simulate(`*`<RCModel>`*`)`](https://samtool.openmse.com/reference/simulate.md)
+  : Generate simulated data from TMB models in SAMtool
 - [`retrospective()`](https://samtool.openmse.com/reference/retrospective.md)
   : Retrospective analysis of assessment models
 - [`retrospective_AM()`](https://samtool.openmse.com/reference/retrospective_AM.md)

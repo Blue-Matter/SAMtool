@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SAMtool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,8 +32,11 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.9.1" id="samtool-191">SAMtool 1.9.1<a class="anchor" aria-label="anchor" href="#samtool-191"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.10.0" id="samtool-1100">SAMtool 1.10.0<a class="anchor" aria-label="anchor" href="#samtool-1100"></a></h2>
 <ul><li>Minor update for RCM - uses <code>IAL_n</code> (multinomial sample size) to search for index length composition data to make predictions (cannot have NAs in <code>IAL_n</code>. Previously, NA’s in length composition <code>IAL_hist</code> caused issues introduced in 1.9.0.</li>
+<li>RCM reports recruitment of NA (rather than zero) in first projection year if <code>spawn_time_frac &gt; 0</code> (spawn timing in middle of time step).</li>
+<li>Add argument to allow Mohn’s rho calculation with <code>na.rm = TRUE</code>, e.g., <code>summary(ret, na.rm = TRUE)</code>.</li>
+<li>Import <code>simulate</code> generic from stats package</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.9.0" id="samtool-190">SAMtool 1.9.0<a class="anchor" aria-label="anchor" href="#samtool-190"></a></h2><p class="text-muted">CRAN release: 2025-10-21</p>

@@ -6,8 +6,6 @@ error) from the likelihood function.
 ## Usage
 
 ``` r
-simulate(object, ...)
-
 # S4 method for class 'Assessment'
 simulate(
   object,
@@ -40,10 +38,6 @@ simulate(
   or [RCModel](https://samtool.openmse.com/reference/RCModel-class.md)
   containing the fitted model.
 
-- ...:
-
-  Additional arguments
-
 - nsim:
 
   Number of simulations
@@ -64,6 +58,10 @@ simulate(
 
   The number of CPUs for parallel processing for model re-fitting if
   `refit = TRUE`.
+
+- ...:
+
+  Additional arguments
 
 ## Value
 

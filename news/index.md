@@ -1,11 +1,16 @@
 # Changelog
 
-## SAMtool 1.9.1
+## SAMtool 1.10.0
 
 - Minor update for RCM - uses `IAL_n` (multinomial sample size) to
   search for index length composition data to make predictions (cannot
   have NAs in `IAL_n`. Previously, NA’s in length composition `IAL_hist`
   caused issues introduced in 1.9.0.
+- RCM reports recruitment of NA (rather than zero) in first projection
+  year if `spawn_time_frac > 0` (spawn timing in middle of time step).
+- Add argument to allow Mohn’s rho calculation with `na.rm = TRUE`,
+  e.g., `summary(ret, na.rm = TRUE)`.
+- Import `simulate` generic from stats package
 
 ## SAMtool 1.9.0
 

@@ -111,5 +111,5 @@ r <- RCM_assess(Data = SimulatedData)
 myMP <- make_MP(RCM_assess, HCR_MSY)
 myMP(x = 1, Data = SimulatedData)
 #> TAC (median) 
-#>     23620.79 
+#>     25210.27 
 ```

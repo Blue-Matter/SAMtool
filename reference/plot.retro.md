@@ -9,7 +9,7 @@ plot and summary functions for retro object.
 plot(x, color = NULL)
 
 # S4 method for class 'retro'
-summary(object)
+summary(object, na.rm = FALSE)
 ```
 
 ## Arguments
@@ -27,6 +27,11 @@ summary(object)
 
   An object of class
   [retro](https://samtool.openmse.com/reference/retro-class.md).
+
+- na.rm:
+
+  Logical, whether NA values should be excluded from Mohn's rho
+  calculation
 
 ## Value
 
