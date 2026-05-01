@@ -15,3 +15,5 @@
 ^LICENSE\.md$
 ^codecov\.yml$
 ^scratch$
+^\.positai$
+^\.claude$
