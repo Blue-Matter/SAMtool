@@ -79,7 +79,7 @@ out <- RCM(OM = pcod$OM, data = pcod$data,
 #> ℹ Generating additional model fit from mean values of parameters in the operating model...
 #> ✔ Updating operating model:
 #>   
-#> ✔ Range of unfished age-0 recruitment (OM@cpars$R0): 6383.45 - 13782.83
+#> ✔ Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.79
 #> ✔ Range of initial spawning depletion: 0.44 - 1.45
 #> ✔ Range of spawning depletion (OM@cpars$D): 0.14 - 0.45
 #> ✔ Historical F set with OM@cpars$Find and OM@cpars$qs.

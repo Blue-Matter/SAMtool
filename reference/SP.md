@@ -336,10 +336,10 @@ res <- SP(Data = swordfish, start = start)
 
 # \donttest{
 plot(res)
-#> ℹ Writing markdown file: /tmp/RtmpRktVJQ/report_SP.Rmd
-#> ℹ Rendering markdown file: /tmp/RtmpRktVJQ/report_SP.Rmd
+#> ℹ Writing markdown file: /tmp/RtmpNbrYWx/report_SP.Rmd
+#> ℹ Rendering markdown file: /tmp/RtmpNbrYWx/report_SP.Rmd
 #> ℹ See help(plot.Assessment) to adjust report and file directory.
-#> ✔ Rendered file: /tmp/RtmpRktVJQ/report_SP.html
+#> ✔ Rendered file: /tmp/RtmpNbrYWx/report_SP.html
 profile(res, FMSY = seq(0.1, 0.4, 0.01))
 
 #> An object of class "prof"
@@ -408,10 +408,10 @@ res_SS <- SP_SS(Data = swordfish, start = list(dep = 0.875, sigma = 0.1, tau = 0
 
 # \donttest{
 plot(res_SS)
-#> ℹ Writing markdown file: /tmp/RtmpRktVJQ/report_SP_SS.Rmd
-#> ℹ Rendering markdown file: /tmp/RtmpRktVJQ/report_SP_SS.Rmd
+#> ℹ Writing markdown file: /tmp/RtmpNbrYWx/report_SP_SS.Rmd
+#> ℹ Rendering markdown file: /tmp/RtmpNbrYWx/report_SP_SS.Rmd
 #> ℹ See help(plot.Assessment) to adjust report and file directory.
-#> ✔ Rendered file: /tmp/RtmpRktVJQ/report_SP_SS.html
+#> ✔ Rendered file: /tmp/RtmpNbrYWx/report_SP_SS.html
 # }
 
 #### Fox model

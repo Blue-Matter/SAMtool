@@ -17,6 +17,7 @@ You can install the released version of SAMtool from
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
+
 install.packages("SAMtool")
 ```
 
@@ -24,6 +25,7 @@ And the development version from
 [GitHub](https://github.com/Blue-Matter/SAMtool) with:
 
 ``` r
+
 # install.packages("remotes")
 remotes::install_github("Blue-Matter/SAMtool")
 ```
