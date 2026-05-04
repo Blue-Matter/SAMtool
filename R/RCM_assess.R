@@ -363,7 +363,7 @@ RCM_assess_ref <- function(obj, report, yref = 1:obj$env$data$n_y) {
     BMSY <- opt3["B"]
     EMSY <- opt3["E"]
     
-    Fvec <- seq(0, 2.5 * FMSY, length.out = 100)
+    Fvec <- seq(0, max(2.5 * FMSY, 4), length.out = 100)
     
     # Yield curve
     yield <- lapply(Fvec, yield_fn_SCA, M = M, mat = mat, weight = weight, fec = fec, vul = vul, SR = SR, 
