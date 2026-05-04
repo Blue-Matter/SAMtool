@@ -11,6 +11,8 @@
 - Add argument to allow Mohn’s rho calculation with `na.rm = TRUE`,
   e.g., `summary(ret, na.rm = TRUE)`.
 - Import `simulate` generic from stats package
+- Update internal `RCM_assess` functions for better SPR search (avoid
+  errors in selectivity and wider range of F)
 
 ## SAMtool 1.9.0
 
