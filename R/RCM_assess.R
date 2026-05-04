@@ -327,7 +327,21 @@ RCM_assess_ref <- function(obj, report, yref = 1:obj$env$data$n_y) {
     fec <- obj$env$data$fec[y, ]
     spawn_time_frac <- obj$env$data$spawn_time_frac
     
-    vul <- report$F_at_age[y, ]/max(report$F_at_age[y, ])
+    nf <- dim(report$vul)[3]
+    if (nf == 1) {
+      vul <- report$vul[y, , nf]
+    } else {
+      vul <- report$F_at_age[y, ]/max(report$F_at_age[y, ])
+      
+      # Loop that searches for previous years with F > 0 to calculate selectivity
+      if (all(is.na(vul))) yvul <- y
+      while (all(is.na(vul))) {
+        yvul <- yvul - 1
+        vul <- report$F_at_age[yvul, ]/max(report$F_at_age[yvul, ])
+        if (all(!is.na(vul)) || yvul == 1) break
+      }
+    }
+    
     SR <- obj$env$data$SR_type
     catch_eq <- "Baranov"
     tv_M <- "none"
