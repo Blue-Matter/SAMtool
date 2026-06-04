@@ -34,10 +34,11 @@ RCM2MOM <- function(RCModel) {
   
   if (.hasSlot(RCModel, "report")) {
     report <- RCModel@report
+    if (length(report) == 1) report <- lapply(1:MOM@nsim, function(...) RCModel@report[[1]])
   } else {
     report <- RCModel@Misc
+    if (length(report) == 1) report <- lapply(1:MOM@nsim, function(...) RCModel@Misc[[1]])
   }
-  if (length(report) == 1) report <- lapply(1:MOM@nsim, function(...) RCModel@Misc[[1]])
   cpars <- lapply(1:nf, function(f) {
     cp <- RCModel@OM@cpars
     
