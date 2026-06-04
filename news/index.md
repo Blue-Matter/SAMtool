@@ -1,5 +1,9 @@
 # Changelog
 
+## SAMtool 1.11.0
+
+- Fix `plot(RCM)` when `OM@nsim = 1`
+
 ## SAMtool 1.10.0
 
 - Minor update for RCM - uses `IAL_n` (multinomial sample size) to
