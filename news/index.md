@@ -3,6 +3,8 @@
 ## SAMtool 1.11.0
 
 - Fix `plot(RCM)` when `OM@nsim = 1`
+- Fix `RCM2MOM` when there is only one single fit (identical
+  simulations).
 
 ## SAMtool 1.10.0
 

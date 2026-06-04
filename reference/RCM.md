@@ -792,9 +792,9 @@ out <- RCM(OM = pcod$OM, data = pcod$data,
 #> ✔ Historical indices added to OM@cpars$Data@AddInd.
 #> ✔ Complete.
 plot(out, s_name = colnames(pcod$data@Index))
-#> ℹ Rendering markdown file: /tmp/Rtmpo7tdE8/RCM.Rmd
+#> ℹ Rendering markdown file: /tmp/RtmpANgsKg/RCM.Rmd
 #> ℹ See help(plot.RCModel) to adjust report and file directory.
-#> ✔ Rendered file: /tmp/Rtmpo7tdE8/RCM.html
+#> ✔ Rendered file: /tmp/RtmpANgsKg/RCM.html
 
 # Alternative OM with age-3 maturity and selectivity instead.
 out_age3 <- local({
@@ -859,8 +859,8 @@ out_age3 <- local({
   
 compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 maturity")),
             s_name = colnames(pcod$data@Index))
-#> ℹ Rendering markdown file: /tmp/Rtmpo7tdE8/compare_RCM.Rmd
-#> ✔ Rendered file: /tmp/Rtmpo7tdE8/compare_RCM.html
+#> ℹ Rendering markdown file: /tmp/RtmpANgsKg/compare_RCM.Rmd
+#> ✔ Rendered file: /tmp/RtmpANgsKg/compare_RCM.html
              
 Hist <- runMSE(out@OM, Hist = TRUE)            
 #> → Loading operating model
