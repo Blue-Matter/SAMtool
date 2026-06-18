@@ -1,17 +1,10 @@
 # Changelog
 
-## SAMtool 1.11.0
+## SAMtool 1.9.2
 
 - Fix `plot(RCM)` when `OM@nsim = 1`
 - Fix `RCM2MOM` when there is only one single fit (identical
   simulations).
-
-## SAMtool 1.10.0
-
-- Minor update for RCM - uses `IAL_n` (multinomial sample size) to
-  search for index length composition data to make predictions (cannot
-  have NAs in `IAL_n`. Previously, NA’s in length composition `IAL_hist`
-  caused issues introduced in 1.9.0.
 - RCM reports recruitment of NA (rather than zero) in first projection
   year if `spawn_time_frac > 0` (spawn timing in middle of time step).
 - Add argument to allow Mohn’s rho calculation with `na.rm = TRUE`,
@@ -19,6 +12,15 @@
 - Import `simulate` generic from stats package
 - Update internal `RCM_assess` functions for better SPR search (avoid
   errors in selectivity and wider range of F)
+
+## SAMtool 1.9.1
+
+CRAN release: 2026-01-15
+
+- Minor update for RCM - uses `IAL_n` (multinomial sample size) to
+  search for index length composition data to make predictions (cannot
+  have NAs in `IAL_n`. Previously, NA’s in length composition `IAL_hist`
+  caused issues introduced in 1.9.0.
 
 ## SAMtool 1.9.0
 
