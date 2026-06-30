@@ -100,7 +100,7 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
       }
     } else {
       // Dome or logistic sel
-      if(est_vul(1,b)) prior -= dnorm_(vul_par(1,b), Type(0), Type(3), true);
+      if(est_vul(1,b)) prior -= dnorm_(vul_par(1,b), Type(0), Type(2), true);
       
       Type ilogit_x = invlogit(vul_par(0,b));
       if(est_vul(0,b)) {
@@ -220,7 +220,7 @@ array<Type> calc_ivul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> l
     } else if(vul_type(ff) > 0) { // Index mirrored to fleet
       vul.col(ff) = fleet_var.col(vul_type(ff) - 1);
     } else { // Logistic or dome vul_type %in% c(0, -1, -5, -6)
-      if(est_vul(1,ff)) prior -= dnorm_(vul_par(1,ff), Type(0), Type(3), true);
+      if(est_vul(1,ff)) prior -= dnorm_(vul_par(1,ff), Type(0), Type(2), true);
       
       Type ilogit_x = invlogit(vul_par(0,ff));
       if(est_vul(0,ff)) {
