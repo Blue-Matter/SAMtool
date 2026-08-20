@@ -153,7 +153,7 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
                  start = start, map = map, dots = dots)
   
   conv <- fit$report$conv
-  highF <- any(fit$report$F >= max_F)
+  highF <- any(fit$report$F >= max_F, na.rm = TRUE)
   if (highF) warning("Model had F on the upper boundary.\n")
   
   NaF <- any(is.na(fit$report$F) | is.infinite(fit$report$F))
