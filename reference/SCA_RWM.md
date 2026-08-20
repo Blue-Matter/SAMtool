@@ -305,9 +305,9 @@ res_5r <- SCA_RWM(Data = MSEtool::SimulatedData,
                   start = list(M_start = 0.4, tau_M = 0.001))
 res_5r@SSB0 # SSB0 reported (see also res_5r@TMB_report$new_E0)
 #>        B 
-#> 26454.48 
+#> 26454.56 
 res_5r@TMB_report$E0 # SSB0 of Year 1 M
-#> [1] 14910.57
+#> [1] 14910.62
 
 # \donttest{
 compare_models(res, res2, res3)
