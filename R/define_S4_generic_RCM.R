@@ -33,6 +33,7 @@
 #' Not used when data are provided in a [RCMdata-class] object.
 #' @param prior A named list for the parameters of any priors to be added to the model. See below.
 #' @param max_F The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update `OM@maxF`. See also `drop_highF`.
+#' Typically a single numeric, but can also be a matrix by year and fleet.
 #' @param cores Integer for the number of CPU cores (set greater than 1 for parallel processing).
 #' @param integrate Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).
 #' @param mean_fit Logical, whether to run an additional with mean values of life history parameters from the OM.

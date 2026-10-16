@@ -305,7 +305,7 @@ Type MesnilRochet_SR(Type x, Type gamma, Type Rmax, Type Shinge, int Sp = 1) {
 // We iteratively solve for x where x_next = x_previous - g(x)/g'(x)
 template<class Type>
 vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, array<Type> C_wt, matrix<Type> VB_out, array<Type> vul,
-                      Type max_F, int y, int max_age, int nfleet, int n_itF, Type &penalty) {
+                      matrix<Type> max_F, int y, int max_age, int nfleet, int n_itF, Type &penalty) {
 
   vector<Type> F_out(nfleet);
   vector<Type> x_loop(nfleet);
@@ -353,8 +353,8 @@ vector<Type> Newton_F(matrix<Type> C_hist, matrix<Type> N, matrix<Type> M, array
 
     } else {
       for(int ff=0;ff<nfleet;ff++) {
-        Type tmp = max_F - F_loop(ff);
-        F_out(ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F_loop(ff)); //posfun
+        Type tmp = max_F(y,ff) - F_loop(ff);
+        F_out(ff) = CppAD::CondExpLt(tmp, Type(0), max_F(y,ff) - posfun(tmp, Type(0), penalty), F_loop(ff)); //posfun
       }
     }
   }

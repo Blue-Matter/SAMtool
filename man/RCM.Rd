@@ -132,7 +132,8 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 \item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 
-\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.}
+\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.
+Typically a single numeric, but can also be a matrix by year and fleet.}
 
 \item{cores}{Integer for the number of CPU cores (set greater than 1 for parallel processing).}
 

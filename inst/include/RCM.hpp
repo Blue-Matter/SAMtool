@@ -72,7 +72,7 @@ Type RCM(objective_function<Type> *obj) {
   DATA_MATRIX(LWT_index); // Likelihood weights for the indices data
   DATA_STRING(comp_like); // Distribution for age/length comps (multinomial, lognormal, mvlogistic, dirmult1, dirmult2)
 
-  DATA_SCALAR(max_F);     // Maximum F in the model
+  DATA_MATRIX(max_F);     // Maximum F in the model
   DATA_SCALAR(rescale);   // R0 rescaler
   DATA_INTEGER(ageM);     // Age of maturity used for averaging E0 and EPR0 for stock-recruit relationship
 
@@ -205,8 +205,8 @@ Type RCM(objective_function<Type> *obj) {
     if(condition(ff) != 2 && C_eq(ff)>0) F_equilibrium(ff) = exp(log_F_equilibrium(ff)); // catch/catch2
     if(condition(ff) == 2 && E_eq(ff)>0) F_equilibrium(ff) = q_effort(ff) * E_eq(ff);    // effort
     if(condition(ff) == 0) { //catch - set up F in midpoint of time series
-      Type tmp = max_F - exp(log_F_dev(yind_F(ff),ff));
-      F(yind_F(ff),ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), exp(log_F_dev(yind_F(ff),ff)));
+      Type tmp = max_F(yind_F(ff),ff) - exp(log_F_dev(yind_F(ff),ff));
+      F(yind_F(ff),ff) = CppAD::CondExpLt(tmp, Type(0), max_F(yind_F(ff),ff) - posfun(tmp, Type(0), penalty), exp(log_F_dev(yind_F(ff),ff)));
     }
   }
 
@@ -362,12 +362,12 @@ Type RCM(objective_function<Type> *obj) {
       for(int ff=0;ff<nfleet;ff++) {
         if(condition(ff) == 0) { // catch
           if(y != yind_F(ff)) {
-            Type tmp = max_F - F(yind_F(ff),ff) * exp(log_F_dev(y,ff)); // annual F as deviation from F in middle of time series
-            F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
+            Type tmp = max_F(y,ff) - F(yind_F(ff),ff) * exp(log_F_dev(y,ff)); // annual F as deviation from F in middle of time series
+            F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F(y,ff) - posfun(tmp, Type(0), penalty), F(yind_F(ff),ff) * exp(log_F_dev(y,ff)));
           }
         } else if(condition(ff) == 2) { //effort
-          Type tmp = max_F - q_effort(ff) * E_hist(y,ff);
-          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
+          Type tmp = max_F(y,ff) - q_effort(ff) * E_hist(y,ff);
+          F(y,ff) = CppAD::CondExpLt(tmp, Type(0), max_F(y,ff) - posfun(tmp, Type(0), penalty), q_effort(ff) * E_hist(y,ff));
         }
       }
     }

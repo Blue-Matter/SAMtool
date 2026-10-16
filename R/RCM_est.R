@@ -182,7 +182,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     SR_type = SR_type, 
     LWT_fleet = LWT_fleet, LWT_index = LWT_index, 
     comp_like = comp_like,
-    max_F = max_F, 
+    max_F = matrix(max_F, nyears, nfleet), 
     rescale = dots$rescale, 
     ageM = min(nyears, ceiling(StockPars$ageMarray[x, 1])),
     yind_F = as.integer(rep(0.5 * nyears, nfleet)), 

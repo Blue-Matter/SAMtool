@@ -42,8 +42,15 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   RCMdata@Misc$max_F <- max_F
   if (length(dots)) RCMdata@Misc <- c(RCMdata@Misc, dots)
   
-  OM@maxF <- max_F
-  if (!silent) message("Maximum F in RCM will be ", max_F, ". OM@maxF is also updated.\n\n")
+  OM@maxF <- max(max_F)
+  if (!silent) {
+    if (is.matrix(max_F)) {
+      message("Maximum F in RCM will vary between ", paste(range(max_F), collapse = "-"), ".")
+    } else {
+      message("Maximum F in RCM will be ", max_F, "")
+    }
+    message("Update OM@maxF = ", OM@maxF, ".\n\n")
+  }
   
   # No comp data
   if (!any(RCMdata@CAA > 0, na.rm = TRUE) && !any(RCMdata@CAL > 0, na.rm = TRUE)) {
@@ -169,7 +176,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
     }
   }
   
-  highF <- vapply(res, function(x) max(getElement(x, "F"), na.rm = TRUE) >= max_F, logical(1))
+  highF <- vapply(res, function(x) any(getElement(x, "F") >= max_F, na.rm = TRUE), logical(1))
   if (length(res) == 1) {
     if (highF) warning("Model had F on the upper boundary.\n")
   } else if (sum(highF)) {
