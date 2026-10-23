@@ -607,29 +607,32 @@ process_AddIndV <- function(sur, report, s_sel, n_age, nfleet, nyears) { # Retur
 }
 
 #' @importFrom pbapply pbsapply
-RCM_retro <- function(x, nyr = 5) {
+RCM_retro <- function(x, nyr = 5, y) {
   if (!length(x@mean_fit)) stop("Re-run RCM() with argument `mean_fit = TRUE`", .call = FALSE)
   
   data <- x@mean_fit$obj$env$data
   n_y <- data$n_y
   
+  if (missing(y)) y <- seq(0, nyr)
+  n_ret <- length(y)
+    
   if (data$nfleet > 1) {
-    retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, data$nfleet + 4))
+    retro_ts <- array(NA, dim = c(n_ret, n_y + 1, data$nfleet + 4))
     TS_var <- c(paste("Fleet", 1:data$nfleet, "F"), "Apical F", "SSB", "SSB_SSB0", "R")
   } else {
-    retro_ts <- array(NA, dim = c(nyr+1, n_y + 1, 4))
+    retro_ts <- array(NA, dim = c(n_ret, n_y + 1, 4))
     TS_var <- c("Apical F", "SSB", "SSB_SSB0", "R")
   }
-  dimnames(retro_ts) <- list(Peel = 0:nyr, Year = (x@OM@CurrentYr - n_y):x@OM@CurrentYr + 1, Var = TS_var)
+  dimnames(retro_ts) <- list(Peel = y, Year = (x@OM@CurrentYr - n_y):x@OM@CurrentYr + 1, Var = TS_var)
   
-  new_args <- lapply(n_y - 0:nyr, RCM_retro_subset, 
+  new_args <- lapply(n_y - y, RCM_retro_subset, 
                      data = data, 
                      params = clean_tmb_parameters(x@mean_fit$obj), 
                      map = x@mean_fit$obj$env$map)
-  lapply_fn <- function(i, new_args, x) {
-    obj2 <- MakeADFun(data = new_args[[i+1]]$data, parameters = new_args[[i+1]]$params, map = new_args[[i+1]]$map,
+  lapply_fn <- function(i, new_args, x, n_y) {
+    obj2 <- MakeADFun(data = new_args[[i]]$data, parameters = new_args[[i]]$params, map = new_args[[i]]$map,
                       random = x@mean_fit$obj$env$random, DLL = "SAMtool", silent = TRUE)
-    if (any(new_args[[i+1]]$data$condition == "1L")) {
+    if (any(new_args[[i]]$data$condition == "1L")) {
       if (any(is.na(obj2$report(obj2$par)$F)) || any(is.infinite(obj2$report(obj2$par)$F))) {
         for(ii in 1:10) {
           obj2$par["R0x"] <- 0.5 + obj2$par["R0x"]
@@ -644,21 +647,22 @@ RCM_retro <- function(x, nyr = 5) {
     if (!is.character(opt2)) {
       report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2)
       
-      FMort <- rbind(report$F, matrix(NA, i + 1, ncol(report$F)))
-      if (data$nfleet > 1) FMort <- cbind(FMort, apply(report$F_at_age, 1, max, na.rm = TRUE) %>% c(rep(NA, i+1)))
+      y_NA <- n_y - nrow(report$F) + 1
+      FMort <- rbind(report$F, matrix(NA, y_NA, ncol(report$F)))
+      if (data$nfleet > 1) FMort <- cbind(FMort, apply(report$F_at_age, 1, max, na.rm = TRUE) %>% c(rep(NA, y_NA)))
       
-      SSB <- c(report$E, rep(NA, i))
+      SSB <- c(report$E, rep(NA, y_NA - 1))
       SSB_SSB0 <- SSB/report$E0_SR
-      R <- c(report$R, rep(NA, i))
+      R <- c(report$R, rep(NA, y_NA - 1))
       
-      retro_ts[i+1, , ] <<- cbind(FMort, SSB, SSB_SSB0, R)
+      retro_ts[i, , ] <<- cbind(FMort, SSB, SSB_SSB0, R)
       
       return(SD$pdHess)
     }
     return(FALSE)
   }
   
-  conv <- pbsapply(0:nyr, lapply_fn, new_args = new_args, x = x, 
+  conv <- pbsapply(1:length(y), lapply_fn, new_args = new_args, x = x, n_y = n_y,
                    cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
   if (any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
   

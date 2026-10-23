@@ -7,6 +7,7 @@
 #'
 #' @param x An S4 object of class [Assessment-class] or [RCModel-class].
 #' @param nyr The maximum number of years to remove for the retrospective analysis.
+#' @param y Optional vector for number of years to remove. Use positive numbers and include zero as the first value.
 #' @param figure Indicates whether plots will be drawn.
 #' @param ... More arguments.
 #' @return A list with an array of model output and of model estimates from
@@ -47,12 +48,12 @@ setMethod("retrospective", signature(x = "Assessment"),
 #' @aliases retrospective,RCModel-method
 #' @exportMethod retrospective
 setMethod("retrospective", signature(x = "RCModel"),
-          function(x, nyr = 5, figure = TRUE) {
+          function(x, nyr = 5, y, figure = TRUE) {
             if (figure) {
               old_par <- par(no.readonly = TRUE)
               on.exit(par(old_par))
             }
-            res <- RCM_retro(x, nyr)
+            res <- RCM_retro(x, nyr, y)
             if (figure) plot(res)
             return(res)
           })
