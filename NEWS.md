@@ -1,5 +1,9 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 1.10.0
+- `max_F` in `RCM` can now be a matrix by year and fleet
+- Fix erroneous check in `RCMdata@I_delta` (introduced in version 1.9.0)
+
 ## SAMtool 1.9.2
 - Fix `plot(RCM)` when `OM@nsim = 1`
 - Fix `RCM2MOM` when there is only one single fit (identical simulations).
