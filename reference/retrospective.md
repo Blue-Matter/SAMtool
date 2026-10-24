@@ -12,7 +12,7 @@ retrospective(x, ...)
 retrospective(x, nyr = 5, figure = TRUE)
 
 # S4 method for class 'RCModel'
-retrospective(x, nyr = 5, figure = TRUE)
+retrospective(x, nyr = 5, y, figure = TRUE)
 ```
 
 ## Arguments
@@ -34,6 +34,11 @@ retrospective(x, nyr = 5, figure = TRUE)
 - figure:
 
   Indicates whether plots will be drawn.
+
+- y:
+
+  Optional vector for number of years to remove. Use positive numbers
+  and include zero as the first value.
 
 ## Value
 

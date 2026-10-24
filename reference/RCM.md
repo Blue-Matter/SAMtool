@@ -201,7 +201,8 @@ RCM(
 
   The maximum F for any fleet in the scoping model (higher F's in the
   model are penalized in the objective function). This argument will
-  also update `OM@maxF`. See also `drop_highF`.
+  also update `OM@maxF`. See also `drop_highF`. Typically a single
+  numeric, but can also be a matrix by year and fleet.
 
 - cores:
 
@@ -754,7 +755,8 @@ out <- RCM(OM = pcod$OM, data = pcod$data,
 #> ✔ Checking OM and getting biological parameters...
 #> ✔ Mean weight data found.
 #> ✔ Passing user arguments (LWT, map, start, prior, etc.) to RCMdata@Misc..
-#> ✔ Maximum F in RCM will be 3. OM@maxF is also updated.
+#> ✔ Maximum F in RCM will be 3
+#> ✔ Update OM@maxF = 3.
 #>   
 #> ℹ No fishery length or age compositions were provided. Selectivity is fixed to values from OM.
 #>   
@@ -774,7 +776,7 @@ out <- RCM(OM = pcod$OM, data = pcod$data,
 #> ℹ Generating additional model fit from mean values of parameters in the operating model...
 #> ✔ Updating operating model:
 #>   
-#> ✔ Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.79
+#> ✔ Range of unfished age-0 recruitment (OM@cpars$R0): 6383.45 - 13782.83
 #> ✔ Range of initial spawning depletion: 0.44 - 1.45
 #> ✔ Range of spawning depletion (OM@cpars$D): 0.14 - 0.45
 #> ✔ Historical F set with OM@cpars$Find and OM@cpars$qs.
@@ -792,9 +794,9 @@ out <- RCM(OM = pcod$OM, data = pcod$data,
 #> ✔ Historical indices added to OM@cpars$Data@AddInd.
 #> ✔ Complete.
 plot(out, s_name = colnames(pcod$data@Index))
-#> ℹ Rendering markdown file: /tmp/RtmpHHw9tN/RCM.Rmd
+#> ℹ Rendering markdown file: /tmp/RtmpxfgWRt/RCM.Rmd
 #> ℹ See help(plot.RCModel) to adjust report and file directory.
-#> ✔ Rendered file: /tmp/RtmpHHw9tN/RCM.html
+#> ✔ Rendered file: /tmp/RtmpxfgWRt/RCM.html
 
 # Alternative OM with age-3 maturity and selectivity instead.
 out_age3 <- local({
@@ -819,7 +821,8 @@ out_age3 <- local({
 #> ✔ Checking OM and getting biological parameters...
 #> ✔ Mean weight data found.
 #> ✔ Passing user arguments (LWT, map, start, prior, etc.) to RCMdata@Misc..
-#> ✔ Maximum F in RCM will be 3. OM@maxF is also updated.
+#> ✔ Maximum F in RCM will be 3
+#> ✔ Update OM@maxF = 3.
 #>   
 #> ℹ No fishery length or age compositions were provided. Selectivity is fixed to values from OM.
 #>   
@@ -839,7 +842,7 @@ out_age3 <- local({
 #> ℹ Generating additional model fit from mean values of parameters in the operating model...
 #> ✔ Updating operating model:
 #>   
-#> ✔ Range of unfished age-0 recruitment (OM@cpars$R0): 6383.47 - 13782.79
+#> ✔ Range of unfished age-0 recruitment (OM@cpars$R0): 6383.45 - 13782.83
 #> ✔ Range of initial spawning depletion: 0.44 - 1.45
 #> ✔ Range of spawning depletion (OM@cpars$D): 0.14 - 0.45
 #> ✔ Historical F set with OM@cpars$Find and OM@cpars$qs.
@@ -859,8 +862,8 @@ out_age3 <- local({
   
 compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 maturity")),
             s_name = colnames(pcod$data@Index))
-#> ℹ Rendering markdown file: /tmp/RtmpHHw9tN/compare_RCM.Rmd
-#> ✔ Rendered file: /tmp/RtmpHHw9tN/compare_RCM.html
+#> ℹ Rendering markdown file: /tmp/RtmpxfgWRt/compare_RCM.Rmd
+#> ✔ Rendered file: /tmp/RtmpxfgWRt/compare_RCM.html
              
 Hist <- runMSE(out@OM, Hist = TRUE)            
 #> → Loading operating model
