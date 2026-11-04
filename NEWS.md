@@ -1,5 +1,13 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool 2.0.0
+- Requires R 4.4.0 and MSEtool 4.0.0.
+- New `RCM2()` conditions MSEtool 4 operating models from `stock`, `fleet` and `data` objects (or an `om`) and returns an `rcmodel` object with the conditioned `om` in `@OM`.
+- `RCM2()` fits hermaphroditic stocks (stocks linked by `Herm`) as one population.
+- Assessment-based MPs run in MSEtool 4 projections.
+- Fix RCM treating simulations that differ by a constant factor (e.g., in M) as identical.
+- Fix the RCM unfished spawners-per-recruit for the stock-recruit relationship when the age of maturity is at least the number of historical years.
+
 ## SAMtool 1.9.2
 - Fix `plot(RCM)` when `OM@nsim = 1`
 - Fix `RCM2MOM` when there is only one single fit (identical simulations).

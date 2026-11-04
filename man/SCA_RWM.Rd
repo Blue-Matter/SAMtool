@@ -122,7 +122,7 @@ is passed on to \code{\link[TMB:newton]{TMB::newton()}}.}
 \code{IAA_hist} (an array of index age proportions by year, age, survey), and \code{IAA_n} (a matrix of multinomial sample size by year and survey).}
 }
 \value{
-An object of class \linkS4class{Assessment}.
+An object of class \link[=Assessment-class]{Assessment}.
 }
 \description{
 \code{SCA_RWM} is a modification of \link{SCA} that incorporates a random walk in M in logit space (constant with age).
@@ -155,7 +155,7 @@ By default, 150\% \code{Data@OM$R0[x]} is used as the start value in closed-loop
 See \link{SCA} for all other information about the structure and setup of the model.
 
 The SCA builds in a stock-recruit relationship into the model. Annual unfished and MSY reference points are
-calculated and reported in TMB_report of the \linkS4class{Assessment} object.
+calculated and reported in TMB_report of the \link[=Assessment-class]{Assessment} object.
 }
 \section{Online Documentation}{
 

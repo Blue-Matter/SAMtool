@@ -204,8 +204,8 @@ DD_ <- function(x = 1, Data, state_space = FALSE, condition = c("catch", "effort
   }
   
   if (MW) {
-    if (!is.null(Data@Misc[[x]]$MW)) {
-      MW_hist <- Data@Misc[[x]]$MW
+    if (!is.null(.MiscSim(Data, x)$MW)) {
+      MW_hist <- .MiscSim(Data, x)$MW
     } else {
       MW_hist <- apply(Data@CAL[x, , ], 1, function(xx) {
         weighted.mean(Data@wla[x]*Data@CAL_mids^Data@wlb[x], xx, na.rm = TRUE)

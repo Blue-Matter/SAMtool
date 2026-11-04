@@ -85,7 +85,7 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
     ny <- length(Data@Year)
     Current_Yr <- Data@Year[ny]
     first_assess_yr <- Current_Yr == Data@LHYear
-    run_assessment <- first_assess_yr || Current_Yr == Data@Misc[[x]]$interim$next_assess_yr
+    run_assessment <- first_assess_yr || Current_Yr == .MiscSim(Data, x)$interim$next_assess_yr
     run_interim <- !run_assessment
     
     if (run_assessment) {
@@ -113,7 +113,7 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
         
         next_assess_yr <- Current_Yr + 1
         
-        if (first_assess_yr || is.null(Data@Misc[[x]]$interim)) { # No assessment has been run in the past, can't do interim procedure, return TAC = NA
+        if (first_assess_yr || is.null(.MiscSim(Data, x)$interim)) { # No assessment has been run in the past, can't do interim procedure, return TAC = NA
           
           Rec <- new("Rec")
           Rec@TAC <- rep(NA_real_, reps)
@@ -134,8 +134,8 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
     }
     
     if (run_interim) {
-      Cref <- Data@Misc[[x]]$interim$Cref
-      Iref <- Data@Misc[[x]]$interim$Iref
+      Cref <- .MiscSim(Data, x)$interim$Cref
+      Iref <- .MiscSim(Data, x)$interim$Iref
       I_y <- switch(type,
                     "buffer" = Assess_I_hist(AddInd[1], Data, x, ny)$I_hist,
                     "mean" =  local({
@@ -157,7 +157,7 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
         } else {
           b <- type_par
         }
-        s <- Data@Misc[[x]]$interim$s
+        s <- .MiscSim(Data, x)$interim$s
       } else {
         b <- s <- 0
       }
@@ -172,7 +172,7 @@ make_interim_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", AddInd = "VB", as
         Rec@Misc <- Assess_diagnostic(x, Data, do_Assessment, include_assessment = .(diagnostic == "full"))
         if (!is.null(do_Assessment@info$Misc)) Rec@Misc <- c(Rec@Misc, do_Assessment@info$Misc)
       }
-      Rec@Misc <- c(Rec@Misc, Data@Misc[[x]][setdiff(names(Data@Misc[[x]]), names(Rec@Misc))]) # Only add items that are missing from Rec@Misc
+      Rec@Misc <- c(Rec@Misc, .MiscSim(Data, x)[setdiff(names(.MiscSim(Data, x)), names(Rec@Misc))]) # Only add items that are missing from Rec@Misc
     }
     return(Rec)
   })
@@ -236,7 +236,7 @@ make_projection_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", assessment_int
     ny <- length(Data@Year)
     Current_Yr <- Data@Year[ny]
     first_assess_yr <- Current_Yr == Data@LHYear
-    run_assessment <- first_assess_yr || Current_Yr == Data@Misc[[x]]$proj$next_assess_yr
+    run_assessment <- first_assess_yr || Current_Yr == .MiscSim(Data, x)$proj$next_assess_yr
     get_projection <- !run_assessment
     
     Rec <- new("Rec")
@@ -263,8 +263,8 @@ make_projection_MP <- function(.Assess = "SCA", .HCR = "HCR_MSY", assessment_int
     }
     
     if (get_projection) {
-      Rec@Misc <- Data@Misc[[x]]
-      Rec@TAC <- rep(Data@Misc[[x]]$proj$TACvec[as.character(Current_Yr + 1)], reps)
+      Rec@Misc <- .MiscSim(Data, x)
+      Rec@TAC <- rep(.MiscSim(Data, x)$proj$TACvec[as.character(Current_Yr + 1)], reps)
     }
     return(Rec)
   })

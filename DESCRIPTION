@@ -1,7 +1,7 @@
 Package: SAMtool
 Type: Package
 Title: Stock Assessment Methods Toolkit
-Version: 1.9.2
+Version: 2.0.0
 Authors@R: c(person("Quang", "Huynh", email = "quang@bluematterscience.com", role = c("aut", "cre")), 
   person("Tom", "Carruthers", email = "tom@bluematterscience.com", role = "aut"),
   person("Adrian", "Hordyk", email = "adrian@bluematterscience.com", role = "aut"))
@@ -11,14 +11,16 @@ Description: Simulation tools for closed-loop simulation are provided for the 'M
   'SAMtool' provides a conditioning model, assessment models of varying complexity with standardized reporting, 
   model-based management procedures, and diagnostic tools for evaluating assessments inside closed-loop simulation.
 License: GPL-3
-Depends: R (>= 4.1.0), MSEtool (>= 3.0.0)
-Imports: 
+Depends: R (>= 4.4.0), MSEtool (>= 4.0.0)
+Imports:
     TMB (>= 1.9.0),
     abind,
+    cli,
     dplyr,
     gplots,
     graphics,
     methods,
+    parallel,
     pbapply,
     rmarkdown,
     snowfall,
@@ -44,7 +46,7 @@ Suggests:
 LazyData: yes
 LazyLoad: yes
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Encoding: UTF-8
 URL: https://openmse.com, https://samtool.openmse.com, https://github.com/Blue-Matter/SAMtool
 BugReports: https://github.com/Blue-Matter/SAMtool/issues
+Config/roxygen2/version: 8.1.0

@@ -13,7 +13,7 @@ retrospective(x, ...)
 \S4method{retrospective}{RCModel}(x, nyr = 5, figure = TRUE)
 }
 \arguments{
-\item{x}{An S4 object of class \linkS4class{Assessment} or \linkS4class{RCModel}.}
+\item{x}{An S4 object of class \link[=Assessment-class]{Assessment} or \link[=RCModel-class]{RCModel}.}
 
 \item{...}{More arguments.}
 

@@ -16,7 +16,7 @@ prelim_AM(x, Assess, ncpus = NULL, ...)
 \item{...}{Arguments to be passed to \code{Assess}, e.g., model configurations.}
 }
 \value{
-Returns invisibly a list of \linkS4class{Assessment} objects of length \code{OM@nsim}. Messages via console.
+Returns invisibly a list of \link[=Assessment-class]{Assessment} objects of length \code{OM@nsim}. Messages via console.
 }
 \description{
 Evaluates the likely performance of Assessment models in the operating model. This function will

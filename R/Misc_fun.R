@@ -1,3 +1,13 @@
+# Per-simulation MP state in Data@Misc[[x]]; empty when Data@Misc holds other objects
+.MiscSim <- function(Data, x) {
+  misc <- Data@Misc
+  if (length(x) != 1 || x > length(misc)) return(list())
+  nm <- names(misc)
+  if (!is.null(nm) && nzchar(nm[x])) return(list())
+  out <- misc[[x]]
+  if (is.list(out)) out else list()
+}
+
 
 do.call2 <- function(..., fast = TRUE) {
   if (fast && requireNamespace("Gmisc", quietly = TRUE)) {

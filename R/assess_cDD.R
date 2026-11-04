@@ -168,8 +168,8 @@ cDD_ <- function(x = 1, Data, AddInd = "B", state_space = FALSE, SR = c("BH", "R
   nsurvey <- ncol(I_hist)
   
   if (MW) {
-    if (!is.null(Data@Misc[[x]]$MW)) {
-      MW_hist <- Data@Misc[[x]]$MW
+    if (!is.null(.MiscSim(Data, x)$MW)) {
+      MW_hist <- .MiscSim(Data, x)$MW
     } else {
       MW_hist <- apply(Data@CAL[x, , ], 1, function(xx) {
         weighted.mean(x = Data@wla[x]*Data@CAL_mids^Data@wlb[x], w = xx, na.rm = TRUE)

@@ -95,7 +95,7 @@ hasn't converged. The optimization continues from the parameters from the previo
 \item{...}{Other arguments to be passed.}
 }
 \value{
-An object of class \linkS4class{Assessment}. The F vector is the apical fishing mortality experienced by any
+An object of class \link[=Assessment-class]{Assessment}. The F vector is the apical fishing mortality experienced by any
 age class in a given year.
 }
 \description{

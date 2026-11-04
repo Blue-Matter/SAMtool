@@ -15,7 +15,7 @@
 #' @param OM An object of class [MSEtool::OM-class] that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 #' steepness, maturity parameters (L50 and L50_95), and standard deviation of recruitment variability (Perr).
 #' Alternatively, provide a named list of biological inputs, see "StockPars" section below.
-#' @param data Data inputs formatted in a [RCMdata-class] (preferred) or [MSEtool::Data-class] object. 
+#' @param data Data inputs formatted in a [RCMdata-class] (preferred) or [MSEtool::Data-class] object.
 #' Use of a list is deprecated. See Data section below.
 #' @param condition String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 #' or "effort" (F is proportional to an index series in `data@Ehist`. Can be fleet specific, in which case some combination of "catch" and "effort" are permissible.
@@ -241,7 +241,7 @@
 #'
 #' Annual multinomial sample sizes for the age and length comps can now be provided directly in the 
 #' [RCMdata-class] object. For a list or [MSEtool::Data-class] object, use the `ESS` argument.
-#' 
+#'
 #' @author Q. Huynh
 #' @examples 
 #' \donttest{ 
@@ -277,10 +277,10 @@
 #' compare_RCM(out, out_age3, scenario = list(names = c("Age-2 maturity", "Age-3 maturity")),
 #'             s_name = colnames(pcod$data@Index))
 #'              
-#' Hist <- runMSE(out@OM, Hist = TRUE)            
-#' } 
-#' 
-#' @seealso [plot.RCModel] [RCModel-class] [compare_RCM] [pcod] [RCM2MOM] [posterior]
+#' Hist <- runMSE(out@OM, Hist = TRUE)
+#' }
+#'
+#' @seealso [plot.RCModel] [RCModel-class] [RCM2()] [compare_RCM] [pcod] [RCM2MOM] [posterior]
 #' @references 
 #' Thorson et al. 2017. Model-based estimates of effective sample size in stock assessment models using the Dirichlet-multinomial distribution.
 #' Fish. Res. 192:84-93. \doi{10.1016/j.fishres.2016.06.005}
@@ -514,13 +514,12 @@ setMethod("RCM", signature(OM = "OM", data = "Data"),
 setMethod("RCM", signature(OM = "list", data = "RCMdata"),
           function(OM, data, condition = "catch", selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
-                   max_F = 3, integrate = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), 
+                   max_F = 3, integrate = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05),
                    start = list(), map = list(), silent = FALSE, ...) {
             RCM_single_fit(
               StockPars = OM, RCMdata = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
-              comp_like = comp_like, prior = prior, max_F = max_F, integrate = integrate, 
-              control = control, start = start, map = map, silent = silent, 
+              comp_like = comp_like, prior = prior, max_F = max_F, integrate = integrate,
+              control = control, start = start, map = map, silent = silent,
               ...
             )
           })
-
