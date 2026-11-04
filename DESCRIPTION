@@ -11,8 +11,9 @@ Description: Simulation tools for closed-loop simulation are provided for the 'M
   'SAMtool' provides a conditioning model, assessment models of varying complexity with standardized reporting, 
   model-based management procedures, and diagnostic tools for evaluating assessments inside closed-loop simulation.
 License: GPL-3
-Depends: R (>= 4.4.0), MSEtool (>= 4.0.0)
+Depends: R (>= 4.4.0)
 Imports:
+    MSEtool (>= 4.0.0),
     TMB (>= 1.9.0),
     abind,
     cli,
