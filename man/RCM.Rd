@@ -6,6 +6,7 @@
 \alias{RCM,OM,list-method}
 \alias{RCM,OM,Data-method}
 \alias{RCM,OM,RCMdata-method}
+\alias{RCM,om,RCMdata-method}
 \alias{RCM,list,RCMdata-method}
 \title{Rapid Conditioning Model (RCM)}
 \usage{
@@ -14,6 +15,28 @@ check_RCMdata(RCMdata, OM, condition = "catch", silent = FALSE)
 RCM(OM, data, ...)
 
 \S4method{RCM}{OM,RCMdata}(
+  OM,
+  data,
+  condition = "catch",
+  selectivity = "logistic",
+  s_selectivity = NULL,
+  LWT = list(),
+  comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"),
+  prior = list(),
+  max_F = 3,
+  cores = 1L,
+  integrate = FALSE,
+  mean_fit = FALSE,
+  drop_nonconv = FALSE,
+  drop_highF = FALSE,
+  control = list(iter.max = 2e+05, eval.max = 4e+05),
+  start = list(),
+  map = list(),
+  silent = FALSE,
+  ...
+)
+
+\S4method{RCM}{om,RCMdata}(
   OM,
   data,
   condition = "catch",

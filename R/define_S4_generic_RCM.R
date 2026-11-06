@@ -304,6 +304,19 @@ setMethod("RCM", signature(OM = "OM", data = "RCMdata"),
 
 #' @rdname RCM
 #' @export
+setMethod("RCM", signature(OM = "om", data = "RCMdata"),
+          function(OM, data, condition = "catch", selectivity = "logistic", s_selectivity = NULL, LWT = list(),
+                   comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
+                   max_F = 3, cores = 1L, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE,
+                   drop_highF = FALSE, control = list(iter.max = 2e+05, eval.max = 4e+05), 
+                   start = list(), map = list(), silent = FALSE, ...) {
+            RCM_int(OM = OM, RCMdata = data, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
+                    comp_like = comp_like, prior = prior, max_F = max_F, cores = cores, integrate = integrate, mean_fit = mean_fit,
+                    drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, start = start, map = map, silent = silent, ...)
+          })
+
+#' @rdname RCM
+#' @export
 setMethod("RCM", signature(OM = "OM", data = "list"),
           function(OM, data, condition = "catch", selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                    comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), ESS = c(30, 30), prior = list(),

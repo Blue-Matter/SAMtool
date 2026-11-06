@@ -302,11 +302,24 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
 
   # Preliminary OM check for basics
   if (!missing(OM)) {
-    if (!length(OM@nyears)) stop("OM@nyears is needed.", call. = FALSE)
-    if (!length(OM@maxage)) stop("OM@maxage is needed.", call. = FALSE)
-    RCMdata@Misc$nyears <- nyears <- OM@nyears
-    RCMdata@Misc$maxage <- maxage <- OM@maxage
-    RCMdata@Misc$CurrentYr <- OM@CurrentYr
+    
+    if (is(OM, "OM")) {
+      if (!length(OM@nyears)) stop("OM@nyears is needed.", call. = FALSE)
+      if (!length(OM@maxage)) stop("OM@maxage is needed.", call. = FALSE)
+      RCMdata@Misc$nyears <- nyears <- OM@nyears
+      RCMdata@Misc$minage <- minage <- 0
+      RCMdata@Misc$maxage <- maxage <- OM@maxage
+      RCMdata@Misc$n_age <- n_age <- maxage+1
+      RCMdata@Misc$CurrentYr <- OM@CurrentYr
+    } else if (is(OM, "om")) {
+      if (!length(OM@nyears)) stop("OM@nyears is needed.", call. = FALSE)
+      if (!length(OM@maxage)) stop("OM@maxage is needed.", call. = FALSE)
+      RCMdata@Misc$nyears <- nyears <- nYear(OM)
+      RCMdata@Misc$minage <- minage <- min(AgeClasses(OM@Stock))
+      RCMdata@Misc$maxage <- maxage <- max(AgeClasses(OM@Stock))
+      RCMdata@Misc$n_age <- n_age <- maxage - minage + 1
+      RCMdata@Misc$CurrentYr <- CurrentYear(OM)
+    }
   } else {
     #nyears <- RCMdata@Misc$nyears
     maxage <- RCMdata@Misc$maxage
