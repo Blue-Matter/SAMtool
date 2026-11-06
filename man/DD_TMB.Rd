@@ -118,7 +118,7 @@ Otherwise, recruitment deviations are penalized parameters.}
 is passed on to \code{\link[TMB:newton]{TMB::newton()}} via \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \value{
-An object of \link[=Assessment-class]{Assessment} containing objects and output from TMB.
+An object of \linkS4class{Assessment} containing objects and output from TMB.
 }
 \description{
 A simple delay-difference assessment model using a

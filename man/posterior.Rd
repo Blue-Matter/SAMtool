@@ -30,7 +30,7 @@ posterior(x, ...)
 RCMstan(RCModel, stanfit, sim, cores = 1, silent = FALSE)
 }
 \arguments{
-\item{x}{An object of class \link[=Assessment-class]{Assessment} or \link[=RCModel-class]{RCModel}.}
+\item{x}{An object of class \linkS4class{Assessment} or \linkS4class{RCModel}.}
 
 \item{...}{Additional arguments to pass to \code{rstan::sampling} via \code{tmbstan::tmbstan}.}
 

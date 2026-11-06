@@ -8,7 +8,7 @@
 \S4method{plot}{prof,missing}(x, contour_levels = 20, ...)
 }
 \arguments{
-\item{x}{An object of class \link[=prof-class]{prof} returned by \link{profile}.}
+\item{x}{An object of class \linkS4class{prof} returned by \link{profile}.}
 
 \item{contour_levels}{Integer, passed to \code{nlevels} argument of \link[graphics:contour]{contour}.}
 

@@ -790,7 +790,6 @@ check_RCMdata <- function(RCMdata, OM, condition = "catch", silent = FALSE) {
         if (length(RCMdata@I_delta) != RCMdata@Misc$nsurvey) stop("I_delta should be length ", RCMdata@Misc$nsurvey, call. = FALSE)
         RCMdata@I_delta <- matrix(RCMdata@I_delta, RCMdata@Misc$nyears, RCMdata@Misc$nsurvey, byrow = TRUE)
       }
-      RCMdata@I_delta <- matrix(RCMdata@I_delta, RCMdata@Misc$nyears, RCMdata@Misc$nsurvey, byrow = TRUE)
       if (nrow(RCMdata@I_delta) != RCMdata@Misc$nyears) {
         stop(paste("I_delta should be a matrix of", RCMdata@Misc$nyears, "rows."), call. = FALSE)
       }

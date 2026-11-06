@@ -7,7 +7,7 @@
 HCR_MSY(Assessment, reps = 1, MSY_frac = 1, ...)
 }
 \arguments{
-\item{Assessment}{An object of class \link[=Assessment-class]{Assessment} with estimates of
+\item{Assessment}{An object of class \linkS4class{Assessment} with estimates of
 FMSY or UMSY and vulnerable biomass in terminal year.}
 
 \item{reps}{The number of stochastic samples of the TAC recommendation.}

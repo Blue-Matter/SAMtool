@@ -282,10 +282,10 @@ class(Shortcut) <- "Assess"
 Shortcut2 <- function(x, Data, method = "N", SCA_args = list(), VAR_args = list(type = "none"), ...) {
   method <- match.arg(method, choices = c("N", "B", "RF"))
   
-  if (!is.null(.MiscSim(Data, x)$VAR_model)) {
-    run_Shortcut <- Shortcut(x = x, Data = Data, method = method, VAR_model = .MiscSim(Data, x)$VAR_model)
+  if (!is.null(Data@Misc[[x]]$VAR_model)) {
+    run_Shortcut <- Shortcut(x = x, Data = Data, method = method, VAR_model = Data@Misc[[x]]$VAR_model)
     
-    run_Shortcut@info$Misc$VAR_model <- .MiscSim(Data, x)$VAR_model
+    run_Shortcut@info$Misc$VAR_model <- Data@Misc[[x]]$VAR_model
     return(run_Shortcut)
   } else if (max(Data@Year) == Data@LHYear) {
     SCA_args$x <- x

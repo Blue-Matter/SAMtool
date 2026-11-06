@@ -127,7 +127,7 @@ of the biomass deviations (thus, treating it as a state-space variable).}
 is passed on to \link[TMB:newton]{newton} via \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \value{
-An object of \link[=Assessment-class]{Assessment} containing objects and output from TMB.
+An object of \linkS4class{Assessment} containing objects and output from TMB.
 }
 \description{
 A surplus production model that uses only a time-series of catches and a relative abundance index

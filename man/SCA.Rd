@@ -176,7 +176,7 @@ for which the catch-at-age matrix has less than half the abundance than that at 
 \item{fix_U_equilibrium}{Logical, same as \code{fix_F_equilibrium} for \code{SCA_Pope}.}
 }
 \value{
-An object of class \link[=Assessment-class]{Assessment}.
+An object of class \linkS4class{Assessment}.
 }
 \description{
 A generic statistical catch-at-age model (single fleet, single season) that uses catch, index, and catch-at-age composition

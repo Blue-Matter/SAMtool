@@ -84,7 +84,7 @@ An S4 class for the output from \link{RCM}.
 \item report - a list of model output reported from the TMB executable, i.e. \code{obj$report()}. See Misc.
 }}
 
-\item{\code{data}}{A \link[=RCMdata-class]{RCMdata} object containing data inputs for the RCM.}
+\item{\code{data}}{A \linkS4class{RCMdata} object containing data inputs for the RCM.}
 
 \item{\code{config}}{A list describing configuration of the RCM:
 \itemize{

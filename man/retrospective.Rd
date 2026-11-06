@@ -10,16 +10,18 @@ retrospective(x, ...)
 
 \S4method{retrospective}{Assessment}(x, nyr = 5, figure = TRUE)
 
-\S4method{retrospective}{RCModel}(x, nyr = 5, figure = TRUE)
+\S4method{retrospective}{RCModel}(x, nyr = 5, y, figure = TRUE)
 }
 \arguments{
-\item{x}{An S4 object of class \link[=Assessment-class]{Assessment} or \link[=RCModel-class]{RCModel}.}
+\item{x}{An S4 object of class \linkS4class{Assessment} or \linkS4class{RCModel}.}
 
 \item{...}{More arguments.}
 
 \item{nyr}{The maximum number of years to remove for the retrospective analysis.}
 
 \item{figure}{Indicates whether plots will be drawn.}
+
+\item{y}{Optional vector for number of years to remove. Use positive numbers and include zero as the first value.}
 }
 \value{
 A list with an array of model output and of model estimates from

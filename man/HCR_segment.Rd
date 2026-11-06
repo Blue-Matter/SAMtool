@@ -17,7 +17,7 @@ HCR_segment(
 )
 }
 \arguments{
-\item{Assessment}{An object of class \link[=Assessment-class]{Assessment} with estimates of
+\item{Assessment}{An object of class \linkS4class{Assessment} with estimates of
 FMSY or UMSY, vulnerable biomass, and spawning biomass depletion in terminal year.}
 
 \item{reps}{The number of stochastic samples of the TAC recommendation.}
@@ -53,7 +53,7 @@ assessment. See \code{Assessment@forecast$catch_eq}, a function that returns the
 \emph{Operational control points (OCP_type)}
 
 The following are the available options for harvest control rule inputs, and the source of those values
-in the \link[=Assessment-class]{Assessment} object:
+in the \linkS4class{Assessment} object:
 
 \itemize{
 \item \strong{Default} \code{"SSB_SSB0"}: Spawning depletion. Uses the last value in  \code{Assessment@SSB_SSB0} vector.
@@ -70,7 +70,7 @@ in the \link[=Assessment-class]{Assessment} object:
 \emph{Fishing mortality target (Ftarget_type)}
 
 The type of F for which the corresponding catch is calculated in the HCR is specified here. The source of those values
-in the \link[=Assessment-class]{Assessment} object is specified:
+in the \linkS4class{Assessment} object is specified:
 
 \itemize{
 \item \strong{Default} \code{"FMSY"}: Fishing mortality relative to MSY. Uses the value in \code{Assessment@FMSY}.

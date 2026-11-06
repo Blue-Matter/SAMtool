@@ -7,7 +7,7 @@
 RCM2MOM(RCModel)
 }
 \arguments{
-\item{RCModel}{Output from \link{RCM}, a class \link[=RCModel-class]{RCModel} object.}
+\item{RCModel}{Output from \link{RCM}, a class \linkS4class{RCModel} object.}
 }
 \value{
 A class \link[MSEtool:MOM-class]{MSEtool::MOM} object.

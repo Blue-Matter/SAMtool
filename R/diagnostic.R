@@ -324,10 +324,10 @@ Assess_diagnostic <- function(x, Data, Assessment, include_assessment = TRUE) {
   # Assign report objects to output
   if (!length(Data@Misc)) Data@Misc <- vector("list", length(Data@Mort))
   output <- list()
-  if (is.null(.MiscSim(Data, x)$diagnostic) || !length(.MiscSim(Data, x)$diagnostic)) {
+  if (is.null(Data@Misc[[x]]$diagnostic) || !length(Data@Misc[[x]]$diagnostic)) {
     output$diagnostic <- dg
   } else {
-    output$diagnostic <- rbind(.MiscSim(Data, x)$diagnostic, dg)
+    output$diagnostic <- rbind(Data@Misc[[x]]$diagnostic, dg)
   }
 
   if (include_assessment) {
@@ -376,10 +376,10 @@ Assess_diagnostic <- function(x, Data, Assessment, include_assessment = TRUE) {
     } else {
       Assessment_report <- data.frame()
     }
-    if(is.null(.MiscSim(Data, x)$Assessment_report) || !length(.MiscSim(Data, x)$Assessment_report)) {
+    if(is.null(Data@Misc[[x]]$Assessment_report) || !length(Data@Misc[[x]]$Assessment_report)) {
       output$Assessment_report <- Assessment_report
     } else {
-      output$Assessment_report <- rbind(.MiscSim(Data, x)$Assessment_report, Assessment_report)
+      output$Assessment_report <- rbind(Data@Misc[[x]]$Assessment_report, Assessment_report)
     }
   }
   

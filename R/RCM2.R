@@ -103,7 +103,13 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
   #nsim <- 1
   #proyears <- 0
   
-  if (!silent) message("Maximum F in RCM will be ", max_F, ".\n\n")
+  if (!silent) {
+    if (is.matrix(max_F)) {
+      message("Maximum F in RCM will vary between ", paste(range(max_F), collapse = "-"), ".\n\n")
+    } else {
+      message("Maximum F in RCM will be ", max_F, ".\n\n")
+    }
+  }
   
   # No comp data
   if (!any(RCMdata@CAA > 0, na.rm = TRUE) && !any(RCMdata@CAL > 0, na.rm = TRUE) && is.null(start$vul_par)) {
@@ -153,7 +159,7 @@ RCM_single_fit <- function(StockPars, RCMdata, condition = "catch", selectivity 
                  start = start, map = map, dots = dots)
   
   conv <- fit$report$conv
-  highF <- any(fit$report$F >= max_F)
+  highF <- any(fit$report$F >= max_F, na.rm = TRUE)
   if (highF) warning("Model had F on the upper boundary.\n")
   
   NaF <- any(is.na(fit$report$F) | is.infinite(fit$report$F))

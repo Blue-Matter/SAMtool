@@ -7,7 +7,7 @@
 HCR_fixedF(Assessment, reps = 1, Ftarget = 0.1)
 }
 \arguments{
-\item{Assessment}{An object of class \link[=Assessment-class]{Assessment} with estimates of next year's abundance or biomass.}
+\item{Assessment}{An object of class \linkS4class{Assessment} with estimates of next year's abundance or biomass.}
 
 \item{reps}{The number of replicates of the TAC recommendation (not used).}
 

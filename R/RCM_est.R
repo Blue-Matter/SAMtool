@@ -182,9 +182,9 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     SR_type = SR_type, 
     LWT_fleet = LWT_fleet, LWT_index = LWT_index, 
     comp_like = comp_like,
-    max_F = max_F, 
+    max_F = matrix(max_F, nyears, nfleet), 
     rescale = dots$rescale, 
-    ageM = min(nyears - 1, ceiling(StockPars$ageMarray[x, 1])),
+    ageM = min(nyears, ceiling(StockPars$ageMarray[x, 1])),
     yind_F = as.integer(rep(0.5 * nyears, nfleet)), 
     n_itF = n_itF, plusgroup = plusgroup,
     use_prior = prior$use_prior, 
@@ -538,7 +538,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
 par_identical_sims_fn <- function(StockPars, FleetPars, RCMdata, dots) {
   vector_fn <- function(x) sum(mean(x) - x) == 0
   CloseToSame <- function(x,y) {
-    all(abs(x - y) <= 0.001 * abs(y), na.rm = TRUE)
+    diff(x/y) |> abs() |> max() < 0.001
   }
   array_fn <- function(x) {
     x_mean <- apply(x, 2:length(dim(x)), mean)

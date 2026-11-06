@@ -30,7 +30,7 @@
 )
 }
 \arguments{
-\item{x}{An object of class \link[=Assessment-class]{Assessment}.}
+\item{x}{An object of class \linkS4class{Assessment}.}
 
 \item{filename}{Character string for the name of the markdown and HTML files.}
 
@@ -47,13 +47,13 @@ to the number of peels (the maximum number of terminal years for which the data 
 
 \item{...}{Other arguments.}
 
-\item{y}{An object of class \link[=retro-class]{retro}.}
+\item{y}{An object of class \linkS4class{retro}.}
 }
 \value{
 Returns invisibly the output from \link[rmarkdown:render]{render}.
 }
 \description{
-Produces HTML file (via markdown) figures of parameter estimates and output from an \link[=Assessment-class]{Assessment} object.
+Produces HTML file (via markdown) figures of parameter estimates and output from an \linkS4class{Assessment} object.
 }
 \examples{
 output <- DD_TMB(Data = Simulation_1)

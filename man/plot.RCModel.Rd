@@ -45,7 +45,7 @@ compare_RCM(
 )
 }
 \arguments{
-\item{x}{An object of class \link[=RCModel-class]{RCModel} (output from \link{RCM}).}
+\item{x}{An object of class \linkS4class{RCModel} (output from \link{RCM}).}
 
 \item{compare}{Logical, if TRUE, the function will run \code{runMSE} to compare the historical period of the operating model
 and the RCM output.}
@@ -85,11 +85,11 @@ and the RCM output.}
 Returns invisibly the output from \link[rmarkdown:render]{render}.
 }
 \description{
-Produces HTML file (via markdown) figures of parameter estimates and output from an \link[=Assessment-class]{Assessment} object.
+Produces HTML file (via markdown) figures of parameter estimates and output from an \linkS4class{Assessment} object.
 Plots histograms of operating model parameters that are updated by the RCM scoping function, as well as diagnostic plots
 for the fits to the RCM for each simulation. \code{compare_RCM} plots a short report that compares output from multiple RCM objects,
 assuming the same model structure, i.e., identical matrix and array dimensions among models, but different data weightings, data omissions, etc.
 }
 \seealso{
-\link[=RCModel-class]{RCModel} \link{RCM}
+\linkS4class{RCModel} \link{RCM}
 }

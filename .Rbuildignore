@@ -17,3 +17,5 @@
 ^scratch$
 ^\.positai$
 ^\.claude$
+src/Makevars
+src/Makevars.win
