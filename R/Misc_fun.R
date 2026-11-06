@@ -44,6 +44,7 @@ matplot <- function(..., zero_line = FALSE) {
 }
 
 #' @importFrom graphics hist legend
+#' @exportS3Method NULL
 hist.numeric <- function(x, ...) {
   n <- length(x)
   
