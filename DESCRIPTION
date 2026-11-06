@@ -46,7 +46,7 @@ Suggests:
 LazyData: yes
 LazyLoad: yes
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Encoding: UTF-8
 URL: https://openmse.com, https://samtool.openmse.com, https://github.com/Blue-Matter/SAMtool
 BugReports: https://github.com/Blue-Matter/SAMtool/issues
+Config/roxygen2/version: 8.1.0

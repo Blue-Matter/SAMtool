@@ -4,9 +4,9 @@
 #' @import methods
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom graphics arrows abline points lines legend text title mtext axTicks axis box contour hist 
-#' layout matlines matplot par polygon segments
+#'     layout matlines matplot par polygon segments
 #' @importFrom stats acf coef cov cov2cor dbeta density dlnorm dnorm formula integrate lm median nlminb nls 
-#' optimHess optimize plogis pnorm predict qlogis qnorm quantile rbeta rnorm sd setNames uniroot weighted.mean
+#'     optimHess optimize plogis pnorm predict qlogis qnorm quantile rbeta rnorm sd setNames uniroot weighted.mean
 #' @importFrom utils browseURL globalVariables packageVersion
 setOldClass("sdreport")
 setClassUnion("sdreportAssess", members = c("character", "sdreport"))
