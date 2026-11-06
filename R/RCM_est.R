@@ -160,7 +160,7 @@ RCM_est_data <- function(x, RCMdata, selectivity, s_selectivity, LWT = list(), c
     msize = RCMdata@MS, msize_type = RCMdata@MS_type,
     sel_block = rbind(RCMdata@sel_block, RCMdata@sel_block[nyears, ]), 
     nsel_block = RCMdata@Misc$nsel_block,
-    n_y = nyears, n_age = n_age, nfleet = nfleet, nsurvey = nsurvey,
+    n_y = nyears, min_age = 0L, max_age = n_age-1, nfleet = nfleet, nsurvey = nsurvey,
     M_data = if (prior$use_prior[3]) matrix(1, 1, 1) else t(StockPars$M_ageArray[x, , 1:nyears]), 
     len_age = t(StockPars$Len_age[x, , 1:(nyears+1)]),
     Linf = StockPars$Linf[x],

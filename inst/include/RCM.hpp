@@ -47,7 +47,8 @@ Type RCM(objective_function<Type> *obj) {
   DATA_INTEGER(nsel_block); // The number of selectivity "blocks"
 
   DATA_INTEGER(n_y);      // Number of years in model
-  DATA_INTEGER(n_age);    // Number of age classes from 0 - maxage (plus-group)
+  DATA_INTEGER(min_age);  // Minimum age (>0)
+  DATA_INTEGER(max_age);  // Maximum age
   DATA_INTEGER(nfleet);   // Number of fleets
   DATA_INTEGER(nsurvey);  // Number of surveys
 
@@ -116,7 +117,8 @@ Type RCM(objective_function<Type> *obj) {
   PARAMETER_MATRIX(log_compi);          // IAA/IAL dispersion parameter
   
   PARAMETER_VECTOR(log_q);              // Index q
-
+  
+  int n_age = max_age - min_age + 1;
   int nlbin = lbinmid.size();
   Type R0 = 0;
   Type h = 0;
@@ -380,7 +382,10 @@ Type RCM(objective_function<Type> *obj) {
     
     // Calculate this year's recruitment
     if(y>0) {
-      if(SR_type == "BH") {
+      int y_SRR = y-min_age;
+      if (y_SRR < 0) {
+        R(y) = R_eq; 
+      } else if(SR_type == "BH") {
         R(y) = BH_SR(E(y), h, R0, E0_SR);
       } else if(SR_type == "Ricker") {
         R(y) = Ricker_SR(E(y), h, R0, E0_SR);
