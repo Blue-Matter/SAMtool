@@ -29,7 +29,7 @@
 )
 }
 \arguments{
-\item{object}{An object of class \linkS4class{Assessment} or \linkS4class{RCModel} containing the fitted model.}
+\item{object}{An object of class \link[=Assessment-class]{Assessment} or \link[=RCModel-class]{RCModel} containing the fitted model.}
 
 \item{nsim}{Number of simulations}
 
@@ -44,7 +44,7 @@
 \item{...}{Additional arguments}
 }
 \value{
-A \linkS4class{sim} object returning the original data, simulated data, original parameters, parameters estimated
+A \link[=sim-class]{sim} object returning the original data, simulated data, original parameters, parameters estimated
 from simulated data, and process error used to simulate data.
 then a nested list of model output (\code{opt}, \code{SD}, and \code{report}).
 }

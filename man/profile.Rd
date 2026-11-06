@@ -11,7 +11,7 @@
 \S4method{profile}{RCModel}(fitted, figure = TRUE, ...)
 }
 \arguments{
-\item{fitted, Assessment}{An object of class \linkS4class{Assessment}.}
+\item{fitted, Assessment}{An object of class \link[=Assessment-class]{Assessment}.}
 
 \item{figure}{Logical, indicates whether a figure will be plotted.}
 
@@ -19,7 +19,7 @@
 See details for name of arguments to be passed on.}
 }
 \value{
-An object of class \linkS4class{prof} that contains a data frame of negative log-likelihood values from the profile and, optionally,
+An object of class \link[=prof-class]{prof} that contains a data frame of negative log-likelihood values from the profile and, optionally,
 a figure of the likelihood surface.
 }
 \description{

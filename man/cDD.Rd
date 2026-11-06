@@ -111,7 +111,7 @@ of the recruitment deviations (thus, treating it as a state-space variable). Oth
 is passed on to \code{\link[TMB:newton]{TMB::newton()}} via \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \value{
-An object of \linkS4class{Assessment} containing objects and output
+An object of \link[=Assessment-class]{Assessment} containing objects and output
 from TMB.
 }
 \description{

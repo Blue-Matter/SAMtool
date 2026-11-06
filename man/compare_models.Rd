@@ -7,7 +7,7 @@
 compare_models(..., label = NULL, color = NULL)
 }
 \arguments{
-\item{...}{Objects of class \linkS4class{Assessment}.}
+\item{...}{Objects of class \link[=Assessment-class]{Assessment}.}
 
 \item{label}{A character vector of the models for the legend.}
 
