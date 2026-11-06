@@ -16,7 +16,6 @@ RCM2(
   Imp = NULL,
   Name = "RCM",
   Seed = 101,
-  stocks = NULL,
   condition = "catch",
   selectivity = "logistic",
   s_selectivity = NULL,
@@ -37,19 +36,18 @@ RCM2(
 )
 }
 \arguments{
-\item{Stock}{A \link[MSEtool:stock-class]{MSEtool::stock} object, or a named list of them. Alternatively, an
-\link[MSEtool:om-class]{MSEtool::om} object with fishery data in \code{OM@Data}.}
+\item{Stock}{A \link[MSEtool:stock-class]{MSEtool::stock} object, or a named list of them. The names become the stock names.
+Alternatively, an \link[MSEtool:om-class]{MSEtool::om} object with fishery data in \code{OM@Data}.}
 
-\item{data}{A \link[MSEtool:data-class]{MSEtool::data} object, or a list of them named by stock (or by complex, see
-"Hermaphroditic stocks"). Not used when \code{Stock} is an \link[MSEtool:om-class]{MSEtool::om} object with data.}
+\item{data}{A \link[MSEtool:data-class]{MSEtool::data} object with catches and indices summed over all stocks.
+Not used when \code{Stock} is an \link[MSEtool:om-class]{MSEtool::om} object with data.}
 
 \item{Fleet}{Optional \link[MSEtool:fleet-class]{MSEtool::fleet} object, or a list of them named by fleet, used for every stock.
-Can also be a list of these named by stock. Fleet names are matched to \code{data@Landings@Name}. Fleet
-selectivity parameters are used as starting values, and other fleet settings are kept in the returned
-operating model.}
+Fleet names are matched to \code{data@Landings@Name}. Fleet selectivity parameters are used as starting values,
+and other fleet settings are kept in the returned operating model.}
 
 \item{Herm}{Optional \link[MSEtool:stocktransition-class]{MSEtool::stocktransition} object (see \code{\link[MSEtool:Herm]{MSEtool::Herm()}}), or a list of them,
-for hermaphroditic stocks.}
+for hermaphroditic stocks. \code{From} and \code{To} are names (or positions) in \code{Stock}.}
 
 \item{nSim}{Number of simulations. Defaults to the value in populated stock objects, otherwise 48.}
 
@@ -64,8 +62,6 @@ for hermaphroditic stocks.}
 \item{Name}{Name of the returned operating model.}
 
 \item{Seed}{Random seed for populating the stock objects.}
-
-\item{stocks}{Optional character vector of stock or complex names to fit. Other stocks are returned unchanged.}
 
 \item{condition}{String to indicate whether the RCM is conditioned on "catch" (where F are estimated parameters), "catch2" (where F is solved internally using Newton's method),
 or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be fleet specific, in which case some combination of "catch" and "effort" are permissible.}
@@ -86,7 +82,8 @@ see Additional arguments section for setup of survey selectivity parameters and 
 
 \item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
 
-\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.}
+\item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.
+Typically a single numeric, but can also be a matrix by year and fleet.}
 
 \item{integrate}{Logical, whether to treat recruitment deviations as penalized parameters in the likelihood (FALSE) or random effects to be marginalized out of the likelihood (TRUE).}
 
@@ -107,44 +104,55 @@ see Additional arguments section for setup of survey selectivity parameters and 
 \item{...}{Other arguments passed to \code{\link[=RCM]{RCM()}} for starting values and fixed parameters.}
 }
 \value{
-An \link[=rcmodel-class]{rcmodel} object with the conditioned operating model in \verb{@OM} and the \link[=rcmodel-class]{RCModel-class} fit for
-each stock or complex in \verb{@fits}.
+An \link[=rcmodel-class]{rcmodel} object with the conditioned operating model in \verb{@OM} and the \link[=rcmodel-class]{RCModel-class} fit in
+\verb{@fits}, named by the stock or complex.
 }
 \description{
 Conditions an operating model on fishery data with the Rapid Conditioning Model (see \code{\link[=RCM]{RCM()}}) and returns
-a complete \link[MSEtool:om-class]{MSEtool::om} object. The life history comes from \link[MSEtool:stock-class]{MSEtool::stock} objects and the
-fishery data from \link[MSEtool:data-class]{MSEtool::data} objects. \code{RCM2()} builds the operating model, fits each stock (or
-hermaphroditic complex) and writes the fitted values into the operating model.
+a complete \link[MSEtool:om-class]{MSEtool::om} object. The life history comes from one or more \link[MSEtool:stock-class]{MSEtool::stock} objects
+and the fishery data from one \link[MSEtool:data-class]{MSEtool::data} object. \code{RCM2()} builds the operating model, fits the
+stocks as one population to the data, and writes the fitted values into the operating model.
 }
 \section{Data}{
 
-Each stock (or hermaphroditic complex) is fitted to its own \link[MSEtool:data-class]{MSEtool::data} object. Fleets correspond to
-the columns of \code{data@Landings@Value}, plus \code{data@Discards@Value} if provided, and each fleet has its own
-fitted selectivity and fishing mortality. Catch CVs in \verb{@CV} are optional.
-Indices in \code{data@CPUE} and \code{data@Survey} are fitted in that order, so \code{s_selectivity} refers to the CPUE
-indices first. Index CVs are required. Age and length compositions are taken from \code{data@LandingsAtAge} and
-\code{data@LandingsAtSize}. The number of historical years and \code{CurrentYear} are taken from \code{data@Years}, and the
-first year of data is the first historical year.
-
-Arguments such as \code{condition}, \code{selectivity}, \code{s_selectivity}, \code{LWT}, \code{prior}, \code{start} and \code{map} apply to
-every stock, or can be a list named by stock (or complex) to set values for each.
+\code{RCM2()} fits one \link[MSEtool:data-class]{MSEtool::data} object. Fleets correspond to the columns of \code{data@Landings@Value},
+plus \code{data@Discards@Value} if provided, and each fleet has its own fitted selectivity and fishing mortality.
+Catch CVs in \verb{@CV} are optional. Indices in \code{data@CPUE} and \code{data@Survey} are fitted in that order, so
+\code{s_selectivity} refers to the CPUE indices first. Index CVs are required. Age and length compositions are
+taken from \code{data@LandingsAtAge} and \code{data@LandingsAtSize}. The number of historical years and \code{CurrentYear}
+are taken from \code{data@Years}, and the first year of data is the first historical year.
 }
 
-\section{Hermaphroditic stocks}{
+\section{Several stocks}{
 
-A hermaphroditic stock is two or more \link[MSEtool:stock-class]{MSEtool::stock} objects, one for each sex, linked by \code{Herm}.
-The stocks share their age classes. Recruitment is to the stock that individuals start in (the \code{From} stock
-that is not the \code{To} stock of any transition). \code{RCM2()} sets \code{SRR@R0 = 0} for the other stocks and, if not
-set, their \code{SRR@SPFrom} to the recruiting stock. The linked stocks form one complex, named by joining the
-stock names with \code{"-"}, and are fitted to one \link[MSEtool:data-class]{MSEtool::data} object with catches and indices summed
-over the stocks. In a list of data objects, this element is named by the complex or by any of its stocks.
+Several \link[MSEtool:stock-class]{MSEtool::stock} objects, e.g., the sexes of a stock or its components, are fitted together as
+one population (a complex) to the one data object, with catches and indices summed over the stocks. The
+stocks share their age classes. The complex is named by joining the stock names with \code{"-"}, and the returned
+operating model has every stock in that complex in \verb{@Complexes}.
 
-The complex is fitted as one population. Natural mortality, weight and length-at-age are averaged over the
-stocks at age, weighted by the unfished numbers-at-age of each stock. Spawning output is that of the stocks
-in \code{SRR@SPFrom} of the recruiting stock. The fitted unfished recruitment, steepness and recruitment
-deviations are assigned to the recruiting stock. Every stock in the complex gets the fitted fishing mortality
-and selectivity-at-age of each fleet, so the proportion of each stock at age is the same as in the unfished
-population.
+Natural mortality, weight and length-at-age are averaged over the stocks at age, weighted by the unfished
+numbers-at-age of each stock. Spawning output is set by \code{SRR@SPFrom} of the recruiting stocks, as in MSEtool: a
+stock name, a position in \code{Stock}, or a weight vector named by stock (name or position). An empty \code{SRR@SPFrom} is
+the stock itself. Recruiting stocks with the same \code{SRR@SPFrom} recruit from the same spawning output. Recruiting
+stocks with an empty \code{SRR@SPFrom} each recruit from their own spawning output, and the fit uses their sum.
+Every stock gets the fitted fishing mortality and selectivity-at-age of each fleet, so the proportion of each
+stock at age is the same as in the unfished population.
+
+Recruitment is to the stocks that are not the \code{To} stock of any \code{Herm} transition. \code{RCM2()} sets
+\code{SRR@R0 = 0} for the other stocks. Each recruiting stock gets the fitted unfished recruitment times its share of
+the input \code{SRR@R0} (equal shares if no stock has \code{SRR@R0}), and the fitted steepness and recruitment
+deviations. An empty \code{SRR@SPFrom} is set to the recruiting stocks. The recruiting stocks must have the same
+\code{SRR@SPFrom} and \code{SRR@Model}.
+
+For a hermaphroditic stock, link the stocks (one for each sex) with \code{Herm}. Recruitment is then to the stock
+that individuals start in, from the spawning output of the stocks in its \code{SRR@SPFrom} (itself if empty).
+\code{RCM2()} does not change a \code{SRR@SPFrom} that is set. For a protogynous stock (\code{Herm(From = "Female", To = "Male")}),
+the female stock recruits from its own spawning output by default. For a protandrous stock
+(\code{Herm(From = "Male", To = "Female")}), set \code{SRR@SPFrom = "Female"} in the male stock so that recruitment comes
+from female spawning output.
+
+When \code{Stock} is a named list, the names replace \code{Stock@Name}. Stock names in \code{SRR@SPFrom}, \code{Herm@From} and
+\code{Herm@To} are updated to match.
 }
 
 \section{Operating model}{

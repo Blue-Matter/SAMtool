@@ -1,5 +1,12 @@
 The latest release of the SAMtool package is available on [CRAN](https://CRAN.R-project.org/package=SAMtool).
 
+## SAMtool (development version)
+- New `RCM2()` conditions MSEtool 4 operating models from `stock`, `fleet` and `data` objects (or an `om`) and returns an `rcmodel` object with the conditioned `om` in `@OM`.
+- `RCM2()` fits one data set. Several stocks (e.g., the sexes of a hermaphroditic stock linked by `Herm`) are fitted together as one population, with recruitment and spawning output set by `SRR@SPFrom`.
+- Requires R 4.4.0 and MSEtool 4.0.0.
+- Fix RCM treating simulations that differ by a constant factor (e.g., in M) as identical.
+- Fix the RCM unfished spawners-per-recruit for the stock-recruit relationship when the age of maturity is at least the number of historical years.
+
 ## SAMtool 1.10.0
 - `max_F` in `RCM` can now be a matrix by year and fleet
 - Fix erroneous check in `RCMdata@I_delta` (introduced in version 1.9.0)

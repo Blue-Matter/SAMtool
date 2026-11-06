@@ -118,7 +118,7 @@ is passed on to \code{\link[TMB:newton]{TMB::newton()}}.}
 \code{IAA_hist} (an array of index age proportions by year, age, survey), and \code{IAA_n} (a matrix of multinomial sample size by year and survey).}
 }
 \value{
-An object of class \linkS4class{Assessment}.
+An object of class \link[=Assessment-class]{Assessment}.
 }
 \description{
 A modification of \code{SCA} that incorporates density-dependent effects on M based on biomass depletion (Forrest et al. 2018).

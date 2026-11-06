@@ -12,11 +12,11 @@
 \S4method{summary}{retro}(object, na.rm = FALSE)
 }
 \arguments{
-\item{x}{An object of class \linkS4class{retro}.}
+\item{x}{An object of class \link[=retro-class]{retro}.}
 
 \item{color}{An optional character vector of colors for plotting.}
 
-\item{object}{An object of class \linkS4class{retro}.}
+\item{object}{An object of class \link[=retro-class]{retro}.}
 
 \item{na.rm}{Logical, whether NA values should be excluded from Mohn's rho calculation}
 }

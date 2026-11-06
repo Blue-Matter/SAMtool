@@ -8,8 +8,8 @@
 #' fitted apical fishing mortality (as `@@Effort` with unit catchability) and selectivity-at-age, with
 #' full retention so that all catch is removed.
 #' The fitted data are in `@@Data`, with index selectivity set in `@@Obs`.
-#' @slot fits A list, named by stock (or by complex for hermaphroditic stocks), of [RCModel-class] objects
-#' with each fit. Use [plot()] on an element for the fit diagnostics report.
+#' @slot fits A list with one [RCModel-class] object, named by the stock (or by the complex for several stocks),
+#' with the fit. Use [plot()] for the fit diagnostics report.
 #' @slot RCMdata A list, named as `fits`, of the [RCMdata-class] objects that were fitted.
 #' @slot Misc A list for additional output.
 #'
@@ -25,7 +25,7 @@ setClass("rcmodel", slots = c(
 #' @param object An `rcmodel` object.
 #' @export
 setMethod("show", signature(object = "rcmodel"), function(object) {
-  cat("rcmodel:", length(object@fits), "stock(s),", object@OM@nSim, "simulation(s)
+  cat("rcmodel:", length(MSEtool::StockNames(object@OM)), "stock(s),", object@OM@nSim, "simulation(s)
 ")
   for (st in names(object@fits)) {
     fit <- object@fits[[st]]

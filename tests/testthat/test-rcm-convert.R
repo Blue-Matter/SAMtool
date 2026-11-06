@@ -6,9 +6,9 @@ test_that(".stock2OM() produces an OM that passes check_OM_for_sampling()", {
   convOM <- .stock2OM(new_fixture$Stock, new_fixture$Fleet, seed = 1)
 
   expect_s4_class(convOM, "OM")
-  expect_equal(convOM@nsim, nSim)
+  expect_equal(convOM@nsim, n_sim)
   expect_equal(convOM@maxage, maxage)
-  expect_equal(dim(convOM@cpars$Len_age), c(nSim, maxage + 1, nyears + pYear))
+  expect_equal(dim(convOM@cpars$Len_age), c(n_sim, maxage + 1, nyears + p_year))
 
   dummyRCMdata <- methods::new("RCMdata")
   dummyRCMdata@Chist <- Chist_true
@@ -76,10 +76,11 @@ test_that(".fit2om() writes the fit back into a valid, non-default om/rcmodel", 
 
   om_skeleton <- MSEtool::OM(Name = "TestOM", Stock = list(TestStock = new_fixture$Stock),
                              Fleet = list(TestStock = list(Fleet1 = new_fixture$Fleet)),
-                             nSim = nSim, nYear = nyears, pYear = pYear, CurrentYear = CurrentYear)
+                             nSim = n_sim, nYear = nyears, pYear = p_year, CurrentYear = current_year)
 
   fits <- list(TestStock = fit)
-  units <- list(TestStock = list(stocks = "TestStock", complex = 1, herm = FALSE))
+  units <- list(TestStock = list(stocks = "TestStock", rec = "TestStock", share = list(TestStock = 1),
+                                complex = 1, combined = FALSE))
   om_fitted <- .fit2om(om_skeleton, fits, units,
                           Data = list(TestStock = new_fixture$data), silent = TRUE)
 
@@ -90,13 +91,13 @@ test_that(".fit2om() writes the fit back into a valid, non-default om/rcmodel", 
   expect_error(methods::validObject(rcmodel_obj), NA)
 
   R0_report <- vapply(fit@report, getElement, numeric(1), "R0")
-  expect_equal(as.numeric(om_fitted@Stock$TestStock@SRR@R0), rep(R0_report, length.out = nSim))
+  expect_equal(as.numeric(om_fitted@Stock$TestStock@SRR@R0), rep(R0_report, length.out = n_sim))
   expect_true(all(om_fitted@Stock$TestStock@SRR@R0 != 1000)) # not the pre-fit starting value
 
   expect_length(om_fitted@Stock$TestStock@Depletion@Final, 0)
 
   fitted_fleet <- om_fitted@Fleet$TestStock$Fleet1
-  F_report <- t(vapply(rep(fit@report, length.out = nSim), function(x) x$F[1:nyears, 1], numeric(nyears)))
+  F_report <- t(vapply(rep(fit@report, length.out = n_sim), function(x) x$F[1:nyears, 1], numeric(nyears)))
   expect_equal(matrix(fitted_fleet@Effort@Effort, nrow(F_report), ncol(F_report)), F_report)
 
   sel_arr <- fitted_fleet@Selectivity@MeanAtAge
@@ -109,7 +110,7 @@ test_that("RCM2(stock, data = data) reproduces the RCM_int() fit", {
   new_fixture <- make_new_fixture()
 
   rc <- RCM2(new_fixture$Stock, data = new_fixture$data, Fleet = new_fixture$Fleet,
-           nSim = nSim, pYear = pYear, CurrentYear = CurrentYear,
+           nSim = n_sim, pYear = p_year, CurrentYear = current_year,
            condition = "catch", selectivity = "logistic", s_selectivity = "B", silent = TRUE)
 
   expect_s4_class(rc, "rcmodel")
@@ -125,7 +126,7 @@ test_that("RCM2(stock, data = data) reproduces the RCM_int() fit", {
                                silent = TRUE)
   R0_ref <- vapply(ref_fit@report, getElement, numeric(1), "R0")
 
-  expect_equal(as.numeric(rc@OM@Stock$TestStock@SRR@R0), rep(R0_ref, length.out = nSim))
+  expect_equal(as.numeric(rc@OM@Stock$TestStock@SRR@R0), rep(R0_ref, length.out = n_sim))
 })
 
 test_that("RCM() keeps only the legacy methods", {
@@ -137,89 +138,56 @@ test_that("RCM() keeps only the legacy methods", {
   expect_true(methods::existsMethod("RCM", methods::signature("list", "RCMdata")))
 })
 
-test_that("RCM2(list, data = list) fits two stocks", {
-  new_fixture <- make_new_fixture()
-  stock2 <- new_fixture$Stock
-  stock2@Name <- "TestStock2"
+test_that("RCM2() fits several stocks as one population to one data set", {
+  fx <- make_new_fixture()
+  stockA <- stockB <- fx$Stock
+  stockA@SRR@R0 <- 600
+  stockB@SRR@R0 <- 400
 
-  rc2 <- RCM2(list(TestStock = new_fixture$Stock, TestStock2 = stock2),
-            data = list(TestStock = new_fixture$data, TestStock2 = new_fixture$data),
-            Fleet = list(TestStock = new_fixture$Fleet, TestStock2 = new_fixture$Fleet),
-            nSim = nSim, pYear = pYear, CurrentYear = CurrentYear,
-            condition = "catch", selectivity = "logistic", s_selectivity = "B", silent = TRUE)
+  rc <- RCM2(list(StockA = stockA, StockB = stockB), data = fx$data, Fleet = fx$Fleet,
+             nSim = n_sim, pYear = p_year, s_selectivity = "B", silent = TRUE)
 
-  expect_s4_class(rc2, "rcmodel")
-  expect_error(methods::validObject(rc2), NA)
-  expect_error(methods::validObject(rc2@OM), NA)
-  expect_equal(sort(names(rc2@fits)), c("TestStock", "TestStock2"))
-  expect_true(all(vapply(rc2@fits, function(x) all(x@conv), logical(1))))
+  expect_named(rc@fits, "StockA-StockB")
+  expect_true(all(rc@fits[[1]]@conv))
+  expect_equal(names(rc@OM@Complexes), "StockA-StockB")
+
+  # The fitted R0 is split by the input R0
+  R0 <- vapply(rc@fits[[1]]@report, getElement, numeric(1), "R0")
+  expect_equal(as.numeric(rc@OM@Stock$StockA@SRR@R0), 0.6 * rep(R0, length.out = n_sim))
+  expect_equal(as.numeric(rc@OM@Stock$StockB@SRR@R0), 0.4 * rep(R0, length.out = n_sim))
+
+  # Same biology, so the summed history matches the fit
+  hist <- MSEtool::Simulate(rc@OM, silent = TRUE)
+  sb <- MSEtool::SBiomass(hist)
+  sb <- sb[sb$Period == "Historical", ]
+  sb <- tapply(sb$Value, list(sb$Sim, sb$Year), sum)
+  # Identical simulations are simulated once
+  ssb_fit <- rc@fits[[1]]@SSB[seq_len(nrow(sb)), 1:nyears, drop = FALSE]
+  expect_equal(unname(sb), unname(ssb_fit), tolerance = 1e-4)
+
+  r <- MSEtool::Removals(hist)
+  r <- r[r$Sim == 1 & r$Period == "Historical", ]
+  expect_equal(as.numeric(tapply(r$Value, r$Year, sum)), Chist_true, tolerance = 1e-3)
 })
 
-test_that("RCM2() fits two stocks with two fleets each independently", {
-  mk_stock <- function(name, M, Linf, h) {
-    ages <- MSEtool::Ages(MaxAge = maxage, MinAge = 0, Units = "year", PlusGroup = TRUE)
-    length_obj <- MSEtool::Length(Pars = list(Linf = Linf, K = 0.2, t0 = -0.5), Model = "vonBert")
-    weight_obj <- MSEtool::Weight(Pars = list(Alpha = 1e-5, Beta = 3), Model = "WeightatLength")
-    natm <- MSEtool::NaturalMortality(Pars = list(M = M), Model = "MortalityAtAge")
-    mat <- MSEtool::Maturity(Pars = list(L50 = 40, L50_95 = 5), Model = "MaturityAtLength")
-    srr <- MSEtool::SRR(Pars = list(h = h), Model = "BevertonHolt", R0 = 1000, SD = 0.4, AC = 0)
-    stock <- MSEtool::Stock(Name = name, Ages = ages, Length = length_obj, Weight = weight_obj,
-                             NaturalMortality = natm, Maturity = mat, SRR = srr)
-    MSEtool::PopulateStock(stock, nYear = nyears, pYear = pYear, nSim = nSim,
-                            CurrentYear = CurrentYear, seed = 1)
-  }
-  mk_fleet <- function(name, L5, LFS, Vmaxlen = 1) {
-    sel <- MSEtool::Selectivity(Pars = list(L5 = L5, LFS = LFS, Vmaxlen = Vmaxlen), Model = "DoubleNormal")
-    MSEtool::Fleet(Name = name, Selectivity = sel)
-  }
-  mk_data <- function() {
-    Chist1 <- round(100 + 20 * sin(seq(0, 3 * pi, length.out = nyears)) + seq(0, 30, length.out = nyears), 1)
-    Chist2 <- round(60 + 10 * cos(seq(0, 2 * pi, length.out = nyears)) + seq(0, 15, length.out = nyears), 1)
-    Ind_true2 <- round(pmax(50 - 1.2 * seq_len(nyears) + 5 * cos(seq(0, 2 * pi, length.out = nyears)), 1), 2)
-    dat <- MSEtool::Data(Years = (CurrentYear - nyears + 1):CurrentYear)
-    dat@Landings <- MSEtool::CatchData(Name = c("Small", "Large"), Value = unname(cbind(Chist1, Chist2)),
-                                        CV = matrix(0.01, nyears, 2))
-    dat@CPUE <- MSEtool::IndicesData(Value = matrix(Ind_true2, ncol = 1), CV = matrix(0.2, nyears, 1))
-    dat
-  }
+test_that("RCM2() splits recruitment equally without input R0", {
+  fx <- make_new_fixture()
+  stockA <- stockB <- fx$Stock
+  stockA@SRR@R0 <- stockB@SRR@R0 <- numeric()
+  rc <- RCM2(list(StockA = stockA, StockB = stockB), data = fx$data, Fleet = fx$Fleet,
+             nSim = n_sim, pYear = p_year, s_selectivity = "B", silent = TRUE)
+  expect_equal(rc@OM@Stock$StockA@SRR@R0, rc@OM@Stock$StockB@SRR@R0)
+})
 
-  # Different biology per stock, different selectivity per fleet within a stock.
-  stockA <- mk_stock("StockA", M = 0.2, Linf = 100, h = 0.7)
-  stockB <- mk_stock("StockB", M = 0.35, Linf = 80, h = 0.85)
-  fleetA <- list(Small = mk_fleet("Small", L5 = 20, LFS = 35), Large = mk_fleet("Large", L5 = 50, LFS = 70))
-  fleetB <- list(Small = mk_fleet("Small", L5 = 15, LFS = 30), Large = mk_fleet("Large", L5 = 40, LFS = 60))
-  dataA <- mk_data()
-  dataB <- mk_data()
+test_that("RCM2() fits one data set", {
+  fx <- make_new_fixture()
+  stockB <- fx$Stock
+  expect_error(RCM2(list(StockA = fx$Stock, StockB = stockB), data = list(fx$data, fx$data),
+                    Fleet = fx$Fleet, nSim = n_sim, pYear = p_year, silent = TRUE), "one data set")
+  expect_error(RCM2(fx$Stock, Fleet = fx$Fleet, nSim = n_sim, pYear = p_year, silent = TRUE), "data")
 
-  rc <- RCM2(list(StockA = stockA, StockB = stockB),
-            data = list(StockA = dataA, StockB = dataB),
-            Fleet = list(StockA = fleetA, StockB = fleetB),
-            nSim = nSim, pYear = pYear, CurrentYear = CurrentYear,
-            condition = "catch", selectivity = "logistic", s_selectivity = "B", silent = TRUE)
-
-  expect_s4_class(rc, "rcmodel")
-  expect_error(methods::validObject(rc), NA)
-  expect_error(methods::validObject(rc@OM), NA)
-  expect_equal(sort(names(rc@fits)), c("StockA", "StockB"))
-  expect_true(all(rc@fits$StockA@conv))
-  expect_true(all(rc@fits$StockB@conv))
-
-  # No cross-contamination between stocks: fitted R0 differs substantially.
-  R0_A <- mean(rc@OM@Stock$StockA@SRR@R0)
-  R0_B <- mean(rc@OM@Stock$StockB@SRR@R0)
-  expect_false(isTRUE(all.equal(R0_A, R0_B)))
-  expect_gt(abs(R0_A - R0_B) / R0_A, 0.1)
-
-  # Independent per-fleet selectivity/F within a stock (no collapse to one aggregate fleet).
-  selA_small <- rc@OM@Fleet$StockA$Small@Selectivity@MeanAtAge
-  selA_large <- rc@OM@Fleet$StockA$Large@Selectivity@MeanAtAge
-  nAge <- dim(selA_small)[2]
-  expect_false(isTRUE(all.equal(
-    selA_small[1, , dim(selA_small)[3], 1],
-    selA_large[1, , dim(selA_large)[3], 1]
-  )))
-
-  FA_small <- rc@OM@Fleet$StockA$Small@Effort@Effort
-  FA_large <- rc@OM@Fleet$StockA$Large@Effort@Effort
-  expect_false(isTRUE(all.equal(as.numeric(FA_small[1, ]), as.numeric(FA_large[1, ]))))
+  # A list of one data object is accepted
+  rc <- RCM2(fx$Stock, data = list(fx$data), Fleet = fx$Fleet, nSim = n_sim, pYear = p_year,
+             s_selectivity = "B", silent = TRUE)
+  expect_named(rc@fits, "TestStock")
 })

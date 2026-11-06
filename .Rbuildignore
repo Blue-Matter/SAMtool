@@ -19,3 +19,4 @@
 ^\.claude$
 src/Makevars
 src/Makevars.win
+^dev$

@@ -59,8 +59,11 @@
     for (s in members) {
       si <- stock_index(s)
       stock <- OM@Stock[[si]]
-      if (s == members[1]) {
-        stock@SRR@R0 <- vapply(report, getElement, numeric(1), "R0")
+      rec <- units[[u]]$rec %||% members[1]
+      if (s %in% rec) {
+        R0 <- vapply(report, getElement, numeric(1), "R0")
+        share <- units[[u]]$share[[s]] %||% 1
+        stock@SRR@R0 <- R0 * rep(share, length.out = length(R0))
         stock@SRR@Pars[[.SRRHSlot(stock@SRR@Model)]] <- vapply(report, getElement, numeric(1), "h")
         stock@SRR@SD <- vapply(report, getElement, numeric(1), "tau")
         if (!is.null(fit@OM@cpars$AC)) stock@SRR@AC <- fit@OM@cpars$AC
@@ -128,8 +131,8 @@
   fleet_names <- names(OM@Fleet[[si]])
 
   for (i in seq_along(nms)) {
-    # Combined spawning output is not an om index type, so hermaphroditic SSB indices use the fitted array
-    sel <- switch(as.character(s_sel[i]), B = "Biomass", SSB = if (!unit$herm) "SBiomass", NULL)
+    # Combined spawning output is not an om index type, so SSB indices of several stocks use the fitted array
+    sel <- switch(as.character(s_sel[i]), B = "Biomass", SSB = if (!isTRUE(unit$combined)) "SBiomass", NULL)
     fleet_match <- suppressWarnings(as.integer(s_sel[i]))
     same_fleet <- !is.na(fleet_match) && identical(fleet_names[fleet_match], nms[i])
     if (is.null(sel) && !same_fleet) {

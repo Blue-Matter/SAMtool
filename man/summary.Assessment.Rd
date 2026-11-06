@@ -8,13 +8,13 @@
 \S4method{summary}{Assessment}(object)
 }
 \arguments{
-\item{object}{An object of class \linkS4class{Assessment}}
+\item{object}{An object of class \link[=Assessment-class]{Assessment}}
 }
 \value{
 A list of parameters.
 }
 \description{
-Returns a summary of parameter estimates and output from an \linkS4class{Assessment} object.
+Returns a summary of parameter estimates and output from an \link[=Assessment-class]{Assessment} object.
 }
 \examples{
 output <- DD_TMB(Data = MSEtool::SimulatedData)

@@ -34,8 +34,8 @@ fitted apical fishing mortality (as \verb{@Effort} with unit catchability) and s
 full retention so that all catch is removed.
 The fitted data are in \verb{@Data}, with index selectivity set in \verb{@Obs}.}
 
-\item{\code{fits}}{A list, named by stock (or by complex for hermaphroditic stocks), of \link[=RCModel-class]{RCModel} objects
-with each fit. Use \code{\link[=plot]{plot()}} on an element for the fit diagnostics report.}
+\item{\code{fits}}{A list with one \link[=RCModel-class]{RCModel} object, named by the stock (or by the complex for several stocks),
+with the fit. Use \code{\link[=plot]{plot()}} for the fit diagnostics report.}
 
 \item{\code{RCMdata}}{A list, named as \code{fits}, of the \link[=RCMdata-class]{RCMdata} objects that were fitted.}
 

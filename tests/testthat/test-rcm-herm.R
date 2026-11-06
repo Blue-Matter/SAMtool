@@ -102,16 +102,96 @@ test_that("RCM2() builds the hermaphroditic om from stocks, data and Herm", {
   expect_equal(unname(sb), unname(rc@fits[[1]]@SSB[, 1:herm_om@nYear]), tolerance = 1e-4)
 })
 
-test_that("complexes need Herm links and one recruiting stock", {
-  om <- herm_om
-  om@Herm <- list()
-  expect_error(RCM2(om, silent = TRUE), "not linked")
+test_that("RCM2() renames stock names in SPFrom and Herm to the list names", {
+  female <- herm_om@Stock[[1]]
+  male <- herm_om@Stock[[2]]
+  expect_equal(male@SRR@SPFrom, female@Name)
+  h <- herm_om@Herm[[1]]
+  h@From <- female@Name
+  h@To <- male@Name
 
+  rc <- suppressWarnings(RCM2(list(Female = female, Male = male), data = herm_om@Data[[1]],
+                              Fleet = herm_om@Fleet[[1]], Herm = h, nSim = 3, pYear = 5,
+                              s_selectivity = "B", silent = TRUE))
+  expect_equal(rc@OM@Stock$Male@SRR@SPFrom, "Female")
+  expect_equal(rc@OM@Herm[[1]]@From, "Female")
+  expect_equal(rc@OM@Herm[[1]]@To, "Male")
+})
+
+test_that("RCM2(om) puts every stock in one complex and fits one data set", {
   om <- herm_om
   om@Stock[[2]]@SRR@R0 <- 100
-  expect_error(RCM2(om, silent = TRUE), "one stock with recruitment")
+  rc <- suppressWarnings(RCM2(om, s_selectivity = "B", silent = TRUE))
+  expect_true(all(rc@OM@Stock[[2]]@SRR@R0 == 0))
 
   om <- herm_om
   om@Complexes <- list()
-  expect_error(RCM2(om, silent = TRUE), "OM@Complexes")
+  rc <- suppressWarnings(RCM2(om, s_selectivity = "B", silent = TRUE))
+  expect_equal(length(rc@OM@Complexes), 1L)
+  expect_equal(rc@OM@Complexes[[1]], 1:2)
+
+  om <- herm_om
+  om@Complexes <- list(A = 1, B = 2)
+  expect_error(RCM2(om, silent = TRUE), "one complex")
+
+  om <- herm_om
+  om@Data <- list(herm_om@Data[[1]], herm_om@Data[[1]])
+  expect_error(RCM2(om, silent = TRUE), "one data set")
+})
+
+test_that("a protandrous stock recruits to males from female spawning output", {
+  female <- herm_om@Stock[[1]]
+  male <- herm_om@Stock[[2]]
+  male@SRR <- female@SRR
+  male@SRR@SPFrom <- "Female"
+  female@SRR@SPFrom <- NULL
+  h <- MSEtool::Herm(From = "Male", To = "Female", Frac = herm_om@Herm[[1]]@Frac)
+
+  rc <- suppressWarnings(RCM2(list(Male = male, Female = female), data = herm_om@Data[[1]],
+                              Fleet = herm_om@Fleet[[1]], Herm = h, nSim = 3, pYear = 5,
+                              s_selectivity = "B", silent = TRUE))
+  expect_true(all(rc@OM@Stock$Female@SRR@R0 == 0))
+  expect_true(all(rc@OM@Stock$Male@SRR@R0 > 0))
+  expect_equal(rc@OM@Stock$Male@SRR@SPFrom, "Female")
+  expect_length(rc@OM@Stock$Female@SRR@SPFrom, 0)
+
+  hist <- MSEtool::Simulate(rc@OM, silent = TRUE)
+  sb <- MSEtool::SBiomass(hist)
+  sb <- sb[sb$Period == "Historical" & sb$Stock == "Female", ]
+  sb <- tapply(sb$Value, list(sb$Sim, sb$Year), sum)
+  expect_equal(unname(sb), unname(rc@fits[[1]]@SSB[seq_len(nrow(sb)), seq_len(ncol(sb))]), tolerance = 1e-4)
+})
+
+test_that("a numeric SPFrom is the position of the stock in the list", {
+  female <- herm_om@Stock[[1]]
+  male <- herm_om@Stock[[2]]
+  male@SRR <- female@SRR
+  male@SRR@SPFrom <- 1  # Female, first in the list
+  female@SRR@SPFrom <- NULL
+  h <- MSEtool::Herm(From = "Male", To = "Female", Frac = herm_om@Herm[[1]]@Frac)
+
+  rc <- suppressWarnings(RCM2(list(Female = female, Male = male), data = herm_om@Data[[1]],
+                              Fleet = herm_om@Fleet[[1]], Herm = h, nSim = 3, pYear = 5,
+                              s_selectivity = "B", silent = TRUE))
+  expect_equal(rc@OM@Stock$Male@SRR@SPFrom, "Female")
+  expect_true(all(rc@OM@Stock$Female@SRR@R0 == 0))
+
+  hist <- MSEtool::Simulate(rc@OM, silent = TRUE)
+  sb <- MSEtool::SBiomass(hist)
+  sb <- sb[sb$Period == "Historical" & sb$Stock == "Female", ]
+  sb <- tapply(sb$Value, list(sb$Sim, sb$Year), sum)
+  expect_equal(unname(sb), unname(rc@fits[[1]]@SSB[seq_len(nrow(sb)), seq_len(ncol(sb))]), tolerance = 1e-4)
+})
+
+test_that("SPFrom naming a stock that is not in the om is an error", {
+  om <- herm_om
+  om@Stock[[2]]@SRR@SPFrom <- "Nope"
+  expect_error(RCM2(om, silent = TRUE), "not in the stocks")
+})
+
+test_that("weighted SPFrom names that are positions are mapped to stock names", {
+  expect_equal(.NameSPFrom(c("1" = 0.5, "2" = 0.5), c("A", "B"), "A"), c(A = 0.5, B = 0.5))
+  expect_equal(.NameSPFrom(2, c("A", "B"), "A"), "B")
+  expect_equal(.SPFromWeights(NULL, "A", c("A", "B")), c(A = 1))
+  expect_equal(.SPFromWeights("B", "A", c("A", "B")), c(B = 1))
 })

@@ -1,11 +1,11 @@
 
 # Shared single-stock fixtures for the RCM tests
 
-nSim <- 3
+n_sim <- 3
 nyears <- 20
-pYear <- 2
+p_year <- 2
 maxage <- 8
-CurrentYear <- 2020
+current_year <- 2020
 
 Chist_true <- round(100 + 20 * sin(seq(0, 3 * pi, length.out = nyears)) + seq(0, 30, length.out = nyears), 1)
 Ind_true <- round(pmax(50 - 1.2 * seq_len(nyears) + 5 * cos(seq(0, 2 * pi, length.out = nyears)), 1), 2)
@@ -33,7 +33,7 @@ make_legacy_fixture <- function() {
   legacyStock@L50_95 <- c(5, 5)
 
   legacyFleet <- methods::new("Fleet")
-  legacyFleet@CurrentYr <- CurrentYear
+  legacyFleet@CurrentYr <- current_year
   legacyFleet@nyears <- nyears
   legacyFleet@EffYears <- c(1, nyears)
   legacyFleet@EffLower <- legacyFleet@EffUpper <- c(0, 1)
@@ -48,7 +48,7 @@ make_legacy_fixture <- function() {
 
   legacyOM <- methods::new("OM", Stock = legacyStock, Fleet = legacyFleet,
                             Obs = MSEtool::Generic_Obs, Imp = MSEtool::Perfect_Imp,
-                            nsim = nSim, proyears = pYear)
+                            nsim = n_sim, proyears = p_year)
   legacyOM@seed <- 1
   legacyOM@maxF <- 3
 
@@ -71,13 +71,13 @@ make_new_fixture <- function() {
 
   stock <- MSEtool::Stock(Name = "TestStock", Ages = ages, Length = length_obj, Weight = weight_obj,
                            NaturalMortality = natm, Maturity = mat, SRR = srr)
-  stock <- MSEtool::PopulateStock(stock, nYear = nyears, pYear = pYear, nSim = nSim,
-                                   CurrentYear = CurrentYear, seed = 1)
+  stock <- MSEtool::PopulateStock(stock, nYear = nyears, pYear = p_year, nSim = n_sim,
+                                   CurrentYear = current_year, seed = 1)
 
   sel <- MSEtool::Selectivity(Pars = list(L5 = 30, LFS = 50, Vmaxlen = 1), Model = "DoubleNormal")
   fleet <- MSEtool::Fleet(Name = "Fleet1", Selectivity = sel)
 
-  dat <- MSEtool::Data(Years = (CurrentYear - nyears + 1):CurrentYear)
+  dat <- MSEtool::Data(Years = (current_year - nyears + 1):current_year)
   dat@Landings <- MSEtool::CatchData(Value = matrix(Chist_true, ncol = 1), CV = matrix(0.01, nyears, 1))
   dat@CPUE <- MSEtool::IndicesData(Value = matrix(Ind_true, ncol = 1), CV = matrix(0.2, nyears, 1))
 

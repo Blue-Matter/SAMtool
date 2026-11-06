@@ -100,7 +100,7 @@ RCM(OM, data, ...)
 )
 }
 \arguments{
-\item{RCMdata}{An \linkS4class{RCMdata} object.}
+\item{RCMdata}{An \link[=RCMdata-class]{RCMdata} object.}
 
 \item{OM}{An object of class \link[MSEtool:OM-class]{MSEtool::OM} that specifies natural mortality (M), growth (Linf, K, t0, a, b), stock-recruitment relationship,
 steepness, maturity parameters (L50 and L50_95), and standard deviation of recruitment variability (Perr).
@@ -111,7 +111,7 @@ or "effort" (F is proportional to an index series in \code{data@Ehist}. Can be f
 
 \item{silent}{Logical to indicate whether informative messages will be reported to console.}
 
-\item{data}{Data inputs formatted in a \linkS4class{RCMdata} (preferred) or \link[MSEtool:Data-class]{MSEtool::Data} object.
+\item{data}{Data inputs formatted in a \link[=RCMdata-class]{RCMdata} (preferred) or \link[MSEtool:Data-class]{MSEtool::Data} object.
 Use of a list is deprecated. See Data section below.}
 
 \item{...}{Other arguments to pass in for starting values of parameters and fixing parameters. See details.}
@@ -152,10 +152,10 @@ Typically a single numeric, but can also be a matrix by year and fleet.}
 \item{map}{A list of \code{map} argument to TMB models to override defaults. See \link[TMB:MakeADFun]{MakeADFun} and details.}
 
 \item{ESS}{A vector of length two. A shortcut method to setting the maximum multinomial sample size of the age and length compositions.
-Not used when data are provided in a \linkS4class{RCMdata} object.}
+Not used when data are provided in a \link[=RCMdata-class]{RCMdata} object.}
 }
 \value{
-An object of class \linkS4class{RCModel} (see link for description of output).
+An object of class \link[=RCModel-class]{RCModel} (see link for description of output).
 
 \code{check_RCMdata} returns a list of updated RCMdata object, OM, and StockPars and FleetPars from the Hist object generated
 from the OM.
@@ -220,7 +220,7 @@ See online documentation for more details.
 One of indices, age compositions, or length compositions should be provided in addition to the historical catch or effort. Not all arguments
 are needed to run the model (some have defaults, while others are ignored if not applicable depending on the data provided).
 
-The \code{data} variable can be an object of class \linkS4class{RCMdata}. See help file for description of inputs.
+The \code{data} variable can be an object of class \link[=RCMdata-class]{RCMdata}. See help file for description of inputs.
 
 Alternatively, the \code{data} input can be a \link[MSEtool:Data-class]{MSEtool::Data} S4 object which will retrieve data from the following slots:
 
@@ -378,7 +378,7 @@ where individual parameters are independent of other indices. Use \code{RCMdata@
 By default, all likelihood weights are equal to one if not specified by the user.
 
 Annual multinomial sample sizes for the age and length comps can now be provided directly in the
-\linkS4class{RCMdata} object. For a list or \link[MSEtool:Data-class]{MSEtool::Data} object, use the \code{ESS} argument.
+\link[=RCMdata-class]{RCMdata} object. For a list or \link[MSEtool:Data-class]{MSEtool::Data} object, use the \code{ESS} argument.
 }
 
 \examples{
@@ -424,7 +424,7 @@ Thorson et al. 2017. Model-based estimates of effective sample size in stock ass
 Fish. Res. 192:84-93. \doi{10.1016/j.fishres.2016.06.005}
 }
 \seealso{
-\link{plot.RCModel} \linkS4class{RCModel} \link{compare_RCM} \link{pcod} \link{RCM2MOM} \link{posterior}
+\link{plot.RCModel} \link[=RCModel-class]{RCModel} \code{\link[=RCM2]{RCM2()}} \link{compare_RCM} \link{pcod} \link{RCM2MOM} \link{posterior}
 }
 \author{
 Q. Huynh

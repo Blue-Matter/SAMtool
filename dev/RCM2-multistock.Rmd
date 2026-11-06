@@ -1,0 +1,192 @@
+---
+title: "RCM2() with several stocks"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", warning = FALSE, message = FALSE)
+library(MSEtool)
+library(SAMtool)
+```
+
+`RCM2()` fits **one data set**. With several stocks, it fits them together as one population, called a complex,
+to that data set. The catches and indices in the data are summed over the stocks.
+Use it for stocks that are fished and surveyed together, e.g., the sexes of one population. Stocks with separate data
+need separate `RCM2()` calls.
+
+| Stocks | Recruitment in the returned `om` |
+|---|---|
+| One stock | the fitted R0 |
+| Several stocks, no `Herm` | every stock recruits; the fitted R0 is split by the input `SRR@R0` |
+| Stocks linked by `Herm` | the stock that individuals start in gets the fitted R0; the `To` stocks get `R0 = 0` |
+
+For several stocks:
+
+- The fit uses natural mortality, weight and length-at-age averaged over the stocks, weighted by their unfished
+  numbers-at-age.
+- Every stock gets the fitted F and selectivity of each fleet, plus the fitted steepness and recruitment
+  deviations.
+- `fit@fits` has one fit, named by the complex (the stock names joined with `"-"`). `fit@OM@Complexes` has all
+  the stocks in that complex.
+- The stocks share the historical years in `data@Years` and their age classes.
+- RCM is a single-area model, so an `om` with more than one area simulates a history close to, but not identical to,
+  the fit. The examples use one area.
+
+## Example data
+
+The examples use MSEtool's `HermOM` (a protogynous grouper), with data from one simulated history. Catches and the
+survey are summed over both sexes.
+
+```{r data}
+# One data object, summed over the stocks
+sim_data <- function(om) {
+  hist <- Simulate(om, silent = TRUE)
+  yrs <- Years(om, "Historical")
+  r <- Removals(hist); r <- r[r$Sim == 1 & r$Period == "Historical", ]
+  b <- Biomass(hist);  b <- b[b$Sim == 1 & b$Period == "Historical", ]
+  C <- tapply(r$Value, list(r$Year, r$Fleet), sum)
+  B <- tapply(b$Value, b$Year, sum)
+  dat <- Data(Years = yrs)
+  dat@Landings <- CatchData(Name = colnames(C), Value = unname(C), CV = matrix(0.05, length(yrs), ncol(C)))
+  dat@Survey <- IndicesData(Name = "Survey", Value = matrix(B, ncol = 1), CV = matrix(0.2, length(yrs), 1))
+  dat
+}
+
+hm <- HermOM
+hm@nSim <- 3
+for (s in 1:2) hm@Stock[[s]]@Spatial <- Spatial()
+dat <- sim_data(hm)
+fleets <- hm@Fleet[[1]]
+names(fleets)
+```
+
+## 1. One stock
+
+```{r single}
+fit1 <- RCM2(hm@Stock[[1]], data = dat, Fleet = fleets, nSim = 3, pYear = 10,
+             s_selectivity = "B", silent = TRUE)
+fit1
+```
+
+## 2. Several stocks without `Herm`
+
+Here the two sexes have different growth but no sex change, and each recruits half the population. Pass a named
+list of stocks and one data object. The list names become the stock names.
+
+```{r several}
+female <- hm@Stock[[1]]
+male <- hm@Stock[[2]]
+male@SRR <- female@SRR      # the HermOM male has no stock-recruit relationship of its own
+female@SRR@SPFrom <- male@SRR@SPFrom <- NULL
+female@SRR@R0 <- male@SRR@R0 <- 5000    # the shares of the fitted R0
+
+fit2 <- RCM2(list(Female = female, Male = male), data = dat, Fleet = fleets,
+             nSim = 3, pYear = 10, s_selectivity = "B", silent = TRUE)
+fit2
+names(fit2@fits)
+fit2@OM@Stock$Female@SRR@R0 / (fit2@OM@Stock$Female@SRR@R0 + fit2@OM@Stock$Male@SRR@R0)
+```
+
+The input `SRR@R0` values only set the shares. If no stock has `SRR@R0`, the shares are equal.
+
+Both stocks have an empty `SRR@SPFrom`, so each recruits from its own spawning output, with the fitted steepness.
+The fit uses their summed spawning output. So the `om` history matches the fit exactly when the stocks have the same
+biology, and is close when their biology differs. Recruiting stocks can instead share a source, e.g., both with the
+same `SRR@SPFrom`. They then recruit from the same spawning output.
+
+## 3. Hermaphroditic stocks
+
+Link the stocks with a `stocktransition` object (`MSEtool::Herm()`). `Herm` only moves fish between the stocks.
+As in MSEtool, two settings determine recruitment:
+
+- **Where recruits go:** to the stock that individuals start in, i.e., the stock that is not the `To` stock of any
+  transition. `RCM2()` sets `SRR@R0 = 0` for the other stocks.
+- **Whose spawning output drives recruitment:** `SRR@SPFrom` of the recruiting stock, with an empty `SRR@SPFrom`
+  meaning the stock itself. `RCM2()` keeps any `SRR@SPFrom` you set.
+
+### Protogynous (females first)
+
+The female stock recruits and spawns, so its empty `SPFrom` is right. The `HermOM` male has
+`SRR@SPFrom = "Example Grouper Female Stock"`, the name of the female stock.
+
+```{r herm}
+female <- hm@Stock[[1]]
+male <- hm@Stock[[2]]
+female@SRR@SPFrom
+male@SRR@SPFrom
+frac <- hm@Herm[[1]]@Frac
+
+fit3 <- RCM2(list(Female = female, Male = male), data = dat, Fleet = fleets,
+             Herm = Herm(From = "Female", To = "Male", Frac = frac),
+             nSim = 3, pYear = 10, s_selectivity = "B", silent = TRUE)
+fit3
+fit3@OM@Stock$Male@SRR@SPFrom
+range(fit3@OM@Stock$Male@SRR@R0)
+```
+
+The list names replace `Stock@Name`. `RCM2()` renames the old stock names in `SRR@SPFrom`, and in `Herm@From` and
+`Herm@To`, to the list names. Here `"Example Grouper Female Stock"` becomes `"Female"`.
+
+The simulated female spawning biomass matches the fit:
+
+```{r herm-check}
+ssb_check <- function(fit, stock) {
+  hist <- Simulate(fit@OM, silent = TRUE)
+  sb <- SBiomass(hist)
+  sb <- sb[sb$Period == "Historical" & sb$Stock == stock, ]
+  sb <- tapply(sb$Value, list(sb$Sim, sb$Year), sum)
+  max(abs(sb / fit@fits[[1]]@SSB[seq_len(nrow(sb)), seq_len(ncol(sb))] - 1))
+}
+ssb_check(fit3, "Female")
+```
+
+### Protandrous (males first)
+
+The male stock recruits, so set its `SRR@SPFrom` to the female stock for recruitment to come from female spawning
+output. Otherwise the males would recruit from their own spawning output, as in MSEtool. `SRR@SPFrom` can be the
+stock name or its position in the list, here `1`. This example reuses the protogynous data to show the setup.
+
+```{r protandry}
+male_p <- male
+male_p@SRR <- female@SRR   # the HermOM male has no stock-recruit relationship of its own
+male_p@SRR@SPFrom <- 1     # Female, first in the list
+
+fit4 <- RCM2(list(Female = female, Male = male_p), data = dat, Fleet = fleets,
+             Herm = Herm(From = "Male", To = "Female", Frac = frac),
+             nSim = 3, pYear = 10, s_selectivity = "B", silent = TRUE)
+fit4@OM@Stock$Male@SRR@SPFrom
+range(fit4@OM@Stock$Female@SRR@R0)
+ssb_check(fit4, "Female")
+```
+
+### How `SRR@SPFrom` is read
+
+`RCM2()` maps `SRR@SPFrom` to stock names as MSEtool does. It can be:
+
+- A stock name, e.g., `"Female"`.
+- A position in `Stock` (or in `OM@Stock`), e.g., `1`.
+- A weight vector named by stock name or position, e.g., `c(Female = 0.7, Male = 0.3)` or `c("1" = 0.7, "2" = 0.3)`.
+  Recruitment depends on spawning output relative to unfished, so the weights set the relative contribution of each
+  source.
+
+An empty `SRR@SPFrom` on a stock that does not recruit is set to the recruiting stock it comes from, unless that stock
+is itself a spawning source.
+
+## 4. An existing om
+
+`RCM2(om)` conditions an `om` with one data object in `OM@Data`. Every stock is put in one complex. The other `om`
+settings (name, `maxF`, `Obs`, `Imp`, ...) are kept.
+
+```{r om}
+hm@Data <- list(Grouper = dat)
+RCM2(hm, s_selectivity = "B", silent = TRUE)
+```
+
+## Errors
+
+- More than one data object (`data = list(d1, d2)`, or `OM@Data` of length > 1).
+- `OM@Complexes` with more than one complex, or a complex without every stock.
+- `SRR@SPFrom` that names a stock that is not in `Stock`.
+- Several recruiting stocks whose `SRR@SPFrom` name different spawning sources (other than each its own), or with different `SRR@Model`.
+- Seasonal models (`OM@Seasons > 1`).
+- `drop_nonconv = TRUE` or `drop_highF = TRUE`, which drop simulations. Every simulation is kept in the `om`.
