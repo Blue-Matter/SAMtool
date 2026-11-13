@@ -22,6 +22,8 @@ RCM2(
   LWT = list(),
   comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"),
   prior = list(),
+  C_eq = NULL,
+  C_eq_sd = NULL,
   max_F = 3,
   integrate = FALSE,
   mean_fit = FALSE,
@@ -81,6 +83,12 @@ see Additional arguments section for setup of survey selectivity parameters and 
 \code{"dirmult1"} (Dirichlet multinomial, linear version), or \code{"dirmult2"} (saturating version; see Thorson et al. 2017).}
 
 \item{prior}{A named list for the parameters of any priors to be added to the model. See below.}
+
+\item{C_eq}{Optional vector of length \code{nfleet}, the equilibrium catch of each fleet before the first historical
+year. With \code{condition = "catch"}, an equilibrium F is estimated for each fleet so that the first historical year
+starts from a fished equilibrium instead of the unfished state. See slot \code{C_eq} in \link[=RCMdata-class]{RCMdata}.}
+
+\item{C_eq_sd}{Optional vector of length \code{nfleet}, the lognormal standard deviations of \code{C_eq} (default 0.01).}
 
 \item{max_F}{The maximum F for any fleet in the scoping model (higher F's in the model are penalized in the objective function). This argument will also update \code{OM@maxF}. See also \code{drop_highF}.
 Typically a single numeric, but can also be a matrix by year and fleet.}
