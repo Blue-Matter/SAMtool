@@ -102,7 +102,7 @@
 # Fit every stock in an om as one population to OM@Data with RCM_int(), then write the fit back into the om
 .RCMCore <- function(OM, condition = "catch", selectivity = "logistic", s_selectivity = NULL,
                      LWT = list(), comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"),
-                     prior = list(), max_F = 3, integrate = FALSE, mean_fit = FALSE,
+                     prior = list(), C_eq = NULL, C_eq_sd = NULL, max_F = 3, integrate = FALSE, mean_fit = FALSE,
                      drop_nonconv = FALSE, drop_highF = FALSE,
                      control = list(iter.max = 2e5, eval.max = 4e5), start = list(), map = list(),
                      cores = 1L, silent = FALSE, ...) {
@@ -131,6 +131,9 @@
   fl_for_convert <- if (length(fl_aligned) == 1L) fl_aligned[[1]] else fl_aligned
 
   RCMdata <- .data2RCMdata(dat, condition = condition)
+  # Equilibrium catch before the first year: fished initial state
+  if (length(C_eq)) RCMdata@C_eq <- as.numeric(C_eq)
+  if (length(C_eq_sd)) RCMdata@C_eq_sd <- as.numeric(C_eq_sd)
   OM_fit <- .stock2OM(stk, fl_for_convert, nSim = nSim, pYear = OM@pYear, CurrentYear = OM@CurrentYear)
 
   if (is.null(start$vul_par) && length(fleet_names) > 1L) {

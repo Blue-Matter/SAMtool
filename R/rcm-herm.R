@@ -1,6 +1,4 @@
 
-# The fitting unit for RCM2(): every stock in the om, fitted as one population to one data set
-
 # Herm pairs as stock names
 .HermPairNames <- function(OM, stock_names) {
   herm <- OM@Herm

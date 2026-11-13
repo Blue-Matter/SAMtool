@@ -23,6 +23,10 @@
 #' @param Name Name of the returned operating model.
 #' @param Seed Random seed for populating the stock objects.
 #' @inheritParams RCM
+#' @param C_eq Optional vector of length `nfleet`, the equilibrium catch of each fleet before the first historical
+#' year. With `condition = "catch"`, an equilibrium F is estimated for each fleet so that the first historical year
+#' starts from a fished equilibrium instead of the unfished state. See slot `C_eq` in [RCMdata-class].
+#' @param C_eq_sd Optional vector of length `nfleet`, the lognormal standard deviations of `C_eq` (default 0.01).
 #' @param mean_fit Logical, whether to run an additional fit with mean values of the life history parameters.
 #' @param drop_nonconv,drop_highF Must be `FALSE`; every simulation is kept in the operating model.
 #' @param ... Other arguments passed to [RCM()] for starting values and fixed parameters.
@@ -94,6 +98,7 @@ RCM2 <- function(Stock, data = NULL, Fleet = NULL, Herm = NULL, nSim = NULL, pYe
                  Obs = NULL, Imp = NULL, Name = "RCM", Seed = 101,
                  condition = "catch", selectivity = "logistic", s_selectivity = NULL, LWT = list(),
                  comp_like = c("multinomial", "lognormal", "mvlogistic", "dirmult1", "dirmult2"), prior = list(),
+                 C_eq = NULL, C_eq_sd = NULL,
                  max_F = 3, integrate = FALSE, mean_fit = FALSE, drop_nonconv = FALSE, drop_highF = FALSE,
                  control = list(iter.max = 2e+05, eval.max = 4e+05), start = list(), map = list(),
                  cores = 1L, silent = FALSE, ...) {
@@ -105,7 +110,8 @@ RCM2 <- function(Stock, data = NULL, Fleet = NULL, Herm = NULL, nSim = NULL, pYe
                       CurrentYear = CurrentYear, Obs = Obs, Imp = Imp, Name = Name, Seed = Seed)
   }
   .RCMCore(OM, condition = condition, selectivity = selectivity, s_selectivity = s_selectivity, LWT = LWT,
-           comp_like = comp_like, prior = prior, max_F = max_F, integrate = integrate, mean_fit = mean_fit,
+           comp_like = comp_like, prior = prior, C_eq = C_eq, C_eq_sd = C_eq_sd,
+           max_F = max_F, integrate = integrate, mean_fit = mean_fit,
            drop_nonconv = drop_nonconv, drop_highF = drop_highF, control = control, start = start, map = map,
            cores = cores, silent = silent, ...)
 }
