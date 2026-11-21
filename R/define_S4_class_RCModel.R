@@ -301,7 +301,7 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
               
               if (compare) {
                 message_info("Getting Hist object from runMSE...")
-                Hist <- runMSE(OM, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
+                Hist <- runMSE(OM, Hist = TRUE, silent = TRUE)
                 compare_rmd <- rmd_RCM_Hist_compare()
               } else {
                 compare_rmd <- c("### RCM-OM comparison\n",
@@ -622,10 +622,11 @@ setMethod("plot", signature(x = "RCModel", y = "missing"),
 
 
 #' @rdname plot.RCModel
+#' @param cores Number of cores for parallel processing. Only used if `compare = TRUE`
 #' @export
 compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = tempdir(), Year = NULL, Age = NULL,
                         f_name = NULL, s_name = NULL, MSY_ref = c(0.5, 1), bubble_adj = 1.5, scenario = list(), title = NULL,
-                        open_file = TRUE, quiet = TRUE, render_args) {
+                        open_file = TRUE, quiet = TRUE, render_args, cores = 1) {
 
   dots <- list(...)
   test <- vapply(dots, inherits, logical(1), what = "RCModel") %>% all()
@@ -721,11 +722,16 @@ compare_RCM <- function(..., compare = FALSE, filename = "compare_RCM", dir = te
   #### MSY comparisons
   if (compare) {
     message_info("Running runMSE() to get MSY reference points...")
-    if (snowfall::sfIsRunning()) {
-      Hist <- snowfall::sfClusterApplyLB(dots, function(xx) runMSE(xx@OM, Hist = TRUE, silent = TRUE))
-    } else {
-      Hist <- lapply(dots, function(xx) runMSE(xx@OM, Hist = TRUE, silent = TRUE))
+    
+    if (cores > 1) {
+      .cl <- parallel::makeCluster(cores)
+      on.exit(parallel::stopCluster(.cl))
     }
+    
+    Hist <- pbapply::pblapply(
+      dots, function(xx) runMSE(xx@OM, Hist = TRUE, silent = TRUE),
+      cl = if (cores > 1) .cl else NULL
+    )
 
     SSB_MSY <- c("```{r, fig.cap = \"Spawning biomass (SSB) relative to MSY from the operating model.\"}",
                  "SSB <- do.call(rbind, lapply(report_list, function(x) x$E[1:nyears]))",

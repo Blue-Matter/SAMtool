@@ -97,7 +97,10 @@ setMethod("simulate", signature(object = "Assessment"),
             
             # Refit model from simulated data
             if (refit) {
-              if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
+              if (cores > 1) {
+                .cl <- parallel::makeCluster(cores)
+                on.exit(parallel::stopCluster(.cl))
+              }
               
               fit <- pbapply::pblapply(1:nsim, function(x) {
                 newdata <- object@obj$env$data
@@ -111,7 +114,7 @@ setMethod("simulate", signature(object = "Assessment"),
                 mod$report <- obj2$report(obj2$env$last.par.best)
                 mod$obj <- obj2
                 return(mod)
-              }, cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>%
+              }, cl = if (cores > 1) .cl else NULL) %>%
                 structure(names = paste0("sim_", 1:nsim))
               
             } else {
@@ -154,7 +157,10 @@ setMethod("simulate", signature(object = "RCModel"),
             # Refit model from simulated model
             if (refit) {
               
-              if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(cores)
+              if (cores > 1) {
+                .cl <- parallel::makeCluster(cores)
+                on.exit(parallel::stopCluster(.cl))
+              }
               
               fit <- pbapply::pblapply(1:nsim, function(x) {
                 newdata <- object@mean_fit$obj$env$data
@@ -169,7 +175,7 @@ setMethod("simulate", signature(object = "RCModel"),
                 mod$report <- obj2$report(obj2$env$last.par.best) %>% RCM_posthoc_adjust(obj2)
                 mod$obj <- obj2
                 return(mod)
-              }, cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL) %>% 
+              }, cl = if (cores > 1) .cl else NULL) %>% 
                 structure(names = paste0("sim_", 1:nsim))
               
             } else {

@@ -21,9 +21,9 @@ Imports:
     gplots,
     graphics,
     methods,
+    parallel,
     pbapply,
     rmarkdown,
-    snowfall,
     stats,
     utils,
     vars
@@ -49,4 +49,4 @@ Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
 URL: https://openmse.com, https://samtool.openmse.com, https://github.com/Blue-Matter/SAMtool
 BugReports: https://github.com/Blue-Matter/SAMtool/issues
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

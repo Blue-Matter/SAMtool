@@ -46,14 +46,15 @@ setMethod("retrospective", signature(x = "Assessment"),
 
 #' @rdname retrospective
 #' @aliases retrospective,RCModel-method
+#' @param cores Number of cores for parallel processing
 #' @exportMethod retrospective
 setMethod("retrospective", signature(x = "RCModel"),
-          function(x, nyr = 5, y, figure = TRUE) {
+          function(x, nyr = 5, y, cores = 1, figure = TRUE) {
             if (figure) {
               old_par <- par(no.readonly = TRUE)
               on.exit(par(old_par))
             }
-            res <- RCM_retro(x, nyr, y)
+            res <- RCM_retro(x, nyr, y, cores)
             if (figure) plot(res)
             return(res)
           })

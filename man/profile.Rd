@@ -8,7 +8,7 @@
 \usage{
 \S4method{profile}{Assessment}(fitted, figure = TRUE, ...)
 
-\S4method{profile}{RCModel}(fitted, figure = TRUE, ...)
+\S4method{profile}{RCModel}(fitted, cores = 1, figure = TRUE, ...)
 }
 \arguments{
 \item{fitted, Assessment}{An object of class \link[=Assessment-class]{Assessment}.}
@@ -17,6 +17,8 @@
 
 \item{...}{A sequence of values of the parameter(s) for the profile. See details and example below.
 See details for name of arguments to be passed on.}
+
+\item{cores}{Number of cores for parallel processings}
 }
 \value{
 An object of class \link[=prof-class]{prof} that contains a data frame of negative log-likelihood values from the profile and, optionally,

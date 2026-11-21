@@ -141,12 +141,12 @@ RCMstan <- function(RCModel, stanfit, sim, cores = 1, silent = FALSE) {
     
   if (!silent) message_info("Re-constructing population model from MCMC parameter samples...")
   
-  if (cores > 1 && !snowfall::sfIsRunning()) {
-    MSEtool::setup(as.integer(cores))
-    on.exit(snowfall::sfStop())
+  if (cores > 1) {
+    .cl <- parallel::makeCluster(as.integer(cores))
+    on.exit(parallel::stopCluster(.cl))
   }   
   res <- pblapply(1:nsim, RCM_report_samps, samps = samps[, -ncol(samps)], obj = obj, conv = TRUE, 
-                  cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+                  cl = if (cores > 1) .cl else NULL)
   
   if (!silent) message("Updating operating model with MCMC samples...\n")
   newOM <- RCM_update_OM(

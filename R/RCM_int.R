@@ -90,13 +90,16 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, RCMdata, dots)
   
   # Fit model
-  if (cores > 1 && !snowfall::sfIsRunning()) MSEtool::setup(as.integer(cores))
+  if (cores > 1) {
+    .cl <- parallel::makeCluster(as.integer(cores))
+    on.exit(parallel::stopCluster(.cl))
+  }
   if (!silent) {
     .lapply <- pbapply::pblapply
     # Argument to pass parallel cluster (if running)
-    formals(.lapply)$cl <- substitute(if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
-  } else if (snowfall::sfIsRunning()) {
-    .lapply <- snowfall::sfLapply
+    formals(.lapply)$cl <- substitute(if (cores > 1) .cl else NULL)
+  } else if (cores > 1) {
+    .lapply <- parallel::clusterApplyLB
   } else {
     .lapply <- base::lapply
   }
@@ -607,7 +610,7 @@ process_AddIndV <- function(sur, report, s_sel, n_age, nfleet, nyears) { # Retur
 }
 
 #' @importFrom pbapply pbsapply
-RCM_retro <- function(x, nyr = 5, y) {
+RCM_retro <- function(x, nyr = 5, y, cores = 1) {
   if (!length(x@mean_fit)) stop("Re-run RCM() with argument `mean_fit = TRUE`", .call = FALSE)
   
   data <- x@mean_fit$obj$env$data
@@ -662,8 +665,13 @@ RCM_retro <- function(x, nyr = 5, y) {
     return(FALSE)
   }
   
+  if (cores > 1) {
+    .cl <- parallel::makeCluster(as.integer(cores))
+    on.exit(parallel::stopCluster(.cl))
+  }
+  
   conv <- pbsapply(1:length(y), lapply_fn, new_args = new_args, x = x, n_y = n_y,
-                   cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+                   cl = if (cores > 1) .cl else NULL)
   if (any(!conv)) warning("Peels that did not converge: ", paste0(which(!conv) - 1, collapse = " "))
   
   retro <- new("retro", Model = "RCM", Name = x@OM@Name, TS_var = TS_var, TS = retro_ts)
@@ -739,7 +747,7 @@ RCM_retro_subset <- function(yr, data, params, map) {
 }
 
 #' @importFrom abind abind
-profile_likelihood_RCM <- function(x, ...) {
+profile_likelihood_RCM <- function(x, cores = 1, ...) {
   dots <- list(...)
   if (!length(x@mean_fit)) stop("No model found. Re-run RCM with mean_fit = TRUE.")
   
@@ -850,8 +858,13 @@ profile_likelihood_RCM <- function(x, ...) {
     
   }
   
+  if (cores > 1) {
+    .cl <- parallel::makeCluster(as.integer(cores))
+    on.exit(parallel::stopCluster(.cl))
+  }
+  
   do_profile <- pblapply(1:nrow(profile_grid), profile_fn, new_args = new_args, x = x,
-                         cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+                         cl = if (cores > 1) .cl else NULL)
   
   profile_grid$nll <- vapply(do_profile, function(xx) xx[[1]][1, 1], numeric(1))
   
