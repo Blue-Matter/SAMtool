@@ -135,14 +135,15 @@ setMethod("profile", signature(fitted = "Assessment"),
           })
 
 #' @rdname profile
+#' @param cores Number of cores for parallel processing
 #' @exportMethod profile
 setMethod("profile", signature(fitted = "RCModel"),
-          function(fitted, figure = TRUE, ...) {
+          function(fitted, cores = 1, figure = TRUE, ...) {
             dots <- list(...)
             if (!length(dots)) stop("No parameters for profile was found. See help.")
             dots[["Assessment"]] <- fitted
             
-            res <- profile_likelihood_RCM(fitted, ...)
+            res <- profile_likelihood_RCM(fitted, cores, ...)
             if (figure) plot(res)
             return(res)
           })

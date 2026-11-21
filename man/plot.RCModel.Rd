@@ -41,7 +41,8 @@ compare_RCM(
   title = NULL,
   open_file = TRUE,
   quiet = TRUE,
-  render_args
+  render_args,
+  cores = 1
 )
 }
 \arguments{
@@ -80,6 +81,8 @@ and the RCM output.}
 \item{render_args}{A list of other arguments to pass to \link[rmarkdown:render]{render}.}
 
 \item{...}{For \code{compare_RCM}, multiple RCM objects for comparison.}
+
+\item{cores}{Number of cores for parallel processing. Only used if \code{compare = TRUE}}
 }
 \value{
 Returns invisibly the output from \link[rmarkdown:render]{render}.

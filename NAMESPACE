@@ -137,6 +137,12 @@ importFrom(graphics,
   text,
   title
 )
+importFrom(parallel,
+  clusterApplyLB,
+  clusterExport,
+  makeCluster,
+  stopCluster
+)
 importFrom(pbapply,
   pblapply,
   pbsapply

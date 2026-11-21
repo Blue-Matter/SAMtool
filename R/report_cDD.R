@@ -196,8 +196,7 @@ profile_likelihood_cDD <- function(Assessment, ...) {
     return(nll)
   }
   nll <- pblapply(1:nrow(profile_grid), profile_fn, 
-                  Assessment = Assessment, params = params, map = map,
-                  cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+                  Assessment = Assessment, params = params, map = map)
   profile_grid$nll <- do.call(c, nll) - Assessment@opt$objective
 
   if (joint_profile) {

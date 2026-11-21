@@ -19,9 +19,9 @@
 #' @export
 prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
   
-  if (is.numeric(ncpus) && !snowfall::sfIsRunning()) {
-    MSEtool::setup(cpus = ncpus)
-    on.exit(snowfall::sfStop())
+  if (is.numeric(ncpus) && ncpus > 1) {
+    .cl <- parallel::makeCluster(ncpus)
+    on.exit(parallel::stopCluster(.cl))
   }
   
   # is Hist?
@@ -29,7 +29,7 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
     Data <- x@Data
   } else if (inherits(x, "OM")) {
     message("Generating Hist object from OM via runMSE...")
-    runHist <- runMSE(x, Hist = TRUE, silent = TRUE, parallel = snowfall::sfIsRunning())
+    runHist <- runMSE(x, Hist = TRUE, silent = TRUE)
     Data <- runHist@Data
   } else if (inherits(x, "Data")) {
     Data <- x
@@ -45,10 +45,10 @@ prelim_AM <- function(x, Assess, ncpus = NULL, ...) {
   Assess <- match.fun(Assess)
   if (!inherits(Assess, "Assess")) stop(paste(deparse(substitute(Assess))), "does not appear to be an Assess function.")
 
-  if (snowfall::sfIsRunning()) snowfall::sfExport(list = c("Assess", "Data"))
+  if (cores > 1) parallel::clusterExport(.cl, varlist = c("Assess", "Data"))
   timing <- proc.time()
   message(paste0("Running ", Assess_char, " with ", nsim, " simulations for ", deparse(substitute(x)), "."))
-  res <- pblapply(1:nsim, Assess, Data = Data, ..., cl = if (snowfall::sfIsRunning()) snowfall::sfGetCluster() else NULL)
+  res <- pblapply(1:nsim, Assess, Data = Data, ..., cl = if (cores > 1) .cl else NULL)
   timing2 <- (proc.time() - timing)[3]
   message("Assessments complete.")
 

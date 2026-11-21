@@ -3,6 +3,7 @@
 #' @import MSEtool
 #' @import methods
 #' @importFrom TMB MakeADFun sdreport
+#' @importFrom parallel makeCluster stopCluster clusterExport clusterApplyLB
 #' @importFrom graphics arrows abline points lines legend text title mtext axTicks axis box contour hist 
 #'     layout matlines matplot par polygon segments
 #' @importFrom stats acf coef cov cov2cor dbeta density dlnorm dnorm formula integrate lm median nlminb nls 
