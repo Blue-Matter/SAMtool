@@ -177,11 +177,12 @@ int_sel <- function(selectivity, RCMdata, silent = FALSE) {
   
   selectivity <- match.arg(
     selectivity,
-    choices = c("logistic_length", "logistic_age", "dome_length", "dome_age", "free"),
+    choices = c("logistic_length", "logistic_age", "dome_length", "dome_age", "free", "AMAK"),
     several.ok = TRUE
   )
   
   sel <- suppressWarnings(as.numeric(selectivity))
+  sel[selectivity == "AMAK"] <- -7
   sel[selectivity == "free"] <- -2
   sel[selectivity == "logistic_length"] <- -1
   sel[selectivity == "dome_length"] <- 0
@@ -190,7 +191,7 @@ int_sel <- function(selectivity, RCMdata, silent = FALSE) {
   
   if (any(is.na(sel))) {
     stop("Character entries for selectivity (for fleets) must be either: \"logistic_length\", \"logistic_age\", 
-         \"dome_length\", \"dome_age\" or \"free\"", call. = FALSE)
+         \"dome_length\", \"dome_age\", \"free\", or \"AMAK\"", call. = FALSE)
   }
   
   if (!silent && !missing(RCMdata)) {

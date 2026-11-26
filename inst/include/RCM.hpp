@@ -189,7 +189,7 @@ Type RCM(objective_function<Type> *obj) {
   vector<Type> Vmaxlen(nsel_block);
   matrix<Type> vul_len(nlbin,nsel_block);
   vul_len.setZero();
-  array<Type> vul = calc_vul(vul_par, vul_type, lbinmid, n_y+1, n_age, PLA, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, vul_len, prior, est_vul);
+  array<Type> vul = calc_vul(vul_par, vul_type, lbinmid, n_y+1, n_age, PLA, LFS, L5, Vmaxlen, Linf, nfleet, sel_block, nsel_block, vul_len, prior, penalty, est_vul);
 
   vector<Type> q_effort(nfleet);
   vector<Type> CV_msize(nfleet);

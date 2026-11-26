@@ -267,7 +267,7 @@ RCM_est_params <- function(x, RCMdata, selectivity, s_selectivity, prior = list(
   if (ncol(start$vul_par) != RCMdata@Misc$nsel_block) {
     stop("start$vul_par needs to be a matrix with ", RCMdata@Misc$nsel_block, " columns")
   }
-  if (any(selectivity == -2) && nrow(start$vul_par) != n_age) {
+  if (any(selectivity %in% c(-2, -7)) && nrow(start$vul_par) != n_age) {
     stop("start$vul_par needs to be a matrix with ", n_age, " (maxage + 1) rows")
   }
   

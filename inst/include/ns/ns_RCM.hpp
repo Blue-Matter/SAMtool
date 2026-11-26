@@ -76,12 +76,64 @@ Type sum_EPR(vector<Type> NPR, matrix<Type> fec, int n_age, int y) {
   return EPR;
 }
 
+template<class Type>
+vector<Type> calc_AMAK_sel(matrix<Type> vul_par, matrix<int> est_vul, int b, int n_age, Type &penalty) {
+  
+  // Model changes if selectivity is fixed!
+  int AMAK_minage = 0;
+  int AMAK_maxage = n_age - 1;
+  for(int a=0;a<n_age;a++) {
+    if (est_vul(a,b)) { 
+      AMAK_minage = a; 
+      break;
+    }
+  }
+  for(int a=n_age-1;a>=0;a--) {
+    if (est_vul(a,b)) {
+      AMAK_maxage = a;
+      break;
+    }
+  }
+  vector<Type> ls(n_age);
+  for (int a=0;a<n_age;a++) {
+    if (a<AMAK_minage) {
+      ls(a) = vul_par(AMAK_minage,b);
+    } else if (a>AMAK_maxage) {
+      ls(a) = vul_par(AMAK_maxage,b);
+    } else {
+      ls(a) = vul_par(a,b);
+    }
+  }
+  
+  Type meanls = log(exp(ls).sum()/Type(ls.size()));
+  ls -= meanls;   // AMAK: mean selectivity = 1
+  
+  // Penalty for smoother by age
+  Type curv_pen = 1;
+  for (int a=2;a<ls.size();a++) {
+    penalty += curv_pen * square(ls(a) - 2*ls(a-1) + ls(a-2));
+  }
+  
+  // Penalty for declining selectivity with age
+  Type seldec_pen = 1;
+  int seldec_age = 0.5 * n_age;
+  for (int a=seldec_age+1;a<ls.size();a++) {
+    Type d = ls(a-1) - ls(a);
+    penalty += 0.5 * CppAD::CondExpGt(d, Type(0), d*d, Type(0))/seldec_pen;
+  }
+  
+  // Penalty to normalize selectivity
+  penalty += 20 * square(meanls);
+  
+  // Another penalty for year to year change in another function
+  return ls;
+}
 
 template<class Type>
 array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lbinmid, int n_y, int n_age,
                      vector<matrix<Type> > PLA, vector<Type> &LFS, vector<Type> &L5,
                      vector<Type> &Vmaxlen, Type Linf, int nfleet, matrix<int> sel_block, int nsel_block, 
-                     matrix<Type> &vul_len, Type &prior, matrix<int> est_vul) {
+                     matrix<Type> &vul_len, Type &prior, Type &penalty, matrix<int> est_vul) {
   
   int nlbin = lbinmid.size();
   array<Type> vul(n_y, n_age, nfleet); // Corresponding age based selectivity
@@ -89,8 +141,10 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
   vector<Type> sls(nsel_block);
   vector<Type> srs(nsel_block);
   Type maxage = Type(n_age) - 1;
+  vector< vector<Type>> AMAK_sel(nsel_block);
+  vector<Type> max_AMAK_sel(nsel_block);
   
-  for(int b=0;b<nsel_block;b++) { // Parameters for sel_block - don't do anything for age-specific index
+  for(int b=0;b<nsel_block;b++) { // Parameters for sel_block b
     if(vul_type(b) == -2) { // Free parameters - adding priors only
       for(int a=0;a<n_age;a++) {
         if(est_vul(a,b)) {
@@ -98,6 +152,10 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
           prior -= dbeta_(v, Type(1.01), Type(1.01), true) + log(v - v * v);
         }
       }
+    } else if(vul_type(b) == -7) {
+      // Calculate AMAK sel once with side effect of accumulating penalty value
+      AMAK_sel(b) = calc_AMAK_sel(vul_par, est_vul, b, n_age, penalty);
+      max_AMAK_sel(b) = max(exp(AMAK_sel(b)));
     } else {
       // Dome or logistic sel
       if(est_vul(1,b)) prior -= dnorm_(vul_par(1,b), Type(0), Type(3), true);
@@ -177,8 +235,22 @@ array<Type> calc_vul(matrix<Type> vul_par, vector<int> vul_type, vector<Type> lb
         
         Type max_vul = max(vul_age);
         for(int a=0;a<n_age;a++) vul(y,a,ff) = vul_age(a)/max_vul;
-      } else { //if(vul_type(b) == -2) { // Free parameters
+      } else if(vul_type(b) == -2) { // Free parameters
         for(int a=0;a<n_age;a++) vul(y,a,ff) = invlogit(vul_par(a, b));
+      } else { //if(vul_type(b) == -7) {
+        //for(int a=0;a<n_age;a++) vul(y,a,ff) = exp(AMAK_sel(b)(a))/max_AMAK_sel(b);
+        for(int a=0;a<n_age;a++) vul(y,a,ff) = exp(AMAK_sel(b)(a));
+        
+        // Calculate year by year change 
+        if (y > 0) {
+          int b_prev = sel_block(y-1,ff) - 1;
+          if (b_prev != b && vul_type(b_prev) == -7) {
+            Type sel_sigma = 0.5;
+            for(int a=0;a<n_age;a++) {
+              prior -= dnorm_(AMAK_sel(b)(a), AMAK_sel(b_prev)(a), sel_sigma, true);
+            }
+          }
+        }
       } //else { // Age-specific index - superseded by free parameters long ago
         //vul(y,vul_type(b)-1,ff) = 1;
       //}

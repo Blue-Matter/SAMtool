@@ -11,7 +11,10 @@ Type qlogis(Type p, Type location = 0, Type scale = 1) {
   return scale * log(p/(1 - p)) + location;
 }
 
-
+template<class Type>
+Type square(Type x) {
+  return x * x;
+}
 
 template<class Type>
 Type invlogit2(Type x, Type ymin = 0, Type ymax = 1, Type y0 = 0.5, Type scale = 1) {
