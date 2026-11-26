@@ -488,7 +488,7 @@ Type RCM(objective_function<Type> *obj) {
   IN.setZero();
   Itot.setZero();
 
-  array<Type> ivul = calc_ivul(ivul_par, ivul_type, lbinmid, n_y, n_age, PLA, iLFS, iL5, iVmaxlen, Linf, 
+  array<Type> ivul = calc_ivul(ivul_par, ivul_type, lbinmid, n_y+1, n_age, PLA, iLFS, iL5, iVmaxlen, Linf, 
                                mat, vul, ivul_len, prior, est_ivul);
   vector<Type> q(nsurvey);
   
