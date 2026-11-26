@@ -2,6 +2,8 @@
 
 ## SAMtool 1.10.0
 
+CRAN release: 2026-11-20
+
 - `max_F` in `RCM` can now be a matrix by year and fleet
 - Fix erroneous check in `RCMdata@I_delta` (introduced in version 1.9.0)
 
