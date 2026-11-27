@@ -90,18 +90,18 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   par_identical_sims <- par_identical_sims_fn(StockPars, FleetPars, RCMdata, dots)
   
   # Fit model
+  if (!silent) {
+    .lapply <- pbapply::pblapply
+  } else if (cores > 1) {
+    .lapply <- parallel::parLapply
+  } else {
+    .lapply <- base::lapply
+  }
   if (cores > 1) {
     .cl <- parallel::makeCluster(as.integer(cores))
     on.exit(parallel::stopCluster(.cl))
-  }
-  if (!silent) {
-    .lapply <- pbapply::pblapply
-    # Argument to pass parallel cluster (if running)
-    formals(.lapply)$cl <- substitute(if (cores > 1) .cl else NULL)
-  } else if (cores > 1) {
-    .lapply <- parallel::clusterApplyLB
-  } else {
-    .lapply <- base::lapply
+    
+    formals(.lapply)$cl <- substitute(.cl)
   }
   
   if (all(par_identical_sims)) { # All identical sims detected
@@ -140,7 +140,7 @@ RCM_int <- function(OM, RCMdata, condition = "catch", selectivity = "logistic", 
   } else {
     if (!silent) message_info("Fitting model (", nsim, " simulations) ...")
     
-    mod <- .lapply(1:nsim, RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
+    mod <- .lapply(X = 1:nsim, FUN = RCM_est, RCMdata = RCMdata, selectivity = sel, s_selectivity = s_sel,
                    LWT = RCMdata@Misc$LWT, comp_like = comp_like, prior = prior_rcm, 
                    max_F = max_F, integrate = integrate, StockPars = StockPars,
                    FleetPars = FleetPars, control = control, start = start, map = map, dots = dots)

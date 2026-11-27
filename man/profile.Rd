@@ -18,7 +18,7 @@
 \item{...}{A sequence of values of the parameter(s) for the profile. See details and example below.
 See details for name of arguments to be passed on.}
 
-\item{cores}{Number of cores for parallel processings}
+\item{cores}{Number of cores for parallel processing}
 }
 \value{
 An object of class \link[=prof-class]{prof} that contains a data frame of negative log-likelihood values from the profile and, optionally,
